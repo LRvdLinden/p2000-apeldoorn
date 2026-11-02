@@ -17,7 +17,7 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 - **Animated splash**: het schild valt in beeld, pager-pulsen golven uit en daarna gaat de app open.
 - **Welkomstscherm** met pushmeldingen en *Inloggen met Apple*. Inloggen is optioneel.
 - **Pager**: de live tijdlijn zoals op de site. Meldingen zijn per dag gegroepeerd, met een live klok en een online-status, en de cijfers van vandaag per discipline. Je kunt zoeken en filteren (disciplines, plaatsen, prioriteit). Meldingen kun je bewaren of delen, en op iPad en Mac staat de detailweergave ernaast (split view).
-- **Detail**: dezelfde opbouw als p2000-apeldoorn.nl/melding/…. Bovenaan een grote kaart met marker en een **Look Around**-preview. Daaronder de *Let op*-melding als er geen straat is, het incidentnummer en de views, en een hoofdkaart met plaats, categorie, prioriteit en tijd. Er is alleen een **Apple Kaarten**-knop. Verder: Beschrijving, Capcodes, Voertuigen, **METEO-gegevens via WeatherKit** (historisch weer per uur op tijd en plek, met Base44-weer als fallback) en Meldinggegevens. De lettertypen zijn Poppins en Social Gothic, als je die toevoegt.
+- **Detail**: dezelfde opbouw als p2000-apeldoorn.nl/melding/…. Bovenaan een grote kaart met marker en een **Look Around**-preview. Daaronder de *Let op*-melding als er geen straat is, het incidentnummer en de views, en een hoofdkaart met plaats, categorie, prioriteit en tijd. Er is alleen een **Apple Kaarten**-knop. Verder: Beschrijving, Capcodes, Voertuigen, **METEO-gegevens via WeatherKit** (historisch weer per uur, op het tijdstip en de plek van de melding) en Meldinggegevens. De lettertypen zijn Poppins en Social Gothic, als je die toevoegt.
 - **Kaart**: Apple Maps met de **markers van de website** (brandweer, ambulance, politie, traumaheli). Je filtert op periode (6 uur, 24 uur, 7 dagen) en discipline. Meldingen op dezelfde plek worden net als op de site in een cirkel gezet.
 - **Statistieken**: vandaag, deze maand (met vorige maand ernaast), per uur, per weekdag, per prioriteit en de meest voorkomende categorieën.
 - **Instellingen**: account, notificaties (plaatsen, disciplines, prioriteit, stille modus, kritieke meldingen), filters, huidige locatie, donkere modus, kaarttype, app-vergrendeling met Face ID/Touch ID, recensie, feedback, changelog, voorwaarden, privacy, disclaimer en de kaart **Meer apps van de ontwikkelaar** (in alle talen).
@@ -34,48 +34,57 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 
 Poppins (SIL OFL) zit in `P2000Apeldoorn/Fonts`. **Social Gothic Bold** is het kopjeslettertype van de website. Het is een commercieel lettertype van Canada Type en zit er daarom niet in. Heb je een app-licentie, zet dan `SocialGothic-Bold.otf` in `P2000Apeldoorn/Fonts`. De app pakt hem automatisch op; zonder dat bestand gebruikt hij een smal systeemlettertype.
 
-## Databronnen
+## Architectuur: de app staat los van de website
 
-1. **Base44**: `https://p2000-apeldoorn.nl/api/apps/69b6661a41c2b1b46f95682e/entities/…`. Hier komen de geschiedenis (`P2000Melding`), de statistieken (`MaandStatistiek`), de `Changelog`, de `PrivacyVerklaring`, de `TermsOfUse` en de `DisclaimerContent` vandaan. Dit zijn dezelfde endpoints die de website gebruikt.
-2. **p2000.page live-feed** (`service.p2000.page/api-…`). De app vraagt deze elke 15 seconden op en houdt alleen de plaatsen in de gemeente Apeldoorn over. Zodra Base44 dezelfde melding heeft (`uid` = `guid`), wint de Base44-versie, want die bevat categorie, weer en views.
+```
+p2000.page-feed ──► server/ (Railway, Node 24 + SQLite) ──► REST-API ──► iPhone · iPad · Mac · Watch · widgets
+                                   │
+                                   └──► Apple Push Notification service (APNs) ──► pushmeldingen
+```
 
-### Sleutel van de live-feed
+De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.page staat alleen op de server.
 
-De URL bevat een persoonlijke sleutel en staat **niet** in git.
+### server/
+- Vraagt de p2000.page-feed elke 10 seconden op en bewaart alleen meldingen uit de gemeente Apeldoorn.
+- Per melding bepaalt hij de prioriteit, de categorie, de eenheden (capcodes), de voertuigen en de coördinaten.
+- Endpoints:
+  - `GET /v1/meldingen` en `GET /v1/meldingen/:guid`
+  - `POST /v1/meldingen/:guid/view`
+  - `GET /v1/stats/:yyyy-mm`
+  - `GET /v1/content/privacy|terms|disclaimer` en `GET /v1/changelog`
+- Pushmeldingen gaan rechtstreeks via APNs (een JWT op basis van je .p8-sleutel):
+  - `POST /v1/devices` registreert een toestel met zijn instellingen: plaatsen, disciplines, prioriteiten, stille modus, kritieke meldingen en de radius (km + middelpunt, afgerond op ~100 m).
+  - `DELETE /v1/devices/:token` meldt een toestel af.
+  - `POST /v1/devices/:token/test` stuurt een testmelding.
+  - `POST /v1/broadcast` stuurt een bericht naar iedereen, met `Authorization: Bearer ADMIN_TOKEN`.
+- Testen: `cd server && npm test`.
+- Geschiedenis eenmalig overnemen van de website: `npm run backfill` (optioneel).
 
-- **Lokaal:** kopieer `Config/Secrets.example.xcconfig` naar `Config/Secrets.xcconfig` en vul je URL in. Schrijf daarbij `https:/$()/` in plaats van `https://`, want `//` begint in een .xcconfig een commentaar.
-- **GitHub Actions:** zet de repo-secret `P2000_PAGE_API_URL` (de volledige URL). De workflow *Build* maakt daar `Secrets.xcconfig` van.
+### Deploy naar Railway
+1. Maak in Railway een project met een lege service **p2000-api**. Koppel er een **volume** aan op `/data`.
+2. Zet in GitHub deze repo-secrets:
+   - **verplicht:** `RAILWAY_TOKEN` (Railway → Project → Settings → Tokens), `P2000_PAGE_API_URL`, `APN_KEY_ID`, `APN_TEAM_ID`, `APN_P8_CERT`
+   - **optioneel:** `ADMIN_TOKEN`
+3. Bij elke push naar `server/` test de workflow **Deploy API-server** de code. Daarna zet hij de secrets als Railway-variabelen en deployt hij.
+4. Koppel in Railway het domein `api.p2000-apeldoorn.nl` met een CNAME. Dat is de standaard in `Config/Base.xcconfig` (`P2000_API_URL`). Wil je eerst testen, zet dan de Railway-URL in `Config/Secrets.xcconfig`.
 
-Zonder sleutel werkt de app gewoon, maar dan alleen via Base44.
+## Pushmeldingen in de app
+- iPhone, iPad en Mac gebruiken echte APNs-pushmeldingen. De Apple Watch krijgt de meldingen van de iPhone mee.
+- Debug-builds gebruiken APNs-sandbox. TestFlight- en App Store-builds gebruiken productie.
+- Tik je op een melding, dan opent de app die melding. Dat werkt via `guid` in de payload.
 
-## Pushmeldingen
+## Mijn buurt (radius)
+Bij Instellingen → **Mijn buurt** kies je een straal van 0,5 tot 25 km rond **je locatie** of een **vast punt**. Een vast punt kies je door op de kaart te tikken of een adres te zoeken. De straal geldt voor de lijst, de kaart (met een cirkel), de widgets én de pushmeldingen.
 
-Op iPhone en iPad gebruikt de app de bestaande **OneSignal-app** van de website (App ID `4b1d5c83-…`), via Swift Package `OneSignal-XCFramework`.
-
-- Zet in OneSignal bij *Apple iOS (APNs)* een `.p8`-sleutel van team EU3UY476T6 voor bundle `nl.lrvdlinden.p2000apeldoorn`.
-- Na *Inloggen met Apple* is de OneSignal external ID het Apple user-ID.
-- Elk toestel stuurt deze **tags** mee:
-
-| tag | waarde |
-|---|---|
-| `app` | `ios` |
-| `meldingen` | `1`/`0` |
-| `plaatsen` | `alle` of bv. `apeldoorn,ugchelen` (kleine letters, spatie i.p.v. streepje) |
-| `diensten` | `alle` of bv. `ambulance,brandweer` |
-| `prioriteiten` | `alle` of bv. `A1,P1` |
-| `stil`, `stil_van`, `stil_tot` | stille modus aan/uit en de tijden in minuten na middernacht |
-| `kritiek` | `1` = A0/A1/P1 komen ook in de stille modus door |
-| `taal` | `nl`/`en` |
-
-Geef bij de push `additionalData.guid` (de melding-guid) mee. Dan opent een tik meteen de juiste melding.
-
-Op de **Mac** stuurt de app lokale meldingen zolang hij draait, met dezelfde filters.
+## Tijdlijn
+- De Pager toont alleen de meldingen van de laatste **24 uur**.
+- Meldingen die je al hebt geopend worden **grijs**. Met *Verberg bekeken meldingen* zie je ze niet meer.
 
 ## Bouwen
 
 1. Open `P2000Apeldoorn.xcodeproj` in Xcode 16 of nieuwer. De mappen zijn gesynchroniseerd, dus nieuwe bestanden komen er vanzelf in.
 2. Kies het scheme **P2000 Apeldoorn** en als bestemming een iPhone, iPad, *My Mac* of een Apple Watch. De Watch-app wordt automatisch in de iOS-app ingebed.
-3. Zet in de Developer-portal bij de App ID's deze capabilities aan: **Sign in with Apple**, **Push Notifications**, **iCloud (Key-value storage)** en **WeatherKit** (ook onder *Services*). Met automatische signing doet Xcode dit meestal zelf.
+3. Zet in de Developer-portal bij de App ID's deze capabilities aan: **Sign in with Apple**, **Push Notifications** (ook *Time Sensitive Notifications*), **iCloud (Key-value storage)**, **App Groups** (`group.nl.lrvdlinden.p2000apeldoorn`) en **WeatherKit** (ook onder *Services*). Doe dat ook voor de widget- en Watch-App ID's (App Groups en iCloud). Met automatische signing doet Xcode dit meestal zelf.
 
 Teksten vertaal je in `tools/en.json`. Met `python3 tools/make_strings.py` maak je daarna `Shared/Localizable.xcstrings` opnieuw. Het projectbestand maak je opnieuw met `python3 tools/make_project.py`.
 
