@@ -1,0 +1,6 @@
+// Shared build settings. Secrets.xcconfig is optional and not in git (see Secrets.example.xcconfig).
+MARKETING_VERSION = 1.0.0
+CURRENT_PROJECT_VERSION = 1
+DEVELOPMENT_TEAM = EU3UY476T6
+P2000_PAGE_API_URL =
+#include? "Secrets.xcconfig"

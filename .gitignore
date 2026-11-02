@@ -1,0 +1,13 @@
+# Secrets
+Config/Secrets.xcconfig
+
+# Xcode
+xcuserdata/
+*.xcuserstate
+DerivedData/
+build/
+*.ipa
+*.dSYM.zip
+*.dSYM
+.swiftpm/
+.DS_Store
