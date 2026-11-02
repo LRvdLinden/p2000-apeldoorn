@@ -69,19 +69,16 @@ Bij elke push naar `worker/` test en deployt de workflow opnieuw.
 
 ## Website (`website/`)
 
-Een statische website op **GitHub Pages**, zonder build-stap:
+Een statische website voor je **eigen hosting**, zonder build-stap:
 
 - `/` – de homepage over de app, met animaties, live tellingen en een ticker met de laatste meldingen.
 - `/pager/` – de **live pager** in je browser: tijdlijn (24 uur), filters, Mijn buurt, kaart (MapKit JS met de eigen markers), meldingdetail met Look Around en METEO (WeatherKit), en statistieken vandaag vs. gisteren. Geopende meldingen worden grijs.
 - `/info/?p=privacy|terms|disclaimer` – de teksten uit `worker/content`.
-- Oude links `/melding/<guid>` worden doorgestuurd naar `/pager/?melding=<guid>`.
+- Oude links `/melding/<guid>` worden doorgestuurd naar `/pager/?melding=<guid>` (via `.htaccess` op Apache-hosting, of `404.html`).
 
-Zolang de API niet bereikbaar is, toont de site voorbeeldmeldingen met een melding bovenaan.
+**Uploaden:** bij elke wijziging maakt de workflow *Website-zip* een kant-en-klare zip (Actions → Website-zip → Artifacts). Upload de inhoud naar de webmap van je domein (`public_html`), inclusief het verborgen bestand `.htaccess`.
 
-**Workflow `Website`** (bij elke push naar `website/`, en wekelijks):
-1. Maakt `website/config.js` met het API-adres (repo-variabele `API_BASE`, standaard `https://p2000-apeldoorn-api.lrvdlinden.workers.dev`) en een MapKit JS-token uit de secrets `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID` en `WEB_MAPKIT_JS_P8` (40 dagen geldig, wekelijks vernieuwd; met variabele `SITE_ORIGIN` beperk je hem tot je domein).
-2. Zet eigen domein via variabele `SITE_DOMAIN` (bijv. `p2000-apeldoorn.nl`) als `CNAME`.
-3. Publiceert naar GitHub Pages.
+`config.js` bevat het API-adres. Het MapKit JS-token haalt de site zelf op bij de Worker (`/v1/mapkit-token`), voor de domeinen in `SITE_ORIGINS` (standaard p2000-apeldoorn.nl).
 
 Lokaal bekijken: `cd website && python3 -m http.server 8000` en open http://localhost:8000.
 

@@ -1,50 +1,22 @@
-name: Website
+name: Website-zip
 
+# Builds a ready-to-upload zip of website/ for your own hosting (download it under the run's "Artifacts").
 on:
   push:
     branches: [main]
-    paths: ["website/**", "worker/content/**", "tools/site-config.mjs", ".github/workflows/website.yml"]
-  schedule:
-    - cron: "17 3 * * 1" # weekly: fresh MapKit JS token
+    paths: ["website/**", "worker/content/**", ".github/workflows/website.yml"]
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: pages
-  cancel-in-progress: true
-
 jobs:
-  deploy:
+  zip:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-      - name: config.js (API + MapKit JS token)
-        env:
-          API_BASE: ${{ vars.API_BASE }}
-          SITE_ORIGIN: ${{ vars.SITE_ORIGIN }}
-          APP_STORE_URL: ${{ vars.APP_STORE_URL }}
-          WEB_MAPKIT_JS_KEY_ID: ${{ secrets.WEB_MAPKIT_JS_KEY_ID }}
-          WEB_MAPKIT_JS_TEAM_ID: ${{ secrets.WEB_MAPKIT_JS_TEAM_ID }}
-          WEB_MAPKIT_JS_P8: ${{ secrets.WEB_MAPKIT_JS_P8 }}
-        run: node tools/site-config.mjs
       - name: Teksten (privacy, voorwaarden, disclaimer)
         run: mkdir -p website/data && cp worker/content/*.json website/data/
-      - name: Custom domain
-        if: ${{ vars.SITE_DOMAIN != '' }}
-        run: echo "${{ vars.SITE_DOMAIN }}" > website/CNAME
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
+          name: p2000-apeldoorn-website
           path: website
-      - id: deployment
-        uses: actions/deploy-pages@v4
+          include-hidden-files: true
+          retention-days: 30
