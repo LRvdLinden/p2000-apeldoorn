@@ -1,6 +1,7 @@
-import { fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js";
+import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js";
 
 reveal();
+trackVisit();
 
 // Nav turns solid after scrolling.
 const nav = document.getElementById("nav");

@@ -55,6 +55,7 @@ struct RootView: View {
         }
         .task {
             store.startPolling()
+            InstallPing.send()
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
@@ -62,6 +63,7 @@ struct RootView: View {
                 store.startPolling()
                 location.start()
                 Task { await account.verifyCredential() }
+                InstallPing.send()
                 if lock.isLocked { Task { await lock.unlock() } }
                 scheduleReview()
             case .background:
@@ -74,6 +76,8 @@ struct RootView: View {
                 reviewTask?.cancel()
             }
         }
+        .onChange(of: account.isSignedIn) { _, _ in InstallPing.send() }
+        .onChange(of: settings.notificationsEnabled) { _, _ in InstallPing.send() }
         .onChange(of: lock.isLocked) { _, locked in
             if locked { reviewTask?.cancel() } else { scheduleReview() }
         }

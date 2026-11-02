@@ -52,7 +52,7 @@ async function apnsToken(env) {
 export const apnsConfigured = (env) => hasKey(env.APN_KEY_ID, env.APN_TEAM_ID, env.APN_P8_CERT);
 
 /** Resolves to { ok, status, reason }. */
-export async function sendPush(env, device, payload, { urgent = false, collapseId } = {}) {
+export async function sendPush(env, device, payload, { urgent = false, collapseId, topic } = {}) {
   if (!apnsConfigured(env)) return { ok: false, status: 0, reason: "APNs not configured" };
   const host = device.environment === "sandbox" ? "https://api.sandbox.push.apple.com" : "https://api.push.apple.com";
   try {
@@ -60,7 +60,7 @@ export async function sendPush(env, device, payload, { urgent = false, collapseI
       method: "POST",
       headers: {
         authorization: `bearer ${await apnsToken(env)}`,
-        "apns-topic": env.APN_TOPIC || "nl.lrvdlinden.p2000apeldoorn",
+        "apns-topic": topic || env.APN_TOPIC || "nl.lrvdlinden.p2000apeldoorn",
         "apns-push-type": "alert",
         "apns-priority": "10",
         "apns-expiration": String(Math.floor(Date.now() / 1000) + (urgent ? 3600 : 6 * 3600)),

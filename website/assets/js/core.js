@@ -309,3 +309,13 @@ export function countUp(el, to, ms = 1100) {
   };
   requestAnimationFrame(step);
 }
+
+// ------------------------------------------------------------------ visitor count (no cookies, no storage)
+
+/** Counts a page view for P2000Beheer. The API only keeps a daily-salted hash, never the IP address. */
+export function trackVisit() {
+  if (location.protocol === "file:" || /^(localhost|127\.)/.test(location.hostname)) return;
+  try {
+    fetch(`${API}/v1/visit`, { method: "POST", body: JSON.stringify({ path: location.pathname }), keepalive: true, headers: { "content-type": "text/plain" } }).catch(() => {});
+  } catch {}
+}

@@ -54,3 +54,50 @@ CREATE TABLE IF NOT EXISTS outbox (
 
 CREATE TABLE IF NOT EXISTS weather (guid TEXT PRIMARY KEY, data TEXT NOT NULL, fetched_at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS kv (key TEXT PRIMARY KEY, value TEXT, at INTEGER);
+
+-- Beheer: corrections per alert (hide, title, category, location) without touching the original row.
+CREATE TABLE IF NOT EXISTS overrides (
+  guid TEXT PRIMARY KEY,
+  hidden INTEGER NOT NULL DEFAULT 0,
+  title TEXT,
+  categorie TEXT,
+  locatie TEXT,
+  lat REAL,
+  lon REAL,
+  updated_at INTEGER NOT NULL
+);
+
+-- Anonymous app installs (random id per install): platform, version, Sign in with Apple yes/no, push yes/no.
+CREATE TABLE IF NOT EXISTS installs (
+  id TEXT PRIMARY KEY,
+  platform TEXT NOT NULL,
+  model TEXT,
+  os_version TEXT,
+  app_version TEXT,
+  build TEXT,
+  apple_login INTEGER NOT NULL DEFAULT 0,
+  push INTEGER NOT NULL DEFAULT 0,
+  language TEXT,
+  first_seen INTEGER NOT NULL,
+  last_seen INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS install_days (day TEXT NOT NULL, id TEXT NOT NULL, PRIMARY KEY (day, id));
+
+-- Website visitors without cookies: a daily-salted hash (salt is thrown away the next day).
+CREATE TABLE IF NOT EXISTS visits (
+  day TEXT NOT NULL,
+  visitor TEXT NOT NULL,
+  pages INTEGER NOT NULL DEFAULT 1,
+  device TEXT,
+  PRIMARY KEY (day, visitor)
+);
+CREATE TABLE IF NOT EXISTS pageviews (day TEXT NOT NULL, path TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (day, path));
+
+-- P2000Beheer app devices (push for outages).
+CREATE TABLE IF NOT EXISTS admin_devices (
+  token TEXT PRIMARY KEY,
+  environment TEXT NOT NULL,
+  platform TEXT,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL
+);

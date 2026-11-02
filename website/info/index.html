@@ -28,7 +28,8 @@
 </header>
 <article id="doc"><p>Laden…</p></article>
 <script type="module">
-  import { API, esc } from "../assets/js/core.js";
+  import { API, esc, trackVisit } from "../assets/js/core.js";
+  trackVisit();
   const names = { privacy: "Privacyverklaring", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer" };
   const p = new URLSearchParams(location.search).get("p");
   const name = names[p] ? p : "privacy";

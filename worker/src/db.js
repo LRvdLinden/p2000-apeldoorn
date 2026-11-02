@@ -11,6 +11,7 @@ export function toAPI(row) {
     lat: row.lat, lon: row.lon, stad: row.stad, regio: row.regio, provincie: "Gelderland", capcode: row.capcode,
     categorie: row.categorie, grip: row.grip, opschaling: row.opschaling, eenheden: parse(row.eenheden),
     voertuigen: parse(row.voertuigen), link: row.link, views: row.views,
+    ...(row.hidden !== undefined ? { hidden: Boolean(row.hidden), edited: Boolean(row.edited) } : {}),
   };
 }
 
@@ -22,6 +23,13 @@ export const insertStmt = (env, m) => env.DB.prepare(`
     m.lat ?? null, m.lon ?? null, m.stad ?? null, m.regio ?? null, m.capcode ?? null, m.categorie ?? null,
     m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now());
 
+/** Alerts with the corrections from beheer applied. */
+export const SELECT = `SELECT m.guid, COALESCE(o.title, m.title) AS title, m.full_melding, m.dienst, m.prioriteit, m.datum,
+  COALESCE(o.locatie, m.locatie) AS locatie, COALESCE(o.lat, m.lat) AS lat, COALESCE(o.lon, m.lon) AS lon, m.stad, m.regio,
+  m.capcode, COALESCE(o.categorie, m.categorie) AS categorie, m.grip, m.opschaling, m.eenheden, m.voertuigen, m.link, m.views,
+  COALESCE(o.hidden, 0) AS hidden, (o.guid IS NOT NULL) AS edited
+  FROM meldingen m LEFT JOIN overrides o ON o.guid = m.guid`;
+
 export async function knownGuids(env, guids) {
   if (!guids.length) return new Set();
   const { results } = await env.DB.prepare(`SELECT guid FROM meldingen WHERE guid IN (${guids.map(() => "?").join(",")})`).bind(...guids).all();
@@ -31,12 +39,17 @@ export async function knownGuids(env, guids) {
 export async function listMeldingen(env, { limit, before } = {}) {
   const lim = Math.min(Math.max(Number(limit) || 300, 1), 1000);
   const stmt = before
-    ? env.DB.prepare("SELECT * FROM meldingen WHERE datum < ? ORDER BY datum DESC LIMIT ?").bind(Number(new Date(before)), lim)
-    : env.DB.prepare("SELECT * FROM meldingen ORDER BY datum DESC LIMIT ?").bind(lim);
+    ? env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.datum < ? ORDER BY m.datum DESC LIMIT ?`).bind(Number(new Date(before)), lim)
+    : env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 ORDER BY m.datum DESC LIMIT ?`).bind(lim);
   return (await stmt.all()).results.map(toAPI);
 }
 
-export const getMelding = async (env, guid) => toAPI(await env.DB.prepare("SELECT * FROM meldingen WHERE guid = ?").bind(guid).first());
+/** Public lookup: hidden alerts are not found. */
+export async function getMelding(env, guid, { includeHidden = false } = {}) {
+  const row = await env.DB.prepare(`${SELECT} WHERE m.guid = ?`).bind(guid).first();
+  if (!row || (row.hidden && !includeHidden)) return null;
+  return toAPI(row);
+}
 
 export async function addView(env, guid) {
   const row = await env.DB.prepare("UPDATE meldingen SET views = views + 1 WHERE guid = ? RETURNING views").bind(guid).first();

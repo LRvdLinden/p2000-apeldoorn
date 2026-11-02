@@ -1,11 +1,12 @@
 import {
-  fetchMeldingen, fetchMelding, fetchWeather, addView, DIENSTEN, SELECTABLE, PLAATSEN, dienstOf, asset, date,
+  trackVisit, fetchMeldingen, fetchMelding, fetchWeather, addView, DIENSTEN, SELECTABLE, PLAATSEN, dienstOf, asset, date,
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   loadMapKit, markerAnnotation, spread, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js";
 
 const $ = (id) => document.getElementById(id);
+trackVisit();
 const shell = $("shell");
 const WINDOW_MS = 24 * 3600_000; // the timeline shows the last 24 hours, like the app
 

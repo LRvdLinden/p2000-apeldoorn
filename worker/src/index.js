@@ -10,12 +10,16 @@ import {
   sendPush, isDeadToken, apnsConfigured, mapkitToken, mapkitConfigured, weatherFor, weatherConfigured, geocode,
   mapsServerConfigured,
 } from "./apple.js";
+import {
+  login, requireAdmin, beheerConfigured, recordInstall, recordVisit, overview, adminMeldingen, updateMelding, broadcast,
+  broadcastHistory, contentFor, saveContent, CONTENT_NAMES, registerAdminDevice, pushAdmins, checkOutage, adminHousekeeping,
+} from "./admin.js";
 import privacy from "../content/privacy.json";
 import terms from "../content/terms.json";
 import disclaimer from "../content/disclaimer.json";
 import changelog from "../content/changelog.json";
 
-const CONTENT = { privacy, terms, disclaimer };
+const CONTENT = { privacy, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 // ------------------------------------------------------------------ HTTP
@@ -23,7 +27,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "content-type, authorization",
-  "access-control-allow-methods": "GET, POST, DELETE, OPTIONS",
+  "access-control-allow-methods": "GET, POST, PUT, PATCH, DELETE, OPTIONS",
 };
 const reply = (status, body, extra = {}) =>
   new Response(body === undefined ? null : JSON.stringify(body), {
@@ -92,8 +96,18 @@ async function handle(req, env) {
   }
 
   m = path.match(/^\/v1\/content\/(privacy|terms|disclaimer)$/);
-  if (method === "GET" && m) return reply(200, CONTENT[m[1]], { "cache-control": "public, max-age=3600" });
-  if (method === "GET" && path === "/v1/changelog") return reply(200, changelog);
+  if (method === "GET" && m) return reply(200, await contentFor(env, m[1], CONTENT), { "cache-control": "public, max-age=300" });
+  if (method === "GET" && path === "/v1/changelog") return reply(200, await contentFor(env, "changelog", CONTENT), { "cache-control": "public, max-age=300" });
+
+  // Anonymous counters for the beheer statistics.
+  if (method === "POST" && path === "/v1/installs") {
+    await recordInstall(env, await readJSON(req));
+    return reply(200, { ok: true });
+  }
+  if (method === "POST" && path === "/v1/visit") {
+    await recordVisit(env, req, await readJSON(req));
+    return reply(200, { ok: true });
+  }
 
   if (method === "POST" && path === "/v1/devices") {
     await upsertDevice(env, deviceFrom(await readJSON(req)));
@@ -113,18 +127,62 @@ async function handle(req, env) {
     return reply(r.ok ? 200 : 502, r);
   }
 
-  // Admin broadcast: queued in the outbox and sent by the cron.
-  if (method === "POST" && path === "/v1/broadcast") {
-    if (!env.ADMIN_TOKEN || req.headers.get("authorization") !== `Bearer ${env.ADMIN_TOKEN}`) return reply(401, { error: "Unauthorized" });
-    const body = await readJSON(req);
-    if (!body.title || !body.body) return reply(400, { error: "title and body required" });
-    const id = `broadcast:${Date.now()}`;
-    await kvSet(env, id, JSON.stringify({ title: String(body.title).slice(0, 120), body: String(body.body).slice(0, 1000), guid: body.guid || null }));
-    const devices = await activeDevices(env);
-    await queue(env, id, devices.map((d) => d.token));
-    return reply(200, { queued: devices.length });
+  if (path.startsWith("/v1/beheer/")) return handleBeheer(req, env, url, path, method);
+
+  return reply(404, { error: "Not found" });
+}
+
+// ------------------------------------------------------------------ P2000Beheer
+
+async function statusInfo(env) {
+  const get = async (k) => (await kvGet(env, k))?.value || null;
+  const ok = await get("feed_ok"), cron = await get("cron_run");
+  return {
+    feed: { lastOk: ok ? new Date(Number(ok)).toISOString() : null, lastError: await get("feed_error") },
+    cron: cron ? new Date(Number(cron)).toISOString() : null,
+    apns: apnsConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
+    meldingenInDatabase: await meldingCount(env),
+    outbox: (await env.DB.prepare("SELECT COUNT(*) AS n FROM outbox").first()).n,
+    beheerApparaten: (await env.DB.prepare("SELECT COUNT(*) AS n FROM admin_devices").first()).n,
+  };
+}
+
+async function handleBeheer(req, env, url, path, method) {
+  if (method === "POST" && path === "/v1/beheer/login") return reply(200, await login(env, req, await readJSON(req)));
+  if (method === "GET" && path === "/v1/beheer/ping") return reply(200, { configured: beheerConfigured(env) });
+
+  const admin = await requireAdmin(env, req);
+  if (method === "GET" && path === "/v1/beheer/me") return reply(200, { user: admin.u, expires: new Date(admin.exp).toISOString() });
+  if (method === "GET" && path === "/v1/beheer/overview") return reply(200, await overview(env, await statusInfo(env)));
+
+  if (method === "GET" && path === "/v1/beheer/meldingen") return reply(200, await adminMeldingen(env, url));
+  let m = path.match(/^\/v1\/beheer\/meldingen\/([\w-]{8,64})$/);
+  if (m && method === "GET") {
+    const item = await getMelding(env, m[1], { includeHidden: true });
+    return item ? reply(200, item) : reply(404, { error: "Niet gevonden" });
+  }
+  if (m && (method === "PATCH" || method === "PUT")) return reply(200, await updateMelding(env, m[1], await readJSON(req)));
+
+  if (method === "POST" && path === "/v1/beheer/push") return reply(200, await broadcast(env, await readJSON(req), queue));
+  if (method === "GET" && path === "/v1/beheer/push") return reply(200, await broadcastHistory(env));
+
+  m = path.match(/^\/v1\/beheer\/content\/(\w+)$/);
+  if (m && CONTENT_NAMES.includes(m[1])) {
+    if (method === "GET") return reply(200, await contentFor(env, m[1], CONTENT));
+    if (method === "PUT") return reply(200, await saveContent(env, m[1], await readJSON(req)));
+    if (method === "DELETE") {
+      await env.DB.prepare("DELETE FROM kv WHERE key = ?").bind(`content:${m[1]}`).run();
+      return reply(200, CONTENT[m[1]]);
+    }
   }
 
+  if (method === "POST" && path === "/v1/beheer/devices") {
+    await registerAdminDevice(env, await readJSON(req));
+    return reply(200, { ok: true });
+  }
+  if (method === "POST" && path === "/v1/beheer/devices/test") {
+    return reply(200, await pushAdmins(env, "P2000Beheer", "Testmelding: meldingen van P2000Beheer werken. ✅"));
+  }
   return reply(404, { error: "Not found" });
 }
 
@@ -259,7 +317,11 @@ async function cron(env, event) {
     await drain(env, budget);
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
-  if (new Date(event.scheduledTime).getUTCMinutes() === 7) await housekeeping(env, Number(env.RETENTION_DAYS || 3));
+  try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
+  if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
+    await housekeeping(env, Number(env.RETENTION_DAYS || 3));
+    await adminHousekeeping(env);
+  }
 }
 
 export default {

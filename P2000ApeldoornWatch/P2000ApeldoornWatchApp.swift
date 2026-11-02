@@ -42,7 +42,10 @@ struct WatchRootView: View {
             guard let guid = AppGroup.guid(from: url) else { return }
             Task { opened = await store.melding(guid: guid) }
         }
-        .task { store.startPolling() }
+        .task {
+            store.startPolling()
+            InstallPing.send()
+        }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.startPolling() } else if phase == .background { store.stopPolling() }
         }

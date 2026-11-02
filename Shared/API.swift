@@ -78,6 +78,12 @@ struct P2000API: Sendable {
         try await get(url("v1/changelog"), as: [ChangelogEntry].self)
     }
 
+    // MARK: - Anonymous statistics (P2000Beheer)
+
+    func recordInstall(_ body: [String: Any]) async throws {
+        try await send("POST", url("v1/installs"), json: body)
+    }
+
     // MARK: - Push devices
 
     func registerDevice(_ body: [String: Any]) async throws {

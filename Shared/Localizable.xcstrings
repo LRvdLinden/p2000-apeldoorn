@@ -681,6 +681,23 @@
         }
       }
     },
+    "Capcode": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capcode"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Capcode"
+          }
+        }
+      }
+    },
     "Capcodes (%lld)": {
       "extractionState": "manual",
       "localizations": {
@@ -4043,6 +4060,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "gisteren %lld"
+          }
+        }
+      }
+    },
+    "meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meldingen"
           }
         }
       }
