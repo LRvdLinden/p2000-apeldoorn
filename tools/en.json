@@ -224,5 +224,16 @@
  "Windvlagen tot %lld km/h": "Gusts up to %lld km/h",
  "bij je vandaan": "away from you",
  "met spoed ter plaatse": "to the scene urgently",
- "ter plaatse": "to the scene"
+ "ter plaatse": "to the scene",
+ "Alle disciplines": "All services",
+ "P2000-meldingen": "P2000 alerts",
+ "Toont de laatste P2000-meldingen in gem. Apeldoorn.": "Shows the latest P2000 alerts in Apeldoorn.",
+ "Filters uit de app gebruiken": "Use the app's filters",
+ "Laatste melding": "Latest alert",
+ "De nieuwste P2000-melding in gem. Apeldoorn.": "The newest P2000 alert in Apeldoorn.",
+ "De laatste meldingen als lijst, tik om te openen.": "The latest alerts as a list – tap to open.",
+ "Het aantal meldingen van vandaag per hulpdienst.": "Today's number of alerts per emergency service.",
+ "Vandaag: %lld": "Today: %lld",
+ "P2000 vandaag: %lld": "P2000 today: %lld",
+ "P2000 vandaag": "P2000 today"
 }

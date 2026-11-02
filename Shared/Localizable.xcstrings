@@ -375,6 +375,23 @@
         }
       }
     },
+    "Alle disciplines": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All services"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle disciplines"
+          }
+        }
+      }
+    },
     "Alle meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -749,6 +766,23 @@
         }
       }
     },
+    "De laatste meldingen als lijst, tik om te openen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The latest alerts as a list – tap to open."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De laatste meldingen als lijst, tik om te openen."
+          }
+        }
+      }
+    },
     "De melding werd om %@ via het P2000 netwerk verzonden naar de %@ van %@, die het verzoek kreeg om %@.": {
       "extractionState": "manual",
       "localizations": {
@@ -779,6 +813,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen."
+          }
+        }
+      }
+    },
+    "De nieuwste P2000-melding in gem. Apeldoorn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The newest P2000 alert in Apeldoorn."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De nieuwste P2000-melding in gem. Apeldoorn."
           }
         }
       }
@@ -1072,6 +1123,23 @@
         }
       }
     },
+    "Filters uit de app gebruiken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use the app's filters"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filters uit de app gebruiken"
+          }
+        }
+      }
+    },
     "GRIP": {
       "extractionState": "manual",
       "localizations": {
@@ -1187,6 +1255,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gisteren"
+          }
+        }
+      }
+    },
+    "Het aantal meldingen van vandaag per hulpdienst.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today's number of alerts per emergency service."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het aantal meldingen van vandaag per hulpdienst."
           }
         }
       }
@@ -1527,6 +1612,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "LIVE MELDINGEN"
+          }
+        }
+      }
+    },
+    "Laatste melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste melding"
           }
         }
       }
@@ -2143,6 +2245,57 @@
         }
       }
     },
+    "P2000 vandaag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 vandaag"
+          }
+        }
+      }
+    },
+    "P2000 vandaag: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 today: %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 vandaag: %lld"
+          }
+        }
+      }
+    },
+    "P2000-meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000-meldingen"
+          }
+        }
+      }
+    },
     "Pager": {
       "extractionState": "manual",
       "localizations": {
@@ -2704,6 +2857,23 @@
         }
       }
     },
+    "Toont de laatste P2000-meldingen in gem. Apeldoorn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows the latest P2000 alerts in Apeldoorn."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont de laatste P2000-meldingen in gem. Apeldoorn."
+          }
+        }
+      }
+    },
     "Toont hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat.": {
       "extractionState": "manual",
       "localizations": {
@@ -2887,6 +3057,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vandaag · %@"
+          }
+        }
+      }
+    },
+    "Vandaag: %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today: %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag: %lld"
           }
         }
       }

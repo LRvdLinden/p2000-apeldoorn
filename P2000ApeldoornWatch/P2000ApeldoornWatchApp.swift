@@ -20,6 +20,7 @@ struct WatchRootView: View {
     @Environment(MeldingStore.self) private var store
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSplash = true
+    @State private var opened: Melding?
 
     var body: some View {
         ZStack {
@@ -33,6 +34,13 @@ struct WatchRootView: View {
                 SplashView { withAnimation { showSplash = false } }
                     .transition(.opacity)
             }
+        }
+        .sheet(item: $opened) { m in
+            NavigationStack { WatchDetailView(melding: m) }
+        }
+        .onOpenURL { url in
+            guard let guid = AppGroup.guid(from: url) else { return }
+            Task { opened = await store.melding(guid: guid) }
         }
         .task { store.startPolling() }
         .onChange(of: scenePhase) { _, phase in

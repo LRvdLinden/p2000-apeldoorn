@@ -7,6 +7,11 @@ for f in glob.glob(os.path.join(root, '**/*.swift'), recursive=True):
     for m in re.finditer(r'\bLf?\(\s*"((?:[^"\\]|\\.)*)"', open(f, encoding='utf-8').read()):
         keys.add(m.group(1).replace('\\"', '"'))
 en = json.load(open(os.path.join(root, 'tools/en.json'), encoding='utf-8'))
+# Also keep literal keys (App Intents / widget names) that appear as string literals in the sources.
+alltext = "".join(open(f, encoding='utf-8').read() for f in glob.glob(os.path.join(root, '**/*.swift'), recursive=True))
+for k in en:
+    if '"' + k + '"' in alltext:
+        keys.add(k)
 missing = sorted(k for k in keys if k not in en)
 if missing:
     print("Missing English:", *missing, sep="\n  "); sys.exit(1)

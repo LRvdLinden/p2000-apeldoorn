@@ -7,11 +7,27 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		FD2336DF84AEB3E008BA961D /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		054146E4C18F80A7C31E81FD /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		BB663FFF0E664CCEBC73D5EE /* OneSignalFramework in Frameworks */ = {isa = PBXBuildFile; platformFilters = (ios, ); productRef = 429EF653C1ACBAFFD48CF265 /* OneSignalFramework */; };
 		9B9287EBA647D0439E489C80 /* P2000 Apeldoorn Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		712017AB23FD54565B2487C7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E8173D1080A28ECDFD3BF6B2;
+			remoteInfo = "P2000 Apeldoorn Widgets";
+		};
+		3176BA0E3510B2566ADCF6CD /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 640645859680FECE10D3AC8A;
+			remoteInfo = "P2000 Apeldoorn Watch Widgets";
+		};
 		1090DF891EA5F07439DD036B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
@@ -22,6 +38,28 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		D611E53912A8A2057539A7C4 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				FD2336DF84AEB3E008BA961D /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8BE181058040592656A944C1 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				054146E4C18F80A7C31E81FD /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		6E8718158237C993CEAF2DCD /* Embed Watch Content */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -36,6 +74,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "P2000 Apeldoorn Widgets.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "P2000 Apeldoorn Watch Widgets.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		81918909E83595C8F4212CCC /* P2000 Apeldoorn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		55DD020B327986A9172F33E5 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Base.xcconfig"; sourceTree = "<group>"; };
@@ -45,15 +85,35 @@
 		4F7E42E1A78A853AD2A4C47A /* P2000Apeldoorn-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "P2000Apeldoorn-macOS.entitlements"; sourceTree = "<group>"; };
 		DA693D0995F7145A4B12FB53 /* P2000ApeldoornWatch-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "P2000ApeldoornWatch-Info.plist"; sourceTree = "<group>"; };
 		1A565F794A583E65CC97DF86 /* P2000ApeldoornWatch.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "P2000ApeldoornWatch.entitlements"; sourceTree = "<group>"; };
+		69B15355B49F447ED26D12D0 /* Widgets-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Widgets-Info.plist"; sourceTree = "<group>"; };
+		9E911FDB69245A9A47B4489B /* Widgets-iOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Widgets-iOS.entitlements"; sourceTree = "<group>"; };
+		DB9AAE27424A38151FD2B367 /* Widgets-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Widgets-macOS.entitlements"; sourceTree = "<group>"; };
+		2044E976CFC20D38EFD74DA3 /* WatchWidgets-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "WatchWidgets-Info.plist"; sourceTree = "<group>"; };
+		5992590146A9F619F6F3A3FF /* WatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "WatchWidgets.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		EB8CA8D1CCE6CA70621B7C5C /* P2000ApeldoornWidgets */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornWidgets; sourceTree = "<group>"; };
 		6CB77480E0F0214B7AC1764B /* P2000Apeldoorn */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000Apeldoorn; sourceTree = "<group>"; };
 		9D254543540250A73DA109E9 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Shared; sourceTree = "<group>"; };
 		F33036C6125B3CE37D900505 /* P2000ApeldoornWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornWatch; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		C2B571F11AF4AD9F122E48C3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C95AD6CA6A7B9792AD971617 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		0248D6DB510EB0F7E9C05175 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -78,6 +138,7 @@
 				6CB77480E0F0214B7AC1764B /* P2000Apeldoorn */,
 				9D254543540250A73DA109E9 /* Shared */,
 				F33036C6125B3CE37D900505 /* P2000ApeldoornWatch */,
+				EB8CA8D1CCE6CA70621B7C5C /* P2000ApeldoornWidgets */,
 				2245023265AE4CF87D02C8B6 /* Config */,
 				86024CAD1E83101D97359D73 /* Products */,
 			);
@@ -93,6 +154,11 @@
 				4F7E42E1A78A853AD2A4C47A /* P2000Apeldoorn-macOS.entitlements */,
 				DA693D0995F7145A4B12FB53 /* P2000ApeldoornWatch-Info.plist */,
 				1A565F794A583E65CC97DF86 /* P2000ApeldoornWatch.entitlements */,
+				69B15355B49F447ED26D12D0 /* Widgets-Info.plist */,
+				9E911FDB69245A9A47B4489B /* Widgets-iOS.entitlements */,
+				DB9AAE27424A38151FD2B367 /* Widgets-macOS.entitlements */,
+				2044E976CFC20D38EFD74DA3 /* WatchWidgets-Info.plist */,
+				5992590146A9F619F6F3A3FF /* WatchWidgets.entitlements */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -102,6 +168,8 @@
 			children = (
 				81918909E83595C8F4212CCC /* P2000 Apeldoorn.app */,
 				F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */,
+				1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */,
+				D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -109,6 +177,52 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E8173D1080A28ECDFD3BF6B2 /* P2000 Apeldoorn Widgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E5E361A19AF73B31E4F0D905 /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Widgets" */;
+			buildPhases = (
+				C861C1B2713F1DA729267477 /* Sources */,
+				C2B571F11AF4AD9F122E48C3 /* Frameworks */,
+				3EB9B1A63CB0AF905AC09EAB /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EB8CA8D1CCE6CA70621B7C5C /* P2000ApeldoornWidgets */,
+				9D254543540250A73DA109E9 /* Shared */,
+			);
+			name = "P2000 Apeldoorn Widgets";
+			packageProductDependencies = (
+			);
+			productName = "P2000 Apeldoorn Widgets";
+			productReference = 1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		640645859680FECE10D3AC8A /* P2000 Apeldoorn Watch Widgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 674F2AD3963007322C17D19F /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Watch Widgets" */;
+			buildPhases = (
+				9AF7365F73F3F0DD0B9E4309 /* Sources */,
+				C95AD6CA6A7B9792AD971617 /* Frameworks */,
+				EC23631E6EF07898CBE7791E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EB8CA8D1CCE6CA70621B7C5C /* P2000ApeldoornWidgets */,
+				9D254543540250A73DA109E9 /* Shared */,
+			);
+			name = "P2000 Apeldoorn Watch Widgets";
+			packageProductDependencies = (
+			);
+			productName = "P2000 Apeldoorn Watch Widgets";
+			productReference = D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		3D4C91345015A4DD0A099400 /* P2000 Apeldoorn */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 780754F98F0CCAA36D4D0A49 /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn" */;
@@ -117,11 +231,13 @@
 				0248D6DB510EB0F7E9C05175 /* Frameworks */,
 				82A968CB662751220D4DFE2D /* Resources */,
 				6E8718158237C993CEAF2DCD /* Embed Watch Content */,
+				D611E53912A8A2057539A7C4 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				1FE4145645A1A997E920D435 /* PBXTargetDependency */,
+				615AA1906207512488C3BBEF /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6CB77480E0F0214B7AC1764B /* P2000Apeldoorn */,
@@ -142,10 +258,12 @@
 				20179E75B0E9400620538D72 /* Sources */,
 				0F1DC2FF14A45FBF78CFDBDF /* Frameworks */,
 				3C2C5EEA477D7EF260EF0631 /* Resources */,
+				8BE181058040592656A944C1 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				65251725F1E34D14EDB0E015 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F33036C6125B3CE37D900505 /* P2000ApeldoornWatch */,
@@ -174,6 +292,12 @@
 					361B7D4D928FEE083F87C595 = {
 						CreatedOnToolsVersion = 26.0;
 					};
+					E8173D1080A28ECDFD3BF6B2 = {
+						CreatedOnToolsVersion = 26.0;
+					};
+					640645859680FECE10D3AC8A = {
+						CreatedOnToolsVersion = 26.0;
+					};
 				};
 			};
 			buildConfigurationList = 71371EFA15DA3BB408E93DEB /* Build configuration list for PBXProject "P2000Apeldoorn" */;
@@ -196,11 +320,27 @@
 			targets = (
 				3D4C91345015A4DD0A099400 /* P2000 Apeldoorn */,
 				361B7D4D928FEE083F87C595 /* P2000 Apeldoorn Watch */,
+				E8173D1080A28ECDFD3BF6B2 /* P2000 Apeldoorn Widgets */,
+				640645859680FECE10D3AC8A /* P2000 Apeldoorn Watch Widgets */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		3EB9B1A63CB0AF905AC09EAB /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		EC23631E6EF07898CBE7791E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		82A968CB662751220D4DFE2D /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -218,6 +358,20 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		C861C1B2713F1DA729267477 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9AF7365F73F3F0DD0B9E4309 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		DA10D9DD089DF2AFEBC5ED5A /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -235,6 +389,16 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		615AA1906207512488C3BBEF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E8173D1080A28ECDFD3BF6B2 /* P2000 Apeldoorn Widgets */;
+			targetProxy = 712017AB23FD54565B2487C7 /* PBXContainerItemProxy */;
+		};
+		65251725F1E34D14EDB0E015 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 640645859680FECE10D3AC8A /* P2000 Apeldoorn Watch Widgets */;
+			targetProxy = 3176BA0E3510B2566ADCF6CD /* PBXContainerItemProxy */;
+		};
 		1FE4145645A1A997E920D435 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			platformFilters = (ios, );
@@ -434,9 +598,135 @@
 			};
 			name = Release;
 		};
+		2D74CA302FF4E1F0293F50B2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Config/Widgets-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Config/Widgets-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Config/Widgets-macOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Widgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.widgets;
+				PRODUCT_MODULE_NAME = P2000ApeldoornWidgets;
+				PRODUCT_NAME = "P2000 Apeldoorn Widgets";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		999D00FC968E12EBDA6FF541 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphoneos*]" = "Config/Widgets-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=iphonesimulator*]" = "Config/Widgets-iOS.entitlements";
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Config/Widgets-macOS.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Widgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.widgets;
+				PRODUCT_MODULE_NAME = P2000ApeldoornWidgets;
+				PRODUCT_NAME = "P2000 Apeldoorn Widgets";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		76B6616F4DC5495E2643BB3B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Config/WatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/WatchWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.watchkitapp.widgets;
+				PRODUCT_MODULE_NAME = P2000ApeldoornWatchWidgets;
+				PRODUCT_NAME = "P2000 Apeldoorn Watch Widgets";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Debug;
+		};
+		96D67DD01530E03F5889573E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_ENTITLEMENTS = "Config/WatchWidgets.entitlements";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/WatchWidgets-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.watchkitapp.widgets;
+				PRODUCT_MODULE_NAME = P2000ApeldoornWatchWidgets;
+				PRODUCT_NAME = "P2000 Apeldoorn Watch Widgets";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E5E361A19AF73B31E4F0D905 /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Widgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2D74CA302FF4E1F0293F50B2 /* Debug */,
+				999D00FC968E12EBDA6FF541 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		674F2AD3963007322C17D19F /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Watch Widgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				76B6616F4DC5495E2643BB3B /* Debug */,
+				96D67DD01530E03F5889573E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		71371EFA15DA3BB408E93DEB /* Build configuration list for PBXProject "P2000Apeldoorn" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

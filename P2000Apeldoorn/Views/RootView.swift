@@ -84,6 +84,13 @@ struct RootView: View {
         .onChange(of: settings.onboardingDone) { _, done in
             if done { scheduleReview() }
         }
+        .onOpenURL { url in
+            if let guid = AppGroup.guid(from: url) {
+                router.open(guid: guid)
+            } else if url.host == "statistieken" {
+                router.tab = .statistieken
+            }
+        }
     }
 
     /// Review prompt only at a quiet moment: a few seconds after opening,

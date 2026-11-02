@@ -16,5 +16,9 @@
 	<string>$(TeamIdentifierPrefix)nl.lrvdlinden.p2000apeldoorn</string>
 	<key>com.apple.developer.weatherkit</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>group.nl.lrvdlinden.p2000apeldoorn</string>
+	</array>
 </dict>
 </plist>

@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import WidgetKit
 
 /// Keeps the live list of alerts: Base44 history (same as the website) merged with the
 /// p2000.page live feed. Polls while the app is active and caches the last result for an instant start.
@@ -26,6 +27,7 @@ final class MeldingStore {
     @ObservationIgnored private var history: [Melding] = []
     @ObservationIgnored private var liveItems: [Melding] = []
     @ObservationIgnored private var lastHistoryLoad: Date = .distantPast
+    @ObservationIgnored private var didReloadWidgets = false
 
     private init() {
         loadCache()
@@ -75,6 +77,10 @@ final class MeldingStore {
         }
         saveCache()
         if !newOnes.isEmpty { onNew?(newOnes) }
+        if !newOnes.isEmpty || !didReloadWidgets {
+            didReloadWidgets = true
+            WidgetCenter.shared.reloadAllTimelines()
+        }
     }
 
     /// Keeps live items until Base44 has them (the live feed only holds a few minutes).
@@ -85,8 +91,12 @@ final class MeldingStore {
         return byID.values.filter { $0.datum > cutoff }
     }
 
-    /// Base44 records win (they have category, weather and views); live fills the gap.
     private func merge(history: [Melding], live: [Melding]) -> [Melding] {
+        Self.combine(history: history, live: live)
+    }
+
+    /// Base44 records win (they have category, weather and views); live fills the gap.
+    nonisolated static func combine(history: [Melding], live: [Melding]) -> [Melding] {
         let known = Set(history.map(\.guid))
         let extra = live.filter { !known.contains($0.guid) }
         return (extra + history).sorted { $0.datum > $1.datum }
@@ -166,13 +176,10 @@ final class MeldingStore {
 
     // MARK: - Cache
 
-    private nonisolated static var cacheURL: URL {
-        FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0].appendingPathComponent("meldingen.json")
-    }
 
     private func loadCache() {
-        guard let data = try? Data(contentsOf: Self.cacheURL),
-              let list = try? JSONDecoder().decode([Melding].self, from: data) else { return }
+        let list = AppGroup.readCache()
+        guard !list.isEmpty else { return }
         meldingen = list
         history = list.filter { !$0.recordID.hasPrefix("live-") }
         liveItems = list.filter { $0.recordID.hasPrefix("live-") }
@@ -181,9 +188,6 @@ final class MeldingStore {
 
     private func saveCache() {
         let list = meldingen
-        let url = Self.cacheURL
-        Task.detached(priority: .utility) {
-            if let data = try? JSONEncoder().encode(list) { try? data.write(to: url, options: .atomic) }
-        }
+        Task.detached(priority: .utility) { AppGroup.writeCache(list) }
     }
 }

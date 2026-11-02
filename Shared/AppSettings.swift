@@ -55,11 +55,13 @@ final class AppSettings {
         var storageKey: String { "settings.\(rawValue)" }
     }
 
-    @ObservationIgnored private let defaults = UserDefaults.standard
+    /// App Group defaults so the widgets see the same filters.
+    @ObservationIgnored private let defaults = AppGroup.defaults
     @ObservationIgnored private let cloud = NSUbiquitousKeyValueStore.default
     @ObservationIgnored private var isLoading = false
 
     private init() {
+        Self.migrateFromStandardDefaults()
         load(from: { self.defaults.object(forKey: $0) })
         useLocation = defaults.bool(forKey: Key.useLocation.rawValue)
         appLock = defaults.bool(forKey: Key.appLock.rawValue)
@@ -71,6 +73,20 @@ final class AppSettings {
         }
         cloud.synchronize()
         pullFromCloud()
+    }
+
+    /// Build 1 stored settings in UserDefaults.standard; move them into the App Group once.
+    private static func migrateFromStandardDefaults() {
+        let group = AppGroup.defaults
+        guard group !== UserDefaults.standard, !group.bool(forKey: "settings.migrated") else { return }
+        for key in Key.allCases {
+            for name in [key.storageKey, key.rawValue] {
+                if let value = UserDefaults.standard.object(forKey: name), group.object(forKey: name) == nil {
+                    group.set(value, forKey: name)
+                }
+            }
+        }
+        group.set(true, forKey: "settings.migrated")
     }
 
     /// Takes the iCloud values (another device changed something).
