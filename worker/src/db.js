@@ -18,7 +18,7 @@ export const insertStmt = (env, m) => env.DB.prepare(`
   INSERT INTO meldingen (guid, title, full_melding, dienst, prioriteit, datum, locatie, lat, lon, stad, regio, capcode,
                          categorie, grip, opschaling, eenheden, voertuigen, link, created_at)
   VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(guid) DO NOTHING`)
-  .bind(m.guid, m.title, m.full_melding ?? null, m.dienst, m.prioriteit ?? null, m.datum, m.locatie ?? null,
+  .bind(m.guid, m.title || "", m.full_melding ?? null, m.dienst || "onbekend", m.prioriteit ?? null, m.datum, m.locatie ?? null,
     m.lat ?? null, m.lon ?? null, m.stad ?? null, m.regio ?? null, m.capcode ?? null, m.categorie ?? null,
     m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now());
 

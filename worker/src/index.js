@@ -51,10 +51,13 @@ async function handle(req, env) {
   if (method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   if (path === "/" || path === "/health") {
-    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error");
+    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error"), bf = await kvGet(env, "backfill_error");
+    const cronRun = await kvGet(env, "cron_run");
     return reply(200, {
       ok: true,
       feed: { configured: Boolean(env.P2000_PAGE_API_URL), lastOk: ok ? new Date(Number(ok.value)).toISOString() : null, lastError: err?.value || null },
+      cron: cronRun ? new Date(Number(cronRun.value)).toISOString() : null,
+      backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
       apns: apnsConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
       devices: await deviceCount(env),
@@ -208,7 +211,7 @@ async function backfill(env, budget) {
   const base = "https://p2000-apeldoorn.nl/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding";
   const res = await fetch(`${base}?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`);
   if (!res.ok) return;
-  const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd).map((r) => ({
+  const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd && !Number.isNaN(Date.parse(r.datum_tijd))).map((r) => ({
     guid: r.guid, title: r.title || r.description || "", full_melding: r.full_melding, dienst: r.dienst,
     prioriteit: r.prioriteit && r.prioriteit !== "onbekend" ? r.prioriteit : null, datum: Date.parse(r.datum_tijd),
     locatie: r.locatie, lat: r.lat, lon: r.lon, stad: r.stad, regio: r.regio, capcode: r.capcode, categorie: r.categorie,
@@ -219,8 +222,14 @@ async function backfill(env, budget) {
 }
 
 async function cron(env, event) {
+  await kvSet(env, "cron_run", String(Date.now()));
   const budget = new Budget(Number(env.SUBREQUEST_BUDGET || 45));
-  await backfill(env, budget);
+  try {
+    await backfill(env, budget);
+  } catch (e) {
+    await kvSet(env, "backfill_error", String(e.message || e));
+    console.error("[backfill]", e.message || e);
+  }
   // Three reads per minute: new alerts show up (and are pushed) within ~20 seconds.
   const runs = Number(env.POLLS_PER_RUN || 3);
   for (let i = 0; i < runs; i++) {
