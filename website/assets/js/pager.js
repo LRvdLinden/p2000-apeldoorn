@@ -240,6 +240,12 @@ const ICO = {
   maps: `<svg viewBox="0 0 24 24"><path d="M3 11 21 3l-8 18-2-8-8-2z" fill="#fff"/></svg>`,
 };
 
+/** Keeps the description and canonical URL in step with the open alert (for search engines that render JS). */
+function setMeta(description, query) {
+  document.querySelector('meta[name="description"]')?.setAttribute("content", description);
+  document.querySelector('link[rel="canonical"]')?.setAttribute("href", `https://p2000-apeldoorn.nl/pager/${query}`);
+}
+
 async function select(guid, { push = true } = {}) {
   if (!guid) { closeDetail(push); return; }
   let m = state.list.find((x) => x.guid === guid) || await fetchMelding(guid);
@@ -250,6 +256,7 @@ async function select(guid, { push = true } = {}) {
   shell.classList.add("has-detail");
   if (push) history.pushState({ guid }, "", `?melding=${encodeURIComponent(guid)}${location.hash}`);
   document.title = `${m.title} – P2000 Apeldoorn`;
+  setMeta(`${m.title} · ${plaatsText(m)} · ${prioText(m)}`, `?melding=${encodeURIComponent(guid)}`);
   renderDetail(m);
   renderList();
 }
@@ -260,6 +267,7 @@ function closeDetail(push = true) {
   $("detail").innerHTML = "";
   if (detailMap) { try { detailMap.destroy(); } catch {} detailMap = null; }
   document.title = "Live pager – P2000 Apeldoorn";
+  setMeta("Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.", "");
   if (push) history.pushState({}, "", location.pathname + location.hash);
   renderList();
 }

@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>P2000 Apeldoorn</title>
+<meta name="description" content="Privacyverklaring, gebruiksvoorwaarden en disclaimer van P2000 Apeldoorn.">
+<link rel="canonical" id="canonical" href="https://p2000-apeldoorn.nl/info/?p=privacy">
+<meta name="robots" content="index, follow">
 <link rel="icon" href="../assets/img/appicon-32.png">
 <link rel="stylesheet" href="../assets/css/base.css">
 <style>
@@ -49,6 +52,7 @@
     return t.innerHTML;
   };
   document.title = `${names[name]} – P2000 Apeldoorn`;
+  document.getElementById("canonical").href = `https://p2000-apeldoorn.nl/info/?p=${name}`;
   doc.innerHTML = data
     ? `<h1>${esc(data.title || names[name])}</h1>${data.updated_at || data.last_updated ? `<p class="meta">Laatst bijgewerkt: ${esc(new Date(data.updated_at || data.last_updated).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }))}</p>` : ""}${clean(data.content || data.html || "")}`
     : `<h1>${names[name]}</h1><p>Deze tekst kon niet worden geladen.</p>`;
