@@ -53,9 +53,25 @@ jobs:
           sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
           npx wrangler d1 execute p2000-apeldoorn --remote --file schema.sql
 
+      - name: workers.dev-subdomein (eenmalig)
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        run: |
+          API="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/subdomain"
+          CUR=$(curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "$API" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{console.log(JSON.parse(s).result?.subdomain||"")}catch{console.log("")}})')
+          if [ -n "$CUR" ]; then echo "Subdomein: $CUR.workers.dev"; exit 0; fi
+          for NAME in ${{ vars.WORKERS_SUBDOMAIN || 'lrvdlinden' }} lrvdlinden-apps p2000-apeldoorn pixelforges-p2000; do
+            R=$(curl -s -X PUT -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "content-type: application/json" -d "{\"subdomain\":\"$NAME\"}" "$API")
+            if echo "$R" | grep -q '"success":true'; then echo "Subdomein geregistreerd: $NAME.workers.dev"; exit 0; fi
+            echo "$NAME niet beschikbaar: $R"
+          done
+          echo "::error::Kon geen workers.dev-subdomein registreren. Kies er zelf een in Cloudflare (Workers & Pages → je subdomein)."
+          exit 1
+
       - name: Deploy
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
-        run: npx wrangler deploy | tee deploy.log
+        run: |
+          set -o pipefail
+          npx wrangler deploy 2>&1 | tee deploy.log
 
       - name: Secrets naar de Worker
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
