@@ -40,7 +40,11 @@ jobs:
       - name: D1-database (aanmaken als hij nog niet bestaat)
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
         run: |
-          find_id() { npx wrangler d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const d=JSON.parse(s).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")})'; }
+          find_id() { npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const i=s.indexOf("[");const d=JSON.parse(s.slice(i)).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")}catch{console.log("")}})'; }
+          if ! npx wrangler d1 list > /dev/null 2>&1; then
+            echo "::error::Het Cloudflare-token mag geen D1-databases beheren. Voeg bij het token de permissie Account → D1 → Edit toe (en controleer CLOUDFLARE_ACCOUNT_ID)."
+            exit 1
+          fi
           ID=$(find_id)
           if [ -z "$ID" ]; then
             npx wrangler d1 create p2000-apeldoorn --location weur
