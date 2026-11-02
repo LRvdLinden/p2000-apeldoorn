@@ -7,7 +7,7 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 | | |
 |---|---|
 | Bundle ID | `nl.lrvdlinden.p2000apeldoorn` (watch: `…​.watchkitapp`) |
-| Versie | 1.0.0 (build 4) |
+| Versie | 1.0.0 (build 5) |
 | Platforms | iOS/iPadOS 18+, macOS 15+, watchOS 11+ |
 | Talen | Nederlands (bron), Engels |
 | Team | EU3UY476T6 |
@@ -79,7 +79,7 @@ Een statische website op **GitHub Pages**, zonder build-stap:
 Zolang de API niet bereikbaar is, toont de site voorbeeldmeldingen met een melding bovenaan.
 
 **Workflow `Website`** (bij elke push naar `website/`, en wekelijks):
-1. Maakt `website/config.js` met het API-adres (repo-variabele `API_BASE`, standaard `https://api.p2000-apeldoorn.nl`) en een MapKit JS-token uit de secrets `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID` en `WEB_MAPKIT_JS_P8` (40 dagen geldig, wekelijks vernieuwd; met variabele `SITE_ORIGIN` beperk je hem tot je domein).
+1. Maakt `website/config.js` met het API-adres (repo-variabele `API_BASE`, standaard `https://p2000-apeldoorn-api.lrvdlinden.workers.dev`) en een MapKit JS-token uit de secrets `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID` en `WEB_MAPKIT_JS_P8` (40 dagen geldig, wekelijks vernieuwd; met variabele `SITE_ORIGIN` beperk je hem tot je domein).
 2. Zet eigen domein via variabele `SITE_DOMAIN` (bijv. `p2000-apeldoorn.nl`) als `CNAME`.
 3. Publiceert naar GitHub Pages.
 

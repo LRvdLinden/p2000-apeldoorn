@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.0 (build 5) – 2 november 2026
+- De app, de widgets en de website gebruiken de nieuwe API op Cloudflare (`p2000-apeldoorn-api.lrvdlinden.workers.dev`).
+
 ## Backend – Cloudflare Worker
 - Geen eigen server meer: de API, de ingest van p2000.page en de pushmeldingen draaien als Cloudflare Worker met een D1-database (`worker/`).
 - Cron elke minuut, feed 3× per minuut uitgelezen; pushes via een wachtrij binnen de limieten van het gratis plan.

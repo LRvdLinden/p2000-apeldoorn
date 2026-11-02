@@ -1,7 +1,7 @@
 // Shared helpers for the P2000 Apeldoorn website (landing page + live pager).
 // Data comes from the app's own API (Cloudflare Worker in worker/), never from the website builder.
 
-const CFG = Object.assign({ api: "https://api.p2000-apeldoorn.nl", mapkitToken: "" }, window.P2000_CONFIG || {});
+const CFG = Object.assign({ api: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev", mapkitToken: "" }, window.P2000_CONFIG || {});
 export const API = CFG.api.replace(/\/+$/, "");
 export const config = CFG;
 const base = new URL("../../", import.meta.url); // website root (works on a sub-path such as GitHub Pages)

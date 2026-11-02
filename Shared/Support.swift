@@ -25,7 +25,7 @@ enum Config {
            raw.hasPrefix("http"), !raw.contains("$("), let url = URL(string: raw) {
             return url
         }
-        return URL(string: "https://api.p2000-apeldoorn.nl")!
+        return URL(string: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev")!
     }()
     static let website = URL(string: "https://p2000-apeldoorn.nl")!
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!

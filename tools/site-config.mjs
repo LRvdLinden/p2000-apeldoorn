@@ -18,7 +18,7 @@ function mapkitToken() {
 }
 
 const config = {
-  api: env.API_BASE || "https://api.p2000-apeldoorn.nl",
+  api: env.API_BASE || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev",
   mapkitToken: mapkitToken(),
   appStoreURL: env.APP_STORE_URL || "",
 };

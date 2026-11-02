@@ -1,10 +1,10 @@
 // Shared build settings.
 MARKETING_VERSION = 1.0.0
-CURRENT_PROJECT_VERSION = 4
+CURRENT_PROJECT_VERSION = 5
 DEVELOPMENT_TEAM = EU3UY476T6
 
 // The app's own API (server/ in this repo). "//" starts a comment in .xcconfig, hence https:/$()/
-P2000_API_URL = https:/$()/api.p2000-apeldoorn.nl
+P2000_API_URL = https:/$()/p2000-apeldoorn-api.lrvdlinden.workers.dev
 
 // Optional local overrides (not in git), e.g. a Railway URL while testing.
 #include? "Secrets.xcconfig"
