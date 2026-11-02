@@ -24,11 +24,15 @@ struct WatchRootView: View {
 
     var body: some View {
         ZStack {
-            TabView {
-                WatchListView()
-                WatchStatsView()
+            // One NavigationStack around the paged TabView (watchOS 10+ pattern). A NavigationStack inside each
+            // page gives two navigation bars and crashes on launch on watchOS 26.
+            NavigationStack {
+                TabView {
+                    WatchListView()
+                    WatchStatsView()
+                }
+                .tabViewStyle(.verticalPage)
             }
-            .tabViewStyle(.verticalPage)
 
             if showSplash {
                 SplashView { withAnimation { showSplash = false } }
@@ -58,8 +62,7 @@ struct WatchListView: View {
 
     var body: some View {
         let list = Array(store.filtered(settings).prefix(60))
-        NavigationStack {
-            List {
+        List {
                 if list.isEmpty {
                     Text(store.isLoading ? L("Meldingen laden...") : L("Geen meldingen"))
                         .foregroundStyle(.secondary)
@@ -79,7 +82,6 @@ struct WatchListView: View {
                     LiveDot(online: store.isOnline)
                 }
             }
-        }
     }
 }
 
@@ -167,8 +169,7 @@ struct WatchStatsView: View {
     var body: some View {
         let today = store.vandaag
         let yesterday = store.statsGisteren
-        NavigationStack {
-            ScrollView {
+        ScrollView {
                 VStack(spacing: 10) {
                     Text("\(today.totaal)")
                         .font(.system(size: 44, weight: .black, design: .rounded))
@@ -191,6 +192,5 @@ struct WatchStatsView: View {
                 }
             }
             .navigationTitle(L("Vandaag"))
-        }
     }
 }

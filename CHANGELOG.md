@@ -3,6 +3,9 @@
 ## 1.0.0 (build 5) – 2 november 2026
 - De app, de widgets en de website gebruiken de nieuwe API op Cloudflare (`p2000-apeldoorn-api.lrvdlinden.workers.dev`).
 
+## 1.0.0 (build 9) – 2 november 2026
+- Apple Watch: de app crashte direct na het openen (twee navigatiebalken in de paginaweergave). Opgelost.
+
 ## 1.0.0 (build 8) – 2 november 2026
 - **Nieuw: Apple TV.** Een meldkamerscherm met de live kaart, de laatste meldingen, de tellingen van vandaag en een grote klok.
   - Een nieuwe melding verschijnt groot in beeld met een alarmscherm (instelbaar: altijd of alleen bij spoed, 10–60 seconden).
