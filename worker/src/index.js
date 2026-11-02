@@ -57,6 +57,8 @@ async function handle(req, env) {
       ok: true,
       feed: { configured: Boolean(env.P2000_PAGE_API_URL), lastOk: ok ? new Date(Number(ok.value)).toISOString() : null, lastError: err?.value || null },
       cron: cronRun ? new Date(Number(cronRun.value)).toISOString() : null,
+      lastTry: (await kvGet(env, "feed_try"))?.value ? new Date(Number((await kvGet(env, "feed_try")).value)).toISOString() : null,
+      backfill: (await kvGet(env, "backfill_status"))?.value || null,
       backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
       apns: apnsConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
@@ -145,7 +147,7 @@ async function queue(env, guid, tokens) {
 async function poll(env, budget) {
   if (!env.P2000_PAGE_API_URL || !budget.take()) return;
   try {
-    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json" } });
+    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "P2000Apeldoorn/1.0 (+https://p2000-apeldoorn.nl)" }, signal: AbortSignal.timeout(10_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const list = await res.json();
     const parsed = (Array.isArray(list) ? list : []).map(fromFeed).filter(Boolean);
@@ -209,7 +211,8 @@ async function drain(env, budget) {
 async function backfill(env, budget) {
   if (env.BACKFILL !== "1" || (await meldingCount(env)) >= 100 || !budget.take()) return;
   const base = "https://p2000-apeldoorn.nl/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding";
-  const res = await fetch(`${base}?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`);
+  const res = await fetch(`${base}?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`, { signal: AbortSignal.timeout(15_000) });
+  await kvSet(env, "backfill_status", `HTTP ${res.status}`);
   if (!res.ok) return;
   const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd && !Number.isNaN(Date.parse(r.datum_tijd))).map((r) => ({
     guid: r.guid, title: r.title || r.description || "", full_melding: r.full_melding, dienst: r.dienst,
