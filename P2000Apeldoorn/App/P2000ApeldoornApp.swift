@@ -16,6 +16,10 @@ struct P2000ApeldoornApp: App {
     @State private var location = LocationManager.shared
     @State private var router = Router.shared
 
+    init() {
+        AppFont.register()
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()

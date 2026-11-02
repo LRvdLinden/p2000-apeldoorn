@@ -116,6 +116,7 @@ struct Melding: Identifiable, Hashable, Codable {
     var link: String?
     var stad: String?
     var regio: String?
+    var provincie: String?
     var capcode: String?
     var categorie: String?
     var grip: String?
@@ -162,7 +163,7 @@ struct Melding: Identifiable, Hashable, Codable {
 
     enum CodingKeys: String, CodingKey {
         case recordID = "id", guid, title, fullMelding = "full_melding", dienstRaw = "dienst", prioriteit
-        case datum = "datum_tijd", locatie, lat, lon, link, stad, regio, capcode, categorie, grip, opschaling
+        case datum = "datum_tijd", locatie, lat, lon, link, stad, regio, provincie, capcode, categorie, grip, opschaling
         case eenheden, voertuigen, views, weather
     }
 
@@ -187,6 +188,7 @@ struct Melding: Identifiable, Hashable, Codable {
         link = try? c.decodeIfPresent(String.self, forKey: .link)
         stad = try? c.decodeIfPresent(String.self, forKey: .stad)
         regio = try? c.decodeIfPresent(String.self, forKey: .regio)
+        provincie = try? c.decodeIfPresent(String.self, forKey: .provincie)
         capcode = try? c.decodeIfPresent(String.self, forKey: .capcode)
         categorie = try? c.decodeIfPresent(String.self, forKey: .categorie)
         grip = c.flexibleString(.grip)
@@ -212,6 +214,7 @@ struct Melding: Identifiable, Hashable, Codable {
         try c.encodeIfPresent(link, forKey: .link)
         try c.encodeIfPresent(stad, forKey: .stad)
         try c.encodeIfPresent(regio, forKey: .regio)
+        try c.encodeIfPresent(provincie, forKey: .provincie)
         try c.encodeIfPresent(capcode, forKey: .capcode)
         try c.encodeIfPresent(categorie, forKey: .categorie)
         try c.encodeIfPresent(grip, forKey: .grip)
