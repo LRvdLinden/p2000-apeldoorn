@@ -7,4 +7,5 @@
 - Pushmeldingen via OneSignal met plaatsen, disciplines, prioriteit, stille modus en kritieke meldingen.
 - Inloggen met Apple en iCloud-sync van instellingen en bewaarde meldingen.
 - Animated splash, een welkomstscherm, app-vergrendeling met Face ID en een review-prompt op een rustig moment.
+- Een meldingdetail zoals op de website: kaart met Look Around, METEO via WeatherKit en alleen Apple Kaarten.
 - De kaart "Meer apps van de ontwikkelaar" in Instellingen, in het Nederlands en Engels.
