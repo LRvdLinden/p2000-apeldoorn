@@ -16,10 +16,8 @@ jobs:
         id: sim
         run: |
           xcrun simctl list runtimes | grep -i watch || true
-          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if "watchOS" in x["name"] and x["isAvailable"]]; print(r[-1]["identifier"] if r else "")')
-          DEVTYPE=$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys; d=[x for x in json.load(sys.stdin)["devicetypes"] if "Apple Watch" in x["name"]]; print(d[-1]["identifier"])')
-          echo "runtime=$RUNTIME devtype=$DEVTYPE"
-          UDID=$(xcrun simctl create SmokeWatch "$DEVTYPE" "$RUNTIME")
+          UDID=$(xcrun simctl list devices available -j | python3 -c 'import json,sys; d=json.load(sys.stdin)["devices"]; ks=sorted([k for k in d if "watchOS" in k]); devs=[x for k in reversed(ks) for x in d[k]]; print(devs[0]["udid"] if devs else "")')
+          echo "udid=$UDID"
           xcrun simctl boot "$UDID"
           echo "udid=$UDID" >> "$GITHUB_OUTPUT"
       - name: Build
