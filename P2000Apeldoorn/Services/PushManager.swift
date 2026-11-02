@@ -140,7 +140,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         // While the app is open the in-app alarm plays its own sound (once per alert), instead of the system sound.
         let content = notification.request.content
         let urgent = content.interruptionLevel == .timeSensitive || content.interruptionLevel == .critical
-        let guid = PushManager.guid(from: content.userInfo)
+        let guid = content.userInfo["guid"] as? String
         let handled = await MainActor.run { InAppAlarm.shared.handlePush(guid: guid, urgent: urgent) }
         return handled ? [.banner, .list] : [.banner, .sound, .list]
     }
