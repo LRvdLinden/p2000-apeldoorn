@@ -1,0 +1,44 @@
+name: Watch smoke test
+
+# Builds the Apple Watch app for the simulator, launches it and collects console output and crash reports.
+on:
+  workflow_dispatch:
+
+jobs:
+  smoke:
+    runs-on: macos-15
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)" && xcodebuild -version
+      - name: Watch simulator
+        id: sim
+        run: |
+          xcrun simctl list runtimes | grep -i watch || true
+          RUNTIME=$(xcrun simctl list runtimes -j | python3 -c 'import json,sys; r=[x for x in json.load(sys.stdin)["runtimes"] if "watchOS" in x["name"] and x["isAvailable"]]; print(r[-1]["identifier"] if r else "")')
+          DEVTYPE=$(xcrun simctl list devicetypes -j | python3 -c 'import json,sys; d=[x for x in json.load(sys.stdin)["devicetypes"] if "Apple Watch" in x["name"]]; print(d[-1]["identifier"])')
+          echo "runtime=$RUNTIME devtype=$DEVTYPE"
+          UDID=$(xcrun simctl create SmokeWatch "$DEVTYPE" "$RUNTIME")
+          xcrun simctl boot "$UDID"
+          echo "udid=$UDID" >> "$GITHUB_OUTPUT"
+      - name: Build
+        run: |
+          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn Watch" -configuration Debug \
+            -destination "id=${{ steps.sim.outputs.udid }}" -derivedDataPath build CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u
+          exit ${PIPESTATUS[0]}
+      - name: Launch and watch for 25 s
+        run: |
+          APP=$(find build/Build/Products -name "P2000 Apeldoorn Watch.app" -maxdepth 3 | head -1)
+          echo "App: $APP"
+          xcrun simctl install "${{ steps.sim.outputs.udid }}" "$APP"
+          xcrun simctl launch --console-pty --terminate-running-process "${{ steps.sim.outputs.udid }}" nl.lrvdlinden.p2000apeldoorn.watchkitapp > launch.log 2>&1 &
+          sleep 25
+          echo "----- console -----"; tail -n 120 launch.log || true
+          echo "----- running? -----"; xcrun simctl spawn "${{ steps.sim.outputs.udid }}" launchctl list | grep -i p2000 || echo "NOT RUNNING"
+      - name: Crash reports
+        if: always()
+        run: |
+          ls -la ~/Library/Logs/DiagnosticReports/ || true
+          for f in $(ls -t ~/Library/Logs/DiagnosticReports/*P2000* 2>/dev/null | head -2); do echo "===== $f"; head -c 12000 "$f"; done
+          xcrun simctl spawn "${{ steps.sim.outputs.udid }}" log show --last 2m --style compact --predicate 'process CONTAINS "P2000"' 2>/dev/null | grep -iE "fault|error|crash|fatal|terminat|exception" | tail -n 80 || true
