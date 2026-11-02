@@ -20,44 +20,36 @@ struct MapScreen: View {
 
     @State private var range: Range = .uur24
     @State private var selected: Melding?
+    @State private var selectedCluster: PlaatsCluster?
     @State private var position: MapCameraPosition = .region(MapScreen.apeldoorn)
     @State private var visibleDiensten: Set<Dienst> = Set(Dienst.selectable)
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
 
-    /// Pins on the map; alerts at the same spot are spread in a small circle (like the website).
-    private var pins: [MapPin] {
+    /// Alerts with a street get their own pin; alerts with only a town name are grouped into one marker per town.
+    private var layout: (pins: [MapPin], clusters: [PlaatsCluster]) {
         let cutoff = Date.now.addingTimeInterval(-Double(range.rawValue) * 3600)
-        let list = store.meldingen.filter {
-            $0.hasCoordinate && $0.datum >= cutoff
+        return MapLayout.build(store.meldingen.filter {
+            $0.datum >= cutoff
                 && (visibleDiensten.contains($0.dienst) || !Dienst.selectable.contains($0.dienst))
                 && settings.matchesList($0)
-        }
-        let groups = Dictionary(grouping: list) { m in
-            "\(Int(((m.lat ?? 0) * 1000).rounded())),\(Int(((m.lon ?? 0) * 1000).rounded()))"
-        }
-        var result: [MapPin] = []
-        for (_, group) in groups {
-            let sorted = group.sorted { $0.datum < $1.datum }
-            for (i, m) in sorted.enumerated() {
-                var lat = m.lat ?? 0, lon = m.lon ?? 0
-                if sorted.count > 1 {
-                    let angle = Double(i) / Double(sorted.count) * .pi * 2
-                    lat += cos(angle) * 0.0003
-                    lon += sin(angle) * 0.0003
-                }
-                result.append(MapPin(melding: m, coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon)))
-            }
-        }
-        // Newest on top.
-        return result.sorted { $0.melding.datum < $1.melding.datum }
+        })
     }
 
     var body: some View {
         NavigationStack {
+            let groups = layout
             Map(position: $position) {
-                ForEach(pins) { pin in
+                ForEach(groups.clusters) { cluster in
+                    Annotation(cluster.plaats, coordinate: cluster.coordinate, anchor: .bottom) {
+                        ClusterMarker(cluster: cluster, selected: selectedCluster?.id == cluster.id)
+                            .onTapGesture { selected = nil; selectedCluster = cluster }
+                            .accessibilityAddTraits(.isButton)
+                    }
+                    .annotationTitles(.hidden)
+                }
+                ForEach(groups.pins) { pin in
                     Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
                         DienstMarker(dienst: pin.melding.dienst, size: 44, selected: selected?.guid == pin.melding.guid)
                             .onTapGesture { withAnimation { selected = pin.melding } }
@@ -86,6 +78,10 @@ struct MapScreen: View {
                         .padding(.bottom, 8)
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                 }
+            }
+            .sheet(item: $selectedCluster) { cluster in
+                ClusterSheet(cluster: cluster)
+                    .presentationDetents([.medium, .large])
             }
             .navigationTitle(L("Kaart"))
             #if os(iOS)
@@ -156,10 +152,33 @@ struct MapScreen: View {
     }
 }
 
-struct MapPin: Identifiable {
-    let melding: Melding
-    let coordinate: CLLocationCoordinate2D
-    var id: String { melding.guid }
+/// The alerts behind a town marker: all alerts without a street name in that town.
+struct ClusterSheet: View {
+    let cluster: PlaatsCluster
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        NavigationStack {
+            List {
+                Section {
+                    ForEach(cluster.meldingen) { m in
+                        NavigationLink { MeldingDetailView(melding: m) } label: { MeldingRow(melding: m) }
+                    }
+                } footer: {
+                    Text(L("De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats."))
+                }
+            }
+            .navigationTitle(Lf("%lld in %@", cluster.meldingen.count, cluster.plaats))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) {
+                    Button(L("Klaar")) { dismiss() }
+                }
+            }
+        }
+    }
 }
 
 /// Small card at the bottom of the map for the tapped pin.

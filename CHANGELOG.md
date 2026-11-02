@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0 (build 10) – 2 november 2026
+- Kaart: meldingen zonder straatnaam (vaak ambulance, alleen "Apeldoorn") staan niet meer als grote ring van pins op het centrum. Ze worden per plaats samengevoegd tot één marker met het aantal; tik erop voor de lijst.
+- Apple TV: dezelfde plaatsmarkers; de rondleiding gaat per plaats maar één keer naar het centrum en zoomt daar verder uit.
+- Website: live pager-kaart en de nieuwe meldkamer (/meldkamer/) gebruiken dezelfde plaatsmarkers.
+
 ## 1.0.0 (build 5) – 2 november 2026
 - De app, de widgets en de website gebruiken de nieuwe API op Cloudflare (`p2000-apeldoorn-api.lrvdlinden.workers.dev`).
 

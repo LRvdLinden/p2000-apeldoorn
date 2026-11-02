@@ -75,10 +75,7 @@ struct MeldingDetailView: View {
         CLLocationCoordinate2D(latitude: melding.lat ?? Config.center.lat, longitude: melding.lon ?? Config.center.lon)
     }
 
-    private var hasStreet: Bool {
-        guard let loc = melding.locatie?.trimmingCharacters(in: .whitespaces) else { return false }
-        return !loc.isEmpty && loc.lowercased() != "onbekend"
-    }
+    private var hasStreet: Bool { melding.hasStreet }
 
     private var mapHeader: some View {
         Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, latitudinalMeters: 1300, longitudinalMeters: 1300))) {

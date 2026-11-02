@@ -2,7 +2,7 @@
 // an alarm screen for new alerts, today's counts and today vs. yesterday. Made for a big screen.
 import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
-  isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, spread,
+  isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
 } from "./core.js";
 
@@ -70,32 +70,58 @@ function markerEl(m) {
   return el;
 }
 
+const clusterOf = new Map(); // melding guid -> cluster id (alerts without a street)
+
 async function renderMap() {
-  const items = spread(mapped());
+  const { pins, clusters } = layout(mapped());
+  clusterOf.clear();
+  clusters.forEach((c) => c.meldingen.forEach((m) => clusterOf.set(m.guid, c.id)));
   const kit = await mapReady;
-  if (!kit) return renderStatic(items);
-  const wanted = new Set(items.map((m) => m.guid));
-  for (const [guid, a] of annByGuid) if (!wanted.has(guid)) { map.removeAnnotation(a); annByGuid.delete(guid); elByGuid.delete(guid); }
-  const add = items.filter((m) => !annByGuid.has(m.guid)).map((m) => {
-    const a = new mk.Annotation(new mk.Coordinate(m.lat, m.lon), () => markerEl(m), { anchorOffset: new DOMPoint(0, -18), calloutEnabled: false, title: m.title });
-    annByGuid.set(m.guid, a);
-    return a;
-  });
+  if (!kit) return renderStatic(pins, clusters);
+  // Clusters change when their count changes, so they are always rebuilt; pins are kept.
+  for (const [id, a] of annByGuid) {
+    if (id.startsWith("plaats-") || !pins.some((m) => m.guid === id)) { map.removeAnnotation(a); annByGuid.delete(id); elByGuid.delete(id); }
+  }
+  const add = [
+    ...clusters.map((c) => {
+      const a = new mk.Annotation(new mk.Coordinate(c.lat, c.lon), () => { const el = clusterEl(c, openTown); elByGuid.set(c.id, el); return el; },
+        { anchorOffset: new DOMPoint(0, -30), calloutEnabled: false, title: c.plaats });
+      annByGuid.set(c.id, a);
+      return a;
+    }),
+    ...pins.filter((m) => !annByGuid.has(m.guid)).map((m) => {
+      const a = new mk.Annotation(new mk.Coordinate(m.lat, m.lon), () => markerEl(m), { anchorOffset: new DOMPoint(0, -18), calloutEnabled: false, title: m.title });
+      annByGuid.set(m.guid, a);
+      return a;
+    }),
+  ];
   if (add.length) map.addAnnotations(add);
   setFocus(state.focus);
 }
 
+const openTown = () => window.open("../pager/#kaart", "_self");
+
 /** Without MapKit: markers placed roughly over the brand map texture. */
-function renderStatic(items) {
+function renderStatic(pins, clusters) {
   let box = $("map").querySelector(".static-markers");
   if (!box) { box = document.createElement("div"); box.className = "static-markers"; $("map").appendChild(box); }
   box.innerHTML = "";
   elByGuid.clear();
-  for (const m of items) {
-    const x = 50 + ((m.lon - 5.9699) / (0.22 * 1.6)) * 100, y = 50 - ((m.lat - 52.2112) / 0.22) * 100;
-    if (x < 2 || x > 98 || y < 10 || y > 96) continue;
+  const pos = (m) => ({ x: 50 + ((m.lon - 5.9699) / (0.22 * 1.6)) * 100, y: 50 - ((m.lat - 52.2112) / 0.22) * 100 });
+  const inside = ({ x, y }) => x >= 2 && x <= 98 && y >= 10 && y <= 96;
+  for (const c of clusters) {
+    const p = pos(c);
+    if (!inside(p)) continue;
+    const el = clusterEl(c, openTown);
+    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;translate:-50% -100%`;
+    elByGuid.set(c.id, el);
+    box.appendChild(el);
+  }
+  for (const m of pins) {
+    const p = pos(m);
+    if (!inside(p)) continue;
     const el = markerEl(m);
-    el.style.cssText += `;position:absolute;left:${x}%;top:${y}%;margin:-38px 0 0 -19px`;
+    el.style.cssText += `;position:absolute;left:${p.x}%;top:${p.y}%;margin:-38px 0 0 -19px`;
     box.appendChild(el);
   }
   setFocus(state.focus);
@@ -103,7 +129,8 @@ function renderStatic(items) {
 
 function setFocus(guid) {
   state.focus = guid;
-  for (const [g, el] of elByGuid) el.classList.toggle("is-focus", g === guid);
+  const target = clusterOf.get(guid) || guid;
+  for (const [g, el] of elByGuid) el.classList.toggle("is-focus", g === target);
   document.querySelectorAll(".row").forEach((r) => r.classList.toggle("is-focus", r.dataset.guid === guid));
   renderLatest();
 }
@@ -112,7 +139,9 @@ function fly(m) {
   if (!m) return;
   setFocus(m.guid);
   state.lastFly = Date.now();
-  if (map && m.lat != null) map.setRegionAnimated(region({ lat: m.lat, lon: m.lon, dLat: 0.018, dLon: 0.03 }), true);
+  // Without a street the coordinate is only the town centre: show the town, not a street corner.
+  const span = hasStreet(m) ? { dLat: 0.018, dLon: 0.03 } : { dLat: 0.06, dLon: 0.1 };
+  if (map && m.lat != null) map.setRegionAnimated(region({ lat: m.lat, lon: m.lon, ...span }), true);
 }
 
 function overview() {
@@ -124,7 +153,9 @@ function overview() {
 setInterval(() => {
   if (!state.tour || document.hidden || !$("alarm").hidden) return;
   if (Date.now() - state.lastFly < TOUR_MS - 500) return;
-  const list = mapped().slice(0, 8);
+  // Each town without street names only once, so the tour doesn't keep flying to the same centre.
+  const towns = new Set();
+  const list = mapped().filter((m) => hasStreet(m) || (!towns.has(capPlaats(m.stad || "")) && towns.add(capPlaats(m.stad || "")))).slice(0, 8);
   if (!list.length) return;
   if (state.tourIndex >= list.length) { state.tourIndex = 0; state.lastFly = Date.now(); overview(); return; }
   fly(list[state.tourIndex++]);

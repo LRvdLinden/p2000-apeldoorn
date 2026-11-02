@@ -90,6 +90,43 @@ struct DienstMarker: View {
     }
 }
 
+/// One marker for all alerts in a town that came without a street name.
+struct ClusterMarker: View {
+    let cluster: PlaatsCluster
+    var size: CGFloat = 54
+    var selected = false
+
+    var body: some View {
+        VStack(spacing: size * 0.06) {
+            ZStack {
+                Circle().fill(Color(white: 0.1))
+                Circle().strokeBorder(cluster.hoofdDienst.color, lineWidth: size * 0.07)
+                VStack(spacing: 0) {
+                    HStack(spacing: -size * 0.08) {
+                        ForEach(cluster.diensten.prefix(3)) { d in DienstIcon(dienst: d, size: size * 0.3) }
+                    }
+                    Text("\(cluster.meldingen.count)")
+                        .font(.system(size: size * 0.32, weight: .heavy).monospacedDigit())
+                        .foregroundStyle(.white)
+                        .minimumScaleFactor(0.6)
+                }
+                .padding(size * 0.1)
+            }
+            .frame(width: size, height: size)
+            .shadow(color: .black.opacity(0.35), radius: 4, y: 2)
+            Text(cluster.plaats)
+                .font(.system(size: max(10, size * 0.2), weight: .bold))
+                .foregroundStyle(.white)
+                .padding(.horizontal, size * 0.14).padding(.vertical, size * 0.04)
+                .background(Color(white: 0.1).opacity(0.85), in: Capsule())
+        }
+        .scaleEffect(selected ? 1.15 : 1, anchor: .bottom)
+        .animation(.spring(duration: 0.3), value: selected)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Lf("%lld meldingen zonder adres in %@", cluster.meldingen.count, cluster.plaats))
+    }
+}
+
 struct PrioBadge: View {
     let melding: Melding
 

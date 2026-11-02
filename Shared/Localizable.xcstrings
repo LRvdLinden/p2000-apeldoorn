@@ -137,6 +137,40 @@
         }
       }
     },
+    "%lld in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in %@"
+          }
+        }
+      }
+    },
+    "%lld meldingen zonder adres in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alerts without an address in %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld meldingen zonder adres in %@"
+          }
+        }
+      }
+    },
     "%lld min": {
       "extractionState": "manual",
       "localizations": {
@@ -932,6 +966,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De melding werd om %@ via het P2000 netwerk verzonden naar de %@ van %@, die het verzoek kreeg om %@."
+          }
+        }
+      }
+    },
+    "De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dispatch didn't send a street name for these alerts, so they are shown together at one point in the town."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats."
           }
         }
       }

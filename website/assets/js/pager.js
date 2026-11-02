@@ -2,7 +2,7 @@ import {
   trackVisit, fetchMeldingen, fetchMelding, fetchWeather, addView, DIENSTEN, SELECTABLE, PLAATSEN, dienstOf, asset, date,
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
-  loadMapKit, markerAnnotation, spread, CONDITIONS, compass, demoMode, countUp,
+  loadMapKit, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js";
 
 const $ = (id) => document.getElementById(id);
@@ -431,7 +431,7 @@ $("period").addEventListener("click", (e) => {
 async function renderMap() {
   renderMapChips();
   const cutoff = Date.now() - state.mapHours * 3600_000;
-  const items = spread(state.list.filter((m) => date(m).getTime() >= cutoff && state.mapDiensten.has(m.dienst)));
+  const { pins, clusters } = layout(state.list.filter((m) => date(m).getTime() >= cutoff && state.mapDiensten.has(m.dienst)));
   if (!bigMapReady) {
     bigMapReady = loadMapKit().then((mk) => {
       if (!mk) { $("mapFallback").hidden = false; return null; }
@@ -446,24 +446,49 @@ async function renderMap() {
     });
   }
   const mk = await bigMapReady;
-  if (!mk) { renderStaticMarkers(items); return; }
+  if (!mk) { renderStaticMarkers(pins, clusters); return; }
   bigMap.removeAnnotations(bigMap.annotations);
-  const anns = items.map((m) => markerAnnotation(mk, m, (x) => select(x.guid)));
-  bigMap.addAnnotations(anns);
+  bigMap.addAnnotations([
+    ...clusters.map((c) => clusterAnnotation(mk, c, openCluster)),
+    ...pins.map((m) => markerAnnotation(mk, m, (x) => select(x.guid))),
+  ]);
 }
 
 /** Without MapKit: show the markers roughly placed over the brand map texture. */
-function renderStaticMarkers(items) {
+function renderStaticMarkers(pins, clusters) {
   let box = $("bigMap").querySelector(".static-markers");
   if (!box) { box = document.createElement("div"); box.className = "static-markers"; $("bigMap").appendChild(box); }
   const lat0 = 52.2112, lon0 = 5.9699, span = 0.22;
-  box.innerHTML = items.filter((m) => m.lat != null).map((m) => {
-    const x = 50 + ((m.lon - lon0) / (span * 1.6)) * 100, y = 50 - ((m.lat - lat0) / span) * 100;
-    if (x < 2 || x > 98 || y < 8 || y > 98) return "";
-    return `<img class="mk-marker" style="position:absolute;left:${x}%;top:${y}%;margin:-38px 0 0 -19px" src="${asset(`assets/img/${dienstOf(m).marker}.png`)}" alt="${esc(m.title)}" title="${esc(m.title)}" data-guid="${esc(m.guid)}">`;
+  const pos = (m) => ({ x: 50 + ((m.lon - lon0) / (span * 1.6)) * 100, y: 50 - ((m.lat - lat0) / span) * 100 });
+  const inside = ({ x, y }) => x >= 2 && x <= 98 && y >= 8 && y <= 98;
+  box.innerHTML = pins.map((m) => {
+    const p = pos(m);
+    if (!inside(p)) return "";
+    return `<img class="mk-marker" style="position:absolute;left:${p.x}%;top:${p.y}%;margin:-38px 0 0 -19px" src="${asset(`assets/img/${dienstOf(m).marker}.png`)}" alt="${esc(m.title)}" title="${esc(m.title)}" data-guid="${esc(m.guid)}">`;
   }).join("");
+  for (const c of clusters) {
+    const p = pos(c);
+    if (!inside(p)) continue;
+    const el = clusterEl(c, openCluster);
+    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;transform:translate(-50%,-100%)`;
+    box.appendChild(el);
+  }
   box.onclick = (e) => { const g = e.target.dataset.guid; if (g) select(g); };
 }
+
+/** Town marker tapped: list the alerts without a street name in that town. */
+function openCluster(c) {
+  const box = $("clusterPanel");
+  box.innerHTML = `<header><b>${c.meldingen.length} in ${esc(c.plaats)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    <p>De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats.</p>
+    <div class="cp-list">${c.meldingen.map((m) => `<button data-guid="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(ago(date(m)))} · ${fmtTime(date(m))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div>`;
+  box.hidden = false;
+}
+$("clusterPanel").addEventListener("click", (e) => {
+  if (e.target.closest("[data-close]")) { $("clusterPanel").hidden = true; return; }
+  const g = e.target.closest("[data-guid]")?.dataset.guid;
+  if (g) { $("clusterPanel").hidden = true; select(g); }
+});
 
 // ------------------------------------------------------------------ statistics (today vs yesterday)
 

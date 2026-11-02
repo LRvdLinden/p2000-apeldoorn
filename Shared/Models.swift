@@ -134,6 +134,18 @@ struct Melding: Identifiable, Hashable, Codable {
         return lat != 0 && lon != 0
     }
 
+    /// The dispatcher sent a street name. Without one the coordinate is only the town centre.
+    var hasStreet: Bool {
+        guard let loc = locatie?.trimmingCharacters(in: .whitespaces) else { return false }
+        return !loc.isEmpty && loc.lowercased() != "onbekend"
+    }
+
+    /// Town name for grouping, e.g. "Apeldoorn" or "Ugchelen".
+    var plaatsNaam: String {
+        guard let s = stad?.trimmingCharacters(in: .whitespaces), !s.isEmpty, s.lowercased() != "onbekend" else { return "Apeldoorn" }
+        return s.capitalizedPlaats
+    }
+
     /// "Prioriteit A1 - Ambulance spoedurgentie" like the website.
     var prioriteitText: String {
         let cat = (categorie?.isEmpty == false ? categorie : nil) ?? ""

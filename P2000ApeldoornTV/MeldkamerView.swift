@@ -17,6 +17,7 @@ struct MeldkamerView: View {
 
     private var items: [Melding] { store.filtered(settings) }
     private var mapped: [Melding] { items.filter { $0.hasCoordinate } }
+    private var layout: (pins: [MapPin], clusters: [PlaatsCluster]) { MapLayout.build(items) }
 
     var body: some View {
         HStack(alignment: .top, spacing: 40) {
@@ -42,10 +43,18 @@ struct MeldkamerView: View {
 
     private var mapPanel: some View {
         ZStack(alignment: .bottomLeading) {
+            let groups = layout
             Map(position: $position, interactionModes: []) {
-                ForEach(mapped) { m in
-                    Annotation(m.title, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), anchor: .bottom) {
-                        TVMarker(melding: m, highlighted: m.guid == focusGuid)
+                // Alerts without a street name: one marker per town instead of a ring of identical pins.
+                ForEach(groups.clusters) { c in
+                    Annotation(c.plaats, coordinate: c.coordinate, anchor: .bottom) {
+                        ClusterMarker(cluster: c, size: 84, selected: c.meldingen.contains { $0.guid == focusGuid })
+                    }
+                    .annotationTitles(.hidden)
+                }
+                ForEach(groups.pins) { pin in
+                    Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
+                        TVMarker(melding: pin.melding, highlighted: pin.melding.guid == focusGuid)
                     }
                     .annotationTitles(.hidden)
                 }
@@ -112,9 +121,10 @@ struct MeldkamerView: View {
     private func fly(to m: Melding) {
         guard let lat = m.lat, let lon = m.lon else { return }
         focusGuid = m.guid
+        // Without a street the coordinate is only the town centre: show the town, not a street corner.
         withAnimation(.easeInOut(duration: 2.2)) {
             position = .camera(MapCamera(centerCoordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon),
-                                         distance: 3200, heading: 0, pitch: 55))
+                                         distance: m.hasStreet ? 3200 : 9000, heading: 0, pitch: m.hasStreet ? 55 : 35))
         }
     }
 
@@ -126,7 +136,9 @@ struct MeldkamerView: View {
         }
         while !Task.isCancelled {
             try? await Task.sleep(for: .seconds(12))
-            let list = Array(mapped.prefix(8))
+            // Each town without street names only once, so the tour doesn't keep flying to the same centre.
+            var seenTowns = Set<String>()
+            let list = Array(mapped.filter { $0.hasStreet || seenTowns.insert($0.plaatsNaam).inserted }.prefix(8))
             guard !list.isEmpty else { continue }
             if tourIndex >= list.count {
                 tourIndex = 0

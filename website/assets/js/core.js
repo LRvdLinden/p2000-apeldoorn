@@ -268,6 +268,46 @@ export function spread(list) {
   return out;
 }
 
+/** Alerts with a street get their own pin; alerts with only a town name (all geocoded to the town centre)
+ *  become one marker per town instead of a big ring of identical pins. */
+export function layout(list) {
+  const withCoord = list.filter((m) => m.lat != null && m.lon != null);
+  const pins = spread(withCoord.filter(hasStreet));
+  const towns = new Map();
+  for (const m of withCoord.filter((x) => !hasStreet(x))) {
+    const k = capPlaats(m.stad || "") || "Apeldoorn";
+    if (!towns.has(k)) towns.set(k, []);
+    towns.get(k).push(m);
+  }
+  const clusters = [...towns].map(([plaats, items]) => {
+    const per = {};
+    items.forEach((m) => (per[m.dienst] = (per[m.dienst] || 0) + 1));
+    const main = Object.entries(per).sort((a, b) => b[1] - a[1])[0][0];
+    return {
+      id: `plaats-${plaats}`, plaats, meldingen: items.sort((a, b) => date(b) - date(a)), main,
+      diensten: SELECTABLE.filter((d) => per[d]),
+      lat: items.reduce((t, m) => t + m.lat, 0) / items.length, lon: items.reduce((t, m) => t + m.lon, 0) / items.length,
+    };
+  });
+  return { pins, clusters };
+}
+
+export function clusterEl(c, onClick) {
+  const el = document.createElement("div");
+  el.className = "mk-cluster";
+  el.style.setProperty("--c", (DIENSTEN[c.main] || DIENSTEN.onbekend).color);
+  el.title = `${c.meldingen.length} meldingen zonder adres in ${c.plaats}`;
+  el.innerHTML = `<div class="mk-cluster-dot"><span class="mk-cluster-ic">${c.diensten.slice(0, 3).map((d) => `<img src="${asset(`assets/img/${DIENSTEN[d].icon}.png`)}" alt="">`).join("")}</span><b>${c.meldingen.length}</b></div><span class="mk-cluster-name">${esc(c.plaats)}</span>`;
+  if (onClick) el.addEventListener("click", (e) => { e.stopPropagation(); onClick(c); });
+  return el;
+}
+
+export function clusterAnnotation(mk, c, onClick) {
+  return new mk.Annotation(new mk.Coordinate(c.lat, c.lon), () => clusterEl(c, onClick), {
+    anchorOffset: new DOMPoint(0, -30), calloutEnabled: false, title: c.plaats, data: { cluster: c.id },
+  });
+}
+
 // ------------------------------------------------------------------ weather labels
 
 export const CONDITIONS = {
