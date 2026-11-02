@@ -147,6 +147,7 @@ struct LatestMeldingView: View {
     #endif
 }
 
+#if !os(watchOS)
 // MARK: - List
 
 struct MeldingenListView: View {
@@ -234,6 +235,7 @@ struct MeldingenListView: View {
         }
     }
 }
+#endif
 
 // MARK: - Today
 
