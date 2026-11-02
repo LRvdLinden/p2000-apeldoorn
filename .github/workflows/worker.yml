@@ -61,7 +61,7 @@ jobs:
           if [ -n "$CUR" ]; then echo "Subdomein: $CUR.workers.dev"; exit 0; fi
           for NAME in ${{ vars.WORKERS_SUBDOMAIN || 'lrvdlinden' }} lrvdlinden-apps p2000-apeldoorn pixelforges-p2000; do
             R=$(curl -s -X PUT -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" -H "content-type: application/json" -d "{\"subdomain\":\"$NAME\"}" "$API")
-            if echo "$R" | grep -q '"success":true'; then echo "Subdomein geregistreerd: $NAME.workers.dev"; exit 0; fi
+            if echo "$R" | grep -qE '"success": *true'; then echo "Subdomein geregistreerd: $NAME.workers.dev"; exit 0; fi
             echo "$NAME niet beschikbaar: $R"
           done
           echo "::error::Kon geen workers.dev-subdomein registreren. Kies er zelf een in Cloudflare (Workers & Pages → je subdomein)."
