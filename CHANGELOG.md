@@ -7,7 +7,7 @@
 - **Nieuw: Apple TV.** Een meldkamerscherm met de live kaart, de laatste meldingen, de tellingen van vandaag en een grote klok.
   - Een nieuwe melding verschijnt groot in beeld met een alarmscherm (instelbaar: altijd of alleen bij spoed, 10–60 seconden).
   - De kaart gaat zelf langs de laatste meldingen; het scherm blijft aan.
-  - Detail met kaart, Look Around, capcodes, voertuigen en het weer; statistieken vandaag tegenover gisteren.
+  - Detail met 3D-kaart, capcodes, voertuigen en het weer; statistieken vandaag tegenover gisteren.
   - Dezelfde animated splash, en je filters via iCloud.
 - De app meldt anoniem of je met Apple bent ingelogd en of pushmeldingen aan staan (voor P2000Beheer).
 

@@ -24,7 +24,7 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 - **iCloud-sync**: instellingen en bewaarde meldingen worden via iCloud key-value storage gelijkgehouden op iPhone, iPad, Mac en Watch.
 - **Review-prompt**: de eerste keer 4 uur na het eerste gebruik op dat apparaat, daarna hoogstens één keer per week. Hij verschijnt alleen op een rustig moment: een paar seconden na het openen, en nooit tijdens de splash, het welkomstscherm of als de app vergrendeld is.
 - **Apple Watch**: de laatste meldingen, een detailscherm met kaart en de tellingen van vandaag.
-- **Apple TV (meldkamer)**: live kaart die zelf langs de meldingen gaat, de laatste meldingen, een grote klok en de tellingen van vandaag. Nieuwe meldingen verschijnen met een alarmscherm (altijd of alleen bij spoed). Detail met Look Around, capcodes en het weer, statistieken vandaag vs. gisteren. Het scherm blijft aan. Zelfde bundle ID als de iPhone-app (universal purchase).
+- **Apple TV (meldkamer)**: live kaart die zelf langs de meldingen gaat, de laatste meldingen, een grote klok en de tellingen van vandaag. Nieuwe meldingen verschijnen met een alarmscherm (altijd of alleen bij spoed). Detail met 3D-kaart, capcodes en het weer, statistieken vandaag vs. gisteren. Het scherm blijft aan. Zelfde bundle ID als de iPhone-app (universal purchase).
 
 ## Screenshots
 

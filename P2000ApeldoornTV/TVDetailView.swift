@@ -1,13 +1,12 @@
 import SwiftUI
 import MapKit
 
-/// Detail of one alert on the TV: big map with Look Around, all data, capcodes and the weather.
+/// Detail of one alert on the TV: big 3D map, all data, capcodes and the weather.
 struct TVDetailView: View {
     let melding: Melding
     @Environment(AppSettings.self) private var settings
     @Environment(\.dismiss) private var dismiss
     @State private var weather: AlertWeather?
-    @State private var scene: MKLookAroundScene?
 
     var body: some View {
         HStack(alignment: .top, spacing: 50) {
@@ -19,11 +18,6 @@ struct TVDetailView: View {
                     }
                     .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
-                    if let scene {
-                        LookAroundPreview(initialScene: scene)
-                            .frame(height: 300)
-                            .clipShape(RoundedRectangle(cornerRadius: 26, style: .continuous))
-                    }
                 } else {
                     RoundedRectangle(cornerRadius: 34, style: .continuous).fill(.white.opacity(0.06))
                         .overlay(Text(L("Geen exacte locatie bekend")).foregroundStyle(.secondary))
@@ -75,9 +69,6 @@ struct TVDetailView: View {
             settings.markRead(melding)
             MeldingStore.shared.registerView(melding)
             weather = await P2000API.shared.weather(guid: melding.guid)
-            if let lat = melding.lat, let lon = melding.lon, melding.hasCoordinate {
-                scene = try? await MKLookAroundSceneRequest(coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon)).scene
-            }
         }
     }
 
