@@ -221,8 +221,23 @@ async function backfill(env, budget) {
   console.log(`[backfill] ${rows.length} meldingen`);
 }
 
+async function catchUp(env) {
+  try {
+    const last = await kvGet(env, "feed_try");
+    if (last && Date.now() - Number(last.value) < 45_000) return;
+    await kvSet(env, "feed_try", String(Date.now()));
+    const budget = new Budget(40);
+    try { await backfill(env, budget); } catch (e) { await kvSet(env, "backfill_error", String(e.message || e)); }
+    await poll(env, budget);
+    await drain(env, budget);
+  } catch (e) {
+    console.error("[catch-up]", e.message || e);
+  }
+}
+
 async function cron(env, event) {
   await kvSet(env, "cron_run", String(Date.now()));
+  await kvSet(env, "feed_try", String(Date.now()));
   const budget = new Budget(Number(env.SUBREQUEST_BUDGET || 45));
   try {
     await backfill(env, budget);
@@ -241,8 +256,10 @@ async function cron(env, event) {
 }
 
 export default {
-  async fetch(req, env) {
+  async fetch(req, env, ctx) {
     try {
+      // Backup for the cron: an API call also reads the feed when the last read is over 45 s old.
+      if (req.method === "GET" && new URL(req.url).pathname.startsWith("/v1/meldingen")) ctx.waitUntil(catchUp(env));
       return await handle(req, env);
     } catch (err) {
       const status = err.status || 500;
