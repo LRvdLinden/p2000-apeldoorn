@@ -12,6 +12,9 @@ struct TVSettingsView: View {
                 Section(L("Meldkamer")) {
                     Toggle(L("Alarmscherm bij nieuwe melding"), isOn: $tv.alarmScreen)
                     Toggle(L("Alleen bij spoed (A1, P1)"), isOn: $tv.alarmOnlyUrgent).disabled(!tv.alarmScreen)
+                    Toggle(L("Alarmgeluid"), isOn: Bindable(InAppAlarm.shared).soundOn)
+                    Toggle(L("Geluid alleen bij spoed (A1, P1)"), isOn: Bindable(InAppAlarm.shared).onlyUrgent).disabled(!InAppAlarm.shared.soundOn)
+                    Button(L("Geluid testen")) { InAppAlarm.shared.preview(urgent: InAppAlarm.shared.onlyUrgent) }
                     Picker(L("Alarm in beeld"), selection: $tv.alarmSeconds) {
                         Text("10 s").tag(10)
                         Text("15 s").tag(15)

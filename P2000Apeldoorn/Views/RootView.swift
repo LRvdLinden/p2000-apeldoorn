@@ -54,6 +54,7 @@ struct RootView: View {
             }
         }
         .task {
+            store.onNew = { InAppAlarm.shared.handle($0) }
             store.startPolling()
             InstallPing.send()
         }

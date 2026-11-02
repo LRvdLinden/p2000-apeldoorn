@@ -137,7 +137,12 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationDelegate()
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification) async -> UNNotificationPresentationOptions {
-        [.banner, .sound, .list]
+        // While the app is open the in-app alarm plays its own sound (once per alert), instead of the system sound.
+        let content = notification.request.content
+        let urgent = content.interruptionLevel == .timeSensitive || content.interruptionLevel == .critical
+        let guid = PushManager.guid(from: content.userInfo)
+        let handled = await MainActor.run { InAppAlarm.shared.handlePush(guid: guid, urgent: urgent) }
+        return handled ? [.banner, .list] : [.banner, .sound, .list]
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {

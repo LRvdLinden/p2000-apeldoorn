@@ -426,6 +426,23 @@
         }
       }
     },
+    "Alarm bij": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm for"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm bij"
+          }
+        }
+      }
+    },
     "Alarm in beeld": {
       "extractionState": "manual",
       "localizations": {
@@ -439,6 +456,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alarm in beeld"
+          }
+        }
+      }
+    },
+    "Alarmgeluid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm sound"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarmgeluid"
+          }
+        }
+      }
+    },
+    "Alarmgeluid in de app": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm sound in the app"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarmgeluid in de app"
           }
         }
       }
@@ -541,6 +592,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alleen meldingen in mijn buurt"
+          }
+        }
+      }
+    },
+    "Alleen spoed (A1, P1)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent only (A1, P1)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen spoed (A1, P1)"
           }
         }
       }
@@ -1480,6 +1548,40 @@
         }
       }
     },
+    "Geluid alleen bij spoed (A1, P1)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sound for urgent alerts only (A1, P1)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geluid alleen bij spoed (A1, P1)"
+          }
+        }
+      }
+    },
+    "Geluid testen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test sound"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geluid testen"
+          }
+        }
+      }
+    },
     "Gesynchroniseerd via iCloud": {
       "extractionState": "manual",
       "localizations": {
@@ -1578,6 +1680,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Het aantal meldingen van vandaag per hulpdienst."
+          }
+        }
+      }
+    },
+    "Het alarmgeluid klinkt als er een nieuwe melding binnenkomt terwijl de app open is. Het volgt je filters en de stille modus. Op iPhone volgt het ook de stilschakelaar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The alarm sound plays when a new alert comes in while the app is open. It follows your filters and quiet mode. On iPhone it also follows the silent switch."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het alarmgeluid klinkt als er een nieuwe melding binnenkomt terwijl de app open is. Het volgt je filters en de stille modus. Op iPhone volgt het ook de stilschakelaar."
           }
         }
       }

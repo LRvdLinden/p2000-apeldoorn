@@ -79,6 +79,7 @@ struct TVRootView: View {
         .task {
             UIApplication.shared.isIdleTimerDisabled = tv.keepAwake
             store.onNew = { list in
+                InAppAlarm.shared.handle(list)
                 let wanted = list.filter { settings.matchesList($0) && (!tv.alarmOnlyUrgent || $0.isUrgent) }
                     .sorted { $0.datum < $1.datum }
                 guard tv.alarmScreen, !wanted.isEmpty else { return }

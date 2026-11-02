@@ -25,8 +25,27 @@ struct SettingsView: View {
                     SettingsRow(icon: "bell.badge.fill", color: .red, title: L("Notificaties"),
                                 value: settings.notificationsEnabled ? L("Aan") : L("Uit"))
                 }
+                Toggle(isOn: Bindable(InAppAlarm.shared).soundOn) {
+                    SettingsRow(icon: "speaker.wave.2.fill", color: .pink, title: L("Alarmgeluid in de app"))
+                }
+                if InAppAlarm.shared.soundOn {
+                    Picker(selection: Bindable(InAppAlarm.shared).onlyUrgent) {
+                        Text(L("Alle meldingen")).tag(false)
+                        Text(L("Alleen spoed (A1, P1)")).tag(true)
+                    } label: {
+                        SettingsRow(icon: "exclamationmark.triangle.fill", color: .orange, title: L("Alarm bij"))
+                    }
+                    Button {
+                        InAppAlarm.shared.preview(urgent: InAppAlarm.shared.onlyUrgent)
+                    } label: {
+                        SettingsRow(icon: "play.circle.fill", color: .gray, title: L("Geluid testen"))
+                    }
+                    .buttonStyle(.plain)
+                }
             } header: {
                 Text(L("Meldingen"))
+            } footer: {
+                Text(L("Het alarmgeluid klinkt als er een nieuwe melding binnenkomt terwijl de app open is. Het volgt je filters en de stille modus. Op iPhone volgt het ook de stilschakelaar."))
             }
 
             Section {
