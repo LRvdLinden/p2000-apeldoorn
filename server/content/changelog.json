@@ -4,6 +4,6 @@
   "title": "Eerste versie",
   "version": "1.0.0",
   "release_date": "2026-11-02T00:00:00Z",
-  "content": "<ul><li>De officiële P2000 Apeldoorn-app voor iPhone, iPad, Mac en Apple Watch</li><li>Live pager, kaart met markers, statistieken en meldingdetails met Look Around en Apple Weer</li><li>Pushmeldingen met plaatsen, disciplines, prioriteit, radius, stille modus en kritieke meldingen</li><li>Widgets voor beginscherm, vergrendelscherm, bureaublad en wijzerplaat</li></ul>"
+  "content": "<ul><li>De officiële P2000 Apeldoorn-app voor iPhone, iPad, Mac en Apple Watch</li><li>Live pager, kaart met markers, statistieken (vandaag vs. gisteren) en meldingdetails met Look Around en Apple Weer</li><li>Pushmeldingen met plaatsen, disciplines, prioriteit, radius, stille modus en kritieke meldingen</li><li>Widgets voor beginscherm, vergrendelscherm, bureaublad en wijzerplaat</li></ul>"
  }
 ]

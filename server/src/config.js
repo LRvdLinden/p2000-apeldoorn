@@ -20,7 +20,7 @@ export const config = {
   },
 
   adminToken: env.ADMIN_TOKEN || "",
-  retentionDays: Number(env.RETENTION_DAYS || 730),
+  retentionDays: Number(env.RETENTION_DAYS || 3),
   timeZone: "Europe/Amsterdam",
 };
 

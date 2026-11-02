@@ -987,23 +987,6 @@
         }
       }
     },
-    "Deze maand": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "This month"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Deze maand"
-          }
-        }
-      }
-    },
     "Discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -1089,19 +1072,19 @@
         }
       }
     },
-    "Drukste uur: %@ (%lld meldingen)": {
+    "Drukste uur vandaag: %@ (%lld meldingen)": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Busiest hour: %1$@ (%2$lld alerts)"
+            "value": "Busiest hour today: %@ (%lld alerts)"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Drukste uur: %@ (%lld meldingen)"
+            "value": "Drukste uur vandaag: %@ (%lld meldingen)"
           }
         }
       }
@@ -1378,6 +1361,40 @@
         }
       }
     },
+    "Gisteren om deze tijd: %lld meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday at this time: %lld alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gisteren om deze tijd: %lld meldingen"
+          }
+        }
+      }
+    },
+    "Gisteren: %lld (om deze tijd %lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday: %lld (%lld by this time)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gisteren: %lld (om deze tijd %lld)"
+          }
+        }
+      }
+    },
     "Het aantal meldingen van vandaag per hulpdienst.": {
       "extractionState": "manual",
       "localizations": {
@@ -1442,23 +1459,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hybride"
-          }
-        }
-      }
-    },
-    "In de afgelopen dertig dagen is de brandweer van %@ %lld keer gealarmeerd en moest de ambulance %lld keer naar een plaats toe.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In the past thirty days the fire brigade of %1$@ was alerted %2$lld times and the ambulance was sent out %3$lld times."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In de afgelopen dertig dagen is de brandweer van %@ %lld keer gealarmeerd en moest de ambulance %lld keer naar een plaats toe."
           }
         }
       }
@@ -2194,6 +2194,23 @@
         }
       }
     },
+    "Nog geen meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen meldingen"
+          }
+        }
+      }
+    },
     "Nog niets bewaard": {
       "extractionState": "manual",
       "localizations": {
@@ -2534,19 +2551,19 @@
         }
       }
     },
-    "Per dag van de week": {
+    "Per discipline": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "By day of the week"
+            "value": "Per service"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Per dag van de week"
+            "value": "Per discipline"
           }
         }
       }
@@ -2976,23 +2993,6 @@
         }
       }
     },
-    "Statistieken laden...": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Loading statistics..."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Statistieken laden..."
-          }
-        }
-      }
-    },
     "Stille modus": {
       "extractionState": "manual",
       "localizations": {
@@ -3316,19 +3316,53 @@
         }
       }
     },
-    "Vandaag · %@": {
+    "Vandaag / gisteren (hele dag)": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Today · %@"
+            "value": "Today / yesterday (whole day)"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vandaag · %@"
+            "value": "Vandaag / gisteren (hele dag)"
+          }
+        }
+      }
+    },
+    "Vandaag is de brandweer %lld keer en de ambulance %lld keer gealarmeerd in gem. Apeldoorn; gisteren waren dat %lld en %lld keer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today the fire brigade was dispatched %lld times and the ambulance %lld times in the municipality of Apeldoorn; yesterday that was %lld and %lld times."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag is de brandweer %lld keer en de ambulance %lld keer gealarmeerd in gem. Apeldoorn; gisteren waren dat %lld en %lld keer."
+          }
+        }
+      }
+    },
+    "Vandaag vs. gisteren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today vs. yesterday"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag vs. gisteren"
           }
         }
       }
@@ -3618,23 +3652,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volgende"
-          }
-        }
-      }
-    },
-    "Vorige maand: %lld": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Last month: %lld"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Vorige maand: %lld"
           }
         }
       }
@@ -4013,19 +4030,19 @@
         }
       }
     },
-    "meldingen": {
+    "gisteren %lld": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "alerts"
+            "value": "yesterday %lld"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "meldingen"
+            "value": "gisteren %lld"
           }
         }
       }

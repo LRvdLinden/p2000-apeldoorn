@@ -14,8 +14,6 @@ final class MeldingStore {
     private(set) var isLoading = false
     private(set) var isOnline = true
     private(set) var errorMessage: String?
-    private(set) var maand: MaandStatistiek?
-    private(set) var vorigeMaand: MaandStatistiek?
 
     /// Called with alerts that arrived since the previous refresh (used for local notifications on macOS).
     @ObservationIgnored var onNew: (([Melding]) -> Void)?
@@ -23,7 +21,7 @@ final class MeldingStore {
     @ObservationIgnored private var pollTask: Task<Void, Never>?
     @ObservationIgnored private var knownIDs: Set<String> = []
     @ObservationIgnored private let api = P2000API.shared
-    @ObservationIgnored private var limit = 300
+    @ObservationIgnored private var limit = 500
     @ObservationIgnored private var didReloadWidgets = false
 
     private init() {
@@ -55,16 +53,6 @@ final class MeldingStore {
             isOnline = false
             errorMessage = error.localizedDescription
         }
-    }
-
-    func refreshStats() async {
-        let now = Date()
-        let prev = Calendar.current.date(byAdding: .month, value: -1, to: now) ?? now
-        async let current = try? api.maandStatistiek(key: P2000API.monthKey(now))
-        async let previous = try? api.maandStatistiek(key: P2000API.monthKey(prev))
-        let (c, p) = await (current, previous)
-        if let c = c ?? nil { maand = c }
-        if let p = p ?? nil { vorigeMaand = p }
     }
 
     /// Starts polling every 15 seconds; call when the scene becomes active.
@@ -122,11 +110,14 @@ final class MeldingStore {
 
     /// Today's counts per discipline (same tiles as "P2000 Statistieken" on the website).
     var vandaag: (totaal: Int, perDienst: [Dienst: Int]) {
-        let start = Calendar.current.startOfDay(for: .now)
-        let today = meldingen.filter { $0.datum >= start }
-        var per: [Dienst: Int] = [:]
-        for m in today { per[m.dienst, default: 0] += 1 }
-        return (today.count, per)
+        let s = statsVandaag
+        return (s.totaal, s.perDienst)
+    }
+
+    /// Statistics are kept for today and yesterday only, computed from the alerts.
+    var statsVandaag: DayStats { DayStats(day: .now, meldingen: meldingen) }
+    var statsGisteren: DayStats {
+        DayStats(day: Calendar.current.date(byAdding: .day, value: -1, to: .now) ?? .now, meldingen: meldingen)
     }
 
     // MARK: - Cache

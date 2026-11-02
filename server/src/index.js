@@ -6,7 +6,6 @@ import { config, apnsConfigured } from "./config.js";
 import { listMeldingen, getMelding, addView, upsertDevice, deleteDevice, getDevice, deviceCount, prune } from "./db.js";
 import { startIngest, feedStatus } from "./ingest.js";
 import { notify, sendTest, broadcast } from "./push.js";
-import { monthStats } from "./stats.js";
 import { backfill, meldingCount } from "./backfill.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -116,13 +115,6 @@ const server = http.createServer(async (req, res) => {
       return reply(res, 200, { views: addView(m[1]) });
     }
 
-    // Statistics
-    m = path.match(/^\/v1\/stats\/(\d{4}-\d{2})$/);
-    if (method === "GET" && m) {
-      const stats = monthStats(m[1]);
-      return stats ? reply(res, 200, stats, { "cache-control": "public, max-age=60" }) : reply(res, 400, { error: "Bad month" });
-    }
-
     // Texts (privacy, terms, disclaimer) and changelog
     m = path.match(/^\/v1\/content\/(privacy|terms|disclaimer)$/);
     if (method === "GET" && m) return reply(res, 200, content(m[1]), { "cache-control": "public, max-age=3600" });
@@ -169,16 +161,16 @@ server.listen(config.port, () => {
   console.log(`[api] P2000 Apeldoorn API op poort ${config.port} · APNs ${apnsConfigured() ? "aan" : "UIT"}`);
 });
 
-// Optional one-time import of the website history: set the variable BACKFILL=1 in Railway.
+// Optional one-time import of the last ~2 days from the website: set the variable BACKFILL=1 in Railway.
 // Only runs while the database is (almost) empty, so it is safe to leave on.
 if (process.env.BACKFILL === "1" && meldingCount() < 100) {
-  backfill(Number(process.env.BACKFILL_LIMIT || 5000))
+  backfill(Number(process.env.BACKFILL_LIMIT || 400))
     .then((n) => console.log(`[backfill] klaar: ${n} meldingen geïmporteerd`))
     .catch((e) => console.error("[backfill] mislukt:", e.message));
 }
 
 startIngest(notify);
 prune(config.retentionDays);
-setInterval(() => prune(config.retentionDays), 24 * 3600_000).unref();
+setInterval(() => prune(config.retentionDays), 3600_000).unref();
 
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(() => process.exit(0)));

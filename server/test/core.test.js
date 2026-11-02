@@ -8,7 +8,6 @@ process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "p2000-"));
 const { fromFeed, prioriteit, categorie } = await import("../src/ingest.js");
 const { matches, distanceKm, payloadFor, isQuiet } = await import("../src/push.js");
 const { insertMelding, listMeldingen, upsertDevice, activeDevices } = await import("../src/db.js");
-const { monthStats } = await import("../src/stats.js");
 
 const feed = {
   uid: "52581a38-2ca2-a4c9-fc27-3d654d952a71", link: "https://p2000.page/u-52581a38/7", timestamp: String(Math.floor(Date.now() / 1000)),
@@ -44,19 +43,13 @@ test("fromFeed keeps Apeldoorn only and parses units", () => {
   assert.ok(fromFeed({ ...feed, plaats: "Beemte broekland" }));
 });
 
-test("store + list + stats", () => {
+test("store + list", () => {
   const m = fromFeed(feed);
   assert.equal(insertMelding(m), true);
   assert.equal(insertMelding(m), false);
   const list = listMeldingen({ limit: 10 });
   assert.equal(list[0].guid, m.guid);
   assert.ok(list[0].datum_tijd.endsWith("Z"));
-  const d = new Date();
-  const key = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit" }).format(d);
-  const s = monthStats(key);
-  assert.equal(s.totaal, 1);
-  assert.equal(s.by_dienst.ambulance, 1);
-  assert.equal(s.by_uur.reduce((a, b) => a + b), 1);
 });
 
 test("matching incl. radius and quiet hours", () => {

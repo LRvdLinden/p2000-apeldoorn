@@ -229,39 +229,31 @@ struct Melding: Identifiable, Hashable, Codable {
     }
 }
 
-// MARK: - Statistics
+// MARK: - Statistics (today vs yesterday, computed in the app)
 
-struct MaandStatistiek: Codable, Hashable {
-    var maandKey: String
-    var totaal: Int
-    var byDienst: [String: Int]
-    var byPrioriteit: [String: Int]
-    var byCategorie: [String: Int]
-    /// Index 0 = zondag … 6 = zaterdag.
-    var byDag: [Int]
-    /// Index 0…23.
-    var byUur: [Int]
+struct DayStats: Hashable {
+    var day: Date
+    var totaal = 0
+    var perDienst: [Dienst: Int] = [:]
+    var perPrioriteit: [String: Int] = [:]
+    var perCategorie: [String: Int] = [:]
+    /// Index 0…23 (local hour).
+    var perUur: [Int] = Array(repeating: 0, count: 24)
+    /// Alerts up to the same time of day (for a fair "so far" comparison with today).
+    var totaalTotNu = 0
 
-    enum CodingKeys: String, CodingKey {
-        case maandKey = "maand_key", totaal, byDienst = "by_dienst", byPrioriteit = "by_prioriteit"
-        case byCategorie = "by_categorie", byDag = "by_dag", byUur = "by_uur"
-    }
-
-    init(from decoder: Decoder) throws {
-        let c = try decoder.container(keyedBy: CodingKeys.self)
-        maandKey = (try? c.decodeIfPresent(String.self, forKey: .maandKey)) ?? ""
-        totaal = Int(c.flexibleDouble(.totaal) ?? 0)
-        func dict(_ key: CodingKeys) -> [String: Int] {
-            ((try? c.decodeIfPresent([String: Double].self, forKey: key)) ?? [:]).mapValues { Int($0) }
+    init(day: Date, meldingen: [Melding], now: Date = .now) {
+        let cal = Calendar.current
+        self.day = cal.startOfDay(for: day)
+        let nowSeconds = now.timeIntervalSince(cal.startOfDay(for: now))
+        for m in meldingen where cal.isDate(m.datum, inSameDayAs: day) {
+            totaal += 1
+            perDienst[m.dienst, default: 0] += 1
+            if let p = m.prioriteit, !p.isEmpty, p.lowercased() != "onbekend" { perPrioriteit[p.uppercased(), default: 0] += 1 }
+            if let c = m.categorie, !c.isEmpty { perCategorie[c, default: 0] += 1 }
+            perUur[cal.component(.hour, from: m.datum)] += 1
+            if m.datum.timeIntervalSince(self.day) <= nowSeconds { totaalTotNu += 1 }
         }
-        func list(_ key: CodingKeys) -> [Int] {
-            ((try? c.decodeIfPresent([Double].self, forKey: key)) ?? []).map { Int($0) }
-        }
-        byDienst = dict(.byDienst)
-        byPrioriteit = dict(.byPrioriteit)
-        byCategorie = dict(.byCategorie)
-        byDag = list(.byDag)
-        byUur = list(.byUur)
     }
 }
 

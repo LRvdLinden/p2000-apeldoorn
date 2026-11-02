@@ -67,11 +67,7 @@ struct P2000API: Sendable {
         _ = try? await send("POST", url("v1/meldingen/\(guid)/view"))
     }
 
-    // MARK: - Statistics & texts
-
-    func maandStatistiek(key: String) async throws -> MaandStatistiek? {
-        try await get(url("v1/stats/\(key)"), as: MaandStatistiek.self)
-    }
+    // MARK: - Texts
 
     /// "privacy", "terms" or "disclaimer".
     func contentPage(_ name: String) async throws -> ContentPage? {
@@ -94,10 +90,5 @@ struct P2000API: Sendable {
 
     func sendTestPush(token: String) async throws {
         try await send("POST", url("v1/devices/\(token)/test"))
-    }
-
-    static func monthKey(_ date: Date) -> String {
-        let comps = Calendar(identifier: .gregorian).dateComponents(in: TimeZone(identifier: "Europe/Amsterdam")!, from: date)
-        return String(format: "%04d-%02d", comps.year ?? 2026, comps.month ?? 1)
     }
 }

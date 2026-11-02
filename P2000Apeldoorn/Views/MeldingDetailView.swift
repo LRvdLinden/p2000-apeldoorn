@@ -325,11 +325,11 @@ struct MeldingDetailView: View {
         var parts = [p1,
                      Lf("%@ is een plaats in de provincie Gelderland en valt onder de P2000-regio Noord- en Oost-Gelderland.", stad),
                      Lf("De hulpdiensten in %@ reageren onder meer op 112 meldingen die bij deze veiligheidsregio binnenkomen. Via P2000 worden deze 112 meldingen uitgestuurd naar bijvoorbeeld het juiste brandweerkorps, ambulancedienst of de dienstdoende politieagenten.", stad)]
-        if let cur = store.maand {
-            let prev = store.vorigeMaand
-            let brand = (cur.byDienst["brandweer"] ?? 0) + (prev?.byDienst["brandweer"] ?? 0)
-            let ambu = (cur.byDienst["ambulance"] ?? 0) + (prev?.byDienst["ambulance"] ?? 0)
-            parts.append(Lf("In de afgelopen dertig dagen is de brandweer van %@ %lld keer gealarmeerd en moest de ambulance %lld keer naar een plaats toe.", stad, brand, ambu))
+        let today = store.statsVandaag, yesterday = store.statsGisteren
+        if today.totaal + yesterday.totaal > 0 {
+            parts.append(Lf("Vandaag is de brandweer %lld keer en de ambulance %lld keer gealarmeerd in gem. Apeldoorn; gisteren waren dat %lld en %lld keer.",
+                            today.perDienst[.brandweer] ?? 0, today.perDienst[.ambulance] ?? 0,
+                            yesterday.perDienst[.brandweer] ?? 0, yesterday.perDienst[.ambulance] ?? 0))
         }
         return parts.joined(separator: "\n\n")
     }

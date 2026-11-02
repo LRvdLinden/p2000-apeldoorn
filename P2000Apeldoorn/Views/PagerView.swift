@@ -31,7 +31,6 @@ struct PagerView: View {
                 .searchable(text: $search, prompt: L("Zoek op plaats, straat of capcode"))
                 .refreshable {
                     await store.refresh()
-                    await store.refreshStats()
                 }
                 .toolbar {
                     ToolbarItem(placement: .primaryAction) {

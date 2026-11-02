@@ -55,17 +55,13 @@ struct RootView: View {
         }
         .task {
             store.startPolling()
-            await store.refreshStats()
         }
         .onChange(of: scenePhase) { _, phase in
             switch phase {
             case .active:
                 store.startPolling()
                 location.start()
-                Task {
-                    await store.refreshStats()
-                    await account.verifyCredential()
-                }
+                Task { await account.verifyCredential() }
                 if lock.isLocked { Task { await lock.unlock() } }
                 scheduleReview()
             case .background:

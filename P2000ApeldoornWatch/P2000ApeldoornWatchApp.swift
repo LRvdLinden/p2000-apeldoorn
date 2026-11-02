@@ -163,17 +163,21 @@ struct WatchStatsView: View {
 
     var body: some View {
         let today = store.vandaag
+        let yesterday = store.statsGisteren
         NavigationStack {
             ScrollView {
                 VStack(spacing: 10) {
                     Text("\(today.totaal)")
                         .font(.system(size: 44, weight: .black, design: .rounded))
                     Text(L("meldingen vandaag")).font(.footnote).foregroundStyle(.secondary)
+                    Text(Lf("Gisteren: %lld (om deze tijd %lld)", yesterday.totaal, yesterday.totaalTotNu))
+                        .font(.caption2).foregroundStyle(.secondary)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                         ForEach(Dienst.selectable) { d in
                             VStack(spacing: 4) {
                                 DienstIcon(dienst: d, size: 22)
                                 Text("\(today.perDienst[d] ?? 0)").font(.headline.monospacedDigit())
+                                Text(Lf("gisteren %lld", yesterday.perDienst[d] ?? 0)).font(.system(size: 9)).foregroundStyle(.secondary)
                                 Text(d.label).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
                             }
                             .frame(maxWidth: .infinity)
