@@ -1,7 +1,7 @@
 import SwiftUI
 import WebKit
 
-/// Privacy statement, terms of use and disclaimer – served by the app's own API (server/content).
+/// Privacy statement, terms of use and disclaimer – served by the app's own API (worker/content).
 struct ContentPageView: View {
     let name: String
     let title: String

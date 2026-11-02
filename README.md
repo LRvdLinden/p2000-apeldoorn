@@ -34,48 +34,38 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 
 Poppins (SIL OFL) zit in `P2000Apeldoorn/Fonts`. **Social Gothic Bold** is het kopjeslettertype van de website. Het is een commercieel lettertype van Canada Type en zit er daarom niet in. Heb je een app-licentie, zet dan `SocialGothic-Bold.otf` in `P2000Apeldoorn/Fonts`. De app pakt hem automatisch op; zonder dat bestand gebruikt hij een smal systeemlettertype.
 
-## Architectuur: de app staat los van de website
+## Architectuur: geen server, wel 24/7
 
 ```
-p2000.page-feed ──► server/ (Railway, Node 24 + SQLite) ──► REST-API ──► iPhone · iPad · Mac · Watch · widgets
+p2000.page-feed ──► Cloudflare Worker (cron elke minuut, 3× uitlezen) + D1-database ──► REST-API ──► app · widgets · website
                                    │
                                    └──► Apple Push Notification service (APNs) ──► pushmeldingen
 ```
 
-De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.page staat alleen op de server.
+Er is geen server om te beheren: de API draait als **Cloudflare Worker** (`worker/`), gratis binnen het Workers Free-plan. De sleutel van p2000.page en de Apple-sleutels staan alleen als secrets bij de Worker; ze komen uit je GitHub-secrets.
 
-### server/
-- Vraagt de p2000.page-feed elke 10 seconden op en bewaart alleen meldingen uit de gemeente Apeldoorn.
-- Per melding bepaalt hij de prioriteit, de categorie, de eenheden (capcodes), de voertuigen en de coördinaten.
+### worker/
+- Een cron-trigger draait elke minuut en leest de p2000.page-feed 3× per minuut. Alleen meldingen uit de gemeente Apeldoorn worden bewaard (3 dagen, `RETENTION_DAYS`).
+- Per melding: prioriteit, categorie, capcodes, voertuigen en coördinaten (straten via de Apple Maps Server API).
 - Endpoints:
-  - `GET /v1/meldingen` en `GET /v1/meldingen/:guid`
-  - `POST /v1/meldingen/:guid/view`
+  - `GET /v1/meldingen` en `GET /v1/meldingen/:guid`, `POST /v1/meldingen/:guid/view`
   - `GET /v1/meldingen/:guid/weather` (WeatherKit) en `GET /v1/mapkit-token`
   - `GET /v1/content/privacy|terms|disclaimer` en `GET /v1/changelog`
-- Pushmeldingen gaan rechtstreeks via APNs (een JWT op basis van je .p8-sleutel):
-  - `POST /v1/devices` registreert een toestel met zijn instellingen: plaatsen, disciplines, prioriteiten, stille modus, kritieke meldingen en de radius (km + middelpunt, afgerond op ~100 m).
-  - `DELETE /v1/devices/:token` meldt een toestel af.
-  - `POST /v1/devices/:token/test` stuurt een testmelding.
-  - `POST /v1/broadcast` stuurt een bericht naar iedereen, met `Authorization: Bearer ADMIN_TOKEN`.
-- Testen: `cd server && npm test`.
-- De server bewaart meldingen 3 dagen (`RETENTION_DAYS`), genoeg voor de 24-uurstijdlijn en de vergelijking vandaag/gisteren.
-- Vandaag en gisteren eenmalig overnemen van de website (optioneel): zet in Railway de variabele `BACKFILL=1`. De server importeert dan bij het opstarten de laatste 400 meldingen (`BACKFILL_LIMIT` voor meer), alleen zolang de database (bijna) leeg is.
+  - `POST /v1/devices`, `DELETE /v1/devices/:token`, `POST /v1/devices/:token/test`
+  - `POST /v1/broadcast` met `Authorization: Bearer ADMIN_TOKEN`
+- Pushmeldingen gaan rechtstreeks naar APNs en houden rekening met plaatsen, disciplines, prioriteiten, stille modus, kritieke meldingen en de radius. Het gratis plan staat 50 uitgaande verzoeken per cron-run toe; meer pushes dan dat gaan via een wachtrij (`outbox`) mee met de volgende minuut. Met Workers Paid ($5 per maand) is die limiet veel hoger.
+- Bij een lege database worden eenmalig de laatste 400 meldingen van vandaag en gisteren van de oude website overgenomen (`BACKFILL`).
+- Testen: `cd worker && npm test`. Lokaal draaien: `npm run dev`.
 
-### Deploy naar Railway
-1. Log in op [railway.com](https://railway.com) met GitHub en neem het **Hobby**-plan ($5 per maand, inclusief $5 gebruik).
-2. Kies **New Project → Deploy from GitHub repo → LRvdLinden/p2000-apeldoorn**.
-3. Service → **Settings**:
-   - Hernoem de service naar `p2000-api`.
-   - Zet **Root Directory** op `/server`.
-   - Zet **Watch Paths** op `/server/**`.
-4. Service → **Variables**. GitHub-secrets kun je niet uitlezen, dus plak de waarden hier opnieuw: `P2000_PAGE_API_URL`, `APN_KEY_ID`, `APN_TEAM_ID`, `APN_P8_CERT` (de hele .p8, inclusief de BEGIN- en END-regel) en eventueel `BACKFILL=1`.
-5. Klik met de rechtermuisknop op de service → **Attach volume** → mount path `/data`.
-6. **Settings → Networking**:
-   - Klik op **Generate Domain**. Je krijgt een `…up.railway.app`-adres.
-   - Voeg daarna eventueel een **Custom Domain** toe: `api.p2000-apeldoorn.nl` met een CNAME bij je domeinbeheerder.
-7. Controleer `https://<domein>/health`. Je moet `"ok":true` en `"apns":true` zien.
+### Eenmalig instellen
+1. Maak een gratis account op [dash.cloudflare.com](https://dash.cloudflare.com).
+2. **Account ID**: staat rechts op de overzichtspagina van *Workers & Pages*. Zet hem in GitHub als secret `CLOUDFLARE_ACCOUNT_ID`.
+3. **API-token**: *My Profile → API Tokens → Create Token → template "Edit Cloudflare Workers"*, en voeg de permissie **Account → D1 → Edit** toe. Zet hem in GitHub als secret `CLOUDFLARE_API_TOKEN`.
+4. Start in GitHub **Actions → Worker → Run workflow**. De workflow maakt de D1-database, zet alle secrets over en deployt. In de samenvatting staat het adres (`https://p2000-apeldoorn-api.<jouw-naam>.workers.dev`).
+5. Controleer `<adres>/health`: `"feed"` moet een recente `lastOk` hebben.
+6. Eigen adres (optioneel): staat het domein p2000-apeldoorn.nl bij Cloudflare, voeg dan bij de Worker *Settings → Domains & Routes → Custom Domain* `api.p2000-apeldoorn.nl` toe.
 
-Bij elke push naar `server/` deployt Railway zelf. De GitHub-workflow draait alleen de tests.
+Bij elke push naar `worker/` test en deployt de workflow opnieuw.
 
 ## Website (`website/`)
 
@@ -83,10 +73,10 @@ Een statische website op **GitHub Pages**, zonder build-stap:
 
 - `/` – de homepage over de app, met animaties, live tellingen en een ticker met de laatste meldingen.
 - `/pager/` – de **live pager** in je browser: tijdlijn (24 uur), filters, Mijn buurt, kaart (MapKit JS met de eigen markers), meldingdetail met Look Around en METEO (WeatherKit), en statistieken vandaag vs. gisteren. Geopende meldingen worden grijs.
-- `/info/?p=privacy|terms|disclaimer` – de teksten uit `server/content`.
+- `/info/?p=privacy|terms|disclaimer` – de teksten uit `worker/content`.
 - Oude links `/melding/<guid>` worden doorgestuurd naar `/pager/?melding=<guid>`.
 
-Zolang de API-server niet bereikbaar is, toont de site voorbeeldmeldingen met een melding bovenaan.
+Zolang de API niet bereikbaar is, toont de site voorbeeldmeldingen met een melding bovenaan.
 
 **Workflow `Website`** (bij elke push naar `website/`, en wekelijks):
 1. Maakt `website/config.js` met het API-adres (repo-variabele `API_BASE`, standaard `https://api.p2000-apeldoorn.nl`) en een MapKit JS-token uit de secrets `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID` en `WEB_MAPKIT_JS_P8` (40 dagen geldig, wekelijks vernieuwd; met variabele `SITE_ORIGIN` beperk je hem tot je domein).
@@ -95,16 +85,18 @@ Zolang de API-server niet bereikbaar is, toont de site voorbeeldmeldingen met ee
 
 Lokaal bekijken: `cd website && python3 -m http.server 8000` en open http://localhost:8000.
 
-### Server-variabelen voor de website (Railway)
-Plak dezelfde waarden als de GitHub-secrets ook in Railway:
+### Apple-sleutels voor de Worker
+De workflow *Worker* zet deze GitHub-secrets automatisch over:
 
-| Variabele | Waarvoor |
+| Secret | Waarvoor |
 |---|---|
-| `WEB_WEATHERKIT_KEY_ID`, `WEB_WEATHERKIT_TEAM_ID`, `WEB_WEATHERKIT_P8` | METEO per melding: `GET /v1/meldingen/:guid/weather` (gecachet) |
-| `WEB_WEATHERKIT_SERVICE_ID` | Je **Services ID** met WeatherKit (Identifiers → Services IDs), standaard `nl.lrvdlinden.p2000apeldoorn.weatherkit` |
-| `MAPS_SERVER_API_KEY_ID`, `MAPS_SERVER_API_TEAM_ID`, `MAPS_SERVER_API_P8` | Straatnamen omzetten naar precieze coördinaten (Apple Maps Server API) |
-| `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID`, `WEB_MAPKIT_JS_P8` | `GET /v1/mapkit-token` (reserve als het token in config.js verloopt) |
-| `SITE_ORIGINS` | Toegestane websites voor dat token (standaard p2000-apeldoorn.nl en lrvdlinden.github.io) |
+| `P2000_PAGE_API_URL` | De bron van de meldingen |
+| `APN_KEY_ID`, `APN_TEAM_ID`, `APN_P8_CERT` | Pushmeldingen |
+| `WEB_WEATHERKIT_KEY_ID`, `WEB_WEATHERKIT_TEAM_ID`, `WEB_WEATHERKIT_P8` | METEO per melding (gecachet) |
+| `MAPS_SERVER_API_KEY_ID`, `MAPS_SERVER_API_TEAM_ID`, `MAPS_SERVER_API_P8` | Straatnamen omzetten naar precieze coördinaten |
+| `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID`, `WEB_MAPKIT_JS_P8` | `GET /v1/mapkit-token` (reserve voor de website) |
+
+WeatherKit heeft ook een **Services ID** nodig (Identifiers → Services IDs, met WeatherKit aan). Standaard is dat `nl.lrvdlinden.p2000apeldoorn.weatherkit`; een andere naam zet je in `worker/wrangler.toml` bij `WEB_WEATHERKIT_SERVICE_ID`.
 
 `/health` laat zien welke diensten actief zijn (`apns`, `mapkit`, `weatherkit`, `mapsServer`).
 
@@ -137,7 +129,7 @@ Shared/                modellen, API's, store, instellingen, splash, gedeelde UI
 Config/                xcconfig, Info.plist's, entitlements
 tools/                 generators voor strings, projectbestand en website-config
 website/               de website + live pager (GitHub Pages)
-server/                API, ingest, pushmeldingen, WeatherKit/Maps (Railway)
+worker/                API, ingest, pushmeldingen, WeatherKit/Maps (Cloudflare Worker + D1)
 ```
 
 © 2026 P2000 Apeldoorn. Made & Powered by [PixelForges](https://pixelforges.nl). Bron: [p2000.page](https://p2000.page).

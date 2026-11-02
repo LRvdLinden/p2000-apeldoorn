@@ -19,7 +19,7 @@ func Lf(_ key: String, _ args: CVarArg...) -> String {
 }
 
 enum Config {
-    /// Own backend (server/ in this repo, runs on Railway). The app does not use the website.
+    /// Own backend (Cloudflare Worker, worker/ in this repo). The app does not use the website.
     static let apiBase: URL = {
         if let raw = Bundle.main.object(forInfoDictionaryKey: "P2000APIURL") as? String,
            raw.hasPrefix("http"), !raw.contains("$("), let url = URL(string: raw) {

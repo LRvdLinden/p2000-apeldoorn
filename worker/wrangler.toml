@@ -1,0 +1,22 @@
+# Cloudflare Worker: the API + ingest + pushmeldingen for P2000 Apeldoorn.
+# Deployed by the GitHub workflow "Worker" (database_id is filled in there).
+name = "p2000-apeldoorn-api"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+workers_dev = true
+
+[triggers]
+crons = ["* * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "p2000-apeldoorn"
+database_id = "__D1_DATABASE_ID__"
+
+[vars]
+RETENTION_DAYS = "3"
+APN_TOPIC = "nl.lrvdlinden.p2000apeldoorn"
+WEB_WEATHERKIT_SERVICE_ID = "nl.lrvdlinden.p2000apeldoorn.weatherkit"
+
+[observability]
+enabled = true

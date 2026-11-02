@@ -1,0 +1,91 @@
+name: Worker
+
+# Tests the Cloudflare Worker and deploys it (when the Cloudflare secrets are set).
+# Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID; all other values come from the
+# existing secrets (P2000_PAGE_API_URL, APN_*, WEB_*, MAPS_SERVER_API_*).
+on:
+  push:
+    branches: [main]
+    paths: ["worker/**", ".github/workflows/worker.yml"]
+  pull_request:
+    paths: ["worker/**"]
+  workflow_dispatch:
+
+concurrency:
+  group: worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+      - run: npm test
+
+      - name: Cloudflare-secrets aanwezig?
+        id: cf
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then echo "ok=true" >> "$GITHUB_OUTPUT";
+          else echo "::warning::CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID ontbreken – alleen getest, niet gedeployd."; fi
+
+      - name: D1-database (aanmaken als hij nog niet bestaat)
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        run: |
+          find_id() { npx wrangler d1 list --json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const d=JSON.parse(s).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")})'; }
+          ID=$(find_id)
+          if [ -z "$ID" ]; then
+            npx wrangler d1 create p2000-apeldoorn --location weur
+            ID=$(find_id)
+          fi
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
+          npx wrangler d1 execute p2000-apeldoorn --remote --file schema.sql
+
+      - name: Deploy
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        run: npx wrangler deploy | tee deploy.log
+
+      - name: Secrets naar de Worker
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        env:
+          P2000_PAGE_API_URL: ${{ secrets.P2000_PAGE_API_URL }}
+          APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
+          APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
+          APN_P8_CERT: ${{ secrets.APN_P8_CERT }}
+          WEB_MAPKIT_JS_KEY_ID: ${{ secrets.WEB_MAPKIT_JS_KEY_ID }}
+          WEB_MAPKIT_JS_TEAM_ID: ${{ secrets.WEB_MAPKIT_JS_TEAM_ID }}
+          WEB_MAPKIT_JS_P8: ${{ secrets.WEB_MAPKIT_JS_P8 }}
+          WEB_WEATHERKIT_KEY_ID: ${{ secrets.WEB_WEATHERKIT_KEY_ID }}
+          WEB_WEATHERKIT_TEAM_ID: ${{ secrets.WEB_WEATHERKIT_TEAM_ID }}
+          WEB_WEATHERKIT_P8: ${{ secrets.WEB_WEATHERKIT_P8 }}
+          MAPS_SERVER_API_KEY_ID: ${{ secrets.MAPS_SERVER_API_KEY_ID }}
+          MAPS_SERVER_API_TEAM_ID: ${{ secrets.MAPS_SERVER_API_TEAM_ID }}
+          MAPS_SERVER_API_P8: ${{ secrets.MAPS_SERVER_API_P8 }}
+          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
+          BACKFILL: "1"
+        run: |
+          node -e '
+            const keys = ["P2000_PAGE_API_URL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
+              "WEB_MAPKIT_JS_P8","WEB_WEATHERKIT_KEY_ID","WEB_WEATHERKIT_TEAM_ID","WEB_WEATHERKIT_P8","MAPS_SERVER_API_KEY_ID",
+              "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","ADMIN_TOKEN","BACKFILL"];
+            const out = {}; for (const k of keys) if (process.env[k]) out[k] = process.env[k];
+            require("fs").writeFileSync("secrets.json", JSON.stringify(out));
+            console.log("Secrets:", Object.keys(out).join(", "));'
+          npx wrangler secret bulk secrets.json
+          rm secrets.json
+
+      - name: Adres van de API
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        run: |
+          URL=$(grep -oE 'https://[a-z0-9.-]+\.workers\.dev' deploy.log | head -1)
+          echo "### API: $URL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Controle: $URL/health" >> "$GITHUB_STEP_SUMMARY"
+          echo "API: $URL"

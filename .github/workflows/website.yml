@@ -3,7 +3,7 @@ name: Website
 on:
   push:
     branches: [main]
-    paths: ["website/**", "server/content/**", "tools/site-config.mjs", ".github/workflows/website.yml"]
+    paths: ["website/**", "worker/content/**", "tools/site-config.mjs", ".github/workflows/website.yml"]
   schedule:
     - cron: "17 3 * * 1" # weekly: fresh MapKit JS token
   workflow_dispatch:
@@ -38,7 +38,7 @@ jobs:
           WEB_MAPKIT_JS_P8: ${{ secrets.WEB_MAPKIT_JS_P8 }}
         run: node tools/site-config.mjs
       - name: Teksten (privacy, voorwaarden, disclaimer)
-        run: mkdir -p website/data && cp server/content/*.json website/data/
+        run: mkdir -p website/data && cp worker/content/*.json website/data/
       - name: Custom domain
         if: ${{ vars.SITE_DOMAIN != '' }}
         run: echo "${{ vars.SITE_DOMAIN }}" > website/CNAME

@@ -6,7 +6,7 @@ import UIKit
 import AppKit
 #endif
 
-/// Native Apple push notifications (APNs) via the app's own server (server/ in this repo).
+/// Native Apple push notifications (APNs) via the app's own Cloudflare Worker (worker/ in this repo).
 ///
 /// The device registers its APNs token together with its notification settings
 /// (places, disciplines, priorities, quiet hours, critical alerts and radius). The server

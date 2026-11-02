@@ -1,6 +1,6 @@
 import Foundation
 
-/// Client for the app's own backend (server/ in this repo). The app works standalone from the website:
+/// Client for the app's own backend (Cloudflare Worker, worker/ in this repo). The app works standalone from the website:
 /// alerts, statistics, view counts, texts and push registration all go through this API.
 struct P2000API: Sendable {
     static let shared = P2000API()
