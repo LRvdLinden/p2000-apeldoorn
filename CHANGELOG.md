@@ -9,6 +9,7 @@
   - De kaart gaat zelf langs de laatste meldingen; het scherm blijft aan.
   - Detail met 3D-kaart, capcodes, voertuigen en het weer; statistieken vandaag tegenover gisteren.
   - Dezelfde animated splash, en je filters via iCloud.
+- Het LIVE-label op de kaarten in de tijdlijn is weg.
 - De app meldt anoniem of je met Apple bent ingelogd en of pushmeldingen aan staan (voor P2000Beheer).
 
 ## Backend – Cloudflare Worker

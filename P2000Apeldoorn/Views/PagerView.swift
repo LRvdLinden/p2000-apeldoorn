@@ -317,13 +317,6 @@ struct MeldingRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    if melding.isRecent {
-                        Text(L("LIVE"))
-                            .font(.system(size: 9, weight: .heavy))
-                            .padding(.horizontal, 5).padding(.vertical, 1)
-                            .background(Theme.red, in: Capsule())
-                            .foregroundStyle(.white)
-                    }
                     if bewaard {
                         Image(systemName: "bookmark.fill").font(.caption2).foregroundStyle(.orange)
                     }
