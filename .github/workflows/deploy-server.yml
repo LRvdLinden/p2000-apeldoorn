@@ -1,15 +1,14 @@
-name: Deploy API-server
+name: Test API-server
 
-# Deploys server/ to Railway and sets its variables from the GitHub secrets:
-#   RAILWAY_TOKEN (project token), P2000_PAGE_API_URL, APN_KEY_ID, APN_TEAM_ID, APN_P8_CERT, ADMIN_TOKEN (optional)
-# Optional repo variable RAILWAY_SERVICE (default: p2000-api).
+# Railway deploys server/ itself from GitHub (Root Directory "/server").
+# This workflow only runs the server tests on every change.
 on:
   push:
     branches: [main]
     paths: ["server/**", ".github/workflows/deploy-server.yml"]
+  pull_request:
+    paths: ["server/**"]
   workflow_dispatch:
-
-concurrency: deploy-server
 
 jobs:
   test:
@@ -20,42 +19,3 @@ jobs:
         with: { node-version: 24 }
       - run: npm test
         working-directory: server
-
-  deploy:
-    needs: test
-    runs-on: ubuntu-latest
-    env:
-      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-      SERVICE: ${{ vars.RAILWAY_SERVICE || 'p2000-api' }}
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check token
-        run: |
-          if [ -z "$RAILWAY_TOKEN" ]; then
-            echo "::warning::Zet de repo-secret RAILWAY_TOKEN (Railway → Project → Settings → Tokens) om automatisch te deployen."
-            exit 0
-          fi
-      - name: Install Railway CLI
-        if: env.RAILWAY_TOKEN != ''
-        run: npm i -g @railway/cli
-      - name: Set variables
-        if: env.RAILWAY_TOKEN != ''
-        env:
-          P2000_PAGE_API_URL: ${{ secrets.P2000_PAGE_API_URL }}
-          APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
-          APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
-          APN_P8_CERT: ${{ secrets.APN_P8_CERT }}
-          ADMIN_TOKEN: ${{ secrets.ADMIN_TOKEN }}
-        run: |
-          set -e
-          args=()
-          for k in P2000_PAGE_API_URL APN_KEY_ID APN_TEAM_ID APN_P8_CERT ADMIN_TOKEN; do
-            v="${!k}"
-            if [ -n "$v" ]; then args+=(--set "$k=$v"); fi
-          done
-          args+=(--set "DATA_DIR=/data" --set "APN_TOPIC=nl.lrvdlinden.p2000apeldoorn")
-          railway variables --service "$SERVICE" --skip-deploys "${args[@]}" > /dev/null
-          echo "Variabelen gezet: $(( ${#args[@]} / 2 ))"
-      - name: Deploy
-        if: env.RAILWAY_TOKEN != ''
-        run: railway up server --path-as-root --service "$SERVICE" --ci

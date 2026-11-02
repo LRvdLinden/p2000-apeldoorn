@@ -61,12 +61,20 @@ De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.pag
 - Geschiedenis eenmalig overnemen van de website (optioneel): zet in Railway de variabele `BACKFILL=1`. De server importeert dan bij het opstarten de laatste 5000 meldingen, met `BACKFILL_LIMIT` voor meer. Dat gebeurt alleen zolang de database (bijna) leeg is.
 
 ### Deploy naar Railway
-1. Maak in Railway een project met een lege service **p2000-api**. Koppel er een **volume** aan op `/data`.
-2. Zet in GitHub deze repo-secrets:
-   - **verplicht:** `RAILWAY_TOKEN` (Railway → Project → Settings → Tokens), `P2000_PAGE_API_URL`, `APN_KEY_ID`, `APN_TEAM_ID`, `APN_P8_CERT`
-   - **optioneel:** `ADMIN_TOKEN`
-3. Bij elke push naar `server/` test de workflow **Deploy API-server** de code. Daarna zet hij de secrets als Railway-variabelen en deployt hij.
-4. Koppel in Railway het domein `api.p2000-apeldoorn.nl` met een CNAME. Dat is de standaard in `Config/Base.xcconfig` (`P2000_API_URL`). Wil je eerst testen, zet dan de Railway-URL in `Config/Secrets.xcconfig`.
+1. Log in op [railway.com](https://railway.com) met GitHub en neem het **Hobby**-plan ($5 per maand, inclusief $5 gebruik).
+2. Kies **New Project → Deploy from GitHub repo → LRvdLinden/p2000-apeldoorn**.
+3. Service → **Settings**:
+   - Hernoem de service naar `p2000-api`.
+   - Zet **Root Directory** op `/server`.
+   - Zet **Watch Paths** op `/server/**`.
+4. Service → **Variables**. GitHub-secrets kun je niet uitlezen, dus plak de waarden hier opnieuw: `P2000_PAGE_API_URL`, `APN_KEY_ID`, `APN_TEAM_ID`, `APN_P8_CERT` (de hele .p8, inclusief de BEGIN- en END-regel) en eenmalig `BACKFILL=1`.
+5. Klik met de rechtermuisknop op de service → **Attach volume** → mount path `/data`.
+6. **Settings → Networking**:
+   - Klik op **Generate Domain**. Je krijgt een `…up.railway.app`-adres.
+   - Voeg daarna eventueel een **Custom Domain** toe: `api.p2000-apeldoorn.nl` met een CNAME bij je domeinbeheerder.
+7. Controleer `https://<domein>/health`. Je moet `"ok":true` en `"apns":true` zien.
+
+Bij elke push naar `server/` deployt Railway zelf. De GitHub-workflow draait alleen de tests.
 
 ## Pushmeldingen in de app
 - iPhone, iPad en Mac gebruiken echte APNs-pushmeldingen. De Apple Watch krijgt de meldingen van de iPhone mee.
