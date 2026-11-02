@@ -28,7 +28,7 @@ private struct TodayCounts: View {
     }
 }
 
-private func background(for dienst: Dienst?) -> some View {
+private func widgetTint(for dienst: Dienst?) -> some View {
     LinearGradient(colors: [(dienst?.color ?? Theme.red).opacity(0.28), Color.clear],
                    startPoint: .topLeading, endPoint: .bottomTrailing)
 }
@@ -66,7 +66,7 @@ struct LatestMeldingView: View {
             }
         }
         .widgetURL(entry.latest.map { AppGroup.link(for: $0.guid) })
-        .containerBackground(for: .widget) { background(for: entry.latest?.dienst) }
+        .containerBackground(for: .widget) { widgetTint(for: entry.latest?.dienst) }
         .redacted(reason: entry.isPlaceholder ? .placeholder : [])
     }
 
@@ -173,7 +173,7 @@ struct MeldingenListView: View {
                 Spacer(minLength: 0)
             }
         }
-        .containerBackground(for: .widget) { background(for: entry.discipline.dienst) }
+        .containerBackground(for: .widget) { widgetTint(for: entry.discipline.dienst) }
         .redacted(reason: entry.isPlaceholder ? .placeholder : [])
     }
 
@@ -255,7 +255,7 @@ struct TodayView: View {
             }
         }
         .widgetURL(URL(string: "p2000apeldoorn://statistieken"))
-        .containerBackground(for: .widget) { background(for: nil) }
+        .containerBackground(for: .widget) { widgetTint(for: nil) }
     }
 
     private var small: some View {
