@@ -42,9 +42,10 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         let status = manager.authorizationStatus
         Task { @MainActor in
             self.authorization = status
-            if status == .authorizedWhenInUse || status == .authorizedAlways { self.manager.requestLocation() }
             #if os(macOS)
-            if status == .authorized { self.manager.requestLocation() }
+            if status == .authorized || status == .authorizedAlways { self.manager.requestLocation() }
+            #else
+            if status == .authorizedWhenInUse || status == .authorizedAlways { self.manager.requestLocation() }
             #endif
         }
     }
