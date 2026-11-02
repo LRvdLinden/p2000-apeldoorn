@@ -14,6 +14,8 @@ struct SplashView: View {
 
     #if os(watchOS)
     private let markSize: CGFloat = 70
+    #elseif os(tvOS)
+    private let markSize: CGFloat = 220
     #else
     private let markSize: CGFloat = 120
     #endif

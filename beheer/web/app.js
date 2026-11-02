@@ -7,7 +7,7 @@ const DIENST = {
   brandweer: ["🔥", "Brandweer", "#E30613"], ambulance: ["🚑", "Ambulance", "#F4C400"],
   politie: ["🚓", "Politie", "#15428B"], traumaheli: ["🚁", "Lifeliner", "#9333EA"],
 };
-const PLATFORM = { ios: ["iPhone", "#DC2626"], ipados: ["iPad", "#f97316"], macos: ["Mac", "#3b82f6"], watchos: ["Apple Watch", "#22c55e"] };
+const PLATFORM = { ios: ["iPhone", "#DC2626"], ipados: ["iPad", "#f97316"], macos: ["Mac", "#3b82f6"], watchos: ["Apple Watch", "#22c55e"], tvos: ["Apple TV", "#9333EA"] };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));

@@ -184,6 +184,7 @@ enum PlatformName {
         case "ipados": return "iPad"
         case "macos": return "Mac"
         case "watchos": return "Apple Watch"
+        case "tvos": return "Apple TV"
         case "visionos": return "Vision Pro"
         default: return p
         }
@@ -194,6 +195,7 @@ enum PlatformName {
         case "ipados": return .orange
         case "macos": return .blue
         case "watchos": return .green
+        case "tvos": return .purple
         default: return .gray
         }
     }

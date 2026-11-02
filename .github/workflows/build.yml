@@ -28,6 +28,13 @@ jobs:
             CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u | head -n 150
           exit ${PIPESTATUS[0]}
 
+      - name: Build tvOS (Apple TV)
+        run: |
+          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn TV" \
+            -destination 'generic/platform=tvOS Simulator' \
+            CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u | head -n 150
+          exit ${PIPESTATUS[0]}
+
       - name: Build P2000Beheer (iOS)
         run: |
           xcodebuild -project beheer/P2000Beheer.xcodeproj -scheme P2000Beheer \

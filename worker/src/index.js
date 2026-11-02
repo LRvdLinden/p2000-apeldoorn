@@ -21,6 +21,7 @@ import changelog from "../content/changelog.json";
 
 const CONTENT = { privacy, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const listCache = new Map();
 
 // ------------------------------------------------------------------ HTTP
 
@@ -71,8 +72,15 @@ async function handle(req, env) {
   }
 
   if (method === "GET" && path === "/v1/meldingen") {
-    return reply(200, await listMeldingen(env, { limit: url.searchParams.get("limit"), before: url.searchParams.get("before") }),
-      { "cache-control": "public, max-age=5" });
+    const limit = url.searchParams.get("limit"), before = url.searchParams.get("before");
+    // Short in-memory cache per Worker instance: many apps polling at once cost one database read.
+    const key = `${limit}|${before}`;
+    const hit = listCache.get(key);
+    if (hit && Date.now() - hit.at < 8_000) return reply(200, hit.data, { "cache-control": "public, max-age=5" });
+    const data = await listMeldingen(env, { limit, before });
+    listCache.set(key, { at: Date.now(), data });
+    if (listCache.size > 20) listCache.delete(listCache.keys().next().value);
+    return reply(200, data, { "cache-control": "public, max-age=5" });
   }
   let m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})$/);
   if (method === "GET" && m) {

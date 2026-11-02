@@ -68,7 +68,7 @@ export async function requireAdmin(env, req) {
 
 // ------------------------------------------------------------------ anonymous counters (public)
 
-const PLATFORMS = new Set(["ios", "ipados", "macos", "watchos", "visionos"]);
+const PLATFORMS = new Set(["ios", "ipados", "macos", "watchos", "tvos", "visionos"]);
 const str = (v, n) => (typeof v === "string" && v ? v.slice(0, n) : null);
 
 /** App ping: one row per install (random UUID), updated at most a few times a day. */

@@ -22,6 +22,8 @@ enum InstallPing {
         return "watchos"
         #elseif os(macOS)
         return "macos"
+        #elseif os(tvOS)
+        return "tvos"
         #else
         return UIDevice.current.userInterfaceIdiom == .pad ? "ipados" : "ios"
         #endif

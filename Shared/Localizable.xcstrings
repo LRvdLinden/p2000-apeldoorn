@@ -392,6 +392,40 @@
         }
       }
     },
+    "Alarm in beeld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm on screen"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm in beeld"
+          }
+        }
+      }
+    },
+    "Alarmscherm bij nieuwe melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarm screen for new alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarmscherm bij nieuwe melding"
+          }
+        }
+      }
+    },
     "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn – live, op de kaart en met statistieken.": {
       "extractionState": "manual",
       "localizations": {
@@ -439,6 +473,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle meldingen"
+          }
+        }
+      }
+    },
+    "Alleen bij spoed (A1, P1)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent only (A1, P1)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen bij spoed (A1, P1)"
           }
         }
       }
@@ -558,6 +609,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekijk op p2000.page"
+          }
+        }
+      }
+    },
+    "Bel bij nood altijd 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In an emergency, always call 112."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bel bij nood altijd 112."
           }
         }
       }
@@ -1259,6 +1327,23 @@
         }
       }
     },
+    "Geen exacte locatie bekend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No exact location known"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen exacte locatie bekend"
+          }
+        }
+      }
+    },
     "Geen meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -1272,6 +1357,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen"
+          }
+        }
+      }
+    },
+    "Geen meldingen in de laatste 24 uur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts in the last 24 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen meldingen in de laatste 24 uur"
           }
         }
       }
@@ -1548,6 +1650,23 @@
         }
       }
     },
+    "Je filters worden via iCloud gedeeld met je iPhone, iPad en Mac.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your filters are shared with your iPhone, iPad and Mac through iCloud."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je filters worden via iCloud gedeeld met je iPhone, iPad en Mac."
+          }
+        }
+      }
+    },
     "Je krijgt een pushmelding zodra er een nieuwe melding is die bij je keuzes past.": {
       "extractionState": "manual",
       "localizations": {
@@ -1595,6 +1714,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaart"
+          }
+        }
+      }
+    },
+    "Kaart gaat zelf langs de meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map tours the alerts by itself"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart gaat zelf langs de meldingen"
           }
         }
       }
@@ -1786,6 +1922,23 @@
         }
       }
     },
+    "Laatste 24 uur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 24 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste 24 uur"
+          }
+        }
+      }
+    },
     "Laatste melding": {
       "extractionState": "manual",
       "localizations": {
@@ -1799,6 +1952,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Laatste melding"
+          }
+        }
+      }
+    },
+    "Laatste meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Latest alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste meldingen"
           }
         }
       }
@@ -1990,6 +2160,23 @@
         }
       }
     },
+    "Meest voorkomend vandaag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most common today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meest voorkomend vandaag"
+          }
+        }
+      }
+    },
     "Meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -2054,6 +2241,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldinggegevens"
+          }
+        }
+      }
+    },
+    "Meldkamer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control room"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldkamer"
+          }
+        }
+      }
+    },
+    "Meldkamer · live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Control room · live"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldkamer · live"
           }
         }
       }
@@ -2139,6 +2360,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mis geen melding"
+          }
+        }
+      }
+    },
+    "NIEUWE MELDING": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NEW ALERT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NIEUWE MELDING"
           }
         }
       }
@@ -2840,6 +3078,23 @@
         }
       }
     },
+    "SPOED": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "URGENT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "SPOED"
+          }
+        }
+      }
+    },
     "Satelliet": {
       "extractionState": "manual",
       "localizations": {
@@ -2853,6 +3108,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Satelliet"
+          }
+        }
+      }
+    },
+    "Scherm altijd aan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keep screen on"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scherm altijd aan"
           }
         }
       }
@@ -2938,6 +3210,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sluit"
+          }
+        }
+      }
+    },
+    "Sluiten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Close"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sluiten"
           }
         }
       }
@@ -3673,6 +3962,40 @@
         }
       }
     },
+    "Volledige melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full message"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volledige melding"
+          }
+        }
+      }
+    },
+    "Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For Apple TV: the live control room on a big screen. New alerts appear instantly with an alarm screen and on the map."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart."
+          }
+        }
+      }
+    },
     "Waarvoor": {
       "extractionState": "manual",
       "localizations": {
@@ -3754,6 +4077,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "WhatsApp-groep"
+          }
+        }
+      }
+    },
+    "Wind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wind"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wind"
           }
         }
       }

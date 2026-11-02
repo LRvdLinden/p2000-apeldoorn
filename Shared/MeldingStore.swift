@@ -1,6 +1,8 @@
 import Foundation
 import Observation
+#if canImport(WidgetKit) && !os(tvOS)
 import WidgetKit
+#endif
 
 /// Keeps the live list of alerts from the app's own API. Polls while the app is active and
 /// caches the last result in the App Group (also read by the widgets) for an instant start.
@@ -45,10 +47,12 @@ final class MeldingStore {
             errorMessage = nil
             saveCache()
             if !newOnes.isEmpty { onNew?(newOnes) }
+            #if canImport(WidgetKit) && !os(tvOS)
             if !newOnes.isEmpty || !didReloadWidgets {
                 didReloadWidgets = true
                 WidgetCenter.shared.reloadAllTimelines()
             }
+            #endif
         } catch {
             isOnline = false
             errorMessage = error.localizedDescription

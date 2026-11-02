@@ -2,13 +2,13 @@
 
 ![P2000 Apeldoorn](docs/hero.jpg)
 
-De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iPhone, iPad, Mac en Apple Watch**. Je ziet alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn: live, op de kaart en met statistieken.
+De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iPhone, iPad, Mac, Apple Watch en Apple TV**. Je ziet alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn: live, op de kaart en met statistieken.
 
 | | |
 |---|---|
 | Bundle ID | `nl.lrvdlinden.p2000apeldoorn` (watch: `…​.watchkitapp`) |
-| Versie | 1.0.0 (build 5) |
-| Platforms | iOS/iPadOS 18+, macOS 15+, watchOS 11+ |
+| Versie | 1.0.0 (build 8) |
+| Platforms | iOS/iPadOS 18+, macOS 15+, watchOS 11+, tvOS 18+ |
 | Talen | Nederlands (bron), Engels |
 | Team | EU3UY476T6 |
 
@@ -24,6 +24,7 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 - **iCloud-sync**: instellingen en bewaarde meldingen worden via iCloud key-value storage gelijkgehouden op iPhone, iPad, Mac en Watch.
 - **Review-prompt**: de eerste keer 4 uur na het eerste gebruik op dat apparaat, daarna hoogstens één keer per week. Hij verschijnt alleen op een rustig moment: een paar seconden na het openen, en nooit tijdens de splash, het welkomstscherm of als de app vergrendeld is.
 - **Apple Watch**: de laatste meldingen, een detailscherm met kaart en de tellingen van vandaag.
+- **Apple TV (meldkamer)**: live kaart die zelf langs de meldingen gaat, de laatste meldingen, een grote klok en de tellingen van vandaag. Nieuwe meldingen verschijnen met een alarmscherm (altijd of alleen bij spoed). Detail met Look Around, capcodes en het weer, statistieken vandaag vs. gisteren. Het scherm blijft aan. Zelfde bundle ID als de iPhone-app (universal purchase).
 
 ## Screenshots
 
@@ -122,6 +123,7 @@ Teksten vertaal je in `tools/en.json`. Met `python3 tools/make_strings.py` maak 
 ```
 P2000Apeldoorn/        iOS · iPadOS · macOS (App, Services, Views, Assets)
 P2000ApeldoornWatch/   watchOS-app
+P2000ApeldoornTV/      tvOS-app (meldkamer)
 Shared/                modellen, API's, store, instellingen, splash, gedeelde UI, strings
 Config/                xcconfig, Info.plist's, entitlements
 tools/                 generators voor strings, projectbestand en website-config

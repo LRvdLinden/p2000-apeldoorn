@@ -18,12 +18,13 @@ I = {k: oid(k) for k in [
     "cfgFiles", "grpWidgets", "widgetProduct", "watchWidgetProduct", "widgetTarget", "watchWidgetTarget",
     "widgetSources", "widgetResources", "widgetFrameworks", "wwSources", "wwResources", "wwFrameworks",
     "widgetDebug", "widgetRelease", "widgetList", "wwDebug", "wwRelease", "wwList",
+    "tvTarget", "tvProduct", "grpTV", "tvSources", "tvResources", "tvFrameworks", "tvDebug", "tvRelease", "tvList",
     "appEmbedExt", "watchEmbedExt", "bfEmbedWidget", "bfEmbedWatchWidget", "depWidget", "proxyWidget", "depWW", "proxyWW"]}
 
 config_files = ["Base.xcconfig", "Secrets.example.xcconfig", "P2000Apeldoorn-Info.plist", "P2000Apeldoorn-iOS.entitlements",
                 "P2000Apeldoorn-macOS.entitlements", "P2000ApeldoornWatch-Info.plist", "P2000ApeldoornWatch.entitlements",
                 "Widgets-Info.plist", "Widgets-iOS.entitlements", "Widgets-macOS.entitlements",
-                "WatchWidgets-Info.plist", "WatchWidgets.entitlements"]
+                "WatchWidgets-Info.plist", "WatchWidgets.entitlements", "P2000ApeldoornTV-Info.plist", "P2000ApeldoornTV.entitlements"]
 cfg_refs = {f: oid("cfg-" + f) for f in config_files}
 I["baseXC"] = cfg_refs["Base.xcconfig"]
 
@@ -57,6 +58,7 @@ common_proj = {
     "IPHONEOS_DEPLOYMENT_TARGET": "18.0",
     "MACOSX_DEPLOYMENT_TARGET": "15.0",
     "WATCHOS_DEPLOYMENT_TARGET": "11.0",
+    "TVOS_DEPLOYMENT_TARGET": "18.0",
 }
 proj_debug = dict(common_proj, **{"DEBUG_INFORMATION_FORMAT": "dwarf", "ENABLE_TESTABILITY": "YES", "GCC_OPTIMIZATION_LEVEL": "0",
     "ONLY_ACTIVE_ARCH": "YES", "SWIFT_ACTIVE_COMPILATION_CONDITIONS": "DEBUG $(inherited)", "SWIFT_OPTIMIZATION_LEVEL": "-Onone",
@@ -173,6 +175,29 @@ watch_widget = {
     "TARGETED_DEVICE_FAMILY": "4",
 }
 
+tv = {
+    "ASSETCATALOG_COMPILER_APPICON_NAME": "App Icon & Top Shelf Image",
+    "ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME": "AccentColor",
+    "CODE_SIGN_ENTITLEMENTS": "Config/P2000ApeldoornTV.entitlements",
+    "CODE_SIGN_STYLE": "Automatic",
+    "DEVELOPMENT_TEAM": "EU3UY476T6",
+    "ENABLE_PREVIEWS": "YES",
+    "GENERATE_INFOPLIST_FILE": "YES",
+    "INFOPLIST_FILE": "Config/P2000ApeldoornTV-Info.plist",
+    "INFOPLIST_KEY_CFBundleDisplayName": "P2000 Apeldoorn",
+    "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.news",
+    "INFOPLIST_KEY_UIUserInterfaceStyle": "Dark",
+    "LD_RUNPATH_SEARCH_PATHS": "$(inherited) @executable_path/Frameworks",
+    # Same bundle ID as the iPhone/iPad/Mac app: one App Store record (universal purchase).
+    "PRODUCT_BUNDLE_IDENTIFIER": APP_BUNDLE,
+    "PRODUCT_MODULE_NAME": "P2000ApeldoornTV",
+    "PRODUCT_NAME": "P2000 Apeldoorn TV",
+    "SDKROOT": "appletvos",
+    "SUPPORTED_PLATFORMS": "appletvos appletvsimulator",
+    "SWIFT_EMIT_LOC_STRINGS": "YES",
+    "TARGETED_DEVICE_FAMILY": "3",
+}
+
 def xcconf(key, name, d, base=None):
     b = f"\t\t\tbaseConfigurationReference = {base} /* Base.xcconfig */;\n" if base else ""
     return f"""\t\t{key} /* {name} */ = {{
@@ -268,6 +293,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t{I['watchWidgetProduct']} /* P2000 Apeldoorn Watch Widgets.appex */ = {{isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "P2000 Apeldoorn Watch Widgets.appex"; sourceTree = BUILT_PRODUCTS_DIR; }};
 \t\t{I['appProduct']} /* P2000 Apeldoorn.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
 \t\t{I['watchProduct']} /* P2000 Apeldoorn Watch.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
+\t\t{I['tvProduct']} /* P2000 Apeldoorn TV.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn TV.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
 {cfg_file_refs}/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -275,6 +301,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t{I['grpApp']} /* P2000Apeldoorn */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000Apeldoorn; sourceTree = "<group>"; }};
 \t\t{I['grpShared']} /* Shared */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = Shared; sourceTree = "<group>"; }};
 \t\t{I['grpWatch']} /* P2000ApeldoornWatch */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornWatch; sourceTree = "<group>"; }};
+\t\t{I['grpTV']} /* P2000ApeldoornTV */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornTV; sourceTree = "<group>"; }};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -306,6 +333,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
+\t\t{I['tvFrameworks']} /* Frameworks */ = {{
+\t\t\tisa = PBXFrameworksBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -316,6 +350,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['grpShared']} /* Shared */,
 \t\t\t\t{I['grpWatch']} /* P2000ApeldoornWatch */,
 \t\t\t\t{I['grpWidgets']} /* P2000ApeldoornWidgets */,
+\t\t\t\t{I['grpTV']} /* P2000ApeldoornTV */,
 \t\t\t\t{I['config']} /* Config */,
 \t\t\t\t{I['products']} /* Products */,
 \t\t\t);
@@ -335,6 +370,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['watchProduct']} /* P2000 Apeldoorn Watch.app */,
 \t\t\t\t{I['widgetProduct']} /* P2000 Apeldoorn Widgets.appex */,
 \t\t\t\t{I['watchWidgetProduct']} /* P2000 Apeldoorn Watch Widgets.appex */,
+\t\t\t\t{I['tvProduct']} /* P2000 Apeldoorn TV.app */,
 \t\t\t);
 \t\t\tname = Products;
 \t\t\tsourceTree = "<group>";
@@ -440,6 +476,29 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tproductReference = {I['watchProduct']} /* P2000 Apeldoorn Watch.app */;
 \t\t\tproductType = "com.apple.product-type.application";
 \t\t}};
+\t\t{I['tvTarget']} /* P2000 Apeldoorn TV */ = {{
+\t\t\tisa = PBXNativeTarget;
+\t\t\tbuildConfigurationList = {I['tvList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn TV" */;
+\t\t\tbuildPhases = (
+\t\t\t\t{I['tvSources']} /* Sources */,
+\t\t\t\t{I['tvFrameworks']} /* Frameworks */,
+\t\t\t\t{I['tvResources']} /* Resources */,
+\t\t\t);
+\t\t\tbuildRules = (
+\t\t\t);
+\t\t\tdependencies = (
+\t\t\t);
+\t\t\tfileSystemSynchronizedGroups = (
+\t\t\t\t{I['grpTV']} /* P2000ApeldoornTV */,
+\t\t\t\t{I['grpShared']} /* Shared */,
+\t\t\t);
+\t\t\tname = "P2000 Apeldoorn TV";
+\t\t\tpackageProductDependencies = (
+\t\t\t);
+\t\t\tproductName = "P2000 Apeldoorn TV";
+\t\t\tproductReference = {I['tvProduct']} /* P2000 Apeldoorn TV.app */;
+\t\t\tproductType = "com.apple.product-type.application";
+\t\t}};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -460,6 +519,9 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t\t\tCreatedOnToolsVersion = 26.0;
 \t\t\t\t\t}};
 \t\t\t\t\t{I['watchWidgetTarget']} = {{
+\t\t\t\t\t\tCreatedOnToolsVersion = 26.0;
+\t\t\t\t\t}};
+\t\t\t\t\t{I['tvTarget']} = {{
 \t\t\t\t\t\tCreatedOnToolsVersion = 26.0;
 \t\t\t\t\t}};
 \t\t\t\t}};
@@ -483,6 +545,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['watchTarget']} /* P2000 Apeldoorn Watch */,
 \t\t\t\t{I['widgetTarget']} /* P2000 Apeldoorn Widgets */,
 \t\t\t\t{I['watchWidgetTarget']} /* P2000 Apeldoorn Watch Widgets */,
+\t\t\t\t{I['tvTarget']} /* P2000 Apeldoorn TV */,
 \t\t\t);
 \t\t}};
 /* End PBXProject section */
@@ -510,6 +573,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
 \t\t{I['watchResources']} /* Resources */ = {{
+\t\t\tisa = PBXResourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
+\t\t{I['tvResources']} /* Resources */ = {{
 \t\t\tisa = PBXResourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
@@ -547,6 +617,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
+\t\t{I['tvSources']} /* Sources */ = {{
+\t\t\tisa = PBXSourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -569,7 +646,7 @@ pbx = f"""// !$*UTF8*$!
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-{xcconf(I['projDebug'], 'Debug', proj_debug, I['baseXC'])}{xcconf(I['projRelease'], 'Release', proj_release, I['baseXC'])}{xcconf(I['appDebug'], 'Debug', app)}{xcconf(I['appRelease'], 'Release', app)}{xcconf(I['watchDebug'], 'Debug', watch)}{xcconf(I['watchRelease'], 'Release', watch)}{xcconf(I['widgetDebug'], 'Debug', widget)}{xcconf(I['widgetRelease'], 'Release', widget)}{xcconf(I['wwDebug'], 'Debug', watch_widget)}{xcconf(I['wwRelease'], 'Release', watch_widget)}/* End XCBuildConfiguration section */
+{xcconf(I['projDebug'], 'Debug', proj_debug, I['baseXC'])}{xcconf(I['projRelease'], 'Release', proj_release, I['baseXC'])}{xcconf(I['appDebug'], 'Debug', app)}{xcconf(I['appRelease'], 'Release', app)}{xcconf(I['watchDebug'], 'Debug', watch)}{xcconf(I['watchRelease'], 'Release', watch)}{xcconf(I['widgetDebug'], 'Debug', widget)}{xcconf(I['widgetRelease'], 'Release', widget)}{xcconf(I['wwDebug'], 'Debug', watch_widget)}{xcconf(I['wwRelease'], 'Release', watch_widget)}{xcconf(I['tvDebug'], 'Debug', tv)}{xcconf(I['tvRelease'], 'Release', tv)}/* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 \t\t{I['widgetList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Widgets" */ = {{
@@ -613,6 +690,15 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tbuildConfigurations = (
 \t\t\t\t{I['watchDebug']} /* Debug */,
 \t\t\t\t{I['watchRelease']} /* Release */,
+\t\t\t);
+\t\t\tdefaultConfigurationIsVisible = 0;
+\t\t\tdefaultConfigurationName = Release;
+\t\t}};
+\t\t{I['tvList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn TV" */ = {{
+\t\t\tisa = XCConfigurationList;
+\t\t\tbuildConfigurations = (
+\t\t\t\t{I['tvDebug']} /* Debug */,
+\t\t\t\t{I['tvRelease']} /* Release */,
 \t\t\t);
 \t\t\tdefaultConfigurationIsVisible = 0;
 \t\t\tdefaultConfigurationName = Release;

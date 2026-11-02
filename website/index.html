@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>P2000 Apeldoorn – alle meldingen live, ook als app</title>
-<meta name="description" content="Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Live, op de kaart en als pushmelding. Op iPhone, iPad, Mac en Apple Watch.">
+<meta name="description" content="Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Live, op de kaart en als pushmelding. Op iPhone, iPad, Mac, Apple Watch en Apple TV.">
 <meta name="theme-color" content="#cf0a1e">
 <meta property="og:type" content="website">
 <meta property="og:title" content="P2000 Apeldoorn">
@@ -19,7 +19,7 @@
 <meta property="og:locale" content="nl_NL">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <link rel="manifest" href="/site.webmanifest">
-<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://p2000-apeldoorn.nl/#website", "url": "https://p2000-apeldoorn.nl/", "name": "P2000 Apeldoorn", "inLanguage": "nl-NL", "publisher": {"@id": "https://p2000-apeldoorn.nl/#org"}}, {"@type": "Organization", "@id": "https://p2000-apeldoorn.nl/#org", "name": "P2000 Apeldoorn", "url": "https://p2000-apeldoorn.nl/", "logo": "https://p2000-apeldoorn.nl/assets/img/appicon-512.png", "parentOrganization": {"@type": "Organization", "name": "PixelForges", "url": "https://pixelforges.nl"}}, {"@type": "MobileApplication", "name": "P2000 Apeldoorn", "operatingSystem": "iOS, iPadOS, macOS, watchOS", "applicationCategory": "NewsApplication", "inLanguage": ["nl", "en"], "description": "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn: live, op de kaart en als pushmelding.", "image": "https://p2000-apeldoorn.nl/assets/img/og-image.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "publisher": {"@id": "https://p2000-apeldoorn.nl/#org"}}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "WebSite", "@id": "https://p2000-apeldoorn.nl/#website", "url": "https://p2000-apeldoorn.nl/", "name": "P2000 Apeldoorn", "inLanguage": "nl-NL", "publisher": {"@id": "https://p2000-apeldoorn.nl/#org"}}, {"@type": "Organization", "@id": "https://p2000-apeldoorn.nl/#org", "name": "P2000 Apeldoorn", "url": "https://p2000-apeldoorn.nl/", "logo": "https://p2000-apeldoorn.nl/assets/img/appicon-512.png", "parentOrganization": {"@type": "Organization", "name": "PixelForges", "url": "https://pixelforges.nl"}}, {"@type": "MobileApplication", "name": "P2000 Apeldoorn", "operatingSystem": "iOS, iPadOS, macOS, watchOS, tvOS", "applicationCategory": "NewsApplication", "inLanguage": ["nl", "en"], "description": "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn: live, op de kaart en als pushmelding.", "image": "https://p2000-apeldoorn.nl/assets/img/og-image.jpg", "offers": {"@type": "Offer", "price": "0", "priceCurrency": "EUR"}, "publisher": {"@id": "https://p2000-apeldoorn.nl/#org"}}]}</script>
 <link rel="icon" href="assets/img/appicon-32.png">
 <link rel="apple-touch-icon" href="assets/img/appicon-180.png">
 <link rel="preload" href="assets/fonts/overpass-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -38,6 +38,7 @@
   <nav class="links">
     <a href="#functies">Functies</a>
     <a href="#apparaten">Apparaten</a>
+    <a href="#tv">Apple TV</a>
     <a href="#buurt">Mijn buurt</a>
     <a href="#privacy">Privacy</a>
   </nav>
@@ -56,7 +57,7 @@
       <div class="hero-copy">
         <p class="eyebrow" data-reveal><span class="live-dot"></span><span id="heroStatus">Live uit gemeente Apeldoorn</span></p>
         <h1 data-reveal style="--d:.08s">Elke melding.<br><span class="outline">Direct</span> live.</h1>
-        <p class="lead" data-reveal style="--d:.16s">Brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Op de kaart, met het weer ter plaatse en als pushmelding. Nu als app voor iPhone, iPad, Mac en Apple Watch.</p>
+        <p class="lead" data-reveal style="--d:.16s">Brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Op de kaart, met het weer ter plaatse en als pushmelding. Nu als app voor iPhone, iPad, Mac, Apple Watch en Apple TV.</p>
         <div class="cta" data-reveal style="--d:.24s">
           <a class="btn btn-white" href="pager/"><span class="live-dot is-red" style="background:var(--red)"></span>Open de live pager</a>
           <a class="btn btn-ghost appstore" id="appStoreBtn" href="#download"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.84.86-3.6 2.18-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.73 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.28-3.53zM14.2 6.1c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.08 1.96-.49 2.56-1.21z"/></svg><span>Binnenkort in de App Store</span></a>
@@ -161,7 +162,7 @@
   <section class="devices" id="apparaten">
     <div class="sec-head" data-reveal>
       <p class="kicker">Op al je apparaten</p>
-      <h2>iPhone, iPad, Mac<br>én Apple Watch.</h2>
+      <h2>iPhone, iPad, Mac,<br>Apple Watch én Apple TV.</h2>
       <p class="sub">Je instellingen en bewaarde meldingen gaan via iCloud mee naar al je apparaten. Inloggen met Apple is optioneel.</p>
     </div>
     <div class="stage">
@@ -181,6 +182,35 @@
           <img src="assets/img/watch-today.webp" alt="" loading="lazy">
         </div></div>
       </div>
+    </div>
+  </section>
+
+  <!-- APPLE TV -->
+  <section class="tv" id="tv">
+    <div class="sec-head" data-reveal>
+      <p class="kicker">Nieuw · Apple TV</p>
+      <h2>De meldkamer<br>op je grote scherm.</h2>
+      <p class="sub">Zet P2000 Apeldoorn op een tv in de kazerne, de post of de woonkamer. De kaart gaat zelf langs de laatste meldingen en een nieuwe melding verschijnt direct groot in beeld, met een alarmscherm bij spoed.</p>
+    </div>
+    <div class="tv-stage" data-reveal>
+      <div class="tv-frame">
+        <div class="tv-screen">
+          <div class="tv-map"><img src="assets/img/mac-map.webp" alt="" loading="lazy"><span class="tv-ping"></span></div>
+          <div class="tv-side">
+            <div class="tv-head"><b>P2000 Apeldoorn</b><span id="tvClock">--:--:--</span></div>
+            <div class="tv-sub"><span class="live-dot"></span>Meldkamer · live</div>
+            <div class="tv-list" id="tvList"></div>
+          </div>
+          <div class="tv-alarm" id="tvAlarm" hidden></div>
+        </div>
+      </div>
+      <div class="tv-stand"></div>
+      <ul class="checks tv-checks">
+        <li>Alarmscherm bij nieuwe meldingen (of alleen bij spoed)</li>
+        <li>Kaart die zelf langs de meldingen gaat</li>
+        <li>Vandaag tegenover gisteren, leesbaar vanaf de bank</li>
+        <li>Scherm blijft aan · filters via iCloud</li>
+      </ul>
     </div>
   </section>
 

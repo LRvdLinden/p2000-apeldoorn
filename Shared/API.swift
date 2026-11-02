@@ -67,6 +67,11 @@ struct P2000API: Sendable {
         _ = try? await send("POST", url("v1/meldingen/\(guid)/view"))
     }
 
+    /// Weather at the time and place of an alert (WeatherKit via the API; used by the Apple TV app).
+    func weather(guid: String) async -> AlertWeather? {
+        try? await get(url("v1/meldingen/\(guid)/weather"), as: AlertWeather.self)
+    }
+
     // MARK: - Texts
 
     /// "privacy", "terms" or "disclaimer".
@@ -97,4 +102,17 @@ struct P2000API: Sendable {
     func sendTestPush(token: String) async throws {
         try await send("POST", url("v1/devices/\(token)/test"))
     }
+}
+
+/// Hourly weather around an alert, as returned by GET /v1/meldingen/:guid/weather.
+struct AlertWeather: Decodable, Hashable {
+    var condition: String?
+    var temperature: Double?
+    var apparent: Double?
+    var humidity: Double?
+    var cloudCover: Double?
+    var windSpeed: Double?
+    var windGust: Double?
+    var windDirection: Double?
+    var precipitation: Double?
 }

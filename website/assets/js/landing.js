@@ -104,6 +104,8 @@ async function load() {
   const { list } = await fetchMeldingen(300);
   renderToday(list);
   renderTicker(list);
+  renderTV(list);
+  tvAlarm(list);
   if (first) { cycleNotes(list); first = false; }
   document.getElementById("heroStatus").textContent = demoMode
     ? "Voorbeeld · de live-server is nog niet bereikbaar"
@@ -111,3 +113,30 @@ async function load() {
 }
 load();
 setInterval(load, 30_000);
+
+// ------------------------------------------------------------------ Apple TV preview (live data)
+
+function renderTV(list) {
+  const box = document.getElementById("tvList");
+  if (!box) return;
+  box.innerHTML = list.slice(0, 4).map((m) => `
+    <div class="tv-item"><img src="${icon(m)}" alt=""><div><small>${esc(ago(date(m)))}</small><b>${esc(m.title)}</b><small>${esc(plaatsText(m))}</small></div></div>`).join("");
+}
+setInterval(() => {
+  const c = document.getElementById("tvClock");
+  if (c) c.textContent = new Date().toLocaleTimeString("nl-NL", { timeZone: "Europe/Amsterdam" });
+}, 1000);
+let tvLatest = null;
+function tvAlarm(list) { tvLatest = list[0] || tvLatest; }
+// When the TV comes into view, a new alert pops up like the alarm screen on the Apple TV.
+const tvSection = document.getElementById("tv");
+if (tvSection) new IntersectionObserver((entries, io) => {
+  if (!entries[0].isIntersecting || !tvLatest) return;
+  io.disconnect();
+  const m = tvLatest, el = document.getElementById("tvAlarm");
+  setTimeout(() => {
+    el.innerHTML = `<b>${/^(A0|A1|P1)$/i.test(m.prioriteit || "") ? "SPOED" : "NIEUWE MELDING"}</b><span>${esc(m.title)}</span><span style="font-weight:600">${esc(plaatsText(m))}</span>`;
+    el.hidden = false;
+    setTimeout(() => (el.hidden = true), 5000);
+  }, 1200);
+}, { threshold: 0.5 }).observe(tvSection);
