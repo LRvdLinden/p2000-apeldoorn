@@ -21,7 +21,7 @@ struct MeldkamerView: View {
     var body: some View {
         HStack(alignment: .top, spacing: 40) {
             mapPanel
-            sidePanel.frame(width: 640)
+            sidePanel.frame(width: 600)
         }
         .padding(.horizontal, 60)
         .padding(.vertical, 30)
@@ -62,13 +62,13 @@ struct MeldkamerView: View {
             HStack(spacing: 14) {
                 ForEach(Dienst.selectable) { d in
                     HStack(spacing: 8) {
-                        DienstIcon(dienst: d, size: 34)
-                        Text("\(mapped.filter { $0.dienst == d }.count)").font(.title3.bold().monospacedDigit())
+                        DienstIcon(dienst: d, size: 28)
+                        Text("\(mapped.filter { $0.dienst == d }.count)").font(.system(size: 24, weight: .bold).monospacedDigit())
                     }
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .background(.ultraThinMaterial, in: Capsule())
                 }
-                Text(L("Laatste 24 uur")).font(.callout.weight(.semibold))
+                Text(L("Laatste 24 uur")).font(.system(size: 20, weight: .semibold))
                     .padding(.horizontal, 16).padding(.vertical, 10)
                     .background(.ultraThinMaterial, in: Capsule())
             }
@@ -86,22 +86,22 @@ struct MeldkamerView: View {
 
     private func latestCard(_ m: Melding) -> some View {
         HStack(spacing: 22) {
-            DienstIcon(dienst: m.dienst, size: 72)
+            DienstIcon(dienst: m.dienst, size: 56)
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 12) {
                     if m.isRecent { LivePill() }
                     Text(m.agoText).foregroundStyle(.secondary)
                 }
-                .font(.callout.weight(.semibold))
-                Text(m.title).font(.title2.weight(.heavy)).lineLimit(2)
-                Text(m.plaatsText).font(.headline).foregroundStyle(.secondary)
+                .font(.system(size: 20, weight: .semibold))
+                Text(m.title).font(.system(size: 30, weight: .heavy)).lineLimit(2)
+                Text(m.plaatsText).font(.system(size: 22, weight: .medium)).foregroundStyle(.secondary)
                 if !m.prioriteitText.isEmpty {
-                    Text(m.prioriteitText).font(.headline).foregroundStyle(m.dienst.textColor)
+                    Text(m.prioriteitText).font(.system(size: 22, weight: .semibold)).foregroundStyle(m.dienst.textColor)
                 }
             }
         }
-        .padding(26)
-        .frame(maxWidth: 900, alignment: .leading)
+        .padding(22)
+        .frame(maxWidth: 820, alignment: .leading)
         .background(.ultraThickMaterial, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
         .shadow(color: .black.opacity(0.4), radius: 30, y: 12)
         .id(m.guid)
@@ -142,18 +142,20 @@ struct MeldkamerView: View {
     // MARK: Side panel
 
     private var sidePanel: some View {
-        VStack(alignment: .leading, spacing: 26) {
-            HStack(alignment: .center, spacing: 18) {
-                AppMark(size: 74)
+        VStack(alignment: .leading, spacing: 20) {
+            HStack(alignment: .center, spacing: 14) {
+                AppMark(size: 60)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("P2000 Apeldoorn").font(.title2.weight(.black))
+                    Text("P2000 Apeldoorn").font(.system(size: 28, weight: .black)).lineLimit(1).minimumScaleFactor(0.7)
                     HStack(spacing: 8) {
                         LiveDot(online: store.isOnline)
-                        Text(store.isOnline ? L("Meldkamer · live") : L("Offline")).font(.callout).foregroundStyle(.secondary)
+                        Text(store.isOnline ? L("Meldkamer · live") : L("Offline")).font(.system(size: 18, weight: .medium))
+                            .foregroundStyle(.secondary).lineLimit(1)
                     }
                 }
-                Spacer()
-                TVClock(size: 54)
+                .layoutPriority(1)
+                Spacer(minLength: 10)
+                TVClock(size: 40)
             }
 
             let today = store.vandaag
@@ -164,7 +166,7 @@ struct MeldkamerView: View {
                 }
             }
 
-            Text(L("Laatste meldingen")).font(.headline).foregroundStyle(.secondary)
+            Text(L("Laatste meldingen")).font(.system(size: 22, weight: .semibold)).foregroundStyle(.secondary)
             ScrollView {
                 LazyVStack(spacing: 14) {
                     ForEach(items.prefix(40)) { m in
@@ -215,8 +217,8 @@ struct LivePill: View {
     @State private var blink = false
     var body: some View {
         Text("LIVE")
-            .font(.caption.weight(.black))
-            .padding(.horizontal, 10).padding(.vertical, 4)
+            .font(.system(size: 14, weight: .black))
+            .padding(.horizontal, 8).padding(.vertical, 3)
             .background(Theme.red, in: Capsule())
             .foregroundStyle(.white)
             .opacity(blink ? 0.55 : 1)
@@ -233,14 +235,14 @@ struct TodayTile: View {
 
     var body: some View {
         VStack(spacing: 6) {
-            if let icon { DienstIcon(dienst: icon, size: 34) } else {
-                Image(systemName: "calendar").font(.title3).foregroundStyle(color).frame(height: 34)
+            if let icon { DienstIcon(dienst: icon, size: 26) } else {
+                Image(systemName: "calendar").font(.system(size: 22)).foregroundStyle(color).frame(height: 26)
             }
-            Text("\(value)").font(.title2.weight(.black).monospacedDigit()).contentTransition(.numericText())
-            Text(label).font(.caption2.weight(.semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
+            Text("\(value)").font(.system(size: 32, weight: .black).monospacedDigit()).contentTransition(.numericText())
+            Text(label).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
-        .padding(.vertical, 14)
+        .padding(.vertical, 10)
         .background(color.opacity(0.16), in: RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 }
@@ -251,22 +253,22 @@ struct TVRow: View {
 
     var body: some View {
         HStack(alignment: .top, spacing: 18) {
-            DienstIcon(dienst: melding.dienst, size: 48)
-            VStack(alignment: .leading, spacing: 4) {
+            DienstIcon(dienst: melding.dienst, size: 36)
+            VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 10) {
                     if melding.isRecent { LivePill() }
                     Text("\(melding.agoText) · \(melding.datum.formatted(date: .omitted, time: .shortened))")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.system(size: 16)).foregroundStyle(.secondary)
                 }
-                Text(melding.title).font(.headline).lineLimit(2)
-                Text(melding.plaatsText).font(.caption).foregroundStyle(.secondary)
+                Text(melding.title).font(.system(size: 22, weight: .semibold)).lineLimit(2)
+                Text(melding.plaatsText).font(.system(size: 16)).foregroundStyle(.secondary)
                 if !melding.prioriteitText.isEmpty {
-                    Text(melding.prioriteitText).font(.caption.weight(.semibold)).foregroundStyle(melding.dienst.textColor).lineLimit(1)
+                    Text(melding.prioriteitText).font(.system(size: 16, weight: .semibold)).foregroundStyle(melding.dienst.textColor).lineLimit(1)
                 }
             }
             Spacer(minLength: 0)
         }
-        .padding(18)
+        .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .opacity(read ? 0.6 : 1)
     }

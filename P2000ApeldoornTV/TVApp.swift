@@ -112,8 +112,12 @@ struct TVClock: View {
             VStack(alignment: .trailing, spacing: 0) {
                 Text(ctx.date, format: .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
                     .font(.system(size: size, weight: .black, design: .rounded).monospacedDigit())
+                    .lineLimit(1)
+                    .fixedSize()
                 Text(ctx.date, format: .dateTime.weekday(.wide).day().month(.wide))
-                    .font(.system(size: size * 0.32, weight: .semibold))
+                    .font(.system(size: max(size * 0.38, 15), weight: .semibold))
+                    .lineLimit(1)
+                    .fixedSize()
                     .foregroundStyle(.secondary)
             }
         }

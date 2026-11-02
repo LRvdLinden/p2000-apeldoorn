@@ -5,6 +5,8 @@
 
 ## 1.0.0 (build 9) – 2 november 2026
 - Apple Watch: de app crashte direct na het openen (twee navigatiebalken in de paginaweergave). Opgelost.
+- Apple TV: kleinere, rustigere letters; de klok en de titel passen weer op één regel.
+- Apple TV: de markers op de kaart zijn weer zichtbaar.
 
 ## 1.0.0 (build 8) – 2 november 2026
 - **Nieuw: Apple TV.** Een meldkamerscherm met de live kaart, de laatste meldingen, de tellingen van vandaag en een grote klok.

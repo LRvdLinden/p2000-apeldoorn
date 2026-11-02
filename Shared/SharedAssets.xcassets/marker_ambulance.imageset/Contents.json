@@ -1,6 +1,11 @@
 {
   "images": [
     {
+      "filename": "marker_ambulance@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
       "filename": "marker_ambulance.png",
       "idiom": "universal",
       "scale": "3x"

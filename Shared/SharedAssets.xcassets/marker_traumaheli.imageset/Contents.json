@@ -1,6 +1,11 @@
 {
   "images": [
     {
+      "filename": "marker_traumaheli@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
       "filename": "marker_traumaheli.png",
       "idiom": "universal",
       "scale": "3x"

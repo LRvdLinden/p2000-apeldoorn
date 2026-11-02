@@ -28,10 +28,10 @@ struct TVDetailView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
                     HStack(spacing: 20) {
-                        DienstIcon(dienst: melding.dienst, size: 80)
+                        DienstIcon(dienst: melding.dienst, size: 60)
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(melding.title).font(.title2.weight(.heavy))
-                            Text(melding.prioriteitText).font(.headline).foregroundStyle(melding.dienst.textColor)
+                            Text(melding.title).font(.system(size: 32, weight: .heavy))
+                            Text(melding.prioriteitText).font(.system(size: 22, weight: .semibold)).foregroundStyle(melding.dienst.textColor)
                         }
                     }
                     infoRow("mappin.and.ellipse", melding.plaatsText)
@@ -41,21 +41,21 @@ struct TVDetailView: View {
                         section(Lf("Capcodes (%lld)", melding.eenheden.count))
                         ForEach(Array(melding.eenheden.enumerated()), id: \.offset) { _, e in
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(e.naam ?? e.code ?? "").font(.headline)
-                                Text([e.type, e.regio].compactMap { $0 }.joined(separator: " / ")).font(.caption).foregroundStyle(.secondary)
-                                Text(e.code ?? "").font(.caption.monospaced()).foregroundStyle(Theme.red)
+                                Text(e.naam ?? e.code ?? "").font(.system(size: 20, weight: .semibold))
+                                Text([e.type, e.regio].compactMap { $0 }.joined(separator: " / ")).font(.system(size: 16)).foregroundStyle(.secondary)
+                                Text(e.code ?? "").font(.system(size: 16).monospaced()).foregroundStyle(Theme.red)
                             }
                         }
                     }
                     if !melding.voertuigen.isEmpty {
                         section(Lf("Voertuigen (%lld)", melding.voertuigen.count))
                         ForEach(Array(melding.voertuigen.enumerated()), id: \.offset) { _, v in
-                            Text("\(v.label ?? L("Voertuig")) · \(v.nrb ?? v.nra ?? "")").font(.headline)
+                            Text("\(v.label ?? L("Voertuig")) · \(v.nrb ?? v.nra ?? "")").font(.system(size: 20, weight: .semibold))
                         }
                     }
                     if let f = melding.fullMelding {
                         section(L("Volledige melding"))
-                        Text(f).font(.callout.monospaced()).foregroundStyle(.secondary)
+                        Text(f).font(.system(size: 18).monospaced()).foregroundStyle(.secondary)
                     }
                     Button(L("Sluiten")) { dismiss() }.padding(.top, 10)
                 }
@@ -73,11 +73,11 @@ struct TVDetailView: View {
     }
 
     private func section(_ title: String) -> some View {
-        Text(title).font(.title3.weight(.heavy)).padding(.top, 6)
+        Text(title).font(.system(size: 24, weight: .heavy)).padding(.top, 6)
     }
 
     private func infoRow(_ icon: String, _ text: String) -> some View {
-        Label(text, systemImage: icon).font(.headline)
+        Label(text, systemImage: icon).font(.system(size: 22, weight: .medium))
     }
 
     private func weatherBlock(_ w: AlertWeather) -> some View {
@@ -94,9 +94,9 @@ struct TVDetailView: View {
 
     private func metric(_ icon: String, _ value: String, _ label: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Image(systemName: icon).font(.title3).foregroundStyle(.blue)
-            Text(value).font(.title3.bold())
-            Text(label).font(.caption).foregroundStyle(.secondary)
+            Image(systemName: icon).font(.system(size: 24)).foregroundStyle(.blue)
+            Text(value).font(.system(size: 26, weight: .bold))
+            Text(label).font(.system(size: 16)).foregroundStyle(.secondary)
         }
     }
 }

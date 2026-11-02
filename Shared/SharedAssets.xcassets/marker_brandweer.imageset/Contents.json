@@ -1,6 +1,11 @@
 {
   "images": [
     {
+      "filename": "marker_brandweer@2x.png",
+      "idiom": "universal",
+      "scale": "2x"
+    },
+    {
       "filename": "marker_brandweer.png",
       "idiom": "universal",
       "scale": "3x"
