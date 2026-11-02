@@ -210,10 +210,14 @@ async function drain(env, budget) {
 /** One-time import of the last ~2 days from the old website (set BACKFILL = "1"). */
 async function backfill(env, budget) {
   if (env.BACKFILL !== "1" || (await meldingCount(env)) >= 100 || !budget.take()) return;
-  const base = "https://p2000-apeldoorn.nl/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding";
-  const res = await fetch(`${base}?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`, { signal: AbortSignal.timeout(15_000) });
-  await kvSet(env, "backfill_status", `HTTP ${res.status}`);
-  if (!res.ok) return;
+  const path = `/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`;
+  let res = null;
+  for (const host of ["https://app.base44.com", "https://p2000-apeldoorn.nl"]) {
+    res = await fetch(host + path, { signal: AbortSignal.timeout(15_000) }).catch(() => null);
+    await kvSet(env, "backfill_status", `${host}: ${res ? "HTTP " + res.status : "geen verbinding"}`);
+    if (res?.ok) break;
+  }
+  if (!res?.ok) return;
   const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd && !Number.isNaN(Date.parse(r.datum_tijd))).map((r) => ({
     guid: r.guid, title: r.title || r.description || "", full_melding: r.full_melding, dienst: r.dienst,
     prioriteit: r.prioriteit && r.prioriteit !== "onbekend" ? r.prioriteit : null, datum: Date.parse(r.datum_tijd),
