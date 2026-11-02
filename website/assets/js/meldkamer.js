@@ -85,7 +85,7 @@ async function renderMap() {
   const add = [
     ...clusters.map((c) => {
       const a = new mk.Annotation(new mk.Coordinate(c.lat, c.lon), () => { const el = clusterEl(c, openTown); elByGuid.set(c.id, el); return el; },
-        { anchorOffset: new DOMPoint(0, -30), calloutEnabled: false, title: c.plaats });
+        { anchorOffset: new DOMPoint(0, -18), calloutEnabled: false, title: c.plaats });
       annByGuid.set(c.id, a);
       return a;
     }),
@@ -113,7 +113,7 @@ function renderStatic(pins, clusters) {
     const p = pos(c);
     if (!inside(p)) continue;
     const el = clusterEl(c, openTown);
-    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;translate:-50% -100%`;
+    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;margin:-38px 0 0 -19px`;
     elByGuid.set(c.id, el);
     box.appendChild(el);
   }

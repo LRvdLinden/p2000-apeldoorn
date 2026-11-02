@@ -470,7 +470,7 @@ function renderStaticMarkers(pins, clusters) {
     const p = pos(c);
     if (!inside(p)) continue;
     const el = clusterEl(c, openCluster);
-    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;transform:translate(-50%,-100%)`;
+    el.style.cssText = `position:absolute;left:${p.x}%;top:${p.y}%;margin:-38px 0 0 -19px`;
     box.appendChild(el);
   }
   box.onclick = (e) => { const g = e.target.dataset.guid; if (g) select(g); };

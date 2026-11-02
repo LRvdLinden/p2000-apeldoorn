@@ -48,7 +48,7 @@ struct MeldkamerView: View {
                 // Alerts without a street name: one marker per town instead of a ring of identical pins.
                 ForEach(groups.clusters) { c in
                     Annotation(c.plaats, coordinate: c.coordinate, anchor: .bottom) {
-                        ClusterMarker(cluster: c, size: 84, selected: c.meldingen.contains { $0.guid == focusGuid })
+                        ClusterMarker(cluster: c, size: 64, selected: c.meldingen.contains { $0.guid == focusGuid })
                     }
                     .annotationTitles(.hidden)
                 }

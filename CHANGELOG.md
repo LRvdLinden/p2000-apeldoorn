@@ -6,7 +6,7 @@
   - Volgt je filters en de stille modus; op iPhone ook de stilschakelaar. Komt er tegelijk een pushmelding binnen, dan klinkt het geluid maar één keer.
 
 ## 1.0.1 (build 10) – 2 november 2026
-- Kaart: meldingen zonder straatnaam (vaak ambulance, alleen "Apeldoorn") staan niet meer als grote ring van pins op het centrum. Ze worden per plaats samengevoegd tot één marker met het aantal; tik erop voor de lijst.
+- Kaart: meldingen zonder straatnaam (vaak ambulance, alleen "Apeldoorn") staan niet meer als grote ring van pins op het centrum. Ze worden per plaats samengevoegd tot één gewone marker met rechtsboven een zwart bolletje met het aantal; tik erop voor de lijst.
 - Apple TV: dezelfde plaatsmarkers; de rondleiding gaat per plaats maar één keer naar het centrum en zoomt daar verder uit.
 - Website: live pager-kaart en de nieuwe meldkamer (/meldkamer/) gebruiken dezelfde plaatsmarkers.
 

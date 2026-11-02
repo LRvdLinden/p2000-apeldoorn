@@ -294,17 +294,16 @@ export function layout(list) {
 
 export function clusterEl(c, onClick) {
   const el = document.createElement("div");
-  el.className = "mk-cluster";
-  el.style.setProperty("--c", (DIENSTEN[c.main] || DIENSTEN.onbekend).color);
+  el.className = "mk-marker mk-cluster";
   el.title = `${c.meldingen.length} meldingen zonder adres in ${c.plaats}`;
-  el.innerHTML = `<div class="mk-cluster-dot"><span class="mk-cluster-ic">${c.diensten.slice(0, 3).map((d) => `<img src="${asset(`assets/img/${DIENSTEN[d].icon}.png`)}" alt="">`).join("")}</span><b>${c.meldingen.length}</b></div><span class="mk-cluster-name">${esc(c.plaats)}</span>`;
+  el.innerHTML = `<img src="${asset(`assets/img/${(DIENSTEN[c.main] || DIENSTEN.onbekend).marker}.png`)}" alt=""><b class="mk-count">${c.meldingen.length}</b>`;
   if (onClick) el.addEventListener("click", (e) => { e.stopPropagation(); onClick(c); });
   return el;
 }
 
 export function clusterAnnotation(mk, c, onClick) {
   return new mk.Annotation(new mk.Coordinate(c.lat, c.lon), () => clusterEl(c, onClick), {
-    anchorOffset: new DOMPoint(0, -30), calloutEnabled: false, title: c.plaats, data: { cluster: c.id },
+    anchorOffset: new DOMPoint(0, -18), calloutEnabled: false, title: c.plaats, data: { cluster: c.id },
   });
 }
 
