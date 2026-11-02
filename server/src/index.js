@@ -7,6 +7,7 @@ import { listMeldingen, getMelding, addView, upsertDevice, deleteDevice, getDevi
 import { startIngest, feedStatus } from "./ingest.js";
 import { notify, sendTest, broadcast } from "./push.js";
 import { monthStats } from "./stats.js";
+import { backfill, meldingCount } from "./backfill.js";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const contentDir = join(here, "..", "content");
@@ -167,6 +168,14 @@ const server = http.createServer(async (req, res) => {
 server.listen(config.port, () => {
   console.log(`[api] P2000 Apeldoorn API op poort ${config.port} · APNs ${apnsConfigured() ? "aan" : "UIT"}`);
 });
+
+// Optional one-time import of the website history: set the variable BACKFILL=1 in Railway.
+// Only runs while the database is (almost) empty, so it is safe to leave on.
+if (process.env.BACKFILL === "1" && meldingCount() < 100) {
+  backfill(Number(process.env.BACKFILL_LIMIT || 5000))
+    .then((n) => console.log(`[backfill] klaar: ${n} meldingen geïmporteerd`))
+    .catch((e) => console.error("[backfill] mislukt:", e.message));
+}
 
 startIngest(notify);
 prune(config.retentionDays);

@@ -58,7 +58,7 @@ De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.pag
   - `POST /v1/devices/:token/test` stuurt een testmelding.
   - `POST /v1/broadcast` stuurt een bericht naar iedereen, met `Authorization: Bearer ADMIN_TOKEN`.
 - Testen: `cd server && npm test`.
-- Geschiedenis eenmalig overnemen van de website: `npm run backfill` (optioneel).
+- Geschiedenis eenmalig overnemen van de website (optioneel): zet in Railway de variabele `BACKFILL=1`. De server importeert dan bij het opstarten de laatste 5000 meldingen, met `BACKFILL_LIMIT` voor meer. Dat gebeurt alleen zolang de database (bijna) leeg is.
 
 ### Deploy naar Railway
 1. Maak in Railway een project met een lege service **p2000-api**. Koppel er een **volume** aan op `/data`.
