@@ -1,0 +1,112 @@
+import { fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js";
+
+reveal();
+
+// Nav turns solid after scrolling.
+const nav = document.getElementById("nav");
+const onScroll = () => nav.classList.toggle("is-solid", scrollY > 30);
+addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+
+if (config.appStoreURL) {
+  document.querySelectorAll(".appstore").forEach((a) => {
+    a.href = config.appStoreURL;
+    a.querySelector("span:last-child").textContent = "Download in de App Store";
+  });
+}
+
+// Hero phone follows the pointer a little.
+const phone = document.getElementById("heroPhone");
+if (phone && matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+  addEventListener("pointermove", (e) => {
+    const x = e.clientX / innerWidth - 0.5, y = e.clientY / innerHeight - 0.5;
+    phone.style.transform = `rotateY(${-14 + x * 12}deg) rotateX(${6 - y * 10}deg) rotateZ(2deg)`;
+  });
+}
+
+// Feature scrolly: swap the phone screen with the active step.
+const glows = { pager: "rgba(220,38,38,.45)", map: "rgba(37,99,235,.45)", detail: "rgba(244,196,0,.4)", meteo: "rgba(14,165,233,.45)", notif: "rgba(227,6,19,.45)", home: "rgba(147,51,234,.45)" };
+const steps = document.querySelectorAll(".step");
+const screens = document.querySelectorAll("#featureGlass img");
+const device = document.querySelector(".scrolly-device");
+const stepIO = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    const key = e.target.dataset.step;
+    steps.forEach((s) => s.classList.toggle("is-active", s === e.target));
+    screens.forEach((img) => img.classList.toggle("is-on", img.dataset.screen === key));
+    device.style.setProperty("--glow", glows[key]);
+  }
+}, { rootMargin: "-45% 0px -45% 0px" });
+steps.forEach((s) => stepIO.observe(s));
+
+// Watch cycles through its screens.
+const watchImgs = document.querySelectorAll("#watchGlass img");
+let wi = 0;
+setInterval(() => {
+  watchImgs[wi].classList.remove("is-on");
+  wi = (wi + 1) % watchImgs.length;
+  watchImgs[wi].classList.add("is-on");
+}, 2600);
+
+// Radius section plays its animation once it is visible.
+const buurt = document.getElementById("buurt");
+new IntersectionObserver((entries, io) => {
+  if (entries[0].isIntersecting) { buurt.classList.add("is-play"); io.disconnect(); }
+}, { threshold: 0.35 }).observe(buurt);
+
+// ------------------------------------------------------------------ live data
+
+const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
+
+function renderToday(list) {
+  const t = today(list);
+  countUp(document.getElementById("tTotal"), t.totaal);
+  for (const [id, key] of [["Brandweer", "brandweer"], ["Ambulance", "ambulance"], ["Politie", "politie"], ["Traumaheli", "traumaheli"]]) {
+    countUp(document.getElementById(`t${id}`), t.perDienst[key] || 0);
+    countUp(document.getElementById(`d${id}`), t.perDienst[key] || 0);
+  }
+}
+
+function renderTicker(list) {
+  const items = list.slice(0, 18).map((m) => `
+    <a class="tick" href="pager/?melding=${encodeURIComponent(m.guid)}">
+      <img src="${icon(m)}" alt=""><time>${fmtTime(date(m))}</time><span>${esc(m.title)}</span>
+    </a>`).join("");
+  const el = document.getElementById("tickerMove");
+  el.innerHTML = items + items; // twice for a seamless loop
+  el.style.setProperty("--dur", `${Math.max(30, list.slice(0, 18).length * 6)}s`);
+}
+
+// Lock-screen style notifications next to the hero phone.
+let noteIndex = 0;
+function cycleNotes(list) {
+  const box = document.getElementById("notes");
+  const recent = list.slice(0, 8);
+  if (!recent.length) return;
+  const show = () => {
+    const m = recent[noteIndex++ % recent.length];
+    const el = document.createElement("div");
+    el.className = "note";
+    el.innerHTML = `<img src="${icon(m)}" alt=""><div><b>${esc(m.prioriteit ? m.prioriteit + " · " : "")}${esc(dienstOf(m).label)}</b>${esc(m.title)}<br><small>${esc(plaatsText(m))} · ${esc(ago(date(m)))}</small></div>`;
+    box.prepend(el);
+    const all = box.querySelectorAll(".note:not(.out)");
+    if (all.length > 3) { const last = all[all.length - 1]; last.classList.add("out"); setTimeout(() => last.remove(), 500); }
+  };
+  show();
+  setTimeout(show, 900);
+  setInterval(show, 4200);
+}
+
+let first = true;
+async function load() {
+  const { list } = await fetchMeldingen(300);
+  renderToday(list);
+  renderTicker(list);
+  if (first) { cycleNotes(list); first = false; }
+  document.getElementById("heroStatus").textContent = demoMode
+    ? "Voorbeeld · de live-server is nog niet bereikbaar"
+    : list[0] ? `Laatste melding ${ago(date(list[0]))}` : "Live uit gemeente Apeldoorn";
+}
+load();
+setInterval(load, 30_000);

@@ -2,7 +2,8 @@ import http from "node:http";
 import { readFileSync, existsSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
-import { config, apnsConfigured } from "./config.js";
+import { config, apnsConfigured, mapkitConfigured, weatherConfigured, mapsServerConfigured } from "./config.js";
+import { mapkitToken, weatherFor, pruneWeather } from "./apple.js";
 import { listMeldingen, getMelding, addView, upsertDevice, deleteDevice, getDevice, deviceCount, prune } from "./db.js";
 import { startIngest, feedStatus } from "./ingest.js";
 import { notify, sendTest, broadcast } from "./push.js";
@@ -96,7 +97,7 @@ const server = http.createServer(async (req, res) => {
     if (method === "OPTIONS") return reply(res, 204);
 
     if (path === "/" || path === "/health") {
-      return reply(res, 200, { ok: true, feed: feedStatus(), apns: apnsConfigured(), devices: deviceCount() });
+      return reply(res, 200, { ok: true, feed: feedStatus(), apns: apnsConfigured(), mapkit: mapkitConfigured(), weatherkit: weatherConfigured(), mapsServer: mapsServerConfigured(), devices: deviceCount() });
     }
 
     // Alerts
@@ -113,6 +114,23 @@ const server = http.createServer(async (req, res) => {
     if (method === "POST" && m) {
       if (limited(req, 120)) return reply(res, 429, { error: "Too many requests" });
       return reply(res, 200, { views: addView(m[1]) });
+    }
+
+    m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/weather$/);
+    if (method === "GET" && m) {
+      const item = getMelding(m[1]);
+      if (!item) return reply(res, 404, { error: "Not found" });
+      const w = await weatherFor(item);
+      return w ? reply(res, 200, w, { "cache-control": "public, max-age=3600" }) : reply(res, 503, { error: "Weather unavailable" });
+    }
+
+    // MapKit JS token for the website map
+    if (method === "GET" && path === "/v1/mapkit-token") {
+      if (limited(req, 60)) return reply(res, 429, { error: "Too many requests" });
+      const token = mapkitToken(req.headers.origin || "");
+      if (!token) return reply(res, mapkitConfigured() ? 403 : 503, { error: "MapKit JS unavailable" });
+      res.writeHead(200, { "content-type": "text/plain", "access-control-allow-origin": "*", "cache-control": "no-store" });
+      return res.end(token);
     }
 
     // Texts (privacy, terms, disclaimer) and changelog
@@ -170,7 +188,8 @@ if (process.env.BACKFILL === "1" && meldingCount() < 100) {
 }
 
 startIngest(notify);
-prune(config.retentionDays);
-setInterval(() => prune(config.retentionDays), 3600_000).unref();
+const housekeeping = () => { prune(config.retentionDays); pruneWeather(config.retentionDays + 1); };
+housekeeping();
+setInterval(housekeeping, 3600_000).unref();
 
 for (const sig of ["SIGTERM", "SIGINT"]) process.on(sig, () => server.close(() => process.exit(0)));

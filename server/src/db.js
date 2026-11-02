@@ -117,6 +117,8 @@ export function listMeldingen({ limit = 300, before } = {}) {
   return rows.map(toAPI);
 }
 
+export const hasMelding = (guid) => Boolean(db.prepare("SELECT 1 FROM meldingen WHERE guid = ?").get(guid));
+
 export const getMelding = (guid) => toAPI(db.prepare("SELECT * FROM meldingen WHERE guid = ?").get(guid));
 
 export function addView(guid) {

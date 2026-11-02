@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Live pager – P2000 Apeldoorn</title>
+<meta name="description" content="Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.">
+<meta name="theme-color" content="#cf0a1e">
+<meta property="og:title" content="Live pager – P2000 Apeldoorn">
+<meta property="og:image" content="https://p2000-apeldoorn.nl/assets/img/og-image.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/img/appicon-32.png">
+<link rel="apple-touch-icon" href="../assets/img/appicon-180.png">
+<link rel="stylesheet" href="../assets/css/base.css">
+<link rel="stylesheet" href="../assets/css/pager.css">
+<script src="../config.js"></script>
+<script type="module" src="../assets/js/pager.js"></script>
+</head>
+<body class="app">
+
+<header class="topbar">
+  <a class="brand" href="../" aria-label="Naar de homepage">
+    <span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>
+    <span class="brand-text"><b>P2000 Apeldoorn</b><small id="status"><span class="live-dot"></span><span>Verbinden…</span></small></span>
+  </a>
+  <nav class="tabs" role="tablist" aria-label="Weergave">
+    <button role="tab" data-tab="pager" aria-selected="true"><svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 5h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Pager</span></button>
+    <button role="tab" data-tab="kaart" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg><span>Kaart</span></button>
+    <button role="tab" data-tab="stats" aria-selected="false"><svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Statistieken</span></button>
+  </nav>
+  <div class="clock"><b id="clock">--:--:--</b><small id="dateLabel"></small></div>
+</header>
+
+<div class="demo-banner" id="demoBanner" hidden>
+  De live-server is nog niet bereikbaar. Je ziet <b>voorbeeldmeldingen</b>.
+</div>
+
+<main class="shell" id="shell" data-tab="pager">
+  <!-- LIST -->
+  <section class="pane list-pane" aria-label="Meldingen">
+    <div class="tiles" id="tiles"></div>
+    <div class="toolbar">
+      <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        <input id="search" type="search" placeholder="Zoek op plaats, straat of capcode" autocomplete="off"></label>
+      <button class="icon-btn" id="filterBtn" aria-expanded="false" aria-controls="filters" title="Filters"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span class="badge" id="filterCount" hidden></span></button>
+    </div>
+    <div class="filters" id="filters" hidden>
+      <div class="field"><span>Plaats</span><select id="fPlaats"><option value="">Alle plaatsen</option></select></div>
+      <div class="field"><span>Prioriteit</span><select id="fPrio">
+        <option value="">Alle prioriteiten</option><option value="urgent">Alleen spoed (A1, P1)</option><option value="A1">A1</option><option value="A2">A2</option><option value="B">B1 / B2</option><option value="P1">P1</option><option value="P2">P2</option><option value="P3">P3</option></select></div>
+      <div class="field"><span>Mijn buurt</span><select id="fRadius">
+        <option value="0">Uit</option><option value="1">1 km rond mij</option><option value="2">2 km rond mij</option><option value="5">5 km rond mij</option><option value="10">10 km rond mij</option></select></div>
+      <label class="switch"><input type="checkbox" id="fHideRead"><i></i><span>Verberg bekeken meldingen</span></label>
+      <button class="link-btn" id="resetFilters">Filters wissen</button>
+    </div>
+    <div class="active-filters" id="activeFilters"></div>
+    <div class="list" id="list" aria-live="polite"></div>
+  </section>
+
+  <!-- DETAIL -->
+  <section class="pane detail-pane" id="detailPane" aria-label="Melding">
+    <div class="empty-detail" id="emptyDetail">
+      <img src="../assets/img/appicon-180.png" alt="" width="84" height="84">
+      <p>Kies een melding om de details te zien.</p>
+    </div>
+    <div id="detail"></div>
+  </section>
+
+  <!-- MAP -->
+  <section class="pane map-pane" aria-label="Kaart">
+    <div id="bigMap" class="bigmap"></div>
+    <div class="map-ui">
+      <div class="seg" id="period"><button data-h="6">6 uur</button><button data-h="24" class="on">24 uur</button></div>
+      <div class="chips" id="mapChips"></div>
+    </div>
+    <div class="map-fallback" id="mapFallback" hidden>
+      <p>De kaart is nog niet beschikbaar. Zodra de MapKit JS-sleutel actief is, zie je hier alle meldingen.</p>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <section class="pane stats-pane" aria-label="Statistieken" id="stats"></section>
+</main>
+
+<nav class="bottom-tabs" aria-label="Weergave">
+  <button data-tab="pager" class="on"><svg viewBox="0 0 24 24"><path d="M5 3h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm3 5h8M8 12h8M8 16h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Pager</button>
+  <button data-tab="kaart"><svg viewBox="0 0 24 24"><path d="M9 4 3 6v14l6-2 6 2 6-2V4l-6 2-6-2zm0 0v14m6-12v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>Kaart</button>
+  <button data-tab="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10m6 10V4m6 16v-7m4 7H2" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Statistieken</button>
+</nav>
+
+<template id="tplToast"><div class="toast"></div></template>
+</body>
+</html>

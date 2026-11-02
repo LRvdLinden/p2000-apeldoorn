@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2000 Apeldoorn</title>
+<script>
+  // Keeps old links working, e.g. /melding/<guid> → /pager/?melding=<guid> (also on a GitHub Pages sub-path).
+  (function () {
+    var path = location.pathname;
+    var m = path.match(/^(.*?)\/melding\/([\w-]{8,64})\/?$/);
+    if (m) { location.replace(m[1] + "/pager/?melding=" + m[2]); return; }
+    var base = location.hostname.endsWith("github.io") ? "/" + path.split("/")[1] + "/" : "/";
+    if (/\/(pager|kaart|statistieken)\/?$/i.test(path)) location.replace(base + "pager/" + (/kaart/i.test(path) ? "#kaart" : /statistieken/i.test(path) ? "#stats" : ""));
+  })();
+</script>
+<style>:root{color-scheme:light dark;--red:#DC2626}body{font-family:system-ui,sans-serif;display:grid;place-content:center;min-height:100vh;text-align:center;padding:20px}h1{font-weight:900;font-size:3rem;margin:0}a{color:var(--red);font-weight:700}</style>
+</head>
+<body>
+  <h1>404</h1>
+  <p>Deze pagina bestaat niet (meer).</p>
+  <p><a id="home" href="/">Naar de homepage</a> · <a id="pager" href="/pager/">Live pager</a></p>
+  <script>var r=location.hostname.endsWith("github.io")?"/"+location.pathname.split("/")[1]+"/":"/";document.getElementById("home").href=r;document.getElementById("pager").href=r+"pager/";</script>
+</body>
+</html>

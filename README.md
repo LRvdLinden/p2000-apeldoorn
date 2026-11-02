@@ -50,6 +50,7 @@ De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.pag
 - Endpoints:
   - `GET /v1/meldingen` en `GET /v1/meldingen/:guid`
   - `POST /v1/meldingen/:guid/view`
+  - `GET /v1/meldingen/:guid/weather` (WeatherKit) en `GET /v1/mapkit-token`
   - `GET /v1/content/privacy|terms|disclaimer` en `GET /v1/changelog`
 - Pushmeldingen gaan rechtstreeks via APNs (een JWT op basis van je .p8-sleutel):
   - `POST /v1/devices` registreert een toestel met zijn instellingen: plaatsen, disciplines, prioriteiten, stille modus, kritieke meldingen en de radius (km + middelpunt, afgerond op ~100 m).
@@ -75,6 +76,37 @@ De app en de widgets gebruiken **alleen de eigen API**. De sleutel van p2000.pag
 7. Controleer `https://<domein>/health`. Je moet `"ok":true` en `"apns":true` zien.
 
 Bij elke push naar `server/` deployt Railway zelf. De GitHub-workflow draait alleen de tests.
+
+## Website (`website/`)
+
+Een statische website op **GitHub Pages**, zonder build-stap:
+
+- `/` – de homepage over de app, met animaties, live tellingen en een ticker met de laatste meldingen.
+- `/pager/` – de **live pager** in je browser: tijdlijn (24 uur), filters, Mijn buurt, kaart (MapKit JS met de eigen markers), meldingdetail met Look Around en METEO (WeatherKit), en statistieken vandaag vs. gisteren. Geopende meldingen worden grijs.
+- `/info/?p=privacy|terms|disclaimer` – de teksten uit `server/content`.
+- Oude links `/melding/<guid>` worden doorgestuurd naar `/pager/?melding=<guid>`.
+
+Zolang de API-server niet bereikbaar is, toont de site voorbeeldmeldingen met een melding bovenaan.
+
+**Workflow `Website`** (bij elke push naar `website/`, en wekelijks):
+1. Maakt `website/config.js` met het API-adres (repo-variabele `API_BASE`, standaard `https://api.p2000-apeldoorn.nl`) en een MapKit JS-token uit de secrets `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID` en `WEB_MAPKIT_JS_P8` (40 dagen geldig, wekelijks vernieuwd; met variabele `SITE_ORIGIN` beperk je hem tot je domein).
+2. Zet eigen domein via variabele `SITE_DOMAIN` (bijv. `p2000-apeldoorn.nl`) als `CNAME`.
+3. Publiceert naar GitHub Pages.
+
+Lokaal bekijken: `cd website && python3 -m http.server 8000` en open http://localhost:8000.
+
+### Server-variabelen voor de website (Railway)
+Plak dezelfde waarden als de GitHub-secrets ook in Railway:
+
+| Variabele | Waarvoor |
+|---|---|
+| `WEB_WEATHERKIT_KEY_ID`, `WEB_WEATHERKIT_TEAM_ID`, `WEB_WEATHERKIT_P8` | METEO per melding: `GET /v1/meldingen/:guid/weather` (gecachet) |
+| `WEB_WEATHERKIT_SERVICE_ID` | Je **Services ID** met WeatherKit (Identifiers → Services IDs), standaard `nl.lrvdlinden.p2000apeldoorn.weatherkit` |
+| `MAPS_SERVER_API_KEY_ID`, `MAPS_SERVER_API_TEAM_ID`, `MAPS_SERVER_API_P8` | Straatnamen omzetten naar precieze coördinaten (Apple Maps Server API) |
+| `WEB_MAPKIT_JS_KEY_ID`, `WEB_MAPKIT_JS_TEAM_ID`, `WEB_MAPKIT_JS_P8` | `GET /v1/mapkit-token` (reserve als het token in config.js verloopt) |
+| `SITE_ORIGINS` | Toegestane websites voor dat token (standaard p2000-apeldoorn.nl en lrvdlinden.github.io) |
+
+`/health` laat zien welke diensten actief zijn (`apns`, `mapkit`, `weatherkit`, `mapsServer`).
 
 ## Pushmeldingen in de app
 - iPhone, iPad en Mac gebruiken echte APNs-pushmeldingen. De Apple Watch krijgt de meldingen van de iPhone mee.
@@ -103,7 +135,9 @@ P2000Apeldoorn/        iOS · iPadOS · macOS (App, Services, Views, Assets)
 P2000ApeldoornWatch/   watchOS-app
 Shared/                modellen, API's, store, instellingen, splash, gedeelde UI, strings
 Config/                xcconfig, Info.plist's, entitlements
-tools/                 generators voor strings en projectbestand
+tools/                 generators voor strings, projectbestand en website-config
+website/               de website + live pager (GitHub Pages)
+server/                API, ingest, pushmeldingen, WeatherKit/Maps (Railway)
 ```
 
 © 2026 P2000 Apeldoorn. Made & Powered by [PixelForges](https://pixelforges.nl). Bron: [p2000.page](https://p2000.page).

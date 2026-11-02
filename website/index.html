@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>P2000 Apeldoorn – alle meldingen live, ook als app</title>
+<meta name="description" content="Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Live, op de kaart en als pushmelding. Op iPhone, iPad, Mac en Apple Watch.">
+<meta name="theme-color" content="#cf0a1e">
+<meta property="og:type" content="website">
+<meta property="og:title" content="P2000 Apeldoorn">
+<meta property="og:description" content="Alle P2000-meldingen in gem. Apeldoorn: live, op de kaart en als pushmelding.">
+<meta property="og:image" content="https://p2000-apeldoorn.nl/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="assets/img/appicon-32.png">
+<link rel="apple-touch-icon" href="assets/img/appicon-180.png">
+<link rel="preload" href="assets/fonts/overpass-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/css/base.css">
+<link rel="stylesheet" href="assets/css/landing.css">
+<script src="config.js"></script>
+<script type="module" src="assets/js/landing.js"></script>
+</head>
+<body class="landing">
+
+<header class="nav" id="nav">
+  <a class="brand" href="./" aria-label="P2000 Apeldoorn">
+    <span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>
+    <span><b>P2000</b> Apeldoorn</span>
+  </a>
+  <nav class="links">
+    <a href="#functies">Functies</a>
+    <a href="#apparaten">Apparaten</a>
+    <a href="#buurt">Mijn buurt</a>
+    <a href="#privacy">Privacy</a>
+  </nav>
+  <a class="btn btn-red btn-sm" href="pager/"><span class="live-dot is-red"></span>Live pager</a>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg" aria-hidden="true">
+      <div class="hero-tex"></div>
+      <div class="hero-stripes"></div>
+      <div class="pulse"><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow" data-reveal><span class="live-dot"></span><span id="heroStatus">Live uit gemeente Apeldoorn</span></p>
+        <h1 data-reveal style="--d:.08s">Elke melding.<br><span class="outline">Direct</span> live.</h1>
+        <p class="lead" data-reveal style="--d:.16s">Brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn. Op de kaart, met het weer ter plaatse en als pushmelding. Nu als app voor iPhone, iPad, Mac en Apple Watch.</p>
+        <div class="cta" data-reveal style="--d:.24s">
+          <a class="btn btn-white" href="pager/"><span class="live-dot is-red" style="background:var(--red)"></span>Open de live pager</a>
+          <a class="btn btn-ghost appstore" id="appStoreBtn" href="#download"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="currentColor" d="M16.37 12.6c-.02-2.2 1.8-3.26 1.88-3.31-1.03-1.5-2.62-1.7-3.18-1.73-1.35-.14-2.64.8-3.33.8-.69 0-1.74-.78-2.87-.76-1.47.02-2.84.86-3.6 2.18-1.54 2.67-.39 6.62 1.1 8.79.73 1.06 1.6 2.25 2.73 2.2 1.1-.04 1.51-.71 2.84-.71 1.32 0 1.7.71 2.86.69 1.18-.02 1.93-1.07 2.65-2.14.84-1.23 1.18-2.42 1.2-2.48-.03-.01-2.3-.88-2.28-3.53zM14.2 6.1c.6-.73 1.01-1.75.9-2.76-.87.04-1.92.58-2.54 1.31-.56.64-1.05 1.67-.92 2.66.97.08 1.96-.49 2.56-1.21z"/></svg><span>Binnenkort in de App Store</span></a>
+        </div>
+        <dl class="today" data-reveal style="--d:.32s" aria-label="Meldingen vandaag">
+          <div class="t-total"><dt>Vandaag</dt><dd id="tTotal">–</dd></div>
+          <div style="--c:var(--brandweer)"><dt>Brandweer</dt><dd id="tBrandweer">–</dd></div>
+          <div style="--c:var(--ambulance)"><dt>Ambulance</dt><dd id="tAmbulance">–</dd></div>
+          <div style="--c:#5b8def"><dt>Politie</dt><dd id="tPolitie">–</dd></div>
+          <div style="--c:#b26cf5"><dt>Lifeliner</dt><dd id="tTraumaheli">–</dd></div>
+        </dl>
+      </div>
+      <div class="hero-device" data-reveal style="--d:.2s">
+        <div class="phone tilt" id="heroPhone">
+          <div class="glass"><img src="assets/img/screen-pager.webp" alt="De Pager in de app: alle meldingen live, per dag gegroepeerd" width="440" height="956"></div>
+          <span class="island"></span>
+        </div>
+        <div class="notes" id="notes" aria-live="polite"></div>
+      </div>
+    </div>
+    <a class="scroll-hint" href="#ticker" aria-label="Naar beneden"><span></span></a>
+  </section>
+
+  <!-- TICKER -->
+  <section class="ticker" id="ticker" aria-label="Laatste meldingen">
+    <div class="ticker-label"><span class="live-dot"></span>Laatste meldingen</div>
+    <div class="ticker-track"><div class="ticker-move" id="tickerMove"></div></div>
+  </section>
+
+  <!-- FEATURES (sticky phone) -->
+  <section class="features" id="functies">
+    <div class="sec-head" data-reveal>
+      <p class="kicker">De app</p>
+      <h2>Alles wat de website kan.<br>En nog veel meer.</h2>
+    </div>
+    <div class="scrolly">
+      <div class="scrolly-device">
+        <div class="phone small">
+          <div class="glass" id="featureGlass">
+            <img class="is-on" data-screen="pager" src="assets/img/screen-pager.webp" alt="" loading="lazy">
+            <img data-screen="map" src="assets/img/screen-map.webp" alt="" loading="lazy">
+            <img data-screen="detail" src="assets/img/screen-detail.webp" alt="" loading="lazy">
+            <img data-screen="meteo" src="assets/img/screen-meteo.webp" alt="" loading="lazy">
+            <img data-screen="notif" src="assets/img/screen-lock.webp" alt="" loading="lazy">
+            <img data-screen="home" src="assets/img/screen-home.webp" alt="" loading="lazy">
+          </div>
+          <span class="island"></span>
+        </div>
+      </div>
+      <div class="scrolly-steps">
+        <article class="step" data-step="pager">
+          <span class="step-ico" style="--c:var(--red)">01</span>
+          <h3>De live Pager</h3>
+          <p>Alle meldingen van de laatste 24 uur in één tijdlijn, per dag gegroepeerd. Met de tellingen van vandaag per hulpdienst en een <b>LIVE</b>-label voor alles van de laatste tien minuten. Meldingen die je al hebt geopend worden grijs.</p>
+        </article>
+        <article class="step" data-step="map">
+          <span class="step-ico" style="--c:var(--politie)">02</span>
+          <h3>Direct op de kaart</h3>
+          <p>Apple Kaarten met de vertrouwde markers van brandweer, ambulance, politie en Lifeliner. Meldingen op dezelfde plek komen netjes in een cirkel te staan.</p>
+        </article>
+        <article class="step" data-step="detail">
+          <span class="step-ico" style="--c:var(--ambulance)">03</span>
+          <h3>Alles over de melding</h3>
+          <p>Een grote kaart met Look Around-preview, de prioriteit, categorie, capcodes en voertuigen. En met één tik naar Apple Kaarten.</p>
+        </article>
+        <article class="step" data-step="meteo">
+          <span class="step-ico" style="--c:#0ea5e9">04</span>
+          <h3>Het weer ter plaatse</h3>
+          <p>Bij elke melding de METEO-gegevens van Apple Weer, op het tijdstip en de plek van de melding: temperatuur, bewolking, windrichting en windsnelheid.</p>
+        </article>
+        <article class="step" data-step="notif">
+          <span class="step-ico" style="--c:var(--brandweer)">05</span>
+          <h3>Mis geen melding</h3>
+          <p>Echte pushmeldingen voor jouw plaatsen, hulpdiensten en prioriteiten. Met een stille modus, en kritieke A1- en P1-meldingen die er toch doorheen komen.</p>
+        </article>
+        <article class="step" data-step="home">
+          <span class="step-ico" style="--c:var(--traumaheli)">06</span>
+          <h3>Widgets overal</h3>
+          <p>De laatste melding, een lijst of de cijfers van vandaag op je beginscherm, vergrendelscherm, Mac-bureaublad en Apple Watch-wijzerplaat.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISCIPLINES -->
+  <section class="disciplines" aria-label="Hulpdiensten">
+    <a class="dis" href="pager/?dienst=brandweer" data-reveal style="--img:url(../img/banner_brand.webp);--c:var(--brandweer)">
+      <img src="assets/img/icon_brandweer.png" alt=""><b>Brandweer</b><span><em id="dBrandweer">–</em> vandaag</span>
+    </a>
+    <a class="dis" href="pager/?dienst=ambulance" data-reveal style="--d:.08s;--img:url(../img/banner_ambu.webp);--c:var(--ambulance)">
+      <img src="assets/img/icon_ambulance.png" alt=""><b>Ambulance</b><span><em id="dAmbulance">–</em> vandaag</span>
+    </a>
+    <a class="dis" href="pager/?dienst=politie" data-reveal style="--d:.16s;--img:url(../img/banner_pol.webp);--c:var(--politie)">
+      <img src="assets/img/icon_politie.png" alt=""><b>Politie</b><span><em id="dPolitie">–</em> vandaag</span>
+    </a>
+    <a class="dis" href="pager/?dienst=traumaheli" data-reveal style="--d:.24s;--img:url(../img/banner_life.webp);--c:var(--traumaheli)">
+      <img src="assets/img/icon_traumaheli.png" alt=""><b>Lifeliner</b><span><em id="dTraumaheli">–</em> vandaag</span>
+    </a>
+  </section>
+
+  <!-- DEVICES -->
+  <section class="devices" id="apparaten">
+    <div class="sec-head" data-reveal>
+      <p class="kicker">Op al je apparaten</p>
+      <h2>iPhone, iPad, Mac<br>én Apple Watch.</h2>
+      <p class="sub">Je instellingen en bewaarde meldingen gaan via iCloud mee naar al je apparaten. Inloggen met Apple is optioneel.</p>
+    </div>
+    <div class="stage">
+      <div class="mac-frame" data-reveal>
+        <div class="mac-bar"><i></i><i></i><i></i></div>
+        <img src="assets/img/mac-split.webp" alt="De app op de Mac met lijst en detail naast elkaar" loading="lazy">
+      </div>
+      <div class="ipad-frame" data-reveal style="--d:.15s">
+        <img src="assets/img/ipad-split.webp" alt="De app op de iPad" loading="lazy">
+      </div>
+      <div class="watch-frame" data-reveal style="--d:.3s">
+        <div class="watch-crown"></div>
+        <div class="watch-glass" id="watchGlass">
+          <img class="is-on" src="assets/img/watch-list.webp" alt="Meldingen op de Apple Watch" loading="lazy">
+          <img src="assets/img/watch-detail.webp" alt="" loading="lazy">
+          <img src="assets/img/watch-today.webp" alt="" loading="lazy">
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- RADIUS -->
+  <section class="buurt" id="buurt">
+    <div class="buurt-map" aria-hidden="true">
+      <div class="rings"><i></i><i></i><i></i></div>
+      <span class="you"></span>
+      <img class="drop" style="--x:58%;--y:36%;--d:.2s" src="assets/img/marker_ambulance.png" alt="">
+      <img class="drop" style="--x:36%;--y:58%;--d:.6s" src="assets/img/marker_brandweer.png" alt="">
+      <img class="drop" style="--x:63%;--y:63%;--d:1s" src="assets/img/marker_politie.png" alt="">
+      <img class="drop out" style="--x:88%;--y:18%;--d:1.4s" src="assets/img/marker_ambulance.png" alt="">
+      <img class="drop out" style="--x:12%;--y:86%;--d:1.8s" src="assets/img/marker_traumaheli.png" alt="">
+    </div>
+    <div class="buurt-copy" data-reveal>
+      <p class="kicker">Mijn buurt</p>
+      <h2>Alleen wat er om je heen gebeurt.</h2>
+      <p>Kies een straal van 0,5 tot 25 kilometer rond je locatie of een vast punt. De lijst, de kaart, de widgets én de pushmeldingen houden zich daaraan. Je precieze locatie verlaat je toestel niet: de server krijgt alleen een afgerond middelpunt.</p>
+      <ul class="checks">
+        <li>Rond je huidige locatie of een vast adres</li>
+        <li>Geldt ook voor pushmeldingen</li>
+        <li>Afstand bij elke melding</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- PRIVACY -->
+  <section class="privacy" id="privacy">
+    <div class="sec-head" data-reveal>
+      <p class="kicker">Privacy</p>
+      <h2>Gewoon een goede app.<br>Zonder gedoe.</h2>
+    </div>
+    <div class="cards">
+      <div class="pcard" data-reveal><span>🚫</span><h3>Geen tracking</h3><p>Geen advertentie- of analytics-SDK's in de app. En nergens Facebook.</p></div>
+      <div class="pcard" data-reveal style="--d:.1s"><span>👤</span><h3>Geen account nodig</h3><p>Inloggen met Apple is optioneel en zorgt alleen voor iCloud-sync.</p></div>
+      <div class="pcard" data-reveal style="--d:.2s"><span>🔒</span><h3>Face ID</h3><p>Vergrendel de app met Face ID of Touch ID als je dat wilt.</p></div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section class="final" id="download">
+    <div class="final-inner" data-reveal>
+      <span class="appicon"><img src="assets/img/appicon-512.png" alt="" width="120" height="120"></span>
+      <h2>Altijd weten wat er speelt in Apeldoorn.</h2>
+      <p>De app komt binnenkort in de App Store. Tot die tijd volg je alles live in je browser.</p>
+      <div class="cta center">
+        <a class="btn btn-white" href="pager/"><span class="live-dot is-red" style="background:var(--red)"></span>Open de live pager</a>
+        <a class="btn btn-ghost appstore" href="#download"><span>Binnenkort in de App Store</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="foot-inner">
+    <div class="foot-brand">
+      <span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>
+      <p><b>P2000 Apeldoorn</b><br>Bel bij nood altijd 112. Niet alle meldingen van politie en ambulance gaan via P2000. Dit is geen officiële dienst van de hulpdiensten.</p>
+    </div>
+    <nav>
+      <a href="pager/">Live pager</a>
+      <a href="info/?p=privacy">Privacy</a>
+      <a href="info/?p=terms">Voorwaarden</a>
+      <a href="info/?p=disclaimer">Disclaimer</a>
+      <a href="https://lrvdlinden.app" rel="noopener">Meer apps</a>
+    </nav>
+  </div>
+  <p class="foot-small">© 2026 P2000 Apeldoorn · Bron: <a href="https://p2000.page" rel="noopener">p2000.page</a> · Made &amp; Powered by <a href="https://pixelforges.nl" rel="noopener">PixelForges</a></p>
+</footer>
+</body>
+</html>

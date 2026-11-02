@@ -11,3 +11,4 @@ build/
 *.dSYM
 .swiftpm/
 .DS_Store
+website/data/

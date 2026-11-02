@@ -3,7 +3,12 @@ import assert from "node:assert/strict";
 import { tmpdir } from "node:os";
 import { mkdtempSync } from "node:fs";
 import { join } from "node:path";
+import { generateKeyPairSync, verify } from "node:crypto";
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "p2000-"));
+const testKey = generateKeyPairSync("ec", { namedCurve: "P-256" });
+process.env.WEB_MAPKIT_JS_KEY_ID = "ABC123DEFG";
+process.env.WEB_MAPKIT_JS_TEAM_ID = "EU3UY476T6";
+process.env.WEB_MAPKIT_JS_P8 = testKey.privateKey.export({ type: "pkcs8", format: "pem" });
 
 const { fromFeed, prioriteit, categorie } = await import("../src/ingest.js");
 const { matches, distanceKm, payloadFor, isQuiet } = await import("../src/push.js");
@@ -82,4 +87,18 @@ test("devices", () => {
   const d = activeDevices();
   assert.equal(d.length, 1);
   assert.deepEqual(d[0].plaatsen, ["Apeldoorn"]);
+});
+
+test("MapKit JS token is a valid ES256 JWT bound to the origin", async () => {
+  const { mapkitToken } = await import("../src/apple.js");
+  const token = mapkitToken("https://p2000-apeldoorn.nl");
+  const [h, c, sig] = token.split(".");
+  const header = JSON.parse(Buffer.from(h, "base64url"));
+  const claims = JSON.parse(Buffer.from(c, "base64url"));
+  assert.equal(header.kid, "ABC123DEFG");
+  assert.equal(claims.iss, "EU3UY476T6");
+  assert.equal(claims.origin, "https://p2000-apeldoorn.nl");
+  assert.ok(verify("sha256", Buffer.from(`${h}.${c}`), { key: testKey.publicKey, dsaEncoding: "ieee-p1363" }, Buffer.from(sig, "base64url")));
+  assert.equal(mapkitToken("https://evil.example"), null);
+  assert.ok(mapkitToken("http://localhost:8000"));
 });

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>P2000 Apeldoorn</title>
+<link rel="icon" href="../assets/img/appicon-32.png">
+<link rel="stylesheet" href="../assets/css/base.css">
+<style>
+  body { padding: 0 16px 60px; }
+  header { max-width: 760px; margin: 0 auto; padding: 20px 0; display: flex; align-items: center; gap: 10px; }
+  header a { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; }
+  header .shield { width: 36px; height: 36px; }
+  header nav { margin-left: auto; display: flex; gap: 16px; font-size: .9rem; }
+  header nav a { font-weight: 500; color: var(--muted); }
+  article { max-width: 760px; margin: 0 auto; background: var(--surface); border-radius: 24px; padding: clamp(20px, 4vw, 40px); box-shadow: var(--shadow); }
+  article h1 { font-family: var(--display); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.05; margin: 0 0 .3em; }
+  article h2, article h3 { margin-top: 1.6em; }
+  article .meta { color: var(--muted); font-size: .9rem; margin-bottom: 2em; }
+  article a { color: var(--red); }
+</style>
+<script src="../config.js"></script>
+</head>
+<body>
+<header>
+  <a href="../"><span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>P2000 Apeldoorn</a>
+  <nav><a href="?p=privacy">Privacy</a><a href="?p=terms">Voorwaarden</a><a href="?p=disclaimer">Disclaimer</a><a href="../pager/">Live pager</a></nav>
+</header>
+<article id="doc"><p>Laden…</p></article>
+<script type="module">
+  import { API, esc } from "../assets/js/core.js";
+  const names = { privacy: "Privacyverklaring", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer" };
+  const p = new URLSearchParams(location.search).get("p");
+  const name = names[p] ? p : "privacy";
+  const doc = document.getElementById("doc");
+  let data = null;
+  for (const url of [`../data/${name}.json`, `${API}/v1/content/${name}`]) {
+    try { const r = await fetch(url); if (r.ok) { data = await r.json(); if (data) break; } } catch {}
+  }
+  // Only a small, safe subset of HTML from our own content files.
+  const clean = (html) => {
+    const t = document.createElement("template");
+    t.innerHTML = html || "";
+    t.content.querySelectorAll("script,style,iframe,object,embed,form,link,meta").forEach((n) => n.remove());
+    t.content.querySelectorAll("*").forEach((n) => [...n.attributes].forEach((a) => {
+      if (/^on/i.test(a.name) || a.name === "style" || (a.name === "href" && /^\s*javascript:/i.test(a.value))) n.removeAttribute(a.name);
+    }));
+    return t.innerHTML;
+  };
+  document.title = `${names[name]} – P2000 Apeldoorn`;
+  doc.innerHTML = data
+    ? `<h1>${esc(data.title || names[name])}</h1>${data.updated_at || data.last_updated ? `<p class="meta">Laatst bijgewerkt: ${esc(new Date(data.updated_at || data.last_updated).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }))}</p>` : ""}${clean(data.content || data.html || "")}`
+    : `<h1>${names[name]}</h1><p>Deze tekst kon niet worden geladen.</p>`;
+</script>
+</body>
+</html>

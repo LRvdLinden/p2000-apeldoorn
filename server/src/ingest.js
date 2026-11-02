@@ -1,5 +1,6 @@
 import { config, PLAATS_KEYS, plaatsKey } from "./config.js";
-import { insertMelding } from "./db.js";
+import { insertMelding, hasMelding } from "./db.js";
+import { geocode } from "./apple.js";
 
 // ------------------------------------------------------------------ parsing
 
@@ -132,7 +133,13 @@ export function startIngest(onNew) {
       const fresh = [];
       for (const r of Array.isArray(list) ? list : []) {
         const m = fromFeed(r);
-        if (m && insertMelding(m)) fresh.push(m);
+        if (!m || hasMelding(m.guid)) continue;
+        // Precise coordinates for the street via the Apple Maps Server API (when configured).
+        if (m.locatie) {
+          const c = await geocode(m.locatie, m.stad);
+          if (c) [m.lat, m.lon] = c;
+        }
+        if (insertMelding(m)) fresh.push(m);
       }
       lastOk = Date.now();
       lastError = null;
