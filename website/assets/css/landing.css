@@ -132,11 +132,22 @@
 .mac-bar i { width: 11px; height: 11px; border-radius: 50%; background: #ff5f57; } .mac-bar i:nth-child(2) { background: #febc2e; } .mac-bar i:nth-child(3) { background: #28c840; }
 .ipad-frame { position: absolute; right: 4%; bottom: 0; width: 46%; border-radius: 26px; padding: 12px; background: #1b1b1d; box-shadow: 0 0 0 2px #4a4a50, 0 40px 90px rgba(0,0,0,.6); }
 .ipad-frame img { border-radius: 16px; }
-.watch-frame { position: absolute; left: 1%; bottom: -2%; width: clamp(110px, 15%, 170px); aspect-ratio: 211/257; border-radius: 30%/26%; padding: 7%; background: linear-gradient(145deg, #8d8f94, #3c3d42); box-shadow: 0 0 0 3px #222327, 0 30px 70px rgba(0,0,0,.6); }
-.watch-crown { position: absolute; right: -7%; top: 26%; width: 8%; height: 16%; border-radius: 4px; background: #e2621b; }
-.watch-glass { position: relative; width: 100%; height: 100%; border-radius: 24%/20%; overflow: hidden; background: #000; }
-.watch-glass img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .6s; }
+/* Apple Watch Ultra (sizes in cqw of the frame, so it scales as one piece) */
+.watch-frame { position: absolute; left: 3%; bottom: 12%; width: clamp(120px, 17%, 190px); aspect-ratio: 1 / 1.2; container-type: inline-size; z-index: 3; filter: drop-shadow(0 30px 40px rgba(0,0,0,.55)); }
+.watch-band { position: absolute; left: 17cqw; right: 17cqw; height: 40cqw; background: linear-gradient(90deg, #1d2a33, #2c3d48 50%, #1d2a33); z-index: -1; }
+.watch-band.top { top: -32cqw; border-radius: 10cqw 10cqw 0 0; }
+.watch-band.bottom { bottom: -32cqw; border-radius: 0 0 10cqw 10cqw; }
+.watch-band::after { content: ""; position: absolute; inset: 6cqw 8cqw; border-radius: 6cqw; background: repeating-linear-gradient(0deg, transparent 0 4cqw, rgba(255,255,255,.06) 4cqw 5cqw); }
+.watch-case { position: absolute; inset: 0; border-radius: 24cqw; padding: 5cqw; background: linear-gradient(145deg, #d9d6d0 0%, #a9a59d 35%, #77746e 70%, #b9b5ad 100%);
+  box-shadow: inset 0 0 0 1.2cqw rgba(255,255,255,.35), inset 0 -2cqw 4cqw rgba(0,0,0,.25); }
+.watch-glass { position: relative; width: 100%; height: 100%; border-radius: 19cqw; overflow: hidden; background: #000; box-shadow: 0 0 0 2.5cqw #0b0b0d; }
+.watch-glass img { position: absolute; inset: 4cqw 3cqw; width: calc(100% - 6cqw); height: calc(100% - 8cqw); object-fit: cover; border-radius: 13cqw; opacity: 0; transition: opacity .6s; }
 .watch-glass img.is-on { opacity: 1; }
+.watch-crown { position: absolute; right: -6cqw; top: 30cqw; width: 8cqw; height: 22cqw; border-radius: 3cqw; background: linear-gradient(90deg, #8d8a84, #d4d1ca 60%, #8d8a84);
+  box-shadow: inset 0 0 0 .8cqw rgba(0,0,0,.15); }
+.watch-crown::after { content: ""; position: absolute; left: 3cqw; top: 8cqw; width: 4cqw; height: 6cqw; border-radius: 1cqw; background: #e2621b; }
+.watch-side { position: absolute; right: -3.5cqw; top: 62cqw; width: 4cqw; height: 22cqw; border-radius: 2cqw; background: linear-gradient(90deg, #8d8a84, #c9c6bf); }
+.watch-action { position: absolute; left: -4cqw; top: 36cqw; width: 5cqw; height: 26cqw; border-radius: 2.5cqw; background: linear-gradient(90deg, #c4561a, #f07a2e); }
 
 /* RADIUS */
 .buurt { max-width: 1180px; margin: 0 auto; padding: 60px 20px 140px; display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: center; }
@@ -189,3 +200,9 @@
 .foot nav a { text-decoration: none; color: var(--muted); }
 .foot nav a:hover { color: #fff; }
 .foot-small { text-align: center; color: #6b6b75; font-size: .8rem; margin: 30px 0 0; }
+
+@media (max-width: 640px) {
+  .stage { height: 96vw; }
+  .ipad-frame { width: 54%; bottom: 4%; }
+  .watch-frame { width: 25%; left: 4%; bottom: 14%; }
+}
