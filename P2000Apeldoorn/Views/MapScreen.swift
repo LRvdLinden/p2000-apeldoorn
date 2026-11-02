@@ -65,6 +65,11 @@ struct MapScreen: View {
                     }
                     .annotationTitles(.hidden)
                 }
+                if settings.radiusActive, let c = settings.radiusCenter {
+                    MapCircle(center: CLLocationCoordinate2D(latitude: c.lat, longitude: c.lon), radius: settings.radiusKm * 1000)
+                        .foregroundStyle(Theme.red.opacity(0.08))
+                        .stroke(Theme.red, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+                }
                 UserAnnotation()
             }
             .mapStyle(MapStyleSetting.style(for: settings.mapType))

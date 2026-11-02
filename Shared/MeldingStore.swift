@@ -2,8 +2,8 @@ import Foundation
 import Observation
 import WidgetKit
 
-/// Keeps the live list of alerts: Base44 history (same as the website) merged with the
-/// p2000.page live feed. Polls while the app is active and caches the last result for an instant start.
+/// Keeps the live list of alerts from the app's own API. Polls while the app is active and
+/// caches the last result in the App Group (also read by the widgets) for an instant start.
 @MainActor
 @Observable
 final class MeldingStore {
@@ -24,9 +24,6 @@ final class MeldingStore {
     @ObservationIgnored private var knownIDs: Set<String> = []
     @ObservationIgnored private let api = P2000API.shared
     @ObservationIgnored private var limit = 300
-    @ObservationIgnored private var history: [Melding] = []
-    @ObservationIgnored private var liveItems: [Melding] = []
-    @ObservationIgnored private var lastHistoryLoad: Date = .distantPast
     @ObservationIgnored private var didReloadWidgets = false
 
     private init() {
@@ -35,71 +32,29 @@ final class MeldingStore {
 
     // MARK: - Loading
 
-    /// Full refresh: Base44 history + p2000.page live feed.
+    /// Fetches the latest alerts from the app's own API.
     func refresh() async {
-        await load(includeHistory: true)
-    }
-
-    /// Live-only refresh (p2000.page); cheap enough to run every 15 seconds.
-    func refreshLive() async {
-        await load(includeHistory: !LiveFeed.isConfigured)
-    }
-
-    private func load(includeHistory: Bool) async {
         guard !isLoading else { return }
         isLoading = true
         defer { isLoading = false }
-
-        async let liveResult: [Melding]? = try? LiveFeed.shared.apeldoorn()
-        var historyError: Error?
-        if includeHistory {
-            do {
-                history = try await api.meldingen(limit: limit)
-                lastHistoryLoad = .now
-            } catch {
-                historyError = error
-            }
-        }
-        let live = await liveResult
-        if let live { liveItems = mergeLive(live) }
-
-        let merged = merge(history: history, live: liveItems)
-        let newOnes = knownIDs.isEmpty ? [] : merged.filter { !knownIDs.contains($0.guid) }
-        meldingen = merged
-        knownIDs.formUnion(merged.map(\.guid))
-
-        isOnline = (LiveFeed.isConfigured && live != nil) || (includeHistory && historyError == nil)
-        if historyError == nil || live != nil {
+        do {
+            let fresh = try await api.meldingen(limit: limit)
+            let newOnes = knownIDs.isEmpty ? [] : fresh.filter { !knownIDs.contains($0.guid) }
+            meldingen = fresh
+            knownIDs.formUnion(fresh.map(\.guid))
             lastUpdated = .now
+            isOnline = true
             errorMessage = nil
-        } else {
-            errorMessage = historyError?.localizedDescription
+            saveCache()
+            if !newOnes.isEmpty { onNew?(newOnes) }
+            if !newOnes.isEmpty || !didReloadWidgets {
+                didReloadWidgets = true
+                WidgetCenter.shared.reloadAllTimelines()
+            }
+        } catch {
+            isOnline = false
+            errorMessage = error.localizedDescription
         }
-        saveCache()
-        if !newOnes.isEmpty { onNew?(newOnes) }
-        if !newOnes.isEmpty || !didReloadWidgets {
-            didReloadWidgets = true
-            WidgetCenter.shared.reloadAllTimelines()
-        }
-    }
-
-    /// Keeps live items until Base44 has them (the live feed only holds a few minutes).
-    private func mergeLive(_ fresh: [Melding]) -> [Melding] {
-        var byID = Dictionary(liveItems.map { ($0.guid, $0) }, uniquingKeysWith: { a, _ in a })
-        for m in fresh { byID[m.guid] = m }
-        let cutoff = Date.now.addingTimeInterval(-6 * 60 * 60)
-        return byID.values.filter { $0.datum > cutoff }
-    }
-
-    private func merge(history: [Melding], live: [Melding]) -> [Melding] {
-        Self.combine(history: history, live: live)
-    }
-
-    /// Base44 records win (they have category, weather and views); live fills the gap.
-    nonisolated static func combine(history: [Melding], live: [Melding]) -> [Melding] {
-        let known = Set(history.map(\.guid))
-        let extra = live.filter { !known.contains($0.guid) }
-        return (extra + history).sorted { $0.datum > $1.datum }
     }
 
     func refreshStats() async {
@@ -112,20 +67,13 @@ final class MeldingStore {
         if let p = p ?? nil { vorigeMaand = p }
     }
 
-    /// Starts polling; call when the scene becomes active.
-    /// Live feed every 15 s, Base44 history every 60 s.
+    /// Starts polling every 15 seconds; call when the scene becomes active.
     func startPolling() {
         pollTask?.cancel()
         pollTask = Task { [weak self] in
-            await self?.refresh()
             while !Task.isCancelled {
+                await self?.refresh()
                 try? await Task.sleep(for: .seconds(15))
-                guard let self, !Task.isCancelled else { return }
-                if Date.now.timeIntervalSince(self.lastHistoryLoad) >= 60 {
-                    await self.refresh()
-                } else {
-                    await self.refreshLive()
-                }
             }
         }
     }
@@ -147,11 +95,18 @@ final class MeldingStore {
 
     // MARK: - Derived
 
+    /// Alerts stay on the timeline for 24 hours.
+    nonisolated static let timelineWindow: TimeInterval = 24 * 60 * 60
+
     func filtered(_ settings: AppSettings, search: String = "", onlyBewaard: Bool = false) -> [Melding] {
         let q = search.trimmingCharacters(in: .whitespaces).lowercased()
+        let cutoff = Date.now.addingTimeInterval(-Self.timelineWindow)
         return meldingen.filter { m in
             if onlyBewaard { return settings.bewaard.contains(m.guid) }
+            // The timeline only shows the last 24 hours.
+            guard m.datum >= cutoff else { return false }
             guard settings.matchesList(m) else { return false }
+            if settings.hideRead && settings.isRead(m) { return false }
             guard !q.isEmpty else { return true }
             return [m.title, m.stad ?? "", m.locatie ?? "", m.categorie ?? "", m.capcode ?? "", m.fullMelding ?? ""]
                 .contains { $0.lowercased().contains(q) }
@@ -181,8 +136,6 @@ final class MeldingStore {
         let list = AppGroup.readCache()
         guard !list.isEmpty else { return }
         meldingen = list
-        history = list.filter { !$0.recordID.hasPrefix("live-") }
-        liveItems = list.filter { $0.recordID.hasPrefix("live-") }
         knownIDs = Set(list.map(\.guid))
     }
 

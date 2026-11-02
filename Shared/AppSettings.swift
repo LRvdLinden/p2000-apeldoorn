@@ -14,6 +14,10 @@ final class AppSettings {
     var prioriteiten: Set<String> = [] { didSet { save(.prioriteiten, Array(prioriteiten).sorted()) } }
     var groupByDay: Bool = true { didSet { save(.groupByDay, groupByDay) } }
     var bewaard: Set<String> = [] { didSet { save(.bewaard, Array(bewaard).sorted()) } }
+    /// Opened alerts (newest last, max 600) – shown greyed out in the list; synced via iCloud.
+    var gelezen: [String] = [] { didSet { save(.gelezen, gelezen) } }
+    /// "Verberg bekeken meldingen" (same option as the website).
+    var hideRead: Bool = false { didSet { save(.hideRead, hideRead) } }
 
     // MARK: Appearance
     /// "systeem", "licht" or "donker".
@@ -33,6 +37,19 @@ final class AppSettings {
     /// "Kritieke meldingen": A0/A1/P1 still come through in quiet mode.
     var criticalAlerts: Bool = true { didSet { save(.criticalAlerts, criticalAlerts); notificationsChanged() } }
 
+    // MARK: Radius ("Mijn buurt")
+    /// Only show and notify alerts within `radiusKm` of the centre.
+    var radiusEnabled: Bool = false { didSet { save(.radiusEnabled, radiusEnabled); notificationsChanged() } }
+    var radiusKm: Double = 5 { didSet { save(.radiusKm, radiusKm); notificationsChanged() } }
+    /// "huidig" = current location of this device, "vast" = a fixed point chosen on the map.
+    var radiusMode: String = "huidig" { didSet { save(.radiusMode, radiusMode); notificationsChanged() } }
+    var fixedLat: Double = 0 { didSet { save(.fixedLat, fixedLat); notificationsChanged() } }
+    var fixedLon: Double = 0 { didSet { save(.fixedLon, fixedLon); notificationsChanged() } }
+    var fixedName: String = "" { didSet { save(.fixedName, fixedName) } }
+    /// Last known location of this device (rounded to ~100 m); device-only.
+    var currentLat: Double = 0 { didSet { defaults.set(currentLat, forKey: Key.currentLat.rawValue) } }
+    var currentLon: Double = 0 { didSet { defaults.set(currentLon, forKey: Key.currentLon.rawValue) } }
+
     // MARK: Device-only
     var useLocation: Bool = false { didSet { defaults.set(useLocation, forKey: Key.useLocation.rawValue) } }
     var appLock: Bool = false { didSet { defaults.set(appLock, forKey: Key.appLock.rawValue) } }
@@ -42,13 +59,14 @@ final class AppSettings {
     @ObservationIgnored var onNotificationSettingsChanged: (() -> Void)?
 
     enum Key: String, CaseIterable {
-        case diensten, plaatsen, prioriteiten, groupByDay, bewaard, appearance, mapType
+        case diensten, plaatsen, prioriteiten, groupByDay, bewaard, gelezen, hideRead, appearance, mapType
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
-        case useLocation, appLock, onboardingDone
+        case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
+        case useLocation, appLock, onboardingDone, currentLat, currentLon
 
         var synced: Bool {
             switch self {
-            case .useLocation, .appLock, .onboardingDone: return false
+            case .useLocation, .appLock, .onboardingDone, .currentLat, .currentLon: return false
             default: return true
             }
         }
@@ -66,6 +84,8 @@ final class AppSettings {
         useLocation = defaults.bool(forKey: Key.useLocation.rawValue)
         appLock = defaults.bool(forKey: Key.appLock.rawValue)
         onboardingDone = defaults.bool(forKey: Key.onboardingDone.rawValue)
+        currentLat = defaults.double(forKey: Key.currentLat.rawValue)
+        currentLon = defaults.double(forKey: Key.currentLon.rawValue)
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                object: cloud, queue: .main) { [weak self] _ in
@@ -116,6 +136,8 @@ final class AppSettings {
         if let v = set(.prioriteiten) { prioriteiten = v }
         if let v = source(Key.groupByDay.storageKey) as? Bool { groupByDay = v }
         if let v = set(.bewaard) { bewaard = v }
+        if let v = source(Key.gelezen.storageKey) as? [String] { gelezen = v }
+        if let v = source(Key.hideRead.storageKey) as? Bool { hideRead = v }
         if let v = source(Key.appearance.storageKey) as? String { appearance = v }
         if let v = source(Key.mapType.storageKey) as? String { mapType = v }
         if let v = source(Key.notificationsEnabled.storageKey) as? Bool { notificationsEnabled = v }
@@ -126,6 +148,12 @@ final class AppSettings {
         if let v = source(Key.quietFrom.storageKey) as? Int { quietFrom = v }
         if let v = source(Key.quietTo.storageKey) as? Int { quietTo = v }
         if let v = source(Key.criticalAlerts.storageKey) as? Bool { criticalAlerts = v }
+        if let v = source(Key.radiusEnabled.storageKey) as? Bool { radiusEnabled = v }
+        if let v = source(Key.radiusKm.storageKey) as? Double { radiusKm = v }
+        if let v = source(Key.radiusMode.storageKey) as? String { radiusMode = v }
+        if let v = source(Key.fixedLat.storageKey) as? Double { fixedLat = v }
+        if let v = source(Key.fixedLon.storageKey) as? Double { fixedLon = v }
+        if let v = source(Key.fixedName.storageKey) as? String { fixedName = v }
     }
 
     private func save(_ key: Key, _ value: Any) {
@@ -148,19 +176,44 @@ final class AppSettings {
         }
         cloud.synchronize()
         isLoading = true
-        diensten = []; plaatsen = []; prioriteiten = []; groupByDay = true; bewaard = []
+        diensten = []; plaatsen = []; prioriteiten = []; groupByDay = true; bewaard = []; gelezen = []; hideRead = false
         appearance = "systeem"; mapType = "standard"
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
+        radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
         isLoading = false
         onNotificationSettingsChanged?()
     }
 
     // MARK: - Filtering
 
-    var listFilterActive: Bool { !diensten.isEmpty || !plaatsen.isEmpty || !prioriteiten.isEmpty }
+    var listFilterActive: Bool { !diensten.isEmpty || !plaatsen.isEmpty || !prioriteiten.isEmpty || radiusActive }
+
+    /// Centre of the radius (current location or fixed point), if known.
+    var radiusCenter: (lat: Double, lon: Double)? {
+        if radiusMode == "vast" {
+            return fixedLat != 0 ? (fixedLat, fixedLon) : nil
+        }
+        return currentLat != 0 ? (currentLat, currentLon) : nil
+    }
+
+    var radiusActive: Bool { radiusEnabled && radiusCenter != nil }
+
+    func withinRadius(_ m: Melding) -> Bool {
+        guard radiusEnabled, let c = radiusCenter else { return true }
+        guard let lat = m.lat, let lon = m.lon, m.hasCoordinate else { return false }
+        return Self.distanceKm(c.lat, c.lon, lat, lon) <= radiusKm
+    }
+
+    static func distanceKm(_ lat1: Double, _ lon1: Double, _ lat2: Double, _ lon2: Double) -> Double {
+        let r = Double.pi / 180
+        let dLat = (lat2 - lat1) * r, dLon = (lon2 - lon1) * r
+        let a = sin(dLat / 2) * sin(dLat / 2) + cos(lat1 * r) * cos(lat2 * r) * sin(dLon / 2) * sin(dLon / 2)
+        return 6371 * 2 * atan2(sqrt(a), sqrt(1 - a))
+    }
 
     func matchesList(_ m: Melding) -> Bool {
+        if !withinRadius(m) { return false }
         if !diensten.isEmpty, !diensten.contains(m.dienst.rawValue) { return false }
         if !plaatsen.isEmpty, !plaatsen.contains(where: { $0.plaatsKey == (m.stad ?? "").plaatsKey }) { return false }
         if !prioriteiten.isEmpty, !prioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
@@ -169,7 +222,7 @@ final class AppSettings {
 
     /// Whether this alert should produce a notification right now.
     func matchesNotification(_ m: Melding, at date: Date = .now) -> Bool {
-        guard notificationsEnabled else { return false }
+        guard notificationsEnabled, withinRadius(m) else { return false }
         if !notifDiensten.isEmpty, !notifDiensten.contains(m.dienst.rawValue) { return false }
         if !notifPlaatsen.isEmpty, !notifPlaatsen.contains(where: { $0.plaatsKey == (m.stad ?? "").plaatsKey }) { return false }
         if !notifPrioriteiten.isEmpty, !notifPrioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
@@ -183,6 +236,24 @@ final class AppSettings {
         let now = (c.hour ?? 0) * 60 + (c.minute ?? 0)
         if quietFrom == quietTo { return true }
         return quietFrom < quietTo ? (now >= quietFrom && now < quietTo) : (now >= quietFrom || now < quietTo)
+    }
+
+    func isRead(_ m: Melding) -> Bool { readSet.contains(m.guid) }
+
+    @ObservationIgnored private var readCache: (count: Int, last: String?, set: Set<String>) = (0, nil, [])
+    private var readSet: Set<String> {
+        if readCache.count != gelezen.count || readCache.last != gelezen.last {
+            readCache = (gelezen.count, gelezen.last, Set(gelezen))
+        }
+        return readCache.set
+    }
+
+    func markRead(_ m: Melding) {
+        guard !isRead(m) else { return }
+        var list = gelezen
+        list.append(m.guid)
+        if list.count > 600 { list.removeFirst(list.count - 600) }
+        gelezen = list
     }
 
     func toggleBewaard(_ m: Melding) {

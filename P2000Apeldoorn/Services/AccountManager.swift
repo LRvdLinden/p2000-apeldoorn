@@ -2,7 +2,7 @@ import Foundation
 import AuthenticationServices
 import Observation
 
-/// Optional "Inloggen met Apple". The Apple user ID links push notifications (OneSignal external ID)
+/// Optional "Inloggen met Apple". Shows who is signed in
 /// and the name/e-mail are synced through iCloud so all the user's devices show the same account.
 @MainActor
 @Observable

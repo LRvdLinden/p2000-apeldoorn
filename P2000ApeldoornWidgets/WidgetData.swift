@@ -69,19 +69,11 @@ struct MeldingEntry: TimelineEntry {
 // MARK: - Loading
 
 enum WidgetData {
-    /// Base44 history + p2000.page live feed, with the app's cache as fallback.
+    /// Latest alerts from the app's own API, with the app's cache as fallback.
     static func load(fresh: Bool) async -> [Melding] {
-        var list = AppGroup.readCache()
-        guard fresh else { return list }
-        async let liveResult: [Melding]? = try? LiveFeed.shared.apeldoorn()
-        let history = try? await P2000API.shared.meldingen(limit: 150)
-        let live = await liveResult ?? []
-        if let history {
-            list = MeldingStore.combine(history: history, live: live)
-        } else if !live.isEmpty {
-            list = MeldingStore.combine(history: list, live: live)
-        }
-        if !list.isEmpty { AppGroup.writeCache(list) }
+        let cached = AppGroup.readCache()
+        guard fresh, let list = try? await P2000API.shared.meldingen(limit: 150), !list.isEmpty else { return cached }
+        AppGroup.writeCache(list)
         return list
     }
 
@@ -94,7 +86,8 @@ enum WidgetData {
         let todayList = all.filter { $0.datum >= start }
         for m in todayList { per[m.dienst, default: 0] += 1 }
 
-        var shown = all
+        // Same 24-hour window as the timeline in the app.
+        var shown = all.filter { $0.datum >= Date.now.addingTimeInterval(-MeldingStore.timelineWindow) }
         if let d = discipline.dienst { shown = shown.filter { $0.dienst == d } }
         if useAppFilters {
             let candidates = shown

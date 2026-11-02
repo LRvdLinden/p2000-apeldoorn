@@ -66,6 +66,7 @@ struct WatchListView: View {
                         WatchDetailView(melding: m)
                     } label: {
                         WatchRow(melding: m)
+                            .opacity(settings.isRead(m) ? 0.5 : 1)
                     }
                 }
             }
@@ -150,7 +151,10 @@ struct WatchDetailView: View {
             }
         }
         .navigationTitle(melding.dienst.label)
-        .onAppear { MeldingStore.shared.registerView(melding) }
+        .onAppear {
+            MeldingStore.shared.registerView(melding)
+            settings.markRead(melding)
+        }
     }
 }
 

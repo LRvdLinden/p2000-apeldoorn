@@ -1,140 +1,138 @@
 import Foundation
 import UserNotifications
-#if os(iOS) && canImport(OneSignalFramework)
-import OneSignalFramework
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
 #endif
 
-/// Push notifications.
+/// Native Apple push notifications (APNs) via the app's own server (server/ in this repo).
 ///
-/// - iPhone/iPad: the existing OneSignal app of p2000-apeldoorn.nl (same App ID as the website).
-///   Every device sends tags with its notification settings, so the backend can target
-///   per place, discipline, priority and quiet hours (see README → Pushmeldingen).
-/// - Mac: local notifications for new alerts while the app is running.
+/// The device registers its APNs token together with its notification settings
+/// (places, disciplines, priorities, quiet hours, critical alerts and radius). The server
+/// matches every new alert against those settings and only pushes what fits.
 @MainActor
 enum PushManager {
     /// Set by the app; called with the alert GUID when a notification is tapped.
     static var openMelding: ((String) -> Void)?
 
-    #if os(iOS) && canImport(OneSignalFramework)
-    private static let clickListener = ClickListener()
-    #endif
+    private static let tokenKey = "push.apnsToken"
+    private static var syncTask: Task<Void, Never>?
 
-    static func start(launchOptions: [AnyHashable: Any]? = nil) {
-        #if os(iOS) && canImport(OneSignalFramework)
-        OneSignal.initialize(Config.oneSignalAppID, withLaunchOptions: launchOptions)
-        OneSignal.Notifications.addClickListener(clickListener)
+    static var token: String? {
+        get { AppGroup.defaults.string(forKey: tokenKey) }
+        set { AppGroup.defaults.set(newValue, forKey: tokenKey) }
+    }
+
+    /// Debug builds use the APNs sandbox, TestFlight/App Store builds production.
+    static var environment: String {
+        #if DEBUG
+        return "sandbox"
+        #else
+        return "production"
         #endif
-        let settings = AppSettings.shared
-        settings.onNotificationSettingsChanged = { syncTags() }
-        AccountManager.shared.onChange = { syncIdentity() }
-        syncIdentity()
-        syncTags()
+    }
+
+    static var platform: String {
+        #if os(macOS)
+        return "macos"
+        #else
+        return "ios"
+        #endif
+    }
+
+    static func start() {
+        UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
+        AppSettings.shared.onNotificationSettingsChanged = { syncDevice() }
+        if AppSettings.shared.notificationsEnabled { registerForRemote() }
     }
 
     /// Asks for permission and turns notifications on. Completion reports whether they were allowed.
     static func enable(_ completion: @escaping (Bool) -> Void) {
-        #if os(iOS) && canImport(OneSignalFramework)
-        OneSignal.Notifications.requestPermission({ accepted in
-            Task { @MainActor in
-                AppSettings.shared.notificationsEnabled = accepted
-                if accepted { OneSignal.User.pushSubscription.optIn() }
-                completion(accepted)
-            }
-        }, fallbackToSettings: true)
-        #else
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
             Task { @MainActor in
                 AppSettings.shared.notificationsEnabled = granted
+                if granted { registerForRemote() }
                 completion(granted)
             }
         }
-        #endif
     }
 
     static func disable() {
         AppSettings.shared.notificationsEnabled = false
-        #if os(iOS) && canImport(OneSignalFramework)
-        OneSignal.User.pushSubscription.optOut()
+        guard let token else { return }
+        Task { try? await P2000API.shared.unregisterDevice(token: token) }
+    }
+
+    static func registerForRemote() {
+        #if os(iOS)
+        UIApplication.shared.registerForRemoteNotifications()
+        #elseif os(macOS)
+        NSApplication.shared.registerForRemoteNotifications()
         #endif
     }
 
-    static func syncIdentity() {
-        #if os(iOS) && canImport(OneSignalFramework)
-        let account = AccountManager.shared
-        if let id = account.userID {
-            OneSignal.login(id)
-            if let email = account.email { OneSignal.User.addEmail(email) }
-        } else {
-            OneSignal.logout()
-        }
-        #endif
+    /// Called by the app delegate with the APNs device token.
+    static func didRegister(deviceToken: Data) {
+        token = deviceToken.map { String(format: "%02x", $0) }.joined()
+        syncDevice(immediately: true)
     }
 
-    /// OneSignal tags describing this device's notification settings.
-    static func tags(for s: AppSettings) -> [String: String] {
-        func join(_ set: Set<String>) -> String { set.isEmpty ? "alle" : set.sorted().joined(separator: ",") }
-        return [
-            "app": "ios",
-            "meldingen": s.notificationsEnabled ? "1" : "0",
-            "plaatsen": join(Set(s.notifPlaatsen.map(\.plaatsKey))),
-            "diensten": join(s.notifDiensten),
-            "prioriteiten": join(s.notifPrioriteiten),
-            "stil": s.quietMode ? "1" : "0",
-            "stil_van": String(s.quietFrom),
-            "stil_tot": String(s.quietTo),
-            "kritiek": s.criticalAlerts ? "1" : "0",
-            "taal": Config.uiLanguage,
-        ]
-    }
-
-    static func syncTags() {
-        #if os(iOS) && canImport(OneSignalFramework)
-        let s = AppSettings.shared
-        OneSignal.User.addTags(tags(for: s))
-        if s.notificationsEnabled { OneSignal.User.pushSubscription.optIn() } else { OneSignal.User.pushSubscription.optOut() }
-        #endif
-    }
-
-    // MARK: - Local notifications (Mac, and fallback)
-
-    static func postLocal(for list: [Melding]) {
-        let settings = AppSettings.shared
-        let matching = list.filter { settings.matchesNotification($0) && Date.now.timeIntervalSince($0.datum) < 15 * 60 }.prefix(5)
-        for m in matching {
-            let content = UNMutableNotificationContent()
-            content.title = "\(m.dienst.label) · \(m.plaatsText)"
-            content.body = "\(m.title)\n\(m.prioriteitText)"
-            content.sound = .default
-            content.interruptionLevel = m.isUrgent ? .timeSensitive : .active
-            content.threadIdentifier = m.dienst.rawValue
-            content.userInfo = ["guid": m.guid]
-            let request = UNNotificationRequest(identifier: m.guid, content: content, trigger: nil)
-            UNUserNotificationCenter.current().add(request)
+    /// Sends this device's settings to the server (debounced, so moving sliders doesn't flood it).
+    static func syncDevice(immediately: Bool = false) {
+        syncTask?.cancel()
+        syncTask = Task {
+            if !immediately { try? await Task.sleep(for: .seconds(1.5)) }
+            guard !Task.isCancelled, let token else { return }
+            let s = AppSettings.shared
+            if !s.notificationsEnabled {
+                try? await P2000API.shared.unregisterDevice(token: token)
+                return
+            }
+            var settings: [String: Any] = [
+                "enabled": true,
+                "plaatsen": Array(s.notifPlaatsen).sorted(),
+                "diensten": Array(s.notifDiensten).sorted(),
+                "prioriteiten": Array(s.notifPrioriteiten).sorted(),
+                "quiet": s.quietMode,
+                "quiet_from": s.quietFrom,
+                "quiet_to": s.quietTo,
+                "critical": s.criticalAlerts,
+            ]
+            if s.radiusEnabled, let c = s.radiusCenter {
+                settings["radius_km"] = s.radiusKm
+                settings["lat"] = c.lat
+                settings["lon"] = c.lon
+            }
+            let body: [String: Any] = [
+                "token": token,
+                "platform": platform,
+                "environment": environment,
+                "language": String(Config.uiLanguage.prefix(2)),
+                "app_version": "\(Config.version) (\(Config.build))",
+                "settings": settings,
+            ]
+            try? await P2000API.shared.registerDevice(body)
         }
     }
 
-    static func guid(from data: [AnyHashable: Any]?, url: String? = nil) -> String? {
-        for key in ["guid", "meldingId", "melding_id", "id"] {
-            if let v = data?[key] as? String, !v.isEmpty { return v }
+    /// "Stuur een testmelding" in Settings.
+    static func sendTest() async -> Bool {
+        guard let token else { return false }
+        syncDevice(immediately: true)
+        try? await Task.sleep(for: .seconds(1))
+        return (try? await P2000API.shared.sendTestPush(token: token)) != nil
+    }
+
+    static func guid(from data: [AnyHashable: Any]) -> String? {
+        for key in ["guid", "meldingId", "melding_id"] {
+            if let v = data[key] as? String, !v.isEmpty { return v }
         }
-        if let url, let last = URL(string: url)?.lastPathComponent, last.count > 20 { return last }
         return nil
     }
 }
 
-#if os(iOS) && canImport(OneSignalFramework)
-private final class ClickListener: NSObject, OSNotificationClickListener {
-    func onClick(event: OSNotificationClickEvent) {
-        let data = event.notification.additionalData
-        let url = event.notification.launchURL
-        Task { @MainActor in
-            if let guid = PushManager.guid(from: data, url: url) { PushManager.openMelding?(guid) }
-        }
-    }
-}
-#endif
-
-/// Shows local notifications while the app is open and routes taps to the alert.
+/// Shows notifications while the app is open and routes taps to the alert.
 final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     static let shared = NotificationDelegate()
 
@@ -144,8 +142,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let info = response.notification.request.content.userInfo
-        if let guid = info["guid"] as? String {
-            await MainActor.run { PushManager.openMelding?(guid) }
+        await MainActor.run {
+            if let guid = PushManager.guid(from: info) { PushManager.openMelding?(guid) }
         }
     }
 }

@@ -1,6 +1,6 @@
 name: Build
 
-# Manual check build (no signing). Uses the repo secret P2000_PAGE_API_URL for the live feed.
+# Manual check build of all Apple targets (no signing).
 on:
   workflow_dispatch:
 
@@ -10,18 +10,6 @@ jobs:
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v4
-
-      - name: Write Secrets.xcconfig from repo secret
-        env:
-          P2000_PAGE_API_URL: ${{ secrets.P2000_PAGE_API_URL }}
-        run: |
-          if [ -n "$P2000_PAGE_API_URL" ]; then
-            # "//" starts a comment in .xcconfig files → write https:/$()/
-            printf 'P2000_PAGE_API_URL = %s\n' "$(printf '%s' "$P2000_PAGE_API_URL" | sed 's#https://#https:/$()/#')" > Config/Secrets.xcconfig
-            echo "Secrets.xcconfig written"
-          else
-            echo "No P2000_PAGE_API_URL secret – building without the live feed"
-          fi
 
       - name: Select newest Xcode
         run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)" && xcodebuild -version

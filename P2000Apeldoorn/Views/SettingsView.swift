@@ -51,16 +51,22 @@ struct SettingsView: View {
             }
 
             Section {
+                NavigationLink {
+                    RadiusSettingsView()
+                } label: {
+                    SettingsRow(icon: "scope", color: .red, title: L("Mijn buurt"),
+                                value: settings.radiusEnabled ? Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1)))) : L("Uit"))
+                }
                 Toggle(isOn: Binding(get: { settings.useLocation }, set: { on in
                     settings.useLocation = on
                     if on { location.start() } else { location.stop() }
                 })) {
-                    SettingsRow(icon: "location.fill", color: .blue, title: L("Huidige locatie"))
+                    SettingsRow(icon: "location.fill", color: .blue, title: L("Afstand tonen"))
                 }
             } header: {
                 Text(L("Locatie"))
             } footer: {
-                Text(L("Toont hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat."))
+                Text(L("Met 'Mijn buurt' zie je alleen meldingen binnen een straal rond je locatie of een vast punt, ook voor pushmeldingen. Je locatie blijft op je apparaat en wordt alleen afgerond gedeeld voor de radius van je pushmeldingen."))
             }
 
             Section {
@@ -80,6 +86,9 @@ struct SettingsView: View {
                 }
                 Toggle(isOn: $settings.groupByDay) {
                     SettingsRow(icon: "calendar", color: .red, title: L("Meldingen groeperen per dag"))
+                }
+                Toggle(isOn: $settings.hideRead) {
+                    SettingsRow(icon: "eye.slash.fill", color: .gray, title: L("Verberg bekeken meldingen"))
                 }
             } header: {
                 Text(L("Uiterlijk"))
@@ -114,17 +123,17 @@ struct SettingsView: View {
                     SettingsRow(icon: "sparkles", color: .purple, title: L("Changelog"))
                 }
                 NavigationLink {
-                    ContentPageView(entity: "TermsOfUse", title: L("Gebruiksvoorwaarden"))
+                    ContentPageView(name: "terms", title: L("Gebruiksvoorwaarden"))
                 } label: {
                     SettingsRow(icon: "doc.text.fill", color: .gray, title: L("Gebruiksvoorwaarden"))
                 }
                 NavigationLink {
-                    ContentPageView(entity: "PrivacyVerklaring", title: L("Privacyverklaring"))
+                    ContentPageView(name: "privacy", title: L("Privacyverklaring"))
                 } label: {
                     SettingsRow(icon: "hand.raised.fill", color: .blue, title: L("Privacyverklaring"))
                 }
                 NavigationLink {
-                    ContentPageView(entity: "DisclaimerContent", title: L("Disclaimer"))
+                    ContentPageView(name: "disclaimer", title: L("Disclaimer"))
                 } label: {
                     SettingsRow(icon: "exclamationmark.shield.fill", color: .orange, title: L("Disclaimer"))
                 }
@@ -135,9 +144,6 @@ struct SettingsView: View {
             Section {
                 Link(destination: Config.website) {
                     SettingsRow(icon: "globe", color: .red, title: "p2000-apeldoorn.nl", chevron: true)
-                }
-                Link(destination: Config.facebook) {
-                    SettingsRow(icon: "f.square.fill", color: Color(hex: 0x1877F2), title: "Facebook", chevron: true)
                 }
                 Link(destination: Config.whatsapp) {
                     SettingsRow(icon: "message.fill", color: Color(hex: 0x25D366), title: L("WhatsApp-groep"), chevron: true)
@@ -357,12 +363,20 @@ struct FilterSettingsView: View {
             } header: {
                 Text(L("Filter op"))
             }
+            Section {
+                NavigationLink {
+                    RadiusSettingsView()
+                } label: {
+                    LabeledContent(L("Mijn buurt"), value: settings.radiusEnabled ? Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1)))) : L("Uit"))
+                }
+            }
             if settings.listFilterActive {
                 Section {
                     Button(L("Wis alle filters"), role: .destructive) {
                         settings.diensten = []
                         settings.plaatsen = []
                         settings.prioriteiten = []
+                        settings.radiusEnabled = false
                     }
                 }
             }
@@ -384,6 +398,9 @@ struct FilterSettingsView: View {
 struct NotificationSettingsView: View {
     @Environment(AppSettings.self) private var settings
     @State private var denied = false
+    @State private var testState: TestState = .idle
+
+    enum TestState { case idle, sending, sent, failed }
 
     var body: some View {
         @Bindable var settings = settings
@@ -403,11 +420,7 @@ struct NotificationSettingsView: View {
                     Text(L("Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › P2000 Apeldoorn."))
                         .foregroundStyle(.red)
                 } else {
-                    #if os(macOS)
-                    Text(L("Op de Mac krijg je een melding zolang de app open is (ook als het venster gesloten is)."))
-                    #else
                     Text(L("Je krijgt een pushmelding zodra er een nieuwe melding is die bij je keuzes past."))
-                    #endif
                 }
             }
 
@@ -431,6 +444,11 @@ struct NotificationSettingsView: View {
                     } label: {
                         LabeledContent(L("Prioriteit"), value: AppSettings.summary(settings.notifPrioriteiten) { $0 })
                     }
+                    NavigationLink {
+                        RadiusSettingsView()
+                    } label: {
+                        LabeledContent(L("Mijn buurt"), value: settings.radiusEnabled ? Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1)))) : L("Uit"))
+                    }
                 } header: {
                     Text(L("Waarvoor"))
                 }
@@ -450,6 +468,28 @@ struct NotificationSettingsView: View {
                     Text(L("Stille modus"))
                 } footer: {
                     Text(L("Zet de stille modus aan om in het ingestelde tijdsblok geen pushmeldingen te krijgen. Met 'Kritieke meldingen' komen A1- en P1-meldingen ook in de stille modus door."))
+                }
+
+                Section {
+                    Button {
+                        Task {
+                            testState = .sending
+                            testState = await PushManager.sendTest() ? .sent : .failed
+                        }
+                    } label: {
+                        HStack {
+                            SettingsRow(icon: "paperplane.fill", color: .blue, title: L("Stuur een testmelding"))
+                            if testState == .sending { ProgressView() }
+                            if testState == .sent { Image(systemName: "checkmark.circle.fill").foregroundStyle(.green) }
+                            if testState == .failed { Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(.orange) }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(testState == .sending)
+                } footer: {
+                    if testState == .failed {
+                        Text(L("De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw."))
+                    }
                 }
             }
         }

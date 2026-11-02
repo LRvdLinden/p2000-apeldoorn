@@ -20,8 +20,14 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
         authorization = manager.authorizationStatus
     }
 
+    /// Location is needed for "Huidige locatie" (distances) and for a radius around the current position.
+    var isNeeded: Bool {
+        let s = AppSettings.shared
+        return s.useLocation || (s.radiusEnabled && s.radiusMode == "huidig")
+    }
+
     func start() {
-        guard AppSettings.shared.useLocation else { return }
+        guard isNeeded else { return }
         if manager.authorizationStatus == .notDetermined {
             manager.requestWhenInUseAuthorization()
         } else {
@@ -52,7 +58,21 @@ final class LocationManager: NSObject, CLLocationManagerDelegate {
 
     nonisolated func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let last = locations.last
-        Task { @MainActor in self.location = last }
+        Task { @MainActor in
+            self.location = last
+            guard let last else { return }
+            // Keep the radius centre up to date (rounded to ~100 m); re-register for push when moved > 300 m.
+            let s = AppSettings.shared
+            let lat = (last.coordinate.latitude * 1000).rounded() / 1000
+            let lon = (last.coordinate.longitude * 1000).rounded() / 1000
+            let moved = s.currentLat == 0 ? Double.infinity
+                : AppSettings.distanceKm(s.currentLat, s.currentLon, lat, lon)
+            if moved > 0.3 {
+                s.currentLat = lat
+                s.currentLon = lon
+                if s.radiusEnabled && s.radiusMode == "huidig" { PushManager.syncDevice() }
+            }
+        }
     }
 
     nonisolated func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {}

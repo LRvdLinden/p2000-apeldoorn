@@ -118,7 +118,8 @@ struct PagerView: View {
 
     private func rows(_ items: [Melding]) -> some View {
         ForEach(items) { m in
-            MeldingRow(melding: m, distance: location.distance(to: m), bewaard: settings.bewaard.contains(m.guid))
+            MeldingRow(melding: m, distance: location.distance(to: m), bewaard: settings.bewaard.contains(m.guid),
+                       gelezen: settings.isRead(m))
                 .tag(m.guid)
                 .swipeActions(edge: .leading) {
                     Button {
@@ -275,6 +276,7 @@ struct ActiveFilterBar: View {
                 settings.diensten = []
                 settings.plaatsen = []
                 settings.prioriteiten = []
+                settings.radiusEnabled = false
             }
             .font(.callout.weight(.semibold))
         }
@@ -290,6 +292,7 @@ struct ActiveFilterBar: View {
         if !settings.diensten.isEmpty { parts.append(settings.diensten.compactMap { Dienst(rawValue: $0)?.label }.sorted().joined(separator: ", ")) }
         if !settings.plaatsen.isEmpty { parts.append(Lf("%lld plaatsen", settings.plaatsen.count)) }
         if !settings.prioriteiten.isEmpty { parts.append(settings.prioriteiten.sorted().joined(separator: ", ")) }
+        if settings.radiusActive { parts.append(Lf("binnen %@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1))))) }
         return parts.joined(separator: " · ")
     }
 }
@@ -300,6 +303,8 @@ struct MeldingRow: View {
     let melding: Melding
     var distance: Double?
     var bewaard = false
+    /// Opened before → shown greyed out (like the website).
+    var gelezen = false
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -313,7 +318,7 @@ struct MeldingRow: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     Spacer(minLength: 4)
-                    if melding.recordID.hasPrefix("live-") {
+                    if melding.isRecent {
                         Text(L("LIVE"))
                             .font(.system(size: 9, weight: .heavy))
                             .padding(.horizontal, 5).padding(.vertical, 1)
@@ -352,6 +357,9 @@ struct MeldingRow: View {
             }
         }
         .padding(.vertical, 4)
+        .saturation(gelezen ? 0 : 1)
+        .opacity(gelezen ? 0.5 : 1)
         .accessibilityElement(children: .combine)
+        .accessibilityValue(gelezen ? L("Gelezen") : "")
     }
 }

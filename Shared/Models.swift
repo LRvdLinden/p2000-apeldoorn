@@ -143,6 +143,9 @@ struct Melding: Identifiable, Hashable, Codable {
         return cat
     }
 
+    /// Less than 10 minutes old ("LIVE" badge).
+    var isRecent: Bool { Date.now.timeIntervalSince(datum) < 10 * 60 }
+
     var isUrgent: Bool {
         guard let p = prioriteit?.uppercased() else { return false }
         return ["A0", "A1", "P1"].contains(p)
@@ -262,7 +265,7 @@ struct MaandStatistiek: Codable, Hashable {
     }
 }
 
-/// HTML content pages managed in the Base44 admin (privacy, terms, disclaimer).
+/// HTML text pages served by the API (privacy, terms, disclaimer).
 struct ContentPage: Codable, Hashable {
     var title: String?
     var content: String?

@@ -61,7 +61,10 @@ struct MeldingDetailView: View {
             }
         }
         #endif
-        .onAppear { store.registerView(melding) }
+        .onAppear {
+            store.registerView(melding)
+            settings.markRead(melding)
+        }
         .task(id: melding.guid) { await loadLookAround() }
         .task(id: melding.guid) { await loadWeather() }
     }
@@ -462,7 +465,7 @@ struct MeldingDetailView: View {
         }
     }
 
-    /// WeatherKit (historical hourly at the alert's time and place); falls back to the website's stored weather.
+    /// WeatherKit (historical hourly at the alert's time and place); falls back to weather data in the alert, if any.
     private func loadWeather() async {
         if let w = melding.weather, let t = w.temp {
             meteo = Meteo(temperature: t, feelsLike: nil, clouds: w.clouds, windDirection: w.windDirection,
@@ -484,7 +487,7 @@ struct MeldingDetailView: View {
                           fromWeatherKit: true)
             attribution = try? await WeatherService.shared.attribution
         } catch {
-            // Keep the Base44 weather (if any).
+            // Keep the weather that came with the alert (if any).
         }
     }
 
@@ -524,11 +527,6 @@ struct MeldingDetailView: View {
                         .background(Color.innerCard, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
                 }
                 .accessibilityLabel(L("WhatsApp-groep"))
-                Link(destination: Config.facebook) {
-                    Text("f").font(.system(size: 20, weight: .bold)).frame(width: 46, height: 46)
-                        .background(Color.innerCard, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-                .accessibilityLabel("Facebook")
             }
             .foregroundStyle(.primary)
             HStack(spacing: 4) {

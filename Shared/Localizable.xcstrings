@@ -52,6 +52,23 @@
         }
       }
     },
+    "%@ km": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km"
+          }
+        }
+      }
+    },
     "%@ om %@": {
       "extractionState": "manual",
       "localizations": {
@@ -341,6 +358,23 @@
         }
       }
     },
+    "Afstand tonen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show distance"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afstand tonen"
+          }
+        }
+      }
+    },
     "Al je apparaten in sync": {
       "extractionState": "manual",
       "localizations": {
@@ -405,6 +439,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle meldingen"
+          }
+        }
+      }
+    },
+    "Alleen meldingen in mijn buurt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only alerts in my area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen meldingen in mijn buurt"
           }
         }
       }
@@ -834,6 +885,23 @@
         }
       }
     },
+    "De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The test notification couldn't be sent. Check your internet connection and try again later."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw."
+          }
+        }
+      }
+    },
     "De wind waait vanuit het %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1157,6 +1225,23 @@
         }
       }
     },
+    "Gebruik mijn huidige locatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Use my current location"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebruik mijn huidige locatie"
+          }
+        }
+      }
+    },
     "Gebruiksvoorwaarden": {
       "extractionState": "manual",
       "localizations": {
@@ -1204,6 +1289,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gegevens zijn op basis van incident tijdstip en locatie"
+          }
+        }
+      }
+    },
+    "Geldt voor de lijst, de kaart, de widgets én je pushmeldingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies to the list, the map, the widgets and your push notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldt voor de lijst, de kaart, de widgets én je pushmeldingen."
+          }
+        }
+      }
+    },
+    "Gelezen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gelezen"
           }
         }
       }
@@ -1272,6 +1391,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Het aantal meldingen van vandaag per hulpdienst."
+          }
+        }
+      }
+    },
+    "Het middelpunt schuift mee als je de app opent op een andere plek. Je locatie wordt afgerond op zo'n 100 meter.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The centre moves along when you open the app somewhere else. Your location is rounded to about 100 metres."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het middelpunt schuift mee als je de app opent op een andere plek. Je locatie wordt afgerond op zo'n 100 meter."
           }
         }
       }
@@ -1408,6 +1544,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je krijgt een pushmelding zodra er een nieuwe melding is die bij je keuzes past."
+          }
+        }
+      }
+    },
+    "Je locatie is nog niet bekend. Sta locatietoegang toe voor P2000 Apeldoorn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your location isn't known yet. Allow location access for P2000 Apeldoorn."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor P2000 Apeldoorn."
           }
         }
       }
@@ -1888,6 +2041,74 @@
         }
       }
     },
+    "Met 'Mijn buurt' zie je alleen meldingen binnen een straal rond je locatie of een vast punt, ook voor pushmeldingen. Je locatie blijft op je apparaat en wordt alleen afgerond gedeeld voor de radius van je pushmeldingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With 'My area' you only see alerts within a radius of your location or a fixed point, push notifications included. Your location stays on your device and is only shared rounded, for the radius of your push notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met 'Mijn buurt' zie je alleen meldingen binnen een straal rond je locatie of een vast punt, ook voor pushmeldingen. Je locatie blijft op je apparaat en wordt alleen afgerond gedeeld voor de radius van je pushmeldingen."
+          }
+        }
+      }
+    },
+    "Middelpunt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Centre"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middelpunt"
+          }
+        }
+      }
+    },
+    "Mijn buurt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn buurt"
+          }
+        }
+      }
+    },
+    "Mijn locatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "My location"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mijn locatie"
+          }
+        }
+      }
+    },
     "Mis geen melding": {
       "extractionState": "manual",
       "localizations": {
@@ -1952,6 +2173,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niets aan = alle disciplines."
+          }
+        }
+      }
+    },
+    "Niets gevonden.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing found."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets gevonden."
           }
         }
       }
@@ -2173,23 +2411,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oosten"
-          }
-        }
-      }
-    },
-    "Op de Mac krijg je een melding zolang de app open is (ook als het venster gesloten is).": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "On the Mac you get notifications while the app is running (also when its window is closed)."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Op de Mac krijg je een melding zolang de app open is (ook als het venster gesloten is)."
           }
         }
       }
@@ -2551,6 +2772,23 @@
         }
       }
     },
+    "Radius": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radius"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radius"
+          }
+        }
+      }
+    },
     "Regio": {
       "extractionState": "manual",
       "localizations": {
@@ -2772,6 +3010,23 @@
         }
       }
     },
+    "Stuur een testmelding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send a test notification"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stuur een testmelding"
+          }
+        }
+      }
+    },
     "Systeem": {
       "extractionState": "manual",
       "localizations": {
@@ -2840,6 +3095,23 @@
         }
       }
     },
+    "Tik op de kaart om het middelpunt te kiezen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the map to choose the centre."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op de kaart om het middelpunt te kiezen."
+          }
+        }
+      }
+    },
     "Tip: niets geselecteerd = alles tonen": {
       "extractionState": "manual",
       "localizations": {
@@ -2870,23 +3142,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toont de laatste P2000-meldingen in gem. Apeldoorn."
-          }
-        }
-      }
-    },
-    "Toont hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Shows how far an alert is from you. Your location stays on your device."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toont hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat."
           }
         }
       }
@@ -3027,6 +3282,23 @@
         }
       }
     },
+    "Vanaf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf"
+          }
+        }
+      }
+    },
     "Vandaag": {
       "extractionState": "manual",
       "localizations": {
@@ -3078,6 +3350,23 @@
         }
       }
     },
+    "Vast punt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed point"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vast punt"
+          }
+        }
+      }
+    },
     "Veeg een melding naar rechts of open hem en tik op het bladwijzer-icoon.": {
       "extractionState": "manual",
       "localizations": {
@@ -3091,6 +3380,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Veeg een melding naar rechts of open hem en tik op het bladwijzer-icoon."
+          }
+        }
+      }
+    },
+    "Verberg bekeken meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide viewed alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verberg bekeken meldingen"
           }
         }
       }
@@ -3554,6 +3860,23 @@
         }
       }
     },
+    "Zoek een adres of plaats": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search an address or place"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek een adres of plaats"
+          }
+        }
+      }
+    },
     "Zoek op plaats, straat of capcode": {
       "extractionState": "manual",
       "localizations": {
@@ -3669,6 +3992,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "bijgewerkt %@"
+          }
+        }
+      }
+    },
+    "binnen %@ km": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "within %@ km"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "binnen %@ km"
           }
         }
       }

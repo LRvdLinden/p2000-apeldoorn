@@ -7,7 +7,7 @@
 		<key>NSExtensionPointIdentifier</key>
 		<string>com.apple.widgetkit-extension</string>
 	</dict>
-	<key>P2000PageAPIURL</key>
-	<string>$(P2000_PAGE_API_URL)</string>
+	<key>P2000APIURL</key>
+	<string>$(P2000_API_URL)</string>
 </dict>
 </plist>

@@ -13,8 +13,8 @@
 			</array>
 		</dict>
 	</array>
-	<key>P2000PageAPIURL</key>
-	<string>$(P2000_PAGE_API_URL)</string>
+	<key>P2000APIURL</key>
+	<string>$(P2000_API_URL)</string>
 	<key>WKApplication</key>
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>

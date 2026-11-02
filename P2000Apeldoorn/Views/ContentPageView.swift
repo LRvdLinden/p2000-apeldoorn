@@ -1,9 +1,9 @@
 import SwiftUI
 import WebKit
 
-/// Privacy statement, terms of use and disclaimer – managed in the Base44 admin, same text as the website.
+/// Privacy statement, terms of use and disclaimer – served by the app's own API (server/content).
 struct ContentPageView: View {
-    let entity: String
+    let name: String
     let title: String
 
     @State private var page: ContentPage?
@@ -23,7 +23,7 @@ struct ContentPageView: View {
         .navigationTitle(title)
         .task {
             do {
-                page = try await P2000API.shared.contentPage(entity)
+                page = try await P2000API.shared.contentPage(name)
                 if page == nil { failed = true }
             } catch {
                 failed = true

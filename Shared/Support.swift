@@ -19,17 +19,21 @@ func Lf(_ key: String, _ args: CVarArg...) -> String {
 }
 
 enum Config {
-    static let appID = "69b6661a41c2b1b46f95682e"
-    static let apiBase = URL(string: "https://p2000-apeldoorn.nl/api/apps/\(appID)")!
+    /// Own backend (server/ in this repo, runs on Railway). The app does not use the website.
+    static let apiBase: URL = {
+        if let raw = Bundle.main.object(forInfoDictionaryKey: "P2000APIURL") as? String,
+           raw.hasPrefix("http"), !raw.contains("$("), let url = URL(string: raw) {
+            return url
+        }
+        return URL(string: "https://api.p2000-apeldoorn.nl")!
+    }()
     static let website = URL(string: "https://p2000-apeldoorn.nl")!
-    static let facebook = URL(string: "https://www.facebook.com/p2000apeldoorn")!
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!
     static let pixelForges = URL(string: "https://pixelforges.nl")!
     static let source = URL(string: "https://p2000.page")!
     static let feedbackMail = URL(string: "mailto:hallo@pixelforges.nl?subject=Feedback%20P2000%20Apeldoorn%20app")!
     /// Fill in once the app has an App Store ID; until then "Schrijf een recensie" uses the in-app prompt.
     static let appStoreID = ""
-    static let oneSignalAppID = "4b1d5c83-99df-45c3-b24d-f11d4f89f662"
 
     /// Language the UI is shown in (only languages the app ships).
     static var uiLanguage: String { Bundle.main.preferredLocalizations.first ?? "nl" }
@@ -60,7 +64,7 @@ enum Fmt {
 
     static func parseISO(_ s: String) -> Date? {
         if let d = isoFrac.date(from: s) ?? iso.date(from: s) { return d }
-        // Base44 also stores dates without timezone ("2026-11-02T10:55:16.525000") – these are UTC.
+        // Some sources store dates without timezone ("2026-11-02T10:55:16.525000") – these are UTC.
         let trimmed = String(s.prefix(19))
         return iso.date(from: trimmed + "Z")
     }

@@ -97,22 +97,36 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         MainActor.assumeIsolated {
             PushManager.openMelding = { Router.shared.open(guid: $0) }
-            PushManager.start(launchOptions: launchOptions)
+            PushManager.start()
             ReviewManager.registerLaunch()
         }
         return true
+    }
+
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        MainActor.assumeIsolated { PushManager.didRegister(deviceToken: deviceToken) }
+    }
+
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed:", error.localizedDescription)
     }
 }
 #elseif os(macOS)
 final class MacAppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         MainActor.assumeIsolated {
-            UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
             PushManager.openMelding = { Router.shared.open(guid: $0) }
             PushManager.start()
             ReviewManager.registerLaunch()
-            MeldingStore.shared.onNew = { PushManager.postLocal(for: $0) }
         }
+    }
+
+    func application(_ application: NSApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        MainActor.assumeIsolated { PushManager.didRegister(deviceToken: deviceToken) }
+    }
+
+    func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        print("APNs registration failed:", error.localizedDescription)
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }

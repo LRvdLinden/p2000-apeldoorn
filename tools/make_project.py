@@ -200,7 +200,6 @@ pbx = f"""// !$*UTF8*$!
 /* Begin PBXBuildFile section */
 \t\t{I['bfEmbedWidget']} /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {I['widgetProduct']} /* P2000 Apeldoorn Widgets.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
 \t\t{I['bfEmbedWatchWidget']} /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {I['watchWidgetProduct']} /* P2000 Apeldoorn Watch Widgets.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
-\t\t{I['bfOneSignal']} /* OneSignalFramework in Frameworks */ = {{isa = PBXBuildFile; platformFilters = (ios, ); productRef = {I['prodOneSignal']} /* OneSignalFramework */; }};
 \t\t{I['bfEmbedWatch']} /* P2000 Apeldoorn Watch.app in Embed Watch Content */ = {{isa = PBXBuildFile; fileRef = {I['watchProduct']} /* P2000 Apeldoorn Watch.app */; platformFilters = (ios, ); settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
 /* End PBXBuildFile section */
 
@@ -297,7 +296,6 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tisa = PBXFrameworksBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
-\t\t\t\t{I['bfOneSignal']} /* OneSignalFramework in Frameworks */,
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
@@ -412,7 +410,6 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\tname = "P2000 Apeldoorn";
 \t\t\tpackageProductDependencies = (
-\t\t\t\t{I['prodOneSignal']} /* OneSignalFramework */,
 \t\t\t);
 \t\t\tproductName = "P2000 Apeldoorn";
 \t\t\tproductReference = {I['appProduct']} /* P2000 Apeldoorn.app */;
@@ -477,9 +474,6 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\tmainGroup = {I['main']};
 \t\t\tminimizedProjectReferenceProxies = 1;
-\t\t\tpackageReferences = (
-\t\t\t\t{I['pkgOneSignal']} /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */,
-\t\t\t);
 \t\t\tpreferredProjectObjectVersion = 77;
 \t\t\tproductRefGroup = {I['products']} /* Products */;
 \t\t\tprojectDirPath = "";
@@ -625,24 +619,6 @@ pbx = f"""// !$*UTF8*$!
 \t\t}};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-\t\t{I['pkgOneSignal']} /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */ = {{
-\t\t\tisa = XCRemoteSwiftPackageReference;
-\t\t\trepositoryURL = "https://github.com/OneSignal/OneSignal-XCFramework";
-\t\t\trequirement = {{
-\t\t\t\tkind = upToNextMajorVersion;
-\t\t\t\tminimumVersion = 5.2.0;
-\t\t\t}};
-\t\t}};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-\t\t{I['prodOneSignal']} /* OneSignalFramework */ = {{
-\t\t\tisa = XCSwiftPackageProductDependency;
-\t\t\tpackage = {I['pkgOneSignal']} /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */;
-\t\t\tproductName = OneSignalFramework;
-\t\t}};
-/* End XCSwiftPackageProductDependency section */
 \t}};
 \trootObject = {I['project']} /* Project object */;
 }}

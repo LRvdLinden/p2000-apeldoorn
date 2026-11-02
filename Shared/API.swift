@@ -1,7 +1,7 @@
 import Foundation
 
-/// Read-only client for the public Base44 API behind p2000-apeldoorn.nl.
-/// The website reads exactly the same endpoints, so app and site always show the same alerts.
+/// Client for the app's own backend (server/ in this repo). The app works standalone from the website:
+/// alerts, statistics, view counts, texts and push registration all go through this API.
 struct P2000API: Sendable {
     static let shared = P2000API()
 
@@ -9,7 +9,7 @@ struct P2000API: Sendable {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 20
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        config.httpAdditionalHeaders = ["Accept": "application/json", "X-App-Client": "P2000Apeldoorn-Apple"]
+        config.httpAdditionalHeaders = ["Accept": "application/json", "X-App-Client": "P2000Apeldoorn-Apple/\(Config.version)"]
         return URLSession(configuration: config)
     }()
 
@@ -22,15 +22,9 @@ struct P2000API: Sendable {
         }
     }
 
-    private func entityURL(_ entity: String, query: [String: Any]? = nil, sort: String? = nil, limit: Int? = nil) -> URL {
-        var comps = URLComponents(url: Config.apiBase.appendingPathComponent("entities/\(entity)"), resolvingAgainstBaseURL: false)!
-        var items: [URLQueryItem] = []
-        if let query, let data = try? JSONSerialization.data(withJSONObject: query), let json = String(data: data, encoding: .utf8) {
-            items.append(URLQueryItem(name: "q", value: json))
-        }
-        if let sort { items.append(URLQueryItem(name: "sort", value: sort)) }
-        if let limit { items.append(URLQueryItem(name: "limit", value: String(limit))) }
-        comps.queryItems = items.isEmpty ? nil : items
+    private func url(_ path: String, query: [String: String] = [:]) -> URL {
+        var comps = URLComponents(url: Config.apiBase.appendingPathComponent(path), resolvingAgainstBaseURL: false)!
+        if !query.isEmpty { comps.queryItems = query.map { URLQueryItem(name: $0.key, value: $0.value) } }
         return comps.url!
     }
 
@@ -42,35 +36,64 @@ struct P2000API: Sendable {
         return try JSONDecoder().decode(T.self, from: data)
     }
 
+    @discardableResult
+    private func send(_ method: String, _ url: URL, json: [String: Any]? = nil) async throws -> Data {
+        var request = URLRequest(url: url)
+        request.httpMethod = method
+        if let json {
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONSerialization.data(withJSONObject: json)
+        }
+        let (data, response) = try await session.data(for: request)
+        if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            throw APIError.badStatus(http.statusCode)
+        }
+        return data
+    }
+
+    // MARK: - Alerts
+
     /// Latest alerts, newest first.
     func meldingen(limit: Int = 300) async throws -> [Melding] {
-        try await get(entityURL("P2000Melding", sort: "-datum_tijd", limit: limit), as: [Melding].self)
+        try await get(url("v1/meldingen", query: ["limit": String(limit)]), as: [Melding].self)
     }
 
     func melding(guid: String) async throws -> Melding? {
-        try await get(entityURL("P2000Melding", query: ["guid": guid], sort: "-datum_tijd", limit: 1), as: [Melding].self).first
+        try? await get(url("v1/meldingen/\(guid)"), as: Melding.self)
     }
+
+    /// View counter ("1x", "4x" in the list). Best effort.
+    func incrementViews(guid: String) async {
+        _ = try? await send("POST", url("v1/meldingen/\(guid)/view"))
+    }
+
+    // MARK: - Statistics & texts
 
     func maandStatistiek(key: String) async throws -> MaandStatistiek? {
-        try await get(entityURL("MaandStatistiek", query: ["maand_key": key], limit: 1), as: [MaandStatistiek].self).first
+        try await get(url("v1/stats/\(key)"), as: MaandStatistiek.self)
     }
 
-    /// PrivacyVerklaring, TermsOfUse or DisclaimerContent.
-    func contentPage(_ entity: String) async throws -> ContentPage? {
-        try await get(entityURL(entity, sort: "-created_date", limit: 1), as: [ContentPage].self).first
+    /// "privacy", "terms" or "disclaimer".
+    func contentPage(_ name: String) async throws -> ContentPage? {
+        try await get(url("v1/content/\(name)"), as: ContentPage?.self)
     }
 
     func changelog() async throws -> [ChangelogEntry] {
-        try await get(entityURL("Changelog", sort: "-release_date", limit: 50), as: [ChangelogEntry].self)
+        try await get(url("v1/changelog"), as: [ChangelogEntry].self)
     }
 
-    /// Same view counter the website uses ("1x", "4x" in the list). Best effort.
-    func incrementViews(guid: String) async {
-        var request = URLRequest(url: Config.apiBase.appendingPathComponent("functions/incrementViews"))
-        request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: ["meldingId": guid])
-        _ = try? await session.data(for: request)
+    // MARK: - Push devices
+
+    func registerDevice(_ body: [String: Any]) async throws {
+        try await send("POST", url("v1/devices"), json: body)
+    }
+
+    func unregisterDevice(token: String) async throws {
+        try await send("DELETE", url("v1/devices/\(token)"))
+    }
+
+    func sendTestPush(token: String) async throws {
+        try await send("POST", url("v1/devices/\(token)/test"))
     }
 
     static func monthKey(_ date: Date) -> String {

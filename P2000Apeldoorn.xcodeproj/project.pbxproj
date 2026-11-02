@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		FD2336DF84AEB3E008BA961D /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		054146E4C18F80A7C31E81FD /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		BB663FFF0E664CCEBC73D5EE /* OneSignalFramework in Frameworks */ = {isa = PBXBuildFile; platformFilters = (ios, ); productRef = 429EF653C1ACBAFFD48CF265 /* OneSignalFramework */; };
 		9B9287EBA647D0439E489C80 /* P2000 Apeldoorn Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -118,7 +117,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				BB663FFF0E664CCEBC73D5EE /* OneSignalFramework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -245,7 +243,6 @@
 			);
 			name = "P2000 Apeldoorn";
 			packageProductDependencies = (
-				429EF653C1ACBAFFD48CF265 /* OneSignalFramework */,
 			);
 			productName = "P2000 Apeldoorn";
 			productReference = 81918909E83595C8F4212CCC /* P2000 Apeldoorn.app */;
@@ -310,9 +307,6 @@
 			);
 			mainGroup = FAD58DE7366495DB4650CFEF;
 			minimizedProjectReferenceProxies = 1;
-			packageReferences = (
-				883E430C327C7894A292D1B2 /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */,
-			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 86024CAD1E83101D97359D73 /* Products */;
 			projectDirPath = "";
@@ -756,24 +750,6 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		883E430C327C7894A292D1B2 /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/OneSignal/OneSignal-XCFramework";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 5.2.0;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		429EF653C1ACBAFFD48CF265 /* OneSignalFramework */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 883E430C327C7894A292D1B2 /* XCRemoteSwiftPackageReference "OneSignal-XCFramework" */;
-			productName = OneSignalFramework;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
 }
