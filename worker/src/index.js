@@ -318,8 +318,8 @@ async function cron(env, event) {
     await kvSet(env, "backfill_error", String(e.message || e));
     console.error("[backfill]", e.message || e);
   }
-  // Three reads per minute: new alerts show up (and are pushed) within ~20 seconds.
-  const runs = Number(env.POLLS_PER_RUN || 3);
+  // Five reads per minute: new alerts show up (and are pushed) within ~12 seconds.
+  const runs = Number(env.POLLS_PER_RUN || 5);
   for (let i = 0; i < runs; i++) {
     await poll(env, budget);
     await drain(env, budget);
