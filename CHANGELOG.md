@@ -1,11 +1,11 @@
 # Changelog
 
-## 1.0.0 (build 11) – 2 november 2026
+## 1.0.1 (build 11) – 2 november 2026
 - Nieuw: alarmgeluid als de app open is (iPhone, iPad, Mac en Apple TV), standaard aan. In Instellingen zet je het uit of kies je "Alleen spoed (A1, P1)", met een knop om het geluid te testen.
   - Eigen pagertonen: een korte toon bij een gewone melding, een langere bij spoed.
   - Volgt je filters en de stille modus; op iPhone ook de stilschakelaar. Komt er tegelijk een pushmelding binnen, dan klinkt het geluid maar één keer.
 
-## 1.0.0 (build 10) – 2 november 2026
+## 1.0.1 (build 10) – 2 november 2026
 - Kaart: meldingen zonder straatnaam (vaak ambulance, alleen "Apeldoorn") staan niet meer als grote ring van pins op het centrum. Ze worden per plaats samengevoegd tot één marker met het aantal; tik erop voor de lijst.
 - Apple TV: dezelfde plaatsmarkers; de rondleiding gaat per plaats maar één keer naar het centrum en zoomt daar verder uit.
 - Website: live pager-kaart en de nieuwe meldkamer (/meldkamer/) gebruiken dezelfde plaatsmarkers.
