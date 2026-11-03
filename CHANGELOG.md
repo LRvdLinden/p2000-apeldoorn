@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.0.1 (build 12) – 3 november 2026
+- METEO-gegevens: de app haalt het weer nu via de eigen API op, net als de website en Apple TV. WeatherKit in de app is alleen nog reserve. Daardoor staat het weer weer bij elke melding en is het overal hetzelfde.
+
 ## 1.0.1 (build 11) – 2 november 2026
 - Nieuw: alarmgeluid als de app open is (iPhone, iPad, Mac en Apple TV), standaard aan. In Instellingen zet je het uit of kies je "Alleen spoed (A1, P1)", met een knop om het geluid te testen.
   - Eigen pagertonen: een korte toon bij een gewone melding, een langere bij spoed.

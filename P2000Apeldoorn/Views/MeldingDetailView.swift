@@ -409,7 +409,20 @@ struct MeldingDetailView: View {
                 .foregroundStyle(.secondary)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 10)
-            if w.fromWeatherKit, let attribution { weatherAttribution(attribution) }
+            if w.fromWeatherKit {
+                if let attribution {
+                    weatherAttribution(attribution)
+                } else {
+                    // Attribution could not be loaded from WeatherKit in the app: show the required mark and link anyway.
+                    HStack(spacing: 8) {
+                        Text(" Weather").font(.caption2.weight(.semibold))
+                        Link(L("Overige gegevensbronnen"), destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
+                            .font(.caption2)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 4)
+                }
+            }
         }
         .detailCard()
     }
@@ -448,6 +461,27 @@ struct MeldingDetailView: View {
         .padding(.top, 4)
     }
 
+    /// SF Symbol for a WeatherKit condition code from the API.
+    static func symbol(for condition: String?) -> String {
+        switch condition ?? "" {
+        case "Clear", "MostlyClear", "Hot": return "sun.max.fill"
+        case "PartlyCloudy": return "cloud.sun.fill"
+        case "MostlyCloudy", "Cloudy": return "cloud.fill"
+        case "Foggy", "Haze", "Smoky": return "cloud.fog.fill"
+        case "Breezy", "Windy": return "wind"
+        case "Drizzle", "FreezingDrizzle": return "cloud.drizzle.fill"
+        case "Rain", "FreezingRain": return "cloud.rain.fill"
+        case "HeavyRain": return "cloud.heavyrain.fill"
+        case "SunShowers": return "cloud.sun.rain.fill"
+        case "ScatteredThunderstorms", "IsolatedThunderstorms", "Thunderstorms", "StrongStorms": return "cloud.bolt.rain.fill"
+        case "Flurries", "Snow", "HeavySnow", "BlowingSnow": return "cloud.snow.fill"
+        case "Sleet", "MixedRainAndSnow", "WintryMix": return "cloud.sleet.fill"
+        case "Hail": return "cloud.hail.fill"
+        case "Frigid": return "thermometer.snowflake"
+        default: return "cloud.fill"
+        }
+    }
+
     static func compass(_ degrees: Double) -> String {
         let d = (degrees.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
         switch d {
@@ -468,6 +502,20 @@ struct MeldingDetailView: View {
             meteo = Meteo(temperature: t, feelsLike: nil, clouds: w.clouds, windDirection: w.windDirection,
                           windSpeed: w.windSpeed, gust: nil)
         }
+        // 1. Our API (WeatherKit REST via the Worker): the same weather as the website and Apple TV.
+        if let w = await P2000API.shared.weather(guid: melding.guid), let t = w.temperature {
+            meteo = Meteo(temperature: t,
+                          feelsLike: w.apparent,
+                          clouds: w.cloudCover.map { $0 * 100 },
+                          windDirection: w.windDirection,
+                          windSpeed: w.windSpeed,
+                          gust: w.windGust,
+                          symbol: Self.symbol(for: w.condition),
+                          fromWeatherKit: true)
+            attribution = try? await WeatherService.shared.attribution
+            return
+        }
+        // 2. Fallback: WeatherKit in the app itself.
         let place = CLLocation(latitude: coordinate.latitude, longitude: coordinate.longitude)
         let start = melding.datum.addingTimeInterval(-3600)
         let end = melding.datum.addingTimeInterval(3600)
