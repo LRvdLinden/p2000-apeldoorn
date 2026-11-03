@@ -193,8 +193,16 @@ export function appleMapsURL(m) {
 let mapkitReady = null;
 
 /** Loads MapKit JS once. Resolves to window.mapkit, or null when no token is available. */
+/** Apple Maps (MapKit JS) is a third party, so it only loads after "Accepteren" in the cookie notice. */
+export function mapsAllowed() {
+  try { const v = JSON.parse(localStorage.getItem("p2000_consent")); if (v?.choice) return v.choice === "all"; } catch {}
+  const m = document.cookie.match(/(?:^|; )p2000_consent=([^;]+)/);
+  try { return m ? JSON.parse(decodeURIComponent(m[1])).choice === "all" : false; } catch { return false; }
+}
+
 export function loadMapKit() {
   if (mapkitReady) return mapkitReady;
+  if (!mapsAllowed()) return (mapkitReady = Promise.resolve(null));
   mapkitReady = new Promise((resolve) => {
     const s = document.createElement("script");
     s.src = "https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js";

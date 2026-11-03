@@ -23,11 +23,12 @@
   article a { color: var(--red); }
 </style>
 <script src="../config.js"></script>
+<script src="../assets/js/consent.js" defer></script>
 </head>
 <body>
 <header>
   <a href="../"><span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>P2000 Apeldoorn</a>
-  <nav><a href="?p=privacy">Privacy</a><a href="?p=terms">Voorwaarden</a><a href="?p=disclaimer">Disclaimer</a><a href="../pager/">Live pager</a></nav>
+  <nav><a href="?p=privacy">Privacy</a><a href="?p=terms">Voorwaarden</a><a href="?p=disclaimer">Disclaimer</a><a href="?p=privacy#cookies" data-consent-open>Cookies</a><a href="../pager/">Live pager</a></nav>
 </header>
 <article id="doc"><p>Laden…</p></article>
 <script type="module">
@@ -56,6 +57,7 @@
   doc.innerHTML = data
     ? `<h1>${esc(data.title || names[name])}</h1>${data.updated_at || data.last_updated ? `<p class="meta">Laatst bijgewerkt: ${esc(new Date(data.updated_at || data.last_updated).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }))}</p>` : ""}${clean(data.content || data.html || "")}`
     : `<h1>${names[name]}</h1><p>Deze tekst kon niet worden geladen.</p>`;
+  if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();
 </script>
 </body>
 </html>

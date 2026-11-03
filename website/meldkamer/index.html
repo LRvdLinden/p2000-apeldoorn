@@ -22,9 +22,10 @@
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/meldkamer.css">
 <script src="../config.js"></script>
+<script src="../assets/js/consent.js" defer></script>
 <script type="module" src="../assets/js/meldkamer.js"></script>
 </head>
-<body class="mk">
+<body class="mk" data-maps>
 
 <noscript><p style="padding:20px">De meldkamerweergave van P2000 Apeldoorn toont live alle P2000-meldingen in de gemeente Apeldoorn op een kaart. Zet JavaScript aan om de meldingen te zien.</p></noscript>
 
@@ -40,6 +41,7 @@
       <button id="btnTour" class="ctl on" title="Kaart gaat zelf langs de meldingen"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z" fill="currentColor"/></svg><span>Rondleiding</span></button>
       <button id="btnSound" class="ctl" title="Geluid bij nieuwe meldingen"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4zm12 .5a4 4 0 0 1 0 5M18.5 7a7.5 7.5 0 0 1 0 10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Geluid uit</span></button>
       <button id="btnUrgent" class="ctl" title="Alarmscherm alleen bij spoed (A1/P1)"><svg viewBox="0 0 24 24"><path d="M12 3 2 20h20L12 3zm0 6v5m0 3v.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Alarm: alles</span></button>
+      <button class="ctl" data-consent-open title="Cookie-instellingen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.3A9 9 0 1 1 11.7 3a3 3 0 0 0 3.8 3.8 3 3 0 0 0 3.7 3.7 3 3 0 0 0 1.8 1.8z"/><circle cx="8.5" cy="10.5" r="1" fill="currentColor"/><circle cx="12" cy="15.5" r="1" fill="currentColor"/><circle cx="16" cy="14" r="1" fill="currentColor"/></svg><span>Cookies</span></button>
       <button id="btnFull" class="ctl" title="Volledig scherm"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg><span>Volledig scherm</span></button>
     </div>
   </section>

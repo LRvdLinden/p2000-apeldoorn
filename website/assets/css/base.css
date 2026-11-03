@@ -93,3 +93,33 @@ button { font: inherit; color: inherit; }
 .mk-cluster .mk-count { position: absolute; top: -7px; right: -11px; min-width: 21px; height: 21px; padding: 0 5px; border-radius: 999px; background: #000; color: #fff;
   border: 2px solid #fff; display: grid; place-items: center; font: 800 11px/1 var(--font); font-variant-numeric: tabular-nums; box-sizing: border-box; }
 .mk-cluster.is-focus { transform: scale(1.3) translateY(-4px); }
+
+/* ---------- cookie notice (same pattern as weekdot.com) ---------- */
+#p2000-consent { position: fixed; left: 16px; right: 16px; bottom: 16px; z-index: 9999; max-width: 560px; margin: 0 auto;
+  background: rgba(20, 20, 24, .92); backdrop-filter: saturate(160%) blur(16px); -webkit-backdrop-filter: saturate(160%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, .12); border-radius: 22px; padding: 20px 22px; color: #fff; font: 15px/1.5 var(--font);
+  box-shadow: 0 24px 60px -10px rgba(0, 0, 0, .55); animation: p2k-up .35s cubic-bezier(.2, .8, .2, 1); text-align: start; }
+#p2000-consent .t { font-family: var(--display); font-size: 18px; font-weight: 900; margin: 0 0 6px; color: #fff; }
+#p2000-consent p { margin: 0; color: #c9c9d1; font-size: 14px; }
+#p2000-consent a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
+#p2000-consent .b { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+#p2000-consent button { font: inherit; font-weight: 700; border: 0; border-radius: 12px; padding: 11px 18px; cursor: pointer; transition: filter .15s, background .15s; }
+#p2000-consent .y { background: var(--red); color: #fff; }
+#p2000-consent .y:hover { filter: brightness(1.08); }
+#p2000-consent .n { background: rgba(255, 255, 255, .12); color: #fff; }
+#p2000-consent .n:hover { background: rgba(255, 255, 255, .2); }
+#p2000-consent button:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+#p2000-consent:focus { outline: none; }
+@media (max-width: 420px) { #p2000-consent .b button { flex: 1 1 auto; } }
+@keyframes p2k-up { from { transform: translateY(16px); opacity: 0; } to { transform: none; opacity: 1; } }
+#p2000-cookie-btn { position: fixed; left: 16px; bottom: 16px; z-index: 9998; width: 44px; height: 44px; border-radius: 50%; padding: 0;
+  border: 1px solid rgba(255, 255, 255, .16); background: rgba(20, 20, 24, .88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  color: #fff; display: grid; place-items: center; cursor: pointer; box-shadow: 0 6px 20px rgba(0, 0, 0, .35); transition: transform .2s, background .2s; }
+#p2000-cookie-btn:hover { transform: scale(1.08); background: var(--red); }
+#p2000-cookie-btn:focus-visible { outline: 3px solid var(--red); outline-offset: 3px; }
+#p2000-cookie-btn svg { width: 24px; height: 24px; }
+@media (max-width: 560px) { #p2000-cookie-btn { width: 38px; height: 38px; left: 12px; bottom: 12px; opacity: .9; } #p2000-cookie-btn svg { width: 20px; height: 20px; } }
+/* Live pager on a phone: above the tab bar. Meldkamer: the button sits in the controls instead. */
+@media (max-width: 900px) { body.app #p2000-cookie-btn { bottom: calc(76px + env(safe-area-inset-bottom)); } body.app #p2000-consent { bottom: calc(80px + env(safe-area-inset-bottom)); } }
+body.mk #p2000-cookie-btn { display: none; }
+@media (prefers-reduced-motion: reduce) { #p2000-consent { animation: none; } #p2000-cookie-btn { transition: none; } }

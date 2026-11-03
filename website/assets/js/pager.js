@@ -2,7 +2,7 @@ import {
   trackVisit, fetchMeldingen, fetchMelding, fetchWeather, addView, DIENSTEN, SELECTABLE, PLAATSEN, dienstOf, asset, date,
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
-  loadMapKit, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
+  loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js";
 
 const $ = (id) => document.getElementById(id);
@@ -434,7 +434,13 @@ async function renderMap() {
   const { pins, clusters } = layout(state.list.filter((m) => date(m).getTime() >= cutoff && state.mapDiensten.has(m.dienst)));
   if (!bigMapReady) {
     bigMapReady = loadMapKit().then((mk) => {
-      if (!mk) { $("mapFallback").hidden = false; return null; }
+      if (!mk) {
+        $("mapFallbackText").innerHTML = mapsAllowed()
+          ? "De kaart van Apple Kaarten is nu niet bereikbaar. Je ziet de meldingen op een vereenvoudigde kaart."
+          : 'De kaart komt van Apple Kaarten en laadt pas als je dat toestaat. Je ziet nu een vereenvoudigde kaart. <button class="link-btn" data-consent-open>Kaart toestaan</button>';
+        $("mapFallback").hidden = false;
+        return null;
+      }
       bigMap = new mk.Map($("bigMap"), {
         center: new mk.Coordinate(52.2112, 5.9699),
         cameraDistance: 26000,

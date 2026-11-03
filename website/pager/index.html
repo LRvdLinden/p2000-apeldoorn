@@ -22,9 +22,10 @@
 <link rel="stylesheet" href="../assets/css/base.css">
 <link rel="stylesheet" href="../assets/css/pager.css">
 <script src="../config.js"></script>
+<script src="../assets/js/consent.js" defer></script>
 <script type="module" src="../assets/js/pager.js"></script>
 </head>
-<body class="app">
+<body class="app" data-maps>
 
 <header class="topbar">
   <a class="brand" href="../" aria-label="Naar de homepage">
@@ -85,7 +86,7 @@
     </div>
     <div class="cluster-panel" id="clusterPanel" hidden></div>
     <div class="map-fallback" id="mapFallback" hidden>
-      <p>De kaart is nog niet beschikbaar. Zodra de MapKit JS-sleutel actief is, zie je hier alle meldingen.</p>
+      <p id="mapFallbackText">De kaart is nog niet beschikbaar.</p>
     </div>
   </section>
 
