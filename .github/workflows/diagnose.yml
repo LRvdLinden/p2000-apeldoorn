@@ -1,0 +1,28 @@
+name: Diagnose bronnen
+on:
+  push:
+    branches: [a-alerts]
+    paths: [.github/workflows/diagnose.yml, tools/diagnose_push.mjs]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: worker } }
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
+      - run: |
+          set +e
+          ID=$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const i=s.indexOf("[");const d=JSON.parse(s.slice(i)).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")})')
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
+          q() { npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const i=s.indexOf("[");console.log(JSON.stringify(JSON.parse(s.slice(i))[0].results))})'; }
+          q "SELECT * FROM devices" > /tmp/devices.json
+          q "SELECT * FROM device_prefs" > /tmp/prefs.json
+          q "SELECT guid, dienst, prioriteit, stad, locatie, lat, lon, datum_tijd FROM meldingen ORDER BY datum_tijd DESC LIMIT 40" > /tmp/meldingen.json
+          echo "== outbox"; q "SELECT COUNT(*) n, MIN(created_at) oudste FROM outbox"
+          echo "== feed"; q "SELECT key, value, at FROM kv WHERE key IN ('feed_ok','feed_error','warnings_status')"
+          node ../tools/diagnose_push.mjs
