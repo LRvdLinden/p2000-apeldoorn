@@ -1,0 +1,8 @@
+P2000 Apeldoorn heet nu A-Alerts.
+• NL-Alert en Burgernet in de pager, KNMI-waarschuwingen als balk bovenaan, en alle waarschuwingen van twee weken terug te lezen
+• Kaartlagen die je zelf aan of uit zet, met live trauma- en politiehelikopters en kazernes
+• Nieuwe meldingpagina: gealarmeerde kazernes met geschatte aankomst, verloop van de inzet, route via Apple Kaarten of Google Maps, en delen
+• Tot vijf meldingsprofielen met eigen tijden; je huidige instellingen staan in profiel Standaard
+• Pushmeldingen met een kaartje en knoppen voor Bewaar en Apple Kaarten
+• Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
+• Apple TV: waarschuwingen, kaartlagen, helikopters en kazernes

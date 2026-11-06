@@ -1,0 +1,13 @@
+A-Alerts privacy policy (summary)
+
+A-Alerts (app and website a-alerts.nl) is made by PixelForges. We collect as little as possible.
+
+• No account is needed. Sign in with Apple is optional; your name and email stay in your own iCloud and are not sent to us.
+• Notifications: when you turn them on, your device's push token and your notification settings (places, services, priorities, profiles, quiet hours) are stored on our server, only to send you alerts. Turning notifications off deletes them.
+• My area: when you use a radius for notifications, the centre point is stored rounded to about 100 m. Distances in the app are calculated on your device.
+• Statistics: the app sends an anonymous install count with the app version, without personal data.
+• No ads, no tracking, no analytics or advertising SDKs.
+• Data is processed by Cloudflare (our server) and Apple (push notifications, WeatherKit, Maps).
+• Contact: hallo@pixelforges.nl
+
+Full policy (Dutch): https://a-alerts.nl/privacy/

@@ -1,0 +1,1 @@
+fire,ambulance,police,lifeliner,nl-alert,burgernet,knmi,112,emergency,scanner,pager,netherlands

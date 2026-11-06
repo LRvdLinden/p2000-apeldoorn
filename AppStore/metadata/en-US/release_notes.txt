@@ -1,0 +1,8 @@
+P2000 Apeldoorn is now A-Alerts.
+• NL-Alert and Burgernet in the pager, KNMI warnings as a bar at the top, and all warnings of the last two weeks
+• Map layers you switch on or off, with live trauma and police helicopters and stations
+• New alert page: alerted stations with estimated arrival, incident timeline, route via Apple Maps or Google Maps, and sharing
+• Up to five notification profiles with their own times; your current settings are in the profile Standaard
+• Notifications with a small map and buttons for Save and Apple Maps
+• Area extended to 26 towns and hamlets, including Teuge
+• Apple TV: warnings, map layers, helicopters and stations

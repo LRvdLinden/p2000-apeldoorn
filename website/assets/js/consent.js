@@ -41,7 +41,7 @@
     d.id = "p2000-consent"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "false");
     d.setAttribute("aria-labelledby", "p2000-consent-t"); d.setAttribute("aria-describedby", "p2000-consent-p"); d.tabIndex = -1;
     d.innerHTML = '<div class="t" id="p2000-consent-t">' + T.title + "</div>" +
-      '<p id="p2000-consent-p">' + T.text + ' <a href="' + root + 'info/?p=cookies">' + T.more + "</a></p>" +
+      '<p id="p2000-consent-p">' + T.text + ' <a href="' + root + 'cookies/">' + T.more + "</a></p>" +
       '<div class="b"><button type="button" class="y">' + T.accept + '</button><button type="button" class="n">' + T.necessary + "</button></div>";
     function close(choice) {
       var before = read();

@@ -45,9 +45,9 @@ P2000 Apeldoorn heet nu A-Alerts.
 - Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
 
 URL's
-Ondersteunings-URL: https://a-alerts.nl/info/?p=disclaimer
+Ondersteunings-URL: https://a-alerts.nl/#vragen
 Marketing-URL: https://a-alerts.nl
-Privacybeleid-URL: https://a-alerts.nl/info/?p=privacy
+Privacybeleid-URL: https://a-alerts.nl/privacy/
 Copyright: © 2026 A-Alerts · PixelForges
 
 Notities voor App Review

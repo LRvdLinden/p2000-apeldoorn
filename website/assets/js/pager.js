@@ -3,11 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=34";
+} from "./core.js?v=35";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-} from "./aalerts.js?v=34";
+} from "./aalerts.js?v=35";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -348,7 +348,7 @@ function closeDetail(push = true) {
   shell.classList.remove("has-detail");
   $("detail").innerHTML = "";
   if (detailMap) { try { detailMap.destroy(); } catch {} detailMap = null; }
-  document.title = "Live pager – A-Alerts";
+  document.title = "Live P2000-meldingen Apeldoorn en kaart | A-Alerts";
   setMeta("Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.", "");
   if (push) history.pushState({}, "", location.pathname + location.hash);
   renderList();
@@ -895,7 +895,7 @@ async function refresh() {
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && !state.selected) document.title = "Live pager – A-Alerts";
+  if (!document.hidden && !state.selected) document.title = "Live P2000-meldingen Apeldoorn en kaart | A-Alerts";
   if (!document.hidden) refresh();
 });
 

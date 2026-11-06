@@ -1,0 +1,1 @@
+A-Alerts on Apple TV does not collect personal data. The app fetches public alerts and warnings from the A-Alerts server and only sends an anonymous install count with the app version. No account, no ads and no tracking. Full privacy policy: https://a-alerts.nl/privacy/

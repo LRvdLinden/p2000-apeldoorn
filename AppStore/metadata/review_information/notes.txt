@@ -1,0 +1,32 @@
+A-Alerts is the new name of P2000 Apeldoorn (same app, same bundle ID nl.lrvdlinden.p2000apeldoorn). No account is required; every feature works without signing in. Sign in with Apple is optional and only syncs settings via iCloud.
+
+WHAT THE APP DOES
+It shows public P2000 alerts (the open pager network of the Dutch emergency services) for the municipality of Apeldoorn and Teuge in the Netherlands, together with public warnings from NL-Alert, Burgernet and KNMI (Dutch weather service). Our own server (a Cloudflare Worker) collects and filters the data; the app only talks to that server.
+
+HOW TO TEST
+1. Open the app and go through the short welcome screens (Next, Start). Allowing notifications or location is optional.
+2. Pager tab: the alerts of the last 24 hours appear right away, with NL-Alert and Burgernet warnings between them when there are any. Tap an alert for its detail page (map, Look Around, alerted stations, timeline, weather).
+3. On the detail page, the route button opens a sheet with Apple Maps and Google Maps; the share button shares a link to a-alerts.nl.
+4. Map tab: the layers button (top right) switches layers on or off, including live helicopters and stations.
+5. Statistics tab: today versus yesterday, plus a warnings card.
+6. Settings > Notifications > Profiles: up to five notification profiles. Settings > Notifications > Send a test notification makes the server send a test push right away.
+7. Settings > Warnings > All warnings: NL-Alert, Burgernet and KNMI of the last two weeks.
+8. Apple Watch, Mac and Apple TV show the same data; Apple TV has a control-room view for a large screen.
+
+REGION / DATA NOTES
+The content is limited to one Dutch municipality. Alerts arrive several times per hour; NL-Alert, Burgernet and KNMI warnings are rare, so the warnings list can be empty. That is expected and not an error. Helicopters only appear while they fly.
+
+DATA SOURCES
+P2000 (public pager network), NL-Alert (public warnings), Burgernet (public calls on burgernet.nl), KNMI weather warnings, helicopter positions from the open ADS-B data of adsb.lol (ODbL), stations from OpenStreetMap, weather from WeatherKit (Apple Weather mark and legal link shown). The app is independent and does not claim any affiliation with the emergency services or the government; the in-app disclaimer says so.
+
+PERMISSIONS
+Notifications: asked on the welcome screen or in Settings, to send alerts. Location (when in use): only for "My area" and the distance to an alert; the app works fully without it.
+
+IAP / ADS
+The app contains no in-app purchases, subscriptions, ads or tracking.
+
+OTHER
+A review prompt is shown at most once a week at a calm moment (requestReview). Settings contains a "More apps by the developer" card linking to the developer's App Store page.
+
+WHAT'S NEW IN 2.0.0
+New name and icon, NL-Alert/Burgernet/KNMI, map layers with live helicopters and stations, notification profiles, notification map attachment (notification service extension), Apple TV warnings.

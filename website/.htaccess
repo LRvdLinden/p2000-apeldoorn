@@ -22,6 +22,18 @@ ErrorDocument 404 /404.html
   RewriteCond %{HTTP:X-Forwarded-Proto} !=https
   RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L,NE]
 
+  # Oude tekstpagina's → eigen pagina's
+  RewriteCond %{QUERY_STRING} (^|&)p=privacy(&|$)
+  RewriteRule ^info/?$ /privacy/? [R=301,L]
+  RewriteCond %{QUERY_STRING} (^|&)p=cookies(&|$)
+  RewriteRule ^info/?$ /cookies/? [R=301,L]
+  RewriteCond %{QUERY_STRING} (^|&)p=terms(&|$)
+  RewriteRule ^info/?$ /voorwaarden/? [R=301,L]
+  RewriteCond %{QUERY_STRING} (^|&)p=disclaimer(&|$)
+  RewriteRule ^info/?$ /disclaimer/? [R=301,L]
+  RewriteCond %{QUERY_STRING} (^|&)p=changelog(&|$)
+  RewriteRule ^info/?$ /wat-is-nieuw/? [R=301,L]
+
   # Deellinks uit de app: /melding/<guid> → live pager met die melding open
   RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]
 </IfModule>

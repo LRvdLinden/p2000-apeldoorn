@@ -1,0 +1,11 @@
+(Alleen ter referentie, niet uploaden)
+A-Alerts is de nieuwe naam van P2000 Apeldoorn (zelfde app en bundle-ID). Geen account nodig; Inloggen met Apple is optioneel en synchroniseert alleen instellingen via iCloud.
+
+Wat de app doet: openbare P2000-meldingen voor de gemeente Apeldoorn en Teuge, met openbare waarschuwingen van NL-Alert, Burgernet en KNMI. Onze eigen server (Cloudflare Worker) verzamelt en filtert; de app praat alleen met die server.
+
+Testen: welkomstscherm doorlopen; tab Pager toont de meldingen van 24 uur (met NL-Alert en Burgernet ertussen als die er zijn); tik op een melding voor kaart, Look Around, kazernes, verloop en weer; routeknop opent Apple Kaarten/Google Maps; deelknop deelt een a-alerts.nl-link; tab Kaart > lagenknop; tab Statistieken; Instellingen > Notificaties > Profielen en Stuur een testmelding; Instellingen > Waarschuwingen > Alle waarschuwingen; Watch, Mac en Apple TV tonen dezelfde gegevens.
+
+Regio: alleen één gemeente; waarschuwingen zijn zeldzaam, een lege lijst is normaal; helikopters alleen als ze vliegen.
+Bronnen: P2000, NL-Alert, Burgernet, KNMI, adsb.lol (ODbL), OpenStreetMap, WeatherKit. Onafhankelijk, geen officiële dienst.
+Toestemmingen: meldingen (optioneel), locatie bij gebruik (alleen Mijn buurt en afstand).
+Geen aankopen, abonnementen, advertenties of tracking. Reviewvraag maximaal wekelijks; kaart 'Meer apps van de ontwikkelaar' in Instellingen.

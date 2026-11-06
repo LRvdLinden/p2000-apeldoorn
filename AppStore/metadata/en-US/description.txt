@@ -1,0 +1,36 @@
+A-Alerts (formerly P2000 Apeldoorn) shows live what happens in the municipality of Apeldoorn and Teuge in the Netherlands: alerts from the fire brigade, ambulance, police and trauma helicopter, together with NL-Alert, Burgernet and KNMI weather warnings.
+
+LIVE PAGER
+• Every P2000 alert for 26 towns and hamlets, grouped by day
+• NL-Alert and Burgernet between the alerts, with the time of the warning
+• A KNMI warning (code yellow, orange or red) as a bar at the top while it applies
+• All warnings of the last two weeks
+
+MAP WITH LAYERS
+• Switch layers on or off: alerts, NL-Alert, Burgernet, KNMI areas, the border of the area, stations and helicopters
+• Follow Lifeliner 1 to 4 and the police helicopters live, with heading, altitude and speed
+
+EVERY DETAIL
+• Large map with Look Around and 3D
+• Alerted stations with their route and an estimated arrival time
+• Timeline of alerts that may belong to the same incident
+• Capcodes, vehicles and the weather at the time of the alert
+• Route via Apple Maps or Google Maps, and share with one tap
+
+WARNINGS
+• The same detail page for NL-Alert, Burgernet and KNMI: map with area or place, the message, the weather and nearby alerts
+
+NOTIFICATIONS
+• Up to five notification profiles with their own places, services, priorities, warnings and times
+• Notifications with a small map and buttons to save or open in Apple Maps
+• My area: only alerts within a radius around you
+
+EVERYWHERE
+• iPhone, iPad, Mac, Apple Watch and Apple TV (control-room view)
+• Widgets, iCloud sync of your settings and Face ID lock
+
+No account, no ads and no tracking. The app is available in Dutch and English.
+
+A-Alerts is independent and not an official service of the emergency services or the government. Not every alert goes through P2000. In an emergency, always call 112.
+
+Made by PixelForges. More apps by the developer are listed in the app's Settings.
