@@ -4,6 +4,7 @@
 - Gealarmeerde kazernes op de melding: alle kazernes uit de oproep, met afstand, rijtijd en een geschatte status (onderweg met tijd, of ter plaatse); hun routes als stippellijn op de kaart. Altijd een schatting, zonder voertuigposities.
 - Instellingen › Waarschuwingen: pushmeldingen voor NL-Alert, Burgernet en KNMI (vanaf welke code) voor al je profielen tegelijk.
 - Alle waarschuwingen: NL-Alert, Burgernet en KNMI van de laatste twee weken, per dag, met status en tijd.
+- Pushmeldingen voor waarschuwingen volgen nu ook Mijn buurt: alleen als het gebied (of de Burgernet-locatie) binnen je straal valt, net als de lijst in de app.
 
 ## A-Alerts 2.0.0 (build 21)
 - Detailpagina vernieuwd: glazen balk bovenaan met terug, plaats en straat, en knoppen voor route, bewaren en delen.

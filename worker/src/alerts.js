@@ -157,12 +157,24 @@ export function prefsFrom(s) {
   return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)] };
 }
 
+/** Whether a warning reaches the device's radius: its area covers the centre or comes within the radius. */
+export function withinRadius(device, w) {
+  const r = device.radius_km, lat = device.lat, lon = device.lon;
+  if (Array.isArray(w.gebied) && w.gebied.length && w.bron !== "burgernet") {
+    return w.gebied.some((ring) => inRing(ring, lat, lon) || ring.some(([x, y]) => distanceKm(lat, lon, y, x) <= r));
+  }
+  if (w.lat != null && w.lon != null) return distanceKm(lat, lon, w.lat, w.lon) <= r + 2;
+  return true; // no location known: the place filter decides
+}
+
 /** Whether a device (with its prefs and places) gets a push for this warning. */
 export function wantsPush(device, prefs, w) {
   if (!prefs || !device.enabled) return false;
   if (w.bron === "nlalert" && !prefs.nlalert) return false;
   if (w.bron === "burgernet" && !prefs.burgernet) return false;
   if (w.bron === "knmi" && !prefs.knmi.includes(w.niveau)) return false;
+  // "Mijn buurt": only warnings that reach the radius around the device (same rule as the list in the app).
+  if (device.radius_km > 0 && device.lat != null && device.lon != null && !withinRadius(device, w)) return false;
   const chosen = device.plaatsen || [];
   if (!chosen.length) return true;
   if (w.bron === "burgernet") return matchesPlaatsen(chosen, { stad: w.plaats, locatie: "", lat: null, lon: null });

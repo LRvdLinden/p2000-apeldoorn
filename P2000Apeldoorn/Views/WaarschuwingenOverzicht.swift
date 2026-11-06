@@ -72,7 +72,7 @@ struct WaarschuwingenOverzichtView: View {
             } header: {
                 Text(L("Pushmeldingen"))
             } footer: {
-                Text(L("Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge."))
+                Text(L("Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt."))
             }
             Section {
                 NavigationLink {

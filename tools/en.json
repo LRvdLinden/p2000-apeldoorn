@@ -455,7 +455,6 @@
  "Gealarmeerde kazernes (%lld)": "Alerted stations (%lld)",
  "Geel": "Yellow",
  "Geen waarschuwingen": "No warnings",
- "Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge.": "Applies to all your profiles. You can change it per profile under Notifications › Profiles. You only get warnings for the municipality of Apeldoorn and Teuge.",
  "Kon de waarschuwingen niet laden": "Couldn't load the warnings",
  "Onderweg": "En route",
  "Oranje": "Orange",
@@ -466,5 +465,6 @@
  "Vanaf code oranje": "From code orange",
  "rijtijd %lld min": "%lld min drive",
  "rijtijd < 1 min": "< 1 min drive",
- "± %@": "± %@"
+ "± %@": "± %@",
+ "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": "Applies to all your profiles; you can change it per profile under Notifications › Profiles. You get a warning when it touches the places of a profile (no places chosen = the whole area) and, when My area is on, also falls within your radius."
 }

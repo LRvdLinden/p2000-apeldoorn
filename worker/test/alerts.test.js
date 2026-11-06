@@ -67,3 +67,15 @@ test("push preferences", () => {
   assert.equal(p.aps.alert.title, "NL-Alert");
   assert.equal(p.waarschuwing, "nlalert:x");
 });
+
+test("warnings: Mijn buurt (radius) also limits warning pushes", async () => {
+  const { wantsPush } = await import("../src/alerts.js");
+  const prefs = { nlalert: true, burgernet: true, knmi: ["orange", "red"] };
+  const dev = { enabled: true, plaatsen: [], radius_km: 3, lat: 52.21, lon: 5.97 };
+  const square = (lat, lon, d) => [[[lon - d, lat - d], [lon + d, lat - d], [lon + d, lat + d], [lon - d, lat + d], [lon - d, lat - d]]];
+  assert.equal(wantsPush(dev, prefs, { bron: "nlalert", gebied: square(52.21, 5.97, 0.01) }), true);   // covers the centre
+  assert.equal(wantsPush(dev, prefs, { bron: "nlalert", gebied: square(52.10, 5.80, 0.01) }), false);  // far away
+  assert.equal(wantsPush(dev, prefs, { bron: "burgernet", plaats: "Apeldoorn", lat: 52.22, lon: 5.98 }), true);
+  assert.equal(wantsPush(dev, prefs, { bron: "burgernet", plaats: "Hoenderloo", lat: 52.12, lon: 5.88 }), false);
+  assert.equal(wantsPush({ ...dev, radius_km: null }, prefs, { bron: "burgernet", plaats: "Hoenderloo", lat: 52.12, lon: 5.88 }), true);
+});

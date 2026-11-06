@@ -2466,19 +2466,19 @@
         }
       }
     },
-    "Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge.": {
+    "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Applies to all your profiles. You can change it per profile under Notifications › Profiles. You only get warnings for the municipality of Apeldoorn and Teuge."
+            "value": "Applies to all your profiles; you can change it per profile under Notifications › Profiles. You get a warning when it touches the places of a profile (no places chosen = the whole area) and, when My area is on, also falls within your radius."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge."
+            "value": "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt."
           }
         }
       }
