@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
@@ -68,6 +69,11 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(20_000); now = Instant.now() } }
     val routes = remember(m.guid) { Kazernes.routes(m) }
+    // Lifeliner/Zulu named in the alert: live on the map (every 10 s).
+    val heliRelevant = remember(m.guid) { HeliKoppeling.relevant(m) }
+    if (heliRelevant) LaunchedEffect(m.guid) { while (true) { Store.refreshHelikopters(); delay(10_000) } }
+    val heli = if (heliRelevant) HeliKoppeling.voor(m, Store.helikopters) else null
+    val heliNaam = remember(m.guid) { HeliKoppeling.genoemd(m)?.let { id -> id.replace("lifeliner", "Lifeliner ").replace("zulu", "Zulu ") } }
     val verband = remember(m.guid, Store.meldingen) { Verband.gekoppeld(m, Store.meldingen) }
     val waarschuwingen = remember(m.guid, Store.waarschuwingen) { Store.waarschuwingen.filter { it.bron != "knmi" && it.relates(m) } }
     val knmi = remember(m.guid, Store.waarschuwingen) {
@@ -85,11 +91,15 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
                     val pts = mutableListOf<MapPoint>()
                     routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false) }
                     m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
+                    heli?.let { h -> pts += MapPoint("h:${h.id}", h.lat, h.lon, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
                     AMap(
                         Modifier.fillMaxWidth().height(h),
                         points = pts,
-                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong()) },
-                        camera = MapCamera(la, lo, if (m.hasStreet) 15.0 else 12.5, fit = if (routes.isNotEmpty()) routes.map { it.kazerne.lat to it.kazerne.lon } + listOf(la to lo) else emptyList(), key = m.guid),
+                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong()) } +
+                            listOfNotNull(heli?.let { h -> MapLine("heli", listOf(h.lat to h.lon, la to lo), 0xFF9333EA) }),
+                        camera = MapCamera(la, lo, if (m.hasStreet) 15.0 else 12.5,
+                            fit = (routes.map { it.kazerne.lat to it.kazerne.lon } + listOfNotNull(heli?.let { it.lat to it.lon })).let { if (it.isNotEmpty()) it + listOf(la to lo) else emptyList() },
+                            key = m.guid + (heli != null)),
                         interactive = false,
                         onMapClick = { nav.toonOpKaart(m.guid) },
                     )
@@ -133,6 +143,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
                     if (m.hasCoordinate) ActionButton(Icons.Outlined.Map, tr("Kaart", "Map"), Modifier.weight(1f)) { nav.toonOpKaart(m.guid) }
                     if (m.hasCoordinate && m.hasStreet) ActionButton(Icons.Outlined.Directions, tr("Route", "Route"), Modifier.weight(1f)) { openRoute(ctx, m.lat!!, m.lon!!, m.plaatsText) }
                 }
+                if (heliRelevant) HeliLiveCard(m, heli, heliNaam) { id -> nav.toonHeli(id) }
                 m.fullMelding?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Oproep", "Call-out"), Icons.Outlined.Sms) {
                         Text(it, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
@@ -279,4 +290,36 @@ fun openRoute(ctx: Context, lat: Double, lon: Double, label: String) {
     val geo = Intent(Intent.ACTION_VIEW, Uri.parse("geo:$lat,$lon?q=$lat,$lon(${Uri.encode(label)})"))
     runCatching { ctx.startActivity(nav) }.recoverCatching { ctx.startActivity(geo) }
         .recoverCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lon"))) }
+}
+
+/** The Lifeliner (or Zulu) of this alert, live: altitude, speed, distance to the scene and "Volg op kaart". */
+@Composable
+fun HeliLiveCard(m: Melding, h: Helikopter?, naam: String?, onFollow: (String) -> Unit) {
+    SectionCard(h?.naam ?: naam ?: tr("Traumahelikopter", "Air ambulance"), Icons.Outlined.Flight) {
+        if (h == null) {
+            Text(tr("${naam ?: "De traumahelikopter"} is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.",
+                "${naam ?: "The air ambulance"} is not visible live right now. Flying low or on the ground, the position is sometimes missing."), color = Muted, fontSize = 13.sp)
+            return@SectionCard
+        }
+        val km = if (m.lat != null && m.lon != null) Geo.distanceKm(h.lat, h.lon, m.lat, m.lon) else null
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(h.afbeelding), null,
+                Modifier.width(76.dp).graphicsLayer { scaleX = if (h.vliegtWest) -1f else 1f })
+            Spacer(Modifier.width(12.dp))
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(h.naam, fontWeight = FontWeight.Bold); LiveBadge()
+                }
+                Text(h.info, color = Muted, fontSize = 12.sp)
+                km?.let { d ->
+                    val eta = h.snelheidKmh?.takeIf { it > 40 && !h.opGrond }?.let { v -> Math.round(d / v * 60.0) }
+                    Text(tr("${Fmt.km(d)} van de melding", "${Fmt.km(d)} from the alert") + (eta?.let { tr(" · ± $it min", " · ± $it min") } ?: ""), fontSize = 13.sp, fontWeight = FontWeight.Medium)
+                }
+            }
+        }
+        Button(onClick = { onFollow(h.id) }, modifier = Modifier.fillMaxWidth()) {
+            Icon(Icons.Outlined.MyLocation, null); Spacer(Modifier.width(8.dp)); Text(tr("Volg ${h.naam} op de kaart", "Follow ${h.naam} on the map"))
+        }
+        Text(tr("Positie via adsb.lol, kan enkele seconden achterlopen.", "Position via adsb.lol, may lag a few seconds."), color = Muted, fontSize = 11.sp)
+    }
 }

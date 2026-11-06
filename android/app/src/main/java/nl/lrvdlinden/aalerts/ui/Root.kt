@@ -47,6 +47,8 @@ class Nav(val nav: NavHostController) {
     fun open(route: String) = nav.navigate(route)
     fun back() { nav.popBackStack() }
     fun toonOpKaart(guid: String) { kaartFocus = guid; tab = Tab.KAART; nav.popBackStack("main", false) }
+    /** Map tab, following a helicopter ("h:<id>"). */
+    fun toonHeli(id: String) { kaartFocus = "h:$id"; tab = Tab.KAART; nav.popBackStack("main", false) }
 }
 
 @Composable

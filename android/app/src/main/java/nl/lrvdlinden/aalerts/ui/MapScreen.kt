@@ -67,10 +67,19 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h -> points += MapPoint("h:${h.id}", h.lat, h.lon, h.afbeelding, 70, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
 
     val focusMelding = focus?.let { Store.melding(it) }
-    val camera = if (focusMelding?.hasCoordinate == true) MapCamera(focusMelding.lat!!, focusMelding.lon!!, 15.0, key = focus) else APELDOORN
+    // Following a helicopter: the camera moves along with every new position.
+    val focusHeli = focus?.takeIf { it.startsWith("h:") }?.let { f -> Store.helikopters.firstOrNull { it.id == f.removePrefix("h:") } }
+    LaunchedEffect(focus) {
+        if (focus?.startsWith("h:") == true && KaartLaag.HELIKOPTERS.key !in Settings.kaartLagen) Settings.kaartLagen = Settings.kaartLagen + KaartLaag.HELIKOPTERS.key
+    }
+    val camera = when {
+        focusHeli != null -> MapCamera(focusHeli.lat, focusHeli.lon, 12.5, key = "${focusHeli.id}${focusHeli.lat}${focusHeli.lon}")
+        focusMelding?.hasCoordinate == true -> MapCamera(focusMelding.lat!!, focusMelding.lon!!, 15.0, key = focus)
+        else -> APELDOORN
+    }
 
     Box(Modifier.fillMaxSize()) {
-        AMap(Modifier.fillMaxSize(), points = points, areas = areas, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null })
+        AMap(Modifier.fillMaxSize(), points = points, areas = areas, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
 
         // Period and layers
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp)) {
@@ -88,7 +97,7 @@ fun MapScreen(nav: Nav) {
             if (Store.helikopters.isNotEmpty() && KaartLaag.HELIKOPTERS.key in lagen) {
                 LazyRow(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                     items(Store.helikopters, key = { it.id }) { h ->
-                        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surface, onClick = { selected = "h:${h.id}" }) {
+                        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surface, onClick = { selected = "h:${h.id}"; nav.kaartFocus = "h:${h.id}" }) {
                             Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Image(painterResource(h.afbeelding), null, Modifier.width(34.dp).graphicsLayer { scaleX = if (h.vliegtWest) -1f else 1f })
                                 Spacer(Modifier.width(6.dp)); Text(h.naam, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)

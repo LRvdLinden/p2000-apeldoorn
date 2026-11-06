@@ -181,3 +181,29 @@ object Verband {
         return out.sortedWith(compareByDescending<MeldingVerband> { it.score }.thenBy { abs(it.melding.millis - m.millis) }).take(max)
     }
 }
+
+/**
+ * The helicopter that belongs to an alert: the Lifeliner (or Zulu) named in the call-out ("Traumaheli LifeLiner 3"),
+ * or for a trauma alert without a number the trauma helicopter in the air closest to it.
+ */
+object HeliKoppeling {
+    private val LIFELINER = Regex("life\\s*liner\\s*0?([1-4])", RegexOption.IGNORE_CASE)
+    private val ZULU = Regex("zulu\\s*0?(\\d{1,2})", RegexOption.IGNORE_CASE)
+
+    fun genoemd(m: Melding): String? {
+        val tekst = (m.eenheden.mapNotNull { it.naam } + listOfNotNull(m.fullMelding, m.title)).joinToString(" ")
+        LIFELINER.find(tekst)?.let { return "lifeliner${it.groupValues[1]}" }
+        ZULU.find(tekst)?.let { return "zulu" + it.groupValues[1].padStart(2, '0') }
+        return null
+    }
+
+    /** Whether the detail page should follow helicopters for this alert. */
+    fun relevant(m: Melding) = m.soort == Dienst.TRAUMAHELI || genoemd(m) != null
+
+    fun voor(m: Melding, helis: List<Helikopter>): Helikopter? {
+        genoemd(m)?.let { id -> helis.firstOrNull { it.id == id }?.let { return it } }
+        if (m.soort != Dienst.TRAUMAHELI || genoemd(m) != null) return null
+        val la = m.lat ?: return null; val lo = m.lon ?: return null
+        return helis.filter { it.isTrauma }.minByOrNull { Geo.distanceKm(it.lat, it.lon, la, lo) }?.takeIf { Geo.distanceKm(it.lat, it.lon, la, lo) < 120 }
+    }
+}
