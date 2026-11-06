@@ -1,4 +1,4 @@
-// A-Alerts-beheer (P2000Beheer) web dashboard – talks to the beheer part of the P2000 Apeldoorn API.
+// A-Alerts-beheer (P2000Beheer) web dashboard – talks to the beheer part of the A-Alerts API.
 const API = (/^(localhost|127\.)/.test(location.hostname) && new URLSearchParams(location.search).get("api"))
   || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
 // The 26 A-Alerts places (same list as Shared/Werkgebied.json).
@@ -377,7 +377,7 @@ async function push(el) {
     <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(360px,1fr))">
       <div class="card"><h2>Pushmelding versturen</h2>
         <form class="form" id="pf">
-          <label>Titel<input name="title" value="P2000 Apeldoorn" maxlength="120" required></label>
+          <label>Titel<input name="title" value="A-Alerts" maxlength="120" required></label>
           <label>Bericht<textarea name="body" maxlength="1000" required></textarea></label>
           <div><b style="font-size:.85rem">Ontvangers</b> <small class="muted">(niets aangevinkt = iedereen)</small>
             <div class="chips" style="margin-top:8px">${PLAATSEN.map((p) => `<label><input type="checkbox" name="plaats" value="${p}"> ${p}</label>`).join("")}</div></div>
@@ -400,7 +400,7 @@ async function push(el) {
   };
 }
 
-const DOCS = { privacy: "Privacyverklaring", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer", changelog: "Changelog" };
+const DOCS = { privacy: "Privacyverklaring", cookies: "Cookies", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer", changelog: "Changelog" };
 let doc = "privacy";
 async function teksten(el) {
   const data = await api("GET", `/v1/beheer/content/${doc}`);
@@ -452,7 +452,7 @@ async function instellingen(el) {
         <div class="actions"><button class="btn danger" id="lo">Uitloggen</button></div>
       </div>
       <div class="card"><h2>Links</h2>
-        <div class="row"><a href="https://p2000-apeldoorn.nl" target="_blank" rel="noopener">p2000-apeldoorn.nl</a></div>
+        <div class="row"><a href="https://a-alerts.nl" target="_blank" rel="noopener">a-alerts.nl</a></div>
         <div class="row"><a href="${API}/health" target="_blank" rel="noopener">API-status (health)</a></div>
         <div class="row"><a href="https://github.com/LRvdLinden/p2000-apeldoorn" target="_blank" rel="noopener">GitHub-repo</a></div>
       </div>

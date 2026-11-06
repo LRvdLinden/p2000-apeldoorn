@@ -51,7 +51,7 @@ app = {
     "INFOPLIST_KEY_CFBundleDisplayName": "P2000Beheer",
     "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.utilities",
     "INFOPLIST_KEY_NSFaceIDUsageDescription": "Gebruik Face ID om P2000Beheer te openen.",
-    "INFOPLIST_KEY_NSHumanReadableCopyright": "© 2026 P2000 Apeldoorn · PixelForges",
+    "INFOPLIST_KEY_NSHumanReadableCopyright": "© 2026 A-Alerts · PixelForges",
     "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]": "YES",
     "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]": "YES",
     "INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]": "YES",
