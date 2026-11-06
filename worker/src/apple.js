@@ -83,7 +83,7 @@ export const isDeadToken = (r) => r.status === 410 || ["BadDeviceToken", "Unregi
 
 export const mapkitConfigured = (env) => hasKey(env.WEB_MAPKIT_JS_KEY_ID, env.WEB_MAPKIT_JS_TEAM_ID || env.APN_TEAM_ID, env.WEB_MAPKIT_JS_P8);
 
-const DEFAULT_ORIGINS = "https://p2000-apeldoorn.nl,https://www.p2000-apeldoorn.nl,https://lrvdlinden.github.io";
+const DEFAULT_ORIGINS = "https://a-alerts.nl,https://www.a-alerts.nl,https://beheer.a-alerts.nl,https://p2000-apeldoorn.nl,https://www.p2000-apeldoorn.nl,https://lrvdlinden.github.io";
 
 export async function mapkitToken(env, origin) {
   if (!mapkitConfigured(env)) return null;
