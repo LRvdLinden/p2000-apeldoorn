@@ -7,13 +7,19 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults: { run: { working-directory: worker } }
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci
       - run: |
           set +e
-          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          echo "== 112meldkamer raw"; curl -sS -m 20 -i https://api.112meldkamer.nl/v1/burgernet | head -c 1500; echo
-          echo "== worker waarschuwingen"; curl -sS -m 20 "$A/v1/waarschuwingen?days=1" | head -c 3000; echo
-          echo "== worker overview-status"; curl -sS -m 20 "$A/v1/meldingen?limit=1" | head -c 800; echo
-          echo "== burgernet.nl api guesses"
-          for u in https://www.burgernet.nl/api/actions https://www.burgernet.nl/burgernet/3967274; do echo "-- $u"; curl -sS -m 20 -A "Mozilla/5.0" -i "$u" | head -c 1200; echo; done
+          q() { npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const i=s.indexOf("[");console.log(JSON.stringify(JSON.parse(s.slice(i))[0].results,null,0))}catch(e){console.log(s.slice(0,800))}})'; }
+          echo "== warnings_status"; q "SELECT key, value, at FROM kv WHERE key IN ('warnings_status','bronnen_status') OR key LIKE 'bron%'"
+          echo "== laatste waarschuwingen"; q "SELECT id, bron, status, plaats, titel, start_at, end_at FROM waarschuwingen ORDER BY start_at DESC LIMIT 15"
+          echo "== aantallen per bron"; q "SELECT bron, status, COUNT(*) n FROM waarschuwingen GROUP BY bron, status"
           true
