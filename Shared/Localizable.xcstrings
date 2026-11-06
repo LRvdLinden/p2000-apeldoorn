@@ -2755,6 +2755,40 @@
         }
       }
     },
+    "Herkend aan de eigenaar van het toestel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recognised by the aircraft's owner"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herkend aan de eigenaar van het toestel"
+          }
+        }
+      }
+    },
+    "Herkend aan het toestel; vliegt nu als %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recognised by the aircraft; now flying as %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herkend aan het toestel; vliegt nu als %@"
+          }
+        }
+      }
+    },
     "Het aantal meldingen van vandaag per hulpdienst.": {
       "extractionState": "manual",
       "localizations": {

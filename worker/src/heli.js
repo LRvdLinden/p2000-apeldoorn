@@ -23,22 +23,56 @@ const POINT = { lat: 52.2, lon: 5.4, nm: 160 };
 const TTL = 12_000;
 let memo = null;
 
-/** Finds our helicopter for one adsb.lol aircraft (by callsign or registration). */
-export function identify(ac) {
+const HELI_TYPES = new Set(["EC35", "EC45", "A139", "H135", "H145", "EC30", "A169", "H160"]);
+const byId = (id) => HELIS.find((h) => h.id === id) || null;
+
+/**
+ * Finds our helicopter for one adsb.lol aircraft. In order:
+ *  1. the known callsign or registration;
+ *  2. a callsign pattern (LIFELN3, LIFELINER3, ZXP25, ZULU25 …), so a new spelling still works;
+ *  3. the airframe (ICAO hex) remembered from an earlier flight, when the crew flies under another callsign;
+ *  4. the operator in the aircraft database (ANWB Medical Air Assistance, Politie) for a Dutch helicopter.
+ * `learned` maps hex → helicopter (from the database); `herkenning` says which rule matched.
+ */
+export function identify(ac, learned = new Map()) {
   const cs = String(ac.flight || "").trim().toUpperCase();
   const reg = String(ac.r || "").trim().toUpperCase();
-  return HELIS.find((h) => h.callsigns.includes(cs) || (h.regs || []).includes(reg)) || null;
+  const hex = String(ac.hex || "").trim().toLowerCase();
+  const exact = HELIS.find((h) => (cs && h.callsigns.includes(cs)) || (reg && (h.regs || []).includes(reg)));
+  if (exact) return { ...exact, herkenning: cs && exact.callsigns.includes(cs) ? "callsign" : "registratie" };
+
+  let m = cs.match(/^(?:LIFELN|LIFELINER|LIFE)0?([1-9])$/);
+  if (m && byId(`lifeliner${m[1]}`)) return { ...byId(`lifeliner${m[1]}`), herkenning: "callsign" };
+  m = cs.match(/^(?:ZXP|ZULU|POLITIE)0?(\d{1,2})$/);
+  if (m) {
+    const nr = m[1].padStart(2, "0");
+    return { ...(byId(`zulu${nr}`) || { id: `zulu${nr}`, naam: `Zulu ${nr}`, soort: "politie", callsigns: [] }), herkenning: "callsign" };
+  }
+
+  if (hex && learned.has(hex)) return { ...learned.get(hex), herkenning: "toestel" };
+
+  const owner = `${ac.ownOp || ""} ${ac.desc || ""}`;
+  const isHeli = HELI_TYPES.has(String(ac.t || "").toUpperCase()) || ac.category === "A7";
+  if (isHeli && reg.startsWith("PH-")) {
+    if (/ANWB|MEDICAL AIR|LIFELINER|TRAUMA/i.test(owner)) {
+      return { id: `trauma-${hex || reg}`, naam: `Traumaheli ${reg}`, soort: "trauma", callsigns: [], herkenning: "operator" };
+    }
+    if (/POLITIE|POLICE|KLPD/i.test(owner)) {
+      return { id: `politie-${hex || reg}`, naam: `Politieheli ${reg}`, soort: "politie", callsigns: [], herkenning: "operator" };
+    }
+  }
+  return null;
 }
 
 /** Converts adsb.lol aircraft into the app's shape. */
-export function fromAdsb(list, now = Date.now()) {
+export function fromAdsb(list, now = Date.now(), learned = new Map()) {
   const out = new Map();
   for (const ac of Array.isArray(list) ? list : []) {
-    const h = identify(ac);
+    const h = identify(ac, learned);
     if (!h || typeof ac.lat !== "number" || typeof ac.lon !== "number") continue;
     const seen = Number(ac.seen_pos ?? ac.seen ?? 0);
     const item = {
-      id: h.id, naam: h.naam, soort: h.soort, basis: h.basis || null,
+      id: h.id, naam: h.naam, soort: h.soort, basis: h.basis || null, herkenning: h.herkenning,
       callsign: String(ac.flight || "").trim() || null, registratie: ac.r || null, type: ac.t || null, hex: ac.hex || null,
       lat: ac.lat, lon: ac.lon,
       koers: typeof ac.track === "number" ? Math.round(ac.track) : (typeof ac.true_heading === "number" ? Math.round(ac.true_heading) : null),
@@ -53,6 +87,34 @@ export function fromAdsb(list, now = Date.now()) {
     if (!prev || prev.gezien < item.gezien) out.set(h.id, item);
   }
   return [...out.values()].sort((a, b) => a.naam.localeCompare(b.naam));
+}
+
+/** Airframes (ICAO hex) seen before under a known callsign or registration. */
+async function loadLearned(env) {
+  const map = new Map();
+  if (!env?.DB) return map;
+  try {
+    const { results } = await env.DB.prepare("SELECT key, value FROM kv WHERE key LIKE 'heli_hex:%'").all();
+    for (const r of results) {
+      try { map.set(r.key.slice(9), JSON.parse(r.value)); } catch {}
+    }
+  } catch (e) { console.warn("[heli] learned", e.message || e); }
+  return map;
+}
+
+/** Remember which airframe flew as which helicopter, so it is still recognised under another callsign. */
+async function learn(env, list, learned) {
+  if (!env?.DB) return;
+  for (const h of list) {
+    if (!h.hex || !["callsign", "registratie"].includes(h.herkenning)) continue;
+    const hex = h.hex.toLowerCase();
+    const prev = learned.get(hex);
+    if (prev && prev.id === h.id) continue;
+    const value = JSON.stringify({ id: h.id, naam: h.naam, soort: h.soort, basis: h.basis || null, callsigns: [] });
+    try {
+      await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(`heli_hex:${hex}`, value, Date.now()).run();
+    } catch (e) { console.warn("[heli] learn", e.message || e); }
+  }
 }
 
 export async function helikopters(env) {
@@ -75,7 +137,10 @@ export async function helikopters(env) {
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const body = await res.json();
-    data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: fromAdsb(body.ac, Number(body.now) || Date.now()) };
+    const learned = await loadLearned(env);
+    const list = fromAdsb(body.ac, Number(body.now) || Date.now(), learned);
+    await learn(env, list, learned);
+    data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list };
   } catch (e) {
     console.warn("[heli]", e.message || e);
     // Show the last positions for a short while instead of an empty map.

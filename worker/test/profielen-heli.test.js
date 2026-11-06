@@ -66,3 +66,21 @@ test("helicopters: Lifeliner and Zulu found by callsign or registration", () => 
   assert.equal(identify({ r: "PH-PXA" }).naam, "Zulu 01");
   assert.equal(identify({ flight: "MEDIC01" }), null);
 });
+
+test("helicopters: still recognised after a callsign change", () => {
+  // New spelling of the callsign.
+  assert.equal(identify({ flight: "LIFELINER3" }).naam, "Lifeliner 3");
+  assert.equal(identify({ flight: "ZULU25" }).naam, "Zulu 25");
+  assert.equal(identify({ flight: "ZXP07" }).naam, "Zulu 07");
+  // Unknown callsign, but this airframe flew as Lifeliner 3 before.
+  const learned = new Map([["486a31", { id: "lifeliner3", naam: "Lifeliner 3", soort: "trauma", callsigns: [] }]]);
+  const h = identify({ flight: "PHXYZ", hex: "486A31" }, learned);
+  assert.equal(h.naam, "Lifeliner 3");
+  assert.equal(h.herkenning, "toestel");
+  // Unknown airframe, but the aircraft database names the operator.
+  const op = identify({ flight: "", r: "PH-ABC", t: "EC35", ownOp: "ANWB Medical Air Assistance", hex: "4844aa" });
+  assert.equal(op.soort, "trauma");
+  assert.equal(op.herkenning, "operator");
+  // An ordinary helicopter is not shown.
+  assert.equal(identify({ flight: "PHHOP", r: "PH-HOP", t: "R44", hex: "48aaaa" }), null);
+});

@@ -466,5 +466,7 @@
  "rijtijd %lld min": "%lld min drive",
  "rijtijd < 1 min": "< 1 min drive",
  "± %@": "± %@",
- "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": "Applies to all your profiles; you can change it per profile under Notifications › Profiles. You get a warning when it touches the places of a profile (no places chosen = the whole area) and, when My area is on, also falls within your radius."
+ "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": "Applies to all your profiles; you can change it per profile under Notifications › Profiles. You get a warning when it touches the places of a profile (no places chosen = the whole area) and, when My area is on, also falls within your radius.",
+ "Herkend aan het toestel; vliegt nu als %@": "Recognised by the aircraft; now flying as %@",
+ "Herkend aan de eigenaar van het toestel": "Recognised by the aircraft's owner"
 }

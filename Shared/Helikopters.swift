@@ -19,9 +19,11 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let opGrond: Bool
     let snelheidKt: Double?
     let gezien: Date
+    /// How the server recognised it: "callsign", "registratie", "toestel" (same airframe, other callsign) or "operator".
+    let herkenning: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
 
@@ -42,6 +44,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         snelheidKt = try? c.decodeIfPresent(Double.self, forKey: .snelheidKt)
         let raw = (try? c.decode(String.self, forKey: .gezien)) ?? ""
         gezien = Fmt.parseISO(raw) ?? .now
+        herkenning = try? c.decodeIfPresent(String.self, forKey: .herkenning)
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
@@ -71,6 +74,15 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         guard let k = koers else { return nil }
         let dirs = [L("N"), L("NO"), L("O"), L("ZO"), L("Z"), L("ZW"), L("W"), L("NW")]
         return "\(Int(k))° \(dirs[Int(((k + 22.5).truncatingRemainder(dividingBy: 360)) / 45)])"
+    }
+
+    /// Shown when the helicopter was not recognised by its usual callsign.
+    var herkenningTekst: String? {
+        switch herkenning {
+        case "toestel": return Lf("Herkend aan het toestel; vliegt nu als %@", callsign ?? "–")
+        case "operator": return L("Herkend aan de eigenaar van het toestel")
+        default: return nil
+        }
     }
 
     /// Not seen for more than two minutes.
@@ -200,6 +212,9 @@ struct HeliInfoKaart: View {
                 waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill")
                 waarde(L("Hoogte"), heli.opGrond ? L("Op de grond") : (heli.hoogteMeter.map { "\($0) m" } ?? "–"), "arrow.up.and.down")
                 waarde(L("Snelheid"), heli.snelheidKmh.map { "\($0) km/u" } ?? "–", "speedometer")
+            }
+            if let h = heli.herkenningTekst {
+                Label(h, systemImage: "info.circle").font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary)
             }
             HStack(spacing: 6) {
                 if let afstandKm {
