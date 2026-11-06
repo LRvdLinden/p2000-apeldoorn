@@ -5,7 +5,7 @@ name: Android
 #   GOOGLE_SERVICES_JSON      google-services.json from Firebase (push notifications)
 #   ANDROID_KEYSTORE_B64      release keystore, base64
 #   ANDROID_KEYSTORE_PASSWORD password of the keystore and the key (alias a-alerts)
-# Result: artifact "A-Alerts-apk" with A-Alerts.apk and android.json (for a-alerts.nl/downloads/).
+# Result (also on branch android-build): artifact "A-Alerts-apk" with A-Alerts.apk and android.json (for a-alerts.nl/downloads/).
 on:
   workflow_dispatch:
   push:
