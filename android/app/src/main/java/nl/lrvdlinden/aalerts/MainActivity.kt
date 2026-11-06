@@ -29,6 +29,8 @@ sealed interface Bestemming {
 class MainActivity : FragmentActivity() {
     var bestemming by mutableStateOf<Bestemming?>(null)
     var locked by mutableStateOf(false)
+    /** Screenshots and smoke test (adb): "-e tab kaart" opens a tab, "--ez skipWelkom true" skips the welcome screen. */
+    var startTab by mutableStateOf<String?>(null)
     private var lastBackground = 0L
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -61,6 +63,8 @@ class MainActivity : FragmentActivity() {
 
     private fun handle(intent: Intent?) {
         intent ?: return
+        if (intent.getBooleanExtra("skipWelkom", false)) Settings.onboardingDone = true
+        intent.getStringExtra("tab")?.let { startTab = it }
         intent.getStringExtra(EXTRA_GUID)?.let { bestemming = Bestemming.Melding(it, intent.getBooleanExtra(EXTRA_KAART, false)) }
         intent.getStringExtra(EXTRA_WAARSCHUWING)?.let { bestemming = Bestemming.Waarschuwing(it) }
         intent.data?.let { uri ->

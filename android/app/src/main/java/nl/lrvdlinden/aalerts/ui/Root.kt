@@ -55,6 +55,10 @@ fun AAlertsRoot(activity: MainActivity) {
         val navController = rememberNavController()
         val nav = remember { Nav(navController) }
         var onboarding by rememberSaveable { mutableStateOf(!Settings.onboardingDone) }
+        LaunchedEffect(activity.startTab) {
+            when (activity.startTab) { "kaart" -> nav.tab = Tab.KAART; "statistieken" -> nav.tab = Tab.STATISTIEKEN; "instellingen" -> nav.tab = Tab.INSTELLINGEN; "pager" -> nav.tab = Tab.PAGER }
+            if (activity.startTab == "waarschuwingen") nav.open("waarschuwingen")
+        }
 
         // Refresh alerts and warnings every 15 seconds while the app is open.
         LaunchedEffect(Unit) {
