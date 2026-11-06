@@ -7,6 +7,7 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest,
 } from "./aalerts.js?v=35";
 
 const $ = (id) => document.getElementById(id);
@@ -379,6 +380,7 @@ function renderDetail(m) {
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
       <a class="amaps" href="${appleMapsURL(m)}" target="_blank" rel="noopener">${ICO.maps} Apple Kaarten</a>
     </section>
+    <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
     ${verloopHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
@@ -413,6 +415,7 @@ function renderDetail(m) {
   const mapReady = drawDetailMap(m);
   loadMeteo(m);
   loadKazernes(m, mapReady);
+  if (heliRelevant(m)) loadHeli(m, mapReady);
   $("detail").querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
 }
 
@@ -430,6 +433,50 @@ function verloopHTML(m) {
       return `<li class="${zelf ? "zelf" : ""}" style="--c:${dienstOf(x).color}"><time>${fmtTime(date(x))}${plus ? `<small>+${plus} min</small>` : ""}</time>
         <a href="?melding=${encodeURIComponent(x.guid)}" ${zelf ? "" : `data-goto="${esc(x.guid)}"`}><img src="${icon(x)}" alt=""><span><b>${esc(x.title)}</b>${zelf ? `<em>Deze melding</em>` : reden ? `<small>${esc(reden)}</small>` : ""}</span></a></li>`;
     }).join("")}</ol></section>`;
+}
+
+/** The Lifeliner (or Zulu) named in the alert: live on the detail map, every 10 seconds, with "Volg op de kaart". */
+async function loadHeli(m, mapReady) {
+  await mapReady;
+  let items = [];
+  const draw = async () => {
+    if (state.selected !== m.guid) return false;
+    const helis = await fetchHelikopters();
+    if (state.selected !== m.guid) return false;
+    const h = heliVoor(m, helis);
+    const box = $("heliCard");
+    if (!box) return false;
+    box.hidden = false;
+    const naam = h?.naam || (heliGenoemd(m) ? heliNaam(heliGenoemd(m)) : "Traumahelikopter");
+    if (!h) {
+      box.innerHTML = `<h2>${esc(naam)}</h2><p class="hint">${esc(naam)} is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.</p>`;
+    } else {
+      const km = m.lat != null ? distanceKm(h, m) : null;
+      const v = h.snelheid_kt != null ? h.snelheid_kt * 1.852 : null;
+      const eta = km != null && v > 40 && !h.op_grond ? Math.round((km / v) * 60) : null;
+      box.innerHTML = `<h2>${esc(h.naam)} <span class="live-tag">LIVE</span></h2>
+        <div class="kz heli-live"><img src="${heliImg(h)}" alt="" style="width:84px;height:auto;${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">
+        <div><b>${esc(heliInfo(h))}</b>${km != null ? `<small>${km.toFixed(1).replace(".", ",")} km van de melding${eta ? ` · ± ${eta} min` : ""}</small>` : ""}</div></div>
+        <button class="btn btn-red" id="volgHeli" style="width:100%;margin-top:10px">Volg ${esc(h.naam)} op de kaart</button>
+        <p class="hint">Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.</p>`;
+      $("volgHeli").onclick = () => { state.volgHeli = h.id; if (innerWidth <= 900) closeDetail(); setTab("kaart"); };
+    }
+    const mk = detailMap && window.mapkit;
+    if (mk) {
+      if (items.length) { try { detailMap.removeItems(items); } catch {} }
+      items = [];
+      if (h && m.lat != null) {
+        const a = heliAnnotation(mk, h);
+        const line = new mk.PolylineOverlay([new mk.Coordinate(h.lat, h.lon), new mk.Coordinate(m.lat, m.lon)],
+          { style: new mk.Style({ strokeColor: "#9333EA", lineWidth: 3, lineDash: [4, 7], lineCap: "round" }) });
+        detailMap.addAnnotation(a); detailMap.addOverlay(line);
+        items = [a, line];
+        if (!draw.done) { draw.done = true; try { detailMap.showItems([...detailMap.annotations, ...detailMap.overlays], { animate: true, padding: new mk.Padding(60, 40, 40, 40) }); } catch {} }
+      }
+    }
+    return true;
+  };
+  while (await draw()) await new Promise((r) => setTimeout(r, 10_000));
 }
 
 /** Alarmed stations with an estimated arrival time (no vehicle positions). */
@@ -615,6 +662,7 @@ function setTab(tab, push = true) {
   });
   if (push) history.replaceState(history.state, "", location.pathname + location.search + (tab === "pager" ? "" : `#${tab}`));
   if (tab === "kaart") {
+    if (state.volgHeli && !state.lagen.has("helikopters")) state.lagen.add("helikopters");
     renderMap();
     pollHelis();
     clearInterval(heliTimer);
@@ -726,6 +774,15 @@ async function renderMap() {
     ...pins.map((m) => markerAnnotation(mk, m, (x) => select(x.guid))),
     ...extra,
   ]);
+  // "Volg … op de kaart": centre on the helicopter at every new position.
+  if (state.volgHeli) {
+    const h = state.helis.find((x) => x.id === state.volgHeli);
+    if (h) {
+      bigMap.setCenterAnimated(new mk.Coordinate(h.lat, h.lon));
+      if (bigMap.cameraDistance > 30000) bigMap.cameraDistance = 15000;
+      openHeli(h);
+    }
+  }
 }
 
 /** Without MapKit: show the markers roughly placed over the brand map texture. */
@@ -783,7 +840,7 @@ function openCluster(c) {
   box.hidden = false;
 }
 $("clusterPanel").addEventListener("click", (e) => {
-  if (e.target.closest("[data-close]")) { $("clusterPanel").hidden = true; return; }
+  if (e.target.closest("[data-close]")) { $("clusterPanel").hidden = true; state.volgHeli = null; return; }
   const g = e.target.closest("[data-guid]")?.dataset.guid;
   if (g) { $("clusterPanel").hidden = true; select(g); }
 });

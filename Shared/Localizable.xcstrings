@@ -86,6 +86,23 @@
         }
       }
     },
+    "%@ km van de melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km from the alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ km van de melding"
+          }
+        }
+      }
+    },
     "%@ km van je af": {
       "extractionState": "manual",
       "localizations": {
@@ -1612,6 +1629,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De app vraagt bij het openen direct om te ontgrendelen."
+          }
+        }
+      }
+    },
+    "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The helicopter is not visible live right now. Flying low or on the ground, the position is sometimes missing."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms."
           }
         }
       }
@@ -5407,6 +5441,23 @@
         }
       }
     },
+    "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Position via adsb.lol (ODbL), may lag a few seconds."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen."
+          }
+        }
+      }
+    },
     "Prioriteit": {
       "extractionState": "manual",
       "localizations": {
@@ -6784,23 +6835,6 @@
         }
       }
     },
-    "Verstuur feedback": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Send feedback"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Verstuur feedback"
-          }
-        }
-      }
-    },
     "Verwacht": {
       "extractionState": "manual",
       "localizations": {
@@ -6882,6 +6916,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voertuigen (%lld)"
+          }
+        }
+      }
+    },
+    "Volg %@ op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow %@ on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volg %@ op de kaart"
           }
         }
       }

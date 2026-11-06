@@ -508,5 +508,9 @@
  "Gegevens zijn op basis van tijdstip en plaats van de waarschuwing": "Based on the time and place of the warning",
  "Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten.": "What you see on the control-room map. Shared with your other devices via iCloud.",
  "NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge.": "NL-Alert, Burgernet and KNMI of the last 14 days for the municipality of Apeldoorn and Teuge.",
- "Geen waarschuwingen in de laatste twee weken.": "No warnings in the last two weeks."
+ "Geen waarschuwingen in de laatste twee weken.": "No warnings in the last two weeks.",
+ "%@ km van de melding": "%@ km from the alert",
+ "Volg %@ op de kaart": "Follow %@ on the map",
+ "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.": "The helicopter is not visible live right now. Flying low or on the ground, the position is sometimes missing.",
+ "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.": "Position via adsb.lol (ODbL), may lag a few seconds."
 }

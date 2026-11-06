@@ -299,3 +299,8 @@ a.drow { text-decoration: none; color: inherit; }
 .heli-vals div { background: var(--surface-2); border-radius: 12px; padding: 8px 10px; display: grid; }
 .heli-vals small { color: var(--muted); font-size: .72rem; }
 .heli-vals b { font-size: .95rem; font-variant-numeric: tabular-nums; }
+
+/* Lifeliner/Zulu of an alert, live */
+.kz.heli-live img { width: 84px; height: auto; }
+.kz.heli-live b { font-weight: 600; }
+.live-tag { display: inline-block; font-size: .65rem; font-weight: 900; letter-spacing: .04em; color: #fff; background: #DC2626; border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }

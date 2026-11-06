@@ -8,13 +8,16 @@ struct TVDetailView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var weather: AlertWeather?
     @State private var routes: [KazerneRoute] = []
+    @State private var helis = HeliStore.shared
+    /// The Lifeliner/Zulu named in the alert, live.
+    private var liveHeli: Helikopter? { HeliKoppeling.relevant(melding) ? HeliKoppeling.heli(voor: melding, in: helis.items) : nil }
 
     var body: some View {
         HStack(alignment: .top, spacing: 50) {
             VStack(spacing: 24) {
                 if let lat = melding.lat, let lon = melding.lon, melding.hasCoordinate {
                     let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                    Map(initialPosition: routes.isEmpty ? .camera(MapCamera(centerCoordinate: coord, distance: 1400, heading: 0, pitch: 45)) : .automatic, interactionModes: []) {
+                    Map(initialPosition: routes.isEmpty && liveHeli == nil ? .camera(MapCamera(centerCoordinate: coord, distance: 1400, heading: 0, pitch: 45)) : .automatic, interactionModes: []) {
                         // Alarmed stations: a dashed line to the alert (tvOS has no driving routes).
                         ForEach(routes) { r in
                             MapPolyline(coordinates: r.polyline.map { line in
@@ -26,9 +29,15 @@ struct TVDetailView: View {
                             Annotation(r.kazerne.naam, coordinate: r.kazerne.coordinate, anchor: .center) { KazerneIcon(soort: r.kazerne.soort, size: 36) }
                                 .annotationTitles(.hidden)
                         }
+                        if let h = liveHeli {
+                            MapPolyline(coordinates: [h.coordinate, coord])
+                                .stroke(h.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [6, 10]))
+                            Annotation(h.naam, coordinate: h.coordinate, anchor: .center) { HeliMarker(heli: h, size: 34) }
+                                .annotationTitles(.hidden)
+                        }
                         Annotation("", coordinate: coord, anchor: .bottom) { TVMarker(melding: melding, highlighted: true) }
                     }
-                    .id(routes.count)
+                    .id("\(routes.count)-\(liveHeli?.id ?? "")")
                     .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                 } else {
@@ -50,6 +59,7 @@ struct TVDetailView: View {
                     infoRow("mappin.and.ellipse", melding.plaatsText)
                     infoRow("clock", "\(melding.datum.formatted(date: .complete, time: .standard)) · \(melding.agoText)")
                     TVInzetBlok(melding: melding)
+                    if HeliKoppeling.relevant(melding) { heliBlok }
                     if let w = weather { weatherBlock(w) }
                     if !melding.eenheden.isEmpty {
                         section(Lf("Capcodes (%lld)", melding.eenheden.count))
@@ -79,11 +89,33 @@ struct TVDetailView: View {
         }
         .padding(60)
         .background(Color(hex: 0x0B0B0F).ignoresSafeArea())
+        .onAppear { if HeliKoppeling.relevant(melding) { helis.start() } }
+        .onDisappear { if HeliKoppeling.relevant(melding) { helis.stop() } }
         .task {
             settings.markRead(melding)
             MeldingStore.shared.registerView(melding)
             weather = await P2000API.shared.weather(guid: melding.guid)
             routes = await Aanrijtijd.routes(voor: melding)
+        }
+    }
+
+    /// Lifeliner/Zulu of this alert, live.
+    @ViewBuilder private var heliBlok: some View {
+        section(liveHeli?.naam ?? HeliKoppeling.genoemd(melding).map(HeliKoppeling.naam) ?? L("Traumahelikopter"))
+        if let h = liveHeli {
+            HStack(spacing: 18) {
+                Image(h.afbeelding).resizable().scaledToFit().frame(width: 150, height: 54).scaleEffect(x: h.vliegtWest ? -1 : 1, y: 1)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst].compactMap { $0 }.joined(separator: " · "))
+                        .font(AppFont.body(20, .semibold))
+                    if let lat = melding.lat, let lon = melding.lon {
+                        Text(Lf("%@ km van de melding", Werkgebied.distanceKm(h.lat, h.lon, lat, lon).formatted(.number.precision(.fractionLength(1)))))
+                            .font(AppFont.body(18, .regular)).foregroundStyle(.secondary)
+                    }
+                }
+            }
+        } else {
+            Text(L("De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.")).font(AppFont.body(18, .regular)).foregroundStyle(.secondary)
         }
     }
 

@@ -30,6 +30,7 @@ struct MapScreen: View {
     @State private var visibleDiensten: Set<Dienst> = Set(Dienst.selectable)
     @State private var showLagen = false
     @State private var helis = HeliStore.shared
+    @State private var volgen = false
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
@@ -62,6 +63,21 @@ struct MapScreen: View {
     }
 
     private var heli: Helikopter? { selectedHeli.flatMap { id in helis.items.first { $0.id == id } } }
+
+    /// "Volg Lifeliner 3 op de kaart" from an alert: helicopter layer on, select it and follow it.
+    private func volgGevraagd() {
+        guard let id = Router.shared.volgHeli else { return }
+        Router.shared.volgHeli = nil
+        if !settings.laag(.helikopters) { settings.setLaag(.helikopters, true) }
+        selected = nil; selectedKazerne = nil
+        selectedHeli = id
+        volgen = true
+        if let h = helis.items.first(where: { $0.id == id }) {
+            withAnimation { position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 15000, longitudinalMeters: 15000)) }
+        } else {
+            Task { await helis.refresh(); if let h = helis.items.first(where: { $0.id == id }) { withAnimation { position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 15000, longitudinalMeters: 15000)) } } }
+        }
+    }
 
     var body: some View {
         NavigationStack {
@@ -124,7 +140,16 @@ struct MapScreen: View {
                     }
                 }
             }
-            .onAppear { if settings.laag(.helikopters) { helis.start() } }
+            .onAppear { if settings.laag(.helikopters) { helis.start() }; volgGevraagd() }
+            .onChange(of: Router.shared.volgHeli) { _, _ in volgGevraagd() }
+            // Following a helicopter: the camera moves along with every new position, until the user moves the map.
+            .onChange(of: heli?.lat) { _, _ in
+                guard volgen, let h = heli else { return }
+                withAnimation(.easeInOut(duration: 1)) { position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 15000, longitudinalMeters: 15000)) }
+            }
+            .onMapCameraChange(frequency: .onEnd) { ctx in
+                if volgen, let h = heli, Werkgebied.distanceKm(ctx.region.center.latitude, ctx.region.center.longitude, h.lat, h.lon) > 3 { volgen = false }
+            }
             .onDisappear { if settings.laag(.helikopters) { helis.stop() } }
             .onChange(of: settings.laag(.helikopters)) { _, on in
                 if on { helis.start() } else { helis.stop(); selectedHeli = nil }

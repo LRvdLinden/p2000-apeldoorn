@@ -153,3 +153,55 @@ struct GealarmeerdeKazernesKaart: View {
         }
     }
 }
+
+/// Detail page: the Lifeliner (or Zulu) of this alert, live, with distance and "Volg op de kaart".
+struct HeliLiveKaart: View {
+    let melding: Melding
+    let heli: Helikopter?
+    var onVolg: ((String) -> Void)?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(heli?.naam ?? HeliKoppeling.genoemd(melding).map(HeliKoppeling.naam) ?? L("Traumahelikopter"))
+                .font(.headline).padding(.horizontal, 4)
+            VStack(alignment: .leading, spacing: 12) {
+                if let h = heli {
+                    HStack(spacing: 12) {
+                        Image(h.afbeelding).resizable().scaledToFit().frame(width: 84, height: 30)
+                            .scaleEffect(x: h.vliegtWest ? -1 : 1, y: 1)
+                        VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 6) {
+                                Text(h.naam).font(.body.weight(.semibold))
+                                Text(verbatim: "LIVE").font(.caption2.weight(.heavy)).foregroundStyle(.white)
+                                    .padding(.horizontal, 5).padding(.vertical, 1).background(Color.red, in: Capsule())
+                            }
+                            Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst]
+                                .compactMap { $0 }.joined(separator: " · "))
+                                .font(.footnote).foregroundStyle(.secondary)
+                            if let lat = melding.lat, let lon = melding.lon {
+                                let km = Werkgebied.distanceKm(h.lat, h.lon, lat, lon)
+                                let eta = h.snelheidKmh.flatMap { v in !h.opGrond && v > 40 ? Int((km / Double(v) * 60).rounded()) : nil }
+                                Text(Lf("%@ km van de melding", km.formatted(.number.precision(.fractionLength(1)))) + (eta.map { " · ± \($0) min" } ?? ""))
+                                    .font(.footnote.weight(.medium))
+                            }
+                        }
+                    }
+                    if let onVolg {
+                        Button { onVolg(h.id) } label: {
+                            Label(Lf("Volg %@ op de kaart", h.naam), systemImage: "scope").frame(maxWidth: .infinity)
+                        }
+                        .buttonStyle(.borderedProminent)
+                        .tint(h.color)
+                    }
+                } else {
+                    Text(L("De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms."))
+                        .font(.footnote).foregroundStyle(.secondary)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+            Text(L("Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.")).font(.footnote).foregroundStyle(.secondary).padding(.horizontal, 4)
+        }
+    }
+}

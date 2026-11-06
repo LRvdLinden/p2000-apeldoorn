@@ -85,6 +85,14 @@ final class Router {
     var presented: Melding?
     /// NL-Alert, Burgernet or KNMI warning opened from a push notification or a link.
     var presentedWaarschuwing: WaarschuwingRef?
+    /// Helicopter to follow on the map ("Volg Lifeliner 3 op de kaart" on an alert).
+    var volgHeli: String?
+
+    func volg(heli id: String) {
+        presented = nil
+        volgHeli = id
+        tab = .kaart
+    }
 
     func openWaarschuwing(id: String) {
         tab = .pager

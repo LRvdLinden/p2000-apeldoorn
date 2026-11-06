@@ -188,3 +188,24 @@ export function kazerneAnnotation(mk, k, color) {
   };
   return new mk.Annotation(new mk.Coordinate(k.lat, k.lon), factory, { calloutEnabled: false, title: k.naam });
 }
+
+// ------------------------------------------------------------------ helicopter of an alert (same rules as the apps)
+
+/** Helicopter id named in the call-out: "Traumaheli LifeLiner 3" → "lifeliner3", "Zulu 5" → "zulu05". */
+export function heliGenoemd(m) {
+  const tekst = [...(m.eenheden || []).map((u) => u.naam || ""), m.full_melding || "", m.title || ""].join(" ");
+  const ll = /life\s*liner\s*0?([1-4])/i.exec(tekst);
+  if (ll) return `lifeliner${ll[1]}`;
+  const z = /zulu\s*0?(\d{1,2})/i.exec(tekst);
+  return z ? `zulu${z[1].padStart(2, "0")}` : null;
+}
+export const heliNaam = (id) => id.replace(/^lifeliner/, "Lifeliner ").replace(/^zulu/, "Zulu ");
+export const heliRelevant = (m) => m.dienst === "traumaheli" || m.dienst === "lifeliner" || heliGenoemd(m) != null;
+/** The named helicopter, or for a trauma alert without a number the closest trauma helicopter in the air. */
+export function heliVoor(m, helis) {
+  const id = heliGenoemd(m);
+  if (id) return helis.find((h) => h.id === id) || null;
+  if (!heliRelevant(m) || m.lat == null) return null;
+  const best = helis.filter((h) => h.soort === "trauma").sort((a, b) => distanceKm(a, m) - distanceKm(b, m))[0];
+  return best && distanceKm(best, m) < 120 ? best : null;
+}

@@ -244,3 +244,40 @@ struct HeliInfoKaart: View {
         .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
+
+// MARK: - Helicopter of an alert
+
+/// The helicopter that belongs to an alert: the Lifeliner (or Zulu) named in the call-out ("Traumaheli LifeLiner 3"),
+/// or for a trauma alert without a number the trauma helicopter in the air closest to it.
+enum HeliKoppeling {
+    private static func eerste(_ pattern: String, in tekst: String) -> String? {
+        guard let re = try? NSRegularExpression(pattern: pattern, options: .caseInsensitive),
+              let m = re.firstMatch(in: tekst, range: NSRange(tekst.startIndex..., in: tekst)),
+              let r = Range(m.range(at: 1), in: tekst) else { return nil }
+        return String(tekst[r])
+    }
+
+    /// Helicopter id named in the alert ("lifeliner3", "zulu05").
+    static func genoemd(_ m: Melding) -> String? {
+        let tekst = (m.eenheden.compactMap(\.naam) + [m.fullMelding ?? "", m.title]).joined(separator: " ")
+        if let n = eerste("life\\s*liner\\s*0?([1-4])", in: tekst) { return "lifeliner\(n)" }
+        if let n = eerste("zulu\\s*0?(\\d{1,2})", in: tekst), let i = Int(n) { return String(format: "zulu%02d", i) }
+        return nil
+    }
+
+    static func naam(_ id: String) -> String {
+        id.hasPrefix("lifeliner") ? "Lifeliner \(id.dropFirst(9))" : id.hasPrefix("zulu") ? "Zulu \(id.dropFirst(4))" : id
+    }
+
+    /// Whether the detail page should follow helicopters for this alert.
+    static func relevant(_ m: Melding) -> Bool { m.dienst == .traumaheli || genoemd(m) != nil }
+
+    static func heli(voor m: Melding, in helis: [Helikopter]) -> Helikopter? {
+        if let id = genoemd(m) { return helis.first { $0.id == id } }
+        guard m.dienst == .traumaheli, let lat = m.lat, let lon = m.lon else { return nil }
+        return helis.filter(\.isTrauma)
+            .min { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < Werkgebied.distanceKm($1.lat, $1.lon, lat, lon) }
+            .flatMap { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < 120 ? $0 : nil }
+    }
+}
+

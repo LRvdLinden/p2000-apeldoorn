@@ -32,6 +32,10 @@ struct MeldingDetailView: View {
     @State private var toonRoute = false
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
+    @State private var helis = HeliStore.shared
+    private var heliRelevant: Bool { HeliKoppeling.relevant(melding) }
+    /// The Lifeliner/Zulu of this alert, live (nil when not in the air or not seen).
+    private var liveHeli: Helikopter? { heliRelevant ? HeliKoppeling.heli(voor: melding, in: helis.items) : nil }
 
     /// Visible map below the status bar: close to square (width × 0.9), at most 440 pt.
     private func mapHeight(_ width: CGFloat) -> CGFloat { min(max(width * 0.9, 300), 440) }
@@ -89,9 +93,16 @@ struct MeldingDetailView: View {
         .task(id: melding.guid) { await loadLookAround() }
         .task(id: melding.guid) {
             kazerneRoutes = await Aanrijtijd.routes(voor: melding)
-            if !kazerneRoutes.isEmpty, !drieD, !opMij { withAnimation(.easeInOut(duration: 0.6)) { position = .rect(routeRect) } }
+            if !kazerneRoutes.isEmpty || liveHeli != nil, !drieD, !opMij { withAnimation(.easeInOut(duration: 0.6)) { position = .rect(routeRect) } }
         }
         .task(id: melding.guid) { await loadWeather() }
+        .onAppear { if heliRelevant { helis.start() } }
+        .onDisappear { if heliRelevant { helis.stop() } }
+        .onChange(of: liveHeli?.id) { _, id in
+            // First position of the helicopter: show it together with the alert.
+            guard id != nil, !drieD, !opMij else { return }
+            withAnimation(.easeInOut(duration: 0.6)) { position = .rect(routeRect) }
+        }
     }
 
     private var content: some View {
@@ -102,6 +113,9 @@ struct MeldingDetailView: View {
                     incidentLine
                     mainCard
                     descriptionCard
+                    if heliRelevant {
+                        HeliLiveKaart(melding: melding, heli: liveHeli) { id in Router.shared.volg(heli: id); dismiss() }
+                    }
                     GealarmeerdeKazernesKaart(routes: kazerneRoutes)
                     VerloopKaart(melding: melding)
                     GerelateerdeWaarschuwingen(melding: melding)
@@ -159,6 +173,7 @@ struct MeldingDetailView: View {
     private var mapHeader: some View {
         Map(position: $position) {
             kazerneLaag
+            heliLaag
             Annotation(melding.title, coordinate: coordinate, anchor: .bottom) {
                 DienstMarker(dienst: melding.dienst, size: 52)
             }
@@ -219,9 +234,22 @@ struct MeldingDetailView: View {
         }
     }
 
-    /// The alert and its stations together in view.
+    /// The Lifeliner/Zulu of this alert, live, with a dashed line to the scene.
+    @MapContentBuilder private var heliLaag: some MapContent {
+        if let h = liveHeli {
+            MapPolyline(coordinates: [h.coordinate, coordinate])
+                .stroke(h.color, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [4, 6]))
+            Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                HeliMarker(heli: h, size: 22)
+                    .onTapGesture { Router.shared.volg(heli: h.id); dismiss() }
+            }
+            .annotationTitles(.hidden)
+        }
+    }
+
+    /// The alert, its stations and its helicopter together in view.
     private var routeRect: MKMapRect {
-        let pts = [MKMapPoint(coordinate)] + kazerneRoutes.map { MKMapPoint($0.kazerne.coordinate) }
+        let pts = [MKMapPoint(coordinate)] + kazerneRoutes.map { MKMapPoint($0.kazerne.coordinate) } + (liveHeli.map { [MKMapPoint($0.coordinate)] } ?? [])
         var rect = pts.map { MKMapRect(origin: $0, size: MKMapSize(width: 1, height: 1)) }.reduce(MKMapRect.null) { $0.union($1) }
         rect = rect.insetBy(dx: -max(rect.width * 0.3, 500), dy: -max(rect.height * 0.3, 500))
         return rect
@@ -241,7 +269,7 @@ struct MeldingDetailView: View {
         withAnimation(.easeInOut(duration: 0.6)) {
             position = drieD
                 ? .camera(MapCamera(centerCoordinate: coordinate, distance: 900, heading: 30, pitch: 65))
-                : (kazerneRoutes.isEmpty ? .region(startRegion) : .rect(routeRect))
+                : (kazerneRoutes.isEmpty && liveHeli == nil ? .region(startRegion) : .rect(routeRect))
         }
     }
 
