@@ -286,7 +286,7 @@ struct WaarschuwingMap: View {
                     .foregroundStyle(waarschuwing.color.opacity(0.22))
                     .stroke(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color, lineWidth: 2)
             }
-            if (waarschuwing.rings.isEmpty || waarschuwing.bron == .nlalert), let c = waarschuwing.coordinate {
+            if (waarschuwing.rings.isEmpty || waarschuwing.bron != .knmi), let c = waarschuwing.coordinate {
                 Annotation(waarschuwing.plaats ?? "", coordinate: c, anchor: .bottom) {
                     WaarschuwingMarker(waarschuwing: waarschuwing, size: 44)
                 }

@@ -1,7 +1,7 @@
 # Changelog
 
 ## A-Alerts 1.0.0 (build 15)
-- NL-Alert gebruikt nu je eigen artwork: de gele driehoek in de pager en de zwarte marker met gele driehoek op de kaart.
+- NL-Alert en Burgernet gebruiken nu je eigen artwork: in de pager de gele driehoek en het Burgernet-huisje, op de kaart de zwarte NL-Alert-marker en de blauwe Burgernet-marker.
 
 ## A-Alerts 1.0.0 (build 14) – testbuild fase 3
 - NL-Alert en Burgernet staan nu in de pager tussen de P2000-meldingen, met eigen kleur, icoon en status (actief/beëindigd).

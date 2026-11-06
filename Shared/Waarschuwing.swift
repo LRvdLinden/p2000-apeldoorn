@@ -272,9 +272,9 @@ struct WaarschuwingIcon: View {
     var size: CGFloat = 38
 
     var body: some View {
-        if waarschuwing.bron == .nlalert {
-            // Léon's own NL-Alert artwork (yellow triangle), like the discipline icons.
-            Image("icon_nlalert")
+        if waarschuwing.bron != .knmi {
+            // Léon's own artwork (NL-Alert triangle, Burgernet house), like the discipline icons.
+            Image(waarschuwing.bron == .nlalert ? "icon_nlalert" : "icon_burgernet")
                 .resizable()
                 .scaledToFit()
                 .frame(width: size, height: size)
@@ -300,17 +300,17 @@ struct WaarschuwingIcon: View {
     }
 }
 
-/// Map pin for a warning: NL-Alert uses its own marker artwork, others the icon in a pin.
+/// Map pin for a warning: NL-Alert and Burgernet use their own marker artwork, KNMI the icon.
 struct WaarschuwingMarker: View {
     let waarschuwing: Waarschuwing
     var size: CGFloat = 40
 
     var body: some View {
-        if waarschuwing.bron == .nlalert {
-            Image("marker_nlalert")
+        if waarschuwing.bron != .knmi {
+            Image(waarschuwing.bron == .nlalert ? "marker_nlalert" : "marker_burgernet")
                 .resizable()
                 .scaledToFit()
-                .frame(width: size * 300 / 368, height: size)
+                .frame(width: size * 0.82, height: size)
                 .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
                 .accessibilityLabel(Text(verbatim: waarschuwing.kop))
         } else {
