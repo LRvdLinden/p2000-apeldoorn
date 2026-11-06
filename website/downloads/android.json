@@ -1,1 +1,1 @@
-{"version":"2.0.0","build":8,"url":"https://a-alerts.nl/downloads/A-Alerts.apk","size":24787943,"sha256":"ecefd7355426221331199b726eb6e541c1bcb55cb479d8d6b2c4e3acdfcf4610","minAndroid":"7.0","notes":"Eerste beta van A-Alerts voor Android. Pushmeldingen volgen in een update."}
+{"version": "2.0.0", "build": 9, "url": "https://a-alerts.nl/downloads/A-Alerts.apk", "size": 24668352, "sha256": "ed5f7444959ac2e98863ba3d70eb33cad5b0f0f68b64c88f8aeda837b207da9f", "minAndroid": "7.0", "notes": "Eerste beta van A-Alerts voor Android, met pushmeldingen."}
