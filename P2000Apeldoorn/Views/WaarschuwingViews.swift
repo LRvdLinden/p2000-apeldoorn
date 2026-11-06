@@ -286,11 +286,11 @@ struct WaarschuwingMap: View {
                     .foregroundStyle(waarschuwing.color.opacity(0.22))
                     .stroke(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color, lineWidth: 2)
             }
-            if waarschuwing.rings.isEmpty, let c = waarschuwing.coordinate {
-                Annotation(waarschuwing.plaats ?? "", coordinate: c) {
-                    WaarschuwingIcon(waarschuwing: waarschuwing, size: 34)
-                        .shadow(radius: 3)
+            if (waarschuwing.rings.isEmpty || waarschuwing.bron == .nlalert), let c = waarschuwing.coordinate {
+                Annotation(waarschuwing.plaats ?? "", coordinate: c, anchor: .bottom) {
+                    WaarschuwingMarker(waarschuwing: waarschuwing, size: 44)
                 }
+                .annotationTitles(.hidden)
             }
             ForEach(meldingen.filter(\.hasCoordinate)) { m in
                 Annotation(m.title, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), anchor: .bottom) {

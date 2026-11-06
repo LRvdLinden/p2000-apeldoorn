@@ -272,6 +272,20 @@ struct WaarschuwingIcon: View {
     var size: CGFloat = 38
 
     var body: some View {
+        if waarschuwing.bron == .nlalert {
+            // Léon's own NL-Alert artwork (yellow triangle), like the discipline icons.
+            Image("icon_nlalert")
+                .resizable()
+                .scaledToFit()
+                .frame(width: size, height: size)
+                .opacity(waarschuwing.isBeeindigd ? 0.75 : 1)
+                .accessibilityLabel(Text(verbatim: waarschuwing.kop))
+        } else {
+            tile
+        }
+    }
+
+    private var tile: some View {
         ZStack {
             RoundedRectangle(cornerRadius: size * 0.24, style: .continuous)
                 .fill(waarschuwing.bron == .nlalert ? Color.black : waarschuwing.color)
@@ -283,5 +297,25 @@ struct WaarschuwingIcon: View {
         .frame(width: size, height: size)
         .opacity(waarschuwing.isBeeindigd ? 0.75 : 1)
         .accessibilityLabel(Text(verbatim: waarschuwing.kop))
+    }
+}
+
+/// Map pin for a warning: NL-Alert uses its own marker artwork, others the icon in a pin.
+struct WaarschuwingMarker: View {
+    let waarschuwing: Waarschuwing
+    var size: CGFloat = 40
+
+    var body: some View {
+        if waarschuwing.bron == .nlalert {
+            Image("marker_nlalert")
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 300 / 368, height: size)
+                .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
+                .accessibilityLabel(Text(verbatim: waarschuwing.kop))
+        } else {
+            WaarschuwingIcon(waarschuwing: waarschuwing, size: size * 0.8)
+                .shadow(radius: 3)
+        }
     }
 }
