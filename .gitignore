@@ -12,3 +12,6 @@ build/
 .swiftpm/
 .DS_Store
 website/data/
+
+# APK staat alleen op de server (niet in de repo)
+website/downloads/*.apk
