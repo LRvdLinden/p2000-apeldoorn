@@ -851,6 +851,23 @@
         }
       }
     },
+    "Buurtschappen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hamlets"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buurtschappen"
+          }
+        }
+      }
+    },
     "Capcode": {
       "extractionState": "manual",
       "localizations": {
@@ -2602,6 +2619,23 @@
         }
       }
     },
+    "Niets geselecteerd = alle plaatsen. Buurtschappen herken je aan de straat van de melding; meldingen zonder straat staan onder de plaats zelf.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing selected = all places. Hamlets are recognised by the street of the alert; alerts without a street are listed under the place itself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets geselecteerd = alle plaatsen. Buurtschappen herken je aan de straat van de melding; meldingen zonder straat staan onder de plaats zelf."
+          }
+        }
+      }
+    },
     "Niets gevonden.": {
       "extractionState": "manual",
       "localizations": {
@@ -3057,6 +3091,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plaatsen"
+          }
+        }
+      }
+    },
+    "Plaatsen en dorpen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Places and villages"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plaatsen en dorpen"
           }
         }
       }

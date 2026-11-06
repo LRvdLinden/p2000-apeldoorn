@@ -41,9 +41,14 @@ enum Config {
     static var version: String { Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0.0" }
     static var build: String { Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "1" }
 
-    /// The places in the municipality of Apeldoorn (same list as the website).
-    static let plaatsen = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek",
-                           "Lieren", "Loenen", "Radio Kootwijk", "Teuge", "Uddel", "Ugchelen", "Wenum-Wiesel"]
+    /// The 26 A-Alerts places: municipality of Apeldoorn + Teuge (see Werkgebied.json).
+    static var plaatsen: [String] { Werkgebied.shared.namen }
+    /// Grouped as in the settings: places and villages, then hamlets.
+    static var plaatsGroepen: [(titel: String, opties: [String])] {
+        let w = Werkgebied.shared.plaatsen
+        return [(L("Plaatsen en dorpen"), w.filter { $0.groep == "plaats" }.map(\.naam)),
+                (L("Buurtschappen"), w.filter { $0.groep != "plaats" }.map(\.naam))]
+    }
     static let prioriteiten = ["A0", "A1", "A2", "B1", "B2", "B3", "P1", "P2", "P3"]
     static let center = (lat: 52.2112, lon: 5.9699)
 }

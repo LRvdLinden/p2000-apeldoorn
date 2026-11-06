@@ -3,13 +3,13 @@
 
 export const TIME_ZONE = "Europe/Amsterdam";
 
-// Places in the municipality of Apeldoorn (same list as the website and the app).
-export const PLAATSEN = [
-  "Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek",
-  "Lieren", "Loenen", "Radio Kootwijk", "Teuge", "Uddel", "Ugchelen", "Wenum-Wiesel",
-];
-export const plaatsKey = (s) => String(s || "").toLowerCase().replace(/-/g, " ").replace(/\s+/g, " ").trim();
-export const PLAATS_KEYS = new Set(PLAATSEN.map(plaatsKey));
+import { PLAATS_NAMEN, WOONPLAATS_KEYS, matchesPlaatsen, plaatsKey } from "./werkgebied.js";
+
+// The 26 A-Alerts places (municipality of Apeldoorn + Teuge), see werkgebied.json.
+export const PLAATSEN = PLAATS_NAMEN;
+export { plaatsKey };
+// Town names P2000 can send for the working area (woonplaatsen and their spellings).
+export const PLAATS_KEYS = WOONPLAATS_KEYS;
 
 // ------------------------------------------------------------------ parsing
 
@@ -163,7 +163,7 @@ export function isQuiet(device, date = new Date()) {
 export function matches(device, m, date = new Date()) {
   if (!device.enabled) return false;
   if (device.diensten.length && !device.diensten.includes(m.dienst)) return false;
-  if (device.plaatsen.length && !device.plaatsen.some((p) => plaatsKey(p) === plaatsKey(m.stad))) return false;
+  if (!matchesPlaatsen(device.plaatsen, m)) return false;
   if (device.prioriteiten.length && !device.prioriteiten.includes(String(m.prioriteit || "").toUpperCase())) return false;
   if (device.radius_km > 0 && device.lat != null && device.lon != null) {
     if (m.lat == null || m.lon == null) return false;

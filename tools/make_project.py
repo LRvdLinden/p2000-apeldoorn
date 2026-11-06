@@ -82,7 +82,7 @@ app = {
     "INFOPLIST_KEY_CFBundleDisplayName": "A-Alerts",
     "INFOPLIST_KEY_LSApplicationCategoryType": "public.app-category.news",
     "INFOPLIST_KEY_NSFaceIDUsageDescription": "Gebruik Face ID om A-Alerts te ontgrendelen.",
-    "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "Je locatie wordt gebruikt om te tonen hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat.",
+    "INFOPLIST_KEY_NSLocationWhenInUseUsageDescription": "Je locatie wordt gebruikt om te tonen hoe ver een melding bij je vandaan is en, als je Mijn buurt aanzet, voor meldingen in jouw buurt. Daarvoor gaat alleen een afgeronde locatie (op ±100 m) naar onze server.",
     "INFOPLIST_KEY_NSHumanReadableCopyright": "© 2026 P2000 Apeldoorn · PixelForges",
     "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]": "YES",
     "INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]": "YES",

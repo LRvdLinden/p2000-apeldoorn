@@ -215,7 +215,7 @@ final class AppSettings {
     func matchesList(_ m: Melding) -> Bool {
         if !withinRadius(m) { return false }
         if !diensten.isEmpty, !diensten.contains(m.dienst.rawValue) { return false }
-        if !plaatsen.isEmpty, !plaatsen.contains(where: { $0.plaatsKey == (m.stad ?? "").plaatsKey }) { return false }
+        if !Werkgebied.shared.matches(m, selected: plaatsen) { return false }
         if !prioriteiten.isEmpty, !prioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
         return true
     }
@@ -224,7 +224,7 @@ final class AppSettings {
     func matchesNotification(_ m: Melding, at date: Date = .now) -> Bool {
         guard notificationsEnabled, withinRadius(m) else { return false }
         if !notifDiensten.isEmpty, !notifDiensten.contains(m.dienst.rawValue) { return false }
-        if !notifPlaatsen.isEmpty, !notifPlaatsen.contains(where: { $0.plaatsKey == (m.stad ?? "").plaatsKey }) { return false }
+        if !Werkgebied.shared.matches(m, selected: notifPlaatsen) { return false }
         if !notifPrioriteiten.isEmpty, !notifPrioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
         if isQuiet(at: date) && !(criticalAlerts && m.isUrgent) { return false }
         return true

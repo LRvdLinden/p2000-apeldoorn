@@ -310,28 +310,27 @@ struct MultiSelectView: View {
     @Binding var selection: Set<String>
     var icon: ((String) -> Dienst?)? = nil
     var footer: String = L("Tip: niets geselecteerd = alles tonen")
+    /// Optional grouping (e.g. "Plaatsen en dorpen" and "Buurtschappen"); the footer goes under the last group.
+    var groups: [(titel: String, opties: [String])]? = nil
 
     var body: some View {
         List {
-            Section {
-                ForEach(options, id: \.self) { option in
-                    Button {
-                        if selection.contains(option) { selection.remove(option) } else { selection.insert(option) }
-                    } label: {
-                        HStack(spacing: 12) {
-                            if let d = icon?(option) { DienstIcon(dienst: d, size: 26) }
-                            Text(label(option)).foregroundStyle(.primary)
-                            Spacer()
-                            if selection.contains(option) {
-                                Image(systemName: "checkmark").foregroundStyle(Theme.red).fontWeight(.semibold)
-                            }
-                        }
-                        .contentShape(Rectangle())
+            if let groups {
+                ForEach(Array(groups.enumerated()), id: \.offset) { index, group in
+                    Section {
+                        rows(group.opties)
+                    } header: {
+                        Text(group.titel)
+                    } footer: {
+                        if index == groups.count - 1 { Text(footer) }
                     }
-                    .buttonStyle(.plain)
                 }
-            } footer: {
-                Text(footer)
+            } else {
+                Section {
+                    rows(options)
+                } footer: {
+                    Text(footer)
+                }
             }
         }
         .navigationTitle(title)
@@ -341,6 +340,28 @@ struct MultiSelectView: View {
                     selection = selection.count == options.count ? [] : Set(options)
                 }
             }
+        }
+    }
+}
+
+extension MultiSelectView {
+    @ViewBuilder
+    fileprivate func rows(_ list: [String]) -> some View {
+        ForEach(list, id: \.self) { option in
+            Button {
+                if selection.contains(option) { selection.remove(option) } else { selection.insert(option) }
+            } label: {
+                HStack(spacing: 12) {
+                    if let d = icon?(option) { DienstIcon(dienst: d, size: 26) }
+                    Text(label(option)).foregroundStyle(.primary)
+                    Spacer()
+                    if selection.contains(option) {
+                        Image(systemName: "checkmark").foregroundStyle(Theme.red).fontWeight(.semibold)
+                    }
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
         }
     }
 }
@@ -370,7 +391,9 @@ struct FilterSettingsView: View {
             }
             Section {
                 NavigationLink {
-                    MultiSelectView(title: L("Plaatsen"), options: Config.plaatsen, selection: $settings.plaatsen)
+                    MultiSelectView(title: L("Plaatsen"), options: Config.plaatsen, selection: $settings.plaatsen,
+                                    footer: L("Niets geselecteerd = alle plaatsen. Buurtschappen herken je aan de straat van de melding; meldingen zonder straat staan onder de plaats zelf."),
+                                    groups: Config.plaatsGroepen)
                 } label: {
                     LabeledContent(L("Plaatsen"), value: AppSettings.summary(settings.plaatsen) { $0 })
                 }
@@ -447,7 +470,8 @@ struct NotificationSettingsView: View {
                 Section {
                     NavigationLink {
                         MultiSelectView(title: L("Plaatsen"), options: Config.plaatsen, selection: $settings.notifPlaatsen,
-                                        footer: L("Kies je plaatsen voor notificaties. Niets geselecteerd = alle plaatsen."))
+                                        footer: L("Kies je plaatsen voor notificaties. Niets geselecteerd = alle plaatsen."),
+                                        groups: Config.plaatsGroepen)
                     } label: {
                         LabeledContent(L("Plaatsen"), value: AppSettings.summary(settings.notifPlaatsen) { $0 })
                     }

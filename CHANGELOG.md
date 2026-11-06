@@ -1,5 +1,11 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 13) – testbuild fase 2
+- Nieuwe naam: P2000 Apeldoorn heet nu A-Alerts. Bundle ID's, app-groep, iCloud en push blijven hetzelfde, dus het is een gewone update.
+- Alle appiconen (iPhone/iPad licht, donker en getint, Mac en Apple Watch) zijn gemaakt uit de lagen van het Apple TV-icoon.
+- 26 plaatsen: de gemeente Apeldoorn met haar dorpen en buurtschappen, plus Teuge. Buurtschappen herkent de app aan de straat van de melding. Bestaande plaatskeuzes blijven staan.
+- Privacy-manifest en Engelse vertaling van de toestemmingsteksten toegevoegd.
+
 ## 1.0.1 (build 12) – 3 november 2026
 - METEO-gegevens: de app haalt het weer nu via de eigen API op, net als de website en Apple TV. WeatherKit in de app is alleen nog reserve. Daardoor staat het weer weer bij elke melding en is het overal hetzelfde.
 
