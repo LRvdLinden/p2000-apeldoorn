@@ -1,4 +1,7 @@
 import SwiftUI
+import os
+
+private let weerLog = Logger(subsystem: "nl.lrvdlinden.p2000apeldoorn", category: "weer")
 import MapKit
 import WeatherKit
 #if canImport(UIKit)
@@ -106,6 +109,7 @@ struct MeldingDetailView: View {
     }
 
     private var content: some View {
+        ScrollViewReader { proxy in
         ScrollView {
             VStack(spacing: 0) {
                 VStack(spacing: 16) {
@@ -123,12 +127,21 @@ struct MeldingDetailView: View {
                     if !melding.voertuigen.isEmpty { vehiclesCard }
                     if let meteo { meteoCard(meteo) }
                     dataCard
-                    footer
+                    footer.id("einde")
                 }
                 .padding(16)
                 .frame(maxWidth: 760)
                 .frame(maxWidth: .infinity)
             }
+        }
+        #if DEBUG
+        .task {
+            // Screenshots/diagnosis: -AAlertsScrollEnd YES scrolls to the end of the page.
+            guard UserDefaults.standard.bool(forKey: "AAlertsScrollEnd") else { return }
+            try? await Task.sleep(for: .seconds(14))
+            withAnimation { proxy.scrollTo("einde", anchor: .bottom) }
+        }
+        #endif
         }
     }
 
@@ -676,7 +689,9 @@ struct MeldingDetailView: View {
                           windSpeed: w.windSpeed, gust: nil)
         }
         // 1. Our API (WeatherKit REST via the Worker): the same weather as the website and Apple TV.
-        if let w = await P2000API.shared.weather(guid: melding.guid), let t = w.temperature {
+        let server = await P2000API.shared.weather(guid: melding.guid)
+        weerLog.notice("weer \(melding.guid, privacy: .public): server=\(server?.temperature.map { String($0) } ?? "nil", privacy: .public) cancelled=\(Task.isCancelled, privacy: .public)")
+        if let w = server, let t = w.temperature {
             meteo = Meteo(temperature: t,
                           feelsLike: w.apparent,
                           clouds: w.cloudCover.map { $0 * 100 },
@@ -685,6 +700,7 @@ struct MeldingDetailView: View {
                           gust: w.windGust,
                           symbol: Self.symbol(for: w.condition),
                           fromWeatherKit: true)
+            weerLog.notice("weer gezet: \(t, privacy: .public)")
             attribution = try? await WeatherService.shared.attribution
             return
         }
@@ -706,6 +722,7 @@ struct MeldingDetailView: View {
             attribution = try? await WeatherService.shared.attribution
         } catch {
             // Keep the weather that came with the alert (if any).
+            weerLog.error("weer WeatherKit fout: \(String(describing: error), privacy: .public)")
         }
     }
 
