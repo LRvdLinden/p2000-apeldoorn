@@ -11,13 +11,8 @@ for (const d of devices) {
   const dev = { ...d, plaatsen: arr(d.plaatsen), diensten: arr(d.diensten), prioriteiten: arr(d.prioriteiten) };
   const p = prefs.get(d.token);
   const prof = (p?.profielen || []).map((x) => ({ naam: x.naam, aan: x.aan ?? x.enabled, plaatsen: (x.plaatsen || []).length, diensten: x.diensten, prio: x.prioriteiten, tijd: x.tijd ?? x.van ?? null, dagen: x.dagen ?? null }));
-  const hits = meldingen.map((m) => ({ ...m, datum: Date.parse(m.datum_tijd) })).filter((m) => meldingWanted(dev, p, m, new Date(m.datum)));
-  let test = "";
-  try {
-    const r = await fetch(`https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/devices/${d.token}/test`, { method: "POST" });
-    const b = await r.json().catch(() => ({}));
-    test = `${r.status} ${b.status ?? ""} ${b.reason ?? ""}`;
-  } catch (e) { test = String(e.message); }
+  const hits = meldingen.map((m) => ({ ...m, eenheden: [], datum: Number(m.datum) })).filter((m) => meldingWanted(dev, p, m, new Date(m.datum)));
+  const test = "niet opnieuw";
   console.log(JSON.stringify({ toestel: d.token.slice(0, 6) + "…", platform: d.platform, env: d.environment, versie: d.app_version, aan: d.enabled,
     plaatsen: dev.plaatsen.length, diensten: dev.diensten, prio: dev.prioriteiten, stil: d.quiet, radius: d.radius_km, bijgewerkt: new Date(d.updated_at).toISOString(),
     profielen: prof, zouKrijgen: `${hits.length}/${meldingen.length}`, testpush: test }));

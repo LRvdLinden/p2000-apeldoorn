@@ -22,7 +22,8 @@ jobs:
           q() { npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const i=s.indexOf("[");console.log(JSON.stringify(JSON.parse(s.slice(i))[0].results))})'; }
           q "SELECT * FROM devices" > /tmp/devices.json
           q "SELECT * FROM device_prefs" > /tmp/prefs.json
-          q "SELECT guid, dienst, prioriteit, stad, locatie, lat, lon, datum_tijd FROM meldingen ORDER BY datum_tijd DESC LIMIT 40" > /tmp/meldingen.json
+          q "SELECT guid, dienst, prioriteit, stad, locatie, lat, lon, datum, created_at FROM meldingen ORDER BY datum DESC LIMIT 40" > /tmp/meldingen.json
+          echo "== vertraging (min) feed → worker, laatste 40"; node -e 'const m=require("/tmp/meldingen.json");console.log(m.map(x=>Math.round((x.created_at-x.datum)/60000)).join(" "))'
           echo "== outbox"; q "SELECT COUNT(*) n, MIN(created_at) oudste FROM outbox"
           echo "== feed"; q "SELECT key, value, at FROM kv WHERE key IN ('feed_ok','feed_error','warnings_status')"
           node ../tools/diagnose_push.mjs
