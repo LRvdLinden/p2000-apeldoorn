@@ -107,7 +107,7 @@ async function handle(req, env) {
   if (method === "GET" && path === "/v1/waarschuwingen") {
     return reply(200, await listWarnings(env, url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
   }
-  m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%]{4,160})$/);
+  m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})$/);
   if (method === "GET" && m) {
     const w = await getWarning(env, decodeURIComponent(m[1]));
     if (!w) return reply(404, { error: "Not found" });

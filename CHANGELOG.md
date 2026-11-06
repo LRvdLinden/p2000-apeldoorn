@@ -1,5 +1,13 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 14) – testbuild fase 3
+- NL-Alert en Burgernet staan nu in de pager tussen de P2000-meldingen, met eigen kleur, icoon en status (actief/beëindigd).
+- KNMI-weerwaarschuwingen (code geel, oranje, rood) verschijnen als gekleurde balk bovenaan de pager zolang ze gelden.
+- Detailpagina per waarschuwing: gebied op de kaart, oorspronkelijke tekst (met Engelse vertaling bij NL-Alert), tijden, officiële bron en de P2000-meldingen in het gebied rond dat tijdstip (als mogelijk verband).
+- Bij een P2000-melding zie je welke waarschuwing in dat gebied gold.
+- Filters voor NL-Alert, Burgernet en de KNMI-codes; pushmeldingen per bron en per KNMI-code (Instellingen › Notificaties › Waarschuwingen).
+- Het pagerlogo is nu het echte A-Alerts-icoon.
+
 ## A-Alerts 1.0.0 (build 13) – testbuild fase 2
 - Nieuwe naam: P2000 Apeldoorn heet nu A-Alerts. Bundle ID's, app-groep, iCloud en push blijven hetzelfde, dus het is een gewone update.
 - Alle appiconen (iPhone/iPad licht, donker en getint, Mac en Apple Watch) zijn gemaakt uit de lagen van het Apple TV-icoon.

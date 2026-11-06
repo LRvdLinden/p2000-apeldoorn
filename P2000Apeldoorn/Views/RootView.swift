@@ -31,6 +31,19 @@ struct RootView: View {
                     .frame(minWidth: 520, minHeight: 640)
                     #endif
                 }
+                .sheet(item: $router.presentedWaarschuwing) { ref in
+                    NavigationStack {
+                        WaarschuwingDetailView(id: ref.id)
+                            .toolbar {
+                                ToolbarItem(placement: .cancellationAction) {
+                                    Button(L("Sluit")) { router.presentedWaarschuwing = nil }
+                                }
+                            }
+                    }
+                    #if os(macOS)
+                    .frame(minWidth: 520, minHeight: 640)
+                    #endif
+                }
 
             if !settings.onboardingDone && !showSplash {
                 OnboardingView()
@@ -62,6 +75,7 @@ struct RootView: View {
             switch phase {
             case .active:
                 store.startPolling()
+                WaarschuwingStore.shared.startPolling()
                 location.start()
                 Task { await account.verifyCredential() }
                 InstallPing.send()
@@ -72,6 +86,7 @@ struct RootView: View {
                 lock.lockIfNeeded()
                 #if !os(macOS)
                 store.stopPolling()
+                WaarschuwingStore.shared.stopPolling()
                 #endif
             default:
                 reviewTask?.cancel()
@@ -86,7 +101,9 @@ struct RootView: View {
             if done { scheduleReview() }
         }
         .onOpenURL { url in
-            if let guid = AppGroup.guid(from: url) {
+            if url.host == "waarschuwing", url.lastPathComponent.count > 3 {
+                router.openWaarschuwing(id: url.lastPathComponent)
+            } else if let guid = AppGroup.guid(from: url) {
                 router.open(guid: guid)
             } else if url.host == "statistieken" {
                 router.tab = .statistieken

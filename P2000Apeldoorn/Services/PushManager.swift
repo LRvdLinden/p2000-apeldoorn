@@ -98,6 +98,12 @@ enum PushManager {
                 "quiet_from": s.quietFrom,
                 "quiet_to": s.quietTo,
                 "critical": s.criticalAlerts,
+                // A-Alerts: NL-Alert, Burgernet and KNMI (older servers ignore this).
+                "waarschuwingen": [
+                    "nlalert": s.pushNLAlert,
+                    "burgernet": s.pushBurgernet,
+                    "knmi": Array(s.pushKnmi).sorted(),
+                ] as [String: Any],
             ]
             if s.radiusEnabled, let c = s.radiusCenter {
                 settings["radius_km"] = s.radiusKm
@@ -124,6 +130,13 @@ enum PushManager {
         return (try? await P2000API.shared.sendTestPush(token: token)) != nil
     }
 
+    /// Set by the app; called with the warning id when an NL-Alert, Burgernet or KNMI notification is tapped.
+    static var openWaarschuwing: ((String) -> Void)?
+
+    static func waarschuwingID(from data: [AnyHashable: Any]) -> String? {
+        (data["waarschuwing"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+    }
+
     static func guid(from data: [AnyHashable: Any]) -> String? {
         for key in ["guid", "meldingId", "melding_id"] {
             if let v = data[key] as? String, !v.isEmpty { return v }
@@ -140,7 +153,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         // While the app is open the in-app alarm plays its own sound (once per alert), instead of the system sound.
         let content = notification.request.content
         let urgent = content.interruptionLevel == .timeSensitive || content.interruptionLevel == .critical
-        let guid = content.userInfo["guid"] as? String
+        let guid = (content.userInfo["guid"] as? String) ?? (content.userInfo["waarschuwing"] as? String)
         let handled = await MainActor.run { InAppAlarm.shared.handlePush(guid: guid, urgent: urgent) }
         return handled ? [.banner, .list] : [.banner, .sound, .list]
     }
@@ -148,7 +161,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
         let info = response.notification.request.content.userInfo
         await MainActor.run {
-            if let guid = PushManager.guid(from: info) { PushManager.openMelding?(guid) }
+            if let id = PushManager.waarschuwingID(from: info) { PushManager.openWaarschuwing?(id) }
+            else if let guid = PushManager.guid(from: info) { PushManager.openMelding?(guid) }
         }
     }
 }

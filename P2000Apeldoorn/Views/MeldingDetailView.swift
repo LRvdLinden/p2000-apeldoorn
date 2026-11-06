@@ -36,6 +36,7 @@ struct MeldingDetailView: View {
                     incidentLine
                     mainCard
                     descriptionCard
+                    GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }
                     if let meteo { meteoCard(meteo) }

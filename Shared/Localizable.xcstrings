@@ -222,6 +222,23 @@
         }
       }
     },
+    "%lld soorten waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld kinds of warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld soorten waarschuwingen"
+          }
+        }
+      }
+    },
     "%lld uur": {
       "extractionState": "manual",
       "localizations": {
@@ -307,6 +324,23 @@
         }
       }
     },
+    "A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A-Alerts complements NL-Alert and does not replace it. An NL-Alert also arrives directly on your phone. Always call 112 in an emergency."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
     "Aan": {
       "extractionState": "manual",
       "localizations": {
@@ -388,6 +422,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Account verwijderen?"
+          }
+        }
+      }
+    },
+    "Actief": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Active"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Actief"
+          }
+        }
+      }
+    },
+    "Afgelopen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgelopen"
           }
         }
       }
@@ -698,6 +766,23 @@
         }
       }
     },
+    "Bekijk de officiële bron": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View the official source"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk de officiële bron"
+          }
+        }
+      }
+    },
     "Bekijk op p2000.page": {
       "extractionState": "manual",
       "localizations": {
@@ -728,6 +813,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
+    "Bericht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bericht"
           }
         }
       }
@@ -817,6 +919,23 @@
         }
       }
     },
+    "Beëindigd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Beëindigd"
+          }
+        }
+      }
+    },
     "Brandweer": {
       "extractionState": "manual",
       "localizations": {
@@ -834,6 +953,23 @@
         }
       }
     },
+    "Bron: %@. Bel bij nood altijd 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: %@. Always call 112 in an emergency."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: %@. Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
     "Bron: p2000.page": {
       "extractionState": "manual",
       "localizations": {
@@ -847,6 +983,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron: p2000.page"
+          }
+        }
+      }
+    },
+    "Buiten het gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outside the area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buiten het gebied"
           }
         }
       }
@@ -932,6 +1085,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Changelog"
+          }
+        }
+      }
+    },
+    "Code geel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code yellow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code geel"
+          }
+        }
+      }
+    },
+    "Code geel, oranje en rood bij gevaarlijk weer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code yellow, orange and red for dangerous weather."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code geel, oranje en rood bij gevaarlijk weer."
+          }
+        }
+      }
+    },
+    "Code oranje": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code orange"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code oranje"
+          }
+        }
+      }
+    },
+    "Code rood": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code red"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code rood"
           }
         }
       }
@@ -1208,6 +1429,40 @@
         }
       }
     },
+    "Deze melding ligt in het gebied van de waarschuwing, rond het tijdstip waarop hij gold. Dit is een mogelijk verband, geen bevestiging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This alert lies in the area of the warning, around the time it applied. This is a possible link, not a confirmation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze melding ligt in het gebied van de waarschuwing, rond het tijdstip waarop hij gold. Dit is een mogelijk verband, geen bevestiging."
+          }
+        }
+      }
+    },
+    "Deze waarschuwing is niet meer beschikbaar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This warning is no longer available."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze waarschuwing is niet meer beschikbaar."
+          }
+        }
+      }
+    },
     "Discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -1429,6 +1684,40 @@
         }
       }
     },
+    "GRIP-melding in het gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GRIP alert in the area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "GRIP-melding in het gebied"
+          }
+        }
+      }
+    },
+    "Gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebied"
+          }
+        }
+      }
+    },
     "Gebruik mijn huidige locatie": {
       "extractionState": "manual",
       "localizations": {
@@ -1459,6 +1748,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gebruiksvoorwaarden"
+          }
+        }
+      }
+    },
+    "Geen P2000-meldingen gevonden in het gebied rond dit tijdstip.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No P2000 alerts found in the area around this time."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen P2000-meldingen gevonden in het gebied rond dit tijdstip."
           }
         }
       }
@@ -1531,6 +1837,74 @@
         }
       }
     },
+    "Gekoppelde incidenten (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Linked incidents (%lld)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekoppelde incidenten (%lld)"
+          }
+        }
+      }
+    },
+    "Geldig tot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valid until"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldig tot"
+          }
+        }
+      }
+    },
+    "Geldig tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valid until %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldig tot %@"
+          }
+        }
+      }
+    },
+    "Geldig vanaf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Valid from"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldig vanaf"
+          }
+        }
+      }
+    },
     "Geldt voor de lijst, de kaart, de widgets én je pushmeldingen.": {
       "extractionState": "manual",
       "localizations": {
@@ -1595,6 +1969,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geluid testen"
+          }
+        }
+      }
+    },
+    "Gemeente Apeldoorn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Municipality of Apeldoorn"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gemeente Apeldoorn"
           }
         }
       }
@@ -1769,6 +2160,23 @@
         }
       }
     },
+    "In het gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Inside the area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In het gebied"
+          }
+        }
+      }
+    },
     "Incident %@": {
       "extractionState": "manual",
       "localizations": {
@@ -1854,6 +2262,23 @@
         }
       }
     },
+    "Je krijgt alleen waarschuwingen die gelden voor de gemeente Apeldoorn en je gekozen plaatsen. Een NL-Alert komt ook rechtstreeks via je telefoon binnen; hier lees je hem terug en zie je het gebied op de kaart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You only get warnings that apply to the municipality of Apeldoorn and your chosen places. An NL-Alert also arrives directly on your phone; here you can read it back and see the area on the map."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je krijgt alleen waarschuwingen die gelden voor de gemeente Apeldoorn en je gekozen plaatsen. Een NL-Alert komt ook rechtstreeks via je telefoon binnen; hier lees je hem terug en zie je het gebied op de kaart."
+          }
+        }
+      }
+    },
     "Je krijgt een pushmelding zodra er een nieuwe melding is die bij je keuzes past.": {
       "extractionState": "manual",
       "localizations": {
@@ -1884,6 +2309,91 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts."
+          }
+        }
+      }
+    },
+    "Jouw locatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your location"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Jouw locatie"
+          }
+        }
+      }
+    },
+    "KNMI code geel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code yellow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code geel"
+          }
+        }
+      }
+    },
+    "KNMI code oranje": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code orange"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code oranje"
+          }
+        }
+      }
+    },
+    "KNMI code rood": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code red"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI code rood"
+          }
+        }
+      }
+    },
+    "KNMI-weerwaarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI weather warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI-weerwaarschuwingen"
           }
         }
       }
@@ -1986,6 +2496,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kies je plaatsen voor notificaties. Niets geselecteerd = alle plaatsen."
+          }
+        }
+      }
+    },
+    "Kies per code of je een melding wilt. Je krijgt een melding bij een nieuwe waarschuwing of als hij wordt opgeschaald, niet bij elke aanpassing. Bron: KNMI.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose per code whether you want a notification. You get one for a new warning or when it is raised, not for every change. Source: KNMI."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies per code of je een melding wilt. Je krijgt een melding bij een nieuwe waarschuwing of als hij wordt opgeschaald, niet bij elke aanpassing. Bron: KNMI."
           }
         }
       }
@@ -2568,6 +3095,40 @@
         }
       }
     },
+    "NL-Alert en Burgernet staan tussen de meldingen; KNMI-waarschuwingen staan als balk bovenaan.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert and Burgernet appear between the alerts; KNMI warnings appear as a bar at the top."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert en Burgernet staan tussen de meldingen; KNMI-waarschuwingen staan als balk bovenaan."
+          }
+        }
+      }
+    },
+    "NL-Alert, Burgernet en KNMI-weerwaarschuwingen voor de gemeente Apeldoorn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet and KNMI weather warnings for the municipality of Apeldoorn."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet en KNMI-weerwaarschuwingen voor de gemeente Apeldoorn."
+          }
+        }
+      }
+    },
     "Niet alle meldingen van politie en ambulance staan in de app, omdat deze niet altijd via het P2000-netwerk worden verstuurd.": {
       "extractionState": "manual",
       "localizations": {
@@ -2772,6 +3333,23 @@
         }
       }
     },
+    "Officiële bron": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Official source"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Officiële bron"
+          }
+        }
+      }
+    },
     "Offline": {
       "extractionState": "manual",
       "localizations": {
@@ -2802,6 +3380,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Onbekend"
+          }
+        }
+      }
+    },
+    "Onderneem actie: extreem weer met grote kans op schade en letsel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Take action: extreme weather with a high risk of damage and injury."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderneem actie: extreem weer met grote kans op schade en letsel."
           }
         }
       }
@@ -2887,6 +3482,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Oosten"
+          }
+        }
+      }
+    },
+    "Open de weerwaarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the weather warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open de weerwaarschuwing"
+          }
+        }
+      }
+    },
+    "Oproepen van de politie om mee te kijken, bijvoorbeeld bij een vermissing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police calls asking the public to look out, for example for a missing person."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oproepen van de politie om mee te kijken, bijvoorbeeld bij een vermissing."
           }
         }
       }
@@ -2993,6 +3622,23 @@
         }
       }
     },
+    "P2000-meldingen in het gebied van deze waarschuwing, rond het tijdstip waarop hij werd uitgezonden. Dit is een mogelijk verband, geen bevestiging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 alerts in the area of this warning, around the time it was issued. This is a possible link, not a confirmation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000-meldingen in het gebied van deze waarschuwing, rond het tijdstip waarop hij werd uitgezonden. Dit is een mogelijk verband, geen bevestiging."
+          }
+        }
+      }
+    },
     "Pager": {
       "extractionState": "manual",
       "localizations": {
@@ -3078,6 +3724,23 @@
         }
       }
     },
+    "Plaats": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plaats"
+          }
+        }
+      }
+    },
     "Plaatsen": {
       "extractionState": "manual",
       "localizations": {
@@ -3125,6 +3788,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Politie"
+          }
+        }
+      }
+    },
+    "Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police alerts in the same place around the time of the call. This is a possible link, not a confirmation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging."
           }
         }
       }
@@ -3656,6 +4336,40 @@
         }
       }
     },
+    "Toon Engelse tekst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show English text"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon Engelse tekst"
+          }
+        }
+      }
+    },
+    "Toon Nederlandse tekst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show Dutch text"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon Nederlandse tekst"
+          }
+        }
+      }
+    },
     "Toont de laatste P2000-meldingen in gem. Apeldoorn.": {
       "extractionState": "manual",
       "localizations": {
@@ -3741,6 +4455,23 @@
         }
       }
     },
+    "Uitgezonden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Broadcast"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitgezonden"
+          }
+        }
+      }
+    },
     "Uitloggen": {
       "extractionState": "manual",
       "localizations": {
@@ -3822,6 +4553,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vanaf"
+          }
+        }
+      }
+    },
+    "Vanaf %@ tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %@ until %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf %@ tot %@"
           }
         }
       }
@@ -4081,6 +4829,23 @@
         }
       }
     },
+    "Verwacht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Expected"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwacht"
+          }
+        }
+      }
+    },
     "Verwijder": {
       "extractionState": "manual",
       "localizations": {
@@ -4217,6 +4982,91 @@
         }
       }
     },
+    "Waarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwing"
+          }
+        }
+      }
+    },
+    "Waarschuwing niet gevonden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warning not found"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwing niet gevonden"
+          }
+        }
+      }
+    },
+    "Waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwingen"
+          }
+        }
+      }
+    },
+    "Waarschuwingen in dit gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Warnings in this area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwingen in dit gebied"
+          }
+        }
+      }
+    },
+    "Waarschuwingen van de overheid bij noodsituaties, zoals een grote brand of gevaarlijke stoffen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Government warnings in emergencies, such as a major fire or hazardous substances."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschuwingen van de overheid bij noodsituaties, zoals een grote brand of gevaarlijke stoffen."
+          }
+        }
+      }
+    },
     "Waarvoor": {
       "extractionState": "manual",
       "localizations": {
@@ -4247,6 +5097,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weergave"
+          }
+        }
+      }
+    },
+    "Wees alert: het weer kan gevaarlijk zijn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be alert: the weather may be dangerous."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wees alert: het weer kan gevaarlijk zijn."
+          }
+        }
+      }
+    },
+    "Wees voorbereid: grote kans op gevaar, schade en overlast.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Be prepared: high risk of danger, damage and disruption."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wees voorbereid: grote kans op gevaar, schade en overlast."
           }
         }
       }

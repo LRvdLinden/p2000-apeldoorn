@@ -36,6 +36,11 @@ struct P2000API: Sendable {
         return try JSONDecoder().decode(T.self, from: data)
     }
 
+    /// GET a path under the API base and decode it (used by extensions in other files).
+    func getJSON<T: Decodable>(_ path: String, as type: T.Type) async throws -> T {
+        try await get(url(path), as: type)
+    }
+
     @discardableResult
     private func send(_ method: String, _ url: URL, json: [String: Any]? = nil) async throws -> Data {
         var request = URLRequest(url: url)

@@ -19,6 +19,16 @@ final class AppSettings {
     /// "Verberg bekeken meldingen" (same option as the website).
     var hideRead: Bool = false { didSet { save(.hideRead, hideRead) } }
 
+    // MARK: Warnings (A-Alerts)
+    /// List filter for NL-Alert, Burgernet and KNMI ("nlalert", "burgernet", "knmi:yellow" …). Empty = all.
+    var waarschuwingFilter: Set<String> = [] { didSet { save(.waarschuwingFilter, Array(waarschuwingFilter).sorted()) } }
+    /// Push for new NL-Alerts in the working area.
+    var pushNLAlert: Bool = true { didSet { save(.pushNLAlert, pushNLAlert); notificationsChanged() } }
+    /// Push for Burgernet calls (optional, off by default).
+    var pushBurgernet: Bool = false { didSet { save(.pushBurgernet, pushBurgernet); notificationsChanged() } }
+    /// KNMI codes that give a push: "yellow", "orange", "red".
+    var pushKnmi: Set<String> = ["orange", "red"] { didSet { save(.pushKnmi, Array(pushKnmi).sorted()); notificationsChanged() } }
+
     // MARK: Appearance
     /// "systeem", "licht" or "donker".
     var appearance: String = "systeem" { didSet { save(.appearance, appearance) } }
@@ -63,6 +73,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
+        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi
 
         var synced: Bool {
             switch self {
@@ -154,6 +165,10 @@ final class AppSettings {
         if let v = source(Key.fixedLat.storageKey) as? Double { fixedLat = v }
         if let v = source(Key.fixedLon.storageKey) as? Double { fixedLon = v }
         if let v = source(Key.fixedName.storageKey) as? String { fixedName = v }
+        if let v = set(.waarschuwingFilter) { waarschuwingFilter = v }
+        if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
+        if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
+        if let v = set(.pushKnmi) { pushKnmi = v }
     }
 
     private func save(_ key: Key, _ value: Any) {
@@ -181,13 +196,16 @@ final class AppSettings {
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
         radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
+        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]
         isLoading = false
         onNotificationSettingsChanged?()
     }
 
     // MARK: - Filtering
 
-    var listFilterActive: Bool { !diensten.isEmpty || !plaatsen.isEmpty || !prioriteiten.isEmpty || radiusActive }
+    var listFilterActive: Bool {
+        !diensten.isEmpty || !plaatsen.isEmpty || !prioriteiten.isEmpty || radiusActive || !waarschuwingFilter.isEmpty
+    }
 
     /// Centre of the radius (current location or fixed point), if known.
     var radiusCenter: (lat: Double, lon: Double)? {
@@ -217,6 +235,21 @@ final class AppSettings {
         if !diensten.isEmpty, !diensten.contains(m.dienst.rawValue) { return false }
         if !Werkgebied.shared.matches(m, selected: plaatsen) { return false }
         if !prioriteiten.isEmpty, !prioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
+        return true
+    }
+
+    /// NL-Alert, Burgernet and KNMI follow the warning filter, the places and the radius.
+    func matchesList(_ w: Waarschuwing) -> Bool {
+        if !waarschuwingFilter.isEmpty, !waarschuwingFilter.contains(w.filterKey), !waarschuwingFilter.contains(w.bron.rawValue) { return false }
+        if !plaatsen.isEmpty, !plaatsen.contains(where: { w.covers(plaats: $0) }) { return false }
+        if radiusEnabled, let c = radiusCenter {
+            if w.bron == .burgernet || w.gebied == nil {
+                guard let lat = w.lat, let lon = w.lon, Self.distanceKm(c.lat, c.lon, lat, lon) <= radiusKm + 2 else { return false }
+            } else if !w.contains(lat: c.lat, lon: c.lon),
+                      !(w.gebied ?? []).contains(where: { Werkgebied.distanceToRingKm($0, c.lat, c.lon) <= radiusKm }) {
+                return false
+            }
+        }
         return true
     }
 

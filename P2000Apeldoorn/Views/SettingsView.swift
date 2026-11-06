@@ -412,6 +412,7 @@ struct FilterSettingsView: View {
                     LabeledContent(L("Mijn buurt"), value: settings.radiusEnabled ? Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1)))) : L("Uit"))
                 }
             }
+            WaarschuwingFilterSection()
             if settings.listFilterActive {
                 Section {
                     Button(L("Wis alle filters"), role: .destructive) {
@@ -419,6 +420,7 @@ struct FilterSettingsView: View {
                         settings.plaatsen = []
                         settings.prioriteiten = []
                         settings.radiusEnabled = false
+                        settings.waarschuwingFilter = []
                     }
                 }
             }
@@ -439,6 +441,14 @@ struct FilterSettingsView: View {
 
 struct NotificationSettingsView: View {
     @Environment(AppSettings.self) private var settings
+
+    private var waarschuwingSummary: String {
+        var parts: [String] = []
+        if settings.pushNLAlert { parts.append("NL-Alert") }
+        if settings.pushBurgernet { parts.append("Burgernet") }
+        if !settings.pushKnmi.isEmpty { parts.append("KNMI") }
+        return parts.isEmpty ? L("Uit") : parts.joined(separator: ", ")
+    }
     @State private var denied = false
     @State private var testState: TestState = .idle
 
@@ -494,6 +504,16 @@ struct NotificationSettingsView: View {
                     }
                 } header: {
                     Text(L("Waarvoor"))
+                }
+
+                Section {
+                    NavigationLink {
+                        WaarschuwingenSettingsView()
+                    } label: {
+                        LabeledContent(L("Waarschuwingen"), value: waarschuwingSummary)
+                    }
+                } footer: {
+                    Text(L("NL-Alert, Burgernet en KNMI-weerwaarschuwingen voor de gemeente Apeldoorn."))
                 }
 
                 Section {

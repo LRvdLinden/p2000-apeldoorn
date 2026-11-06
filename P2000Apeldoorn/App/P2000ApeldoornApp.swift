@@ -29,6 +29,7 @@ struct P2000ApeldoornApp: App {
                 .environment(lock)
                 .environment(location)
                 .environment(router)
+                .environment(WaarschuwingStore.shared)
                 .preferredColorScheme(colorScheme)
                 .tint(Theme.red)
         }
@@ -51,6 +52,7 @@ struct P2000ApeldoornApp: App {
                 .environment(lock)
                 .environment(location)
                 .environment(router)
+                .environment(WaarschuwingStore.shared)
                 .frame(width: 520, height: 640)
                 .preferredColorScheme(colorScheme)
                 .tint(Theme.red)
@@ -80,6 +82,13 @@ final class Router {
     var tab: Destination = .pager
     /// Alert opened from a push notification or the map.
     var presented: Melding?
+    /// NL-Alert, Burgernet or KNMI warning opened from a push notification or a link.
+    var presentedWaarschuwing: WaarschuwingRef?
+
+    func openWaarschuwing(id: String) {
+        tab = .pager
+        presentedWaarschuwing = WaarschuwingRef(id: id)
+    }
 
     func open(guid: String) {
         Task {
@@ -97,6 +106,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         MainActor.assumeIsolated {
             PushManager.openMelding = { Router.shared.open(guid: $0) }
+            PushManager.openWaarschuwing = { Router.shared.openWaarschuwing(id: $0) }
             PushManager.start()
             ReviewManager.registerLaunch()
         }
@@ -116,6 +126,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         MainActor.assumeIsolated {
             PushManager.openMelding = { Router.shared.open(guid: $0) }
+            PushManager.openWaarschuwing = { Router.shared.openWaarschuwing(id: $0) }
             PushManager.start()
             ReviewManager.registerLaunch()
         }
@@ -132,3 +143,8 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }
 }
 #endif
+
+/// Identifiable wrapper so a warning id can drive a sheet.
+struct WaarschuwingRef: Identifiable, Hashable {
+    let id: String
+}

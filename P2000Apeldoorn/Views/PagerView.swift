@@ -5,6 +5,7 @@ struct PagerView: View {
     @Environment(MeldingStore.self) private var store
     @Environment(AppSettings.self) private var settings
     @Environment(LocationManager.self) private var location
+    @Environment(WaarschuwingStore.self) private var warnings
 
     enum Scope: String, CaseIterable, Identifiable {
         case alle, bewaard
@@ -20,6 +21,15 @@ struct PagerView: View {
     private var list: [Melding] {
         store.filtered(settings, search: search, onlyBewaard: scope == .bewaard)
     }
+
+    /// P2000 alerts with NL-Alert and Burgernet in between, newest first (bewaard: alerts only).
+    private var items: [PagerItem] {
+        var all = list.map(PagerItem.melding)
+        if scope == .alle { all += warnings.pager(settings, search: search).map(PagerItem.waarschuwing) }
+        return all.sorted { $0.date > $1.date }
+    }
+
+    private var knmi: [Waarschuwing] { scope == .alle ? warnings.knmiBanner(settings) : [] }
 
     var body: some View {
         NavigationSplitView {
@@ -50,7 +60,12 @@ struct PagerView: View {
                 }
                 .navigationSplitViewColumnWidth(min: 340, ideal: 400, max: 520)
         } detail: {
-            if let selection, let melding = store.meldingen.first(where: { $0.guid == selection }) {
+            if let selection, selection.hasPrefix("w:") {
+                NavigationStack {
+                    WaarschuwingDetailView(id: String(selection.dropFirst(2)))
+                }
+                .id(selection)
+            } else if let selection, let melding = store.meldingen.first(where: { $0.guid == selection }) {
                 NavigationStack {
                     MeldingDetailView(melding: melding)
                 }
@@ -78,6 +93,12 @@ struct PagerView: View {
                 .labelsHidden()
                 .listRowBackground(Color.clear)
                 .listRowSeparator(.hidden)
+                if !knmi.isEmpty {
+                    KnmiBanner(items: knmi) { selection = $0.selectionTag }
+                        .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                }
                 if settings.listFilterActive && scope == .alle {
                     ActiveFilterBar(showFilters: $showFilters)
                         .listRowBackground(Color.clear)
@@ -85,12 +106,12 @@ struct PagerView: View {
                 }
             }
 
-            if list.isEmpty {
+            if items.isEmpty {
                 emptyState
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
             } else if settings.groupByDay {
-                ForEach(MeldingStore.groupedByDay(list), id: \.day) { group in
+                ForEach(PagerItem.groupedByDay(items), id: \.day) { group in
                     Section {
                         rows(group.items)
                     } header: {
@@ -98,7 +119,7 @@ struct PagerView: View {
                     }
                 }
             } else {
-                Section { rows(list) }
+                Section { rows(items) }
             }
 
             Section {
@@ -112,11 +133,27 @@ struct PagerView: View {
         #else
         .listStyle(.inset)
         #endif
-        .animation(.default, value: list.map(\.guid))
+        .animation(.default, value: items.map(\.id))
     }
 
-    private func rows(_ items: [Melding]) -> some View {
-        ForEach(items) { m in
+    private func rows(_ items: [PagerItem]) -> some View {
+        ForEach(items) { item in
+            switch item {
+            case .melding(let m): meldingRow(m)
+            case .waarschuwing(let w):
+                WaarschuwingRow(waarschuwing: w)
+                    .tag(w.selectionTag)
+                    .contextMenu {
+                        if let link = w.link, let url = URL(string: link) {
+                            Link(destination: url) { Label(L("Bekijk de officiële bron"), systemImage: "safari") }
+                        }
+                    }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func meldingRow(_ m: Melding) -> some View {
             MeldingRow(melding: m, distance: location.distance(to: m), bewaard: settings.bewaard.contains(m.guid),
                        gelezen: settings.isRead(m))
                 .tag(m.guid)
@@ -141,7 +178,6 @@ struct PagerView: View {
                         Link(destination: url) { Label(L("Bekijk op p2000.page"), systemImage: "safari") }
                     }
                 }
-        }
     }
 
     @ViewBuilder
@@ -276,6 +312,7 @@ struct ActiveFilterBar: View {
                 settings.plaatsen = []
                 settings.prioriteiten = []
                 settings.radiusEnabled = false
+                settings.waarschuwingFilter = []
             }
             .font(.callout.weight(.semibold))
         }
@@ -292,6 +329,7 @@ struct ActiveFilterBar: View {
         if !settings.plaatsen.isEmpty { parts.append(Lf("%lld plaatsen", settings.plaatsen.count)) }
         if !settings.prioriteiten.isEmpty { parts.append(settings.prioriteiten.sorted().joined(separator: ", ")) }
         if settings.radiusActive { parts.append(Lf("binnen %@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1))))) }
+        if !settings.waarschuwingFilter.isEmpty { parts.append(Lf("%lld soorten waarschuwingen", settings.waarschuwingFilter.count)) }
         return parts.joined(separator: " · ")
     }
 }
@@ -353,5 +391,36 @@ struct MeldingRow: View {
         .opacity(gelezen ? 0.5 : 1)
         .accessibilityElement(children: .combine)
         .accessibilityValue(gelezen ? L("Gelezen") : "")
+    }
+}
+
+// MARK: - Combined timeline
+
+/// One entry in the pager: a P2000 alert or an NL-Alert / Burgernet warning.
+enum PagerItem: Identifiable, Equatable {
+    case melding(Melding)
+    case waarschuwing(Waarschuwing)
+
+    var id: String {
+        switch self {
+        case .melding(let m): return m.guid
+        case .waarschuwing(let w): return w.selectionTag
+        }
+    }
+
+    var date: Date {
+        switch self {
+        case .melding(let m): return m.datum
+        case .waarschuwing(let w): return w.start
+        }
+    }
+
+    static func == (a: PagerItem, b: PagerItem) -> Bool { a.id == b.id }
+
+    /// Groups by calendar day, newest day first.
+    static func groupedByDay(_ list: [PagerItem]) -> [(day: Date, items: [PagerItem])] {
+        let cal = Calendar.current
+        let groups = Dictionary(grouping: list) { cal.startOfDay(for: $0.date) }
+        return groups.keys.sorted(by: >).map { ($0, groups[$0]!.sorted { $0.date > $1.date }) }
     }
 }
