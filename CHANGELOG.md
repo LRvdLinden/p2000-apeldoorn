@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 16)
+- Nieuwe typografie: alle titels in Social Gothic, overige tekst in Poppins (Light voor lopende tekst), op iPhone, iPad, Mac, Apple TV, Apple Watch en in de widgets. Navigatietitels, tabbalk en segmentknoppen gebruiken dezelfde fonts. Teksten schalen mee met de systeemtekstgrootte.
+
 ## A-Alerts 1.0.0 (build 15)
 - NL-Alert en Burgernet gebruiken nu je eigen artwork: in de pager de gele driehoek en het Burgernet-huisje, op de kaart de zwarte NL-Alert-marker en de blauwe Burgernet-marker.
 

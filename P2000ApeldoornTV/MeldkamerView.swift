@@ -72,12 +72,12 @@ struct MeldkamerView: View {
                 ForEach(Dienst.selectable) { d in
                     HStack(spacing: 8) {
                         DienstIcon(dienst: d, size: 28)
-                        Text("\(mapped.filter { $0.dienst == d }.count)").font(.system(size: 24, weight: .bold).monospacedDigit())
+                        Text("\(mapped.filter { $0.dienst == d }.count)").font(AppFont.body(24, .bold).monospacedDigit())
                     }
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .background(.ultraThinMaterial, in: Capsule())
                 }
-                Text(L("Laatste 24 uur")).font(.system(size: 20, weight: .semibold))
+                Text(L("Laatste 24 uur")).font(AppFont.body(20, .semibold))
                     .padding(.horizontal, 16).padding(.vertical, 10)
                     .background(.ultraThinMaterial, in: Capsule())
             }
@@ -101,11 +101,11 @@ struct MeldkamerView: View {
                     if m.isRecent { LivePill() }
                     Text(m.agoText).foregroundStyle(.secondary)
                 }
-                .font(.system(size: 20, weight: .semibold))
-                Text(m.title).font(.system(size: 30, weight: .heavy)).lineLimit(2)
-                Text(m.plaatsText).font(.system(size: 22, weight: .medium)).foregroundStyle(.secondary)
+                .font(AppFont.body(20, .semibold))
+                Text(m.title).font(AppFont.heading(30)).lineLimit(2)
+                Text(m.plaatsText).font(AppFont.body(22, .medium)).foregroundStyle(.secondary)
                 if !m.prioriteitText.isEmpty {
-                    Text(m.prioriteitText).font(.system(size: 22, weight: .semibold)).foregroundStyle(m.dienst.textColor)
+                    Text(m.prioriteitText).font(AppFont.body(22, .semibold)).foregroundStyle(m.dienst.textColor)
                 }
             }
         }
@@ -158,10 +158,10 @@ struct MeldkamerView: View {
             HStack(alignment: .center, spacing: 14) {
                 AppMark(size: 60)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(verbatim: "A-Alerts").font(.system(size: 28, weight: .black)).lineLimit(1).minimumScaleFactor(0.7)
+                    Text(verbatim: "A-Alerts").font(AppFont.heading(28)).lineLimit(1).minimumScaleFactor(0.7)
                     HStack(spacing: 8) {
                         LiveDot(online: store.isOnline)
-                        Text(store.isOnline ? L("Meldkamer · live") : L("Offline")).font(.system(size: 18, weight: .medium))
+                        Text(store.isOnline ? L("Meldkamer · live") : L("Offline")).font(AppFont.body(18, .medium))
                             .foregroundStyle(.secondary).lineLimit(1)
                     }
                 }
@@ -178,7 +178,7 @@ struct MeldkamerView: View {
                 }
             }
 
-            Text(L("Laatste meldingen")).font(.system(size: 22, weight: .semibold)).foregroundStyle(.secondary)
+            Text(L("Laatste meldingen")).font(AppFont.body(22, .semibold)).foregroundStyle(.secondary)
             ScrollView {
                 LazyVStack(spacing: 14) {
                     ForEach(items.prefix(40)) { m in
@@ -229,7 +229,7 @@ struct LivePill: View {
     @State private var blink = false
     var body: some View {
         Text("LIVE")
-            .font(.system(size: 14, weight: .black))
+            .font(AppFont.heading(14))
             .padding(.horizontal, 8).padding(.vertical, 3)
             .background(Theme.red, in: Capsule())
             .foregroundStyle(.white)
@@ -250,8 +250,8 @@ struct TodayTile: View {
             if let icon { DienstIcon(dienst: icon, size: 26) } else {
                 Image(systemName: "calendar").font(.system(size: 22)).foregroundStyle(color).frame(height: 26)
             }
-            Text("\(value)").font(.system(size: 32, weight: .black).monospacedDigit()).contentTransition(.numericText())
-            Text(label).font(.system(size: 15, weight: .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
+            Text("\(value)").font(AppFont.heading(32).monospacedDigit()).contentTransition(.numericText())
+            Text(label).font(AppFont.body(15, .semibold)).foregroundStyle(.secondary).lineLimit(1).minimumScaleFactor(0.7)
         }
         .frame(maxWidth: .infinity)
         .padding(.vertical, 10)
@@ -270,12 +270,12 @@ struct TVRow: View {
                 HStack(spacing: 10) {
                     if melding.isRecent { LivePill() }
                     Text("\(melding.agoText) · \(melding.datum.formatted(date: .omitted, time: .shortened))")
-                        .font(.system(size: 16)).foregroundStyle(.secondary)
+                        .font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
                 }
-                Text(melding.title).font(.system(size: 22, weight: .semibold)).lineLimit(2)
-                Text(melding.plaatsText).font(.system(size: 16)).foregroundStyle(.secondary)
+                Text(melding.title).font(AppFont.body(22, .semibold)).lineLimit(2)
+                Text(melding.plaatsText).font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
                 if !melding.prioriteitText.isEmpty {
-                    Text(melding.prioriteitText).font(.system(size: 16, weight: .semibold)).foregroundStyle(melding.dienst.textColor).lineLimit(1)
+                    Text(melding.prioriteitText).font(AppFont.body(16, .semibold)).foregroundStyle(melding.dienst.textColor).lineLimit(1)
                 }
             }
             Spacer(minLength: 0)

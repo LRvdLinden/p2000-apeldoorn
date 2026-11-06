@@ -416,9 +416,9 @@ struct MeldingDetailView: View {
                 } else {
                     // Attribution could not be loaded from WeatherKit in the app: show the required mark and link anyway.
                     HStack(spacing: 8) {
-                        Text(" Weather").font(.caption2.weight(.semibold))
+                        Text(" Weather").font(AppFont.body(11, .semibold, relativeTo: .caption2))
                         Link(L("Overige gegevensbronnen"), destination: URL(string: "https://weatherkit.apple.com/legal-attribution.html")!)
-                            .font(.caption2)
+                            .font(AppFont.body(11, .regular, relativeTo: .caption2))
                     }
                     .frame(maxWidth: .infinity)
                     .padding(.top, 4)
@@ -453,10 +453,10 @@ struct MeldingDetailView: View {
         HStack(spacing: 8) {
             AsyncImage(url: colorScheme == .dark ? a.combinedMarkDarkURL : a.combinedMarkLightURL) { image in
                 image.resizable().scaledToFit()
-            } placeholder: { Text(" Weather").font(.caption2.weight(.semibold)) }
+            } placeholder: { Text(" Weather").font(AppFont.body(11, .semibold, relativeTo: .caption2)) }
             .frame(height: 12)
             Link(L("Overige gegevensbronnen"), destination: a.legalPageURL)
-                .font(.caption2)
+                .font(AppFont.body(11, .regular, relativeTo: .caption2))
         }
         .frame(maxWidth: .infinity)
         .padding(.top, 4)
@@ -616,7 +616,7 @@ struct Card<Content: View>: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Label(title, systemImage: icon)
-                .font(.headline)
+                .font(AppFont.heading(18, relativeTo: .headline))
             content
         }
         .padding(16)

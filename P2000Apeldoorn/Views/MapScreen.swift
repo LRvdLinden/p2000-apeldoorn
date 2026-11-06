@@ -127,7 +127,7 @@ struct MapScreen: View {
                     } label: {
                         HStack(spacing: 4) {
                             DienstIcon(dienst: d, size: 14)
-                            Text("\(count(d))").font(.caption.weight(.bold).monospacedDigit())
+                            Text("\(count(d))").font(AppFont.body(12, .bold, relativeTo: .caption).monospacedDigit())
                         }
                         .padding(.horizontal, 9).padding(.vertical, 5)
                         .background(on ? d.color.opacity(0.22) : Color.secondary.opacity(0.08), in: Capsule())
@@ -211,7 +211,7 @@ struct MapPreviewCard: View {
                 } label: {
                     Label(L("Details"), systemImage: "chevron.right")
                         .labelStyle(.titleAndIcon)
-                        .font(.callout.weight(.semibold))
+                        .font(AppFont.body(16, .semibold, relativeTo: .callout))
                 }
             }
             .padding(.top, 6)

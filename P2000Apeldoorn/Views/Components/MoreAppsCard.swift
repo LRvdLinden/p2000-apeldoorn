@@ -63,23 +63,23 @@ struct MoreAppsCard: View {
                         .strokeBorder(Brand.line, lineWidth: 1))
                 VStack(alignment: .leading, spacing: 3) {
                     Text(text.title)
-                        .font(.headline)
+                        .font(AppFont.heading(18, relativeTo: .headline))
                         .foregroundStyle(Brand.accent)
                         .fixedSize(horizontal: false, vertical: true)
                     Text(text.subtitle)
-                        .font(.subheadline)
+                        .font(AppFont.body(15, .regular, relativeTo: .subheadline))
                         .foregroundStyle(Brand.muted)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
                 VStack(spacing: 4) {
                     Text(text.action)
-                        .font(.subheadline.weight(.bold))
+                        .font(AppFont.body(15, .bold, relativeTo: .subheadline))
                         .foregroundStyle(Brand.onAccent)
                         .padding(.horizontal, 14).padding(.vertical, 6)
                         .background(Brand.accent, in: Capsule())
                     Text("lrvdlinden.app")
-                        .font(.caption2)
+                        .font(AppFont.body(11, .regular, relativeTo: .caption2))
                         .foregroundStyle(Brand.muted)
                         .lineLimit(1)
                 }

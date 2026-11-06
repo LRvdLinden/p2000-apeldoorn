@@ -57,15 +57,15 @@ struct SplashView: View {
                 VStack(spacing: 4) {
                     Text(verbatim: "A-Alerts")
                         #if os(watchOS)
-                        .font(.headline.weight(.black))
+                        .font(AppFont.heading(18, relativeTo: .headline))
                         #else
-                        .font(.largeTitle.weight(.black))
+                        .font(AppFont.heading(34, relativeTo: .largeTitle))
                         #endif
                         .foregroundStyle(.white)
                         .opacity(textIn ? 1 : 0)
                         .offset(y: textIn ? 0 : 14)
                     Text(L("LIVE MELDINGEN"))
-                        .font(.caption.weight(.bold))
+                        .font(AppFont.body(12, .bold, relativeTo: .caption))
                         .tracking(tagIn ? 5 : 14)
                         .foregroundStyle(.white.opacity(0.85))
                         .opacity(tagIn ? 1 : 0)

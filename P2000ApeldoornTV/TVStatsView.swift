@@ -15,18 +15,18 @@ struct TVStatsView: View {
                 }
                 let diff = t.totaal - y.totaalTotNu
                 Text(Lf("Gisteren om deze tijd: %lld meldingen", y.totaalTotNu))
-                    .font(.system(size: 22)).foregroundStyle(.secondary)
+                    .font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
                 Text(diff == 0 ? "=" : (diff > 0 ? "+\(diff)" : "−\(-diff)"))
-                    .font(.system(size: 40, weight: .black))
+                    .font(AppFont.heading(40))
                     .foregroundStyle(diff > 0 ? Theme.red : (diff < 0 ? .green : .secondary))
                 VStack(spacing: 16) {
                     ForEach(Dienst.selectable) { d in
                         HStack(spacing: 18) {
                             DienstIcon(dienst: d, size: 40)
-                            Text(d == .traumaheli ? L("Lifeliner") : d.label).font(.system(size: 24, weight: .semibold))
+                            Text(d == .traumaheli ? L("Lifeliner") : d.label).font(AppFont.body(24, .semibold))
                             Spacer()
-                            Text("\(t.perDienst[d] ?? 0)").font(.system(size: 32, weight: .black).monospacedDigit())
-                            Text("/ \(y.perDienst[d] ?? 0)").font(.system(size: 22).monospacedDigit()).foregroundStyle(.secondary)
+                            Text("\(t.perDienst[d] ?? 0)").font(AppFont.heading(32).monospacedDigit())
+                            Text("/ \(y.perDienst[d] ?? 0)").font(AppFont.body(22, .regular).monospacedDigit()).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -34,7 +34,7 @@ struct TVStatsView: View {
             .frame(width: 640)
 
             VStack(alignment: .leading, spacing: 20) {
-                Text(L("Per uur van de dag")).font(.system(size: 26, weight: .heavy))
+                Text(L("Per uur van de dag")).font(AppFont.heading(26))
                 Chart {
                     ForEach(0..<24, id: \.self) { h in
                         BarMark(x: .value(L("Uur"), h), y: .value(L("Aantal"), y.perUur[h]))
@@ -55,9 +55,9 @@ struct TVStatsView: View {
                 .frame(height: 520)
                 let top = t.perCategorie.sorted { $0.value > $1.value }.prefix(5)
                 if !top.isEmpty {
-                    Text(L("Meest voorkomend vandaag")).font(.system(size: 26, weight: .heavy)).padding(.top, 10)
+                    Text(L("Meest voorkomend vandaag")).font(AppFont.heading(26)).padding(.top, 10)
                     ForEach(Array(top), id: \.key) { item in
-                        HStack { Text(item.key); Spacer(); Text("\(item.value)").bold() }.font(.system(size: 20))
+                        HStack { Text(item.key); Spacer(); Text("\(item.value)").bold() }.font(AppFont.body(20, .regular))
                     }
                 }
             }
@@ -68,8 +68,8 @@ struct TVStatsView: View {
 
     private func big(_ title: String, _ value: Int, _ color: Color) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(title.uppercased()).font(.system(size: 20, weight: .black)).foregroundStyle(color)
-            Text("\(value)").font(.system(size: 90, weight: .black, design: .rounded)).contentTransition(.numericText())
+            Text(title.uppercased()).font(AppFont.heading(20)).foregroundStyle(color)
+            Text("\(value)").font(AppFont.heading(90)).contentTransition(.numericText())
         }
         .padding(28)
         .frame(maxWidth: .infinity, alignment: .leading)

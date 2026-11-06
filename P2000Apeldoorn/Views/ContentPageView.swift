@@ -58,7 +58,7 @@ struct ChangelogView: View {
             ForEach(entries) { entry in
                 Section {
                     Text(Self.plainText(entry.content ?? ""))
-                        .font(.callout)
+                        .font(AppFont.body(16, .light, relativeTo: .callout))
                 } header: {
                     HStack {
                         Text(entry.title ?? L("Update"))

@@ -205,12 +205,12 @@ struct SettingsView: View {
                         .font(.system(size: 40))
                         .foregroundStyle(Theme.red)
                     VStack(alignment: .leading, spacing: 2) {
-                        Text(account.displayName).font(.headline)
+                        Text(account.displayName).font(AppFont.heading(18, relativeTo: .headline))
                         if let email = account.email, email != account.displayName {
-                            Text(email).font(.caption).foregroundStyle(.secondary)
+                            Text(email).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
                         }
                         Label(L("Gesynchroniseerd via iCloud"), systemImage: "icloud.fill")
-                            .font(.caption)
+                            .font(AppFont.body(12, .regular, relativeTo: .caption))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -220,7 +220,7 @@ struct SettingsView: View {
             } else {
                 VStack(alignment: .leading, spacing: 10) {
                     Text(L("Log in met Apple om je instellingen en bewaarde meldingen op al je apparaten gelijk te houden."))
-                        .font(.callout)
+                        .font(AppFont.body(16, .light, relativeTo: .callout))
                         .foregroundStyle(.secondary)
                     SignInWithAppleButton(.signIn) { request in
                         account.configure(request)
@@ -230,7 +230,7 @@ struct SettingsView: View {
                     .frame(height: 46)
                     .signInWithAppleButtonStyle(.black)
                     if let signInError {
-                        Text(signInError).font(.caption).foregroundStyle(.red)
+                        Text(signInError).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.red)
                     }
                 }
                 .padding(.vertical, 4)
@@ -267,7 +267,7 @@ struct SettingsView: View {
             Text(Lf("Versie %@ (%@)", Config.version, Config.build))
             Link(L("Bron: p2000.page"), destination: Config.source)
         }
-        .font(.caption)
+        .font(AppFont.body(12, .regular, relativeTo: .caption))
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity)
         .multilineTextAlignment(.center)

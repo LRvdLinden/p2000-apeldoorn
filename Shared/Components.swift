@@ -113,7 +113,7 @@ struct ClusterMarker: View {
         DienstMarker(dienst: cluster.hoofdDienst, size: size, selected: selected)
             .overlay(alignment: .topTrailing) {
                 Text("\(cluster.meldingen.count)")
-                    .font(.system(size: size * 0.3, weight: .heavy).monospacedDigit())
+                    .font(AppFont.heading(size * 0.3).monospacedDigit())
                     .foregroundStyle(.white)
                     .lineLimit(1)
                     .fixedSize()
@@ -135,7 +135,7 @@ struct PrioBadge: View {
     var body: some View {
         if let p = melding.prioriteit, !p.isEmpty, p.lowercased() != "onbekend" {
             Text(p.uppercased())
-                .font(.caption2.weight(.heavy))
+                .font(AppFont.body(11, .bold, relativeTo: .caption2))
                 .monospaced()
                 .padding(.horizontal, 6).padding(.vertical, 2)
                 .foregroundStyle(.white)

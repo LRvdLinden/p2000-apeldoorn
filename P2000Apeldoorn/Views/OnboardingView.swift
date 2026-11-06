@@ -46,7 +46,7 @@ struct OnboardingView: View {
                     if page < 2 { withAnimation { page += 1 } } else { finish() }
                 } label: {
                     Text(page < 2 ? L("Volgende") : L("Start"))
-                        .font(.headline)
+                        .font(AppFont.heading(18, relativeTo: .headline))
                         .frame(maxWidth: 420)
                         .padding(.vertical, 15)
                         .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
@@ -75,7 +75,7 @@ struct OnboardingView: View {
                         DienstIcon(dienst: d, size: 34)
                             .padding(10)
                             .background(.white, in: Circle())
-                        Text(d.label).font(.caption2.weight(.semibold)).foregroundStyle(.white)
+                        Text(d.label).font(AppFont.body(11, .semibold, relativeTo: .caption2)).foregroundStyle(.white)
                     }
                 }
             }
@@ -91,7 +91,7 @@ struct OnboardingView: View {
             } label: {
                 Label(settings.notificationsEnabled ? L("Pushmeldingen staan aan") : L("Pushmeldingen aanzetten"),
                       systemImage: settings.notificationsEnabled ? "checkmark.circle.fill" : "bell")
-                    .font(.headline)
+                    .font(AppFont.heading(18, relativeTo: .headline))
                     .padding(.horizontal, 20).padding(.vertical, 12)
                     .background(.white.opacity(0.18), in: Capsule())
                     .overlay(Capsule().strokeBorder(.white.opacity(0.6)))
@@ -109,7 +109,7 @@ struct OnboardingView: View {
             VStack(spacing: 10) {
                 if account.isSignedIn {
                     Label(Lf("Ingelogd als %@", account.displayName), systemImage: "person.crop.circle.badge.checkmark")
-                        .font(.headline)
+                        .font(AppFont.heading(18, relativeTo: .headline))
                         .foregroundStyle(.white)
                 } else {
                     SignInWithAppleButton(.signIn) { request in
@@ -121,7 +121,7 @@ struct OnboardingView: View {
                     .frame(maxWidth: 320)
                     .frame(height: 50)
                     if let error {
-                        Text(error).font(.footnote).foregroundStyle(.white.opacity(0.9))
+                        Text(error).font(AppFont.body(13, .regular, relativeTo: .footnote)).foregroundStyle(.white.opacity(0.9))
                     }
                 }
             }
@@ -144,11 +144,11 @@ struct OnboardingView: View {
                 Spacer(minLength: 40)
                 icon()
                 Text(title)
-                    .font(.title.weight(.black))
+                    .font(AppFont.heading(28, relativeTo: .title))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white)
                 Text(text)
-                    .font(.body)
+                    .font(AppFont.body(17, .light, relativeTo: .body))
                     .multilineTextAlignment(.center)
                     .foregroundStyle(.white.opacity(0.88))
                     .frame(maxWidth: 460)

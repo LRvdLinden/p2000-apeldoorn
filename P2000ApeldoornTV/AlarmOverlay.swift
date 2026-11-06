@@ -27,27 +27,27 @@ struct AlarmOverlay: View {
                         Image(systemName: "light.beacon.max.fill").font(.system(size: 54))
                             .symbolEffect(.pulse, options: .repeating)
                         Text(melding.isUrgent ? L("SPOED") : L("NIEUWE MELDING"))
-                            .font(.system(size: 54, weight: .black))
+                            .font(AppFont.heading(54))
                     }
                     HStack(spacing: 22) {
                         DienstIcon(dienst: melding.dienst, size: 110)
                             .padding(16)
                             .background(.white, in: RoundedRectangle(cornerRadius: 30, style: .continuous))
                         VStack(alignment: .leading, spacing: 8) {
-                            Text(melding.dienst.label).font(.system(size: 44, weight: .heavy))
+                            Text(melding.dienst.label).font(AppFont.heading(44))
                             if let p = melding.prioriteit, !p.isEmpty {
-                                Text(Lf("Prioriteit %@", p)).font(.system(size: 36, weight: .bold))
+                                Text(Lf("Prioriteit %@", p)).font(AppFont.body(36, .bold))
                                     .padding(.horizontal, 18).padding(.vertical, 6)
                                     .background(.black.opacity(0.35), in: Capsule())
                             }
                         }
                     }
-                    Text(melding.title).font(.system(size: 64, weight: .black)).lineLimit(3).minimumScaleFactor(0.6)
-                    Label(melding.plaatsText, systemImage: "mappin.and.ellipse").font(.system(size: 40, weight: .bold))
+                    Text(melding.title).font(AppFont.heading(64)).lineLimit(3).minimumScaleFactor(0.6)
+                    Label(melding.plaatsText, systemImage: "mappin.and.ellipse").font(AppFont.body(40, .bold))
                     if let c = melding.categorie, !c.isEmpty {
-                        Text(c).font(.system(size: 34, weight: .semibold)).opacity(0.85)
+                        Text(c).font(AppFont.body(34, .semibold)).opacity(0.85)
                     }
-                    Text(melding.datum.formatted(date: .omitted, time: .standard)).font(.system(size: 34, weight: .semibold).monospacedDigit()).opacity(0.8)
+                    Text(melding.datum.formatted(date: .omitted, time: .standard)).font(AppFont.body(34, .semibold).monospacedDigit()).opacity(0.8)
                 }
                 .foregroundStyle(.white)
                 .frame(maxWidth: .infinity, alignment: .leading)

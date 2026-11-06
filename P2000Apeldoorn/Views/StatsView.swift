@@ -24,7 +24,7 @@ struct StatsView: View {
                     Link(destination: Config.source) {
                         Text(L("Bron: p2000.page"))
                     }
-                    .font(.caption)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity)
                 }
@@ -54,7 +54,7 @@ struct StatsView: View {
             HStack(spacing: 8) {
                 DeltaBadge(diff: diff)
                 Text(Lf("Gisteren om deze tijd: %lld meldingen", y.totaalTotNu))
-                    .font(.callout)
+                    .font(AppFont.body(16, .light, relativeTo: .callout))
                     .foregroundStyle(.secondary)
             }
         }
@@ -62,12 +62,12 @@ struct StatsView: View {
 
     private func totalTile(_ title: String, date: Date, value: Int, tint: Color) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(title).font(.caption.weight(.bold)).textCase(.uppercase).foregroundStyle(tint)
+            Text(title).font(AppFont.body(12, .bold, relativeTo: .caption)).textCase(.uppercase).foregroundStyle(tint)
             Text("\(value)")
-                .font(.system(size: 40, weight: .black, design: .rounded))
+                .font(AppFont.heading(40))
                 .contentTransition(.numericText())
             Text(date.formatted(.dateTime.weekday(.wide).day().month(.wide)))
-                .font(.caption).foregroundStyle(.secondary)
+                .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(12)
@@ -84,15 +84,15 @@ struct StatsView: View {
                     HStack(spacing: 10) {
                         DienstIcon(dienst: d, size: 26)
                         Text(d == .traumaheli ? L("Lifeliner") : d.label)
-                            .font(.callout.weight(.semibold)).lineLimit(1)
+                            .font(AppFont.body(16, .semibold, relativeTo: .callout)).lineLimit(1)
                         Spacer()
-                        Text("\(a)").font(.title3.weight(.bold).monospacedDigit())
-                        Text("/ \(b)").font(.callout.monospacedDigit()).foregroundStyle(.secondary)
+                        Text("\(a)").font(AppFont.heading(20, relativeTo: .title3).monospacedDigit())
+                        Text("/ \(b)").font(AppFont.body(16, .light, relativeTo: .callout).monospacedDigit()).foregroundStyle(.secondary)
                         DeltaBadge(diff: a - b, compact: true)
                     }
                 }
                 Text(L("Vandaag / gisteren (hele dag)"))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
@@ -130,7 +130,7 @@ struct StatsView: View {
             .frame(height: 190)
             if let peak = t.perUur.enumerated().max(by: { $0.element < $1.element }), peak.element > 0 {
                 Text(Lf("Drukste uur vandaag: %@ (%lld meldingen)", String(format: "%02d:00", peak.offset), peak.element))
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
             }
         }
     }
@@ -178,10 +178,10 @@ struct StatsView: View {
                     ForEach(Array(top), id: \.key) { item in
                         VStack(alignment: .leading, spacing: 3) {
                             HStack {
-                                Text(item.key).font(.callout).lineLimit(1)
+                                Text(item.key).font(AppFont.body(16, .light, relativeTo: .callout)).lineLimit(1)
                                 Spacer()
-                                Text("\(item.a)").font(.callout.weight(.semibold).monospacedDigit())
-                                Text("/ \(item.b)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                                Text("\(item.a)").font(AppFont.body(16, .semibold, relativeTo: .callout).monospacedDigit())
+                                Text("/ \(item.b)").font(AppFont.body(12, .regular, relativeTo: .caption).monospacedDigit()).foregroundStyle(.secondary)
                             }
                             bar(Double(item.a) / maxValue, Theme.red)
                             bar(Double(item.b) / maxValue, yesterdayColor)
@@ -204,7 +204,7 @@ struct StatsView: View {
 
     private var emptyText: some View {
         Text(L("Nog geen meldingen"))
-            .font(.callout).foregroundStyle(.secondary)
+            .font(AppFont.body(16, .light, relativeTo: .callout)).foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, minHeight: 60)
     }
 }

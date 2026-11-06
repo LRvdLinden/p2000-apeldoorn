@@ -208,7 +208,7 @@ struct PagerView: View {
                 Text(L("Bron: p2000.page"))
             }
         }
-        .font(.caption)
+        .font(AppFont.body(12, .regular, relativeTo: .caption))
         .foregroundStyle(.secondary)
         .frame(maxWidth: .infinity)
         .padding(.vertical, 8)
@@ -227,16 +227,16 @@ struct StatusHeader: View {
                 AppMark(size: 46)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: "A-Alerts")
-                        .font(.headline.weight(.black))
+                        .font(AppFont.heading(18, relativeTo: .headline))
                     HStack(spacing: 6) {
                         LiveDot(online: store.isOnline)
                         Text(store.isOnline ? L("Online") : L("Offline"))
-                            .font(.caption.weight(.semibold))
+                            .font(AppFont.body(12, .semibold, relativeTo: .caption))
                             .foregroundStyle(store.isOnline ? Theme.online : Theme.red)
                         if let updated = store.lastUpdated {
                             TimelineView(.periodic(from: .now, by: 15)) { ctx in
                                 Text("· " + Lf("bijgewerkt %@", Fmt.agoShort(updated, now: ctx.date)))
-                                    .font(.caption)
+                                    .font(AppFont.body(12, .regular, relativeTo: .caption))
                                     .foregroundStyle(.secondary)
                             }
                         }
@@ -246,9 +246,9 @@ struct StatusHeader: View {
                 TimelineView(.periodic(from: .now, by: 1)) { ctx in
                     VStack(alignment: .trailing, spacing: 0) {
                         Text(ctx.date.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits)))
-                            .font(.title3.weight(.bold).monospacedDigit())
+                            .font(AppFont.heading(20, relativeTo: .title3).monospacedDigit())
                         Text(ctx.date.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)))
-                            .font(.caption2)
+                            .font(AppFont.body(11, .regular, relativeTo: .caption2))
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -283,10 +283,10 @@ struct TodayStrip: View {
                     .frame(height: 18)
             }
             Text("\(value)")
-                .font(.headline.monospacedDigit())
+                .font(AppFont.heading(18, relativeTo: .headline).monospacedDigit())
                 .contentTransition(.numericText())
             Text(label)
-                .font(.system(size: 9, weight: .semibold))
+                .font(AppFont.body(9, .semibold))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
@@ -314,9 +314,9 @@ struct ActiveFilterBar: View {
                 settings.radiusEnabled = false
                 settings.waarschuwingFilter = []
             }
-            .font(.callout.weight(.semibold))
+            .font(AppFont.body(16, .semibold, relativeTo: .callout))
         }
-        .font(.callout)
+        .font(AppFont.body(16, .light, relativeTo: .callout))
         .padding(.horizontal, 12).padding(.vertical, 8)
         .background(Theme.red.opacity(0.12), in: Capsule())
         .contentShape(Capsule())
@@ -352,7 +352,7 @@ struct MeldingRow: View {
                     TimelineView(.periodic(from: .now, by: 30)) { ctx in
                         Text("\(Fmt.ago(melding.datum, now: ctx.date)) - \(Fmt.time(melding.datum))")
                     }
-                    .font(.caption)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
                     Spacer(minLength: 4)
                     if bewaard {
@@ -361,12 +361,12 @@ struct MeldingRow: View {
                     if melding.views > 0 {
                         Label("\(melding.views)x", systemImage: "eye")
                             .labelStyle(.titleAndIcon)
-                            .font(.caption2.weight(.semibold))
+                            .font(AppFont.body(11, .semibold, relativeTo: .caption2))
                             .foregroundStyle(.secondary)
                     }
                 }
                 Text(melding.title)
-                    .font(.subheadline.weight(.bold))
+                    .font(AppFont.body(15, .bold, relativeTo: .subheadline))
                     .foregroundStyle(.primary)
                     .lineLimit(2)
                 HStack(spacing: 4) {
@@ -376,11 +376,11 @@ struct MeldingRow: View {
                         Text("· " + Fmt.distance(distance))
                     }
                 }
-                .font(.caption)
+                .font(AppFont.body(12, .regular, relativeTo: .caption))
                 .foregroundStyle(.secondary)
                 if !melding.prioriteitText.isEmpty {
                     Text(melding.prioriteitText)
-                        .font(.caption.weight(.semibold))
+                        .font(AppFont.body(12, .semibold, relativeTo: .caption))
                         .foregroundStyle(melding.isUrgent ? Theme.red : melding.dienst.textColor)
                         .lineLimit(1)
                 }

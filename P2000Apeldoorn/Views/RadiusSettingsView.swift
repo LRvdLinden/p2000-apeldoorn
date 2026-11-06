@@ -47,7 +47,7 @@ struct RadiusSettingsView: View {
                             Text(L("Radius"))
                             Spacer()
                             Text(Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(settings.radiusKm < 10 ? 1 : 0)))))
-                                .font(.body.weight(.semibold).monospacedDigit())
+                                .font(AppFont.body(17, .semibold, relativeTo: .body).monospacedDigit())
                                 .foregroundStyle(Theme.red)
                         }
                         Slider(value: Binding(get: { settings.radiusKm }, set: { settings.radiusKm = $0; recenter() }),
@@ -73,7 +73,7 @@ struct RadiusSettingsView: View {
                             if searching { ProgressView() }
                         }
                         if let searchError {
-                            Text(searchError).font(.caption).foregroundStyle(.red)
+                            Text(searchError).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.red)
                         }
                         Button {
                             if let loc = location.location {

@@ -6,11 +6,14 @@ struct P2000ApeldoornWatchApp: App {
     @State private var store = MeldingStore.shared
     @State private var settings = AppSettings.shared
 
+    init() { AppFont.register() }
+
     var body: some Scene {
         WindowGroup {
             WatchRootView()
                 .environment(store)
                 .environment(settings)
+                .font(AppFont.body(16, .regular))
                 .tint(Theme.red)
         }
     }
@@ -94,14 +97,14 @@ struct WatchRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 TimelineView(.periodic(from: .now, by: 60)) { ctx in
                     Text("\(Fmt.time(melding.datum)) · \(Fmt.agoShort(melding.datum, now: ctx.date))")
-                        .font(.caption2)
+                        .font(AppFont.body(11, .regular, relativeTo: .caption2))
                         .foregroundStyle(.secondary)
                 }
                 Text(melding.title)
-                    .font(.footnote.weight(.semibold))
+                    .font(AppFont.body(13, .semibold, relativeTo: .footnote))
                     .lineLimit(3)
                 Text(melding.plaatsText)
-                    .font(.caption2)
+                    .font(AppFont.body(11, .regular, relativeTo: .caption2))
                     .foregroundStyle(melding.dienst.textColor)
                     .lineLimit(1)
             }
@@ -120,16 +123,16 @@ struct WatchDetailView: View {
                 HStack {
                     DienstIcon(dienst: melding.dienst, size: 30)
                     VStack(alignment: .leading) {
-                        Text(melding.dienst.label).font(.headline)
+                        Text(melding.dienst.label).font(AppFont.heading(18, relativeTo: .headline))
                         PrioBadge(melding: melding)
                     }
                 }
-                Text(melding.title).font(.body.weight(.semibold))
+                Text(melding.title).font(AppFont.body(17, .semibold, relativeTo: .body))
                 if !melding.prioriteitText.isEmpty {
-                    Text(melding.prioriteitText).font(.footnote).foregroundStyle(melding.isUrgent ? Theme.red : .secondary)
+                    Text(melding.prioriteitText).font(AppFont.body(13, .regular, relativeTo: .footnote)).foregroundStyle(melding.isUrgent ? Theme.red : .secondary)
                 }
-                Label(melding.plaatsText, systemImage: "mappin").font(.footnote)
-                Label(Fmt.dayTime(melding.datum), systemImage: "clock").font(.footnote)
+                Label(melding.plaatsText, systemImage: "mappin").font(AppFont.body(13, .regular, relativeTo: .footnote))
+                Label(Fmt.dayTime(melding.datum), systemImage: "clock").font(AppFont.body(13, .regular, relativeTo: .footnote))
                 if melding.hasCoordinate, let lat = melding.lat, let lon = melding.lon {
                     let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
                     Map(initialPosition: .region(MKCoordinateRegion(center: coord, latitudinalMeters: 1500, longitudinalMeters: 1500))) {
@@ -141,9 +144,9 @@ struct WatchDetailView: View {
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 if !melding.eenheden.isEmpty {
-                    Text(L("Eenheden")).font(.caption.weight(.bold)).padding(.top, 4)
+                    Text(L("Eenheden")).font(AppFont.body(12, .bold, relativeTo: .caption)).padding(.top, 4)
                     ForEach(Array(melding.eenheden.enumerated()), id: \.offset) { _, e in
-                        Text(e.naam ?? e.code ?? "").font(.caption2)
+                        Text(e.naam ?? e.code ?? "").font(AppFont.body(11, .regular, relativeTo: .caption2))
                     }
                 }
                 Button {
@@ -172,17 +175,17 @@ struct WatchStatsView: View {
         ScrollView {
                 VStack(spacing: 10) {
                     Text("\(today.totaal)")
-                        .font(.system(size: 44, weight: .black, design: .rounded))
-                    Text(L("meldingen vandaag")).font(.footnote).foregroundStyle(.secondary)
+                        .font(AppFont.heading(44))
+                    Text(L("meldingen vandaag")).font(AppFont.body(13, .regular, relativeTo: .footnote)).foregroundStyle(.secondary)
                     Text(Lf("Gisteren: %lld (om deze tijd %lld)", yesterday.totaal, yesterday.totaalTotNu))
-                        .font(.caption2).foregroundStyle(.secondary)
+                        .font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary)
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                         ForEach(Dienst.selectable) { d in
                             VStack(spacing: 4) {
                                 DienstIcon(dienst: d, size: 22)
-                                Text("\(today.perDienst[d] ?? 0)").font(.headline.monospacedDigit())
-                                Text(Lf("gisteren %lld", yesterday.perDienst[d] ?? 0)).font(.system(size: 9)).foregroundStyle(.secondary)
-                                Text(d.label).font(.system(size: 10)).foregroundStyle(.secondary).lineLimit(1)
+                                Text("\(today.perDienst[d] ?? 0)").font(AppFont.heading(18, relativeTo: .headline).monospacedDigit())
+                                Text(Lf("gisteren %lld", yesterday.perDienst[d] ?? 0)).font(AppFont.body(9, .regular)).foregroundStyle(.secondary)
+                                Text(d.label).font(AppFont.body(10, .regular)).foregroundStyle(.secondary).lineLimit(1)
                             }
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 6)

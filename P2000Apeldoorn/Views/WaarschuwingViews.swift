@@ -14,23 +14,23 @@ struct WaarschuwingRow: View {
             VStack(alignment: .leading, spacing: 3) {
                 HStack(spacing: 6) {
                     Text(verbatim: waarschuwing.kop)
-                        .font(.caption.weight(.bold))
+                        .font(AppFont.body(12, .bold, relativeTo: .caption))
                         .foregroundStyle(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color)
                     StatusChip(waarschuwing: waarschuwing)
                     Spacer(minLength: 4)
                     TimelineView(.periodic(from: .now, by: 30)) { ctx in
                         Text("\(Fmt.ago(waarschuwing.start, now: ctx.date)) - \(Fmt.time(waarschuwing.start))")
                     }
-                    .font(.caption)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
                 }
                 Text(waarschuwing.titel)
-                    .font(.subheadline.weight(.bold))
+                    .font(AppFont.body(15, .bold, relativeTo: .subheadline))
                     .foregroundStyle(.primary)
                     .lineLimit(2)
                 if let plaats = waarschuwing.plaats ?? (waarschuwing.bron == .nlalert ? L("Gemeente Apeldoorn") : nil) {
                     Label(plaats, systemImage: "mappin.and.ellipse")
-                        .font(.caption)
+                        .font(AppFont.body(12, .regular, relativeTo: .caption))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
                 }
@@ -47,7 +47,7 @@ struct StatusChip: View {
 
     var body: some View {
         Text(waarschuwing.statusLabel)
-            .font(.caption2.weight(.semibold))
+            .font(AppFont.body(11, .semibold, relativeTo: .caption2))
             .padding(.horizontal, 6).padding(.vertical, 2)
             .background(waarschuwing.isBeeindigd ? Color.secondary.opacity(0.18) : waarschuwing.color.opacity(0.22),
                         in: Capsule())
@@ -71,8 +71,8 @@ struct KnmiBanner: View {
                             .font(.title3.weight(.semibold))
                             .frame(width: 30)
                         VStack(alignment: .leading, spacing: 2) {
-                            Text(verbatim: w.kop).font(.subheadline.weight(.bold))
-                            Text(validity(w)).font(.caption)
+                            Text(verbatim: w.kop).font(AppFont.body(15, .bold, relativeTo: .subheadline))
+                            Text(validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
                         }
                         Spacer(minLength: 0)
                         Image(systemName: "chevron.right").font(.caption.weight(.bold)).opacity(0.7)
@@ -144,14 +144,14 @@ struct WaarschuwingDetailView: View {
             Section {
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {
-                        Label(w.kop, systemImage: w.systemImage).font(.headline)
+                        Label(w.kop, systemImage: w.systemImage).font(AppFont.heading(18, relativeTo: .headline))
                         Spacer()
                         Text(w.statusLabel)
-                            .font(.caption.weight(.bold))
+                            .font(AppFont.body(12, .bold, relativeTo: .caption))
                             .padding(.horizontal, 10).padding(.vertical, 4)
                             .background(.black.opacity(0.15), in: Capsule())
                     }
-                    Text(w.titel).font(.title3.weight(.bold))
+                    Text(w.titel).font(AppFont.heading(20, relativeTo: .title3))
                 }
                 .foregroundStyle(w.onColor)
                 .padding(16)
@@ -203,7 +203,7 @@ struct WaarschuwingDetailView: View {
                                     MeldingRow(melding: m, gelezen: settings.isRead(m))
                                     if detail?.relaties[m.guid] == "grip-in-gebied" {
                                         Label(L("GRIP-melding in het gebied"), systemImage: "exclamationmark.octagon.fill")
-                                            .font(.caption.weight(.semibold)).foregroundStyle(.orange)
+                                            .font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.orange)
                                     }
                                 }
                             }
@@ -245,7 +245,7 @@ struct WaarschuwingDetailView: View {
                 .background(color, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             VStack(alignment: .leading, spacing: 1) {
                 Text(title).foregroundStyle(.primary)
-                Text(subtitle).font(.caption).foregroundStyle(.secondary)
+                Text(subtitle).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
             }
         }
     }
@@ -327,7 +327,7 @@ struct GerelateerdeWaarschuwingen: View {
         if !list.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
                 Text(L("Waarschuwingen in dit gebied"))
-                    .font(.headline)
+                    .font(AppFont.heading(18, relativeTo: .headline))
                 ForEach(list) { w in
                     NavigationLink { WaarschuwingDetailView(id: w.id) } label: {
                         WaarschuwingRow(waarschuwing: w)
@@ -337,7 +337,7 @@ struct GerelateerdeWaarschuwingen: View {
                     .buttonStyle(.plain)
                 }
                 Text(L("Deze melding ligt in het gebied van de waarschuwing, rond het tijdstip waarop hij gold. Dit is een mogelijk verband, geen bevestiging."))
-                    .font(.caption)
+                    .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
             }
         }
@@ -394,7 +394,7 @@ struct WaarschuwingenSettingsView: View {
                 .background(tint, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
                 Text(verbatim: title)
-                Text(text).font(.caption).foregroundStyle(.secondary)
+                Text(text).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
             }
         }
     }
@@ -427,7 +427,7 @@ struct KnmiCodesView: View {
                 Circle().fill(Waarschuwing.codeColor(niveau)).frame(width: 16, height: 16).padding(.top, 3)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(Waarschuwing.codeLabel(niveau))
-                    Text(text).font(.caption).foregroundStyle(.secondary)
+                    Text(text).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
                 }
             }
         }

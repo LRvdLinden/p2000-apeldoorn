@@ -165,16 +165,16 @@ struct LockView: View {
                 AppMark(size: 96, showsTile: false)
                     .scaleEffect(1.4)
                 Text(verbatim: "A-Alerts")
-                    .font(.title.weight(.black))
+                    .font(AppFont.heading(28, relativeTo: .title))
                     .foregroundStyle(.white)
                 Text(Lf("Vergrendeld – ontgrendel met %@", lock.biometryName))
-                    .font(.callout)
+                    .font(AppFont.body(16, .light, relativeTo: .callout))
                     .foregroundStyle(.white.opacity(0.85))
                 Button {
                     Task { await lock.unlock() }
                 } label: {
                     Label(L("Ontgrendel"), systemImage: "faceid")
-                        .font(.headline)
+                        .font(AppFont.heading(18, relativeTo: .headline))
                         .padding(.horizontal, 22).padding(.vertical, 12)
                         .background(.white, in: Capsule())
                         .foregroundStyle(Theme.iconRed)

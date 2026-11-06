@@ -18,6 +18,7 @@ struct P2000ApeldoornApp: App {
 
     init() {
         AppFont.register()
+        AppFont.applyAppearance()
     }
 
     var body: some Scene {
@@ -30,6 +31,7 @@ struct P2000ApeldoornApp: App {
                 .environment(location)
                 .environment(router)
                 .environment(WaarschuwingStore.shared)
+                .font(AppFont.body(17, .light))
                 .preferredColorScheme(colorScheme)
                 .tint(Theme.red)
         }

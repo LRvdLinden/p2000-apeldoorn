@@ -30,8 +30,8 @@ struct TVDetailView: View {
                     HStack(spacing: 20) {
                         DienstIcon(dienst: melding.dienst, size: 60)
                         VStack(alignment: .leading, spacing: 6) {
-                            Text(melding.title).font(.system(size: 32, weight: .heavy))
-                            Text(melding.prioriteitText).font(.system(size: 22, weight: .semibold)).foregroundStyle(melding.dienst.textColor)
+                            Text(melding.title).font(AppFont.heading(32))
+                            Text(melding.prioriteitText).font(AppFont.body(22, .semibold)).foregroundStyle(melding.dienst.textColor)
                         }
                     }
                     infoRow("mappin.and.ellipse", melding.plaatsText)
@@ -41,21 +41,21 @@ struct TVDetailView: View {
                         section(Lf("Capcodes (%lld)", melding.eenheden.count))
                         ForEach(Array(melding.eenheden.enumerated()), id: \.offset) { _, e in
                             VStack(alignment: .leading, spacing: 2) {
-                                Text(e.naam ?? e.code ?? "").font(.system(size: 20, weight: .semibold))
-                                Text([e.type, e.regio].compactMap { $0 }.joined(separator: " / ")).font(.system(size: 16)).foregroundStyle(.secondary)
-                                Text(e.code ?? "").font(.system(size: 16).monospaced()).foregroundStyle(Theme.red)
+                                Text(e.naam ?? e.code ?? "").font(AppFont.body(20, .semibold))
+                                Text([e.type, e.regio].compactMap { $0 }.joined(separator: " / ")).font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
+                                Text(e.code ?? "").font(AppFont.body(16, .regular).monospaced()).foregroundStyle(Theme.red)
                             }
                         }
                     }
                     if !melding.voertuigen.isEmpty {
                         section(Lf("Voertuigen (%lld)", melding.voertuigen.count))
                         ForEach(Array(melding.voertuigen.enumerated()), id: \.offset) { _, v in
-                            Text("\(v.label ?? L("Voertuig")) · \(v.nrb ?? v.nra ?? "")").font(.system(size: 20, weight: .semibold))
+                            Text("\(v.label ?? L("Voertuig")) · \(v.nrb ?? v.nra ?? "")").font(AppFont.body(20, .semibold))
                         }
                     }
                     if let f = melding.fullMelding {
                         section(L("Volledige melding"))
-                        Text(f).font(.system(size: 18).monospaced()).foregroundStyle(.secondary)
+                        Text(f).font(AppFont.body(18, .regular).monospaced()).foregroundStyle(.secondary)
                     }
                     Button(L("Sluiten")) { dismiss() }.padding(.top, 10)
                 }
@@ -73,11 +73,11 @@ struct TVDetailView: View {
     }
 
     private func section(_ title: String) -> some View {
-        Text(title).font(.system(size: 24, weight: .heavy)).padding(.top, 6)
+        Text(title).font(AppFont.heading(24)).padding(.top, 6)
     }
 
     private func infoRow(_ icon: String, _ text: String) -> some View {
-        Label(text, systemImage: icon).font(.system(size: 22, weight: .medium))
+        Label(text, systemImage: icon).font(AppFont.body(22, .medium))
     }
 
     private func weatherBlock(_ w: AlertWeather) -> some View {
@@ -88,15 +88,15 @@ struct TVDetailView: View {
                 if let c = w.cloudCover { metric("cloud.fill", "\(Int((c * 100).rounded()))%", L("Bewolking")) }
                 if let s = w.windSpeed { metric("wind", "\(Int(s.rounded())) km/h", L("Wind")) }
             }
-            Text(" Weather").font(.caption).foregroundStyle(.secondary)
+            Text(" Weather").font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
         }
     }
 
     private func metric(_ icon: String, _ value: String, _ label: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Image(systemName: icon).font(.system(size: 24)).foregroundStyle(.blue)
-            Text(value).font(.system(size: 26, weight: .bold))
-            Text(label).font(.system(size: 16)).foregroundStyle(.secondary)
+            Text(value).font(AppFont.body(26, .bold))
+            Text(label).font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
         }
     }
 }

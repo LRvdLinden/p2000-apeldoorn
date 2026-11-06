@@ -51,12 +51,12 @@ struct TVSettingsView: View {
 
             VStack(alignment: .leading, spacing: 20) {
                 AppMark(size: 140)
-                Text(verbatim: "A-Alerts").font(.title.weight(.black))
+                Text(verbatim: "A-Alerts").font(AppFont.heading(28, relativeTo: .title))
                 Text(L("Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart."))
-                    .font(.headline).foregroundStyle(.secondary)
+                    .font(AppFont.heading(18, relativeTo: .headline)).foregroundStyle(.secondary)
                 Text(Lf("Versie %@ (%@)", Config.version, Config.build)).foregroundStyle(.secondary)
-                Text("p2000-apeldoorn.nl").font(.headline)
-                Text(L("Bel bij nood altijd 112.")).font(.headline).foregroundStyle(Theme.red)
+                Text("p2000-apeldoorn.nl").font(AppFont.heading(18, relativeTo: .headline))
+                Text(L("Bel bij nood altijd 112.")).font(AppFont.heading(18, relativeTo: .headline)).foregroundStyle(Theme.red)
             }
         }
         .padding(.horizontal, 80)

@@ -9,12 +9,18 @@ struct P2000ApeldoornTVApp: App {
     @State private var settings = AppSettings.shared
     @State private var tv = TVSettings.shared
 
+    init() {
+        AppFont.register()
+        AppFont.applyAppearance()
+    }
+
     var body: some Scene {
         WindowGroup {
             TVRootView()
                 .environment(store)
                 .environment(settings)
                 .environment(tv)
+                .font(AppFont.body(29, .regular))
                 .preferredColorScheme(.dark)
         }
     }
@@ -112,11 +118,11 @@ struct TVClock: View {
         TimelineView(.periodic(from: .now, by: 1)) { ctx in
             VStack(alignment: .trailing, spacing: 0) {
                 Text(ctx.date, format: .dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))
-                    .font(.system(size: size, weight: .black, design: .rounded).monospacedDigit())
+                    .font(AppFont.heading(size).monospacedDigit())
                     .lineLimit(1)
                     .fixedSize()
                 Text(ctx.date, format: .dateTime.weekday(.wide).day().month(.wide))
-                    .font(.system(size: max(size * 0.38, 15), weight: .semibold))
+                    .font(AppFont.body(max(size * 0.38, 15), .semibold))
                     .lineLimit(1)
                     .fixedSize()
                     .foregroundStyle(.secondary)

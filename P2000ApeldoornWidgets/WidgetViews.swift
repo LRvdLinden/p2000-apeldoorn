@@ -21,7 +21,7 @@ private struct TodayCounts: View {
             ForEach(Dienst.selectable) { d in
                 HStack(spacing: 3) {
                     DienstIcon(dienst: d, size: iconSize)
-                    Text("\(entry.perDienst[d] ?? 0)").font(.caption2.weight(.bold)).monospacedDigit()
+                    Text("\(entry.perDienst[d] ?? 0)").font(AppFont.body(11, .bold, relativeTo: .caption2)).monospacedDigit()
                 }
             }
         }
@@ -37,7 +37,7 @@ private struct EmptyWidget: View {
     var body: some View {
         VStack(spacing: 6) {
             AppMark(size: 30)
-            Text(L("Geen meldingen")).font(.caption.weight(.semibold))
+            Text(L("Geen meldingen")).font(AppFont.body(12, .semibold, relativeTo: .caption))
         }
     }
 }
@@ -79,15 +79,15 @@ struct LatestMeldingView: View {
             }
             Spacer(minLength: 2)
             Text(m.title)
-                .font(.system(size: 14, weight: .bold))
+                .font(AppFont.body(14, .bold))
                 .lineLimit(3)
                 .minimumScaleFactor(0.85)
             Label(m.plaatsText, systemImage: "mappin")
-                .font(.caption2)
+                .font(AppFont.body(11, .regular, relativeTo: .caption2))
                 .foregroundStyle(.secondary)
                 .lineLimit(1)
             WidgetTime(date: m.datum)
-                .font(.caption2.weight(.semibold))
+                .font(AppFont.body(11, .semibold, relativeTo: .caption2))
                 .foregroundStyle(m.isUrgent ? Theme.red : m.dienst.textColor)
                 .lineLimit(1)
         }
@@ -101,24 +101,24 @@ struct LatestMeldingView: View {
                 VStack(alignment: .leading, spacing: 3) {
                     HStack(spacing: 6) {
                         Text(m.dienst.label.uppercased())
-                            .font(.caption2.weight(.heavy))
+                            .font(AppFont.body(11, .bold, relativeTo: .caption2))
                             .tracking(1)
                             .foregroundStyle(m.dienst.textColor)
                         PrioBadge(melding: m)
                         Spacer()
-                        WidgetTime(date: m.datum).font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                        WidgetTime(date: m.datum).font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary).lineLimit(1)
                     }
-                    Text(m.title).font(.system(size: 15, weight: .bold)).lineLimit(2)
+                    Text(m.title).font(AppFont.body(15, .bold)).lineLimit(2)
                     if !m.prioriteitText.isEmpty {
-                        Text(m.prioriteitText).font(.caption.weight(.semibold))
+                        Text(m.prioriteitText).font(AppFont.body(12, .semibold, relativeTo: .caption))
                             .foregroundStyle(m.isUrgent ? Theme.red : .secondary).lineLimit(1)
                     }
-                    Label(m.plaatsText, systemImage: "mappin.and.ellipse").font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Label(m.plaatsText, systemImage: "mappin.and.ellipse").font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary).lineLimit(1)
                 }
             }
             Spacer(minLength: 0)
             HStack {
-                Text(Lf("Vandaag: %lld", entry.today)).font(.caption.weight(.bold))
+                Text(Lf("Vandaag: %lld", entry.today)).font(AppFont.body(12, .bold, relativeTo: .caption))
                 Spacer()
                 TodayCounts(entry: entry)
             }
@@ -130,9 +130,9 @@ struct LatestMeldingView: View {
         HStack(spacing: 6) {
             DienstIcon(dienst: m.dienst, size: 22).widgetAccentable()
             VStack(alignment: .leading, spacing: 0) {
-                Text(m.title).font(.headline).lineLimit(2).minimumScaleFactor(0.8)
+                Text(m.title).font(AppFont.heading(18, relativeTo: .headline)).lineLimit(2).minimumScaleFactor(0.8)
                 (Text(m.stad?.capitalizedPlaats ?? "Apeldoorn") + Text(" · ") + Text(m.datum, style: .time))
-                    .font(.caption2).foregroundStyle(.secondary).lineLimit(1)
+                    .font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary).lineLimit(1)
             }
             Spacer(minLength: 0)
         }
@@ -182,7 +182,7 @@ struct MeldingenListView: View {
         HStack(spacing: 8) {
             AppMark(size: family == .systemMedium ? 20 : 26)
             Text(entry.discipline == .alle ? "A-Alerts" : "A-Alerts · \(entry.discipline.dienst?.label ?? "")")
-                .font(.system(size: family == .systemMedium ? 13 : 15, weight: .black))
+                .font(AppFont.heading(family == .systemMedium ? 13 : 15))
                 .lineLimit(1)
             Spacer()
             if family != .systemMedium {
@@ -193,7 +193,7 @@ struct MeldingenListView: View {
                 .buttonStyle(.plain)
                 .foregroundStyle(Theme.red)
             } else {
-                Text(Lf("Vandaag: %lld", entry.today)).font(.caption2.weight(.bold)).foregroundStyle(.secondary)
+                Text(Lf("Vandaag: %lld", entry.today)).font(AppFont.body(11, .bold, relativeTo: .caption2)).foregroundStyle(.secondary)
             }
         }
     }
@@ -221,15 +221,15 @@ struct MeldingenListView: View {
             HStack(spacing: 8) {
                 DienstIcon(dienst: m.dienst, size: family == .systemMedium ? 20 : 24)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(m.title).font(.system(size: 12.5, weight: .semibold)).lineLimit(1)
+                    Text(m.title).font(AppFont.body(12.5, .semibold)).lineLimit(1)
                     Text("\(m.plaatsText) · \(m.prioriteitText)")
-                        .font(.system(size: 10.5))
+                        .font(AppFont.body(10.5, .regular))
                         .foregroundStyle(m.isUrgent ? Theme.red : .secondary)
                         .lineLimit(1)
                 }
                 Spacer(minLength: 4)
                 Text(m.datum, style: .time)
-                    .font(.system(size: 11, weight: .semibold)).monospacedDigit()
+                    .font(AppFont.body(11, .semibold)).monospacedDigit()
                     .foregroundStyle(.secondary)
             }
         }
@@ -264,11 +264,11 @@ struct TodayView: View {
         VStack(alignment: .leading, spacing: 6) {
             HStack {
                 AppMark(size: 22)
-                Text(L("Vandaag")).font(.caption.weight(.heavy))
+                Text(L("Vandaag")).font(AppFont.body(12, .bold, relativeTo: .caption))
                 Spacer()
             }
             Text("\(entry.today)")
-                .font(.system(size: 40, weight: .black, design: .rounded))
+                .font(AppFont.heading(40))
                 .contentTransition(.numericText())
                 .minimumScaleFactor(0.6)
             Spacer(minLength: 0)
@@ -283,7 +283,7 @@ struct TodayView: View {
     private func cell(_ d: Dienst) -> some View {
         HStack(spacing: 4) {
             DienstIcon(dienst: d, size: 15)
-            Text("\(entry.perDienst[d] ?? 0)").font(.caption.weight(.bold)).monospacedDigit()
+            Text("\(entry.perDienst[d] ?? 0)").font(AppFont.body(12, .bold, relativeTo: .caption)).monospacedDigit()
             Spacer(minLength: 0)
         }
     }
@@ -293,8 +293,8 @@ struct TodayView: View {
         ZStack {
             AccessoryWidgetBackground()
             VStack(spacing: -2) {
-                Text("\(entry.today)").font(.system(size: 22, weight: .bold, design: .rounded)).minimumScaleFactor(0.5)
-                Text(verbatim: "A-Alerts").font(.system(size: 9, weight: .semibold))
+                Text("\(entry.today)").font(AppFont.body(22, .bold)).minimumScaleFactor(0.5)
+                Text(verbatim: "A-Alerts").font(AppFont.body(9, .semibold))
             }
         }
         .widgetAccentable()
@@ -304,7 +304,7 @@ struct TodayView: View {
     #if os(watchOS)
     private var corner: some View {
         Text("\(entry.today)")
-            .font(.system(size: 20, weight: .bold, design: .rounded))
+            .font(AppFont.body(20, .bold))
             .widgetLabel { Text(L("P2000 vandaag")) }
     }
     #endif
