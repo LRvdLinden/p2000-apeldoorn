@@ -24,4 +24,7 @@ jobs:
           echo "== warnings_status"; q "SELECT key, value, at FROM kv WHERE key IN ('warnings_status','bronnen_status') OR key LIKE 'bron%'"
           echo "== laatste waarschuwingen"; q "SELECT id, bron, status, plaats, titel, start_at, end_at FROM waarschuwingen ORDER BY start_at DESC LIMIT 15"
           echo "== aantallen per bron"; q "SELECT bron, status, COUNT(*) n FROM waarschuwingen GROUP BY bron, status"
+          for u in https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN https://www.burgernet.nl/recent; do echo "== HTML $u"; curl -sS -m 20 -A "A-Alerts/2.0 (+https://a-alerts.nl)" "$u" -o /tmp/p.html -w "%{http_code}\n"; grep -n -i -E "burgernet/[0-9]{6,}|class=\"(views-row|action|actie)[^\"]*\"|<time|datetime" /tmp/p.html | head -40; done
+          echo "== snippet rond 3967274"; grep -n -B8 -A25 "3967274" /tmp/p.html | head -80
+          curl -sS -m 20 -A "A-Alerts/2.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN | grep -n -B6 -A30 "3967274" | head -80
           true
