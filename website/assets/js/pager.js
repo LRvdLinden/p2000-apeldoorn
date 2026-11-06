@@ -3,11 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=33";
+} from "./core.js?v=34";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-} from "./aalerts.js?v=33";
+} from "./aalerts.js?v=34";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -643,7 +643,7 @@ function renderMapChips() {
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("");
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
-    const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? state.warnings.filter((w) => w.bron !== "knmi" && isActief(w)).length
+    const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
     return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
   }).join("");
@@ -655,6 +655,11 @@ $("mapLagen").addEventListener("click", (e) => {
   prefs.set("p2000.lagen", [...state.lagen]);
   renderMap();
 });
+
+function mapWarnings() {
+  const cutoff = Date.now() - state.mapHours * 3600_000;
+  return state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || new Date(w.einde || w.start).getTime() >= cutoff));
+}
 
 let heliTimer = null;
 async function pollHelis() {
@@ -707,7 +712,8 @@ async function renderMap() {
   const extra = [];
   if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
   if (state.lagen.has("waarschuwingen")) {
-    actief.filter((w) => w.bron !== "knmi").forEach((w) => {
+    // Like the app: NL-Alert and Burgernet within the chosen period, or still active (ended ones greyed out).
+    mapWarnings().forEach((w) => {
       bigMap.addOverlays(warnOverlays(mk, w));
       if (w.lat != null) extra.push(warnAnnotation(mk, w, (x) => selectWarning(x.id)));
     });

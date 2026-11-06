@@ -4,8 +4,8 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=33";
-import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js?v=33";
+} from "./core.js?v=34";
+import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js?v=34";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -109,9 +109,10 @@ function renderExtra(kit) {
   if (extraAnn.length) map.removeAnnotations(extraAnn);
   if (extraOv.length) map.removeOverlays(extraOv);
   const actief = state.warnings.filter(isActief);
-  extraOv = actief.flatMap((w) => warnOverlays(kit, w));
+  const dag = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || Date.now() - new Date(w.einde || w.start).getTime() < WINDOW_MS));
+  extraOv = [...actief.filter((w) => w.bron === "knmi"), ...dag].flatMap((w) => warnOverlays(kit, w));
   extraAnn = [
-    ...actief.filter((w) => w.bron !== "knmi" && w.lat != null).map((w) => warnAnnotation(kit, w)),
+    ...dag.filter((w) => w.lat != null).map((w) => warnAnnotation(kit, w)),
     ...state.helis.map((h) => heliAnnotation(kit, h)),
   ];
   if (extraOv.length) map.addOverlays(extraOv);
