@@ -1,5 +1,12 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 21)
+- Detailpagina vernieuwd: glazen balk bovenaan met terug, plaats en straat, en knoppen voor route, bewaren en delen.
+- Kaart met knoppen voor je eigen locatie (melding en jij samen in beeld), 3D en een grote kaart met een balk onderin om terug te gaan.
+- Verloop: meldingen die mogelijk bij dezelfde inzet horen als tijdlijn met tijd, minuten erna en 'Deze melding'.
+- Route naar incident: afstand en rijtijd, Apple Kaarten, Google Maps of adres kopiëren.
+- Melding delen: voorbeeld, Deel via…, link kopiëren of de melding met link kopiëren (link naar p2000-apeldoorn.nl).
+
 ## A-Alerts 2.0.0 (build 20) – fase 9 en 10
 - Versie 2.0.0 (hoger dan 1.0.1 in de App Store).
 - Pushmeldingen met een kaartje van de plek (nieuwe push-extensie) en knoppen *Bewaar* en *Open in Apple Kaarten*; waarschuwingen met *Open in Apple Kaarten*.

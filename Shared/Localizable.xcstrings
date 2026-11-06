@@ -188,6 +188,40 @@
         }
       }
     },
+    "%lld meldingen binnen %lld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alerts within %lld min"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld meldingen binnen %lld min"
+          }
+        }
+      }
+    },
+    "%lld meldingen binnen een minuut": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alerts within a minute"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld meldingen binnen een minuut"
+          }
+        }
+      }
+    },
     "%lld meldingen zonder adres in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -371,6 +405,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "24 uur"
+          }
+        }
+      }
+    },
+    "3D-weergave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D view"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "3D-weergave"
           }
         }
       }
@@ -936,6 +987,23 @@
         }
       }
     },
+    "Berichten, WhatsApp, Mail en meer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages, WhatsApp, Mail and more"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichten, WhatsApp, Mail en meer"
+          }
+        }
+      }
+    },
     "Beschrijving": {
       "extractionState": "manual",
       "localizations": {
@@ -1327,6 +1395,23 @@
         }
       }
     },
+    "De P2000-tekst met de link eronder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The P2000 text with the link below it"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De P2000-tekst met de link eronder"
+          }
+        }
+      }
+    },
     "De app vraagt bij het openen direct om te ontgrendelen.": {
       "extractionState": "manual",
       "localizations": {
@@ -1395,6 +1480,23 @@
         }
       }
     },
+    "De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The dispatch centre gave no street: the route goes to the centre of the town."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats."
+          }
+        }
+      }
+    },
     "De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats.": {
       "extractionState": "manual",
       "localizations": {
@@ -1442,6 +1544,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De nieuwste P2000-melding in gem. Apeldoorn."
+          }
+        }
+      }
+    },
+    "De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The recipient opens the alert on p2000-apeldoorn.nl, even without the app."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app."
           }
         }
       }
@@ -1497,6 +1616,23 @@
         }
       }
     },
+    "Deel via…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share via…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel via…"
+          }
+        }
+      }
+    },
     "Deselecteer alles": {
       "extractionState": "manual",
       "localizations": {
@@ -1544,6 +1680,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze app"
+          }
+        }
+      }
+    },
+    "Deze melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze melding"
           }
         }
       }
@@ -2054,6 +2207,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gegevens zijn op basis van incident tijdstip en locatie"
+          }
+        }
+      }
+    },
+    "Gekopieerd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copied"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gekopieerd"
           }
         }
       }
@@ -2789,6 +2959,40 @@
         }
       }
     },
+    "Kaart groter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Larger map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart groter"
+          }
+        }
+      }
+    },
+    "Kaart kleiner": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Smaller map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart kleiner"
+          }
+        }
+      }
+    },
     "Kaartlagen": {
       "extractionState": "manual",
       "localizations": {
@@ -2955,6 +3159,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kon de tekst niet laden"
+          }
+        }
+      }
+    },
+    "Kopieer adres": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy address"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieer adres"
+          }
+        }
+      }
+    },
+    "Kopieer link": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy link"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieer link"
           }
         }
       }
@@ -3316,6 +3554,23 @@
         }
       }
     },
+    "Melding delen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Melding delen"
+          }
+        }
+      }
+    },
     "Meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -3329,6 +3584,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldingen"
+          }
+        }
+      }
+    },
+    "Meldingen die volgens tijd, plaats en eenheid mogelijk bij dezelfde inzet horen. Dit is een mogelijk verband, geen bevestiging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts that, by time, place and unit, may belong to the same call-out. This is a possible link, not a confirmation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen die volgens tijd, plaats en eenheid mogelijk bij dezelfde inzet horen. Dit is een mogelijk verband, geen bevestiging."
           }
         }
       }
@@ -3924,6 +4196,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Offline"
+          }
+        }
+      }
+    },
+    "Om zelf in een andere app te plakken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To paste into another app yourself"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Om zelf in een andere app te plakken"
           }
         }
       }
@@ -4710,6 +4999,74 @@
         }
       }
     },
+    "Route": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Directions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route"
+          }
+        }
+      }
+    },
+    "Route met de auto in Google Maps": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Driving route in Google Maps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route met de auto in Google Maps"
+          }
+        }
+      }
+    },
+    "Route met de auto in Kaarten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Driving route in Maps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route met de auto in Kaarten"
+          }
+        }
+      }
+    },
+    "Route naar incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route to incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route naar incident"
+          }
+        }
+      }
+    },
     "SPOED": {
       "extractionState": "manual",
       "localizations": {
@@ -5135,6 +5492,23 @@
         }
       }
     },
+    "Toon mij en de melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show me and the alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon mij en de melding"
+          }
+        }
+      }
+    },
     "Toont de laatste P2000-meldingen in gem. Apeldoorn.": {
       "extractionState": "manual",
       "localizations": {
@@ -5475,6 +5849,23 @@
         }
       }
     },
+    "Veeg omhoog of tik voor de melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Swipe up or tap for the alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Veeg omhoog of tik voor de melding"
+          }
+        }
+      }
+    },
     "Verberg bekeken meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -5539,6 +5930,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vergrendeld – ontgrendel met %@"
+          }
+        }
+      }
+    },
+    "Verloop": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeline"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verloop"
           }
         }
       }
@@ -6746,6 +7154,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "zo"
+          }
+        }
+      }
+    },
+    "± %lld min rijden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "± %lld min drive"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "± %lld min rijden"
           }
         }
       }

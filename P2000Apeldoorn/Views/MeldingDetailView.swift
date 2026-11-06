@@ -25,30 +25,27 @@ struct MeldingDetailView: View {
     @State private var attribution: WeatherAttribution?
     @State private var copied = false
     @State private var topSafeArea: CGFloat = 0
+    @State private var position: MapCameraPosition = .automatic
+    @State private var drieD = false
+    @State private var opMij = false
+    @State private var kaartGroot = false
+    @State private var toonRoute = false
+    @State private var toonDelen = false
 
-    private let mapHeight: CGFloat = 380
+    /// Visible map below the top bar (the bar floats over the map like the reference design).
+    private let mapHeight: CGFloat = 300
 
     var body: some View {
-        ScrollView {
+        GeometryReader { geo in
             VStack(spacing: 0) {
                 mapHeader
-                VStack(spacing: 16) {
-                    if !hasStreet { notice }
-                    incidentLine
-                    mainCard
-                    descriptionCard
-                    AanrijtijdKaart(melding: melding)
-                    GerelateerdeMeldingen(melding: melding)
-                    GerelateerdeWaarschuwingen(melding: melding)
-                    if !melding.eenheden.isEmpty { capcodesCard }
-                    if !melding.voertuigen.isEmpty { vehiclesCard }
-                    if let meteo { meteoCard(meteo) }
-                    dataCard
-                    footer
+                    .frame(height: kaartGroot ? max(geo.size.height - 96, 300) : topSafeArea + mapHeight)
+                    .clipped()
+                if kaartGroot {
+                    kaartGrootBalk
+                } else {
+                    content
                 }
-                .padding(16)
-                .frame(maxWidth: 760)
-                .frame(maxWidth: .infinity)
             }
         }
         .background(
@@ -68,16 +65,76 @@ struct MeldingDetailView: View {
         .toolbar {
             ToolbarItemGroup(placement: .primaryAction) {
                 bookmarkButton
-                ShareLink(item: melding.shareText) { Label(L("Deel"), systemImage: "square.and.arrow.up") }
+                Button { toonDelen = true } label: { Label(L("Deel"), systemImage: "square.and.arrow.up") }
             }
         }
         #endif
+        .sheet(isPresented: $toonRoute) {
+            RouteSheet(melding: melding)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
+        .sheet(isPresented: $toonDelen) {
+            DeelSheet(melding: melding)
+                .presentationDetents([.medium, .large])
+                .presentationDragIndicator(.visible)
+        }
         .onAppear {
+            position = .region(startRegion)
             store.registerView(melding)
             settings.markRead(melding)
         }
         .task(id: melding.guid) { await loadLookAround() }
         .task(id: melding.guid) { await loadWeather() }
+    }
+
+    private var content: some View {
+        ScrollView {
+            VStack(spacing: 0) {
+                VStack(spacing: 16) {
+                    if !hasStreet { notice }
+                    incidentLine
+                    mainCard
+                    descriptionCard
+                    AanrijtijdKaart(melding: melding)
+                    VerloopKaart(melding: melding)
+                    GerelateerdeWaarschuwingen(melding: melding)
+                    if !melding.eenheden.isEmpty { capcodesCard }
+                    if !melding.voertuigen.isEmpty { vehiclesCard }
+                    if let meteo { meteoCard(meteo) }
+                    dataCard
+                    footer
+                }
+                .padding(16)
+                .frame(maxWidth: 760)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    /// Enlarged map: a small bar at the bottom brings the alert back.
+    private var kaartGrootBalk: some View {
+        Button {
+            withAnimation(.spring(duration: 0.35)) { kaartGroot = false }
+        } label: {
+            HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(melding.title).font(.headline).lineLimit(1)
+                    Text(L("Veeg omhoog of tik voor de melding")).font(.subheadline).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Image(systemName: "chevron.up").font(.headline).foregroundStyle(.secondary)
+            }
+            .padding(.horizontal, 20)
+            .frame(maxWidth: .infinity, minHeight: 96, alignment: .leading)
+            .background(Color.detailCard)
+            .overlay(alignment: .top) { Capsule().fill(.secondary.opacity(0.4)).frame(width: 40, height: 5).padding(.top, 8) }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .gesture(DragGesture(minimumDistance: 15).onEnded { v in
+            if v.translation.height < -20 { withAnimation(.spring(duration: 0.35)) { kaartGroot = false } }
+        })
     }
 
     // MARK: - Map header
@@ -88,8 +145,13 @@ struct MeldingDetailView: View {
 
     private var hasStreet: Bool { melding.hasStreet }
 
+    private var startRegion: MKCoordinateRegion {
+        let meters: CLLocationDistance = hasStreet ? 1300 : 3500
+        return MKCoordinateRegion(center: coordinate, latitudinalMeters: meters, longitudinalMeters: meters)
+    }
+
     private var mapHeader: some View {
-        Map(initialPosition: .region(MKCoordinateRegion(center: coordinate, latitudinalMeters: 1300, longitudinalMeters: 1300))) {
+        Map(position: $position) {
             Annotation(melding.title, coordinate: coordinate, anchor: .bottom) {
                 DienstMarker(dienst: melding.dienst, size: 52)
             }
@@ -97,55 +159,81 @@ struct MeldingDetailView: View {
             UserAnnotation()
         }
         .mapStyle(MapStyleSetting.style(for: settings.mapType, pointsOfInterest: true))
-        .mapControls {
-            MapCompass()
-            MapPitchToggle()
+        .mapControls { MapCompass() }
+        .safeAreaPadding(.top, topSafeArea + 66)
+        .overlay(alignment: .top) {
+            DetailTopBar(titel: melding.plaatsNaam, subtitel: melding.straatTekst, showsBack: showsBack, isBewaard: isBewaard,
+                         onBack: { dismiss() }, onRoute: { toonRoute = true },
+                         onBewaar: { withAnimation { settings.toggleBewaard(melding) } }, onShare: { toonDelen = true })
+                .padding(.top, topInset)
         }
-        .frame(height: mapHeight)
         .overlay(alignment: .topLeading) {
-            VStack(alignment: .leading, spacing: 12) {
-                #if os(iOS)
-                if isPresented {
-                    circleButton("arrow.left", label: L("Terug")) { dismiss() }
-                }
-                #endif
-                if let lookAround {
-                    LookAroundPreview(initialScene: lookAround)
-                        .frame(width: 140, height: 90)
-                        .clipShape(RoundedRectangle(cornerRadius: 14, style: .continuous))
-                        .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(.white.opacity(0.6), lineWidth: 1))
-                        .shadow(color: .black.opacity(0.3), radius: 8, y: 3)
-                        .accessibilityLabel(L("Look Around"))
-                }
+            if let lookAround {
+                LookAroundPreview(initialScene: lookAround)
+                    .frame(width: 130, height: 84)
+                    .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+                    .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.6), lineWidth: 1))
+                    .shadow(color: .black.opacity(0.3), radius: 8, y: 3)
+                    .accessibilityLabel(L("Look Around"))
+                    .padding(.leading, 14)
+                    .padding(.top, topInset + 66)
             }
-            .padding(.leading, 16)
-            .padding(.top, topInset)
         }
-        #if os(iOS)
         .overlay(alignment: .topTrailing) {
-            HStack(spacing: 10) {
-                circleIcon(isBewaard ? "bookmark.fill" : "bookmark", label: isBewaard ? L("Niet meer bewaren") : L("Bewaar")) {
-                    withAnimation { settings.toggleBewaard(melding) }
-                }
-                ShareLink(item: melding.shareText) {
-                    Image(systemName: "square.and.arrow.up")
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(Theme.red)
-                        .frame(width: 46, height: 46)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-                .accessibilityLabel(L("Deel"))
+            VStack(spacing: 10) {
+                MapControlButton(symbol: opMij ? "location.fill" : "location", active: opMij, label: L("Toon mij en de melding")) { toggleOpMij() }
+                MapControlButton(symbol: "view.3d", text: "3D", active: drieD, label: L("3D-weergave")) { toggle3D() }
             }
-            .padding(.trailing, 16)
-            .padding(.top, topInset)
+            .padding(.trailing, 14)
+            .padding(.top, topInset + 66)
         }
+        .overlay(alignment: .bottomTrailing) {
+            MapControlButton(symbol: kaartGroot ? "arrow.down.right.and.arrow.up.left" : "arrow.up.left.and.arrow.down.right",
+                             label: kaartGroot ? L("Kaart kleiner") : L("Kaart groter")) {
+                withAnimation(.spring(duration: 0.35)) { kaartGroot.toggle() }
+            }
+            .padding(14)
+        }
+    }
+
+    private var showsBack: Bool {
+        #if os(iOS)
+        return isPresented
+        #else
+        return false
         #endif
+    }
+
+    private func toggle3D() {
+        drieD.toggle()
+        opMij = false
+        withAnimation(.easeInOut(duration: 0.6)) {
+            position = drieD
+                ? .camera(MapCamera(centerCoordinate: coordinate, distance: 900, heading: 30, pitch: 65))
+                : .region(startRegion)
+        }
+    }
+
+    /// Shows the alert and your own position together (or back to the alert).
+    private func toggleOpMij() {
+        guard !opMij, let me = location.location?.coordinate else {
+            opMij = false
+            withAnimation(.easeInOut(duration: 0.5)) { position = .region(startRegion) }
+            if location.location == nil { location.start() }
+            return
+        }
+        opMij = true
+        drieD = false
+        let points = [MKMapPoint(me), MKMapPoint(coordinate)]
+        var rect = points.map { MKMapRect(origin: $0, size: MKMapSize(width: 1, height: 1)) }.reduce(MKMapRect.null) { $0.union($1) }
+        rect = rect.insetBy(dx: -max(rect.width * 0.35, 600), dy: -max(rect.height * 0.35, 600))
+        withAnimation(.easeInOut(duration: 0.6)) { position = .rect(rect) }
     }
 
     /// Just below the status bar (full screen) or the top edge of the sheet: the real safe area plus a small margin.
     private var topInset: CGFloat {
         #if os(iOS)
-        return topSafeArea + 10
+        return topSafeArea + 6
         #else
         return 16
         #endif
@@ -253,9 +341,9 @@ struct MeldingDetailView: View {
             }
 
             Button {
-                openInAppleMaps()
+                toonRoute = true
             } label: {
-                Label(L("Apple Kaarten"), systemImage: "location.north.fill")
+                Label(L("Route naar incident"), systemImage: "arrow.triangle.turn.up.right.diamond.fill")
                     .font(AppFont.body(15, .semibold))
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 14)
