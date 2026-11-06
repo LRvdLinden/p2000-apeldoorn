@@ -303,6 +303,14 @@ export async function listWarnings(env, days = 7) {
   return results.map((r) => toAPI(withOverride(r)));
 }
 
+/** Warnings changed after a moment (for the Homey app): new ones, status changes and hand-ended ones. */
+export async function warningsSince(env, since) {
+  const { results } = await env.DB.prepare(
+    `${PUBLIC_SELECT} AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?) ORDER BY w.start_at DESC LIMIT 40`,
+  ).bind(since, since, since).all();
+  return results.map((r) => toAPI(withOverride(r), { withArea: false }));
+}
+
 export async function getWarning(env, id) {
   return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first()));
 }
@@ -458,9 +466,9 @@ export async function ingestWarnings(env, budget, kv) {
     } else status.knmi = "ongewijzigd";
     // Status follows the clock (verwacht → actief → beeindigd) even when KNMI did not change.
     await env.DB.batch([
-      env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd' WHERE bron = 'knmi' AND end_at < ? AND status != 'beeindigd'").bind(now),
+      env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', updated_at = ? WHERE bron = 'knmi' AND end_at < ? AND status != 'beeindigd'").bind(now, now),
       env.DB.prepare("UPDATE waarschuwingen SET status = 'actief' WHERE bron = 'knmi' AND start_at <= ? AND end_at >= ? AND status = 'verwacht'").bind(now, now),
-      env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd' WHERE bron = 'nlalert' AND end_at IS NOT NULL AND end_at < ? AND status != 'beeindigd'").bind(now),
+      env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', updated_at = ? WHERE bron = 'nlalert' AND end_at IS NOT NULL AND end_at < ? AND status != 'beeindigd'").bind(now, now),
     ]);
   } catch (e) { status.knmi = `fout: ${e.message}`; }
 

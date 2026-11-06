@@ -29,6 +29,7 @@ import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { fcmConfigured } from "./fcm.js";
+import { notifyHomey, homeyConfigured } from "./homey.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog };
@@ -201,7 +202,7 @@ async function statusInfo(env) {
   return {
     feed: { lastOk: ok ? new Date(Number(ok)).toISOString() : null, lastError: await get("feed_error") },
     cron: cron ? new Date(Number(cron)).toISOString() : null,
-    apns: apnsConfigured(env), fcm: fcmConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
+    apns: apnsConfigured(env), fcm: fcmConfigured(env), homey: homeyConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
     meldingenInDatabase: await meldingCount(env),
     outbox: (await env.DB.prepare("SELECT COUNT(*) AS n FROM outbox").first()).n,
     beheerApparaten: (await env.DB.prepare("SELECT COUNT(*) AS n FROM admin_devices").first()).n,
@@ -394,6 +395,7 @@ async function catchUp(env) {
     try { await backfill(env, budget); } catch (e) { await kvSet(env, "backfill_error", String(e.message || e)); }
     await poll(env, budget);
     await drain(env, budget);
+    try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); }
   } catch (e) {
     console.error("[catch-up]", e.message || e);
   }
@@ -410,11 +412,14 @@ async function cron(env, event) {
     console.error("[backfill]", e.message || e);
   }
   try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
+  const homey = async () => { try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); } };
+  await homey();
   // Five reads per minute: new alerts show up (and are pushed) within ~12 seconds.
   const runs = Number(env.POLLS_PER_RUN || 5);
   for (let i = 0; i < runs; i++) {
     await poll(env, budget);
     await drain(env, budget);
+    await homey();
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
   try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
