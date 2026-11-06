@@ -1,0 +1,1947 @@
+getpwuid_r did not find a match for uid 501
+Timestamp               Ty Process[PID:TID]
+2026-11-06 22:03:45.531 E  accountsd[6620:5c46] [com.apple.accounts:core] "Total client count exceeded 50: {
+    accountsd = 4;
+    adprivacyd = 3;
+    akd = 1;
+    amsaccountsd = 3;
+    amsengagementd = 1;
+    appleaccountd = 1;
+    appprotectiond = 1;
+    appstored = 2;
+    assetsd = 1;
+    cdpd = 2;
+    chronod = 1;
+    cloudd = 2;
+    contactsd = 1;
+    familycircled = 1;
+    findmylocated = 2;
+    fitcored = 1;
+    itunescloudd = 2;
+    itunesstored = 2;
+    locationd = 1;
+    maild = 2;
+    mediaremoted = 1;
+    passd = 2;
+    promotedcontentd = 2;
+    rapportd = 2;
+    remindd = 1;
+    routined = 1;
+    securityd = 2;
+    sharingd = 2;
+    suggestd = 1;
+    syncdefaultsd = 1;
+    voicebankingd = 1;
+    weatherd = 1;
+}"
+2026-11-06 22:03:46.093 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Invalidating assertion 6617-6914-25 (target:[osservice<com.apple.weatherd>:6914]) from originator [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:03:46.094 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Acquiring assertion targeting [osservice<com.apple.weatherd>:6914] from originator [osservice<com.apple.weatherd>:6914] with description <RBSAssertionDescriptor| "com.apple.CFNetwork.StorageDB" ID:6617-6914-56 target:6914 attributes:[
+	<RBSDomainAttribute| domain:"com.apple.common" name:"FinishTaskUninterruptable" sourceEnvironment:"(null)">,
+	<RBSAcquisitionCompletionAttribute| policy:AfterApplication>
+	]>
+2026-11-06 22:03:46.094 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Assertion 6617-6914-56 (target:[osservice<com.apple.weatherd>:6914]) will be created as active as no start-time-defining assertions exist
+2026-11-06 22:03:46.095 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:03:46.095 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:03:46.095 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:03:46.095 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:03:46.095 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:03:46.751 Df runningboardd[6617:5490] [com.apple.runningboard:ttl] Attempting to rename power assertion 65535 for target osservice<com.apple.weatherd> to osservice<com.apple.weatherd>;6617-6914-24:Notification subscriptions db data migration;6617-6914-25:com.apple.CFNetwork.StorageDB;6617-6914-56:com.apple.CFNetwork.StorageDB
+2026-11-06 22:03:46.751 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:03:46.751 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:03:46.752 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:03:46.752 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:03:46.752 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:03:46.757 Df runningboardd[6617:5490] [com.apple.runningboard:ttl] Attempting to rename power assertion 65535 for target osservice<com.apple.weatherd> to osservice<com.apple.weatherd>;6617-6914-24:Notification subscriptions db data migration;6617-6914-56:com.apple.CFNetwork.StorageDB
+2026-11-06 22:03:51.752 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget 8994A1FF-CA13-495D-8FAB-23BCE34FA4D4 created from arhive.
+2026-11-06 22:03:51.752 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:03:51.752 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:03:51.753 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x6000021eead0; uniqueIdentifier: 8994A1FF-CA13-495D-8FAB-23BCE34FA4D4; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:03:51.753 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x6000021eead0; uniqueIdentifier: 8994A1FF-CA13-495D-8FAB-23BCE34FA4D4; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x60000351de40; nodeID: CA65A65B-F259-4662-9A75-7B6C21E6BC30; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:03:51.753 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x60000351de40 count=1, activeWidget=<SBHWidget:0x6000021eead0 [com.apple.weather.widget:com.apple.weather]>>> Changing active data source: <SBWidgetIcon: 0x60000351de40; nodeID: CA65A65B-F259-4662-9A75-7B6C21E6BC30; gridSizeClass: small>
+2026-11-06 22:03:51.753 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x60000351de40 count=1, activeWidget=<SBHWidget:0x6000021eead0 [com.apple.weather.widget:com.apple.weather]>>> Changing from data souce: (null) to data source:23124C81-CF32-4D05-865E-EEC0DB437095.
+2026-11-06 22:03:51.760 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.760 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.760 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.761 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.761 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.762 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.763 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.763 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.765 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not find icon for representation -> com.apple.weather
+2026-11-06 22:03:51.765 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.765 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.766 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.766 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.766 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.766 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.773 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.774 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.774 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.774 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.774 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.774 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.778 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget 0F351ADC-47CC-43D6-84DA-183AC5457C24 created from arhive.
+2026-11-06 22:03:51.779 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:03:51.779 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:03:51.779 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x6000021f7520; uniqueIdentifier: 0F351ADC-47CC-43D6-84DA-183AC5457C24; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:03:51.779 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x6000021f7520; uniqueIdentifier: 0F351ADC-47CC-43D6-84DA-183AC5457C24; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x6000035256b0; nodeID: 48D43D32-2C08-4457-88AF-64CE718B4BD6; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:03:51.779 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not generate widget icon for representation -> {
+    allowsExternalSuggestions = 0;
+    allowsSuggestions = 1;
+    bundleIdentifier = "com.apple.weather.widget";
+    containerBundleIdentifier = "com.apple.weather";
+    elementType = widget;
+    gridSize = small;
+    iconType = custom;
+    widgetIdentifier = "com.apple.weather";
+}
+2026-11-06 22:03:51.779 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:51.782 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:51.784 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:51.844 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget 3515A73F-5D48-45EC-B353-7F193CD01CFC created from arhive.
+2026-11-06 22:03:51.845 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:03:51.845 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:03:51.846 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x6000021f5e00; uniqueIdentifier: 3515A73F-5D48-45EC-B353-7F193CD01CFC; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:03:51.846 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x6000021f5e00; uniqueIdentifier: 3515A73F-5D48-45EC-B353-7F193CD01CFC; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x6000035256b0; nodeID: 92D6293C-0F7A-4374-8FBB-959AB05C28B8; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:03:51.846 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x6000035256b0 count=1, activeWidget=<SBHWidget:0x6000021f5e00 [com.apple.weather.widget:com.apple.weather]>>> Changing active data source: <SBWidgetIcon: 0x6000035256b0; nodeID: 92D6293C-0F7A-4374-8FBB-959AB05C28B8; gridSizeClass: small>
+2026-11-06 22:03:51.846 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x6000035256b0 count=1, activeWidget=<SBHWidget:0x6000021f5e00 [com.apple.weather.widget:com.apple.weather]>>> Changing from data souce: (null) to data source:65E3BFD7-2556-4D1F-B72C-1D3D9591A1BA.
+2026-11-06 22:03:51.857 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.857 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.858 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.859 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.859 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.860 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.860 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.861 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 1;
+        allowsSuggestions = 1;
+        elements =         (
+                        {
+                bundleIdentifier = "com.apple.weather.widget";
+                containerBundleIdentifier = "com.apple.weather";
+                elementType = widget;
+                widgetIdentifier = "com.apple.weather";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.Maps.GeneralMapsWidget";
+                containerBundleIdentifier = "com.apple.Maps";
+                elementType = widget;
+                widgetIdentifier = "com.apple.Maps";
+                widgetSuggestionSource = onboarding;
+            },
+                        {
+                bundleIdentifier = "com.apple.mobilenotes.WidgetExtension";
+                containerBundleIdentifier = "com.apple.mobilenotes";
+                elementType = widget;
+                widgetIdentifier = "com.apple.mobilenotes.Fol
+2026-11-06 22:03:51.863 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not find icon for representation -> com.apple.weather
+2026-11-06 22:03:51.863 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.864 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.865 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.865 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.866 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.866 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.870 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.871 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.872 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.872 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.873 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.873 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+    "com.apple.weather",
+    "com.apple.stocks",
+    "com.apple.findmy",
+    "com.apple.Home",
+    "com.apple.podcasts",
+    "com.apple.iBooks",
+    "com.apple.Fitness",
+    "com.apple.Bridge",
+    "com.apple.MobileAddressBook",
+    "com.apple.DocumentsApp",
+    "com.apple.Preview",
+        {
+        defaultDisplayName = Utilities;
+        iconLists =         (
+                        (
+                "com.apple.VoiceMemos",
+                "com.apple.compass",
+                "com.apple.measure",
+                "com.apple.Magnifier",
+                "com.apple.calculator",
+                "com.apple.shortcuts",
+                "com.apple.Passwords"
+            )
+        );
+    },
+    "com.apple.MobileStore",
+    "com.apple.Translate",
+    "com.apple.freeform",
+    "com.apple.journal",
+    "com.apple.GenerativePlaygroundApp",
+    "com.apple.tips"
+)
+2026-11-06 22:03:51.876 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget D48CCF72-2160-4189-A729-FF87D8447AB0 created from arhive.
+2026-11-06 22:03:51.876 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:03:51.877 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:03:51.877 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x6000021f73e0; uniqueIdentifier: D48CCF72-2160-4189-A729-FF87D8447AB0; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:03:51.877 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x6000021f73e0; uniqueIdentifier: D48CCF72-2160-4189-A729-FF87D8447AB0; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x600003525970; nodeID: F3624B93-45C7-45AD-9377-99C9D75F7101; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:03:51.877 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not generate widget icon for representation -> {
+    allowsExternalSuggestions = 0;
+    allowsSuggestions = 1;
+    bundleIdentifier = "com.apple.weather.widget";
+    containerBundleIdentifier = "com.apple.weather";
+    elementType = widget;
+    gridSize = small;
+    iconType = custom;
+    widgetIdentifier = "com.apple.weather";
+}
+2026-11-06 22:03:51.877 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:51.880 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:51.884 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:03:53.031 Df SpringBoard[6613:5f5d] [com.apple.UserNotifications:Connections] [com.apple.weather] Getting notification settings
+2026-11-06 22:03:53.032 Df SpringBoard[6613:5f5d] [com.apple.UserNotifications:Settings] Getting effectiveSectionInfo for section identifier: com.apple.weather
+2026-11-06 22:03:53.046 Df SpringBoard[6613:5f5d] [com.apple.UserNotifications:Settings] [com.apple.weather] Getting effective section info
+2026-11-06 22:03:53.194 Df SpringBoard[6613:5f5d] [com.apple.UserNotifications:Settings] [com.apple.weather] Got effective section info [ hasResult: 0 ]
+2026-11-06 22:03:55.588 Df SpringBoard[6613:5f8c] [com.apple.runningboard:process] Hit the server for a process handle 15d37d8600001b02 that resolved to: [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:03:55.784 Df SpringBoard[6613:5f8c] [com.apple.runningboard:process] Hit the server for a process handle 13032a4a000001f4 that resolved to: [anon<WeatherWidget>:500]
+2026-11-06 22:03:55.790 Df SpringBoard[6613:5f8c] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:03:55.792 Df SpringBoard[6613:5f8c] [com.apple.runningboard:monitor] Received state update for 500 (anon<WeatherWidget>, running-NotVisible
+2026-11-06 22:03:58.901 Df runningboardd[6617:5425] [com.apple.runningboard:process] Assertions for process will expire soon: [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:03:58.906 Df runningboardd[6617:5490] [com.apple.runningboard:ttl] Acquiring assertion targeting [osservice<com.apple.weatherd>:6914] from originator [osservice<com.apple.runningboardd>:6617] with description <RBSAssertionDescriptor| "Will expire assertions soon" ID:6617-6617-84 target:6914 attributes:[
+	<RBSCPUAccessGrant| role:NonUserInteractive>,
+	<RBSDurationAttribute| invalidationDuration:4.57 warningDuration:0.00 startPolicy:Delayed-Fixed endPolicy:Invalidate>,
+	<RBSRunningReasonAttribute| runningReason:10101>
+	]>
+2026-11-06 22:03:58.906 Df runningboardd[6617:5490] [com.apple.runningboard:ttl] Assertion 6617-6617-84 (target:[osservice<com.apple.weatherd>:6914]) will be created as active as no start-time-defining assertions exist
+2026-11-06 22:03:58.907 Df SpringBoard[6613:5d61] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:03:58.908 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:03:58.909 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:03:58.909 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:03:58.909 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:03:58.909 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:03:59.228 Df runningboardd[6617:5fdf] [com.apple.runningboard:process] Assertions for process will expire soon: [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:04:04.249 Df runningboardd[6617:5fdf] [com.apple.runningboard:assertion] Assertion did invalidate due to timeout: 6617-6617-84 (target:[osservice<com.apple.weatherd>:6914])
+2026-11-06 22:04:04.251 Df runningboardd[6617:5fdf] [com.apple.runningboard:assertion] Assertion did invalidate due to timeout: 6617-6914-24 (target:[osservice<com.apple.weatherd>:6914])
+2026-11-06 22:04:04.251 Df runningboardd[6617:5fdf] [com.apple.runningboard:assertion] Assertion did invalidate due to timeout: 6617-6914-56 (target:[osservice<com.apple.weatherd>:6914])
+2026-11-06 22:04:31.731 Df runningboardd[6617:5b5f] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:04:31.731 Df runningboardd[6617:5b5f] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:04:31.732 Df runningboardd[6617:5b5f] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:04:31.732 Df runningboardd[6617:5b5f] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:04:31.732 Df runningboardd[6617:5b5f] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:04:31.783 Df weatherd[6914:59da] [com.apple.UserNotifications:Connections] [com.apple.weather] Got notification settings [ hasResult: 1 ]
+2026-11-06 22:04:31.808 Df weatherd[6914:59da] [com.apple.UserNotifications:Connections] [com.apple.weather] Getting notification settings (sync)
+2026-11-06 22:04:31.810 Df SpringBoard[6613:5f5a] [com.apple.UserNotifications:Connections] [com.apple.weather] Getting notification settings
+2026-11-06 22:04:31.812 Df SpringBoard[6613:5f5a] [com.apple.UserNotifications:Settings] Getting effectiveSectionInfo for section identifier: com.apple.weather
+2026-11-06 22:04:31.812 Df SpringBoard[6613:5f5a] [com.apple.UserNotifications:Settings] [com.apple.weather] Getting effective section info
+2026-11-06 22:04:31.814 Df SpringBoard[6613:5f5a] [com.apple.UserNotifications:Settings] [com.apple.weather] Got effective section info [ hasResult: 0 ]
+2026-11-06 22:04:31.816 Df weatherd[6914:59da] [com.apple.UserNotifications:Connections] [com.apple.weather] Got notification settings [ hasResult: 1 ]
+2026-11-06 22:04:31.902 Df SpringBoard[6613:5466] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:04:32.007 Df weatherd[6914:59df] [com.apple.network:connection] [C1 B67A807A-823A-438B-81E5-EF83685DC860 Hostname#e439bf63:443 quic-connection, url: https://weather-edge.apple.com/v1/configs, definite, attribution: developer, context: com.apple.CFNetwork.NSURLSession.{C499E498-445A-4ED9-A36C-0C32025400BA}{(null)}{Y}{2}{0x0} (private), proc: C2BCF263-7BF2-3E36-BA38-42D2DE3B5DAD, delegated upid: 0] start
+2026-11-06 22:04:32.012 Df weatherd[6914:59da] [com.apple.weather:transactions] Acquired transaction: 14E8E917-D74D-416E-8DBA-D6FD63E2C35A for: com.apple.weatherd.channel-validation
+2026-11-06 22:04:32.387 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget 8F5F3B91-6BAE-499F-A834-63D526D7B462 created from arhive.
+2026-11-06 22:04:32.389 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:04:32.389 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:04:32.390 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x60000223ca00; uniqueIdentifier: 8F5F3B91-6BAE-499F-A834-63D526D7B462; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:04:32.390 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x60000223ca00; uniqueIdentifier: 8F5F3B91-6BAE-499F-A834-63D526D7B462; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 2; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x600003539a20; nodeID: F29116CC-CEFE-4E8C-BB24-8FAFA1F9C583; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:04:32.390 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x600003539a20 count=1, activeWidget=<SBHWidget:0x60000223ca00 [com.apple.weather.widget:com.apple.weather]>>> Changing active data source: <SBWidgetIcon: 0x600003539a20; nodeID: F29116CC-CEFE-4E8C-BB24-8FAFA1F9C583; gridSizeClass: small>
+2026-11-06 22:04:32.390 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Icon] <<SBHWidgetStack:0x600003539a20 count=1, activeWidget=<SBHWidget:0x60000223ca00 [com.apple.weather.widget:com.apple.weather]>>> Changing from data souce: (null) to data source:BAA08DB6-9C9F-4C46-A792-CE76CE1FC6DE.
+2026-11-06 22:04:32.398 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Widget com.apple.weather.widget 192E42FC-D1D3-4089-AF76-600C1F030BC2 created from arhive.
+2026-11-06 22:04:32.398 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] checking widget = com.apple.weather
+2026-11-06 22:04:32.398 Df SpringBoard[6613:5388] [com.apple.SpringBoard:WidgetDiscoverability] [ContainerBundleIdentifier debugging] applicationIdentifier = com.apple.weather
+2026-11-06 22:04:32.399 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] No widget descriptor found for widget; removing widget: <SBHWidget: 0x6000021e5810; uniqueIdentifier: 192E42FC-D1D3-4089-AF76-600C1F030BC2; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium>
+2026-11-06 22:04:32.399 Df SpringBoard[6613:5388] [com.apple.SpringBoard:Widgets] Removing iconDataSource:<SBHWidget: 0x6000021e5810; uniqueIdentifier: 192E42FC-D1D3-4089-AF76-600C1F030BC2; kind: com.apple.weather; extensionBundleIdentifier: com.apple.weather.widget; displayName: Waiting…; suggestionSource: 0; supportedGridSizeClasses: gridSizeClasses: newsLargeTall, large, extraLarge, small, medium> from widgetIcon:<SBWidgetIcon: 0x60000353d340; nodeID: ECBFC9C8-84B9-409A-875B-5EE0FA4F137A; gridSizeClass: small; widget: com.apple.weather.widget> as it is no longer valid
+2026-11-06 22:04:32.399 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not generate widget icon for representation -> {
+    allowsExternalSuggestions = 0;
+    allowsSuggestions = 1;
+    bundleIdentifier = "com.apple.weather.widget";
+    containerBundleIdentifier = "com.apple.weather";
+    elementType = widget;
+    gridSize = small;
+    iconType = custom;
+    widgetIdentifier = "com.apple.weather";
+}
+2026-11-06 22:04:32.399 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:04:32.401 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:04:32.402 E  SpringBoard[6613:5388] [com.apple.SpringBoard:Common] could not make icon from representation: (
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.mobilecal.CalendarWidgetExtension";
+        containerBundleIdentifier = "com.apple.mobilecal";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.CalendarWidget.CalendarUpNextWidget";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.weather.widget";
+        containerBundleIdentifier = "com.apple.weather";
+        elementType = widget;
+        gridSize = small;
+        iconType = custom;
+        widgetIdentifier = "com.apple.weather";
+    },
+        {
+        allowsExternalSuggestions = 0;
+        allowsSuggestions = 1;
+        bundleIdentifier = "com.apple.news.widget";
+        containerBundleIdentifier = "com.apple.news";
+        elementType = widget;
+        gridSize = newsLargeTall;
+        iconType = custom;
+        widgetIdentifier =
+2026-11-06 22:04:32.404 Df runningboardd[6617:59b0] [com.apple.runningboard:ttl] Acquiring assertion targeting [osservice<com.apple.weatherd>:6914] from originator [osservice<com.apple.weatherd>:6914] with description <RBSAssertionDescriptor| "TeaDB sqlite statement execution" ID:6617-6914-438 target:6914 attributes:[
+	<RBSDomainAttribute| domain:"com.apple.common" name:"FinishTaskNow" sourceEnvironment:"(null)">,
+	<RBSAcquisitionCompletionAttribute| policy:AfterApplication>
+	]>
+2026-11-06 22:04:32.404 Df runningboardd[6617:59b0] [com.apple.runningboard:ttl] Assertion 6617-6914-438 (target:[osservice<com.apple.weatherd>:6914]) will be created as active
+2026-11-06 22:04:32.582 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:04:32.582 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:04:32.582 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:04:32.582 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:04:32.582 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:04:32.835 Df SpringBoard[6613:5f6d] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:04:33.675 E  weatherd[6914:5c21] [com.apple.CFNetwork:Default] Task <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1> finished with error [-1001] Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.683 Df weatherd[6914:5c21] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation AA07F30B16C201AA> max-age missing from Cache-Control header for URL: https://weather-edge.apple.com/v1/configs
+2026-11-06 22:04:33.683 E  weatherd[6914:5c21] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation AA07F30B16C201AA> failed with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.683 E  weatherd[6914:5c21] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation AA07F30B16C201AA> failed to request configuration <RCConfigurationSettings: 0x600002c05d00; requestInfos: (
+    "<RCRequestInfo: 0x600002105040; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)> with error: The request timed out.
+2026-11-06 22:04:33.684 E  weatherd[6914:5b5e] [com.apple.remoteconfiguration:RemoteConfiguration] <RCEndpointOperation FA2DAE39FF5FA285> failed with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.684 E  weatherd[6914:59e1] [com.apple.remoteconfiguration:RemoteConfiguration] endpoint operation failed with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.704 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch app config. Error=Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.706 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.707 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.707 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.708 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.708 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.708 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.708 E  weatherd[6914:59da] [com.apple.weather:AppConfiguration] Failed to fetch AppConfiguration from server with error: Error Domain=NSURLErrorDomain Code=-1001 "The request timed out." UserInfo={_kCFStreamErrorCodeKey=-2102, NSUnderlyingError=0x600000c10600 {Error Domain=kCFErrorDomainCFNetwork Code=-1001 "(null)" UserInfo={_kCFStreamErrorCodeKey=-2102, _kCFStreamErrorDomainKey=4}}, _NSURLErrorFailingURLSessionTaskErrorKey=LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>, _NSURLErrorRelatedURLSessionTaskErrorKey=(
+    "LocalDataTask <2D8BAAD7-CA53-44FB-AC35-84B86C618915>.<1>"
+), NSLocalizedDescription=The request timed out., NSErrorFailingURLStringKey=https://weather-edge.apple.com/v1/configs, NSErrorFailingURLKey=https://weather-edge.apple.com/v1/configs, _kCFStreamErrorDomainKey=4}
+2026-11-06 22:04:33.708 Df weatherd[6914:59da] [com.apple.UserNotifications:Connections] [com.apple.weather] Getting notification settings (sync)
+2026-11-06 22:04:33.713 Df SpringBoard[6613:5d51] [com.apple.UserNotifications:Connections] [com.apple.weather] Getting notification settings
+2026-11-06 22:04:33.714 Df SpringBoard[6613:5d51] [com.apple.UserNotifications:Settings] Getting effectiveSectionInfo for section identifier: com.apple.weather
+2026-11-06 22:04:33.714 Df SpringBoard[6613:5d51] [com.apple.UserNotifications:Settings] [com.apple.weather] Getting effective section info
+2026-11-06 22:04:33.716 Df SpringBoard[6613:5d51] [com.apple.UserNotifications:Settings] [com.apple.weather] Got effective section info [ hasResult: 0 ]
+2026-11-06 22:04:33.717 Df weatherd[6914:59da] [com.apple.UserNotifications:Connections] [com.apple.weather] Got notification settings [ hasResult: 1 ]
+2026-11-06 22:04:33.766 Df weatherd[6914:59df] [com.apple.network:connection] [C1 B67A807A-823A-438B-81E5-EF83685DC860 Hostname#e439bf63:443 quic-connection, url: https://weather-edge.apple.com/v1/configs, definite, attribution: developer] cancel
+2026-11-06 22:04:33.769 Df weatherd[6914:59df] [com.apple.network:connection] [C1 Hostname#e439bf63:443 quic-connection, url: https://weather-edge.apple.com/v1/configs, definite, attribution: developer] cancelled
+2026-11-06 22:04:34.202 Df runningboardd[6617:6524] [com.apple.runningboard:ttl] Invalidating assertion 6617-6914-438 (target:[osservice<com.apple.weatherd>:6914]) from originator [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:04:34.472 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:04:34.472 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:04:34.472 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:04:34.473 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:04:34.475 Df runningboardd[6617:6035] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:04:34.482 Df SpringBoard[6613:5f58] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:04:38.059 E  accountsd[6620:6010] [com.apple.accounts:core] "Total client count exceeded 60: {
+    NewsTag = 1;
+    NewsTodayIntents = 1;
+    ScreenTimeAgent = 1;
+    Spotlight = 1;
+    accountsd = 4;
+    adprivacyd = 3;
+    akd = 1;
+    amsaccountsd = 3;
+    amsengagementd = 1;
+    appleaccountd = 1;
+    appprotectiond = 1;
+    appstored = 2;
+    assetsd = 1;
+    cdpd = 2;
+    chronod = 1;
+    cloudd = 2;
+    contactsd = 1;
+    familycircled = 1;
+    findmylocated = 2;
+    fitcored = 1;
+    gamed = 2;
+    healthd = 1;
+    icloudmailagent = 1;
+    itunescloudd = 2;
+    itunesstored = 2;
+    locationd = 1;
+    maild = 2;
+    mediaremoted = 1;
+    passd = 2;
+    promotedcontentd = 2;
+    rapportd = 2;
+    remindd = 1;
+    routined = 1;
+    securityd = 2;
+    sharingd = 2;
+    storekitd = 2;
+    suggestd = 1;
+    syncdefaultsd = 1;
+    voicebankingd = 1;
+    weatherd = 1;
+}"
+2026-11-06 22:04:41.560 Df weatherd[6914:59da] [com.apple.weather:KVSMigration] Not running in the Weather app, skipping device lookup
+2026-11-06 22:05:21.595 Df P2000 Apeldoorn[8115:6c39] [nl.lrvdlinden.p2000apeldoorn:weer] weer 7b9acb9c-dc74-9eea-4594-9e711cd6cbcb: server=3.32 cancelled=false
+2026-11-06 22:05:21.596 Df P2000 Apeldoorn[8115:6c39] [nl.lrvdlinden.p2000apeldoorn:weer] weer gezet: 3.320000
+2026-11-06 22:05:21.646 Df P2000 Apeldoorn[8115:6c39] [com.apple.weather:AuthService] About to determine whether to authenticate in process or via com.apple.weatherkit.authservice...
+2026-11-06 22:05:21.650 Df P2000 Apeldoorn[8115:6c39] [com.apple.weather:AuthService] This is a 3rd party process so authenticate via com.apple.weatherkit.authservice
+2026-11-06 22:05:21.661 Df P2000 Apeldoorn[8115:6c39] [com.apple.weather:WeatherDataService] Sending request with User Agent=WeatherKit_P2000 Apeldoorn_iOS_Version 26.2 (Build 23C54)
+2026-11-06 22:05:21.676 Df P2000 Apeldoorn[8115:6c5b] [com.apple.network:connection] [C2 7BABE766-9EA1-4F4A-A44A-61AB9A3D06BA Hostname#ad0553fc:443 quic-connection, url: https://weatherkit.apple.com/attribution/nl, definite, attribution: developer, context: com.apple.CFNetwork.NSURLSession.{7CAD5AB9-656D-4E53-86C2-587BB8ABD82A}{(null)}{Y}{2}{0x0} (private), proc: E0AD32C2-AD0B-3FA8-80EF-DDE253981258, delegated upid: 0] start
+2026-11-06 22:05:22.154 Df P2000 Apeldoorn[8115:6d1b] [com.apple.network:connection] [C3 EB71625C-816D-49A0-BD62-9C7C0907220A Hostname#ad0553fc:443 tcp, url: https://weatherkit.apple.com/assets/branding/nl/Apple_Weather_blk_nl_3X_090122.png, tls, definite, attribution: developer, context: com.apple.CFNetwork.NSURLSession.{7CAD5AB9-656D-4E53-86C2-587BB8ABD82A}{(null)}{Y}{2}{0x0} (private), proc: E0AD32C2-AD0B-3FA8-80EF-DDE253981258, delegated upid: 0] start
+2026-11-06 22:05:33.438 Df syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidFetchChanges context=<FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC)>>>
+2026-11-06 22:05:33.439 E  syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> error fetching changes for context <FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC)>>: <CKError 0x600000c23e40: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:05:33.443 Df syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC>>
+2026-11-06 22:05:33.443 Df syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <WillSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC>>>
+2026-11-06 22:05:33.446 Df syncdefaultsd[6720:5665] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC>>>
+2026-11-06 22:05:33.447 E  syncdefaultsd[6720:5665] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> failed sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=0EF8DBC8264734AC>>: <CKError 0x600000c1de60: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:05:33.448 E  weatherd[6914:6ce2] [com.apple.kvs:Connection] Error synchronizing with cloud for store <(com.apple.weather)>: Error Domain=SyncedDefaults Code=8888 "No account" UserInfo={NSLocalizedDescription=No account}
+2026-11-06 22:05:33.988 Df syncdefaultsd[6720:5665] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> fetching changes for context <FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57)>>
+2026-11-06 22:05:33.988 Df syncdefaultsd[6720:5665] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <WillFetchChanges context=<FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57)>>>
+2026-11-06 22:05:35.463 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidFetchChanges context=<FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57)>>>
+2026-11-06 22:05:35.463 E  syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> error fetching changes for context <FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57)>>: <CKError 0x600000c20450: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:05:35.471 Df syncdefaultsd[6720:6699] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57>>
+2026-11-06 22:05:35.471 Df syncdefaultsd[6720:6699] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <WillSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57>>>
+2026-11-06 22:05:41.196 Df syncdefaultsd[6720:6699] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57>>>
+2026-11-06 22:05:41.198 E  syncdefaultsd[6720:6699] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> failed sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=33F72204AC7D3D57>>: <CKError 0x600000c20c30: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:05:41.206 E  weatherd[6914:6ce2] [com.apple.kvs:Connection] Error synchronizing with cloud for store <(com.apple.weather)>: Error Domain=SyncedDefaults Code=8888 "No account" UserInfo={NSLocalizedDescription=No account}
+2026-11-06 22:05:44.265 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Acquiring assertion targeting [osservice<com.apple.weatherd>:6914] from originator [osservice<com.apple.weatherd>:6914] with description <RBSAssertionDescriptor| "Weather Default Locations Fetch" ID:6617-6914-846 target:6914 attributes:[
+	<RBSDomainAttribute| domain:"com.apple.common" name:"FinishTaskNow" sourceEnvironment:"(null)">
+	]>
+2026-11-06 22:05:44.265 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Assertion 6617-6914-846 (target:[osservice<com.apple.weatherd>:6914]) will be created as active
+2026-11-06 22:05:44.266 Df runningboardd[6617:6fa7] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:05:44.266 Df runningboardd[6617:6fa7] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:05:44.267 Df runningboardd[6617:6fa7] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:05:44.268 Df runningboardd[6617:6fa7] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:05:44.268 Df runningboardd[6617:6fa7] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:05:44.271 Df SpringBoard[6613:5f33] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:05:44.590 Df runningboardd[6617:5425] [com.apple.runningboard:ttl] Invalidating assertion 6617-6914-846 (target:[osservice<com.apple.weatherd>:6914]) from originator [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:05:44.598 Df weatherd[6914:6ce2] [com.apple.FileURL:default] kExcludedFromCloudBackupName set on path: /Users/runner/Library/Developer/CoreSimulator/Devices/309F4F0C-F632-4F5C-BB25-BD783E57455C/data/Library/Weather/weather_data_protection_info
+2026-11-06 22:05:44.598 Df weatherd[6914:6ce2] [com.apple.FileURL:default] kExcludedFromUnencryptedBackupName set on path: /Users/runner/Library/Developer/CoreSimulator/Devices/309F4F0C-F632-4F5C-BB25-BD783E57455C/data/Library/Weather/weather_data_protection_info
+2026-11-06 22:05:44.598 Df weatherd[6914:6ce2] [com.apple.weather:Privacy] Saved data protection data to file /Users/runner/Library/Developer/CoreSimulator/Devices/309F4F0C-F632-4F5C-BB25-BD783E57455C/data/Library/Weather/weather_data_protection_info
+2026-11-06 22:05:44.600 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> fetching changes for context <FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073)>>
+2026-11-06 22:05:44.600 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <WillFetchChanges context=<FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073)>>>
+2026-11-06 22:05:44.835 Df runningboardd[6617:5425] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:05:44.835 Df runningboardd[6617:5425] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:05:44.835 Df runningboardd[6617:5425] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:05:44.835 Df runningboardd[6617:5425] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:05:44.835 Df SpringBoard[6613:5f33] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:05:44.836 Df runningboardd[6617:5425] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:05:52.300 Df P2000 Apeldoorn[8115:6c56] [com.apple.network:connection] [C2 7BABE766-9EA1-4F4A-A44A-61AB9A3D06BA Hostname#ad0553fc:443 quic-connection, url: https://weatherkit.apple.com/attribution/nl, definite, attribution: developer] cancel
+2026-11-06 22:05:52.300 Df P2000 Apeldoorn[8115:6c56] [com.apple.network:connection] [C2 7BABE766-9EA1-4F4A-A44A-61AB9A3D06BA Hostname#ad0553fc:443 quic-connection, url: https://weatherkit.apple.com/attribution/nl, definite, attribution: developer] cancelled
+	[C2.1.1.1 B7275E21-9BC0-43CC-83DF-BE8681A2F4FB 192.168.64.12:49654<->IPv4#f533d143:443]
+	Connected Path: satisfied (Path is satisfied), interface: en0
+	Privacy Stance: Not Eligible
+	Duration: 30.623s, DNS @0.018s took 0.032s, TCP @0.053s took 0.051s, TLS 1.3 took 0.117s
+	bytes in/out: 6233/1881, packets in/out: 3/4, rtt: 0.049s, retransmitted bytes: 0, out-of-order bytes: 0
+	ecn packets sent/acked/marked/lost: 4/4/0/0
+2026-11-06 22:05:53.391 Df P2000 Apeldoorn[8115:6c56] [com.apple.network:connection] [C3 EB71625C-816D-49A0-BD62-9C7C0907220A Hostname#ad0553fc:443 tcp, url: https://weatherkit.apple.com/assets/branding/nl/Apple_Weather_blk_nl_3X_090122.png, tls, definite, attribution: developer] cancel
+2026-11-06 22:05:53.392 Df P2000 Apeldoorn[8115:6c56] [com.apple.network:connection] [C3 EB71625C-816D-49A0-BD62-9C7C0907220A Hostname#ad0553fc:443 tcp, url: https://weatherkit.apple.com/assets/branding/nl/Apple_Weather_blk_nl_3X_090122.png, tls, definite, attribution: developer] cancelled
+	[C3.1.1 B7275E21-9BC0-43CC-83DF-BE8681A2F4FB 192.168.64.12:49656<->IPv4#f533d143:443]
+	Connected Path: satisfied (Path is satisfied), interface: en0
+	Privacy Stance: Not Eligible
+	Duration: 31.238s, DNS @0.030s took 0.089s, TCP @0.166s took 0.047s, TLS 1.3 took 0.088s
+	bytes in/out: 8123/1917, packets in/out: 3/4, rtt: 0.044s, retransmitted bytes: 0, out-of-order bytes: 0
+	ecn packets sent/acked/marked/lost: 4/4/0/0
+2026-11-06 22:06:12.601 Df syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidFetchChanges context=<FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073)>>>
+2026-11-06 22:06:12.603 E  syncdefaultsd[6720:720b] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> error fetching changes for context <FetchChangesContext reason=manual options=<FetchChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073)>>: <CKError 0x600000c1b2d0: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:06:12.616 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073>>
+2026-11-06 22:06:12.616 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <WillSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073>>>
+2026-11-06 22:06:12.618 Df syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> will post event: <DidSendChanges context=<SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073>>>
+2026-11-06 22:06:12.618 E  syncdefaultsd[6720:565e] [com.apple.cloudkit.sim:Engine] <CKSyncEngine com.apple.KeyValueService.EndToEndEncrypted> failed sending changes for context <SendChangesContext reason=manual options=<SendChangesOptions scope=zoneIDs(com.apple.weather:__defaultOwner__)) group=ManualSync groupID=D91CA1C90765C073>>: <CKError 0x600000c1b990: "Not Authenticated" (9); "Could not determine iCloud account status">
+2026-11-06 22:06:13.797 E  weatherd[6914:787b] [com.apple.kvs:Connection] Error synchronizing with cloud for store <(com.apple.weather)>: Error Domain=SyncedDefaults Code=8888 "No account" UserInfo={NSLocalizedDescription=No account}
+2026-11-06 22:06:22.899 Df weatherd[6914:7894] [com.apple.weather:AppConfiguration] RemoteConfiguratin recordID=configuration-weather2-143441
+2026-11-06 22:06:22.931 Df weatherd[6914:7894] [com.apple.weather:AppConfiguration] About to fetch app config with settings: <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)
+ userID: DCEB91A9-F99B-415B-A264-D13DE7FE9D71
+ storefrontID: 143441
+ bundleID: com.apple.weatherd
+ endpointConfig: (null)
+ deviceInfo: <RCDeviceInfo: 0x600002605f20; preferredLanguages: (
+    "en-US"
+)
+ deviceType: iPhone17,3
+ deviceClass: iphone
+ utcOffset: 0
+ dstOffset: 0
+ appVersion: 6.0
+ osVersion: 26.2
+ formatVersion: (null)
+ seedNumber: (null)
+ buildNumber: (null)>
+ debugOverrides: (null)
+ useBackgroundRefreshRate: 0 requestMode: 2 applicationState: 0>
+2026-11-06 22:06:23.217 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] enqueuing configuration fetch from endpoint with settings: <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)
+ userID: DCEB91A9-F99B-415B-A264-D13DE7FE9D71
+ storefrontID: 143441
+ bundleID: com.apple.weatherd
+ endpointConfig: (null)
+ deviceInfo: <RCDeviceInfo: 0x600002605f20; preferredLanguages: (
+    "en-US"
+)
+ deviceType: iPhone17,3
+ deviceClass: iphone
+ utcOffset: 0
+ dstOffset: 0
+ appVersion: 6.0
+ osVersion: 26.2
+ formatVersion: (null)
+ seedNumber: (null)
+ buildNumber: (null)>
+ debugOverrides: (null)
+ useBackgroundRefreshRate: 0 requestMode: 2 applicationState: 0>
+2026-11-06 22:06:23.217 Df weatherd[6914:7210] [com.apple.remoteconfiguration:RemoteConfiguration] fetching configuration from endpoint with settings: <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)
+ userID: DCEB91A9-F99B-415B-A264-D13DE7FE9D71
+ storefrontID: 143441
+ bundleID: com.apple.weatherd
+ endpointConfig: (null)
+ deviceInfo: <RCDeviceInfo: 0x600002605f20; preferredLanguages: (
+    "en-US"
+)
+ deviceType: iPhone17,3
+ deviceClass: iphone
+ utcOffset: 0
+ dstOffset: 0
+ appVersion: 6.0
+ osVersion: 26.2
+ formatVersion: (null)
+ seedNumber: (null)
+ buildNumber: (null)>
+ debugOverrides: (null)
+ useBackgroundRefreshRate: 0 requestMode: 2 applicationState: 0>
+2026-11-06 22:06:23.217 Df weatherd[6914:7210] [com.apple.remoteconfiguration:RemoteConfiguration] <RCEndpointOperation 138E4F6B6B150312> will perform operation to fetch config with settings <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)
+ userID: DCEB91A9-F99B-415B-A264-D13DE7FE9D71
+ storefrontID: 143441
+ bundleID: com.apple.weatherd
+ endpointConfig: (null)
+ deviceInfo: <RCDeviceInfo: 0x600002605f20; preferredLanguages: (
+    "en-US"
+)
+ deviceType: iPhone17,3
+ deviceClass: iphone
+ utcOffset: 0
+ dstOffset: 0
+ appVersion: 6.0
+ osVersion: 26.2
+ formatVersion: (null)
+ seedNumber: (null)
+ buildNumber: (null)>
+ debugOverrides: (null)
+ useBackgroundRefreshRate: 0 requestMode: 2 applicationState: 0>
+2026-11-06 22:06:23.217 Df weatherd[6914:7210] [com.apple.remoteconfiguration:RemoteConfiguration] <RCEndpointOperation 138E4F6B6B150312> Endpoint JSON request: {"storefrontId":"143441","weather2ConfigRequest":{},"deviceInfo":{"appVersion":"6.0","deviceClass":"iphone","preferredLanguages":["en-US"],"osVersion":"26.2","deviceType":"iPhone17,3","dstOffsetSecs":0,"countryCode":"US","utcOffsetSecs":0,"isInternal":false},"bundleId":"com.apple.weatherd","feldsparId":"DCEB91A9-F99B-415B-A264-D13DE7FE9D71"}
+2026-11-06 22:06:23.219 Df weatherd[6914:7210] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation E450603D9D7F56C3> will perform operation to fetch config from URL: https://weather-edge.apple.com/v1/configs with X-Request-ID: 82734569-0EDB-442E-A259-56E71DA0EF91
+2026-11-06 22:06:23.219 Df weatherd[6914:7210] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation E450603D9D7F56C3> will send foreground request for configuration: <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)> with UUID: 82734569-0EDB-442E-A259-56E71DA0EF91, URL: https://weather-edge.apple.com/v1/configs
+2026-11-06 22:06:23.247 Df weatherd[6914:7210] [com.apple.network:connection] [C2 B8DC963C-4E49-43F0-AB36-5050B2680FA1 Hostname#e439bf63:443 quic-connection, url: https://weather-edge.apple.com/v1/configs, definite, attribution: developer, context: com.apple.CFNetwork.NSURLSession.{C499E498-445A-4ED9-A36C-0C32025400BA}{(null)}{Y}{2}{0x0} (private), proc: C2BCF263-7BF2-3E36-BA38-42D2DE3B5DAD, delegated upid: 0] start
+2026-11-06 22:06:23.881 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation E450603D9D7F56C3> max-age missing from Cache-Control header for URL: https://weather-edge.apple.com/v1/configs
+2026-11-06 22:06:23.890 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] <RCURLFetchOperation E450603D9D7F56C3> successfully received configuration <RCConfigurationSettings: 0x600002c08980; requestInfos: (
+    "<RCRequestInfo: 0x6000021057c0; requestKey: weather2ConfigRequest responseKey: weather2ConfigurationWrapper fallbackURL: (null) requestType: 0, additionalChangeTags: (null), cacheKey: weather2ConfigRequest, additionalFields: {\134n} cachePolicy: <RCCachePolicy: requestCachePolicy: 0>>"
+)> with size: 9 KB, total time: 0.662020
+2026-11-06 22:06:23.891 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] creating user segmentation config with endpointURL: https://weather-edge.apple.com/v1/configs widgetEndpointURL: (null) todayEndpointURL: (null)
+2026-11-06 22:06:23.891 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] <RCEndpointOperation 138E4F6B6B150312> endpoint: received configuration with configurationID: weather2-app-config-v1 lastModified: 2026-11-06T22:06:23Z lastFetched: Fri Nov  6 22:06:23 2026 maxAge: (null) treatmentIDs:  segmentSetIDs: 6206, 10886
+2026-11-06 22:06:23.891 Df weatherd[6914:7894] [com.apple.remoteconfiguration:RemoteConfiguration] cached configuration not available for requestKey: weather2ConfigRequest, skip updating last fetch date, treatmentIDs and segmentSetIDs
+2026-11-06 22:06:24.477 Df runningboardd[6617:729e] [com.apple.runningboard:ttl] Acquiring assertion targeting [osservice<com.apple.weatherd>:6914] from originator [osservice<com.apple.weatherd>:6914] with description <RBSAssertionDescriptor| "com.apple.CFNetwork.StorageDB" ID:6617-6914-863 target:6914 attributes:[
+	<RBSDomainAttribute| domain:"com.apple.common" name:"FinishTaskUninterruptable" sourceEnvironment:"(null)">,
+	<RBSAcquisitionCompletionAttribute| policy:AfterApplication>
+	]>
+2026-11-06 22:06:24.477 Df runningboardd[6617:729e] [com.apple.runningboard:ttl] Assertion 6617-6914-863 (target:[osservice<com.apple.weatherd>:6914]) will be created as active as no start-time-defining assertions exist
+2026-11-06 22:06:24.641 Df weatherd[6914:7210] [com.apple.apsd:connection] Initializing APSConnection <APSConnection: 0x600003d00870>: env=production port=com.apple.aps.weather queue=<OS_dispatch_queue_serial: com.apple.weather.notifications>
+2026-11-06 22:06:24.725 Df runningboardd[6617:7898] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:06:24.725 Df runningboardd[6617:7898] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:06:24.725 Df runningboardd[6617:7898] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:06:24.725 Df runningboardd[6617:7898] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:06:24.725 Df runningboardd[6617:7898] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:06:24.805 Df SpringBoard[6613:5f58] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:06:25.947 Df weatherd[6914:7210] [com.apple.apsd:connection] <APSConnection: 0x600003d00870> setting delegate <weatherd.APSConnectionManager: 0x600000c0a460> {asyncSetDelegate: NO}
+2026-11-06 22:06:25.962 Df apsd[6673:54e5] SetupConnection: env=development portName=com.apple.aps.weather
+2026-11-06 22:06:25.962 Df apsd[6673:54e5] [com.apple.apsd:daemon] Found existing connection (null) for port name: com.apple.aps.weather
+2026-11-06 22:06:25.965 Df apsd[6673:54e5] [com.apple.apsd:connectionServer] <APSConnectionServer: 0x10290f660; (null)/(null)/(null) (null)>: Initializing connection server with environmentName 'development' and connectionPortName 'com.apple.aps.weather' and processName 'weatherd'
+2026-11-06 22:06:25.966 Df apsd[6673:54e5] [com.apple.apsd:courier] <APSUserCourier 0x10290ea40 development 0> adding connectionserver <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>, setting publicToken:(null)
+2026-11-06 22:06:25.967 Df apsd[6673:54e5] [com.apple.apsd:daemon] Setting connection <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0> on peer: <xpc object>
+2026-11-06 22:06:25.967 Df apsd[6673:54e5] [com.apple.apsd:courier] <APSUserCourier 0x10290ea40 development 0> <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0> has established new xpc connection <xpc object>
+2026-11-06 22:06:26.002 Df apsd[6673:77a3] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.029 Df weatherd[6914:7210] [com.apple.apsd:connection] <APSConnection: 0x600003d00870> setEnabledTopics (
+    "com.apple.weather"
+) ignoredTopics (
+) opportunisticTopics (
+) nonWakingTopics (
+) sendToDaemon: YES completion: (null)
+2026-11-06 22:06:26.034 E  apsd[6673:54e5] [com.apple.apsd:connectionServer] Unrecognized token received from com.apple.aps.weather
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:connectionServer] <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>: connection set enabled topics (com.apple.weather)
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: adding topics (com.apple.weather) for connection server <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: adding topic com.apple.weather ({length = 20, bytes = 0xe47d793c3165788bf53a4fe573eafb3d4d6df16d}) for connection server <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: recategorizing topic com.apple.weather from none to enabled
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: calculated change type for com.apple.weather {newTopicFilter: 1, previouslyChosenTopicFilter: 0, previousServerTopicFilter: 0 change: NewlyEnabled}
+2026-11-06 22:06:26.040 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: completed transaction - calculated change NewlyEnabled {topics changed: (
+    "<APSTopicState: 0x600001738140> connectionServer=<APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>, topicName=com.apple.weather, topicHash={length = 20, bytes = 0xe47d793c3165788bf53a4fe573eafb3d4d6df16d}, attributes=<<APSTopicAttributes: 0x600000214440>: filter=enabled, darkWakeEnabled=NO, pushWakeEnabled=NO, criticalWakeEnabled=NO, ultraConstrainedEnabled=NO>, currentFilter=enabled, desiredFilter=enabled"
+)}
+2026-11-06 22:06:26.045 Df apsd[6673:54e5] <APSMessageStore: 0x60000000c3f0> Getting channels for topic com.apple.weather environment development userName TokenName
+2026-11-06 22:06:26.048 Df apsd[6673:54e5] <APSMessageStore: 0x60000000c3f0> Found channels for topic com.apple.weather: (
+)
+2026-11-06 22:06:26.137 Df apsd[6673:7790] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.222 Df weatherd[6914:7210] [com.apple.apsd:connection] <APSConnection: 0x600003d00870> push topic com.apple.weather got registered channels (
+)
+2026-11-06 22:06:26.244 Df apsd[6673:779f] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.666 Df apsd[6673:64b1] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:26.900 Df apsd[6673:77a2] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:27.054 Df apsd[6673:7a0e] [com.apple.apsd:connectionServer] Dispatching low priority message on server: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:27.103 Df runningboardd[6617:541b] [com.apple.runningboard:ttl] Invalidating assertion 6617-6914-863 (target:[osservice<com.apple.weatherd>:6914]) from originator [osservice<com.apple.weatherd>:6914]
+2026-11-06 22:06:27.109 Df apsd[6673:54e5] [com.apple.apsd:connectionServer] <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>: connection set enabled topics ()
+2026-11-06 22:06:27.110 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: removing topic com.apple.weather for connection server <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:27.110 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: recategorizing topic com.apple.weather from enabled to none
+2026-11-06 22:06:27.110 Df apsd[6673:54e5] [com.apple.apsd:topicManager] <APSTopicManager: 0x6000030041b0; development; 0>: completed transaction - calculated change None {topics changed: (
+    "<APSTopicState: 0x600001738140> connectionServer=<APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>, topicName=com.apple.weather, topicHash={length = 20, bytes = 0xe47d793c3165788bf53a4fe573eafb3d4d6df16d}, attributes=<<APSTopicAttributes: 0x600000214440>: filter=enabled, darkWakeEnabled=NO, pushWakeEnabled=NO, criticalWakeEnabled=NO, ultraConstrainedEnabled=NO>, currentFilter=none, desiredFilter=none"
+)}
+2026-11-06 22:06:27.131 Df apsd[6673:54e5] [com.apple.apsd:connectionServer] Replacing xpc conn <xpc object> with (null) for <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0> (com.apple.aps.weather)
+2026-11-06 22:06:27.131 F  apsd[6673:54e5] [com.apple.apsd:connectionServer] Unexpected replacement of connection in <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:27.131 F  apsd[6673:54e5] [com.apple.apsd:connectionServer] Unexpected nilling of connection via setter in <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:27.137 Df weatherd[6914:787b] [com.apple.weather:transactions] Releasing transaction: 14E8E917-D74D-416E-8DBA-D6FD63E2C35A for: com.apple.weatherd.channel-validation
+2026-11-06 22:06:27.241 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring jetsam update because this process is not memory-managed
+2026-11-06 22:06:27.241 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring suspend because this process is not lifecycle managed
+2026-11-06 22:06:27.241 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring role changes because this process is not role managed
+2026-11-06 22:06:27.241 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring GPU update because this process is not GPU managed
+2026-11-06 22:06:27.241 Df runningboardd[6617:541b] [com.apple.runningboard:process] [osservice<com.apple.weatherd>:6914] Ignoring memory limit update because this process is not memory-managed
+2026-11-06 22:06:27.242 Df SpringBoard[6613:5f58] [com.apple.runningboard:monitor] Received state update for 6914 (osservice<com.apple.weatherd>, running-NotVisible
+2026-11-06 22:06:37.125 Df apsd[6673:54e5] [com.apple.apsd:courier] <APSUserCourier 0x10290ea40 development 0>: __processStoredIncomingMessageForConnection: <APSConnectionServer: 0x10290f660; development/com.apple.aps.weather/weatherd 0>
+2026-11-06 22:06:40.251 Df log[9615:0] [com.apple.log:] log run noninteractively, parent: 6603 (launchd_sim), args: 'log' 'show' '--last' '3m' '--style' 'compact' '--predicate' 'subsystem == "nl.lrvdlinden.p2000apeldoorn" OR eventMessage CONTAINS[c] "weather" OR eventMessage CONTAINS[c] "weatherkit"'
