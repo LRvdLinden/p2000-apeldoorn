@@ -142,7 +142,7 @@ fun SettingsScreen(nav: Nav) {
             MoreAppsCard()
 
             Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                Image(painterResource(R.mipmap.ic_launcher), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
+                Image(painterResource(R.drawable.app_icon), null, Modifier.size(56.dp).clip(RoundedCornerShape(14.dp)))
                 Text("A-Alerts", fontWeight = FontWeight.Bold)
                 Text(tr("Versie", "Version") + " ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · Android", color = Muted, fontSize = 12.sp)
                 Text(tr("Bel bij nood altijd 112.", "In an emergency always call 112."), color = Muted, fontSize = 12.sp)

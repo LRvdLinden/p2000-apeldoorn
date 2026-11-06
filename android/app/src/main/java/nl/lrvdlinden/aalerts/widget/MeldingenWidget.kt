@@ -52,7 +52,7 @@ class MeldingenWidget : GlanceAppWidget() {
                 .clickable(actionStartActivity<MainActivity>()),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(ImageProvider(R.mipmap.ic_launcher), contentDescription = null, modifier = GlanceModifier.size(18.dp))
+                Image(ImageProvider(R.drawable.app_icon), contentDescription = null, modifier = GlanceModifier.size(18.dp))
                 Spacer(GlanceModifier.width(6.dp))
                 Text("A-Alerts", style = TextStyle(color = fg, fontWeight = FontWeight.Bold, fontSize = 13.sp))
             }

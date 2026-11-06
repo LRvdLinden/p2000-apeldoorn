@@ -26,3 +26,4 @@ adb logcat -d -b crash > shots/crash.txt
 adb logcat -d | grep -E "AndroidRuntime|FATAL|$P" | tail -200 > shots/logcat.txt
 if grep -q "FATAL EXCEPTION" shots/crash.txt; then cat shots/crash.txt; exit 1; fi
 echo "Geen crashes"
+# rerun 1793990107

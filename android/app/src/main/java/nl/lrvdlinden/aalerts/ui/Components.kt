@@ -167,7 +167,8 @@ fun EmptyState(title: String, text: String, modifier: Modifier = Modifier) {
 
 @Composable
 fun SelectChip(label: String, selected: Boolean, onClick: () -> Unit) {
-    FilterChip(selected = selected, onClick = onClick, label = { Text(label, fontSize = 13.sp) })
+    FilterChip(selected = selected, onClick = onClick, label = { Text(label, fontSize = 13.sp) },
+        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f), selectedLabelColor = MaterialTheme.colorScheme.primary))
 }
 
 @Composable

@@ -226,7 +226,7 @@ fun Onboarding(onDone: () -> Unit) {
     }
     data class Page(val icon: Int?, val vector: androidx.compose.ui.graphics.vector.ImageVector?, val title: String, val text: String)
     val pages = listOf(
-        Page(R.mipmap.ic_launcher, null, tr("Welkom bij A-Alerts", "Welcome to A-Alerts"),
+        Page(R.drawable.app_icon, null, tr("Welkom bij A-Alerts", "Welcome to A-Alerts"),
             tr("Live meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn.", "Live alerts from fire, ambulance, police and air ambulance in the municipality of Apeldoorn.")),
         Page(R.drawable.icon_nlalert, null, tr("NL-Alert, Burgernet en KNMI", "NL-Alert, Burgernet and KNMI"),
             tr("Ook NL-Alerts, Burgernet-acties en KNMI-weercodes voor de gemeente, in de tijdlijn en op de kaart.", "Also NL-Alerts, Burgernet calls and KNMI weather codes for the municipality, in the timeline and on the map.")),

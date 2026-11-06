@@ -23,6 +23,7 @@ jobs:
         with: { gradle-version: 8.14.3 }
       - name: Build
         working-directory: android
+        env: { ANDROID_ALL_ABIS: "1" }
         run: gradle --no-daemon assembleRelease && cp app/build/outputs/apk/release/*.apk ../app.apk
       - name: KVM
         run: |

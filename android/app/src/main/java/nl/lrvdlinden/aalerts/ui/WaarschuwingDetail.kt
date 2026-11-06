@@ -61,7 +61,8 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
     val ended = x.isBeeindigd
 
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+        val scroll = rememberScrollState()
+        Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
             BoxWithConstraints(Modifier.fillMaxWidth()) {
                 val h = (maxWidth * 0.9f).coerceIn(300.dp, 440.dp)
                 val rings = x.gebied ?: emptyList()
@@ -125,6 +126,8 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 Spacer(Modifier.height(24.dp))
             }
         }
+        // Bar behind the status bar once the content scrolls over the map.
+        if (scroll.value > 200) Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f)).statusBarsPadding().height(52.dp))
         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 6.dp)) {
             RoundIcon(Icons.AutoMirrored.Filled.ArrowBack, tr("Terug", "Back")) { nav.back() }
         }

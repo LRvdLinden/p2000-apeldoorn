@@ -37,6 +37,8 @@ android {
         buildConfigField("String", "API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
         buildConfigField("String", "WEBSITE", "\"https://a-alerts.nl\"")
         buildConfigField("boolean", "HAS_FIREBASE", hasFirebase.toString())
+        // Phones only (arm64 + armv7) keeps the APK small; the emulator test sets ANDROID_ALL_ABIS=1.
+        if (System.getenv("ANDROID_ALL_ABIS") != "1") ndk { abiFilters += listOf("arm64-v8a", "armeabi-v7a") }
     }
 
     signingConfigs {

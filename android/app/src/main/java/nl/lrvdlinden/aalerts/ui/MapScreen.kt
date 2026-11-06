@@ -79,7 +79,7 @@ fun MapScreen(nav: Nav) {
                     items(listOf(1, 6, 24, 72)) { u ->
                         FilterChip(selected = periode == u, onClick = { Settings.kaartPeriode = u },
                             label = { Text(if (u < 24) "$u " + tr("uur", "h") else "${u / 24} " + tr(if (u == 24) "dag" else "dagen", if (u == 24) "day" else "days"), fontSize = 12.sp) },
-                            colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface))
+                            colors = FilterChipDefaults.filterChipColors(containerColor = MaterialTheme.colorScheme.surface, selectedContainerColor = MaterialTheme.colorScheme.primary, selectedLabelColor = MaterialTheme.colorScheme.onPrimary))
                     }
                 }
                 Spacer(Modifier.width(8.dp))

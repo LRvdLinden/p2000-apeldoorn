@@ -136,7 +136,7 @@ private fun MainTabs(nav: Nav) {
 private fun LockScreen(onUnlock: () -> Unit) {
     LaunchedEffect(Unit) { onUnlock() }
     Column(Modifier.fillMaxSize().background(Color(0xFFB00A1A)).systemBarsPadding(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-        Image(painterResource(R.mipmap.ic_launcher), null, Modifier.size(96.dp))
+        Image(painterResource(R.drawable.app_icon), null, Modifier.size(96.dp))
         Spacer(Modifier.height(16.dp))
         Text("A-Alerts", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
         Spacer(Modifier.height(24.dp))
