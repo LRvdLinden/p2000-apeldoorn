@@ -4,8 +4,8 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js";
-import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js";
+} from "./core.js?v=33";
+import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js?v=33";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();

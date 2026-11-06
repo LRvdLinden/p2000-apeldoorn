@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=33";
 
 const TZ = "Europe/Amsterdam";
 
@@ -146,7 +146,10 @@ export function heliAnnotation(mk, h) {
   const factory = () => {
     const el = document.createElement("div");
     el.className = "heli-marker";
-    el.innerHTML = `<img src="${heliImg(h)}" alt="" style="${vliegtWest(h) ? "transform:scaleX(-1)" : ""}"><span>${esc(h.naam)}</span>`;
+    // Sizes inline so the drawing never shows at its full size (also with an old stylesheet in the cache).
+    el.style.cssText = "display:grid;justify-items:center;gap:2px;width:96px;transform:translateY(-50%)";
+    el.innerHTML = `<img src="${heliImg(h)}" alt="" width="84" style="width:84px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
+      + `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>`;
     el.title = `${h.naam} · ${heliInfo(h)}`;
     return el;
   };
@@ -158,7 +161,7 @@ export function warnAnnotation(mk, w, onSelect) {
   const factory = () => {
     const el = document.createElement("div");
     el.className = "mk-marker warn-marker";
-    el.innerHTML = `<img src="${asset(`assets/img/marker_${w.bron}.png`)}" alt="">`;
+    el.innerHTML = `<img src="${asset(`assets/img/marker_${w.bron}.png`)}" alt="" style="width:34px;height:auto">`;
     return el;
   };
   const a = new mk.Annotation(new mk.Coordinate(w.lat, w.lon), factory, { calloutEnabled: false, title: w.titel, anchorOffset: new DOMPoint(0, -18) });
@@ -177,7 +180,8 @@ export function kazerneAnnotation(mk, k, color) {
     const el = document.createElement("div");
     el.className = "kazerne-marker";
     el.style.setProperty("--c", color);
-    el.innerHTML = `<img src="${asset(`assets/img/icon_${k.soort}.png`)}" alt="">`;
+    el.style.cssText = "width:28px;height:28px;border-radius:8px;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px " + color + ",0 3px 8px rgba(0,0,0,.3)";
+    el.innerHTML = `<img src="${asset(`assets/img/icon_${k.soort}.png`)}" alt="" style="width:20px;height:20px;object-fit:contain">`;
     el.title = k.naam;
     return el;
   };
