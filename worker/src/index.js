@@ -110,6 +110,14 @@ async function handle(req, env) {
   if (method === "GET" && path === "/v1/waarschuwingen") {
     return reply(200, await listWarnings(env, url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
   }
+  // Weather at the place and time of a warning (same WeatherKit data as for an alert).
+  m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})\/weather$/);
+  if (method === "GET" && m) {
+    const w = await getWarning(env, decodeURIComponent(m[1]));
+    if (!w) return reply(404, { error: "Not found" });
+    const data = await weatherFor(env, { guid: `w:${w.id}`, lat: w.lat ?? null, lon: w.lon ?? null, datum_tijd: w.start });
+    return data ? reply(200, data, { "cache-control": "public, max-age=3600" }) : reply(503, { error: "Weather unavailable" });
+  }
   m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})$/);
   if (method === "GET" && m) {
     const w = await getWarning(env, decodeURIComponent(m[1]));
