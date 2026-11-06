@@ -49,9 +49,16 @@ ErrorDocument 404 /404.html
   <FilesMatch "\.(html|json|css|js)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
+  # Android-app: altijd de nieuwste APK, als download (niet openen in de browser)
+  <FilesMatch "\.apk$">
+    Header set Cache-Control "no-cache"
+    Header set Content-Disposition "attachment; filename=A-Alerts.apk"
+    Header set X-Robots-Tag "noindex"
+  </FilesMatch>
 </IfModule>
 
 <IfModule mod_mime.c>
+  AddType application/vnd.android.package-archive .apk
   AddType application/manifest+json .webmanifest
   AddType image/webp .webp
 </IfModule>

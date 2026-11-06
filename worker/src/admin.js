@@ -117,6 +117,7 @@ export async function recordVisit(env, req, body) {
   let path = String(body.path || "/").split("?")[0].slice(0, 80);
   if (/^\/(p2000-apeldoorn\/)?(pager|melding)/.test(path)) path = "/pager/";
   else if (/^\/(p2000-apeldoorn\/)?info/.test(path)) path = "/info/";
+  else if (/^\/android/.test(path)) path = "/android/";
   else if (/melding/.test(path)) path = "/melding/";
   else path = "/";
   await env.DB.batch([

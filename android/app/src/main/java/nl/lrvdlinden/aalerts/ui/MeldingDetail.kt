@@ -1,6 +1,7 @@
 package nl.lrvdlinden.aalerts.ui
 
 import android.content.Context
+import nl.lrvdlinden.aalerts.isDutch
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.foundation.background
@@ -251,7 +252,7 @@ private fun Stat(value: String, label: String) {
 }
 
 fun windRichting(d: Double): String {
-    val dirs = if (nl.lrvdlinden.aalerts.isDutch) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW") else listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+    val dirs = if (isDutch) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW") else listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
     return dirs[(((d + 22.5) % 360) / 45).toInt().coerceIn(0, 7)]
 }
 
@@ -261,7 +262,7 @@ fun conditie(c: String): String {
         "Showers" to "Buien", "ScatteredThunderstorms" to "Lokaal onweer", "Thunderstorms" to "Onweer", "Snow" to "Sneeuw", "Flurries" to "Sneeuwvlokken",
         "Sleet" to "Natte sneeuw", "Windy" to "Winderig", "Breezy" to "Fris", "Hail" to "Hagel", "FreezingRain" to "IJzel", "Frigid" to "Streng koud", "Hot" to "Heet")
     val en = c.replace(Regex("([a-z])([A-Z])"), "$1 $2")
-    return if (nl.lrvdlinden.aalerts.isDutch) nl[c] ?: en else en
+    return if (isDutch) nl[c] ?: en else en
 }
 
 fun share(ctx: Context, m: Melding) {

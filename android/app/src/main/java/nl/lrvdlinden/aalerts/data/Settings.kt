@@ -1,6 +1,7 @@
 package nl.lrvdlinden.aalerts.data
 
 import android.content.Context
+import nl.lrvdlinden.aalerts.isDutch
 import android.content.SharedPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,7 +52,7 @@ data class MeldingProfiel(
     }
     companion object {
         const val MAX = 5
-        fun dagKort(d: Int) = (if (nl.lrvdlinden.aalerts.isDutch) listOf("ma", "di", "wo", "do", "vr", "za", "zo") else listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))[(d - 1).coerceIn(0, 6)]
+        fun dagKort(d: Int) = (if (isDutch) listOf("ma", "di", "wo", "do", "vr", "za", "zo") else listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"))[(d - 1).coerceIn(0, 6)]
     }
 }
 

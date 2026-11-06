@@ -1,6 +1,7 @@
 package nl.lrvdlinden.aalerts.data
 
 import androidx.compose.ui.graphics.Color
+import nl.lrvdlinden.aalerts.isDutch
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
@@ -156,7 +157,7 @@ data class Waarschuwing(
     }
     val marker: Int get() = if (bron == "burgernet") R.drawable.marker_burgernet else R.drawable.marker_nlalert
     /** Dutch text, or the English one when the app runs in English and there is one. */
-    val tekstLokaal: String? get() = if (!nl.lrvdlinden.aalerts.isDutch && !tekstEn.isNullOrBlank()) tekstEn else tekst
+    val tekstLokaal: String? get() = if (!isDutch && !tekstEn.isNullOrBlank()) tekstEn else tekst
 
     fun contains(lat: Double, lon: Double) = (gebied ?: emptyList()).any { Geo.ringContains(it, lat, lon) }
 
@@ -226,7 +227,7 @@ data class Helikopter(
     val snelheidKmh: Int? get() = snelheidKt?.let { Math.round(it * 1.852).toInt() }
     val koersTekst: String? get() {
         val k = koers ?: return null
-        val dirs = if (nl.lrvdlinden.aalerts.isDutch) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW") else listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+        val dirs = if (isDutch) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW") else listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
         return "${k.toInt()}° ${dirs[(((k + 22.5) % 360) / 45).toInt().coerceIn(0, 7)]}"
     }
     val info: String get() {

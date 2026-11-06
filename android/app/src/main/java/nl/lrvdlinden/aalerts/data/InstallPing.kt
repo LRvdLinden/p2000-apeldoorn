@@ -1,9 +1,10 @@
 package nl.lrvdlinden.aalerts.data
 
 import android.content.Context
+import nl.lrvdlinden.aalerts.isDutch
 import android.os.Build
 import nl.lrvdlinden.aalerts.BuildConfig
-import nl.lrvdlinden.aalerts.isDutch
+import isDutch
 import java.util.UUID
 
 /** Anonymous usage ping for the beheer statistics: random install id, platform, model, versions, push on/off. */

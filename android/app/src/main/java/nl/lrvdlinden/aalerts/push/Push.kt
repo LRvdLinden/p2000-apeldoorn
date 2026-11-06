@@ -1,6 +1,7 @@
 package nl.lrvdlinden.aalerts.push
 
 import android.content.Context
+import nl.lrvdlinden.aalerts.isDutch
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.FirebaseApp
@@ -10,7 +11,7 @@ import kotlinx.coroutines.tasks.await
 import nl.lrvdlinden.aalerts.BuildConfig
 import nl.lrvdlinden.aalerts.data.Api
 import nl.lrvdlinden.aalerts.data.Settings
-import nl.lrvdlinden.aalerts.isDutch
+import isDutch
 
 /**
  * Push via Firebase Cloud Messaging. The device registers its FCM token with its notification settings at the

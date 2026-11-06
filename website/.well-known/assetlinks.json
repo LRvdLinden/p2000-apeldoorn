@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "nl.lrvdlinden.aalerts",
+    "sha256_cert_fingerprints": ["B7:40:25:32:F2:A3:D0:71:FB:C5:2E:86:0E:76:A2:04:6A:98:19:EC:96:05:A1:0F:D4:03:54:69:75:B6:73:32"]
+  }
+}]
