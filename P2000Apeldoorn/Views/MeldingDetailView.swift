@@ -565,8 +565,6 @@ struct MeldingDetailView: View {
 
     private var footer: some View {
         VStack(spacing: 14) {
-            Link(destination: Config.source) { Text(L("Bron: p2000.page")) }
-                .foregroundStyle(.secondary)
             HStack(spacing: 16) {
                 Link(destination: Config.whatsapp) {
                     Image(systemName: "message").frame(width: 46, height: 46)

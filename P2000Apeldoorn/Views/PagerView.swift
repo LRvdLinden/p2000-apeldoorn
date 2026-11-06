@@ -174,9 +174,6 @@ struct PagerView: View {
                               systemImage: "bookmark")
                     }
                     ShareLink(item: m.shareText) { Label(L("Deel"), systemImage: "square.and.arrow.up") }
-                    if let link = m.link, let url = URL(string: link) {
-                        Link(destination: url) { Label(L("Bekijk op p2000.page"), systemImage: "safari") }
-                    }
                 }
     }
 
@@ -204,9 +201,6 @@ struct PagerView: View {
         VStack(spacing: 6) {
             Text(L("Niet alle meldingen van politie en ambulance staan in de app, omdat deze niet altijd via het P2000-netwerk worden verstuurd."))
                 .multilineTextAlignment(.center)
-            Link(destination: Config.source) {
-                Text(L("Bron: p2000.page"))
-            }
         }
         .font(AppFont.body(12, .regular, relativeTo: .caption))
         .foregroundStyle(.secondary)

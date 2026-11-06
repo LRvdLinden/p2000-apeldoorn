@@ -21,12 +21,6 @@ struct StatsView: View {
                         priorityCard(today, yesterday)
                         categoryCard(today, yesterday)
                     }
-                    Link(destination: Config.source) {
-                        Text(L("Bron: p2000.page"))
-                    }
-                    .font(AppFont.body(12, .regular, relativeTo: .caption))
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity)
                 }
                 .padding()
                 .frame(maxWidth: 1100)
