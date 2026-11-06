@@ -44,11 +44,14 @@ fun MeldingDetail(guid: String, nav: Nav) {
     var m by remember(guid) { mutableStateOf(Store.melding(guid)) }
     var loaded by remember(guid) { mutableStateOf(m != null) }
     var weer by remember(guid) { mutableStateOf<AlertWeather?>(null) }
+    var weerKlaar by remember(guid) { mutableStateOf(false) }
     LaunchedEffect(guid) {
         if (m == null) { m = Api.melding(guid); loaded = true }
         Settings.markRead(guid)
         Api.addView(guid)
-        weer = Api.weather(guid)
+        // Weather for every alert: try again a few times when the server has a hiccup.
+        for (i in 0 until 3) { weer = Api.weather(guid); if (weer != null) break; delay(4_000L * (i + 1)) }
+        weerKlaar = true
     }
     val melding = m
     if (melding == null) {
@@ -60,11 +63,11 @@ fun MeldingDetail(guid: String, nav: Nav) {
         }
         return
     }
-    MeldingContent(melding, weer, nav)
+    MeldingContent(melding, weer, weerKlaar, nav)
 }
 
 @Composable
-private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
+private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, nav: Nav) {
     val ctx = LocalContext.current
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(20_000); now = Instant.now() } }
@@ -174,7 +177,10 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
                         }
                     }
                 }
-                WeerCard(weer)
+                if (weer != null) WeerCard(weer) else SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
+                    if (!weerKlaar) LinearProgressIndicator(Modifier.fillMaxWidth())
+                    else Text(tr("Het weer is nu even niet beschikbaar. Open de melding later opnieuw.", "The weather is not available right now. Open the alert again later."), color = Muted, fontSize = 13.sp)
+                }
                 if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {
                     (waarschuwingen + knmi).forEach { w ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.waarschuwing(w.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
