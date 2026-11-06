@@ -1,0 +1,210 @@
+[
+ {
+  "naam": "Apeldoorn",
+  "soort": "woonplaats",
+  "lat": 52.21083598,
+  "lon": 5.9737347,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Beekbergen",
+  "soort": "woonplaats",
+  "lat": 52.14413382,
+  "lon": 5.96787641,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Beemte-Broekland",
+  "soort": "woonplaats",
+  "lat": 52.25709649,
+  "lon": 6.01057162,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Hoenderloo",
+  "soort": "woonplaats",
+  "lat": 52.12550259,
+  "lon": 5.90857642,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Hoog Soeren",
+  "soort": "woonplaats",
+  "lat": 52.21222796,
+  "lon": 5.86239883,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Klarenbeek",
+  "soort": "woonplaats",
+  "lat": 52.17114655,
+  "lon": 6.03261385,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Loenen",
+  "soort": "woonplaats",
+  "lat": 52.10966049,
+  "lon": 6.00753931,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Uddel",
+  "soort": "woonplaats",
+  "lat": 52.23545778,
+  "lon": 5.79496579,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Ugchelen",
+  "soort": "woonplaats",
+  "lat": 52.17048275,
+  "lon": 5.9011254,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Wenum-Wiesel",
+  "soort": "woonplaats",
+  "lat": 52.25420438,
+  "lon": 5.92706624,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Assel",
+  "soort": "buurtschap",
+  "lat": 52.20027778,
+  "lon": 5.83638889,
+  "bron": "Wikipedia: Assel (Nederland)",
+  "wiki": "Assel is een gehucht met 12 woningen in de gemeente Apeldoorn in de Nederlandse provincie Gelderland. Het ligt op ca."
+ },
+ {
+  "naam": "Engeland",
+  "soort": "buurtschap",
+  "lat": 52.11888889,
+  "lon": 5.95361111,
+  "bron": "Wikipedia: Engeland (Apeldoorn)",
+  "wiki": "Engeland is een buurtschap in de Nederlandse gemeente Apeldoorn, gelegen in de provincie Gelderland. Het ligt ten zuiden van Apeldoorn, iets ten noordwesten van Beekbergen."
+ },
+ {
+  "naam": "Gerritsflesch",
+  "soort": "buurtschap",
+  "lat": 52.16722222,
+  "lon": 5.82555556,
+  "bron": "Wikipedia: Gerritsflesch",
+  "wiki": "Gerritsflesch is een buurtschap in de Nederlandse gemeente Apeldoorn. Het maakte tot 1966 deel uit van de gemeente Barneveld en ligt op een uitgestrekte heidevlakte in de omgeving van het voormalige z"
+ },
+ {
+  "naam": "Groenendaal",
+  "soort": "buurtschap",
+  "lat": 52.08111111,
+  "lon": 5.94833333,
+  "bron": "Wikipedia: Groenendaal (Gelderland)",
+  "wiki": "Groenendaal is een gehucht en natuurgebied in de gemeente Apeldoorn (Nederlandse provincie Gelderland).\nGroenendaal is het meest zuidelijke punt van de gemeente Apeldoorn en ligt ingeklemd tussen de A"
+ },
+ {
+  "naam": "De Haere",
+  "soort": "buurtschap",
+  "lat": 52.26944444,
+  "lon": 5.95638889,
+  "bron": "Wikipedia: De Haere (plaats)",
+  "wiki": "De Haere is een buurtschap in de Nederlandse gemeente Apeldoorn, gelegen in de provincie Gelderland. Het ligt ten noorden van Apeldoorn tussen Wenum-Wiesel en Vaassen."
+ },
+ {
+  "naam": "Hoog Buurlo",
+  "soort": "buurtschap",
+  "lat": 52.17833333,
+  "lon": 5.84583333,
+  "bron": "Wikipedia: Hoog Buurlo",
+  "wiki": "Hoog Buurlo is een gehucht in de Nederlandse gemeente Apeldoorn (provincie Gelderland). Het ligt ten westen van Apeldoorn en iets ten oosten van Radio Kootwijk."
+ },
+ {
+  "naam": "Hooilanden",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "De Jonas",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "De Krim",
+  "soort": "buurtschap",
+  "lat": 52.65271081,
+  "lon": 6.61980312,
+  "bron": "PDOK woonplaats (Hardenberg)",
+  "wiki": ""
+ },
+ {
+  "naam": "Lieren",
+  "soort": "woonplaats",
+  "lat": 52.15564943,
+  "lon": 6.00885263,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Meerveld",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "Nieuw-Milligen",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "Oosterhuizen",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "Radio Kootwijk",
+  "soort": "woonplaats",
+  "lat": 52.17466539,
+  "lon": 5.83417867,
+  "bron": "PDOK woonplaats (Apeldoorn)",
+  "wiki": ""
+ },
+ {
+  "naam": "Woeste Hoeve",
+  "soort": "buurtschap",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
+  "wiki": ""
+ },
+ {
+  "naam": "Teuge",
+  "soort": "woonplaats",
+  "lat": 52.23685713,
+  "lon": 6.04975026,
+  "bron": "PDOK woonplaats (Voorst)",
+  "wiki": ""
+ }
+]
