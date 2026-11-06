@@ -1,5 +1,9 @@
 name: Diagnose bronnen
-on: workflow_dispatch
+on:
+  workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [.github/workflows/diagnose.yml]
 jobs:
   check:
     runs-on: ubuntu-latest
@@ -11,4 +15,5 @@ jobs:
           echo "== eerste"; curl -sS -m 20 https://api.112meldkamer.nl/v1/burgernet | jq -c '.[0:2]'
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
           echo "== worker waarschuwingen"; curl -sS -m 20 "$A/v1/waarschuwingen?days=1" | head -c 3000; echo
-          echo "== worker status"; curl -sS -m 20 "$A/v1/meldingen?limit=1" | head -c 2000; echo
+          echo "== worker meldingen"; curl -sS -m 20 "$A/v1/meldingen?limit=1" | head -c 1500; echo
+          echo "== burgernet html"; curl -sS -m 20 -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/3967274 | grep -o "<title>[^<]*" | head -2
