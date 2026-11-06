@@ -1,0 +1,116 @@
+name: Screenshots
+
+# Builds the app for the simulator and takes screenshots with live data (iPhone, iPad, Apple Watch) for the website.
+# Runs when this file changes on a-alerts, or by hand. Result: artifact "screenshots".
+on:
+  workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [.github/workflows/screenshots.yml]
+
+jobs:
+  shots:
+    runs-on: macos-15
+    timeout-minutes: 60
+    env:
+      API: https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+      BUNDLE: nl.lrvdlinden.p2000apeldoorn
+    steps:
+      - uses: actions/checkout@v4
+      - name: Select newest Xcode
+        run: sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)" && xcodebuild -version
+      - name: Pick devices
+        id: dev
+        run: |
+          pick() { xcrun simctl list devices available -j | python3 -c "
+          import json,sys,re
+          d=json.load(sys.stdin)['devices']; want=sys.argv[1]; deny=sys.argv[2]
+          best=None
+          for rt in sorted(d, key=lambda k: [int(x) for x in re.findall(r'\d+', k)]):
+              for x in d[rt]:
+                  if re.search(want, x['name']) and not re.search(deny, x['name']): best=x['udid']
+          print(best or '')" "$1" "$2"; }
+          echo "iphone=$(pick 'iPhone 1[6-9] Pro$|iPhone 1[6-9]$' 'Max|Plus|e$')" >> "$GITHUB_OUTPUT"
+          echo "ipad=$(pick 'iPad Pro.*13' 'xxx')" >> "$GITHUB_OUTPUT"
+          echo "watch=$(pick 'Apple Watch (Series 1[01]|Ultra).*' 'xxx')" >> "$GITHUB_OUTPUT"
+          cat "$GITHUB_OUTPUT"
+      - name: Build iOS and watchOS (Debug, simulator)
+        run: |
+          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn" -configuration Debug \
+            -destination "id=${{ steps.dev.outputs.iphone }}" -derivedDataPath build CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u
+          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn Watch" -configuration Debug \
+            -destination "id=${{ steps.dev.outputs.watch }}" -derivedDataPath buildw CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u
+      - name: Live data to show
+        id: data
+        run: |
+          curl -sS "$API/v1/meldingen?limit=80" -o m.json
+          curl -sS "$API/v1/waarschuwingen?days=14" -o w.json
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          m=json.load(open("m.json")); w=json.load(open("w.json"))
+          def ok(x): return x.get("locatie") and x.get("lat") is not None and str(x.get("prioriteit","")).upper() not in ("B1","B2","B3")
+          pref=[x for x in m if ok(x) and x["dienst"]=="brandweer"] or [x for x in m if ok(x)] or m
+          print("guid="+pref[0]["guid"])
+          ws=[x for x in w if x["bron"] in ("burgernet","nlalert")]
+          print("wid="+(ws[0]["id"] if ws else ""))
+          PY
+          cat "$GITHUB_OUTPUT"
+      - name: Screenshots
+        run: |
+          mkdir -p shots
+          APP=$(find build/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
+          shoot() { # device prefix
+            D=$1; P=$2
+            xcrun simctl boot "$D" || true
+            xcrun simctl bootstatus "$D" -b
+            xcrun simctl status_bar "$D" override --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 || true
+            xcrun simctl ui "$D" appearance light || true
+            xcrun simctl location "$D" set 52.2112,5.9699 || true
+            xcrun simctl install "$D" "$APP"
+            xcrun simctl privacy "$D" grant location "$BUNDLE" || true
+            xcrun simctl launch --terminate-running-process "$D" "$BUNDLE" -AAlertsScreenshots
+            sleep 14
+            xcrun simctl io "$D" screenshot "shots/$P-pager.png"
+            xcrun simctl openurl "$D" "p2000apeldoorn://kaart"; sleep 12
+            xcrun simctl io "$D" screenshot "shots/$P-kaart.png"
+            xcrun simctl openurl "$D" "p2000apeldoorn://statistieken"; sleep 6
+            xcrun simctl io "$D" screenshot "shots/$P-statistieken.png"
+            xcrun simctl openurl "$D" "p2000apeldoorn://pager"; sleep 3
+            xcrun simctl openurl "$D" "p2000apeldoorn://melding/${{ steps.data.outputs.guid }}"; sleep 12
+            xcrun simctl io "$D" screenshot "shots/$P-melding.png"
+            if [ -n "${{ steps.data.outputs.wid }}" ]; then
+              xcrun simctl terminate "$D" "$BUNDLE"; xcrun simctl launch "$D" "$BUNDLE" -AAlertsScreenshots; sleep 10
+              xcrun simctl openurl "$D" "p2000apeldoorn://waarschuwing/${{ steps.data.outputs.wid }}"; sleep 10
+              xcrun simctl io "$D" screenshot "shots/$P-waarschuwing.png"
+            fi
+            xcrun simctl openurl "$D" "p2000apeldoorn://instellingen"; sleep 2
+            xcrun simctl terminate "$D" "$BUNDLE" || true
+            xcrun simctl launch "$D" "$BUNDLE" -AAlertsScreenshots; sleep 8
+            xcrun simctl openurl "$D" "p2000apeldoorn://instellingen"; sleep 6
+            xcrun simctl io "$D" screenshot "shots/$P-instellingen.png"
+            xcrun simctl shutdown "$D" || true
+          }
+          shoot "${{ steps.dev.outputs.iphone }}" iphone
+          shoot "${{ steps.dev.outputs.ipad }}" ipad
+          # Welcome screen on a fresh install
+          D="${{ steps.dev.outputs.iphone }}"
+          xcrun simctl boot "$D"; xcrun simctl bootstatus "$D" -b
+          xcrun simctl status_bar "$D" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+          xcrun simctl uninstall "$D" "$BUNDLE" || true; xcrun simctl install "$D" "$APP"
+          xcrun simctl launch "$D" "$BUNDLE"; sleep 10
+          xcrun simctl io "$D" screenshot "shots/iphone-welkom.png"
+          xcrun simctl shutdown "$D" || true
+          # Apple Watch
+          W="${{ steps.dev.outputs.watch }}"
+          WAPP=$(find buildw/Build/Products -name "P2000 Apeldoorn Watch.app" -maxdepth 3 | head -1)
+          xcrun simctl boot "$W"; xcrun simctl bootstatus "$W" -b
+          xcrun simctl status_bar "$W" override --time "9:41" || true
+          xcrun simctl install "$W" "$WAPP"
+          xcrun simctl launch "$W" "$BUNDLE.watchkitapp"; sleep 15
+          xcrun simctl io "$W" screenshot "shots/watch-lijst.png"
+          ls -la shots
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: screenshots
+          path: shots

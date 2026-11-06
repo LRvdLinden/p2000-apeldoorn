@@ -100,13 +100,19 @@ struct RootView: View {
         .onChange(of: settings.onboardingDone) { _, done in
             if done { scheduleReview() }
         }
+        #if DEBUG
+        // Screenshots for the website and App Store (CI): skip the welcome screen.
+        .onAppear {
+            if ProcessInfo.processInfo.arguments.contains("-AAlertsScreenshots") { settings.onboardingDone = true }
+        }
+        #endif
         .onOpenURL { url in
             if url.host == "waarschuwing", url.lastPathComponent.count > 3 {
                 router.openWaarschuwing(id: url.lastPathComponent)
             } else if let guid = AppGroup.guid(from: url) {
                 router.open(guid: guid)
-            } else if url.host == "statistieken" {
-                router.tab = .statistieken
+            } else if let host = url.host, let tab = Router.Destination(rawValue: host) {
+                router.tab = tab
             }
         }
     }
