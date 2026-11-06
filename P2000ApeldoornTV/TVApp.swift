@@ -1,7 +1,7 @@
 import SwiftUI
 import UIKit
 
-/// P2000 Apeldoorn for Apple TV: a big-screen "meldkamer" display with the live map,
+/// A-Alerts for Apple TV: a big-screen "meldkamer" display with the live map,
 /// the latest alerts, a full-screen alarm for new alerts and today vs yesterday.
 @main
 struct P2000ApeldoornTVApp: App {

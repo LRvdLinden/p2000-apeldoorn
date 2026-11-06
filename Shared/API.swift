@@ -9,7 +9,7 @@ struct P2000API: Sendable {
         let config = URLSessionConfiguration.default
         config.timeoutIntervalForRequest = 20
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        config.httpAdditionalHeaders = ["Accept": "application/json", "X-App-Client": "P2000Apeldoorn-Apple/\(Config.version)"]
+        config.httpAdditionalHeaders = ["Accept": "application/json", "X-App-Client": "A-Alerts-Apple/\(Config.version)"]
         return URLSession(configuration: config)
     }()
 

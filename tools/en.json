@@ -427,7 +427,6 @@
  "Berichten, WhatsApp, Mail en meer": "Messages, WhatsApp, Mail and more",
  "De P2000-tekst met de link eronder": "The P2000 text with the link below it",
  "De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.": "The dispatch centre gave no street: the route goes to the centre of the town.",
- "De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app.": "The recipient opens the alert on p2000-apeldoorn.nl, even without the app.",
  "Deel via…": "Share via…",
  "Deze melding": "This alert",
  "Gekopieerd": "Copied",
@@ -468,5 +467,6 @@
  "± %@": "± %@",
  "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": "Applies to all your profiles; you can change it per profile under Notifications › Profiles. You get a warning when it touches the places of a profile (no places chosen = the whole area) and, when My area is on, also falls within your radius.",
  "Herkend aan het toestel; vliegt nu als %@": "Recognised by the aircraft; now flying as %@",
- "Herkend aan de eigenaar van het toestel": "Recognised by the aircraft's owner"
+ "Herkend aan de eigenaar van het toestel": "Recognised by the aircraft's owner",
+ "De ontvanger opent de melding op a-alerts.nl, ook zonder de app.": "The recipient opens the alert on a-alerts.nl, even without the app."
 }

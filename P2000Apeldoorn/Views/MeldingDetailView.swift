@@ -7,7 +7,7 @@ import UIKit
 import AppKit
 #endif
 
-/// Alert detail – same build-up and look as p2000-apeldoorn.nl/melding/<guid>:
+/// Alert detail – same build-up and look as a-alerts.nl/melding/<guid>:
 /// big map with Look Around preview, notice, main card, description, capcodes,
 /// vehicles, METEO data (WeatherKit) and alert data.
 struct MeldingDetailView: View {

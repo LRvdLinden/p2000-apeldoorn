@@ -1,8 +1,8 @@
-# P2000 Apeldoorn – Apple apps
+# A-Alerts (voorheen P2000 Apeldoorn) – Apple apps
 
-![P2000 Apeldoorn](docs/hero.jpg)
+![A-Alerts](docs/hero.jpg)
 
-De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iPhone, iPad, Mac, Apple Watch en Apple TV**. Je ziet alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn: live, op de kaart en met statistieken.
+De app van [a-alerts.nl](https://a-alerts.nl) voor **iPhone, iPad, Mac, Apple Watch en Apple TV**. Je ziet alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn en Teuge, met NL-Alert, Burgernet, KNMI-waarschuwingen en live helikopters: live, op de kaart en met statistieken.
 
 | | |
 |---|---|
@@ -17,7 +17,7 @@ De officiële app van [p2000-apeldoorn.nl](https://p2000-apeldoorn.nl) voor **iP
 - **Animated splash**: het schild valt in beeld, pager-pulsen golven uit en daarna gaat de app open.
 - **Welkomstscherm** met pushmeldingen en *Inloggen met Apple*. Inloggen is optioneel.
 - **Pager**: de live tijdlijn zoals op de site. Meldingen zijn per dag gegroepeerd, met een live klok en een online-status, en de cijfers van vandaag per discipline. Je kunt zoeken en filteren (disciplines, plaatsen, prioriteit). Meldingen kun je bewaren of delen, en op iPad en Mac staat de detailweergave ernaast (split view).
-- **Detail**: dezelfde opbouw als p2000-apeldoorn.nl/melding/…. Bovenaan een grote kaart met marker en een **Look Around**-preview. Daaronder de *Let op*-melding als er geen straat is, het incidentnummer en de views, en een hoofdkaart met plaats, categorie, prioriteit en tijd. Er is alleen een **Apple Kaarten**-knop. Verder: Beschrijving, Capcodes, Voertuigen, **METEO-gegevens via WeatherKit** (historisch weer per uur, op het tijdstip en de plek van de melding) en Meldinggegevens.
+- **Detail**: dezelfde opbouw als a-alerts.nl/melding/…. Bovenaan een grote kaart met marker en een **Look Around**-preview. Daaronder de *Let op*-melding als er geen straat is, het incidentnummer en de views, en een hoofdkaart met plaats, categorie, prioriteit en tijd. Er is alleen een **Apple Kaarten**-knop. Verder: Beschrijving, Capcodes, Voertuigen, **METEO-gegevens via WeatherKit** (historisch weer per uur, op het tijdstip en de plek van de melding) en Meldinggegevens.
 - **Kaart**: Apple Maps met de **markers van de website** (brandweer, ambulance, politie, traumaheli). Je filtert op periode (6 uur, 24 uur, 7 dagen) en discipline. Meldingen op dezelfde plek worden net als op de site in een cirkel gezet.
 - **Statistieken**: vandaag tegenover gisteren: totaal (ook "gisteren om deze tijd"), per discipline, per uur, per prioriteit en de meest voorkomende meldingen. De app rekent dit zelf uit; er worden alleen deze twee dagen bijgehouden.
 - **Instellingen**: account, notificaties (plaatsen, disciplines, prioriteit, stille modus, kritieke meldingen), filters, huidige locatie, donkere modus, kaarttype, app-vergrendeling met Face ID/Touch ID, recensie, feedback, changelog, voorwaarden, privacy, disclaimer en de kaart **Meer apps van de ontwikkelaar** (in alle talen).
@@ -64,7 +64,7 @@ Er is geen server om te beheren: de API draait als **Cloudflare Worker** (`worke
 3. **API-token**: *My Profile → API Tokens → Create Token → template "Edit Cloudflare Workers"*, en voeg de permissie **Account → D1 → Edit** toe. Zet hem in GitHub als secret `CLOUDFLARE_API_TOKEN`.
 4. Start in GitHub **Actions → Worker → Run workflow**. De workflow maakt de D1-database, zet alle secrets over en deployt. In de samenvatting staat het adres (`https://p2000-apeldoorn-api.<jouw-naam>.workers.dev`).
 5. Controleer `<adres>/health`: `"feed"` moet een recente `lastOk` hebben.
-6. Eigen adres (optioneel): staat het domein p2000-apeldoorn.nl bij Cloudflare, voeg dan bij de Worker *Settings → Domains & Routes → Custom Domain* `api.p2000-apeldoorn.nl` toe.
+6. Eigen adres (optioneel): niet nodig: de API blijft bewust op het workers.dev-adres, ook na de overstap naar a-alerts.nl.
 
 Bij elke push naar `worker/` test en deployt de workflow opnieuw.
 
@@ -79,7 +79,7 @@ Een statische website voor je **eigen hosting**, zonder build-stap:
 
 **Uploaden:** bij elke wijziging maakt de workflow *Website-zip* een kant-en-klare zip (Actions → Website-zip → Artifacts). Upload de inhoud naar de webmap van je domein (`public_html`), inclusief het verborgen bestand `.htaccess`.
 
-`config.js` bevat het API-adres. Het MapKit JS-token haalt de site zelf op bij de Worker (`/v1/mapkit-token`), voor de domeinen in `SITE_ORIGINS` (standaard p2000-apeldoorn.nl).
+`config.js` bevat het API-adres. Het MapKit JS-token haalt de site zelf op bij de Worker (`/v1/mapkit-token`), voor de domeinen in `SITE_ORIGINS` (standaard a-alerts.nl, www, beheer.a-alerts.nl en de oude p2000-apeldoorn.nl).
 
 Lokaal bekijken: `cd website && python3 -m http.server 8000` en open http://localhost:8000.
 
@@ -131,4 +131,4 @@ website/               de website + live pager (GitHub Pages)
 worker/                API, ingest, pushmeldingen, WeatherKit/Maps (Cloudflare Worker + D1)
 ```
 
-© 2026 P2000 Apeldoorn. Made & Powered by [PixelForges](https://pixelforges.nl). Bron: [p2000.page](https://p2000.page).
+© 2026 A-Alerts. Made & Powered by [PixelForges](https://pixelforges.nl). Bron: [p2000.page](https://p2000.page).

@@ -27,11 +27,11 @@ enum Config {
         }
         return URL(string: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev")!
     }()
-    static let website = URL(string: "https://p2000-apeldoorn.nl")!
+    static let website = URL(string: "https://a-alerts.nl")!
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!
     static let pixelForges = URL(string: "https://pixelforges.nl")!
     static let source = URL(string: "https://p2000.page")!
-    static let feedbackMail = URL(string: "mailto:hallo@pixelforges.nl?subject=Feedback%20P2000%20Apeldoorn%20app")!
+    static let feedbackMail = URL(string: "mailto:hallo@pixelforges.nl?subject=Feedback%20A-Alerts%20app")!
     /// Fill in once the app has an App Store ID; until then "Schrijf een recensie" uses the in-app prompt.
     static let appStoreID = ""
 
@@ -147,7 +147,7 @@ extension Color {
 }
 
 enum Theme {
-    /// P2000 Apeldoorn red (website buttons / app icon).
+    /// A-Alerts red (website buttons / app icon).
     static let red = Color(hex: 0xDC2626)
     static let redDeep = Color(hex: 0xB0001A)
     static let iconRed = Color(hex: 0xD0021E)

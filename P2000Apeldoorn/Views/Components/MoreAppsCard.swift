@@ -98,7 +98,7 @@ struct MoreAppsCard: View {
 }
 
 /// Card texts per language; picks the app's language, English when unknown.
-/// Covers every language P2000 Apeldoorn ships (nl, en) plus the rest of the LRvdLinden set.
+/// Covers every language A-Alerts ships (nl, en) plus the rest of the LRvdLinden set.
 struct MoreAppsText {
     let section: String
     let title: String

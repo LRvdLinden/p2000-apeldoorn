@@ -44,6 +44,12 @@ P2000 Apeldoorn is now A-Alerts.
 - Notifications with a small map and buttons for Save and Apple Maps
 - Area extended to 26 towns and hamlets, including Teuge
 
+URLs
+Support URL: https://a-alerts.nl/info/?p=disclaimer
+Marketing URL: https://a-alerts.nl
+Privacy Policy URL: https://a-alerts.nl/info/?p=privacy
+Copyright: © 2026 A-Alerts · PixelForges
+
 App Review notes
 A-Alerts is the new name of P2000 Apeldoorn (same app, same bundle ID). No account is needed; every feature works without signing in.
 

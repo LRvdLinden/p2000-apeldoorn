@@ -31,7 +31,7 @@ enum Dienst: String, CaseIterable, Codable, Identifiable, Hashable {
         }
     }
 
-    /// The map pin artwork from p2000-apeldoorn.nl.
+    /// The map pin artwork from a-alerts.nl.
     var markerImage: String? {
         switch self {
         case .brandweer, .ambulance, .politie, .traumaheli: return "marker_\(rawValue)"
@@ -39,7 +39,7 @@ enum Dienst: String, CaseIterable, Codable, Identifiable, Hashable {
         }
     }
 
-    /// The list icon artwork from p2000-apeldoorn.nl.
+    /// The list icon artwork from a-alerts.nl.
     var iconImage: String? {
         switch self {
         case .brandweer, .ambulance, .politie, .traumaheli: return "icon_\(rawValue)"
@@ -173,7 +173,7 @@ struct Melding: Identifiable, Hashable, Codable {
     }
 
     var shareText: String {
-        "\(title)\n\(plaatsText) · \(Fmt.dayTime(datum))\n\(prioriteitText)\n\nP2000 Apeldoorn – https://p2000-apeldoorn.nl"
+        "\(title)\n\(plaatsText) · \(Fmt.dayTime(datum))\n\(prioriteitText)\n\nA-Alerts – \(Config.website.appendingPathComponent("melding").appendingPathComponent(guid).absoluteString)"
     }
 
     enum CodingKeys: String, CodingKey {

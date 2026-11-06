@@ -132,7 +132,7 @@ export async function helikopters(env) {
   let data;
   try {
     const res = await fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
-      headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://p2000-apeldoorn.nl)" },
+      headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" },
       signal: AbortSignal.timeout(8_000),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);

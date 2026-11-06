@@ -169,7 +169,7 @@ struct SettingsView: View {
 
             Section {
                 Link(destination: Config.website) {
-                    SettingsRow(icon: "globe", color: .red, title: "p2000-apeldoorn.nl", chevron: true)
+                    SettingsRow(icon: "globe", color: .red, title: "a-alerts.nl", chevron: true)
                 }
                 Link(destination: Config.whatsapp) {
                     SettingsRow(icon: "message.fill", color: Color(hex: 0x25D366), title: L("WhatsApp-groep"), chevron: true)

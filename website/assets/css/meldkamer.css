@@ -1,4 +1,4 @@
-/* P2000 Apeldoorn – meldkamer (control-room) view, built for a big screen */
+/* A-Alerts – meldkamer (control-room) view, built for a big screen */
 html, body.mk { height: 100%; }
 body.mk {
   --bg: #0b0b0f; --surface: rgba(28, 28, 36, .78); --surface-2: rgba(255,255,255,.06); --line: rgba(255,255,255,.09);

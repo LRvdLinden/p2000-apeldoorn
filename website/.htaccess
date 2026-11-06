@@ -1,14 +1,45 @@
-# Voor Apache-hosting (de meeste webhosts): oude links en de 404-pagina.
+# A-Alerts – a-alerts.nl
+# Upload naar de webroot van a-alerts.nl. Laat p2000-apeldoorn.nl (en www) als alias
+# naar dezelfde map wijzen, of zet dit bestand ook in de webroot van p2000-apeldoorn.nl.
+
+Options -Indexes
+DirectoryIndex index.html
 ErrorDocument 404 /404.html
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
-  RewriteRule ^melding/([A-Za-z0-9-]{8,64})/?$ /pager/?melding=$1 [R=301,L]
+
+  # Oude domein → nieuw domein (301, pad en query blijven behouden)
+  RewriteCond %{HTTP_HOST} ^(www\.)?p2000-apeldoorn\.nl$ [NC]
+  RewriteRule ^(.*)$ https://a-alerts.nl/$1 [R=301,L,NE]
+
+  # www → zonder www
+  RewriteCond %{HTTP_HOST} ^www\.a-alerts\.nl$ [NC]
+  RewriteRule ^(.*)$ https://a-alerts.nl/$1 [R=301,L,NE]
+
+  # Altijd https
+  RewriteCond %{HTTPS} !=on
+  RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}/$1 [R=301,L,NE]
+
+  # Deellinks uit de app: /melding/<guid> → live pager met die melding open
+  RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]
 </IfModule>
+
 <IfModule mod_headers.c>
-  <FilesMatch "\.(woff2|webp|png|jpg)$">
+  Header always set Strict-Transport-Security "max-age=31536000"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  <FilesMatch "\.(webp|png|jpg|svg|woff2?)$">
     Header set Cache-Control "public, max-age=2592000"
   </FilesMatch>
-  <FilesMatch "(config\.js|\.html)$">
+  <FilesMatch "\.(html|json)$">
     Header set Cache-Control "no-cache"
   </FilesMatch>
+</IfModule>
+
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType image/webp .webp
 </IfModule>

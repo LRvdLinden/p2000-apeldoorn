@@ -8,7 +8,7 @@ export const SOURCES = {
   burgernet: "https://api.112meldkamer.nl/v1/burgernet",
   knmi: "https://www.knmi.nl/api/v1/weather-warnings",
 };
-const UA = { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://p2000-apeldoorn.nl)" };
+const UA = { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" };
 const DAY = 86_400_000;
 export const LEVELS = ["green", "yellow", "orange", "red"];
 const levelRank = (l) => LEVELS.indexOf(l);

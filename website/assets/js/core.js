@@ -1,4 +1,4 @@
-// Shared helpers for the P2000 Apeldoorn website (landing page + live pager).
+// Shared helpers for the A-Alerts website (landing page + live pager).
 // Data comes from the app's own API (Cloudflare Worker in worker/), never from the website builder.
 
 const CFG = Object.assign({ api: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev", mapkitToken: "" }, window.P2000_CONFIG || {});
@@ -16,8 +16,7 @@ export const DIENSTEN = {
   onbekend: { label: "Overig", color: "#6B7280", text: "#6B7280", icon: "icon_brandweer", marker: "marker_brandweer" },
 };
 export const SELECTABLE = ["brandweer", "ambulance", "politie", "traumaheli"];
-export const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek",
-  "Lieren", "Loenen", "Radio Kootwijk", "Teuge", "Uddel", "Ugchelen", "Wenum-Wiesel"];
+export const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek", "Loenen", "Uddel", "Ugchelen", "Wenum-Wiesel", "Teuge", "Assel", "Engeland", "Gerritsflesch", "Groenendaal", "De Haere", "Hoog Buurlo", "Hooilanden", "De Jonas", "De Krim", "Lieren", "Meerveld", "Nieuw-Milligen", "Oosterhuizen", "Radio Kootwijk", "Woeste Hoeve"];
 export const dienstOf = (m) => DIENSTEN[m?.dienst] || DIENSTEN.onbekend;
 
 // ------------------------------------------------------------------ data

@@ -108,7 +108,7 @@ export async function recordVisit(env, req, body) {
   const visitor = b64url(await crypto.subtle.digest("SHA-256", enc.encode(`${salt.value}|${ip}|${ua}`))).slice(0, 22);
   const device = /iPad|Tablet/i.test(ua) ? "tablet" : /Mobi|iPhone|Android/i.test(ua) ? "mobiel" : "desktop";
   let path = String(body.path || "/").split("?")[0].slice(0, 80);
-  if (/^\/(p2000-apeldoorn\/)?pager/.test(path)) path = "/pager/";
+  if (/^\/(p2000-apeldoorn\/)?(pager|melding)/.test(path)) path = "/pager/";
   else if (/^\/(p2000-apeldoorn\/)?info/.test(path)) path = "/info/";
   else if (/melding/.test(path)) path = "/melding/";
   else path = "/";
@@ -258,7 +258,7 @@ export async function broadcastHistory(env) {
 
 // ------------------------------------------------------------------ texts
 
-export const CONTENT_NAMES = ["privacy", "terms", "disclaimer", "changelog"];
+export const CONTENT_NAMES = ["privacy", "cookies", "terms", "disclaimer", "changelog"];
 
 export async function contentFor(env, name, bundled) {
   const row = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(`content:${name}`).first();
@@ -317,10 +317,10 @@ export async function checkOutage(env) {
   const down = !ok || Date.now() - Number(ok.value) > 10 * 60_000;
   if (down && !alerted) {
     const err = await env.DB.prepare("SELECT value FROM kv WHERE key = 'feed_error'").first();
-    await pushAdmins(env, "⚠️ P2000-feed ligt eruit", `Al meer dan 10 minuten geen nieuwe gegevens${err ? `: ${err.value}` : ""}.`);
+    await pushAdmins(env, "⚠️ A-Alerts: P2000-feed ligt eruit", `Al meer dan 10 minuten geen nieuwe gegevens${err ? `: ${err.value}` : ""}.`);
     await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES ('outage_alerted', '1', ?)").bind(Date.now()).run();
   } else if (!down && alerted) {
-    await pushAdmins(env, "✅ P2000-feed werkt weer", "De meldingen komen weer binnen.");
+    await pushAdmins(env, "✅ A-Alerts: P2000-feed werkt weer", "De meldingen komen weer binnen.");
     await env.DB.prepare("DELETE FROM kv WHERE key = 'outage_alerted'").run();
   }
 }

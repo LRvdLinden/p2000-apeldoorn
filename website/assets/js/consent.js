@@ -7,9 +7,9 @@
   var root = document.currentScript ? new URL("../../", document.currentScript.src).pathname : "/";
   var T = {
     title: "Cookies en privacy",
-    text: "P2000 Apeldoorn gebruikt alleen opslag die nodig is voor de site: deze keuze, welke meldingen je al hebt bekeken en je filters. " +
+    text: "A-Alerts gebruikt alleen opslag die nodig is voor de site: deze keuze, welke meldingen je al hebt bekeken en je filters. " +
       "Met je toestemming laden we ook de kaarten van Apple Kaarten; daarbij ziet Apple je IP-adres. Geen advertenties, geen tracking.",
-    more: "Meer in de privacyverklaring",
+    more: "Meer over cookies",
     accept: "Accepteren",
     necessary: "Alleen noodzakelijk",
     settings: "Cookie-instellingen",
@@ -41,7 +41,7 @@
     d.id = "p2000-consent"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "false");
     d.setAttribute("aria-labelledby", "p2000-consent-t"); d.setAttribute("aria-describedby", "p2000-consent-p"); d.tabIndex = -1;
     d.innerHTML = '<div class="t" id="p2000-consent-t">' + T.title + "</div>" +
-      '<p id="p2000-consent-p">' + T.text + ' <a href="' + root + 'info/?p=privacy#cookies">' + T.more + "</a></p>" +
+      '<p id="p2000-consent-p">' + T.text + ' <a href="' + root + 'info/?p=cookies">' + T.more + "</a></p>" +
       '<div class="b"><button type="button" class="y">' + T.accept + '</button><button type="button" class="n">' + T.necessary + "</button></div>";
     function close(choice) {
       var before = read();

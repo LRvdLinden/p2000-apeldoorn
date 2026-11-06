@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// The "Pager" timeline, like the home screen of p2000-apeldoorn.nl.
+/// The "Pager" timeline, like the home screen of a-alerts.nl.
 struct PagerView: View {
     @Environment(MeldingStore.self) private var store
     @Environment(AppSettings.self) private var settings

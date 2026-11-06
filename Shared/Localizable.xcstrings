@@ -1599,19 +1599,19 @@
         }
       }
     },
-    "De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app.": {
+    "De ontvanger opent de melding op a-alerts.nl, ook zonder de app.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The recipient opens the alert on p2000-apeldoorn.nl, even without the app."
+            "value": "The recipient opens the alert on a-alerts.nl, even without the app."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app."
+            "value": "De ontvanger opent de melding op a-alerts.nl, ook zonder de app."
           }
         }
       }

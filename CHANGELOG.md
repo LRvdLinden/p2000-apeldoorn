@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 25) – nieuwe naam overal
+- Alle links in de app gaan naar a-alerts.nl: gedeelde meldingen (a-alerts.nl/melding/…), de website in Instellingen en op Apple TV, en de feedbackmail.
+- Privacyverklaring, cookies, gebruiksvoorwaarden, disclaimer en Wat is nieuw opnieuw geschreven voor A-Alerts.
+- De API blijft op hetzelfde adres; er hoeft niets te verhuizen.
+
 ## A-Alerts 2.0.0 (build 24)
 - Helikopters op de kaart als zijaanzicht per type: Lifeliner (EC135, geel), politie EC135 (Zulu 01–06) en politie AW139 (Zulu 24–26). De tekening draait mee met de vliegrichting (naar het westen: neus naar links).
 

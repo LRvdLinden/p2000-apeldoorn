@@ -243,7 +243,7 @@ const ICO = {
 /** Keeps the description and canonical URL in step with the open alert (for search engines that render JS). */
 function setMeta(description, query) {
   document.querySelector('meta[name="description"]')?.setAttribute("content", description);
-  document.querySelector('link[rel="canonical"]')?.setAttribute("href", `https://p2000-apeldoorn.nl/pager/${query}`);
+  document.querySelector('link[rel="canonical"]')?.setAttribute("href", `https://a-alerts.nl/pager/${query}`);
 }
 
 async function select(guid, { push = true } = {}) {
@@ -255,7 +255,7 @@ async function select(guid, { push = true } = {}) {
   addView(guid);
   shell.classList.add("has-detail");
   if (push) history.pushState({ guid }, "", `?melding=${encodeURIComponent(guid)}${location.hash}`);
-  document.title = `${m.title} – P2000 Apeldoorn`;
+  document.title = `${m.title} – A-Alerts`;
   setMeta(`${m.title} · ${plaatsText(m)} · ${prioText(m)}`, `?melding=${encodeURIComponent(guid)}`);
   renderDetail(m);
   renderList();
@@ -266,7 +266,7 @@ function closeDetail(push = true) {
   shell.classList.remove("has-detail");
   $("detail").innerHTML = "";
   if (detailMap) { try { detailMap.destroy(); } catch {} detailMap = null; }
-  document.title = "Live pager – P2000 Apeldoorn";
+  document.title = "Live pager – A-Alerts";
   setMeta("Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.", "");
   if (push) history.pushState({}, "", location.pathname + location.hash);
   renderList();
@@ -585,12 +585,12 @@ async function refresh() {
   list.forEach((m) => state.known.add(m.guid));
   state.list = list;
   render(new Set(fresh.map((m) => m.guid)));
-  if (fresh.length && document.hidden) document.title = `(${fresh.length}) Live pager – P2000 Apeldoorn`;
+  if (fresh.length && document.hidden) document.title = `(${fresh.length}) Live pager – A-Alerts`;
   tick();
 }
 
 document.addEventListener("visibilitychange", () => {
-  if (!document.hidden && !state.selected) document.title = "Live pager – P2000 Apeldoorn";
+  if (!document.hidden && !state.selected) document.title = "Live pager – A-Alerts";
   if (!document.hidden) refresh();
 });
 

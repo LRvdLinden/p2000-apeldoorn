@@ -1,4 +1,4 @@
-/* P2000 Apeldoorn – shared tokens, fonts and components */
+/* A-Alerts – shared tokens, fonts and components */
 @font-face { font-family: "Poppins"; font-weight: 400; font-display: swap; src: url(../fonts/Poppins-Regular.woff2) format("woff2"); }
 @font-face { font-family: "Poppins"; font-weight: 500; font-display: swap; src: url(../fonts/Poppins-Medium.woff2) format("woff2"); }
 @font-face { font-family: "Poppins"; font-weight: 600; font-display: swap; src: url(../fonts/Poppins-SemiBold.woff2) format("woff2"); }
@@ -123,3 +123,7 @@ button { font: inherit; color: inherit; }
 @media (max-width: 900px) { body.app #p2000-cookie-btn { bottom: calc(76px + env(safe-area-inset-bottom)); } body.app #p2000-consent { bottom: calc(80px + env(safe-area-inset-bottom)); } }
 body.mk #p2000-cookie-btn { display: none; }
 @media (prefers-reduced-motion: reduce) { #p2000-consent { animation: none; } #p2000-cookie-btn { transition: none; } }
+
+/* A-Alerts app icon as brand mark */
+.shield.appmark { background: none; box-shadow: 0 6px 16px rgba(220,38,38,.3); overflow: hidden; }
+.shield.appmark img { width: 100%; height: 100%; display: block; object-fit: cover; }

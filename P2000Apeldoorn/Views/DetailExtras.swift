@@ -126,11 +126,9 @@ extension Melding {
         hasStreet ? "\(locatie ?? ""), \(plaatsNaam)" : plaatsNaam
     }
 
-    /// The alert on the website (opens the live pager on that alert).
+    /// The alert on the website: a-alerts.nl/melding/<guid> opens it directly in the live pager.
     var webLink: URL {
-        var c = URLComponents(string: "https://p2000-apeldoorn.nl/pager/")!
-        c.queryItems = [URLQueryItem(name: "melding", value: guid)]
-        return c.url!
+        Config.website.appendingPathComponent("melding").appendingPathComponent(guid)
     }
 
     var deelTekst: String {
@@ -315,13 +313,13 @@ struct DeelSheet: View {
         ScrollView {
             VStack(spacing: 16) {
                 SheetKop(symbol: "square.and.arrow.up", kleur: Theme.red, titel: L("Melding delen"),
-                         subtitel: L("De ontvanger opent de melding op p2000-apeldoorn.nl, ook zonder de app."))
+                         subtitel: L("De ontvanger opent de melding op a-alerts.nl, ook zonder de app."))
                 HStack(alignment: .top, spacing: 12) {
                     DienstIcon(dienst: melding.dienst, size: 40)
                     VStack(alignment: .leading, spacing: 3) {
                         Text(melding.title).font(.subheadline.weight(.semibold)).lineLimit(3)
                         Text("\(melding.plaatsText) · \(Fmt.dayTime(melding.datum))").font(.footnote).foregroundStyle(.secondary).lineLimit(1)
-                        Text(verbatim: "p2000-apeldoorn.nl").font(.footnote).foregroundStyle(.tertiary)
+                        Text(verbatim: "a-alerts.nl").font(.footnote).foregroundStyle(.tertiary)
                     }
                     Spacer(minLength: 0)
                 }
@@ -335,7 +333,7 @@ struct DeelSheet: View {
                         }
                     }
                     Button { kopieer(melding.webLink.absoluteString, "link") } label: {
-                        SheetOptie(titel: gekopieerd == "link" ? L("Gekopieerd") : L("Kopieer link"), subtitel: "p2000-apeldoorn.nl", chevron: false) {
+                        SheetOptie(titel: gekopieerd == "link" ? L("Gekopieerd") : L("Kopieer link"), subtitel: "a-alerts.nl", chevron: false) {
                             Image(systemName: gekopieerd == "link" ? "checkmark" : "link").font(.title3).foregroundStyle(.secondary)
                         }
                     }

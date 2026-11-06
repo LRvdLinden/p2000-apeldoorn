@@ -44,6 +44,12 @@ P2000 Apeldoorn heet nu A-Alerts.
 - Pushmeldingen met een kaartje en knoppen voor Bewaar en Apple Kaarten
 - Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
 
+URL's
+Ondersteunings-URL: https://a-alerts.nl/info/?p=disclaimer
+Marketing-URL: https://a-alerts.nl
+Privacybeleid-URL: https://a-alerts.nl/info/?p=privacy
+Copyright: © 2026 A-Alerts · PixelForges
+
 Notities voor App Review
 A-Alerts is de nieuwe naam van P2000 Apeldoorn (zelfde app, zelfde bundle-ID). Er is geen account nodig; alle functies zijn zonder inloggen te gebruiken.
 

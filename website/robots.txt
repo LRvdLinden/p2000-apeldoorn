@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /assets/demo.json
 
-Sitemap: https://p2000-apeldoorn.nl/sitemap.xml
+Sitemap: https://a-alerts.nl/sitemap.xml

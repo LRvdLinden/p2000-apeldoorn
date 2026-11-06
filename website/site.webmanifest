@@ -1,6 +1,6 @@
 {
-  "name": "P2000 Apeldoorn",
-  "short_name": "P2000",
+  "name": "A-Alerts",
+  "short_name": "A-Alerts",
   "start_url": "/pager/",
   "display": "standalone",
   "background_color": "#0a0a0d",
@@ -17,5 +17,6 @@
       "sizes": "512x512",
       "type": "image/png"
     }
-  ]
+  ],
+  "description": "P2000-meldingen, NL-Alert, Burgernet en KNMI-waarschuwingen in de gemeente Apeldoorn, live."
 }

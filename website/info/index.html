@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>P2000 Apeldoorn</title>
-<meta name="description" content="Privacyverklaring, gebruiksvoorwaarden en disclaimer van P2000 Apeldoorn.">
-<link rel="canonical" id="canonical" href="https://p2000-apeldoorn.nl/info/?p=privacy">
+<title>A-Alerts</title>
+<meta name="description" content="Privacyverklaring, cookies, gebruiksvoorwaarden, disclaimer en wat er nieuw is in A-Alerts.">
+<link rel="canonical" id="canonical" href="https://a-alerts.nl/info/?p=privacy">
 <meta name="robots" content="index, follow">
 <link rel="icon" href="../assets/img/appicon-32.png">
 <link rel="stylesheet" href="../assets/css/base.css">
@@ -27,14 +27,14 @@
 </head>
 <body>
 <header>
-  <a href="../"><span class="shield"><svg viewBox="3 1 18 22"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z" fill="#fff"/><circle cx="12" cy="17.4" r="1.5" fill="#cf0a1e"/><rect x="11" y="6.5" width="2" height="7.5" rx="1" fill="#cf0a1e"/></svg></span>P2000 Apeldoorn</a>
-  <nav><a href="?p=privacy">Privacy</a><a href="?p=terms">Voorwaarden</a><a href="?p=disclaimer">Disclaimer</a><a href="?p=privacy#cookies" data-consent-open>Cookies</a><a href="../pager/">Live pager</a></nav>
+  <a href="../"><span class="shield appmark"><img src="../assets/img/appicon-180.png" alt="" width="40" height="40"></span>A-Alerts</a>
+  <nav><a href="?p=privacy">Privacy</a><a href="?p=terms">Voorwaarden</a><a href="?p=disclaimer">Disclaimer</a><a href="?p=cookies">Cookies</a><a href="?p=changelog">Wat is nieuw</a><a href="../pager/">Live pager</a></nav>
 </header>
 <article id="doc"><p>Laden…</p></article>
 <script type="module">
   import { API, esc, trackVisit } from "../assets/js/core.js";
   trackVisit();
-  const names = { privacy: "Privacyverklaring", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer" };
+  const names = { privacy: "Privacyverklaring", cookies: "Cookies", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer", changelog: "Wat is nieuw" };
   const p = new URLSearchParams(location.search).get("p");
   const name = names[p] ? p : "privacy";
   const doc = document.getElementById("doc");
@@ -52,9 +52,14 @@
     }));
     return t.innerHTML;
   };
-  document.title = `${names[name]} – P2000 Apeldoorn`;
-  document.getElementById("canonical").href = `https://p2000-apeldoorn.nl/info/?p=${name}`;
-  doc.innerHTML = data
+  document.title = `${names[name]} – A-Alerts`;
+  document.getElementById("canonical").href = `https://a-alerts.nl/info/?p=${name}`;
+  const datum = (d) => new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+  if (Array.isArray(data)) {
+    // Changelog: a list of versions, newest first.
+    doc.innerHTML = `<h1>${names[name]}</h1>` + data.map((v) =>
+      `<section class="versie" id="v${esc(v.version || v.id)}"><h2>${esc(v.version || "")} · ${esc(v.title || "")}</h2>${v.release_date ? `<p class="meta">${esc(datum(v.release_date))}</p>` : ""}${clean(v.content || "")}</section>`).join("");
+  } else doc.innerHTML = data
     ? `<h1>${esc(data.title || names[name])}</h1>${data.updated_at || data.last_updated ? `<p class="meta">Laatst bijgewerkt: ${esc(new Date(data.updated_at || data.last_updated).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }))}</p>` : ""}${clean(data.content || data.html || "")}`
     : `<h1>${names[name]}</h1><p>Deze tekst kon niet worden geladen.</p>`;
   if (location.hash) document.getElementById(decodeURIComponent(location.hash.slice(1)))?.scrollIntoView();

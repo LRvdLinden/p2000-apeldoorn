@@ -55,7 +55,7 @@ struct TVSettingsView: View {
                 Text(L("Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart."))
                     .font(AppFont.heading(18, relativeTo: .headline)).foregroundStyle(.secondary)
                 Text(Lf("Versie %@ (%@)", Config.version, Config.build)).foregroundStyle(.secondary)
-                Text("p2000-apeldoorn.nl").font(AppFont.heading(18, relativeTo: .headline))
+                Text(verbatim: "a-alerts.nl").font(AppFont.heading(18, relativeTo: .headline))
                 Text(L("Bel bij nood altijd 112.")).font(AppFont.heading(18, relativeTo: .headline)).foregroundStyle(Theme.red)
             }
         }

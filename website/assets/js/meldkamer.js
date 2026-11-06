@@ -317,14 +317,14 @@ async function refresh() {
   if (fresh.length) {
     state.tourIndex = 0;
     enqueueAlarm(fresh);
-    if (document.hidden) document.title = `(${fresh.length}) Meldkamer – P2000 Apeldoorn`;
+    if (document.hidden) document.title = `(${fresh.length}) Meldkamer – A-Alerts`;
   }
   state.first = false;
 }
 
 document.addEventListener("visibilitychange", () => {
   if (document.hidden) return;
-  document.title = "Meldkamer – P2000 Apeldoorn";
+  document.title = "Meldkamer – A-Alerts";
   keepAwake();
   refresh();
 });

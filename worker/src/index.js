@@ -1,4 +1,5 @@
-// P2000 Apeldoorn API as a Cloudflare Worker (no server to maintain).
+// A-Alerts API (formerly P2000 Apeldoorn) as a Cloudflare Worker (no server to maintain), at
+// p2000-apeldoorn-api.lrvdlinden.workers.dev.
 //  - Cron (every minute): reads the p2000.page feed 3× per run, stores Apeldoorn alerts in D1 and sends pushes.
 //  - HTTP: the same REST API the app, the widgets and the website use.
 import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError } from "./rules.js";
@@ -17,6 +18,7 @@ import {
 import privacy from "../content/privacy.json";
 import terms from "../content/terms.json";
 import disclaimer from "../content/disclaimer.json";
+import cookies from "../content/cookies.json";
 import changelog from "../content/changelog.json";
 import {
   ingestWarnings, listWarnings, getWarning, linkedMeldingen, payloadForWarning, wantsPush, devicePrefs, savePrefs, prefsFrom,
@@ -27,7 +29,7 @@ import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
-const CONTENT = { privacy, terms, disclaimer, changelog };
+const CONTENT = { privacy, cookies, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const listCache = new Map();
 
@@ -128,7 +130,7 @@ async function handle(req, env) {
     return new Response(token, { headers: { "content-type": "text/plain", "cache-control": "no-store", ...CORS } });
   }
 
-  m = path.match(/^\/v1\/content\/(privacy|terms|disclaimer)$/);
+  m = path.match(/^\/v1\/content\/(privacy|cookies|terms|disclaimer)$/);
   if (method === "GET" && m) return reply(200, await contentFor(env, m[1], CONTENT), { "cache-control": "public, max-age=300" });
   if (method === "GET" && path === "/v1/changelog") return reply(200, await contentFor(env, "changelog", CONTENT), { "cache-control": "public, max-age=300" });
 
@@ -159,7 +161,7 @@ async function handle(req, env) {
     if (!device) return reply(404, { error: "Unknown device" });
     const nl = (device.language || "nl").startsWith("nl");
     const r = await sendPush(env, device, {
-      aps: { alert: { title: "P2000 Apeldoorn", body: nl ? "Testmelding: je pushmeldingen werken! 🚨" : "Test notification: your push notifications work! 🚨" }, sound: "default" },
+      aps: { alert: { title: "A-Alerts", body: nl ? "Testmelding: je pushmeldingen werken! 🚨" : "Test notification: your push notifications work! 🚨" }, sound: "default" },
     });
     if (isDeadToken(r)) await deleteDevice(env, device.token);
     return reply(r.ok ? 200 : 502, r);
@@ -231,7 +233,7 @@ async function handleBeheer(req, env, url, path, method) {
     return reply(200, { ok: true });
   }
   if (method === "POST" && path === "/v1/beheer/devices/test") {
-    return reply(200, await pushAdmins(env, "P2000Beheer", "Testmelding: meldingen van P2000Beheer werken. ✅"));
+    return reply(200, await pushAdmins(env, "A-Alerts-beheer", "Testmelding: meldingen van het A-Alerts-beheer werken. ✅"));
   }
   return reply(404, { error: "Not found" });
 }
@@ -255,7 +257,7 @@ async function queue(env, guid, tokens) {
 async function poll(env, budget) {
   if (!env.P2000_PAGE_API_URL || !budget.take()) return;
   try {
-    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "P2000Apeldoorn/1.0 (+https://p2000-apeldoorn.nl)" }, signal: AbortSignal.timeout(10_000) });
+    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const list = await res.json();
     const parsed = (Array.isArray(list) ? list : []).map(fromFeed).filter(Boolean);
