@@ -1,1 +1,1 @@
-{"version": "2.0.0", "build": 9, "url": "https://a-alerts.nl/downloads/A-Alerts.apk", "size": 24668352, "sha256": "ed5f7444959ac2e98863ba3d70eb33cad5b0f0f68b64c88f8aeda837b207da9f", "minAndroid": "7.0", "notes": "Eerste beta van A-Alerts voor Android, met pushmeldingen."}
+{"version": "2.0.0", "build": 11, "url": "https://a-alerts.nl/downloads/A-Alerts.apk", "size": 24684736, "sha256": "658ccf8172cb399094c7994c500e7ecdbfbb537370e1e5852ea159fedf94f06a", "minAndroid": "7.0", "notes": "Helikopters met routespoor, vluchten en vloeiende beweging op de kaart en bij meldingen."}
