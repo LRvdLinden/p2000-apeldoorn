@@ -1,0 +1,16 @@
+name: Diag weer (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: [.github/workflows/diag-weer.yml]
+jobs:
+  d:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s $A/v1/status | head -c 1500; echo
+          G=$(curl -s "$A/v1/meldingen?limit=5" | python3 -c "import json,sys;print(' '.join(m['guid'] for m in json.load(sys.stdin)))")
+          for g in $G; do echo "== $g"; curl -s -w " HTTP %{http_code}" "$A/v1/meldingen/$g/weather" | head -c 400; echo; done
+          W=$(curl -s "$A/v1/waarschuwingen?days=14" | python3 -c "import json,sys;l=json.load(sys.stdin);print(l[0]['id'] if l else '')")
+          [ -n "$W" ] && curl -s -w " HTTP %{http_code}" "$A/v1/waarschuwingen/$W/weather" | head -c 400; echo
