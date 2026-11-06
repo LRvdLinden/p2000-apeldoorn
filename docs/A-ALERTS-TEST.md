@@ -4,7 +4,7 @@
 
 | Controle | Resultaat |
 |---|---|
-| Build iPhone/iPad + Apple Watch, Mac, Apple TV, widgets, push-extensie, P2000Beheer (GitHub Actions, `build.yml`) | zie run bij build 20 |
+| Build iPhone/iPad + Apple Watch, Mac, Apple TV, widgets, push-extensie, P2000Beheer (GitHub Actions, `build.yml`) | geslaagd (run 42206794343, build 20) |
 | Worker-tests (`cd worker && npm test`): werkgebied, NL-Alert/Burgernet/KNMI, profielen, helikopters, beheer, pushpayloads | 25 geslaagd |
 | Bundle-ID's t.o.v. 1.0.1 (build 12) | gelijk; alleen `…p2000apeldoorn.notificationservice` erbij |
 | Entitlements (app, watch, widgets, tv) | ongewijzigd |
