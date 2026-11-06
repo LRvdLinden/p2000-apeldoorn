@@ -171,6 +171,34 @@ struct SheetKop: View {
     }
 }
 
+/// The real app icon of a route app when its image is in the asset catalog (routeapp_applemaps / routeapp_googlemaps,
+/// the official icons from the press kits), else an SF Symbol in the app's colour.
+struct RouteAppIcoon: View {
+    let asset: String
+    let symbol: String
+    let kleur: Color
+
+    private var heeftAfbeelding: Bool {
+        #if canImport(UIKit)
+        UIImage(named: asset) != nil
+        #else
+        NSImage(named: asset) != nil
+        #endif
+    }
+
+    var body: some View {
+        if heeftAfbeelding {
+            Image(asset)
+                .resizable()
+                .scaledToFit()
+                .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+                .overlay(RoundedRectangle(cornerRadius: 10, style: .continuous).strokeBorder(.black.opacity(0.08), lineWidth: 0.5))
+        } else {
+            Image(systemName: symbol).font(.title2).foregroundStyle(kleur)
+        }
+    }
+}
+
 struct SheetOptie<Icon: View>: View {
     let titel: String
     let subtitel: String
@@ -240,12 +268,12 @@ struct RouteSheet: View {
                 VStack(spacing: 12) {
                     Button { openAppleMaps() } label: {
                         SheetOptie(titel: L("Apple Kaarten"), subtitel: L("Route met de auto in Kaarten")) {
-                            Image(systemName: "map.fill").font(.title2).foregroundStyle(.blue)
+                            RouteAppIcoon(asset: "routeapp_applemaps", symbol: "map.fill", kleur: .blue)
                         }
                     }
                     Button { openGoogleMaps() } label: {
                         SheetOptie(titel: "Google Maps", subtitel: L("Route met de auto in Google Maps")) {
-                            Image(systemName: "mappin.and.ellipse").font(.title2).foregroundStyle(.green)
+                            RouteAppIcoon(asset: "routeapp_googlemaps", symbol: "mappin.and.ellipse", kleur: .green)
                         }
                     }
                     Button {

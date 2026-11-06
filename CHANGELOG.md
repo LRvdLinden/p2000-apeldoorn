@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 27)
+- Route naar incident: de echte app-iconen van Apple Kaarten en Google Maps (uit de assets routeapp_applemaps en routeapp_googlemaps; zonder die afbeeldingen een symbool).
+
 ## A-Alerts 2.0.0 (build 26)
 - Meldingdetail: de kaart is vierkanter, en de balk en kaartknoppen staan weer onder de statusbalk (op sommige iPhones zaten ze erachter en waren ze niet te bedienen).
 
