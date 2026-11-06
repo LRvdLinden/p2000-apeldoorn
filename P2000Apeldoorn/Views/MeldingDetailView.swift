@@ -33,14 +33,14 @@ struct MeldingDetailView: View {
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
 
-    /// Visible map below the top bar (the bar floats over the map like the reference design).
-    private let mapHeight: CGFloat = 300
+    /// Visible map below the status bar: close to square (width × 0.9), at most 440 pt.
+    private func mapHeight(_ width: CGFloat) -> CGFloat { min(max(width * 0.9, 300), 440) }
 
     var body: some View {
         GeometryReader { geo in
             VStack(spacing: 0) {
                 mapHeader
-                    .frame(height: kaartGroot ? max(geo.size.height - 96, 300) : topSafeArea + mapHeight)
+                    .frame(height: kaartGroot ? max(geo.size.height - 96, 300) : topSafeArea + mapHeight(geo.size.width))
                     .clipped()
                 if kaartGroot {
                     kaartGrootBalk
@@ -52,8 +52,9 @@ struct MeldingDetailView: View {
         .background(
             GeometryReader { g in
                 Color.clear
-                    .onAppear { topSafeArea = g.safeAreaInsets.top }
-                    .onChange(of: g.safeAreaInsets.top) { _, v in topSafeArea = v }
+                    .onAppear { topSafeArea = Self.statusBarInset(g.safeAreaInsets.top, minY: g.frame(in: .global).minY) }
+                    .onChange(of: g.safeAreaInsets.top) { _, v in topSafeArea = Self.statusBarInset(v, minY: g.frame(in: .global).minY) }
+                    .onChange(of: g.frame(in: .global).minY) { _, y in topSafeArea = Self.statusBarInset(g.safeAreaInsets.top, minY: y) }
             }
         )
         .ignoresSafeArea(edges: .top)
@@ -258,6 +259,20 @@ struct MeldingDetailView: View {
         var rect = points.map { MKMapRect(origin: $0, size: MKMapSize(width: 1, height: 1)) }.reduce(MKMapRect.null) { $0.union($1) }
         rect = rect.insetBy(dx: -max(rect.width * 0.35, 600), dy: -max(rect.height * 0.35, 600))
         withAnimation(.easeInOut(duration: 0.6)) { position = .rect(rect) }
+    }
+
+    /// The measured inset reads 0 once the view ignores the top safe area. The window still knows the status bar:
+    /// only the part of it that overlaps this view counts (none in a sheet that starts lower on screen).
+    static func statusBarInset(_ measured: CGFloat, minY: CGFloat) -> CGFloat {
+        #if os(iOS)
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first(where: \.isKeyWindow)
+        return max(measured, (window?.safeAreaInsets.top ?? 0) - max(minY, 0))
+        #else
+        return measured
+        #endif
     }
 
     /// Just below the status bar (full screen) or the top edge of the sheet: the real safe area plus a small margin.
