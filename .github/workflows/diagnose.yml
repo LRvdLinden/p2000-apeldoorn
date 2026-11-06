@@ -27,4 +27,4 @@ jobs:
           curl -sS -m 20 -A "A-Alerts/2.0 (+https://a-alerts.nl)" https://www.burgernet.nl/burgernet/3967274 -o /tmp/d.html
           echo "== detail main"; sed -n '/<main/,/<\/main>/p' /tmp/d.html | grep -v "^\s*$" | grep -v "<svg\|<path" | head -150
           echo "== voorst"; curl -sS -m 20 -A "A-Alerts/2.0" -o /dev/null -w "%{http_code}\n" https://www.burgernet.nl/gemeente/Oost-Nederland/VOORST
-          true
+          true # run
