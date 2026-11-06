@@ -66,6 +66,7 @@ struct TVRootView: View {
         ZStack {
             TabView(selection: $tab) {
                 MeldkamerView().tabItem { Label(L("Meldkamer"), systemImage: "light.beacon.max") }.tag(0)
+                TVWaarschuwingenView().tabItem { Label(L("Waarschuwingen"), systemImage: "exclamationmark.triangle") }.tag(3)
                 TVStatsView().tabItem { Label(L("Statistieken"), systemImage: "chart.bar.xaxis") }.tag(1)
                 TVSettingsView().tabItem { Label(L("Instellingen"), systemImage: "gearshape") }.tag(2)
             }

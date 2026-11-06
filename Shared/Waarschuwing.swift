@@ -202,6 +202,11 @@ extension P2000API {
         try await getJSON("v1/waarschuwingen/\(id)", as: WaarschuwingDetail.self)
     }
 
+    /// NL-Alert, Burgernet and KNMI of the last `days` days (the server keeps up to 14).
+    func waarschuwingen(days: Int) async throws -> [Waarschuwing] {
+        try await getJSON("v1/waarschuwingen", query: ["days": String(days)], as: [Waarschuwing].self)
+    }
+
     /// Weather at the place and time of the warning (WeatherKit via the Worker, like an alert).
     func waarschuwingWeather(id: String) async -> AlertWeather? {
         try? await getJSON("v1/waarschuwingen/\(id)/weather", as: AlertWeather.self)

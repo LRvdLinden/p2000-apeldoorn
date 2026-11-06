@@ -292,3 +292,10 @@ a.drow { text-decoration: none; color: inherit; }
 .row.warn.ended > img { filter: grayscale(1); }
 .row.warn.ended h3 { font-weight: 500; }
 .row.warn.ended .when b { color: var(--muted) !important; }
+
+.view-seg { margin: 0 0 10px; }
+.view-seg button { flex: 1; }
+.heli-vals { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 8px; }
+.heli-vals div { background: var(--surface-2); border-radius: 12px; padding: 8px 10px; display: grid; }
+.heli-vals small { color: var(--muted); font-size: .72rem; }
+.heli-vals b { font-size: .95rem; font-variant-numeric: tabular-nums; }

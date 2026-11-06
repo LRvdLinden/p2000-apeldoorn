@@ -1,12 +1,5 @@
 import SwiftUI
 
-extension P2000API {
-    /// NL-Alert, Burgernet and KNMI of the last `days` days (the server keeps up to 14).
-    func waarschuwingen(days: Int) async throws -> [Waarschuwing] {
-        try await getJSON("v1/waarschuwingen", query: ["days": String(days)], as: [Waarschuwing].self)
-    }
-}
-
 extension AppSettings {
     /// Warning pushes across all profiles (per profile it can still be changed under Notificaties › Profielen).
     func pushAan(_ bron: Waarschuwing.Bron) -> Bool {

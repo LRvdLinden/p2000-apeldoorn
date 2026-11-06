@@ -57,6 +57,28 @@ struct MeldkamerView: View {
             let groups = layout
             Map(position: $position, interactionModes: []) {
                 // Alerts without a street name: one marker per town instead of a ring of identical pins.
+                // Border of the working area.
+                if settings.laag(.werkgebied) {
+                    ForEach(Array(Werkgebied.shared.gemeente.gebied.enumerated()), id: \.offset) { _, ring in
+                        MapPolyline(coordinates: (ring + ring.prefix(1)).map { CLLocationCoordinate2D(latitude: $0[1], longitude: $0[0]) })
+                            .stroke(Theme.red.opacity(0.75), style: StrokeStyle(lineWidth: 3, dash: [12, 7]))
+                    }
+                }
+                // KNMI areas.
+                if settings.laag(.knmi) {
+                    ForEach(waarschuwingen.items.filter { $0.bron == .knmi && $0.isActief }) { w in
+                        ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
+                            MapPolygon(coordinates: ring).foregroundStyle(w.color.opacity(0.18)).stroke(w.color, lineWidth: 2)
+                        }
+                    }
+                }
+                // Fire, ambulance and police stations.
+                if settings.laag(.kazernes) {
+                    ForEach(Kazernes.all) { k in
+                        Annotation(k.naam, coordinate: k.coordinate, anchor: .center) { KazerneIcon(soort: k.soort, size: 30) }
+                            .annotationTitles(.hidden)
+                    }
+                }
                 ForEach(groups.clusters) { c in
                     Annotation(c.plaats, coordinate: c.coordinate, anchor: .bottom) {
                         ClusterMarker(cluster: c, size: 64, selected: c.meldingen.contains { $0.guid == focusGuid })
@@ -70,7 +92,7 @@ struct MeldkamerView: View {
                     .annotationTitles(.hidden)
                 }
                 // Active NL-Alert areas and Burgernet calls (A-Alerts).
-                ForEach(waarschuwingen.items.filter { $0.isActief && $0.bron != .knmi }) { w in
+                ForEach(waarschuwingen.items.filter { $0.isActief && $0.bron != .knmi && settings.laag($0.bron == .nlalert ? .nlalert : .burgernet) }) { w in
                     ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
                         MapPolygon(coordinates: ring).foregroundStyle(w.color.opacity(0.2)).stroke(w.color, lineWidth: 2)
                     }
@@ -80,7 +102,7 @@ struct MeldkamerView: View {
                     }
                 }
                 // Live trauma and police helicopters (A-Alerts).
-                if AppSettings.shared.laag(.helikopters) {
+                if settings.laag(.helikopters) {
                     ForEach(HeliStore.shared.items) { h in
                         Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
                             HeliMarker(heli: h, size: 34)
@@ -97,6 +119,28 @@ struct MeldkamerView: View {
 
             if let m = items.first(where: { $0.guid == focusGuid }) ?? items.first {
                 latestCard(m).padding(28)
+            }
+        }
+        .overlay(alignment: .bottomTrailing) {
+            // Helicopters in the air, with altitude and speed (the info card of the app).
+            if settings.laag(.helikopters), !HeliStore.shared.items.isEmpty {
+                VStack(alignment: .trailing, spacing: 10) {
+                    ForEach(HeliStore.shared.items.prefix(4)) { h in
+                        HStack(spacing: 12) {
+                            Image(h.afbeelding).resizable().scaledToFit().frame(width: 70, height: 26)
+                                .scaleEffect(x: h.vliegtWest ? -1 : 1, y: 1)
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(h.naam).font(AppFont.body(18, .bold))
+                                Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst]
+                                        .compactMap { $0 }.joined(separator: " · "))
+                                    .font(AppFont.body(14, .regular)).foregroundStyle(.secondary)
+                            }
+                        }
+                        .padding(.horizontal, 16).padding(.vertical, 10)
+                        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                    }
+                }
+                .padding(28)
             }
         }
         .overlay(alignment: .topLeading) {

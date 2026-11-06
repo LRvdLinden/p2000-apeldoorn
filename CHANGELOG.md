@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 32)
+- Fix: tikken op een pushmelding liet de app soms crashen; de app opent nu direct de melding (of de waarschuwing), ook als hij nog niet draaide.
+- Apple TV gelijk aan de app (behalve pushmeldingen): tabblad Waarschuwingen (14 dagen), kaartlagen in Instellingen (meldingen, NL-Alert, Burgernet, KNMI-gebieden, grens werkgebied, kazernes, helikopters), helikopters in de lucht met hoogte, snelheid en koers, kazernes met lijn naar de melding op de kaart, en bij een waarschuwing het weer en de meldingen in de buurt.
+- Website gelijk aan de app: Alle waarschuwingen (14 dagen), kaartlaag Grens werkgebied, infokaart bij een helikopter, echte autoroutes van de kazernes met aankomsttijd, Look Around bij Burgernet.
+
 ## A-Alerts 2.0.0 (build 31)
 - NL-Alert, Burgernet en KNMI: METEO-gegevens op de detailpagina komen nu van onze server (dezelfde WeatherKit-bron als bij een melding), met WeatherKit in de app als reserve. Ook op de website.
 

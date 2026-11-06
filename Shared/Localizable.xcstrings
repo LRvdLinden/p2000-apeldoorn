@@ -2534,6 +2534,23 @@
         }
       }
     },
+    "Geen waarschuwingen in de laatste twee weken.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No warnings in the last two weeks."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen waarschuwingen in de laatste twee weken."
+          }
+        }
+      }
+    },
     "Gegevens": {
       "extractionState": "manual",
       "localizations": {
@@ -4400,6 +4417,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "NL-Alert en Burgernet staan tussen de meldingen; KNMI-waarschuwingen staan als balk bovenaan."
+          }
+        }
+      }
+    },
+    "NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet and KNMI of the last 14 days for the municipality of Apeldoorn and Teuge."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -7052,6 +7086,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waarschuwingen van de overheid bij noodsituaties, zoals een grote brand of gevaarlijke stoffen."
+          }
+        }
+      }
+    },
+    "Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What you see on the control-room map. Shared with your other devices via iCloud."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten."
           }
         }
       }

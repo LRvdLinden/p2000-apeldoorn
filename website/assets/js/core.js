@@ -206,7 +206,7 @@ export function loadMapKit() {
     const s = document.createElement("script");
     s.src = "https://cdn.apple-mapkit.com/mk/5.x.x/mapkit.core.js";
     s.crossOrigin = "anonymous";
-    s.dataset.libraries = "map,annotations,overlays,look-around";
+    s.dataset.libraries = "map,annotations,overlays,look-around,services";
     s.dataset.callback = "__p2000MapKit";
     s.onerror = () => resolve(null);
     window.__p2000MapKit = () => {

@@ -30,6 +30,17 @@ struct TVSettingsView: View {
                     }
                 }
                 Section {
+                    ForEach(KaartLaag.allCases) { l in
+                        Toggle(isOn: Binding(get: { settings.laag(l) }, set: { settings.setLaag(l, $0) })) {
+                            Label(l.titel, systemImage: l.systemImage)
+                        }
+                    }
+                } header: {
+                    Text(L("Kaartlagen"))
+                } footer: {
+                    Text(L("Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten."))
+                }
+                Section {
                     ForEach(Dienst.selectable) { d in
                         Toggle(isOn: Binding(
                             get: { settings.diensten.isEmpty || settings.diensten.contains(d.rawValue) },

@@ -7,15 +7,28 @@ struct TVDetailView: View {
     @Environment(AppSettings.self) private var settings
     @Environment(\.dismiss) private var dismiss
     @State private var weather: AlertWeather?
+    @State private var routes: [KazerneRoute] = []
 
     var body: some View {
         HStack(alignment: .top, spacing: 50) {
             VStack(spacing: 24) {
                 if let lat = melding.lat, let lon = melding.lon, melding.hasCoordinate {
                     let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-                    Map(initialPosition: .camera(MapCamera(centerCoordinate: coord, distance: 1400, heading: 0, pitch: 45)), interactionModes: []) {
+                    Map(initialPosition: routes.isEmpty ? .camera(MapCamera(centerCoordinate: coord, distance: 1400, heading: 0, pitch: 45)) : .automatic, interactionModes: []) {
+                        // Alarmed stations: a dashed line to the alert (tvOS has no driving routes).
+                        ForEach(routes) { r in
+                            MapPolyline(coordinates: r.polyline.map { line in
+                                var pts = [CLLocationCoordinate2D](repeating: .init(), count: line.pointCount)
+                                line.getCoordinates(&pts, range: NSRange(location: 0, length: line.pointCount))
+                                return pts
+                            } ?? [r.kazerne.coordinate, coord])
+                            .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [12, 8]))
+                            Annotation(r.kazerne.naam, coordinate: r.kazerne.coordinate, anchor: .center) { KazerneIcon(soort: r.kazerne.soort, size: 36) }
+                                .annotationTitles(.hidden)
+                        }
                         Annotation("", coordinate: coord, anchor: .bottom) { TVMarker(melding: melding, highlighted: true) }
                     }
+                    .id(routes.count)
                     .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                 } else {
@@ -70,6 +83,7 @@ struct TVDetailView: View {
             settings.markRead(melding)
             MeldingStore.shared.registerView(melding)
             weather = await P2000API.shared.weather(guid: melding.guid)
+            routes = await Aanrijtijd.routes(voor: melding)
         }
     }
 

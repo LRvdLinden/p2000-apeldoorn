@@ -94,6 +94,10 @@ struct TVKnmiBalk: View {
 struct TVWaarschuwingDetail: View {
     let waarschuwing: Waarschuwing
     @Environment(\.dismiss) private var dismiss
+    @Environment(AppSettings.self) private var settings
+    @State private var meldingen: [Melding] = []
+    @State private var weather: AlertWeather?
+    @State private var selected: Melding?
 
     var body: some View {
         HStack(alignment: .top, spacing: 50) {
@@ -106,6 +110,12 @@ struct TVWaarschuwingDetail: View {
                 if let c = waarschuwing.coordinate {
                     Annotation(waarschuwing.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: waarschuwing, size: 64) }
                         .annotationTitles(.hidden)
+                }
+                ForEach(meldingen.filter(\.hasCoordinate)) { m in
+                    Annotation(m.title, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), anchor: .bottom) {
+                        DienstMarker(dienst: m.dienst, size: 40)
+                    }
+                    .annotationTitles(.hidden)
                 }
             }
             .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
@@ -128,6 +138,15 @@ struct TVWaarschuwingDetail: View {
                     if let t = waarschuwing.tekst, !t.isEmpty {
                         Text(t).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
                     }
+                    if let w = weather { TVWeerBlok(weather: w) }
+                    if !meldingen.isEmpty {
+                        Text(Lf("Meldingen in de buurt (%lld)", meldingen.count)).font(AppFont.heading(24)).padding(.top, 6)
+                        ForEach(meldingen.prefix(8)) { m in
+                            Button { selected = m } label: { TVRow(melding: m, read: settings.isRead(m)) }
+                                .buttonStyle(.card)
+                        }
+                        Text(L("Mogelijk verband, geen zekerheid.")).font(AppFont.body(14, .regular)).foregroundStyle(.secondary)
+                    }
                     Button(L("Sluiten")) { dismiss() }.padding(.top, 10)
                 }
                 .padding(.trailing, 20)
@@ -136,6 +155,11 @@ struct TVWaarschuwingDetail: View {
         }
         .padding(60)
         .background(Color(hex: 0x0B0B0F).ignoresSafeArea())
+        .fullScreenCover(item: $selected) { m in TVDetailView(melding: m) }
+        .task(id: waarschuwing.id) {
+            if let d = try? await P2000API.shared.waarschuwing(id: waarschuwing.id) { meldingen = d.meldingen }
+            weather = await P2000API.shared.waarschuwingWeather(id: waarschuwing.id)
+        }
     }
 
     private var startPositie: MapCameraPosition {
@@ -188,5 +212,67 @@ struct TVInzetBlok: View {
             }
         }
         .task(id: melding.guid) { routes = await Aanrijtijd.routes(voor: melding) }
+    }
+}
+
+/// Weather at the time and place (warnings), in the same style as the alert detail.
+struct TVWeerBlok: View {
+    let weather: AlertWeather
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Text(L("METEO-gegevens")).font(AppFont.heading(24)).padding(.top, 6)
+            HStack(spacing: 30) {
+                if let t = weather.temperature { metric("thermometer.medium", "\(Int(t.rounded()))°C", L("Temperatuur")) }
+                if let c = weather.cloudCover { metric("cloud.fill", "\(Int((c * 100).rounded()))%", L("Bewolking")) }
+                if let s = weather.windSpeed { metric("wind", "\(Int(s.rounded())) km/h", L("Wind")) }
+            }
+            Text(" Weather").font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
+        }
+    }
+
+    private func metric(_ icon: String, _ value: String, _ label: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Image(systemName: icon).font(.system(size: 24)).foregroundStyle(.blue)
+            Text(value).font(AppFont.body(26, .bold))
+            Text(label).font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
+        }
+    }
+}
+
+/// Tab "Waarschuwingen": NL-Alert, Burgernet and KNMI of the last two weeks, per day (like "Alle waarschuwingen").
+struct TVWaarschuwingenView: View {
+    @State private var items: [Waarschuwing] = []
+    @State private var loaded = false
+    @State private var selected: Waarschuwing?
+
+    private var perDag: [(dag: Date, items: [Waarschuwing])] {
+        let groups = Dictionary(grouping: items) { Calendar.current.startOfDay(for: $0.start) }
+        return groups.keys.sorted(by: >).map { ($0, groups[$0]!.sorted { $0.start > $1.start }) }
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVStack(alignment: .leading, spacing: 14) {
+                Text(L("NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge."))
+                    .font(AppFont.body(20, .regular)).foregroundStyle(.secondary)
+                if loaded && items.isEmpty {
+                    Text(L("Geen waarschuwingen in de laatste twee weken.")).foregroundStyle(.secondary).frame(maxWidth: .infinity, minHeight: 200)
+                }
+                ForEach(perDag, id: \.dag) { groep in
+                    Text(groep.dag.formatted(.dateTime.weekday(.wide).day().month(.wide))).font(AppFont.heading(24)).padding(.top, 14)
+                    ForEach(groep.items) { w in
+                        Button { selected = w } label: { TVWaarschuwingRow(waarschuwing: w) }
+                            .buttonStyle(.card)
+                    }
+                }
+            }
+            .padding(.horizontal, 80)
+            .padding(.vertical, 30)
+        }
+        .fullScreenCover(item: $selected) { w in TVWaarschuwingDetail(waarschuwing: w) }
+        .task {
+            items = (try? await P2000API.shared.waarschuwingen(days: 14)) ?? []
+            loaded = true
+        }
     }
 }
