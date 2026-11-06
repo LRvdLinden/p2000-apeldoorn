@@ -81,3 +81,4 @@ for name, kind, titles in PLACES:
     print(name, coord, src)
 
 json.dump(out, open("tools/geodata/places.json", "w"), ensure_ascii=False, indent=1)
+# run 1793954643

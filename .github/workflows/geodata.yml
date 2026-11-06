@@ -1,6 +1,9 @@
 name: Geodata (eenmalig)
 on:
   workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [tools/geodata/fetch_places.py]
 permissions:
   contents: write
 jobs:
