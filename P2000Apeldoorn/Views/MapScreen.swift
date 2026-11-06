@@ -218,7 +218,7 @@ struct MapScreen: View {
         if settings.laag(.helikopters) {
             ForEach(helis.items) { h in
                 Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
-                    HeliMarker(heli: h, selected: selectedHeli == h.id)
+                    HeliMarker(heli: h, size: 24, selected: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
                         .accessibilityAddTraits(.isButton)
                 }

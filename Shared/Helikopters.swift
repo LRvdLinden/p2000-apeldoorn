@@ -45,6 +45,21 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
+
+    /// Side-view drawing per type: Lifeliner EC135 (yellow), police EC135, police AW139 (Zulu 24–26).
+    var afbeelding: String {
+        if isTrauma { return "heli_lifeliner_ec135" }
+        let t = (type ?? "").uppercased()
+        if t == "A139" || ["zulu24", "zulu25", "zulu26"].contains(id) { return "heli_politie_aw139" }
+        return "heli_politie_ec135"
+    }
+
+    /// The drawings face east (nose right); flying west (heading 180°–360°) mirrors them.
+    var vliegtWest: Bool {
+        guard let k = koers, !opGrond else { return false }
+        let h = (k.truncatingRemainder(dividingBy: 360) + 360).truncatingRemainder(dividingBy: 360)
+        return h > 180 && h < 360
+    }
     var isTrauma: Bool { soort == "trauma" }
     var color: Color { isTrauma ? Dienst.traumaheli.color : Dienst.politie.color }
     var soortLabel: String { isTrauma ? L("Traumahelikopter") : L("Politiehelikopter") }
@@ -117,29 +132,27 @@ final class HeliStore {
 /// Map marker: a rotated helicopter in the colour of the service, with its name underneath.
 struct HeliMarker: View {
     let heli: Helikopter
+    /// Height of the helicopter drawing in points (it is about 2.8× as wide).
     var size: CGFloat = 38
     var selected = false
+    /// Turn the drawing with the direction of flight (side view: nose left when flying west).
+    var volgtKoers = true
 
     var body: some View {
         VStack(spacing: 2) {
-            ZStack {
-                Circle()
-                    .fill(heli.color)
-                    .frame(width: size, height: size)
-                    .overlay(Circle().strokeBorder(.white, lineWidth: selected ? 3 : 2))
-                    .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
-                Image(systemName: "helicopter")
-                    .font(.system(size: size * 0.48, weight: .bold))
-                    .foregroundStyle(.white)
-                if let k = heli.koers, !heli.opGrond {
-                    Image(systemName: "arrowtriangle.up.fill")
-                        .font(.system(size: size * 0.26))
-                        .foregroundStyle(heli.color)
-                        .offset(y: -size * 0.66)
-                        .rotationEffect(.degrees(k))
+            Image(heli.afbeelding)
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 2.8, height: size)
+                .scaleEffect(x: volgtKoers && heli.vliegtWest ? -1 : 1, y: 1)
+                .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
+                .padding(4)
+                .background {
+                    if selected {
+                        Capsule().fill(heli.color.opacity(0.25))
+                            .overlay(Capsule().strokeBorder(heli.color, lineWidth: 2))
+                    }
                 }
-            }
-            .frame(width: size * 1.6, height: size * 1.6)
             Text(heli.naam)
                 .font(AppFont.body(10, .bold, relativeTo: .caption2))
                 .padding(.horizontal, 6).padding(.vertical, 2)
@@ -148,6 +161,7 @@ struct HeliMarker: View {
         .opacity(heli.isVerouderd ? 0.55 : 1)
         .scaleEffect(selected ? 1.12 : 1)
         .animation(.spring(duration: 0.25), value: selected)
+        .animation(.easeInOut(duration: 0.3), value: heli.vliegtWest)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(heli.naam), \(heli.soortLabel)")
     }
@@ -162,9 +176,11 @@ struct HeliInfoKaart: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 12) {
-                HeliMarker(heli: heli, size: 34).fixedSize()
-                    .frame(width: 54, height: 54)
-                    .clipped()
+                Image(heli.afbeelding)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 84, height: 30)
+                    .scaleEffect(x: heli.vliegtWest ? -1 : 1, y: 1)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(heli.naam).font(AppFont.heading(22))
                     Text([heli.soortLabel, heli.registratie, heli.basis.map { Lf("basis %@", $0) }].compactMap { $0 }.joined(separator: " · "))

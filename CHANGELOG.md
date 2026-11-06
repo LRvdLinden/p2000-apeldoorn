@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 24)
+- Helikopters op de kaart als zijaanzicht per type: Lifeliner (EC135, geel), politie EC135 (Zulu 01–06) en politie AW139 (Zulu 24–26). De tekening draait mee met de vliegrichting (naar het westen: neus naar links).
+
 ## A-Alerts 2.0.0 (build 23)
 - Mac: de push-extensie heeft nu App Sandbox (vereist voor de Mac App Store; gaf een fout bij het archiveren).
 

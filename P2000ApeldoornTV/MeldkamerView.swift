@@ -62,7 +62,7 @@ struct MeldkamerView: View {
                 if AppSettings.shared.laag(.helikopters) {
                     ForEach(HeliStore.shared.items) { h in
                         Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
-                            HeliMarker(heli: h, size: 56)
+                            HeliMarker(heli: h, size: 34)
                         }
                         .annotationTitles(.hidden)
                     }
