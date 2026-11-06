@@ -24,6 +24,7 @@ struct MeldingDetailView: View {
     @State private var meteo: Meteo?
     @State private var attribution: WeatherAttribution?
     @State private var copied = false
+    @State private var topSafeArea: CGFloat = 0
 
     private let mapHeight: CGFloat = 380
 
@@ -50,6 +51,13 @@ struct MeldingDetailView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .background(
+            GeometryReader { g in
+                Color.clear
+                    .onAppear { topSafeArea = g.safeAreaInsets.top }
+                    .onChange(of: g.safeAreaInsets.top) { _, v in topSafeArea = v }
+            }
+        )
         .ignoresSafeArea(edges: .top)
         .background(Color.pageBackground)
         .navigationTitle(melding.dienst.label)
@@ -134,9 +142,10 @@ struct MeldingDetailView: View {
         #endif
     }
 
+    /// Just below the status bar (full screen) or the top edge of the sheet: the real safe area plus a small margin.
     private var topInset: CGFloat {
         #if os(iOS)
-        return 58
+        return topSafeArea + 10
         #else
         return 16
         #endif

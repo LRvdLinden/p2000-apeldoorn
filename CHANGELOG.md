@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 19)
+- Detailpagina: de knoppen op de kaart en de Look Around-preview staan hoger, direct onder de statusbalk of de bovenrand van het venster.
+
 ## A-Alerts 1.0.0 (build 18)
 - Terug naar het standaard Apple-lettertype (SF Pro) op alle platforms; Social Gothic en Poppins zijn verwijderd. Teksten schalen mee met de systeemtekstgrootte.
 
