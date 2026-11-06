@@ -20,7 +20,6 @@ struct P2000ApeldoornTVApp: App {
                 .environment(store)
                 .environment(settings)
                 .environment(tv)
-                .font(AppFont.body(29, .regular))
                 .preferredColorScheme(.dark)
         }
     }

@@ -13,7 +13,6 @@ struct P2000ApeldoornWatchApp: App {
             WatchRootView()
                 .environment(store)
                 .environment(settings)
-                .font(AppFont.body(16, .regular))
                 .tint(Theme.red)
         }
     }

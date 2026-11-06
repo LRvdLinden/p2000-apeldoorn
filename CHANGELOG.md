@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 18)
+- Terug naar het standaard Apple-lettertype (SF Pro) op alle platforms; Social Gothic en Poppins zijn verwijderd. Teksten schalen mee met de systeemtekstgrootte.
+
 ## A-Alerts 1.0.0 (build 17) – fase 4 t/m 8
 - Mogelijk verband: op een melding zie je andere P2000-meldingen op hetzelfde adres of vlakbij, rond hetzelfde tijdstip of met dezelfde eenheid, met de reden erbij. Altijd als mogelijk verband, nooit als feit.
 - Kaartlagen: P2000, NL-Alert, Burgernet, KNMI-gebieden, grens werkgebied, kazernes en posten, en live helikopters, elk aan of uit (gesynchroniseerd via iCloud).
