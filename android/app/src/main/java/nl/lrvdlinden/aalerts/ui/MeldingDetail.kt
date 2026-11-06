@@ -76,6 +76,16 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
     val heliRelevant = remember(m.guid) { HeliKoppeling.relevant(m) }
     if (heliRelevant) LaunchedEffect(m.guid) { while (true) { Store.refreshHelikopters(); delay(10_000) } }
     val heli = if (heliRelevant) HeliKoppeling.voor(m, Store.helikopters) else null
+    // Route of this flight and smooth movement between updates.
+    var heliSpoor by remember { mutableStateOf<List<HeliSpoorPunt>>(emptyList()) }
+    LaunchedEffect(heli?.id) {
+        heliSpoor = emptyList()
+        val id = heli?.id ?: return@LaunchedEffect
+        while (true) { heliSpoor = Api.heliSpoor(id, SpoorBereik.VLUCHT); delay(20_000) }
+    }
+    var nu by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    if (heli != null) LaunchedEffect(Unit) { while (true) { delay(2_000); nu = System.currentTimeMillis() } }
+    val heliPos = heli?.geschat(nu)
     val heliNaam = remember(m.guid) { HeliKoppeling.genoemd(m)?.let { id -> id.replace("lifeliner", "Lifeliner ").replace("zulu", "Zulu ") } }
     val verband = remember(m.guid, Store.meldingen) { Verband.gekoppeld(m, Store.meldingen) }
     val waarschuwingen = remember(m.guid, Store.waarschuwingen) { Store.waarschuwingen.filter { it.bron != "knmi" && it.relates(m) } }
@@ -94,12 +104,14 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     val pts = mutableListOf<MapPoint>()
                     routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false) }
                     m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
-                    heli?.let { h -> pts += MapPoint("h:${h.id}", h.lat, h.lon, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
+                    heli?.let { h -> pts += MapPoint("h:${h.id}", heliPos!!.first, heliPos.second, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
                     AMap(
                         Modifier.fillMaxWidth().height(h),
                         points = pts,
                         lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong()) } +
-                            listOfNotNull(heli?.let { h -> MapLine("heli", listOf(h.lat to h.lon, la to lo), 0xFF9333EA) }),
+                            listOfNotNull(
+                                heli?.takeIf { heliSpoor.isNotEmpty() }?.let { h -> MapLine("spoor", heliSpoor.lijn() + heliPos!!, h.kleur, dashed = false, width = 4.0) },
+                                heli?.let { h -> MapLine("heli", listOf(heliPos!!, la to lo), 0xFF9333EA) }),
                         camera = MapCamera(la, lo, if (m.hasStreet) 15.0 else 12.5,
                             fit = (routes.map { it.kazerne.lat to it.kazerne.lon } + listOfNotNull(heli?.let { it.lat to it.lon })).let { if (it.isNotEmpty()) it + listOf(la to lo) else emptyList() },
                             key = m.guid + (heli != null)),

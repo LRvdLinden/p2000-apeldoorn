@@ -1,5 +1,7 @@
 package nl.lrvdlinden.aalerts.data
 
+import nl.lrvdlinden.aalerts.Fmt
+
 import androidx.compose.ui.graphics.Color
 import nl.lrvdlinden.aalerts.isDutch
 import kotlinx.serialization.SerialName
@@ -222,6 +224,8 @@ data class Helikopter(
         val h = ((k % 360) + 360) % 360
         return h > 180 && h < 360
     }
+    /** Route colour: purple for the Lifeliners, police blue for Zulu (same as iOS and the website). */
+    val kleur: Long get() = if (isTrauma) 0xFF9333EA else 0xFF15428B
     val soortLabel get() = if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
     val hoogteMeter: Int? get() = if (opGrond) 0 else hoogteFt?.let { Math.round(it * 0.3048 / 10).toInt() * 10 }
     val snelheidKmh: Int? get() = snelheidKt?.let { Math.round(it * 1.852).toInt() }
@@ -239,6 +243,57 @@ data class Helikopter(
 
 @Serializable
 data class HeliResponse(val helikopters: List<Helikopter> = emptyList())
+
+/** Estimated position now: the last position moved on along speed and heading (at most 90 s, never on the ground). */
+fun Helikopter.geschat(nu: Long = System.currentTimeMillis()): Pair<Double, Double> {
+    val kt = snelheidKt ?: return lat to lon
+    val k = koers ?: return lat to lon
+    val t = parseInstant(gezien)?.toEpochMilli() ?: return lat to lon
+    if (opGrond || kt < 30) return lat to lon
+    val sec = ((nu - t) / 1000.0).coerceIn(0.0, 90.0)
+    val km = kt * 1.852 * sec / 3600.0
+    val r = Math.toRadians(k)
+    return (lat + km * Math.cos(r) / 111.32) to (lon + km * Math.sin(r) / (111.32 * Math.cos(Math.toRadians(lat))))
+}
+
+@Serializable
+data class HeliSpoorPunt(val t: String, val lat: Double, val lon: Double, @SerialName("hoogte_ft") val hoogteFt: Double? = null, val grond: Boolean = false)
+
+@Serializable
+data class HeliSpoor(val punten: List<HeliSpoorPunt> = emptyList())
+
+@Serializable
+data class HeliVlucht(
+    val start: String,
+    val einde: String? = null,
+    val onderweg: Boolean = false,
+    @SerialName("duur_min") val duurMin: Int = 0,
+    @SerialName("afstand_km") val afstandKm: Double = 0.0,
+    @SerialName("max_hoogte_ft") val maxHoogteFt: Double = 0.0,
+) {
+    val tekst: String get() {
+        val s = parseInstant(start)?.let { "${Fmt.shortDay(it)} ${Fmt.time(it)}" } ?: ""
+        val e = parseInstant(einde)?.let { Fmt.time(it) }
+        val tijd = if (onderweg || e == null) tr("$s – nog in de lucht", "$s – still in the air") else "$s – $e"
+        return "$tijd · $duurMin min · ${Fmt.km(afstandKm)}"
+    }
+}
+
+@Serializable
+data class HeliVluchten(val vluchten: List<HeliVlucht> = emptyList())
+
+/** Which part of the route to draw: this flight, the last 30 minutes or today. */
+enum class SpoorBereik(val key: String) {
+    VLUCHT("vlucht"), KORT("kort"), VANDAAG("vandaag");
+    val label get() = when (this) { VLUCHT -> tr("Deze vlucht", "This flight"); KORT -> "30 min"; VANDAAG -> tr("Vandaag", "Today") }
+}
+
+/** Route points thinned to at most [max] (first and last always kept), as (lat, lon). */
+fun List<HeliSpoorPunt>.lijn(max: Int = 400): List<Pair<Double, Double>> {
+    if (size <= max) return map { it.lat to it.lon }
+    val stap = size.toDouble() / max
+    return (0 until max).map { this[(it * stap).toInt()] }.plus(last()).map { it.lat to it.lon }
+}
 
 @Serializable
 data class AlertWeather(

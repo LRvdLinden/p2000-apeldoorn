@@ -38,7 +38,8 @@ data class MapPoint(
 )
 /** An area of rings of [lon, lat]. */
 data class MapArea(val id: String, val rings: List<List<List<Double>>>, val color: Long, val fill: Double = 0.18, val dashed: Boolean = false, val width: Double = 2.0)
-data class MapLine(val id: String, val points: List<Pair<Double, Double>>, val color: Long, val dashed: Boolean = true)
+/** A line: dashed (station or helicopter → alert) or solid (a helicopter's route). */
+data class MapLine(val id: String, val points: List<Pair<Double, Double>>, val color: Long, val dashed: Boolean = true, val width: Double = 3.5)
 
 /** What the camera should show: a point with zoom, or the bounds around a set of points. */
 data class MapCamera(val lat: Double, val lon: Double, val zoom: Double = 12.0, val fit: List<Pair<Double, Double>> = emptyList(), val key: Any? = null)
@@ -120,9 +121,12 @@ fun AMap(
                     fillColor(Expression.toColor(Expression.get("color"))), fillOpacity(Expression.get("fill"))))
                 s.addLayer(LineLayer("a-outline", "a-areas").withProperties(
                     lineColor(Expression.toColor(Expression.get("color"))), lineWidth(Expression.get("width")), lineOpacity(0.9f)))
+                s.addLayer(LineLayer("a-trail", "a-lines").withProperties(
+                    lineColor(Expression.toColor(Expression.get("color"))), lineWidth(Expression.get("width")), lineOpacity(0.85f),
+                    lineCap(Property.LINE_CAP_ROUND), lineJoin(Property.LINE_JOIN_ROUND)).withFilter(Expression.eq(Expression.get("dashed"), false)))
                 s.addLayer(LineLayer("a-routes", "a-lines").withProperties(
-                    lineColor(Expression.toColor(Expression.get("color"))), lineWidth(3.5f), lineDasharray(arrayOf(1.5f, 1.2f)),
-                    lineCap(Property.LINE_CAP_ROUND)))
+                    lineColor(Expression.toColor(Expression.get("color"))), lineWidth(Expression.get("width")), lineDasharray(arrayOf(1.5f, 1.2f)),
+                    lineCap(Property.LINE_CAP_ROUND)).withFilter(Expression.eq(Expression.get("dashed"), true)))
                 s.addLayer(SymbolLayer("a-points", "a-points").withProperties(
                     iconImage(Expression.get("icon")),
                     iconAllowOverlap(true), iconIgnorePlacement(true),
@@ -165,8 +169,10 @@ fun AMap(
                 }
             }
         }))
-        s.getSourceAs<GeoJsonSource>("a-lines")?.setGeoJson(FeatureCollection.fromFeatures(lines.map { l ->
-            Feature.fromGeometry(LineString.fromLngLats(l.points.map { Point.fromLngLat(it.second, it.first) })).apply { addStringProperty("color", hex(l.color)) }
+        s.getSourceAs<GeoJsonSource>("a-lines")?.setGeoJson(FeatureCollection.fromFeatures(lines.filter { it.points.size >= 2 }.map { l ->
+            Feature.fromGeometry(LineString.fromLngLats(l.points.map { Point.fromLngLat(it.second, it.first) })).apply {
+                addStringProperty("color", hex(l.color)); addBooleanProperty("dashed", l.dashed); addNumberProperty("width", l.width)
+            }
         }))
     }
 

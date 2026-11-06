@@ -1,6 +1,7 @@
 package nl.lrvdlinden.aalerts.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
@@ -48,6 +49,31 @@ fun MapScreen(nav: Nav) {
         if (KaartLaag.HELIKOPTERS.key !in lagen) return@LaunchedEffect
         while (true) { Store.refreshHelikopters(); delay(10_000) }
     }
+    // Smooth movement: between updates the helicopters fly on along speed and heading (like AirAssist/iOS).
+    var nu by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(KaartLaag.HELIKOPTERS.key in lagen) {
+        while (KaartLaag.HELIKOPTERS.key in Settings.kaartLagen) { delay(1_000); nu = System.currentTimeMillis() }
+    }
+    // Route of the last 30 minutes for every helicopter in the air (at most 6), refreshed every 30 s.
+    var sporen by remember { mutableStateOf<Map<String, List<HeliSpoorPunt>>>(emptyMap()) }
+    LaunchedEffect(KaartLaag.HELIKOPTERS.key in lagen) {
+        while (KaartLaag.HELIKOPTERS.key in Settings.kaartLagen) {
+            val lucht = Store.helikopters.filter { !it.opGrond }.take(6)
+            sporen = lucht.associate { it.id to Api.heliSpoor(it.id, SpoorBereik.KORT) }
+            delay(30_000)
+        }
+    }
+    // Selected helicopter: its route in the chosen range and its recent flights.
+    val selHeli = selected?.takeIf { it.startsWith("h:") }?.removePrefix("h:")
+    var bereik by remember { mutableStateOf(SpoorBereik.VLUCHT) }
+    var selSpoor by remember { mutableStateOf<List<HeliSpoorPunt>>(emptyList()) }
+    var selVluchten by remember { mutableStateOf<List<HeliVlucht>?>(null) }
+    LaunchedEffect(selHeli, bereik) {
+        selSpoor = emptyList()
+        val id = selHeli ?: return@LaunchedEffect
+        while (true) { selSpoor = Api.heliSpoor(id, bereik); delay(20_000) }
+    }
+    LaunchedEffect(selHeli) { selVluchten = null; selHeli?.let { selVluchten = Api.heliVluchten(it) } }
 
     val cutoff = System.currentTimeMillis() - periode * 3600_000L
     val meldingen = remember(Store.meldingen, periode, Settings.diensten, Settings.plaatsen, Settings.prioriteiten, Settings.radiusEnabled) {
@@ -64,7 +90,13 @@ fun MapScreen(nav: Nav) {
     }
     if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, 20, anchorBottom = false) } }
     if (KaartLaag.MELDINGEN.key in lagen) meldingen.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
-    if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h -> points += MapPoint("h:${h.id}", h.lat, h.lon, h.afbeelding, 70, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
+    val lines = mutableListOf<MapLine>()
+    if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h ->
+        val (la, lo) = h.geschat(nu)
+        points += MapPoint("h:${h.id}", la, lo, h.afbeelding, 70, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
+        val spoor = if (h.id == selHeli && selSpoor.isNotEmpty()) selSpoor else sporen[h.id].orEmpty()
+        if (spoor.isNotEmpty()) lines += MapLine("spoor:${h.id}", spoor.lijn() + (la to lo), h.kleur, dashed = false, width = if (h.id == selHeli) 4.5 else 3.0)
+    }
 
     val focusMelding = focus?.let { Store.melding(it) }
     // Following a helicopter: the camera moves along with every new position.
@@ -73,13 +105,13 @@ fun MapScreen(nav: Nav) {
         if (focus?.startsWith("h:") == true && KaartLaag.HELIKOPTERS.key !in Settings.kaartLagen) Settings.kaartLagen = Settings.kaartLagen + KaartLaag.HELIKOPTERS.key
     }
     val camera = when {
-        focusHeli != null -> MapCamera(focusHeli.lat, focusHeli.lon, 12.5, key = "${focusHeli.id}${focusHeli.lat}${focusHeli.lon}")
+        focusHeli != null -> MapCamera(focusHeli.lat, focusHeli.lon, 12.5, key = "${focusHeli.id}${focusHeli.gezien}")
         focusMelding?.hasCoordinate == true -> MapCamera(focusMelding.lat!!, focusMelding.lon!!, 15.0, key = focus)
         else -> APELDOORN
     }
 
     Box(Modifier.fillMaxSize()) {
-        AMap(Modifier.fillMaxSize(), points = points, areas = areas, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
+        AMap(Modifier.fillMaxSize(), points = points, areas = areas, lines = lines, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
 
         // Period and layers
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp)) {
@@ -113,7 +145,9 @@ fun MapScreen(nav: Nav) {
         Box(Modifier.align(Alignment.BottomCenter).padding(12.dp)) {
             when {
                 sel == null -> {}
-                sel.startsWith("h:") -> Store.helikopters.firstOrNull { it.id == sel.removePrefix("h:") }?.let { HeliCard(it) { selected = null } }
+                sel.startsWith("h:") -> Store.helikopters.firstOrNull { it.id == sel.removePrefix("h:") }?.let {
+                    HeliCard(it, bereik, { b -> bereik = b }, selVluchten) { selected = null }
+                }
                 sel.startsWith("w:") -> Store.waarschuwing(sel.removePrefix("w:"))?.let { w -> PreviewCard(onClose = { selected = null }) { WaarschuwingRow(w) { nav.waarschuwing(w.id) } } }
                 sel.startsWith("k:") -> Werkgebied.kazernes.firstOrNull { it.id == sel.removePrefix("k:") }?.let { k ->
                     PreviewCard(onClose = { selected = null }) {
@@ -149,8 +183,9 @@ private fun PreviewCard(onClose: () -> Unit, content: @Composable () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HeliCard(h: Helikopter, onClose: () -> Unit) {
+private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik) -> Unit, vluchten: List<HeliVlucht>?, onClose: () -> Unit) {
     PreviewCard(onClose) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -161,8 +196,25 @@ private fun HeliCard(h: Helikopter, onClose: () -> Unit) {
             InfoRow(tr("Hoogte", "Altitude"), if (h.opGrond) tr("Op de grond", "On the ground") else h.hoogteMeter?.let { "$it m" })
             InfoRow(tr("Snelheid", "Speed"), h.snelheidKmh?.let { "$it km/u" })
             InfoRow(tr("Koers", "Heading"), h.koersTekst)
-            InfoRow(tr("Registratie", "Registration"), h.registratie)
             InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) })
+            // Route on the map: this flight, the last 30 minutes or the whole day.
+            Text(tr("Routespoor", "Route"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                SpoorBereik.entries.forEachIndexed { i, b ->
+                    SegmentedButton(selected = bereik == b, onClick = { onBereik(b) }, shape = SegmentedButtonDefaults.itemShape(i, SpoorBereik.entries.size)) { Text(b.label, fontSize = 12.sp) }
+                }
+            }
+            Text(tr("Vluchten", "Flights"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+            when {
+                vluchten == null -> LinearProgressIndicator(Modifier.fillMaxWidth())
+                vluchten.isEmpty() -> Text(tr("Nog geen vluchten opgeslagen.", "No flights saved yet."), color = Muted, fontSize = 12.sp)
+                else -> vluchten.take(4).forEach { v ->
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(Modifier.size(8.dp).background(if (v.onderweg) androidx.compose.ui.graphics.Color(0xFF22C55E) else Muted, RoundedCornerShape(50)))
+                        Spacer(Modifier.width(8.dp)); Text(v.tekst, fontSize = 12.sp)
+                    }
+                }
+            }
         }
     }
 }
