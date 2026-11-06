@@ -39,6 +39,7 @@ jobs:
           xcrun simctl launch $D $BUNDLE -AppleLanguages "(nl)" -AppleLocale nl_NL -AAlertsScreenshots -AAlertsMelding $G -AAlertsScrollEnd YES
           sleep 30
           xcrun simctl io $D screenshot out/einde.png
+          echo "meteo-scroll: $(date)"
           xcrun simctl spawn $D log show --last 3m --style compact --predicate 'subsystem == "nl.lrvdlinden.p2000apeldoorn" OR eventMessage CONTAINS[c] "weather" OR eventMessage CONTAINS[c] "weatherkit"' > out/log.txt 2>&1 || true
           grep -iE "weer|weather" out/log.txt | head -60
       - name: Push

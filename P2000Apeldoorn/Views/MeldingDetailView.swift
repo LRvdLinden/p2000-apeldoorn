@@ -125,7 +125,7 @@ struct MeldingDetailView: View {
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }
-                    if let meteo { meteoCard(meteo) }
+                    if let meteo { meteoCard(meteo).id("meteo") }
                     dataCard
                     footer.id("einde")
                 }
@@ -139,7 +139,7 @@ struct MeldingDetailView: View {
             // Screenshots/diagnosis: -AAlertsScrollEnd YES scrolls to the end of the page.
             guard UserDefaults.standard.bool(forKey: "AAlertsScrollEnd") else { return }
             try? await Task.sleep(for: .seconds(14))
-            withAnimation { proxy.scrollTo("einde", anchor: .bottom) }
+            withAnimation { proxy.scrollTo(meteo == nil ? "einde" : "meteo", anchor: .center) }
         }
         #endif
         }
