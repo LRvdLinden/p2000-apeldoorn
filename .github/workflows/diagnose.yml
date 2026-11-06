@@ -18,6 +18,8 @@ jobs:
       - run: npm ci
       - run: |
           set +e
+          ID=$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const i=s.indexOf("[");const d=JSON.parse(s.slice(i)).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")}catch{console.log("")}})')
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
           q() { npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const i=s.indexOf("[");console.log(JSON.stringify(JSON.parse(s.slice(i))[0].results,null,0))}catch(e){console.log(s.slice(0,800))}})'; }
           echo "== warnings_status"; q "SELECT key, value, at FROM kv WHERE key IN ('warnings_status','bronnen_status') OR key LIKE 'bron%'"
           echo "== laatste waarschuwingen"; q "SELECT id, bron, status, plaats, titel, start_at, end_at FROM waarschuwingen ORDER BY start_at DESC LIMIT 15"
