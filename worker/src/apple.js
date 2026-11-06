@@ -1,3 +1,4 @@
+import { isFcmToken, sendFcm, isDeadFcm } from "./fcm.js";
 // Apple services from the Worker, using WebCrypto (ES256) and fetch:
 //  - APNs pushmeldingen
 //  - MapKit JS tokens for the website map
@@ -53,6 +54,8 @@ export const apnsConfigured = (env) => hasKey(env.APN_KEY_ID, env.APN_TEAM_ID, e
 
 /** Resolves to { ok, status, reason }. */
 export async function sendPush(env, device, payload, { urgent = false, collapseId, topic } = {}) {
+  // Android (A-Alerts APK): same payload, sent through Firebase Cloud Messaging.
+  if (isFcmToken(device.token)) return sendFcm(env, device.token, payload, { urgent, collapseId });
   if (!apnsConfigured(env)) return { ok: false, status: 0, reason: "APNs not configured" };
   const host = device.environment === "sandbox" ? "https://api.sandbox.push.apple.com" : "https://api.push.apple.com";
   try {
@@ -77,7 +80,7 @@ export async function sendPush(env, device, payload, { urgent = false, collapseI
   }
 }
 
-export const isDeadToken = (r) => r.status === 410 || ["BadDeviceToken", "Unregistered", "DeviceTokenNotForTopic"].includes(r.reason);
+export const isDeadToken = (r) => r.fcm ? isDeadFcm(r) : r.status === 410 || ["BadDeviceToken", "Unregistered", "DeviceTokenNotForTopic"].includes(r.reason);
 
 // ------------------------------------------------------------------ MapKit JS
 

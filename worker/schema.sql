@@ -123,3 +123,8 @@ CREATE TABLE IF NOT EXISTS device_prefs (token TEXT PRIMARY KEY, data TEXT NOT N
 CREATE TABLE IF NOT EXISTS waarschuwing_overrides (id TEXT PRIMARY KEY, hidden INTEGER NOT NULL DEFAULT 0, ended_at INTEGER, updated_at INTEGER);
 -- Beheer devices: switch for outage pushes of NL-Alert, Burgernet and KNMI (no row = on).
 CREATE TABLE IF NOT EXISTS admin_prefs (token TEXT PRIMARY KEY, bronnen INTEGER NOT NULL DEFAULT 1, updated_at INTEGER);
+-- A-Alerts Android: APK downloads from a-alerts.nl, once per anonymous visitor per day and version.
+CREATE TABLE IF NOT EXISTS downloads (
+  day TEXT NOT NULL, app TEXT NOT NULL, version TEXT NOT NULL, visitor TEXT NOT NULL, at INTEGER NOT NULL,
+  PRIMARY KEY (day, app, version, visitor)
+);

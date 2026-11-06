@@ -1,0 +1,11 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+.kotlin/
+# Secrets: never in the (public) repo.
+app/google-services.json
+*.jks
+*.keystore
+keystore.properties

@@ -70,7 +70,7 @@ export async function requireAdmin(env, req) {
 
 // ------------------------------------------------------------------ anonymous counters (public)
 
-const PLATFORMS = new Set(["ios", "ipados", "macos", "watchos", "tvos", "visionos"]);
+const PLATFORMS = new Set(["ios", "ipados", "macos", "watchos", "tvos", "visionos", "android"]);
 const str = (v, n) => (typeof v === "string" && v ? v.slice(0, n) : null);
 
 /** App ping: one row per install (random UUID), updated at most a few times a day. */
@@ -94,10 +94,10 @@ export async function recordInstall(env, body) {
 const BOT = /bot|crawl|spider|slurp|preview|facebookexternalhit|headless|lighthouse|monitor|curl|wget|python|node-fetch/i;
 
 /** Website visit without cookies: SHA-256(daily random salt + IP + user agent). The salt is deleted the next day. */
-export async function recordVisit(env, req, body) {
+/** Anonymous visitor key for today (or null for bots): SHA-256(daily salt + IP + user agent), 22 characters. */
+async function visitorKey(env, req, day) {
   const ua = req.headers.get("user-agent") || "";
-  if (!ua || BOT.test(ua)) return;
-  const day = dayKey();
+  if (!ua || BOT.test(ua)) return null;
   let salt = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(`visit_salt:${day}`).first();
   if (!salt) {
     const value = b64url(crypto.getRandomValues(new Uint8Array(24)));
@@ -105,7 +105,14 @@ export async function recordVisit(env, req, body) {
     salt = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(`visit_salt:${day}`).first();
   }
   const ip = req.headers.get("cf-connecting-ip") || "";
-  const visitor = b64url(await crypto.subtle.digest("SHA-256", enc.encode(`${salt.value}|${ip}|${ua}`))).slice(0, 22);
+  return b64url(await crypto.subtle.digest("SHA-256", enc.encode(`${salt.value}|${ip}|${ua}`))).slice(0, 22);
+}
+
+export async function recordVisit(env, req, body) {
+  const day = dayKey();
+  const visitor = await visitorKey(env, req, day);
+  if (!visitor) return;
+  const ua = req.headers.get("user-agent") || "";
   const device = /iPad|Tablet/i.test(ua) ? "tablet" : /Mobi|iPhone|Android/i.test(ua) ? "mobiel" : "desktop";
   let path = String(body.path || "/").split("?")[0].slice(0, 80);
   if (/^\/(p2000-apeldoorn\/)?(pager|melding)/.test(path)) path = "/pager/";
@@ -118,6 +125,45 @@ export async function recordVisit(env, req, body) {
     env.DB.prepare(`INSERT INTO pageviews (day, path, n) VALUES (?, ?, 1)
       ON CONFLICT(day, path) DO UPDATE SET n = n + 1`).bind(day, path),
   ]);
+}
+
+/**
+ * A-Alerts APK downloaded from a-alerts.nl (button "Download APK"). Counted once per visitor per day and version,
+ * without cookies (same anonymous key as the visits).
+ */
+export async function recordDownload(env, req, body) {
+  const day = dayKey();
+  const visitor = await visitorKey(env, req, day);
+  if (!visitor) return false;
+  const app = body.app === "android" ? "android" : null;
+  if (!app) throw new HttpError(400, "Unknown app");
+  const version = /^[\w.\- ()]{1,24}$/.test(String(body.version || "")) ? String(body.version) : "onbekend";
+  await env.DB.prepare("INSERT OR IGNORE INTO downloads (day, app, version, visitor, at) VALUES (?, ?, ?, ?, ?)")
+    .bind(day, app, version, visitor, Date.now()).run();
+  return true;
+}
+
+/** Downloads of the Android APK for the beheer: total, last 30 days, per day and per version. */
+export async function downloadStats(env) {
+  const [tot, perDay, perVersion, devices] = await Promise.all([
+    env.DB.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN day >= ? THEN 1 ELSE 0 END) AS d30, SUM(CASE WHEN day = ? THEN 1 ELSE 0 END) AS vandaag FROM downloads WHERE app = 'android'")
+      .bind(daysAgo(29), dayKey()).first(),
+    rows(env, "SELECT day, COUNT(*) AS n FROM downloads WHERE app = 'android' AND day >= ? GROUP BY day", daysAgo(29)),
+    rows(env, "SELECT version, COUNT(*) AS n, MAX(day) AS laatst FROM downloads WHERE app = 'android' GROUP BY version ORDER BY laatst DESC, n DESC LIMIT 10"),
+    count(env, "SELECT COUNT(*) AS n FROM devices WHERE enabled = 1 AND platform = 'android'"),
+  ]);
+  const installs = await env.DB.prepare("SELECT COUNT(*) AS n, SUM(CASE WHEN last_seen > ? THEN 1 ELSE 0 END) AS actief FROM installs WHERE platform = 'android'")
+    .bind(Date.now() - 30 * 86_400_000).first();
+  return {
+    totaal: Number(tot?.n || 0),
+    dagen30: Number(tot?.d30 || 0),
+    vandaag: Number(tot?.vandaag || 0),
+    perDag: series(30, perDay),
+    perVersie: perVersion.map((r) => ({ version: r.version, n: r.n, laatst: r.laatst })),
+    installaties: Number(installs?.n || 0),
+    actief: Number(installs?.actief || 0),
+    pushToestellen: devices,
+  };
 }
 
 // ------------------------------------------------------------------ overview

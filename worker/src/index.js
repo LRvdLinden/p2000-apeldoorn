@@ -14,6 +14,7 @@ import {
 import {
   login, requireAdmin, beheerConfigured, recordInstall, recordVisit, overview, adminMeldingen, updateMelding, broadcast,
   broadcastHistory, contentFor, saveContent, CONTENT_NAMES, registerAdminDevice, pushAdmins, checkOutage, adminHousekeeping,
+  recordDownload, downloadStats,
 } from "./admin.js";
 import privacy from "../content/privacy.json";
 import terms from "../content/terms.json";
@@ -27,9 +28,15 @@ import {
 import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
+import { fcmConfigured } from "./fcm.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog };
+/** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
+const deviceKey = (s) => {
+  const t = decodeURIComponent(s);
+  return /^fcm:/i.test(t) ? `fcm:${t.slice(4)}` : t.toLowerCase();
+};
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const listCache = new Map();
 
@@ -76,7 +83,7 @@ async function handle(req, env) {
       backfill: (await kvGet(env, "backfill_status"))?.value || null,
       backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
-      apns: apnsConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
+      apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
       devices: await deviceCount(env),
       waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
     });
@@ -147,6 +154,11 @@ async function handle(req, env) {
     await recordInstall(env, await readJSON(req));
     return reply(200, { ok: true });
   }
+  // A-Alerts APK downloaded from a-alerts.nl (sendBeacon from the download button).
+  if (method === "POST" && path === "/v1/downloads") {
+    await recordDownload(env, req, await readJSON(req));
+    return reply(200, { ok: true });
+  }
   if (method === "POST" && path === "/v1/visit") {
     await recordVisit(env, req, await readJSON(req));
     return reply(200, { ok: true });
@@ -161,11 +173,12 @@ async function handle(req, env) {
     if (w || profielen) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }), ...(profielen ? { profielen } : {}) });
     return reply(200, { ok: true });
   }
-  m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200})$/);
-  if (method === "DELETE" && m) return reply(200, { ok: await deleteDevice(env, m[1]) });
-  m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200})\/test$/);
+  // APNs token (hex) or Android token ("fcm:<token>", URL-encoded by the app).
+  m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200}|fcm(?::|%3A)[A-Za-z0-9_:%-]{100,420})$/i);
+  if (method === "DELETE" && m) return reply(200, { ok: await deleteDevice(env, deviceKey(m[1])) });
+  m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200}|fcm(?::|%3A)[A-Za-z0-9_:%-]{100,420})\/test$/i);
   if (method === "POST" && m) {
-    const device = await getDevice(env, m[1]);
+    const device = await getDevice(env, deviceKey(m[1]));
     if (!device) return reply(404, { error: "Unknown device" });
     const nl = (device.language || "nl").startsWith("nl");
     const r = await sendPush(env, device, {
@@ -188,7 +201,7 @@ async function statusInfo(env) {
   return {
     feed: { lastOk: ok ? new Date(Number(ok)).toISOString() : null, lastError: await get("feed_error") },
     cron: cron ? new Date(Number(cron)).toISOString() : null,
-    apns: apnsConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
+    apns: apnsConfigured(env), fcm: fcmConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
     meldingenInDatabase: await meldingCount(env),
     outbox: (await env.DB.prepare("SELECT COUNT(*) AS n FROM outbox").first()).n,
     beheerApparaten: (await env.DB.prepare("SELECT COUNT(*) AS n FROM admin_devices").first()).n,
@@ -202,9 +215,10 @@ async function handleBeheer(req, env, url, path, method) {
   const admin = await requireAdmin(env, req);
   if (method === "GET" && path === "/v1/beheer/me") return reply(200, { user: admin.u, expires: new Date(admin.exp).toISOString() });
   if (method === "GET" && path === "/v1/beheer/overview") {
-    const [base, aAlerts] = await Promise.all([overview(env, await statusInfo(env)), alertsOverview(env)]);
-    return reply(200, { ...base, aAlerts });
+    const [base, aAlerts, android] = await Promise.all([overview(env, await statusInfo(env)), alertsOverview(env), downloadStats(env)]);
+    return reply(200, { ...base, aAlerts, android });
   }
+  if (method === "GET" && path === "/v1/beheer/downloads") return reply(200, await downloadStats(env));
   // A-Alerts: NL-Alert, Burgernet and KNMI in the beheer.
   if (method === "GET" && path === "/v1/beheer/waarschuwingen") return reply(200, await adminWarnings(env, url));
   let w = path.match(/^\/v1\/beheer\/waarschuwingen\/([\w:.\-%+]{4,160})$/);

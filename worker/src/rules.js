@@ -1,3 +1,4 @@
+import { FCM_PREFIX, validFcmToken } from "./fcm.js";
 // Pure logic shared by the Worker and the tests: parsing the p2000.page feed, categories,
 // matching push settings and building notification payloads. No I/O in this file.
 
@@ -209,15 +210,19 @@ const strList = (v, max = 40) => (Array.isArray(v) ? v.filter((x) => typeof x ==
 const num = (v, min, max) => (typeof v === "number" && Number.isFinite(v) && v >= min && v <= max ? v : null);
 
 export function deviceFrom(body) {
-  const token = String(body.token || "").toLowerCase();
-  if (!/^[0-9a-f]{64,200}$/.test(token)) throw new HttpError(400, "Invalid token");
+  // Android (A-Alerts APK) sends its FCM token; it is stored as "fcm:<token>" and keeps its case.
+  const android = body.platform === "android";
+  const raw = String(body.token || "");
+  if (android && !validFcmToken(raw)) throw new HttpError(400, "Invalid token");
+  const token = android ? FCM_PREFIX + raw : raw.toLowerCase();
+  if (!android && !/^[0-9a-f]{64,200}$/.test(token)) throw new HttpError(400, "Invalid token");
   const s = body.settings || {};
   const radius = num(s.radius_km, 0.5, 100);
   const lat = num(s.lat, -90, 90), lon = num(s.lon, -180, 180);
   return {
     token,
-    platform: body.platform === "macos" ? "macos" : "ios",
-    environment: body.environment === "sandbox" ? "sandbox" : "production",
+    platform: android ? "android" : body.platform === "macos" ? "macos" : "ios",
+    environment: android ? "fcm" : body.environment === "sandbox" ? "sandbox" : "production",
     language: typeof body.language === "string" ? body.language.slice(0, 8) : "nl",
     app_version: typeof body.app_version === "string" ? body.app_version.slice(0, 32) : null,
     enabled: s.enabled !== false,
