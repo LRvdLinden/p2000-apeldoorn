@@ -9,7 +9,7 @@ const DIENST = {
   brandweer: [icon("brandweer", "Brandweer"), "Brandweer", "#E30613"], ambulance: [icon("ambulance", "Ambulance"), "Ambulance", "#F4C400"],
   politie: [icon("politie", "Politie"), "Politie", "#15428B"], traumaheli: [icon("traumaheli", "Traumaheli"), "Traumaheli", "#9333EA"],
 };
-const PLATFORM = { ios: ["iPhone", "#DC2626"], ipados: ["iPad", "#f97316"], macos: ["Mac", "#3b82f6"], watchos: ["Apple Watch", "#22c55e"], tvos: ["Apple TV", "#9333EA"] };
+const PLATFORM = { ios: ["iPhone", "#DC2626"], ipados: ["iPad", "#f97316"], macos: ["Mac", "#3b82f6"], watchos: ["Apple Watch", "#22c55e"], tvos: ["Apple TV", "#9333EA"], android: ["Android", "#14b8a6"] };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -158,7 +158,7 @@ async function dashboard(el) {
   const fresh = (iso) => iso && Date.now() - Date.parse(iso) < 5 * 60_000;
   const status = (ok, title, detail) => `<div class="row"><span class="${ok ? "ok" : "warn"}">${ok ? "●" : "▲"}</span><div class="grow"><b>${esc(title)}</b><br><small>${esc(detail)}</small></div></div>`;
   const pct = a.actief ? Math.round((a.appleLogin.ja / a.actief) * 100) : 0;
-  const pages = { "/": "Homepage", "/pager/": "Live pager", "/info/": "Privacy / voorwaarden", "/melding/": "Oude meldinglinks" };
+  const pages = { "/": "Homepage", "/pager/": "Live pager", "/android/": "Android-download", "/info/": "Privacy / voorwaarden", "/melding/": "Oude meldinglinks" };
 
   el.innerHTML = `
   <div class="kpis">
@@ -173,6 +173,7 @@ async function dashboard(el) {
       ${status(fresh(s.feed.lastOk), "P2000-feed", s.feed.lastError || `laatst gelezen ${ago(s.feed.lastOk)}`)}
       ${status(fresh(s.cron), "Cron (elke minuut)", ago(s.cron))}
       ${status(s.apns, "Pushmeldingen (APNs)", s.apns ? "sleutel actief" : "sleutel ontbreekt")}
+      ${s.fcm === undefined ? "" : status(s.fcm, "Android-push (Firebase)", s.fcm ? "serviceaccount actief" : "FCM_SERVICE_ACCOUNT ontbreekt")}
       ${status(s.weatherkit, "WeatherKit", s.weatherkit ? "actief" : "niet ingesteld")}
       ${status(s.mapkit && s.mapsServer, "Apple Maps", `MapKit JS ${s.mapkit ? "✓" : "✗"} · Server API ${s.mapsServer ? "✓" : "✗"}`)}
       <p class="muted" style="font-size:.8rem;margin:8px 0 0">${s.meldingenInDatabase} meldingen in de database${s.outbox ? ` · ${s.outbox} pushes in de wachtrij` : ""}</p>
@@ -213,7 +214,25 @@ async function dashboard(el) {
     <div class="card"><h2>Meest bekeken meldingen</h2>
       ${d.topBekeken.length ? d.topBekeken.map((t) => `<div class="row"><span>${(DIENST[t.dienst] || ["🔔"])[0]}</span><div class="grow"><b style="font-weight:600">${esc(t.title)}</b><br><small>${ago(t.datum_tijd)}</small></div><small>👁 ${t.views}</small></div>`).join("") : `<p class="muted">Nog geen views</p>`}
     </div>
+    ${d.android ? androidCard(d.android) : ""}
     ${d.aAlerts ? aAlertsCards(d.aAlerts, status) : ""}
+  </div>`;
+}
+
+// ------------------------------------------------------------------ Android-app (APK-downloads van a-alerts.nl)
+
+function androidCard(a) {
+  return `<div class="card"><h2>Android-app · downloads</h2>
+    <div class="row" style="gap:18px">
+      <div><b style="font-size:1.6rem">${a.totaal}</b><br><small>Totaal</small></div>
+      <div><b style="font-size:1.6rem">${a.dagen30}</b><br><small>30 dagen</small></div>
+      <div><b style="font-size:1.6rem">${a.vandaag}</b><br><small>Vandaag</small></div>
+    </div>
+    ${a.perDag.some((x) => x.n) ? bars(a.perDag, "n", "#14b8a6") : `<p class="muted">Nog geen downloads in de laatste 30 dagen</p>`}
+    ${a.perVersie.map((v) => `<div class="row"><span class="grow">${esc(v.version)}</span><b>${v.n}×</b></div>`).join("")}
+    <div class="row"><span class="dot" style="background:#14b8a6"></span><span class="grow">Android-installaties (actief 30 dagen)</span><b>${a.actief}</b></div>
+    <div class="row"><span class="dot" style="background:#22c55e"></span><span class="grow">Android-toestellen met push</span><b>${a.pushToestellen}</b></div>
+    <p class="muted" style="font-size:.75rem;margin:6px 0 0">Een download telt één keer per apparaat per dag, zonder cookies.</p>
   </div>`;
 }
 

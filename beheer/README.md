@@ -16,6 +16,7 @@ Beide praten met het beheerdeel van de API (Cloudflare Worker in `../worker`), a
 - **Teksten:** privacyverklaring, cookies, voorwaarden, disclaimer en changelog bewerken (direct live in app en website).
 - **Waarschuwingen (A-Alerts):** NL-Alert, Burgernet en KNMI zoeken en filteren, verbergen in apps en website, of handmatig beëindigen (brongegevens blijven ongewijzigd).
 - **Dashboard (A-Alerts):** status van NL-Alert, Burgernet, KNMI en adsb.lol, helikopters in de lucht, waarschuwingen per bron en het gebruik van de notificatieprofielen.
+- **Android-app:** downloads van de APK op a-alerts.nl/android/ (totaal, 30 dagen, vandaag, per dag en per versie), Android-installaties, toestellen met push en de status van Firebase-push.
 - **App:** Face ID / Touch ID, en een pushmelding bij storingen van de P2000-feed (> 10 min) en, met de schakelaar *Storing bronnen*, van NL-Alert, Burgernet of KNMI (> 30 min).
 
 ## App bouwen
