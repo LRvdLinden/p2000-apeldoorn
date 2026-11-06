@@ -68,70 +68,13 @@ struct MapScreen: View {
             let groups = layout
             let ws = zichtbareWaarschuwingen
             Map(position: $position) {
-                if settings.laag(.werkgebied) {
-                    ForEach(Array(Werkgebied.shared.gemeente.gebied.enumerated()), id: \.offset) { _, ring in
-                        MapPolyline(coordinates: (ring + ring.prefix(1)).compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[1], longitude: $0[0]) : nil })
-                            .stroke(Theme.red.opacity(0.75), style: StrokeStyle(lineWidth: 2.5, dash: [10, 6]))
-                    }
-                }
-                ForEach(ws) { w in
-                    ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
-                        MapPolygon(coordinates: ring)
-                            .foregroundStyle(w.color.opacity(w.bron == .knmi ? 0.16 : 0.22))
-                            .stroke(w.bron == .nlalert ? Color.orange : w.color, lineWidth: 2)
-                    }
-                }
-                if settings.laag(.kazernes) {
-                    ForEach(Kazernes.all) { k in
-                        Annotation(k.naam, coordinate: k.coordinate, anchor: .center) {
-                            KazerneIcon(soort: k.soort, size: selectedKazerne?.id == k.id ? 30 : 24)
-                                .onTapGesture { withAnimation { selectedKazerne = k; selected = nil; selectedHeli = nil } }
-                                .accessibilityAddTraits(.isButton)
-                                .accessibilityLabel("\(k.soortLabel) \(k.naam)")
-                        }
-                        .annotationTitles(.hidden)
-                    }
-                }
-                ForEach(groups.clusters) { cluster in
-                    Annotation(cluster.plaats, coordinate: cluster.coordinate, anchor: .bottom) {
-                        ClusterMarker(cluster: cluster, selected: selectedCluster?.id == cluster.id)
-                            .onTapGesture { selected = nil; selectedCluster = cluster }
-                            .accessibilityAddTraits(.isButton)
-                    }
-                    .annotationTitles(.hidden)
-                }
-                ForEach(groups.pins) { pin in
-                    Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
-                        DienstMarker(dienst: pin.melding.dienst, size: 44, selected: selected?.guid == pin.melding.guid)
-                            .onTapGesture { withAnimation { selected = pin.melding; selectedHeli = nil; selectedKazerne = nil } }
-                            .accessibilityAddTraits(.isButton)
-                    }
-                    .annotationTitles(.hidden)
-                }
-                ForEach(ws.filter { $0.bron != .knmi && $0.coordinate != nil }) { w in
-                    Annotation(w.kop, coordinate: w.coordinate ?? CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon), anchor: .bottom) {
-                        WaarschuwingMarker(waarschuwing: w, size: 44)
-                            .opacity(w.isBeeindigd ? 0.6 : 1)
-                            .onTapGesture { openedWaarschuwing = WaarschuwingRef(id: w.id) }
-                            .accessibilityAddTraits(.isButton)
-                    }
-                    .annotationTitles(.hidden)
-                }
-                if settings.radiusActive, let c = settings.radiusCenter {
-                    MapCircle(center: CLLocationCoordinate2D(latitude: c.lat, longitude: c.lon), radius: settings.radiusKm * 1000)
-                        .foregroundStyle(Theme.red.opacity(0.08))
-                        .stroke(Theme.red, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
-                }
-                if settings.laag(.helikopters) {
-                    ForEach(helis.items) { h in
-                        Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
-                            HeliMarker(heli: h, selected: selectedHeli == h.id)
-                                .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
-                                .accessibilityAddTraits(.isButton)
-                        }
-                        .annotationTitles(.hidden)
-                    }
-                }
+                werkgebiedLaag
+                gebiedenLaag(ws)
+                kazernesLaag
+                meldingenLaag(groups)
+                waarschuwingMarkers(ws)
+                radiusLaag
+                helikoptersLaag
                 UserAnnotation()
             }
             .mapStyle(MapStyleSetting.style(for: settings.mapType))
@@ -141,20 +84,7 @@ struct MapScreen: View {
                 MapUserLocationButton()
             }
             .safeAreaInset(edge: .top) { controls }
-            .safeAreaInset(edge: .bottom) {
-                Group {
-                    if let selected {
-                        MapPreviewCard(melding: selected) { self.selected = nil }
-                    } else if let heli {
-                        HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon)) { selectedHeli = nil }
-                    } else if let k = selectedKazerne {
-                        KazerneKaart(kazerne: k) { selectedKazerne = nil }
-                    }
-                }
-                .padding(.horizontal)
-                .padding(.bottom, 8)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-            }
+            .safeAreaInset(edge: .bottom) { onderkaart }
             .sheet(item: $selectedCluster) { cluster in
                 ClusterSheet(cluster: cluster)
                     .presentationDetents([.medium, .large])
@@ -200,6 +130,116 @@ struct MapScreen: View {
                 if on { helis.start() } else { helis.stop(); selectedHeli = nil }
             }
         }
+    }
+
+    // MARK: Map layers (split up so the compiler can type-check them)
+
+    /// A ring of [lon, lat] as a closed line.
+    private static func gesloten(_ ring: [[Double]]) -> [CLLocationCoordinate2D] {
+        var coords: [CLLocationCoordinate2D] = []
+        for p in ring where p.count == 2 { coords.append(CLLocationCoordinate2D(latitude: p[1], longitude: p[0])) }
+        if let first = coords.first { coords.append(first) }
+        return coords
+    }
+
+    @MapContentBuilder private var werkgebiedLaag: some MapContent {
+        if settings.laag(.werkgebied) {
+            ForEach(Array(Werkgebied.shared.gemeente.gebied.enumerated()), id: \.offset) { _, ring in
+                MapPolyline(coordinates: Self.gesloten(ring))
+                    .stroke(Theme.red.opacity(0.75), style: StrokeStyle(lineWidth: 2.5, dash: [10, 6]))
+            }
+        }
+    }
+
+    @MapContentBuilder private func gebiedenLaag(_ ws: [Waarschuwing]) -> some MapContent {
+        ForEach(ws) { w in
+            ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
+                MapPolygon(coordinates: ring)
+                    .foregroundStyle(w.color.opacity(w.bron == .knmi ? 0.16 : 0.22))
+                    .stroke(w.bron == .nlalert ? Color.orange : w.color, lineWidth: 2)
+            }
+        }
+    }
+
+    @MapContentBuilder private var kazernesLaag: some MapContent {
+        if settings.laag(.kazernes) {
+            ForEach(Kazernes.all) { k in
+                Annotation(k.naam, coordinate: k.coordinate, anchor: .center) {
+                    KazerneIcon(soort: k.soort, size: selectedKazerne?.id == k.id ? 30 : 24)
+                        .onTapGesture { withAnimation { selectedKazerne = k; selected = nil; selectedHeli = nil } }
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityLabel("\(k.soortLabel) \(k.naam)")
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+    }
+
+    @MapContentBuilder private func meldingenLaag(_ groups: (pins: [MapPin], clusters: [PlaatsCluster])) -> some MapContent {
+        ForEach(groups.clusters) { cluster in
+            Annotation(cluster.plaats, coordinate: cluster.coordinate, anchor: .bottom) {
+                ClusterMarker(cluster: cluster, selected: selectedCluster?.id == cluster.id)
+                    .onTapGesture { selected = nil; selectedCluster = cluster }
+                    .accessibilityAddTraits(.isButton)
+            }
+            .annotationTitles(.hidden)
+        }
+        ForEach(groups.pins) { pin in
+            Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
+                DienstMarker(dienst: pin.melding.dienst, size: 44, selected: selected?.guid == pin.melding.guid)
+                    .onTapGesture { withAnimation { selected = pin.melding; selectedHeli = nil; selectedKazerne = nil } }
+                    .accessibilityAddTraits(.isButton)
+            }
+            .annotationTitles(.hidden)
+        }
+    }
+
+    @MapContentBuilder private func waarschuwingMarkers(_ ws: [Waarschuwing]) -> some MapContent {
+        ForEach(ws.filter { $0.bron != .knmi && $0.coordinate != nil }) { w in
+            Annotation(w.kop, coordinate: w.coordinate ?? CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon), anchor: .bottom) {
+                WaarschuwingMarker(waarschuwing: w, size: 44)
+                    .opacity(w.isBeeindigd ? 0.6 : 1)
+                    .onTapGesture { openedWaarschuwing = WaarschuwingRef(id: w.id) }
+                    .accessibilityAddTraits(.isButton)
+            }
+            .annotationTitles(.hidden)
+        }
+    }
+
+    @MapContentBuilder private var radiusLaag: some MapContent {
+        if settings.radiusActive, let c = settings.radiusCenter {
+            MapCircle(center: CLLocationCoordinate2D(latitude: c.lat, longitude: c.lon), radius: settings.radiusKm * 1000)
+                .foregroundStyle(Theme.red.opacity(0.08))
+                .stroke(Theme.red, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+        }
+    }
+
+    @MapContentBuilder private var helikoptersLaag: some MapContent {
+        if settings.laag(.helikopters) {
+            ForEach(helis.items) { h in
+                Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                    HeliMarker(heli: h, selected: selectedHeli == h.id)
+                        .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
+                        .accessibilityAddTraits(.isButton)
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+    }
+
+    private var onderkaart: some View {
+        Group {
+            if let selected {
+                MapPreviewCard(melding: selected) { self.selected = nil }
+            } else if let heli {
+                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon)) { selectedHeli = nil }
+            } else if let k = selectedKazerne {
+                KazerneKaart(kazerne: k) { selectedKazerne = nil }
+            }
+        }
+        .padding(.horizontal)
+        .padding(.bottom, 8)
+        .transition(.move(edge: .bottom).combined(with: .opacity))
     }
 
     private func afstand(_ lat: Double, _ lon: Double) -> Double? {

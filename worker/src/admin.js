@@ -12,6 +12,8 @@ const b64url = (buf) => {
 const fromB64url = (s) => atob(s.replace(/-/g, "+").replace(/_/g, "/"));
 
 export const BEHEER_TOPIC = "nl.lrvdlinden.p2000beheer";
+/** LRbeheer (centrale beheer-app) registreert zich via dezelfde route; zijn token hoort bij dit topic. */
+export const LRBEHEER_TOPIC = "app.lrvdlinden.lrbeheer";
 export const dayKey = (d = new Date()) => d.toLocaleDateString("en-CA", { timeZone: TIME_ZONE });
 const daysAgo = (n) => dayKey(new Date(Date.now() - n * 86_400_000));
 
@@ -291,11 +293,17 @@ export async function registerAdminDevice(env, body) {
     .bind(token, body.environment === "sandbox" ? "sandbox" : "production", body.platform === "macos" ? "macos" : "ios", now, now).run();
 }
 
-export async function pushAdmins(env, title, body) {
-  const list = await rows(env, "SELECT * FROM admin_devices");
+export async function pushAdmins(env, title, body, { kind } = {}) {
+  // kind "bronnen": only devices that did not switch off "Storing bronnen".
+  const list = kind === "bronnen"
+    ? await rows(env, "SELECT a.* FROM admin_devices a LEFT JOIN admin_prefs p ON p.token = a.token WHERE COALESCE(p.bronnen, 1) = 1")
+    : await rows(env, "SELECT * FROM admin_devices");
   let sent = 0;
   for (const d of list) {
-    const r = await sendPush(env, d, { aps: { alert: { title, body }, sound: "default" } }, { topic: BEHEER_TOPIC });
+    let r = await sendPush(env, d, { aps: { alert: { title, body }, sound: "default" } }, { topic: BEHEER_TOPIC });
+    if (!r.ok && r.reason === "DeviceTokenNotForTopic") {
+      r = await sendPush(env, d, { aps: { alert: { title, body }, sound: "default" }, lrenv: "p2000" }, { topic: env.LRBEHEER_TOPIC || LRBEHEER_TOPIC });
+    }
     if (r.ok) sent++;
     else if (isDeadToken(r)) await env.DB.prepare("DELETE FROM admin_devices WHERE token = ?").bind(d.token).run();
   }

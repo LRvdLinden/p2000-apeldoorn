@@ -211,16 +211,21 @@ export function toAPI(row, { withArea = true } = {}) {
   };
 }
 
+// Beheer can hide a warning or end it by hand (table waarschuwing_overrides).
+const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended FROM waarschuwingen w
+  LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
+const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { ...row, status: "beeindigd", end_at: Math.min(row.end_at || row.ov_ended, row.ov_ended) } : row);
+
 export async function listWarnings(env, days = 7) {
   const since = Date.now() - Math.min(Number(days) || 7, 14) * DAY;
   const { results } = await env.DB.prepare(
-    "SELECT * FROM waarschuwingen WHERE COALESCE(end_at, start_at) >= ? OR status != 'beeindigd' ORDER BY start_at DESC LIMIT 200",
+    `${PUBLIC_SELECT} AND (COALESCE(w.end_at, w.start_at) >= ? OR w.status != 'beeindigd') ORDER BY w.start_at DESC LIMIT 200`,
   ).bind(since).all();
-  return results.map((r) => toAPI(r));
+  return results.map((r) => toAPI(withOverride(r)));
 }
 
 export async function getWarning(env, id) {
-  return toAPI(await env.DB.prepare("SELECT * FROM waarschuwingen WHERE id = ?").bind(id).first());
+  return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first()));
 }
 
 /** P2000 alerts in the warning's area (or place) around its time. Never presented as a confirmed link. */

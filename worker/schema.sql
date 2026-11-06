@@ -119,3 +119,7 @@ CREATE TABLE IF NOT EXISTS waarschuwingen (
 CREATE INDEX IF NOT EXISTS waarschuwingen_start ON waarschuwingen (start_at);
 -- Per-device choices for the new sources (old app versions have no row and get no warning pushes).
 CREATE TABLE IF NOT EXISTS device_prefs (token TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at INTEGER);
+-- Beheer: a warning hidden from the apps, or ended by hand (ended_at), without touching the source data.
+CREATE TABLE IF NOT EXISTS waarschuwing_overrides (id TEXT PRIMARY KEY, hidden INTEGER NOT NULL DEFAULT 0, ended_at INTEGER, updated_at INTEGER);
+-- Beheer devices: switch for outage pushes of NL-Alert, Burgernet and KNMI (no row = on).
+CREATE TABLE IF NOT EXISTS admin_prefs (token TEXT PRIMARY KEY, bronnen INTEGER NOT NULL DEFAULT 1, updated_at INTEGER);

@@ -25,6 +25,7 @@ import {
 import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
+import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -190,7 +191,17 @@ async function handleBeheer(req, env, url, path, method) {
 
   const admin = await requireAdmin(env, req);
   if (method === "GET" && path === "/v1/beheer/me") return reply(200, { user: admin.u, expires: new Date(admin.exp).toISOString() });
-  if (method === "GET" && path === "/v1/beheer/overview") return reply(200, await overview(env, await statusInfo(env)));
+  if (method === "GET" && path === "/v1/beheer/overview") {
+    const [base, aAlerts] = await Promise.all([overview(env, await statusInfo(env)), alertsOverview(env)]);
+    return reply(200, { ...base, aAlerts });
+  }
+  // A-Alerts: NL-Alert, Burgernet and KNMI in the beheer.
+  if (method === "GET" && path === "/v1/beheer/waarschuwingen") return reply(200, await adminWarnings(env, url));
+  let w = path.match(/^\/v1\/beheer\/waarschuwingen\/([\w:.\-%+]{4,160})$/);
+  if (w && (method === "PATCH" || method === "PUT")) {
+    const item = await updateWarning(env, decodeURIComponent(w[1]), await readJSON(req));
+    return item ? reply(200, item) : reply(404, { error: "Niet gevonden" });
+  }
 
   if (method === "GET" && path === "/v1/beheer/meldingen") return reply(200, await adminMeldingen(env, url));
   let m = path.match(/^\/v1\/beheer\/meldingen\/([\w-]{8,64})$/);
@@ -214,7 +225,9 @@ async function handleBeheer(req, env, url, path, method) {
   }
 
   if (method === "POST" && path === "/v1/beheer/devices") {
-    await registerAdminDevice(env, await readJSON(req));
+    const body = await readJSON(req);
+    await registerAdminDevice(env, body);
+    await setAdminPrefs(env, String(body.token || "").toLowerCase(), body);
     return reply(200, { ok: true });
   }
   if (method === "POST" && path === "/v1/beheer/devices/test") {
@@ -335,6 +348,7 @@ async function backfill(env, budget) {
 async function warnings(env, budget) {
   const kv = { get: (k) => kvGet(env, k), set: (k, v) => kvSet(env, k, v) };
   const toPush = await ingestWarnings(env, budget, kv);
+  try { await recordBronnen(env, JSON.parse((await kvGet(env, "warnings_status"))?.value || "{}")); } catch (e) { console.error("[bronnen]", e.message || e); }
   if (!toPush.length) return;
   const devices = await activeDevices(env);
   const prefs = await devicePrefs(env);
@@ -380,6 +394,7 @@ async function cron(env, event) {
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
   try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
+  try { await checkBronnen(env, pushAdmins); } catch (e) { console.error("[bronnen-push]", e.message || e); }
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
