@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=35";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=36";
 
 const TZ = "Europe/Amsterdam";
 
@@ -208,4 +208,93 @@ export function heliVoor(m, helis) {
   if (!heliRelevant(m) || m.lat == null) return null;
   const best = helis.filter((h) => h.soort === "trauma").sort((a, b) => distanceKm(a, m) - distanceKm(b, m))[0];
   return best && distanceKm(best, m) < 120 ? best : null;
+}
+
+// ------------------------------------------------------------------ route trail, flights and smooth movement
+
+/** Trail of one helicopter: scope "vlucht" (this flight), "kort" (30 min) or "vandaag". Points old → new. */
+export async function fetchSpoor(id, scope = "vlucht") {
+  try {
+    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/spoor?scope=${scope}`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? (await r.json()).punten || [] : [];
+  } catch { return []; }
+}
+export async function fetchVluchten(id) {
+  try {
+    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/vluchten?days=2`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? (await r.json()).vluchten || [] : [];
+  } catch { return []; }
+}
+
+/** Dead reckoning: position now from the last fix, speed and heading (at most 90 s ahead, never on the ground). */
+export function geschat(h, now = Date.now()) {
+  if (h.op_grond || !(h.snelheid_kt > 20) || h.koers == null) return { lat: h.lat, lon: h.lon };
+  const dt = Math.min(Math.max((now - new Date(h.gezien).getTime()) / 1000, 0), 90);
+  const km = (h.snelheid_kt * 1.852 * dt) / 3600;
+  const rad = (h.koers * Math.PI) / 180;
+  return { lat: h.lat + (km * Math.cos(rad)) / 110.574, lon: h.lon + (km * Math.sin(rad)) / (111.32 * Math.cos((h.lat * Math.PI) / 180)) };
+}
+
+export const heliKleur = (h) => (h.soort === "trauma" ? "#9333EA" : "#15428B");
+
+/** MapKit JS line for a trail (thinned out to ~400 points), ending at the live position. */
+export function spoorOverlay(mk, punten, h, now = Date.now()) {
+  const step = Math.max(1, Math.floor(punten.length / 400));
+  const pts = punten.filter((_, i) => i % step === 0 || i === punten.length - 1).map((p) => [p.lat, p.lon]);
+  if (h) { const g = geschat(h, now); pts.push([g.lat, g.lon]); }
+  if (pts.length < 2) return null;
+  return new mk.PolylineOverlay(pts.map(([la, lo]) => new mk.Coordinate(la, lo)), {
+    style: new mk.Style({ strokeColor: h ? heliKleur(h) : "#9333EA", lineWidth: 4, lineCap: "round", lineJoin: "round", strokeOpacity: 0.9 }),
+  });
+}
+
+/** "14:02 – 14:31 · 29 min · 48 km", or "14:02 – nog in de lucht". */
+export function vluchtTekst(v) {
+  const s = fmtTime(new Date(v.start));
+  const tijd = v.onderweg ? `${s} – nog in de lucht` : `${s} – ${fmtTime(new Date(v.einde))}`;
+  return `${tijd} · ${v.duur_min} min · ${Math.round(v.afstand_km)} km`;
+}
+
+/**
+ * Keeps one MapKit annotation per helicopter and moves it smoothly (dead reckoning every second) instead of
+ * redrawing all markers. update(list) after every fetch; stop() when the map goes away.
+ */
+export function heliLaag(mk, map, { onSelect } = {}) {
+  const anns = new Map();
+  let list = [];
+  const timer = setInterval(() => {
+    const now = Date.now();
+    for (const h of list) { const a = anns.get(h.id); if (a && !h.op_grond) { const g = geschat(h, now); a.coordinate = new mk.Coordinate(g.lat, g.lon); } }
+  }, 1000);
+  return {
+    update(next) {
+      list = next || [];
+      const ids = new Set(list.map((h) => h.id));
+      for (const [id, a] of anns) if (!ids.has(id)) { map.removeAnnotation(a); anns.delete(id); }
+      for (const h of list) {
+        const old = anns.get(h.id);
+        // Flip direction / name changes: replace the marker; otherwise only move it.
+        if (old && old._west === vliegtWest(h)) { const g = geschat(h); old.coordinate = new mk.Coordinate(g.lat, g.lon); continue; }
+        if (old) map.removeAnnotation(old);
+        const a = heliAnnotation(mk, { ...h, ...geschat(h) });
+        a._west = vliegtWest(h);
+        a._heli = true;
+        if (onSelect) a.addEventListener("select", () => onSelect(h.id));
+        anns.set(h.id, a);
+        map.addAnnotation(a);
+      }
+    },
+    current: (id) => list.find((h) => h.id === id),
+    clear() { for (const a of anns.values()) map.removeAnnotation(a); anns.clear(); list = []; },
+    stop() { clearInterval(timer); this.clear(); },
+  };
+}
+
+let werkgebiedCache = null;
+/** Dashed border of the municipality (working area). */
+export async function werkgebiedLijnen(mk, kleur = "#DC2626") {
+  if (!werkgebiedCache) werkgebiedCache = fetch(asset("assets/werkgebied.json")).then((r) => r.json()).catch(() => ({ gebied: [] }));
+  const { gebied = [] } = await werkgebiedCache;
+  return gebied.map((ring) => new mk.PolylineOverlay([...ring, ring[0]].map(([lon, lat]) => new mk.Coordinate(lat, lon)),
+    { style: new mk.Style({ strokeColor: kleur, strokeOpacity: 0.8, lineWidth: 2.5, lineDash: [10, 6] }) }));
 }

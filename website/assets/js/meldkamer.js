@@ -4,8 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=35";
-import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js?v=35";
+} from "./core.js?v=36";
+import {
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
+  heliLaag, fetchSpoor, spoorOverlay, geschat, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
+} from "./aalerts.js?v=36";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -17,8 +20,11 @@ const state = {
   list: [], known: new Set(), first: true, online: false,
   tour: prefs.get("mk.tour", true), sound: false, urgentOnly: prefs.get("mk.urgentOnly", false),
   focus: null, tourIndex: 0, lastFly: 0,
-  warnings: [], helis: [],
+  warnings: [], helis: [], sporen: new Map(), knownWarn: new Map(),
+  lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied"])),
 };
+// Map layers, like the Apple TV control room and the live pager.
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["werkgebied", "Grens"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -98,31 +104,84 @@ async function renderMap() {
     }),
   ];
   if (add.length) map.addAnnotations(add);
-  renderExtra(kit);
   setFocus(state.focus);
 }
 
-// A-Alerts: active NL-Alert / Burgernet / KNMI areas and live helicopters, redrawn as a separate layer.
-let extraAnn = [], extraOv = [];
-function renderExtra(kit) {
+// A-Alerts layers: NL-Alert / Burgernet / KNMI areas, municipality border, stations, the helicopters with their
+// route of the last 30 minutes (moving smoothly between updates), and for the focused alert its stations and Lifeliner.
+let extraAnn = [], extraOv = [], heliMarkers = null;
+async function renderExtra(kit) {
   if (!kit || !map) return;
   if (extraAnn.length) map.removeAnnotations(extraAnn);
   if (extraOv.length) map.removeOverlays(extraOv);
+  const L = state.lagen;
   const actief = state.warnings.filter(isActief);
   const dag = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || Date.now() - new Date(w.einde || w.start).getTime() < WINDOW_MS));
-  extraOv = [...actief.filter((w) => w.bron === "knmi"), ...dag].flatMap((w) => warnOverlays(kit, w));
-  extraAnn = [
-    ...dag.filter((w) => w.lat != null).map((w) => warnAnnotation(kit, w)),
-    ...state.helis.map((h) => heliAnnotation(kit, h)),
+  const ov = [
+    ...(L.has("knmi") ? actief.filter((w) => w.bron === "knmi").flatMap((w) => warnOverlays(kit, w)) : []),
+    ...(L.has("waarschuwingen") ? dag.flatMap((w) => warnOverlays(kit, w)) : []),
+    ...(L.has("werkgebied") ? await werkgebiedLijnen(kit) : []),
+    ...(L.has("helikopters") ? state.helis.map((h) => spoorOverlay(kit, state.sporen.get(h.id) || [], h)).filter(Boolean) : []),
   ];
+  const ann = [
+    ...(L.has("waarschuwingen") ? dag.filter((w) => w.lat != null).map((w) => warnAnnotation(kit, w)) : []),
+    ...(L.has("kazernes") ? (await kazernes()).map((k) => kazerneAnnotation(kit, k, DIENSTEN[k.soort]?.color || "#E30613")) : []),
+  ];
+  // Focused alert: alarmed stations (dashed line) and its Lifeliner/Zulu (dashed line to the scene).
+  const f = inWindow().find((m) => m.guid === state.focus);
+  if (f && f.lat != null) {
+    for (const r of await kazerneRoutes(f)) {
+      if (!L.has("kazernes")) ann.push(kazerneAnnotation(kit, r.kazerne, dienstOf(f).color));
+      ov.push(new kit.PolylineOverlay([new kit.Coordinate(r.kazerne.lat, r.kazerne.lon), new kit.Coordinate(f.lat, f.lon)],
+        { style: new kit.Style({ strokeColor: dienstOf(f).color, lineWidth: 3, lineDash: [8, 7], lineCap: "round" }) }));
+    }
+    const h = heliRelevant(f) ? heliVoor(f, state.helis) : null;
+    if (h) {
+      const g = geschat(h);
+      ov.push(new kit.PolylineOverlay([new kit.Coordinate(g.lat, g.lon), new kit.Coordinate(f.lat, f.lon)],
+        { style: new kit.Style({ strokeColor: "#9333EA", lineWidth: 3, lineDash: [4, 7], lineCap: "round" }) }));
+    }
+  }
+  extraOv = ov; extraAnn = ann;
   if (extraOv.length) map.addOverlays(extraOv);
   if (extraAnn.length) map.addAnnotations(extraAnn);
+  heliMarkers ||= heliLaag(kit, map);
+  heliMarkers.update(L.has("helikopters") ? state.helis : []);
+  renderHeliList();
 }
 
 async function refreshHelis() {
   state.helis = await fetchHelikopters();
+  // Route of the last 30 minutes for every helicopter in the air (at most 6).
+  const lucht = state.helis.filter((h) => !h.op_grond).slice(0, 6);
+  const sporen = await Promise.all(lucht.map((h) => fetchSpoor(h.id, "kort")));
+  state.sporen = new Map(lucht.map((h, i) => [h.id, sporen[i]]));
   renderExtra(await mapReady);
 }
+
+/** Helicopters in the air with altitude and speed, bottom right of the map (like Apple TV). */
+function renderHeliList() {
+  const box = $("helis");
+  if (!box) return;
+  const list = state.lagen.has("helikopters") ? state.helis : [];
+  box.innerHTML = list.slice(0, 4).map((h) => `<div class="heli-row">
+    <img src="${heliImg(h)}" alt="" style="${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">
+    <span><b>${esc(h.naam)}</b><small>${esc(heliInfo(h))}</small></span></div>`).join("");
+  box.hidden = !list.length;
+}
+
+function renderLagen() {
+  $("lagen").innerHTML = LAGEN.map(([k, l]) => `<button class="laag${state.lagen.has(k) ? " on" : ""}" data-laag="${k}">${l}</button>`).join("");
+}
+$("lagen").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-laag]")?.dataset.laag;
+  if (!k) return;
+  state.lagen.has(k) ? state.lagen.delete(k) : state.lagen.add(k);
+  prefs.set("mk.lagen", [...state.lagen]);
+  renderLagen();
+  mapReady.then(renderExtra);
+});
+renderLagen();
 
 const openTown = () => window.open("../pager/#kaart", "_self");
 
@@ -158,6 +217,7 @@ function setFocus(guid) {
   for (const [g, el] of elByGuid) el.classList.toggle("is-focus", g === target);
   document.querySelectorAll(".row").forEach((r) => r.classList.toggle("is-focus", r.dataset.guid === guid));
   renderLatest();
+  if (map && mk) renderExtra(mk);
 }
 
 function fly(m) {
@@ -272,6 +332,7 @@ function nextAlarm() {
   const m = queue.shift();
   const box = $("alarm");
   if (!m) { box.hidden = true; return; }
+  if (m.bron) return warnAlarm(m, box);
   const ms = isUrgent(m) ? 12_000 : 8_000;
   const pr = prioText(m);
   box.style.setProperty("--c", dienstOf(m).color);
@@ -288,6 +349,37 @@ function nextAlarm() {
   alarmTimer = setTimeout(() => { fly(m); nextAlarm(); }, ms);
 }
 $("alarm").addEventListener("click", () => { clearTimeout(alarmTimer); nextAlarm(); });
+
+/** Alarm screen for a new NL-Alert or Burgernet call, and when one ends (like the app's push). */
+function warnAlarm(w, box) {
+  const ms = w.bron === "nlalert" && !isBeeindigd(w) ? 14_000 : 9_000;
+  box.style.setProperty("--c", wKleur(w));
+  box.innerHTML = `<div class="alarm-inner">
+    <img src="${wIcon(w)}" alt="">
+    <span class="alarm-kicker">${esc(wKop(w).toUpperCase())} · ${isBeeindigd(w) ? "BEËINDIGD" : "NIEUW"}</span>
+    <h1 class="alarm-title">${esc(w.titel)}</h1>
+    <div class="alarm-where">${esc(w.plaats || "Gemeente Apeldoorn")} · ${esc(wTijd(w))}</div>
+    <div class="alarm-bar" style="--t:${ms}ms"><i></i></div></div>`;
+  box.hidden = false;
+  beep(w.bron === "nlalert" && !isBeeindigd(w));
+  clearTimeout(alarmTimer);
+  alarmTimer = setTimeout(() => {
+    if (map && w.lat != null) map.setRegionAnimated(region({ lat: w.lat, lon: w.lon, dLat: 0.05, dLon: 0.08 }), true);
+    nextAlarm();
+  }, ms);
+}
+
+/** NL-Alert and Burgernet: new or just ended since the last refresh → alarm screen. */
+function warnChanges(warnings) {
+  const out = [];
+  for (const w of warnings) {
+    if (w.bron === "knmi") continue;
+    const prev = state.knownWarn.get(w.id);
+    if (!state.first && ((!prev && !isBeeindigd(w)) || (prev && prev !== "beeindigd" && isBeeindigd(w)))) out.push(w);
+    state.knownWarn.set(w.id, w.status);
+  }
+  return out;
+}
 
 let audio = null;
 function beep(urgent) {
@@ -345,6 +437,7 @@ keepAwake();
 
 async function refresh() {
   const [{ list, online }, warnings] = await Promise.all([fetchMeldingen(400), fetchWaarschuwingen(2)]);
+  const nieuweWaarschuwingen = warnChanges(warnings);
   state.warnings = warnings;
   state.online = online;
   const fresh = state.first ? [] : list.filter((m) => !state.known.has(m.guid) && Date.now() - date(m).getTime() < 30 * 60_000);
@@ -356,6 +449,8 @@ async function refresh() {
   renderList(new Set(fresh.map((m) => m.guid)));
   renderLatest();
   await renderMap();
+  if (nieuweWaarschuwingen.length) { queue.push(...nieuweWaarschuwingen); if ($("alarm").hidden) nextAlarm(); }
+  else renderExtra(await mapReady);
   if (fresh.length) {
     state.tourIndex = 0;
     enqueueAlarm(fresh);

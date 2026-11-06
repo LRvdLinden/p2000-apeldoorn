@@ -144,3 +144,16 @@ body.mk {
 .heli-marker span { font-size: .75rem; font-weight: 700; padding: 1px 7px; border-radius: 8px; background: rgba(20,20,26,.85); color: #fff; }
 .warn-marker img { width: 40px; }
 .row.warn.ended > img { filter: grayscale(1); }
+
+/* Map layers and helicopters in the air (like Apple TV). */
+.lagen { display: flex; gap: .4em; flex-wrap: wrap; margin-left: auto; pointer-events: auto; }
+.laag { font: inherit; font-size: .82em; font-weight: 700; color: var(--muted); padding: .35em .8em; border-radius: 999px; border: 1px solid rgba(255,255,255,.12);
+  background: rgba(20,20,26,.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); cursor: pointer; }
+.laag.on { color: #fff; border-color: rgba(255,255,255,.4); }
+.helis { position: absolute; right: 1.1em; bottom: 1.1em; z-index: 5; display: grid; gap: .4em; min-width: 14em; }
+.helis[hidden] { display: none; }
+.heli-row { display: flex; align-items: center; gap: .6em; padding: .45em .8em; border-radius: .8em; background: rgba(20,20,26,.78); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+.heli-row img { width: 2.6em; height: 1.6em; object-fit: contain; }
+.heli-row span { display: grid; line-height: 1.2; }
+.heli-row small { color: var(--muted); font-size: .8em; }
+@media (max-width: 700px) { .helis { display: none; } }

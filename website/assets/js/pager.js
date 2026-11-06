@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=35";
+} from "./core.js?v=36";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest,
-} from "./aalerts.js?v=35";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat,
+} from "./aalerts.js?v=36";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -466,11 +466,14 @@ async function loadHeli(m, mapReady) {
       if (items.length) { try { detailMap.removeItems(items); } catch {} }
       items = [];
       if (h && m.lat != null) {
-        const a = heliAnnotation(mk, h);
+        const vlucht = spoorOverlay(mk, await fetchSpoor(h.id, "vlucht"), h);
+        if (state.selected !== m.guid) return false;
+        if (vlucht) { detailMap.addOverlay(vlucht); items.push(vlucht); }
+        const a = heliAnnotation(mk, { ...h, ...geschat(h) });
         const line = new mk.PolylineOverlay([new mk.Coordinate(h.lat, h.lon), new mk.Coordinate(m.lat, m.lon)],
           { style: new mk.Style({ strokeColor: "#9333EA", lineWidth: 3, lineDash: [4, 7], lineCap: "round" }) });
         detailMap.addAnnotation(a); detailMap.addOverlay(line);
-        items = [a, line];
+        items.push(a, line);
         if (!draw.done) { draw.done = true; try { detailMap.showItems([...detailMap.annotations, ...detailMap.overlays], { animate: true, padding: new mk.Padding(60, 40, 40, 40) }); } catch {} }
       }
     }
@@ -754,8 +757,9 @@ async function renderMap() {
   }
   const mk = await bigMapReady;
   if (!mk) { renderStaticMarkers(pins, clusters); return; }
-  bigMap.removeAnnotations(bigMap.annotations);
+  bigMap.removeAnnotations(bigMap.annotations.filter((a) => !a._heli));
   bigMap.removeOverlays(bigMap.overlays);
+  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); } });
   const actief = state.warnings.filter((w) => isActief(w));
   const extra = [];
   if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
@@ -767,7 +771,11 @@ async function renderMap() {
     });
   }
   if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613")));
-  if (state.lagen.has("helikopters")) state.helis.forEach((h) => { const a = heliAnnotation(mk, h); a.addEventListener("select", () => openHeli(h)); extra.push(a); });
+  heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
+  if (state.lagen.has("helikopters") && heliSpoor.id) {
+    const ov = spoorOverlay(mk, heliSpoor.punten, state.helis.find((h) => h.id === heliSpoor.id));
+    if (ov) bigMap.addOverlay(ov);
+  }
   if (state.lagen.has("werkgebied")) bigMap.addOverlays(await werkgebiedOverlays(mk));
   bigMap.addAnnotations([
     ...clusters.map((c) => clusterAnnotation(mk, c, openCluster)),
@@ -778,7 +786,8 @@ async function renderMap() {
   if (state.volgHeli) {
     const h = state.helis.find((x) => x.id === state.volgHeli);
     if (h) {
-      bigMap.setCenterAnimated(new mk.Coordinate(h.lat, h.lon));
+      const g = geschat(h);
+      bigMap.setCenterAnimated(new mk.Coordinate(g.lat, g.lon));
       if (bigMap.cameraDistance > 30000) bigMap.cameraDistance = 15000;
       openHeli(h);
     }
@@ -807,6 +816,27 @@ function renderStaticMarkers(pins, clusters) {
   box.onclick = (e) => { const g = e.target.dataset.guid; if (g) select(g); };
 }
 
+// Route trail and flights of the selected helicopter (refreshed every 20 seconds while its panel is open).
+let heliMarkers = null;
+const heliSpoor = { id: null, scope: prefs.get("p2000.spoorScope", "vlucht"), punten: [], vluchten: [], timer: null };
+async function loadSpoor() {
+  const id = heliSpoor.id;
+  if (!id) return;
+  const [punten, vluchten] = await Promise.all([fetchSpoor(id, heliSpoor.scope), fetchVluchten(id)]);
+  if (heliSpoor.id !== id) return;
+  Object.assign(heliSpoor, { punten, vluchten });
+  const box = $("heliVluchten");
+  if (box) box.innerHTML = vluchten.length ? vluchten.slice(0, 4).map((v) => `<li class="${v.onderweg ? "on" : ""}">${esc(vluchtTekst(v))}</li>`).join("") : `<li class="hint">Nog geen vluchten opgeslagen.</li>`;
+  renderMap();
+}
+function selectSpoor(id) {
+  clearInterval(heliSpoor.timer);
+  Object.assign(heliSpoor, { id, punten: [], vluchten: [] });
+  if (!id) { renderMap(); return; }
+  loadSpoor();
+  heliSpoor.timer = setInterval(loadSpoor, 20_000);
+}
+
 /** Helicopter tapped: heading, altitude and speed (like the app's info card). */
 function openHeli(h) {
   const box = $("clusterPanel");
@@ -819,8 +849,17 @@ function openHeli(h) {
     <p>${esc([h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
+    <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["vandaag", "Vandaag"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
+    <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
     <p class="hint" style="margin:8px 0 0">Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>`;
   box.hidden = false;
+  box.querySelectorAll("[data-scope]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    heliSpoor.scope = b.dataset.scope; prefs.set("p2000.spoorScope", heliSpoor.scope);
+    box.querySelectorAll("[data-scope]").forEach((x) => x.classList.toggle("on", x === b));
+    loadSpoor();
+  }));
+  if (heliSpoor.id !== h.id) selectSpoor(h.id); else loadSpoor();
 }
 
 let werkgebiedCache = null;
@@ -840,7 +879,7 @@ function openCluster(c) {
   box.hidden = false;
 }
 $("clusterPanel").addEventListener("click", (e) => {
-  if (e.target.closest("[data-close]")) { $("clusterPanel").hidden = true; state.volgHeli = null; return; }
+  if (e.target.closest("[data-close]")) { $("clusterPanel").hidden = true; state.volgHeli = null; selectSpoor(null); return; }
   const g = e.target.closest("[data-guid]")?.dataset.guid;
   if (g) { $("clusterPanel").hidden = true; select(g); }
 });

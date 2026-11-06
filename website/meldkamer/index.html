@@ -29,11 +29,11 @@
 <link rel="manifest" href="/site.webmanifest">
 <link rel="icon" href="../assets/img/aalerts-icon-32.png">
 <link rel="apple-touch-icon" href="../assets/img/aalerts-icon-180.png">
-<link rel="stylesheet" href="../assets/css/base.css?v=35">
-<link rel="stylesheet" href="../assets/css/meldkamer.css?v=35">
-<script src="../config.js?v=35"></script>
-<script src="../assets/js/consent.js?v=35" defer></script>
-<script type="module" src="../assets/js/meldkamer.js?v=35"></script>
+<link rel="stylesheet" href="../assets/css/base.css?v=36">
+<link rel="stylesheet" href="../assets/css/meldkamer.css?v=36">
+<script src="../config.js?v=36"></script>
+<script src="../assets/js/consent.js?v=36" defer></script>
+<script type="module" src="../assets/js/meldkamer.js?v=36"></script>
 </head>
 <body class="mk" data-maps>
 <h1 class="sr-only">Meldkamer: live kaart van de gemeente Apeldoorn</h1>
@@ -46,7 +46,9 @@
     <div class="map-top">
       <div class="chips" id="chips"></div>
       <span class="pill">Laatste 24 uur</span>
+      <div class="lagen" id="lagen" aria-label="Kaartlagen"></div>
     </div>
+    <div class="helis" id="helis" hidden></div>
     <div class="latest" id="latest" aria-live="polite"></div>
     <div class="controls">
       <button id="btnTour" class="ctl on" title="Kaart gaat zelf langs de meldingen"><svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 1 7 7c0 5-7 13-7 13S5 14 5 9a7 7 0 0 1 7-7zm0 4.5A2.5 2.5 0 1 0 12 11.5 2.5 2.5 0 0 0 12 6.5z" fill="currentColor"/></svg><span>Rondleiding</span></button>

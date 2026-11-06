@@ -304,3 +304,11 @@ a.drow { text-decoration: none; color: inherit; }
 .kz.heli-live img { width: 84px; height: auto; }
 .kz.heli-live b { font-weight: 600; }
 .live-tag { display: inline-block; font-size: .65rem; font-weight: 900; letter-spacing: .04em; color: #fff; background: #DC2626; border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }
+
+/* Helicopter panel: trail range and flights */
+.seg { display: flex; gap: 4px; margin: 10px 0 4px; background: rgba(127,127,127,.12); border-radius: 10px; padding: 3px; }
+.seg button { flex: 1; border: 0; background: transparent; padding: 6px 4px; border-radius: 8px; font: inherit; font-size: .8rem; font-weight: 600; color: inherit; cursor: pointer; }
+.seg button.on { background: var(--surface, #fff); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.vl-head { margin: 10px 0 4px; font-size: .8rem; color: var(--muted); }
+.vluchten { list-style: none; margin: 0; padding: 0; font-size: .82rem; display: grid; gap: 3px; }
+.vluchten li.on { font-weight: 700; color: #16a34a; }
