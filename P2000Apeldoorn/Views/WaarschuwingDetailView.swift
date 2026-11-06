@@ -477,6 +477,15 @@ struct WaarschuwingDetailView: View {
     }
 
     private func loadWeather(_ w: Waarschuwing) async {
+        // 1. Our API (WeatherKit via the Worker): the same source as the weather of an alert.
+        if let a = await P2000API.shared.waarschuwingWeather(id: w.id), let t = a.temperature {
+            meteo = MeldingDetailView.Meteo(temperature: t, feelsLike: a.apparent, clouds: a.cloudCover.map { $0 * 100 },
+                                            windDirection: a.windDirection, windSpeed: a.windSpeed, gust: a.windGust,
+                                            symbol: MeldingDetailView.symbol(for: a.condition), fromWeatherKit: true)
+            attribution = try? await WeatherService.shared.attribution
+            return
+        }
+        // 2. Fallback: WeatherKit in the app itself.
         let c = coordinate(w)
         let moment = min(w.start, .now)
         do {

@@ -457,6 +457,7 @@ async function selectWarning(id, { push = true } = {}) {
       ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} Bekijk bij ${esc(b.label)}</a>` : ""}
     </section>
     ${w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
+    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     ${near.length ? `<section class="card"><h2>Meldingen in de buurt</h2><p class="hint">P2000-meldingen in hetzelfde gebied rond dezelfde tijd. Mogelijk verband, geen zekerheid.</p>
       <div class="cp-list">${near.slice(0, 10).map((m) => `<button data-goto="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(fmtTime(date(m)))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div></section>` : ""}
@@ -465,6 +466,12 @@ async function selectWarning(id, { push = true } = {}) {
   $("detail").querySelectorAll("[data-goto]").forEach((x) => x.addEventListener("click", () => select(x.dataset.goto)));
   $("detailPane").scrollTop = 0;
   renderList();
+  loadMeteo(w, `w:${w.id}`, async () => {
+    try {
+      const r = await fetch(`${API}/v1/waarschuwingen/${encodeURIComponent(w.id)}/weather`, { signal: AbortSignal.timeout(12_000) });
+      return r.ok ? await r.json() : null;
+    } catch { return null; }
+  });
   const mk = await loadMapKit();
   if (!mk || state.selected !== `w:${w.id}`) return;
   if (detailMap) { try { detailMap.destroy(); } catch {} }
@@ -505,10 +512,10 @@ async function drawDetailMap(m) {
   } catch { la.innerHTML = ""; }
 }
 
-async function loadMeteo(m) {
+async function loadMeteo(m, key = m.guid, loader = () => fetchWeather(m.guid)) {
   const box = $("meteo");
-  const w = await fetchWeather(m.guid);
-  if (state.selected !== m.guid || !box) return;
+  const w = await loader();
+  if (state.selected !== key || !box) return;
   if (!w) {
     box.innerHTML = `<p style="color:var(--muted);margin:0">${demoMode ? "Weergegevens zijn beschikbaar zodra de live-server draait." : "Weergegevens zijn op dit moment niet beschikbaar."}</p>`;
     return;

@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 31)
+- NL-Alert, Burgernet en KNMI: METEO-gegevens op de detailpagina komen nu van onze server (dezelfde WeatherKit-bron als bij een melding), met WeatherKit in de app als reserve. Ook op de website.
+
 ## A-Alerts 2.0.0 (build 30)
 - NL-Alert, Burgernet en KNMI hebben nu dezelfde detailpagina als een P2000-melding: grote kaart met marker (en gebied), glazen balk met delen, Look Around bij Burgernet, knoppen voor locatie, 3D en grote kaart, hoofdkaart met plaats, status, tijd en afstand, het bericht, METEO-gegevens van dat moment, meldingen in de buurt en de gegevens.
 - Een afgelopen NL-Alert of Burgernet-actie wordt in de pager grijs, net als een melding die je al hebt bekeken (ook op de website en Apple TV).

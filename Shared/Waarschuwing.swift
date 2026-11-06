@@ -201,6 +201,11 @@ extension P2000API {
         // appendingPathComponent escapes what is needed; ids only contain letters, digits, ":", "-", "." and "T".
         try await getJSON("v1/waarschuwingen/\(id)", as: WaarschuwingDetail.self)
     }
+
+    /// Weather at the place and time of the warning (WeatherKit via the Worker, like an alert).
+    func waarschuwingWeather(id: String) async -> AlertWeather? {
+        try? await getJSON("v1/waarschuwingen/\(id)/weather", as: AlertWeather.self)
+    }
 }
 
 // MARK: - Store
