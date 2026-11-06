@@ -28,6 +28,7 @@ import {
 import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
+import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
@@ -136,6 +137,14 @@ async function handle(req, env) {
   }
 
   // A-Alerts: live positions of the trauma and police helicopters (adsb.lol, ODbL).
+  // Route trail and flight history of one helicopter (stored by the Worker, 3 days).
+  m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/spoor$/);
+  if (method === "GET" && m) {
+    const scope = ["vlucht", "kort", "vandaag"].includes(url.searchParams.get("scope")) ? url.searchParams.get("scope") : "vlucht";
+    return reply(200, await spoor(env, m[1], scope), { "cache-control": "public, max-age=10" });
+  }
+  m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/vluchten$/);
+  if (method === "GET" && m) return reply(200, await vluchten(env, m[1], url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
   if (method === "GET" && path === "/v1/helikopters") {
     return reply(200, await helikopters(env), { "cache-control": "public, max-age=10" });
   }
@@ -420,6 +429,7 @@ async function cron(env, event) {
     await poll(env, budget);
     await drain(env, budget);
     await homey();
+    if (i % 2 === 0) { try { if (budget.take()) await recordPositions(env, await helikopters(env)); } catch (e) { console.error("[spoor]", e.message || e); } }
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
   try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
@@ -427,6 +437,7 @@ async function cron(env, event) {
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
+    try { await spoorHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
   }
 }

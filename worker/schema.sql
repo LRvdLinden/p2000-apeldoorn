@@ -128,3 +128,9 @@ CREATE TABLE IF NOT EXISTS downloads (
   day TEXT NOT NULL, app TEXT NOT NULL, version TEXT NOT NULL, visitor TEXT NOT NULL, at INTEGER NOT NULL,
   PRIMARY KEY (day, app, version, visitor)
 );
+-- A-Alerts: positions of the trauma and police helicopters (adsb.lol, ODbL) for the route trail and flight history (3 days).
+CREATE TABLE IF NOT EXISTS heli_posities (
+  heli TEXT NOT NULL, at INTEGER NOT NULL, lat REAL NOT NULL, lon REAL NOT NULL,
+  hoogte_ft INTEGER, snelheid_kt INTEGER, koers INTEGER, grond INTEGER NOT NULL DEFAULT 0,
+  PRIMARY KEY (heli, at)
+);
