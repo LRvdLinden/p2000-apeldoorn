@@ -146,6 +146,10 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     if (m.hasCoordinate) ActionButton(Icons.Outlined.Map, tr("Kaart", "Map"), Modifier.weight(1f)) { nav.toonOpKaart(m.guid) }
                     if (m.hasCoordinate && m.hasStreet) ActionButton(Icons.Outlined.Directions, tr("Route", "Route"), Modifier.weight(1f)) { openRoute(ctx, m.lat!!, m.lon!!, m.plaatsText) }
                 }
+                if (weer != null) WeerCard(weer) else SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
+                    if (!weerKlaar) LinearProgressIndicator(Modifier.fillMaxWidth())
+                    else Text(tr("Het weer is nu even niet beschikbaar. Open de melding later opnieuw.", "The weather is not available right now. Open the alert again later."), color = Muted, fontSize = 13.sp)
+                }
                 if (heliRelevant) HeliLiveCard(m, heli, heliNaam) { id -> nav.toonHeli(id) }
                 m.fullMelding?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Oproep", "Call-out"), Icons.Outlined.Sms) {
@@ -176,10 +180,6 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                             e.code?.let { Text(it, color = Muted, fontSize = 12.sp, fontFamily = FontFamily.Monospace) }
                         }
                     }
-                }
-                if (weer != null) WeerCard(weer) else SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
-                    if (!weerKlaar) LinearProgressIndicator(Modifier.fillMaxWidth())
-                    else Text(tr("Het weer is nu even niet beschikbaar. Open de melding later opnieuw.", "The weather is not available right now. Open the alert again later."), color = Muted, fontSize = 13.sp)
                 }
                 if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {
                     (waarschuwingen + knmi).forEach { w ->

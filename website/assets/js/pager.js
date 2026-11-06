@@ -384,11 +384,11 @@ function renderDetail(m) {
     <section class="card" id="kazernesCard" hidden></section>
     ${verloopHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
+    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
       <div class="unit"><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>`).join("")}</div></section>` : ""}
     ${cars.length ? `<section class="card"><h2>Voertuigen (${cars.length})</h2><div class="units">${cars.map((v) => `
       <div class="unit"><b>${esc(v.label || "Voertuig")}</b><code>${esc([v.nra, v.nrb].filter(Boolean).join(" · "))}</code></div>`).join("")}</div></section>` : ""}
-    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     <section class="card"><h2>Meldinggegevens</h2><dl class="kv">
       <dt>Prioriteit</dt><dd>${esc(m.prioriteit || "Onbekend")}</dd>
       <dt>Discipline</dt><dd>${esc(dienst.label)}</dd>
