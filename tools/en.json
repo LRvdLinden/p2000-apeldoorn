@@ -512,5 +512,11 @@
  "%@ km van de melding": "%@ km from the alert",
  "Volg %@ op de kaart": "Follow %@ on the map",
  "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.": "The helicopter is not visible live right now. Flying low or on the ground, the position is sometimes missing.",
- "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.": "Position via adsb.lol (ODbL), may lag a few seconds."
+ "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.": "Position via adsb.lol (ODbL), may lag a few seconds.",
+ "Deze vlucht": "This flight",
+ "30 min": "30 min",
+ "Vluchten": "Flights",
+ "Nog geen vluchten opgeslagen.": "No flights stored yet.",
+ "%@ – nog in de lucht": "%@ – still in the air",
+ "Routespoor": "Route trail"
 }

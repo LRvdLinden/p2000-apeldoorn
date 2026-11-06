@@ -31,6 +31,10 @@ struct MapScreen: View {
     @State private var showLagen = false
     @State private var helis = HeliStore.shared
     @State private var volgen = false
+    /// Route trail and flights of the selected helicopter.
+    @State private var spoor = HeliSpoorStore()
+    /// Clock for the smooth (dead-reckoned) helicopter positions.
+    @State private var nu = Date.now
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
@@ -150,7 +154,13 @@ struct MapScreen: View {
             .onMapCameraChange(frequency: .onEnd) { ctx in
                 if volgen, let h = heli, Werkgebied.distanceKm(ctx.region.center.latitude, ctx.region.center.longitude, h.lat, h.lon) > 3 { volgen = false }
             }
-            .onDisappear { if settings.laag(.helikopters) { helis.stop() } }
+            .onDisappear { if settings.laag(.helikopters) { helis.stop() }; spoor.volg(nil) }
+            .onChange(of: selectedHeli) { _, id in spoor.volg(id) }
+            // Smooth movement: every 2 seconds a new estimated position while a helicopter is in the air.
+            .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
+                guard settings.laag(.helikopters), helis.items.contains(where: { !$0.opGrond }) else { return }
+                withAnimation(.linear(duration: 2)) { nu = t }
+            }
             .onChange(of: settings.laag(.helikopters)) { _, on in
                 if on { helis.start() } else { helis.stop(); selectedHeli = nil }
             }
@@ -241,8 +251,15 @@ struct MapScreen: View {
 
     @MapContentBuilder private var helikoptersLaag: some MapContent {
         if settings.laag(.helikopters) {
+            if let h = heli, spoor.heliID == h.id {
+                let lijn = spoor.coordinates(live: h.geschat(op: nu))
+                if lijn.count >= 2 {
+                    MapPolyline(coordinates: lijn)
+                        .stroke(h.color, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                }
+            }
             ForEach(helis.items) { h in
-                Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                     HeliMarker(heli: h, size: 24, selected: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
                         .accessibilityAddTraits(.isButton)
@@ -257,7 +274,7 @@ struct MapScreen: View {
             if let selected {
                 MapPreviewCard(melding: selected) { self.selected = nil }
             } else if let heli {
-                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon)) { selectedHeli = nil }
+                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor) { selectedHeli = nil }
             } else if let k = selectedKazerne {
                 KazerneKaart(kazerne: k) { selectedKazerne = nil }
             }

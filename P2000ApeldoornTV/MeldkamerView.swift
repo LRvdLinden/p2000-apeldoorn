@@ -11,6 +11,8 @@ struct MeldkamerView: View {
     @State private var tourIndex = 0
     @State private var selected: Melding?
     @State private var selectedWaarschuwing: Waarschuwing?
+    @State private var sporen = HeliSporen()
+    @State private var nu = Date.now
     private var waarschuwingen: WaarschuwingStore { WaarschuwingStore.shared }
 
     /// NL-Alert and Burgernet of the last 24 hours, between the alerts (KNMI is the bar at the top).
@@ -103,8 +105,16 @@ struct MeldkamerView: View {
                 }
                 // Live trauma and police helicopters (A-Alerts).
                 if settings.laag(.helikopters) {
+                    // Route of the last 30 minutes behind every helicopter in the air.
                     ForEach(HeliStore.shared.items) { h in
-                        Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                        let lijn = sporen.lijn(h, nu: nu)
+                        if lijn.count >= 2 {
+                            MapPolyline(coordinates: lijn)
+                                .stroke(h.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+                        }
+                    }
+                    ForEach(HeliStore.shared.items) { h in
+                        Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                             HeliMarker(heli: h, size: 34)
                         }
                         .annotationTitles(.hidden)
@@ -113,6 +123,16 @@ struct MeldkamerView: View {
             }
             .onAppear { HeliStore.shared.start() }
             .onDisappear { HeliStore.shared.stop() }
+            .task {
+                while !Task.isCancelled {
+                    await sporen.refresh(HeliStore.shared.items)
+                    try? await Task.sleep(for: .seconds(30))
+                }
+            }
+            .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
+                guard settings.laag(.helikopters), HeliStore.shared.items.contains(where: { !$0.opGrond }) else { return }
+                withAnimation(.linear(duration: 2)) { nu = t }
+            }
             .mapStyle(mapStyle)
             .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).stroke(.white.opacity(0.08), lineWidth: 2))

@@ -183,6 +183,8 @@ struct HeliMarker: View {
 struct HeliInfoKaart: View {
     let heli: Helikopter
     var afstandKm: Double?
+    /// Route trail and flight history (map screen); nil hides that part.
+    var spoor: HeliSpoorStore?
     var onClose: (() -> Void)?
 
     var body: some View {
@@ -213,6 +215,16 @@ struct HeliInfoKaart: View {
                 waarde(L("Hoogte"), heli.opGrond ? L("Op de grond") : (heli.hoogteMeter.map { "\($0) m" } ?? "–"), "arrow.up.and.down")
                 waarde(L("Snelheid"), heli.snelheidKmh.map { "\($0) km/u" } ?? "–", "speedometer")
             }
+            #if !os(watchOS)
+            if let spoor {
+                @Bindable var s = spoor
+                Picker(L("Routespoor"), selection: $s.bereik) {
+                    ForEach(SpoorBereik.allCases) { Text($0.label).tag($0) }
+                }
+                .pickerStyle(.segmented)
+                HeliVluchtenLijst(vluchten: spoor.vluchten, aantal: 3)
+            }
+            #endif
             if let h = heli.herkenningTekst {
                 Label(h, systemImage: "info.circle").font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary)
             }

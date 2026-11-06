@@ -33,6 +33,9 @@ struct MeldingDetailView: View {
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
     @State private var helis = HeliStore.shared
+    /// Route of the alert's helicopter this flight (worker trail), drawn behind the live marker.
+    @State private var heliSpoor = HeliSpoorStore()
+    @State private var nu = Date.now
     private var heliRelevant: Bool { HeliKoppeling.relevant(melding) }
     /// The Lifeliner/Zulu of this alert, live (nil when not in the air or not seen).
     private var liveHeli: Helikopter? { heliRelevant ? HeliKoppeling.heli(voor: melding, in: helis.items) : nil }
@@ -97,7 +100,12 @@ struct MeldingDetailView: View {
         }
         .task(id: melding.guid) { await loadWeather() }
         .onAppear { if heliRelevant { helis.start() } }
-        .onDisappear { if heliRelevant { helis.stop() } }
+        .onDisappear { if heliRelevant { helis.stop() }; heliSpoor.volg(nil) }
+        .onChange(of: liveHeli?.id, initial: true) { _, id in heliSpoor.volg(id) }
+        .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
+            guard let h = liveHeli, !h.opGrond else { return }
+            withAnimation(.linear(duration: 2)) { nu = t }
+        }
         .onChange(of: liveHeli?.id) { _, id in
             // First position of the helicopter: show it together with the alert.
             guard id != nil, !drieD, !opMij else { return }
@@ -247,9 +255,14 @@ struct MeldingDetailView: View {
     /// The Lifeliner/Zulu of this alert, live, with a dashed line to the scene.
     @MapContentBuilder private var heliLaag: some MapContent {
         if let h = liveHeli {
-            MapPolyline(coordinates: [h.coordinate, coordinate])
+            let gevlogen = heliSpoor.heliID == h.id ? heliSpoor.coordinates(live: h.geschat(op: nu)) : []
+            if gevlogen.count >= 2 {
+                MapPolyline(coordinates: gevlogen)
+                    .stroke(h.color, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+            }
+            MapPolyline(coordinates: [h.geschat(op: nu), coordinate])
                 .stroke(h.color, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [4, 6]))
-            Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+            Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                 HeliMarker(heli: h, size: 22)
                     .onTapGesture { Router.shared.volg(heli: h.id); dismiss() }
             }

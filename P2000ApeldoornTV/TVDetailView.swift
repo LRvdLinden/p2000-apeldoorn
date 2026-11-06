@@ -9,6 +9,7 @@ struct TVDetailView: View {
     @State private var weather: AlertWeather?
     @State private var routes: [KazerneRoute] = []
     @State private var helis = HeliStore.shared
+    @State private var heliSpoor = HeliSpoorStore()
     /// The Lifeliner/Zulu named in the alert, live.
     private var liveHeli: Helikopter? { HeliKoppeling.relevant(melding) ? HeliKoppeling.heli(voor: melding, in: helis.items) : nil }
 
@@ -30,9 +31,14 @@ struct TVDetailView: View {
                                 .annotationTitles(.hidden)
                         }
                         if let h = liveHeli {
-                            MapPolyline(coordinates: [h.coordinate, coord])
+                            let gevlogen = heliSpoor.heliID == h.id ? heliSpoor.coordinates(live: h.geschat()) : []
+                            if gevlogen.count >= 2 {
+                                MapPolyline(coordinates: gevlogen)
+                                    .stroke(h.color, style: StrokeStyle(lineWidth: 6, lineCap: .round, lineJoin: .round))
+                            }
+                            MapPolyline(coordinates: [h.geschat(), coord])
                                 .stroke(h.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [6, 10]))
-                            Annotation(h.naam, coordinate: h.coordinate, anchor: .center) { HeliMarker(heli: h, size: 34) }
+                            Annotation(h.naam, coordinate: h.geschat(), anchor: .center) { HeliMarker(heli: h, size: 34) }
                                 .annotationTitles(.hidden)
                         }
                         Annotation("", coordinate: coord, anchor: .bottom) { TVMarker(melding: melding, highlighted: true) }
@@ -90,7 +96,8 @@ struct TVDetailView: View {
         .padding(60)
         .background(Color(hex: 0x0B0B0F).ignoresSafeArea())
         .onAppear { if HeliKoppeling.relevant(melding) { helis.start() } }
-        .onDisappear { if HeliKoppeling.relevant(melding) { helis.stop() } }
+        .onDisappear { if HeliKoppeling.relevant(melding) { helis.stop() }; heliSpoor.volg(nil) }
+        .onChange(of: liveHeli?.id, initial: true) { _, id in heliSpoor.volg(id) }
         .task {
             settings.markRead(melding)
             MeldingStore.shared.registerView(melding)
@@ -117,6 +124,7 @@ struct TVDetailView: View {
         } else {
             Text(L("De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.")).font(AppFont.body(18, .regular)).foregroundStyle(.secondary)
         }
+        if !heliSpoor.vluchten.isEmpty { HeliVluchtenLijst(vluchten: heliSpoor.vluchten, aantal: 3) }
     }
 
     private func section(_ title: String) -> some View {

@@ -137,6 +137,23 @@
         }
       }
     },
+    "%@ – nog in de lucht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – still in the air"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ – nog in de lucht"
+          }
+        }
+      }
+    },
     "%lld d": {
       "extractionState": "manual",
       "localizations": {
@@ -456,6 +473,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "24 uur"
+          }
+        }
+      }
+    },
+    "30 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 min"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "30 min"
           }
         }
       }
@@ -1969,6 +2003,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze meldingen vonden rond hetzelfde tijdstip op of vlak bij dezelfde plek plaats, of riepen dezelfde eenheid op. Dat wijst op een mogelijk verband, maar is geen bevestiging dat het om hetzelfde incident gaat."
+          }
+        }
+      }
+    },
+    "Deze vlucht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This flight"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze vlucht"
           }
         }
       }
@@ -4659,6 +4710,23 @@
         }
       }
     },
+    "Nog geen vluchten opgeslagen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No flights stored yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen vluchten opgeslagen."
+          }
+        }
+      }
+    },
     "Nog niets bewaard": {
       "extractionState": "manual",
       "localizations": {
@@ -6882,6 +6950,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verwijderen"
+          }
+        }
+      }
+    },
+    "Vluchten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flights"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vluchten"
           }
         }
       }
