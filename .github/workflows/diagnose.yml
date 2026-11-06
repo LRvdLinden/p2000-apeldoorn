@@ -9,11 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          echo "== 112meldkamer burgernet (Apeldoorn/Voorst)"
-          curl -sS -m 20 https://api.112meldkamer.nl/v1/burgernet | jq -c '.[] | select((.location|ascii_downcase|test("apeldoorn|voorst")) or ((.link//"")|test("3967274")))' | head -20
-          echo "== aantal"; curl -sS -m 20 https://api.112meldkamer.nl/v1/burgernet | jq 'length'
-          echo "== eerste"; curl -sS -m 20 https://api.112meldkamer.nl/v1/burgernet | jq -c '.[0:2]'
+          set +e
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          echo "== 112meldkamer raw"; curl -sS -m 20 -i https://api.112meldkamer.nl/v1/burgernet | head -c 1500; echo
           echo "== worker waarschuwingen"; curl -sS -m 20 "$A/v1/waarschuwingen?days=1" | head -c 3000; echo
-          echo "== worker meldingen"; curl -sS -m 20 "$A/v1/meldingen?limit=1" | head -c 1500; echo
-          echo "== burgernet html"; curl -sS -m 20 -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/3967274 | grep -o "<title>[^<]*" | head -2
+          echo "== worker overview-status"; curl -sS -m 20 "$A/v1/meldingen?limit=1" | head -c 800; echo
+          echo "== burgernet.nl api guesses"
+          for u in https://www.burgernet.nl/api/actions https://www.burgernet.nl/burgernet/3967274; do echo "-- $u"; curl -sS -m 20 -A "Mozilla/5.0" -i "$u" | head -c 1200; echo; done
+          true
