@@ -163,7 +163,7 @@ struct SheetKop: View {
                 .foregroundStyle(.white)
                 .frame(width: 60, height: 60)
                 .background(kleur, in: vorm)
-            Text(titel).font(.title3.bold())
+            Text(titel).font(.headline)
             Text(subtitel).font(.subheadline).foregroundStyle(.secondary).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
@@ -211,8 +211,8 @@ struct SheetOptie<Icon: View>: View {
                 .frame(width: 48, height: 48)
                 .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 2) {
-                Text(titel).font(.body.weight(.semibold)).foregroundStyle(.primary)
-                Text(subtitel).font(.subheadline).foregroundStyle(.secondary)
+                Text(titel).font(.subheadline.weight(.semibold)).foregroundStyle(.primary)
+                Text(subtitel).font(.footnote).foregroundStyle(.secondary)
             }
             Spacer(minLength: 8)
             if chevron { Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary) }
@@ -398,7 +398,7 @@ struct VerloopKaart: View {
             let spanMin = Int(((lijst.last?.datum ?? eerste).timeIntervalSince(eerste) / 60).rounded())
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
-                    Text(L("Verloop")).font(.title3.bold())
+                    Text(L("Verloop")).font(AppFont.heading(18))
                     Spacer()
                     Text(spanMin < 1 ? Lf("%lld meldingen binnen een minuut", lijst.count) : Lf("%lld meldingen binnen %lld min", lijst.count, spanMin))
                         .font(.footnote).foregroundStyle(.secondary)

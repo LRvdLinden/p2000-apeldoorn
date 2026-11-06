@@ -350,9 +350,9 @@ struct MeldingDetailView: View {
     private var mainCard: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top, spacing: 12) {
-                DienstIcon(dienst: melding.dienst, size: 36)
+                DienstIcon(dienst: melding.dienst, size: 32)
                 Text(melding.title)
-                    .font(AppFont.body(18, .semibold))
+                    .font(AppFont.body(16, .medium))
                     .fixedSize(horizontal: false, vertical: true)
                     .textSelection(.enabled)
                 Spacer(minLength: 8)
@@ -413,9 +413,9 @@ struct MeldingDetailView: View {
                 .frame(width: 36, height: 36)
                 .background(color, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
             VStack(alignment: .leading, spacing: 1) {
-                Text(title).font(AppFont.body(16, .semibold))
+                Text(title).font(AppFont.body(15, .semibold))
                 if !subtitle.isEmpty {
-                    Text(subtitle).font(AppFont.body(12)).foregroundStyle(.secondary)
+                    Text(subtitle).font(AppFont.body(13)).foregroundStyle(.secondary)
                 }
             }
             Spacer(minLength: 0)
@@ -729,7 +729,7 @@ struct MeldingDetailView: View {
     }
 
     private func heading(_ text: String) -> some View {
-        Text(text).font(AppFont.heading(21))
+        Text(text).font(AppFont.heading(18))
     }
 }
 

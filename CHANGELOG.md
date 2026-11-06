@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 29)
+- Meldingdetail rustiger: kleinere titel en regels, kleinere kopjes bij kazernes, verloop en de sheets voor route en delen.
+
 ## A-Alerts 2.0.0 (build 28)
 - NL-Alert-icoon en -kaartmarker op basis van het echte NL-Alert-logo; KNMI heeft een eigen icoon (zon en wolk op blauw).
 - Pager: NL-Alert en Burgernet tonen de tijd van de melding (met eindtijd als hij is afgelopen) in plaats van 'x minuten geleden'.

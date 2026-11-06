@@ -14,7 +14,7 @@ struct GerelateerdeMeldingen: View {
                 HStack(spacing: 8) {
                     Image(systemName: "link")
                         .foregroundStyle(.secondary)
-                    Text(L("Mogelijk verband")).font(AppFont.heading(21))
+                    Text(L("Mogelijk verband")).font(AppFont.heading(18))
                 }
                 ForEach(list) { v in
                     NavigationLink { MeldingDetailView(melding: v.melding) } label: {
@@ -71,7 +71,7 @@ struct AanrijtijdKaart: View {
                 VStack(alignment: .leading, spacing: 12) {
                     HStack(spacing: 8) {
                         Image(systemName: "timer").foregroundStyle(.secondary)
-                        Text(L("Geschatte aanrijtijd")).font(AppFont.heading(21))
+                        Text(L("Geschatte aanrijtijd")).font(AppFont.heading(18))
                     }
                     HStack(alignment: .center, spacing: 14) {
                         KazerneIcon(soort: s.kazerne.soort, size: 44)
@@ -81,7 +81,7 @@ struct AanrijtijdKaart: View {
                         }
                         Spacer()
                         VStack(alignment: .trailing, spacing: 0) {
-                            Text(verbatim: "± \(s.minuten)").font(AppFont.heading(32).monospacedDigit())
+                            Text(verbatim: "± \(s.minuten)").font(AppFont.heading(26).monospacedDigit())
                             Text(L("min")).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
                         }
                     }
@@ -117,7 +117,7 @@ struct GealarmeerdeKazernesKaart: View {
             let genoemd = routes.first?.genoemd ?? false
             VStack(alignment: .leading, spacing: 10) {
                 Text(genoemd ? Lf("Gealarmeerde kazernes (%lld)", routes.count) : L("Dichtstbijzijnde kazerne"))
-                    .font(.title3.bold())
+                    .font(.headline)
                     .padding(.horizontal, 4)
                 TimelineView(.periodic(from: .now, by: 30)) { ctx in
                     VStack(spacing: 0) {
