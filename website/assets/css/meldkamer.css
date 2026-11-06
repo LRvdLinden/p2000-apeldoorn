@@ -143,3 +143,4 @@ body.mk {
 .heli-marker img { width: 96px; height: auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.45)); }
 .heli-marker span { font-size: .75rem; font-weight: 700; padding: 1px 7px; border-radius: 8px; background: rgba(20,20,26,.85); color: #fff; }
 .warn-marker img { width: 40px; }
+.row.warn.ended > img { filter: grayscale(1); }

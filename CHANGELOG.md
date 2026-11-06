@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 30)
+- NL-Alert, Burgernet en KNMI hebben nu dezelfde detailpagina als een P2000-melding: grote kaart met marker (en gebied), glazen balk met delen, Look Around bij Burgernet, knoppen voor locatie, 3D en grote kaart, hoofdkaart met plaats, status, tijd en afstand, het bericht, METEO-gegevens van dat moment, meldingen in de buurt en de gegevens.
+- Een afgelopen NL-Alert of Burgernet-actie wordt in de pager grijs, net als een melding die je al hebt bekeken (ook op de website en Apple TV).
+- Website: nieuwe icoonbestanden en favicon.ico, zodat nergens meer het oude icoon uit de cache verschijnt.
+
 ## A-Alerts 2.0.0 (build 29)
 - Meldingdetail rustiger: kleinere titel en regels, kleinere kopjes bij kazernes, verloop en de sheets voor route en delen.
 

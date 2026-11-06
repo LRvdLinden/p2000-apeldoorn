@@ -28,15 +28,20 @@ struct WaarschuwingRow: View {
                     .foregroundStyle(.primary)
                     .lineLimit(2)
                 if let plaats = waarschuwing.plaats ?? (waarschuwing.bron == .nlalert ? L("Gemeente Apeldoorn") : nil) {
-                    Label(plaats, systemImage: "mappin.and.ellipse")
-                        .font(AppFont.body(12, .regular, relativeTo: .caption))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Image(systemName: "mappin.and.ellipse")
+                        Text(plaats)
+                    }
+                    .font(AppFont.body(12, .regular, relativeTo: .caption))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
                 }
             }
         }
         .padding(.vertical, 4)
-        .opacity(waarschuwing.isBeeindigd ? 0.7 : 1)
+        // Ended: greyed out like an alert you have already opened.
+        .saturation(waarschuwing.isBeeindigd ? 0 : 1)
+        .opacity(waarschuwing.isBeeindigd ? 0.5 : 1)
         .accessibilityElement(children: .combine)
     }
 
@@ -106,183 +111,6 @@ struct KnmiBanner: View {
 }
 
 // MARK: - Detail
-
-struct WaarschuwingDetailView: View {
-    let id: String
-    @Environment(WaarschuwingStore.self) private var store
-    @Environment(AppSettings.self) private var settings
-    @State private var detail: WaarschuwingDetail?
-    @State private var failed = false
-    @State private var showEnglish = false
-
-    private var w: Waarschuwing? { detail?.waarschuwing ?? store.item(id: id) }
-
-    var body: some View {
-        Group {
-            if let w {
-                content(w)
-            } else if failed {
-                ContentUnavailableView(L("Waarschuwing niet gevonden"), systemImage: "exclamationmark.triangle",
-                                       description: Text(L("Deze waarschuwing is niet meer beschikbaar.")))
-            } else {
-                ProgressView()
-            }
-        }
-        .navigationTitle(Text(verbatim: w?.label ?? L("Waarschuwing")))
-        #if os(iOS)
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
-        .task(id: id) { await load() }
-    }
-
-    private func load() async {
-        do {
-            detail = try await P2000API.shared.waarschuwing(id: id)
-        } catch {
-            if store.item(id: id) == nil { failed = true }
-        }
-    }
-
-    @ViewBuilder
-    private func content(_ w: Waarschuwing) -> some View {
-        List {
-            Section {
-                WaarschuwingMap(waarschuwing: w, meldingen: detail?.meldingen ?? [])
-                    .frame(height: 260)
-                    .listRowInsets(EdgeInsets())
-            }
-
-            Section {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Label(w.kop, systemImage: w.systemImage).font(AppFont.heading(18, relativeTo: .headline))
-                        Spacer()
-                        Text(w.statusLabel)
-                            .font(AppFont.body(12, .bold, relativeTo: .caption))
-                            .padding(.horizontal, 10).padding(.vertical, 4)
-                            .background(.black.opacity(0.15), in: Capsule())
-                    }
-                    Text(w.titel).font(AppFont.heading(20, relativeTo: .title3))
-                }
-                .foregroundStyle(w.onColor)
-                .padding(16)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .background(w.color, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-                .listRowInsets(EdgeInsets())
-                .listRowBackground(Color.clear)
-            } footer: {
-                if w.bron == .knmi, let uitleg = Self.codeUitleg(w.niveau) { Text(uitleg) }
-            }
-
-            if let tekst = w.tekst, !tekst.isEmpty {
-                Section(L("Bericht")) {
-                    Text(showEnglish ? (w.tekstEn ?? tekst) : tekst)
-                        .textSelection(.enabled)
-                    if w.tekstEn != nil {
-                        Button(showEnglish ? L("Toon Nederlandse tekst") : L("Toon Engelse tekst")) { showEnglish.toggle() }
-                    }
-                }
-            }
-
-            Section(L("Details")) {
-                detailRow(icon: "clock.fill", color: .pink, title: Fmt.dayTime(w.start),
-                          subtitle: w.bron == .knmi ? L("Geldig vanaf") : L("Uitgezonden"))
-                if let einde = w.einde {
-                    detailRow(icon: "clock.badge.checkmark.fill", color: .green, title: Fmt.dayTime(einde),
-                              subtitle: einde < .now ? L("Afgelopen") : L("Geldig tot"))
-                }
-                if let plaats = w.plaats {
-                    detailRow(icon: "map.fill", color: .orange, title: plaats, subtitle: w.bron == .knmi ? L("Gebied") : L("Plaats"))
-                }
-                if let inArea = userInArea(w) {
-                    detailRow(icon: inArea ? "location.fill" : "location.slash.fill", color: inArea ? .red : .gray,
-                              title: inArea ? L("In het gebied") : L("Buiten het gebied"), subtitle: L("Jouw locatie"))
-                }
-                if let link = w.link, let url = URL(string: link) {
-                    Link(destination: url) {
-                        detailRow(icon: "safari.fill", color: .blue, title: Self.bronNaam(w.bron), subtitle: L("Officiële bron"))
-                    }
-                }
-            }
-
-            if w.bron != .knmi || !(detail?.meldingen ?? []).isEmpty {
-                Section {
-                    if let list = detail?.meldingen, !list.isEmpty {
-                        ForEach(list) { m in
-                            NavigationLink { MeldingDetailView(melding: m) } label: {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    MeldingRow(melding: m, gelezen: settings.isRead(m))
-                                    if detail?.relaties[m.guid] == "grip-in-gebied" {
-                                        Label(L("GRIP-melding in het gebied"), systemImage: "exclamationmark.octagon.fill")
-                                            .font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.orange)
-                                    }
-                                }
-                            }
-                        }
-                    } else if detail != nil {
-                        Text(L("Geen P2000-meldingen gevonden in het gebied rond dit tijdstip."))
-                            .foregroundStyle(.secondary)
-                    } else {
-                        ProgressView()
-                    }
-                } header: {
-                    Text(Lf("Gekoppelde incidenten (%lld)", detail?.meldingen.count ?? 0))
-                } footer: {
-                    Text(w.bron == .burgernet
-                         ? L("Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging.")
-                         : L("P2000-meldingen in het gebied van deze waarschuwing, rond het tijdstip waarop hij werd uitgezonden. Dit is een mogelijk verband, geen bevestiging."))
-                }
-            }
-
-            Section {
-                EmptyView()
-            } footer: {
-                Text(w.bron == .nlalert
-                     ? L("A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112.")
-                     : Lf("Bron: %@. Bel bij nood altijd 112.", Self.bronNaam(w.bron)))
-            }
-        }
-        #if os(iOS)
-        .listStyle(.insetGrouped)
-        #endif
-    }
-
-    private func detailRow(icon: String, color: Color, title: String, subtitle: String) -> some View {
-        HStack(spacing: 12) {
-            Image(systemName: icon)
-                .font(.subheadline.weight(.semibold))
-                .foregroundStyle(.white)
-                .frame(width: 30, height: 30)
-                .background(color, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-            VStack(alignment: .leading, spacing: 1) {
-                Text(title).foregroundStyle(.primary)
-                Text(subtitle).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
-            }
-        }
-    }
-
-    private func userInArea(_ w: Waarschuwing) -> Bool? {
-        guard w.gebied != nil, settings.currentLat != 0 else { return nil }
-        return w.contains(lat: settings.currentLat, lon: settings.currentLon)
-    }
-
-    static func bronNaam(_ b: Waarschuwing.Bron) -> String {
-        switch b {
-        case .nlalert: return "NL-Alert"
-        case .burgernet: return "Burgernet"
-        case .knmi: return "KNMI"
-        }
-    }
-
-    static func codeUitleg(_ niveau: String?) -> String? {
-        switch niveau {
-        case "yellow": return L("Wees alert: het weer kan gevaarlijk zijn.")
-        case "orange": return L("Wees voorbereid: grote kans op gevaar, schade en overlast.")
-        case "red": return L("Onderneem actie: extreem weer met grote kans op schade en letsel.")
-        default: return nil
-        }
-    }
-}
 
 /// The warning area (or Burgernet place) on a map, with the linked P2000 alerts.
 struct WaarschuwingMap: View {

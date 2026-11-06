@@ -46,7 +46,8 @@ struct TVWaarschuwingRow: View {
         }
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .opacity(waarschuwing.isBeeindigd ? 0.65 : 1)
+        .saturation(waarschuwing.isBeeindigd ? 0 : 1)
+        .opacity(waarschuwing.isBeeindigd ? 0.5 : 1)
     }
 }
 

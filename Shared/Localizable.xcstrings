@@ -511,6 +511,23 @@
         }
       }
     },
+    "A-Alerts is aanvullend op NL-Alert. Volg altijd het advies in het NL-Alert-bericht.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A-Alerts supplements NL-Alert. Always follow the advice in the NL-Alert message."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A-Alerts is aanvullend op NL-Alert. Volg altijd het advies in het NL-Alert-bericht."
+          }
+        }
+      }
+    },
     "Aan": {
       "extractionState": "manual",
       "localizations": {
@@ -626,6 +643,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afgelopen"
+          }
+        }
+      }
+    },
+    "Afgelopen om %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ended at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgelopen om %@"
           }
         }
       }
@@ -1004,6 +1038,23 @@
         }
       }
     },
+    "Bekijk bij %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View on %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk bij %@"
+          }
+        }
+      }
+    },
     "Bekijk de officiële bron": {
       "extractionState": "manual",
       "localizations": {
@@ -1225,6 +1276,23 @@
         }
       }
     },
+    "Bron": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron"
+          }
+        }
+      }
+    },
     "Bron: %@. Bel bij nood altijd 112.": {
       "extractionState": "manual",
       "localizations": {
@@ -1259,23 +1327,6 @@
         }
       }
     },
-    "Buiten het gebied": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Outside the area"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Buiten het gebied"
-          }
-        }
-      }
-    },
     "Burgernet": {
       "extractionState": "manual",
       "localizations": {
@@ -1289,6 +1340,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Burgernet"
+          }
+        }
+      }
+    },
+    "Burgernet geeft de plaats van de oproep, niet het exacte adres. De marker staat daarom ongeveer.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burgernet gives the place of the call, not the exact address, so the marker is approximate."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burgernet geeft de plaats van de oproep, niet het exacte adres. De marker staat daarom ongeveer."
           }
         }
       }
@@ -1374,6 +1442,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Changelog"
+          }
+        }
+      }
+    },
+    "Code": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code"
           }
         }
       }
@@ -2092,6 +2177,23 @@
         }
       }
     },
+    "English": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "English"
+          }
+        }
+      }
+    },
     "Er is nu geen trauma- of politiehelikopter in de lucht.": {
       "extractionState": "manual",
       "localizations": {
@@ -2228,23 +2330,6 @@
         }
       }
     },
-    "GRIP-melding in het gebied": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GRIP alert in the area"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "GRIP-melding in het gebied"
-          }
-        }
-      }
-    },
     "Gealarmeerde kazernes": {
       "extractionState": "manual",
       "localizations": {
@@ -2292,6 +2377,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gebied"
+          }
+        }
+      }
+    },
+    "Gebied staat op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The area is on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gebied staat op de kaart"
           }
         }
       }
@@ -2432,6 +2534,23 @@
         }
       }
     },
+    "Gegevens": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Details"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegevens"
+          }
+        }
+      }
+    },
     "Gegevens zijn op basis van incident tijdstip en locatie": {
       "extractionState": "manual",
       "localizations": {
@@ -2449,6 +2568,23 @@
         }
       }
     },
+    "Gegevens zijn op basis van tijdstip en plaats van de waarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Based on the time and place of the warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gegevens zijn op basis van tijdstip en plaats van de waarschuwing"
+          }
+        }
+      }
+    },
     "Gekopieerd": {
       "extractionState": "manual",
       "localizations": {
@@ -2462,23 +2598,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gekopieerd"
-          }
-        }
-      }
-    },
-    "Gekoppelde incidenten (%lld)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Linked incidents (%lld)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gekoppelde incidenten (%lld)"
           }
         }
       }
@@ -2976,23 +3095,6 @@
         }
       }
     },
-    "In het gebied": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Inside the area"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "In het gebied"
-          }
-        }
-      }
-    },
     "Incident %@": {
       "extractionState": "manual",
       "localizations": {
@@ -3061,6 +3163,23 @@
         }
       }
     },
+    "Je bent in het gebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You are in the area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent in het gebied"
+          }
+        }
+      }
+    },
     "Je filters worden via iCloud gedeeld met je iPhone, iPad en Mac.": {
       "extractionState": "manual",
       "localizations": {
@@ -3125,23 +3244,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts."
-          }
-        }
-      }
-    },
-    "Jouw locatie": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Your location"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Jouw locatie"
           }
         }
       }
@@ -3571,6 +3673,23 @@
         }
       }
     },
+    "Kopieer waarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Copy warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kopieer waarschuwing"
+          }
+        }
+      }
+    },
     "Kritieke meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -3979,6 +4098,23 @@
         }
       }
     },
+    "Meldingen in de buurt (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearby alerts (%lld)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen in de buurt (%lld)"
+          }
+        }
+      }
+    },
     "Meldingen laden...": {
       "extractionState": "manual",
       "localizations": {
@@ -4336,6 +4472,23 @@
         }
       }
     },
+    "Nederlands": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dutch"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nederlands"
+          }
+        }
+      }
+    },
     "Niet alle meldingen van politie en ambulance staan in de app, omdat deze niet altijd via het P2000-netwerk worden verstuurd.": {
       "extractionState": "manual",
       "localizations": {
@@ -4570,23 +4723,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "O"
-          }
-        }
-      }
-    },
-    "Officiële bron": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Official source"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Officiële bron"
           }
         }
       }
@@ -5097,6 +5233,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Plaats"
+          }
+        }
+      }
+    },
+    "Plaats van de oproep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Place of the call"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plaats van de oproep"
           }
         }
       }
@@ -5730,6 +5883,23 @@
         }
       }
     },
+    "Soort": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Type"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Soort"
+          }
+        }
+      }
+    },
     "Specifieke locatie niet bekend": {
       "extractionState": "manual",
       "localizations": {
@@ -5794,6 +5964,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Statistieken"
+          }
+        }
+      }
+    },
+    "Status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status"
           }
         }
       }
@@ -5951,6 +6138,23 @@
         }
       }
     },
+    "Tik voor de waarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap for the warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik voor de waarschuwing"
+          }
+        }
+      }
+    },
     "Tip: niets geselecteerd = alles tonen": {
       "extractionState": "manual",
       "localizations": {
@@ -5968,40 +6172,6 @@
         }
       }
     },
-    "Toon Engelse tekst": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show English text"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toon Engelse tekst"
-          }
-        }
-      }
-    },
-    "Toon Nederlandse tekst": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Show Dutch text"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Toon Nederlandse tekst"
-          }
-        }
-      }
-    },
     "Toon mij en de melding": {
       "extractionState": "manual",
       "localizations": {
@@ -6015,6 +6185,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toon mij en de melding"
+          }
+        }
+      }
+    },
+    "Toon mij en de waarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show me and the warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon mij en de waarschuwing"
           }
         }
       }

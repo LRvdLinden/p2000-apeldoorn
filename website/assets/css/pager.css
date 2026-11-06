@@ -287,3 +287,8 @@
 a.drow { text-decoration: none; color: inherit; }
 .chips.lagen { flex-wrap: wrap; }
 @media (max-width: 1100px) { .map-ui { justify-content: flex-start; } }
+/* Ended warnings look like alerts you have already opened */
+.row.warn.ended { opacity: .58; }
+.row.warn.ended > img { filter: grayscale(1); }
+.row.warn.ended h3 { font-weight: 500; }
+.row.warn.ended .when b { color: var(--muted) !important; }
