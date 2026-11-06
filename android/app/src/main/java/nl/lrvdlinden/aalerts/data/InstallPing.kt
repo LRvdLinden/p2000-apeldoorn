@@ -4,7 +4,6 @@ import android.content.Context
 import nl.lrvdlinden.aalerts.isDutch
 import android.os.Build
 import nl.lrvdlinden.aalerts.BuildConfig
-import isDutch
 import java.util.UUID
 
 /** Anonymous usage ping for the beheer statistics: random install id, platform, model, versions, push on/off. */

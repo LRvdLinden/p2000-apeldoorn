@@ -11,7 +11,6 @@ import kotlinx.coroutines.tasks.await
 import nl.lrvdlinden.aalerts.BuildConfig
 import nl.lrvdlinden.aalerts.data.Api
 import nl.lrvdlinden.aalerts.data.Settings
-import isDutch
 
 /**
  * Push via Firebase Cloud Messaging. The device registers its FCM token with its notification settings at the
