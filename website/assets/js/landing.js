@@ -1,4 +1,4 @@
-import { fetchWaarschuwingen, fetchHelikopters } from "./aalerts.js";
+import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js";
 import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js";
 
 reveal();
@@ -81,16 +81,26 @@ function renderTicker(list) {
 }
 
 // Lock-screen style notifications next to the hero phone.
-let noteIndex = 0;
+// NL-Alert, Burgernet and KNMI of the last week join the rotation (every third card), so the hero shows them live too.
+let noteIndex = 0, heroWarnings = [];
 function cycleNotes(list) {
   const box = document.getElementById("notes");
   const recent = list.slice(0, 8);
-  if (!recent.length) return;
+  if (!recent.length && !heroWarnings.length) return;
   const show = () => {
-    const m = recent[noteIndex++ % recent.length];
+    const i = noteIndex++;
+    const useWarning = heroWarnings.length && (i % 3 === 1 || !recent.length);
     const el = document.createElement("div");
     el.className = "note";
-    el.innerHTML = `<img src="${icon(m)}" alt=""><div><b>${esc(m.prioriteit ? m.prioriteit + " · " : "")}${esc(dienstOf(m).label)}</b>${esc(m.title)}<br><small>${esc(plaatsText(m))} · ${esc(ago(date(m)))}</small></div>`;
+    if (useWarning) {
+      const w = heroWarnings[Math.floor(i / 3) % heroWarnings.length];
+      el.classList.add("note-warn");
+      el.style.setProperty("--wc", BRONNEN[w.bron].text);
+      el.innerHTML = `<img src="${wIcon(w)}" alt=""><div><b>${esc(wKop(w))} · ${esc(wStatus(w))}</b>${esc(w.titel)}<br><small>${esc(w.plaats || "Gemeente Apeldoorn")} · ${esc(wTijd(w))}</small></div>`;
+    } else {
+      const m = recent[i % recent.length];
+      el.innerHTML = `<img src="${icon(m)}" alt=""><div><b>${esc(m.prioriteit ? m.prioriteit + " · " : "")}${esc(dienstOf(m).label)}</b>${esc(m.title)}<br><small>${esc(plaatsText(m))} · ${esc(ago(date(m)))}</small></div>`;
+    }
     box.prepend(el);
     const all = box.querySelectorAll(".note:not(.out)");
     if (all.length > 3) { const last = all[all.length - 1]; last.classList.add("out"); setTimeout(() => last.remove(), 500); }
@@ -144,12 +154,15 @@ if (tvSection) new IntersectionObserver((entries, io) => {
 
 // A-Alerts: warnings today and helicopters in the air.
 async function renderAAlerts() {
-  const [w, h] = await Promise.all([fetchWaarschuwingen(2), fetchHelikopters()]);
+  const [w, h] = await Promise.all([fetchWaarschuwingen(7), fetchHelikopters()]);
+  heroWarnings = w.slice(0, 6);
   const key = (d) => d.toLocaleDateString("en-CA", { timeZone: "Europe/Amsterdam" });
   const vandaag = key(new Date());
   const n = (bron) => w.filter((x) => x.bron === bron && key(new Date(x.start)) === vandaag).length;
   const set = (id, v) => { const el = document.getElementById(id); if (el) countUp(el, v); };
   set("wNlalert", n("nlalert"));
+  set("tNlalert", n("nlalert"));
+  set("tBurgernet", n("burgernet"));
   set("wBurgernet", n("burgernet"));
   set("wKnmi", w.filter((x) => x.bron === "knmi" && x.status === "actief").length);
   set("hTrauma", h.filter((x) => x.soort === "trauma" && !x.op_grond).length);
