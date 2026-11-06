@@ -27,7 +27,7 @@ config_files = ["Base.xcconfig", "Secrets.example.xcconfig", "P2000Apeldoorn-Inf
                 "P2000Apeldoorn-macOS.entitlements", "P2000ApeldoornWatch-Info.plist", "P2000ApeldoornWatch.entitlements",
                 "Widgets-Info.plist", "Widgets-iOS.entitlements", "Widgets-macOS.entitlements",
                 "WatchWidgets-Info.plist", "WatchWidgets.entitlements", "P2000ApeldoornTV-Info.plist", "P2000ApeldoornTV.entitlements",
-                "Notifications-Info.plist"]
+                "Notifications-Info.plist", "Notifications-macOS.entitlements"]
 cfg_refs = {f: oid("cfg-" + f) for f in config_files}
 I["baseXC"] = cfg_refs["Base.xcconfig"]
 
@@ -208,6 +208,8 @@ notifications = {
     "DEVELOPMENT_TEAM": "EU3UY476T6",
     "ENABLE_HARDENED_RUNTIME": "YES",
     "GENERATE_INFOPLIST_FILE": "YES",
+    # The Mac App Store requires the App Sandbox for every executable, extensions included.
+    "CODE_SIGN_ENTITLEMENTS[sdk=macosx*]": "Config/Notifications-macOS.entitlements",
     "INFOPLIST_FILE": "Config/Notifications-Info.plist",
     "INFOPLIST_KEY_CFBundleDisplayName": "A-Alerts",
     "INFOPLIST_KEY_NSHumanReadableCopyright": "© 2026 P2000 Apeldoorn · PixelForges",

@@ -103,6 +103,7 @@
 		011C0FF2B6F08FC6639358B0 /* P2000ApeldoornTV-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "P2000ApeldoornTV-Info.plist"; sourceTree = "<group>"; };
 		39175893BE4E142D9E11CE45 /* P2000ApeldoornTV.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "P2000ApeldoornTV.entitlements"; sourceTree = "<group>"; };
 		861935F11CCF1EC50B7CE94A /* Notifications-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Notifications-Info.plist"; sourceTree = "<group>"; };
+		9FE66DB40C515B3C0F962107 /* Notifications-macOS.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "Notifications-macOS.entitlements"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -192,6 +193,7 @@
 				011C0FF2B6F08FC6639358B0 /* P2000ApeldoornTV-Info.plist */,
 				39175893BE4E142D9E11CE45 /* P2000ApeldoornTV.entitlements */,
 				861935F11CCF1EC50B7CE94A /* Notifications-Info.plist */,
+				9FE66DB40C515B3C0F962107 /* Notifications-macOS.entitlements */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -884,6 +886,7 @@
 				DEVELOPMENT_TEAM = EU3UY476T6;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Config/Notifications-macOS.entitlements";
 				INFOPLIST_FILE = "Config/Notifications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
@@ -910,6 +913,7 @@
 				DEVELOPMENT_TEAM = EU3UY476T6;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				"CODE_SIGN_ENTITLEMENTS[sdk=macosx*]" = "Config/Notifications-macOS.entitlements";
 				INFOPLIST_FILE = "Config/Notifications-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";

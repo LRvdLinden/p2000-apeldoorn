@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 23)
+- Mac: de push-extensie heeft nu App Sandbox (vereist voor de Mac App Store; gaf een fout bij het archiveren).
+
 ## A-Alerts 2.0.0 (build 22)
 - Gealarmeerde kazernes op de melding: alle kazernes uit de oproep, met afstand, rijtijd en een geschatte status (onderweg met tijd, of ter plaatse); hun routes als stippellijn op de kaart. Altijd een schatting, zonder voertuigposities.
 - Instellingen › Waarschuwingen: pushmeldingen voor NL-Alert, Burgernet en KNMI (vanaf welke code) voor al je profielen tegelijk.
