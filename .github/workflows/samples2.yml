@@ -2,7 +2,7 @@ name: Heli- en kazernedata (eenmalig)
 on:
   push:
     branches: [a-alerts]
-    paths: [tools/samples/fetch_heli_kazernes.sh]
+    paths: [tools/geodata/fetch_kazernes.sh]
 permissions:
   contents: write
 jobs:
@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - run: bash tools/samples/fetch_heli_kazernes.sh
+      - run: bash tools/geodata/fetch_kazernes.sh
       - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
