@@ -1,0 +1,17 @@
+name: Geodata (eenmalig)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/geodata/fetch_places.py
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add tools/geodata/places.json
+          git commit -m "Geodata: coördinaten van de A-Alerts-plaatsen" || echo "geen wijzigingen"
+          git push
