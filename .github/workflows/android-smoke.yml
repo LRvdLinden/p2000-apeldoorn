@@ -4,6 +4,9 @@ name: Android smoke test
 # and fails on a crash. Result: branch "android-screenshots" (force-pushed).
 on:
   workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [.github/workflows/android-smoke.yml, .github/android-smoke.sh]
 
 permissions:
   contents: write
