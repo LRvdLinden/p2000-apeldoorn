@@ -14,7 +14,9 @@ Beide praten met het beheerdeel van de API (Cloudflare Worker in `../worker`), a
 - **Meldingen:** zoeken, verbergen, titel/categorie/locatie/coördinaten corrigeren of terugdraaien.
 - **Push:** eigen bericht naar iedereen of naar gebruikers van bepaalde plaatsen, met geschiedenis.
 - **Teksten:** privacyverklaring, voorwaarden, disclaimer en changelog bewerken (direct live in app en website).
-- **App:** Face ID / Touch ID, en een pushmelding bij storingen van de P2000-feed (> 10 min).
+- **Waarschuwingen (A-Alerts):** NL-Alert, Burgernet en KNMI zoeken en filteren, verbergen in apps en website, of handmatig beëindigen (brongegevens blijven ongewijzigd).
+- **Dashboard (A-Alerts):** status van NL-Alert, Burgernet, KNMI en adsb.lol, helikopters in de lucht, waarschuwingen per bron en het gebruik van de notificatieprofielen.
+- **App:** Face ID / Touch ID, en een pushmelding bij storingen van de P2000-feed (> 10 min) en, met de schakelaar *Storing bronnen*, van NL-Alert, Burgernet of KNMI (> 30 min).
 
 ## App bouwen
 Open `P2000Beheer.xcodeproj` (Xcode 16+), bundle ID `nl.lrvdlinden.p2000beheer`. Zet bij de App ID **Push Notifications** aan. Het projectbestand maak je opnieuw met `python3 tools/make_project.py`.

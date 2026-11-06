@@ -1,8 +1,8 @@
-// P2000Beheer web dashboard – talks to the beheer part of the P2000 Apeldoorn API.
+// A-Alerts-beheer (P2000Beheer) web dashboard – talks to the beheer part of the P2000 Apeldoorn API.
 const API = (/^(localhost|127\.)/.test(location.hostname) && new URLSearchParams(location.search).get("api"))
   || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
-const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek",
-  "Lieren", "Loenen", "Radio Kootwijk", "Teuge", "Uddel", "Ugchelen", "Wenum-Wiesel"];
+// The 26 A-Alerts places (same list as Shared/Werkgebied.json).
+const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek", "Loenen", "Uddel", "Ugchelen", "Wenum-Wiesel", "Teuge", "Assel", "Engeland", "Gerritsflesch", "Groenendaal", "De Haere", "Hoog Buurlo", "Hooilanden", "De Jonas", "De Krim", "Lieren", "Meerveld", "Nieuw-Milligen", "Oosterhuizen", "Radio Kootwijk", "Woeste Hoeve"];
 const DIENST = {
   brandweer: ["🔥", "Brandweer", "#E30613"], ambulance: ["🚑", "Ambulance", "#F4C400"],
   politie: ["🚓", "Politie", "#15428B"], traumaheli: ["🚁", "Lifeliner", "#9333EA"],
@@ -76,7 +76,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], meldingen: ["Meldingen", meldingen], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -211,7 +211,98 @@ async function dashboard(el) {
     <div class="card"><h2>Meest bekeken meldingen</h2>
       ${d.topBekeken.length ? d.topBekeken.map((t) => `<div class="row"><span>${(DIENST[t.dienst] || ["🔔"])[0]}</span><div class="grow"><b style="font-weight:600">${esc(t.title)}</b><br><small>${ago(t.datum_tijd)}</small></div><small>👁 ${t.views}</small></div>`).join("") : `<p class="muted">Nog geen views</p>`}
     </div>
+    ${d.aAlerts ? aAlertsCards(d.aAlerts, status) : ""}
   </div>`;
+}
+
+// ------------------------------------------------------------------ A-Alerts
+
+const BRON = {
+  nlalert: ["⚠️", "NL-Alert", "#FFC800"], burgernet: ["📣", "Burgernet", "#0067B1"], knmi: ["🌦️", "KNMI", "#FF8A00"],
+  helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
+};
+const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood" };
+const STATUS = { actief: "Actief", verwacht: "Verwacht", beeindigd: "Beëindigd" };
+
+function aAlertsCards(a, status) {
+  const p = a.profielen, wb = a.waarschuwingen.perBron;
+  const maxV = Math.max(1, ...Object.values(p.verdeling));
+  return `
+    <div class="card"><h2>A-Alerts-bronnen</h2>
+      ${Object.keys(BRON).map((k) => a.bronnen[k] ? status(!a.bronnen[k].storing, BRON[k][1],
+        a.bronnen[k].storing ? (a.bronnen[k].laatsteFout || "geen gegevens") : `${ago(a.bronnen[k].laatstOk)} · ${a.bronnen[k].laatsteStatus || ""}`) : "").join("")}
+      <p class="muted" style="font-size:.75rem;margin:6px 0 0">Storing = langer dan 30 minuten geen gegevens (pushmelding in de beheer-app).</p>
+    </div>
+    <div class="card"><h2>Helikopters in de lucht</h2>
+      ${a.inDeLucht.length ? a.inDeLucht.map((h) => `<div class="row"><span>🚁</span><span class="grow"><b>${esc(h.naam)}</b></span><small>${h.hoogte_m === 0 ? "op de grond" : h.hoogte_m != null ? `${h.hoogte_m} m` : ""}${h.snelheid_kmh != null ? ` · ${h.snelheid_kmh} km/u` : ""}</small></div>`).join("") : `<p class="muted">Er is nu geen Lifeliner of Zulu in de lucht.</p>`}
+    </div>
+    <div class="card"><h2>Waarschuwingen · 7 dagen</h2>
+      ${["nlalert", "burgernet", "knmi"].map((k) => `<div class="row"><span>${BRON[k][0]}</span><span class="grow">${BRON[k][1]}</span><b>${wb[k]?.week || 0}</b><small>${wb[k]?.actief || 0} actief</small></div>`).join("")}
+      ${a.waarschuwingen.verborgen ? `<p class="muted" style="font-size:.8rem">${a.waarschuwingen.verborgen} verborgen</p>` : ""}
+    </div>
+    <div class="card"><h2>Notificatieprofielen</h2>
+      ${p.metProfielen ? `
+        ${[1, 2, 3, 4, 5].map((n) => `<div class="row"><span class="grow">${n} profiel${n > 1 ? "en" : ""}</span><b>${p.verdeling[n] || 0}</b></div><div class="bar"><div style="width:${((p.verdeling[n] || 0) / maxV) * 100}%"></div></div>`).join("")}
+        <div class="row"><span class="grow">Toestellen met profielen</span><b>${p.metProfielen}</b></div>
+        <div class="row"><span class="grow">Nog zonder profielen (oudere versie)</span><b>${p.zonderProfielen}</b></div>
+        <div class="row"><span class="grow">Met eigen tijden</span><b>${p.metTijden}</b></div>
+        <div class="row"><span class="grow">Wil NL-Alert / Burgernet</span><b>${p.waarschuwingen.nlalert} / ${p.waarschuwingen.burgernet}</b></div>
+        <div class="row"><span class="grow">Wil KNMI geel / oranje / rood</span><b>${p.waarschuwingen.knmi.yellow} / ${p.waarschuwingen.knmi.orange} / ${p.waarschuwingen.knmi.red}</b></div>
+        ${p.topPlaatsen.length ? `<p class="muted" style="font-size:.8rem;margin:8px 0 2px">Populairste plaatsen</p>${p.topPlaatsen.slice(0, 6).map((x) => `<div class="row"><span class="grow">${esc(x.plaats)}</span><small>${x.n}</small></div>`).join("")}` : ""}
+        <p class="muted" style="font-size:.75rem;margin:6px 0 0">Gemiddeld ${p.gemiddeld} profiel per toestel · ${p.pushToestellen} toestellen met push</p>
+      ` : `<p class="muted">Nog geen toestellen met profielen. Dat begint bij A-Alerts 1.0.0 (17).</p>`}
+    </div>`;
+}
+
+let wBron = "", wStatus = "", wQuery = "";
+async function waarschuwingen(el) {
+  const qs = new URLSearchParams({ days: "30", ...(wBron ? { bron: wBron } : {}), ...(wStatus ? { status: wStatus } : {}), ...(wQuery ? { q: wQuery } : {}) });
+  const list = await api("GET", `/v1/beheer/waarschuwingen?${qs}`);
+  const kop = (w) => w.bron === "knmi" ? `${CODE[w.niveau] || "KNMI"} · ${w.soort || ""}` : w.bron === "burgernet" ? `Burgernet · ${w.plaats || "Apeldoorn"}` : "NL-Alert";
+  el.innerHTML = `
+    <div class="toolbar">
+      <input type="search" id="wq" placeholder="Zoek in titel, tekst of plaats" value="${esc(wQuery)}">
+      <select id="wb"><option value="">Alle bronnen</option>${["nlalert", "burgernet", "knmi"].map((b) => `<option value="${b}" ${wBron === b ? "selected" : ""}>${BRON[b][1]}</option>`).join("")}</select>
+      <select id="ws"><option value="">Alle statussen</option>${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${wStatus === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+    </div>
+    <div class="list">${list.length ? list.map((w) => `
+      <div class="item${w.verborgen ? " hidden" : ""}" data-id="${esc(w.id)}">
+        <span class="ico">${BRON[w.bron]?.[0] || "⚠️"}</span>
+        <div class="grow" style="flex:1;min-width:0">
+          <small>${dt(w.start)} · ${esc(kop(w))}</small>
+          <div class="t">${esc(w.titel || "–")}</div>
+          <div><span class="tag">${STATUS[w.status] || esc(w.status)}</span>${w.verborgen ? `<span class="tag orange">Verborgen</span>` : ""}${w.handmatig_beeindigd ? `<span class="tag blue">Handmatig beëindigd</span>` : ""}</div>
+        </div>
+      </div>`).join("") : `<p class="muted" style="padding:16px">Geen waarschuwingen in de laatste 30 dagen.</p>`}</div>
+    <p class="muted" style="font-size:.8rem">Verbergen haalt een waarschuwing weg uit de apps en de website. Beëindigen zet hem op beëindigd als de bron dat niet zelf doet. De brongegevens blijven ongewijzigd.</p>`;
+  let t;
+  $("wq").addEventListener("input", (e) => { clearTimeout(t); t = setTimeout(() => { wQuery = e.target.value.trim(); run(); }, 350); });
+  $("wb").addEventListener("change", (e) => { wBron = e.target.value; run(); });
+  $("ws").addEventListener("change", (e) => { wStatus = e.target.value; run(); });
+  el.querySelectorAll(".item").forEach((row) => row.addEventListener("click", () => editWaarschuwing(list.find((w) => w.id === row.dataset.id))));
+}
+
+function editWaarschuwing(w) {
+  openModal(`
+    <h2>${esc(BRON[w.bron]?.[1] || w.bron)}</h2>
+    <p class="muted">${STATUS[w.status] || esc(w.status)} · ${dt(w.start)}${w.einde ? ` – ${dt(w.einde)}` : ""}${w.plaats ? ` · ${esc(w.plaats)}` : ""}</p>
+    <p><b>${esc(w.titel || "–")}</b></p>
+    ${w.tekst && w.tekst !== w.titel ? `<p style="white-space:pre-wrap">${esc(w.tekst)}</p>` : ""}
+    ${w.link ? `<p><a href="${esc(w.link)}" target="_blank" rel="noopener">Bekijk bij de bron ↗</a></p>` : ""}
+    <label class="chips"><label><input type="checkbox" id="wHide" ${w.verborgen ? "checked" : ""}> Verbergen in apps en website</label></label>
+    <label class="chips"><label><input type="checkbox" id="wEnd" ${w.handmatig_beeindigd ? "checked" : ""}> Handmatig beëindigd</label></label>
+    <p class="muted" style="font-size:.8rem">Werkt binnen een minuut in de apps. Zet je het terug, dan geldt weer wat de bron zegt.</p>
+    <p class="muted" style="font-size:.75rem">${esc(w.id)}</p>
+    <div class="actions"><button class="btn" id="wClose">Annuleren</button><button class="btn primary" id="wSave">Opslaan</button></div>`);
+  $("wClose").addEventListener("click", closeModal);
+  $("wSave").addEventListener("click", async () => {
+    try {
+      await api("PATCH", `/v1/beheer/waarschuwingen/${encodeURIComponent(w.id)}`, { verborgen: $("wHide").checked, beeindigd: $("wEnd").checked });
+      closeModal();
+      toast("Opgeslagen");
+      run();
+    } catch (err) { toast(err.message); }
+  });
 }
 
 let meldingQuery = "", onlyHidden = false;
