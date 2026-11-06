@@ -34,6 +34,10 @@ ErrorDocument 404 /404.html
   RewriteCond %{QUERY_STRING} (^|&)p=changelog(&|$)
   RewriteRule ^info/?$ /wat-is-nieuw/? [R=301,L]
 
+  # Korte links (WhatsApp/Homey): /statistieken en /waarschuwing/<id>
+  RewriteRule ^statistieken/?$ /pager/#stats [R=302,L,NE]
+  RewriteRule ^waarschuwing/(.+)$ /pager/?waarschuwing=$1 [R=302,L,QSA]
+
   # Deellinks uit de app: /melding/<guid> → live pager met die melding open
   RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]
 </IfModule>
