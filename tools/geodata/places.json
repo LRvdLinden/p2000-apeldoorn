@@ -146,9 +146,9 @@
  {
   "naam": "De Krim",
   "soort": "buurtschap",
-  "lat": 52.65271081,
-  "lon": 6.61980312,
-  "bron": "PDOK woonplaats (Hardenberg)",
+  "lat": null,
+  "lon": null,
+  "bron": "wikipedia: not found",
   "wiki": ""
  },
  {
