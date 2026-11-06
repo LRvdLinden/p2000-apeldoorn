@@ -3,9 +3,11 @@ const API = (/^(localhost|127\.)/.test(location.hostname) && new URLSearchParams
   || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
 // The 26 A-Alerts places (same list as Shared/Werkgebied.json).
 const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek", "Loenen", "Uddel", "Ugchelen", "Wenum-Wiesel", "Teuge", "Assel", "Engeland", "Gerritsflesch", "Groenendaal", "De Haere", "Hoog Buurlo", "Hooilanden", "De Jonas", "De Krim", "Lieren", "Meerveld", "Nieuw-Milligen", "Oosterhuizen", "Radio Kootwijk", "Woeste Hoeve"];
+// Same pager icons as the A-Alerts app (img/icon_*.png).
+const icon = (name, alt = "") => `<img class="dicon" src="img/icon_${name}.png" alt="${alt}" width="22" height="22">`;
 const DIENST = {
-  brandweer: ["🔥", "Brandweer", "#E30613"], ambulance: ["🚑", "Ambulance", "#F4C400"],
-  politie: ["🚓", "Politie", "#15428B"], traumaheli: ["🚁", "Lifeliner", "#9333EA"],
+  brandweer: [icon("brandweer", "Brandweer"), "Brandweer", "#E30613"], ambulance: [icon("ambulance", "Ambulance"), "Ambulance", "#F4C400"],
+  politie: [icon("politie", "Politie"), "Politie", "#15428B"], traumaheli: [icon("traumaheli", "Traumaheli"), "Traumaheli", "#9333EA"],
 };
 const PLATFORM = { ios: ["iPhone", "#DC2626"], ipados: ["iPad", "#f97316"], macos: ["Mac", "#3b82f6"], watchos: ["Apple Watch", "#22c55e"], tvos: ["Apple TV", "#9333EA"] };
 
@@ -218,7 +220,7 @@ async function dashboard(el) {
 // ------------------------------------------------------------------ A-Alerts
 
 const BRON = {
-  nlalert: ["⚠️", "NL-Alert", "#FFC800"], burgernet: ["📣", "Burgernet", "#0067B1"], knmi: ["🌦️", "KNMI", "#FF8A00"],
+  nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: ["🌦️", "KNMI", "#FF8A00"],
   helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
 };
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood" };
