@@ -31,7 +31,6 @@ enum Config {
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!
     static let pixelForges = URL(string: "https://pixelforges.nl")!
     static let source = URL(string: "https://p2000.page")!
-    static let feedbackMail = URL(string: "mailto:hallo@pixelforges.nl?subject=Feedback%20A-Alerts%20app")!
     /// Fill in once the app has an App Store ID; until then "Schrijf een recensie" uses the in-app prompt.
     static let appStoreID = ""
 

@@ -140,9 +140,6 @@ struct SettingsView: View {
                 } label: {
                     SettingsRow(icon: "star.fill", color: .red, title: L("Schrijf een recensie"), chevron: true)
                 }
-                Link(destination: Config.feedbackMail) {
-                    SettingsRow(icon: "envelope.fill", color: .blue, title: L("Verstuur feedback"), chevron: true)
-                }
                 NavigationLink {
                     ChangelogView()
                 } label: {

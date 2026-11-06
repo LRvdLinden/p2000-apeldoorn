@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 33)
+- Instellingen: 'Verstuur feedback' (mail) is weg.
+- Gebruiksvoorwaarden, privacyverklaring en disclaimer komen als A-Alerts-teksten van de server zodra de nieuwe worker live staat.
+
 ## A-Alerts 2.0.0 (build 32)
 - Fix: tikken op een pushmelding liet de app soms crashen; de app opent nu direct de melding (of de waarschuwing), ook als hij nog niet draaide.
 - Apple TV gelijk aan de app (behalve pushmeldingen): tabblad Waarschuwingen (14 dagen), kaartlagen in Instellingen (meldingen, NL-Alert, Burgernet, KNMI-gebieden, grens werkgebied, kazernes, helikopters), helikopters in de lucht met hoogte, snelheid en koers, kazernes met lijn naar de melding op de kaart, en bij een waarschuwing het weer en de meldingen in de buurt.
