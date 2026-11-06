@@ -575,7 +575,7 @@ struct MeldingDetailView: View {
             }
             .foregroundStyle(.primary)
             HStack(spacing: 4) {
-                Text("© 2026 P2000 Apeldoorn. All rights reserved. | Made & Powered by")
+                Text(verbatim: "© \(Calendar.current.component(.year, from: .now)) A-Alerts. All rights reserved. | Made & Powered by")
                 Link("PixelForges", destination: Config.pixelForges).foregroundStyle(Theme.red)
             }
             .multilineTextAlignment(.center)

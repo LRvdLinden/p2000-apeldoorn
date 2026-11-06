@@ -147,7 +147,7 @@ struct LockView: View {
             VStack(spacing: 22) {
                 AppMark(size: 96, showsTile: false)
                     .scaleEffect(1.4)
-                Text("P2000 Apeldoorn")
+                Text(verbatim: "A-Alerts")
                     .font(.title.weight(.black))
                     .foregroundStyle(.white)
                 Text(Lf("Vergrendeld – ontgrendel met %@", lock.biometryName))

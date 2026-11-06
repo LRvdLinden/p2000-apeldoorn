@@ -55,7 +55,7 @@ struct SplashView: View {
                 .opacity(shieldIn ? 1 : 0)
 
                 VStack(spacing: 4) {
-                    Text("P2000 Apeldoorn")
+                    Text(verbatim: "A-Alerts")
                         #if os(watchOS)
                         .font(.headline.weight(.black))
                         #else
@@ -89,6 +89,6 @@ struct SplashView: View {
             onFinish()
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("P2000 Apeldoorn")
+        .accessibilityLabel(Text(verbatim: "A-Alerts"))
     }
 }

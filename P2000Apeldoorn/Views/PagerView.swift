@@ -24,7 +24,7 @@ struct PagerView: View {
     var body: some View {
         NavigationSplitView {
             content
-                .navigationTitle("P2000 Apeldoorn")
+                .navigationTitle(Text(verbatim: "A-Alerts"))
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
@@ -190,7 +190,7 @@ struct StatusHeader: View {
             HStack(spacing: 12) {
                 AppMark(size: 46)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("P2000 Apeldoorn")
+                    Text(verbatim: "A-Alerts")
                         .font(.headline.weight(.black))
                     HStack(spacing: 6) {
                         LiveDot(online: store.isOnline)

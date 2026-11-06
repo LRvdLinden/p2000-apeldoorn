@@ -259,7 +259,7 @@ struct SettingsView: View {
     private var footer: some View {
         VStack(spacing: 6) {
             AppMark(size: 40)
-            Text("© 2026 P2000 Apeldoorn. All rights reserved.")
+            Text(verbatim: "© \(Calendar.current.component(.year, from: .now)) A-Alerts. All rights reserved.")
             HStack(spacing: 4) {
                 Text(L("Made & Powered by"))
                 Link("PixelForges", destination: Config.pixelForges)
@@ -436,7 +436,7 @@ struct NotificationSettingsView: View {
                 }
             } footer: {
                 if denied {
-                    Text(L("Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › P2000 Apeldoorn."))
+                    Text(L("Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › A-Alerts."))
                         .foregroundStyle(.red)
                 } else {
                     Text(L("Je krijgt een pushmelding zodra er een nieuwe melding is die bij je keuzes past."))

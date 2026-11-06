@@ -76,7 +76,7 @@ struct WatchListView: View {
                     }
                 }
             }
-            .navigationTitle("P2000")
+            .navigationTitle(Text(verbatim: "A-Alerts"))
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     LiveDot(online: store.isOnline)

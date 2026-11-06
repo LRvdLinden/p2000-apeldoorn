@@ -43,7 +43,7 @@ final class AppLock {
         let context = LAContext()
         context.localizedCancelTitle = L("Annuleren")
         let ok = (try? await context.evaluatePolicy(.deviceOwnerAuthentication,
-                                                    localizedReason: L("Ontgrendel P2000 Apeldoorn"))) ?? false
+                                                    localizedReason: L("Ontgrendel A-Alerts"))) ?? false
         if ok { isLocked = false }
     }
 

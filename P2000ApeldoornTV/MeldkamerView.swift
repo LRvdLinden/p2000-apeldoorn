@@ -158,7 +158,7 @@ struct MeldkamerView: View {
             HStack(alignment: .center, spacing: 14) {
                 AppMark(size: 60)
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("P2000 Apeldoorn").font(.system(size: 28, weight: .black)).lineLimit(1).minimumScaleFactor(0.7)
+                    Text(verbatim: "A-Alerts").font(.system(size: 28, weight: .black)).lineLimit(1).minimumScaleFactor(0.7)
                     HStack(spacing: 8) {
                         LiveDot(online: store.isOnline)
                         Text(store.isOnline ? L("Meldkamer · live") : L("Offline")).font(.system(size: 18, weight: .medium))

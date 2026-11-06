@@ -51,7 +51,7 @@ struct TVSettingsView: View {
 
             VStack(alignment: .leading, spacing: 20) {
                 AppMark(size: 140)
-                Text("P2000 Apeldoorn").font(.title.weight(.black))
+                Text(verbatim: "A-Alerts").font(.title.weight(.black))
                 Text(L("Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart."))
                     .font(.headline).foregroundStyle(.secondary)
                 Text(Lf("Versie %@ (%@)", Config.version, Config.build)).foregroundStyle(.secondary)

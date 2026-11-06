@@ -527,9 +527,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000Apeldoorn-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gebruik Face ID om P2000 Apeldoorn te ontgrendelen.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gebruik Face ID om A-Alerts te ontgrendelen.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Je locatie wordt gebruikt om te tonen hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -571,9 +571,9 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000Apeldoorn-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
-				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gebruik Face ID om P2000 Apeldoorn te ontgrendelen.";
+				INFOPLIST_KEY_NSFaceIDUsageDescription = "Gebruik Face ID om A-Alerts te ontgrendelen.";
 				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "Je locatie wordt gebruikt om te tonen hoe ver een melding bij je vandaan is. Je locatie blijft op je apparaat.";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
@@ -611,7 +611,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000ApeldoornWatch-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.lrvdlinden.p2000apeldoorn;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -636,7 +636,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000ApeldoornWatch-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = nl.lrvdlinden.p2000apeldoorn;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -664,7 +664,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Widgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -695,7 +695,7 @@
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/Widgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
@@ -723,7 +723,7 @@
 				DEVELOPMENT_TEAM = EU3UY476T6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/WatchWidgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.watchkitapp.widgets;
 				PRODUCT_MODULE_NAME = P2000ApeldoornWatchWidgets;
@@ -746,7 +746,7 @@
 				DEVELOPMENT_TEAM = EU3UY476T6;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/WatchWidgets-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = P2000;
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.watchkitapp.widgets;
 				PRODUCT_MODULE_NAME = P2000ApeldoornWatchWidgets;
@@ -769,7 +769,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000ApeldoornTV-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -794,7 +794,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "Config/P2000ApeldoornTV-Info.plist";
-				INFOPLIST_KEY_CFBundleDisplayName = "P2000 Apeldoorn";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.news";
 				INFOPLIST_KEY_UIUserInterfaceStyle = Dark;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -1854,19 +1854,19 @@
         }
       }
     },
-    "Je locatie is nog niet bekend. Sta locatietoegang toe voor P2000 Apeldoorn.": {
+    "Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Your location isn't known yet. Allow location access for P2000 Apeldoorn."
+            "value": "Your location isn't known yet. Allow location access for A-Alerts."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor P2000 Apeldoorn."
+            "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts."
           }
         }
       }
@@ -2721,19 +2721,19 @@
         }
       }
     },
-    "Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › P2000 Apeldoorn.": {
+    "Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › A-Alerts.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Notifications are turned off. Turn them on in Settings › Notifications › P2000 Apeldoorn."
+            "value": "Notifications are turned off. Turn them on in Settings › Notifications › A-Alerts."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › P2000 Apeldoorn."
+            "value": "Notificaties zijn geweigerd. Zet ze aan via Instellingen › Notificaties › A-Alerts."
           }
         }
       }
@@ -2806,19 +2806,19 @@
         }
       }
     },
-    "Ontgrendel P2000 Apeldoorn": {
+    "Ontgrendel A-Alerts": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock P2000 Apeldoorn"
+            "value": "Unlock A-Alerts"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ontgrendel P2000 Apeldoorn"
+            "value": "Ontgrendel A-Alerts"
           }
         }
       }
@@ -4200,19 +4200,19 @@
         }
       }
     },
-    "Welkom bij P2000 Apeldoorn": {
+    "Welkom bij A-Alerts": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welcome to P2000 Apeldoorn"
+            "value": "Welcome to A-Alerts"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Welkom bij P2000 Apeldoorn"
+            "value": "Welkom bij A-Alerts"
           }
         }
       }

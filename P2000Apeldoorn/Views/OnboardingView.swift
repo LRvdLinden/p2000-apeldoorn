@@ -67,7 +67,7 @@ struct OnboardingView: View {
 
     private var welcome: some View {
         pageLayout(icon: { AppMark(size: 110) },
-             title: L("Welkom bij P2000 Apeldoorn"),
+             title: L("Welkom bij A-Alerts"),
              text: L("Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn – live, op de kaart en met statistieken.")) {
             HStack(spacing: 18) {
                 ForEach(Dienst.selectable) { d in

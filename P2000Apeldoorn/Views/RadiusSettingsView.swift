@@ -92,7 +92,7 @@ struct RadiusSettingsView: View {
                     if settings.radiusMode == "vast" {
                         Text(L("Tik op de kaart om het middelpunt te kiezen."))
                     } else if center == nil {
-                        Text(L("Je locatie is nog niet bekend. Sta locatietoegang toe voor P2000 Apeldoorn."))
+                        Text(L("Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts."))
                             .foregroundStyle(.red)
                     } else {
                         Text(L("Het middelpunt schuift mee als je de app opent op een andere plek. Je locatie wordt afgerond op zo'n 100 meter."))

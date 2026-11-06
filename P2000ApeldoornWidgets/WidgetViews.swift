@@ -181,7 +181,7 @@ struct MeldingenListView: View {
     private var header: some View {
         HStack(spacing: 8) {
             AppMark(size: family == .systemMedium ? 20 : 26)
-            Text(entry.discipline == .alle ? "P2000 Apeldoorn" : "P2000 · \(entry.discipline.dienst?.label ?? "")")
+            Text(entry.discipline == .alle ? "A-Alerts" : "A-Alerts · \(entry.discipline.dienst?.label ?? "")")
                 .font(.system(size: family == .systemMedium ? 13 : 15, weight: .black))
                 .lineLimit(1)
             Spacer()
@@ -294,7 +294,7 @@ struct TodayView: View {
             AccessoryWidgetBackground()
             VStack(spacing: -2) {
                 Text("\(entry.today)").font(.system(size: 22, weight: .bold, design: .rounded)).minimumScaleFactor(0.5)
-                Text("P2000").font(.system(size: 9, weight: .semibold))
+                Text(verbatim: "A-Alerts").font(.system(size: 9, weight: .semibold))
             }
         }
         .widgetAccentable()
