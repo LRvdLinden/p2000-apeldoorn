@@ -33,7 +33,7 @@ enum Verband {
             if m.hasStreet, o.hasStreet, zelfdePlaats, norm(m.locatie) == norm(o.locatie) {
                 redenen.append(L("Zelfde adres")); score += 3
             } else if m.hasStreet, o.hasStreet, let a = m.lat, let b = m.lon, let c = o.lat, let d = o.lon, m.hasCoordinate, o.hasCoordinate {
-                let km = AppSettings.distanceKm(a, b, c, d)
+                let km = Werkgebied.distanceKm(a, b, c, d)
                 if km <= 0.35 {
                     redenen.append(Lf("Op %@ m afstand", Int((km * 1000 / 10).rounded() * 10).formatted()))
                     score += 2

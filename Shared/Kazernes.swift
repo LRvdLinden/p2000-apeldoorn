@@ -79,10 +79,10 @@ enum Aanrijtijd {
             }
         }
         let kazerne = genoemd ?? kandidaten.min {
-            AppSettings.distanceKm($0.lat, $0.lon, lat, lon) < AppSettings.distanceKm($1.lat, $1.lon, lat, lon)
+            Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < Werkgebied.distanceKm($1.lat, $1.lon, lat, lon)
         }!
         let herkomst = genoemd != nil ? L("Genoemd in de oproep") : L("Dichtstbijzijnde volgens de kaart")
-        let rechtKm = AppSettings.distanceKm(kazerne.lat, kazerne.lon, lat, lon)
+        let rechtKm = Werkgebied.distanceKm(kazerne.lat, kazerne.lon, lat, lon)
         guard rechtKm < 40 else { return nil }
 
         var result: Schatting
