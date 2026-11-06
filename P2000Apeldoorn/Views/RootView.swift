@@ -1,5 +1,8 @@
 import SwiftUI
 import StoreKit
+#if os(macOS)
+import AppKit
+#endif
 
 struct RootView: View {
     @Environment(MeldingStore.self) private var store
@@ -106,6 +109,15 @@ struct RootView: View {
             let args = ProcessInfo.processInfo.arguments
             guard args.contains("-AAlertsScreenshots") else { return }
             settings.onboardingDone = true
+            #if os(macOS)
+            // Fixed window at the top left of the screen, so CI can capture it.
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                for w in NSApp.windows where w.isVisible {
+                    let top = (w.screen ?? NSScreen.main)?.visibleFrame.maxY ?? 900
+                    w.setFrame(NSRect(x: 0, y: top - 900, width: 1440, height: 900), display: true)
+                }
+            }
+            #endif
             func value(_ key: String) -> String? { args.firstIndex(of: key).flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } }
             if let tab = value("-AAlertsTab").flatMap(Router.Destination.init(rawValue:)) { router.tab = tab }
             Task { @MainActor in

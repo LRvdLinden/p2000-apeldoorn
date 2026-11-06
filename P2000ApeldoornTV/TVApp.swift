@@ -82,6 +82,17 @@ struct TVRootView: View {
             }
         }
         .animation(.easeInOut(duration: 0.35), value: alarm?.guid)
+        #if DEBUG
+        // Screenshots (CI): open a tab directly, no alarm screen.
+        .onAppear {
+            let args = ProcessInfo.processInfo.arguments
+            guard args.contains("-AAlertsScreenshots") else { return }
+            tv.alarmScreen = false
+            if let i = args.firstIndex(of: "-AAlertsTab"), i + 1 < args.count {
+                tab = ["meldkamer": 0, "waarschuwingen": 3, "statistieken": 1, "instellingen": 2][args[i + 1]] ?? 0
+            }
+        }
+        #endif
         .task {
             UIApplication.shared.isIdleTimerDisabled = tv.keepAwake
             store.onNew = { list in

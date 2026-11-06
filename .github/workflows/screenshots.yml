@@ -1,7 +1,7 @@
 name: Screenshots
 
-# Builds the app for the simulator and takes screenshots with live data (iPhone, iPad, Apple Watch) for the website.
-# Runs when this file changes on a-alerts, or by hand. Result: branch "screenshots" (force-pushed).
+# Builds the apps for the simulator (and macOS) and takes screenshots with live data in Dutch and English,
+# for the website and the App Store. Result: branch "screenshots" (force-pushed), folders nl/ and en/.
 on:
   workflow_dispatch:
   push:
@@ -14,7 +14,7 @@ permissions:
 jobs:
   shots:
     runs-on: macos-15
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       API: https://p2000-apeldoorn-api.lrvdlinden.workers.dev
       BUNDLE: nl.lrvdlinden.p2000apeldoorn
@@ -36,13 +36,15 @@ jobs:
           echo "iphone=$(pick 'iPhone 1[6-9] Pro$|iPhone 1[6-9]$' 'Max|Plus|e$')" >> "$GITHUB_OUTPUT"
           echo "ipad=$(pick 'iPad Pro.*13' 'xxx')" >> "$GITHUB_OUTPUT"
           echo "watch=$(pick 'Apple Watch (Series 1[01]|Ultra).*' 'xxx')" >> "$GITHUB_OUTPUT"
+          echo "tv=$(pick 'Apple TV 4K' 'xxx')" >> "$GITHUB_OUTPUT"
           cat "$GITHUB_OUTPUT"
-      - name: Build iOS and watchOS (Debug, simulator)
+      - name: Build (Debug)
         run: |
-          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn" -configuration Debug \
-            -destination "id=${{ steps.dev.outputs.iphone }}" -derivedDataPath build CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u
-          xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "P2000 Apeldoorn Watch" -configuration Debug \
-            -destination "id=${{ steps.dev.outputs.watch }}" -derivedDataPath buildw CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u
+          b() { xcodebuild -project P2000Apeldoorn.xcodeproj -scheme "$1" -configuration Debug -destination "$2" -derivedDataPath "$3" CODE_SIGNING_ALLOWED=NO build 2>&1 | grep -E "error:|\*\* BUILD" | sort -u; }
+          b "P2000 Apeldoorn" "id=${{ steps.dev.outputs.iphone }}" build
+          b "P2000 Apeldoorn Watch" "id=${{ steps.dev.outputs.watch }}" buildw
+          b "P2000 Apeldoorn TV" "id=${{ steps.dev.outputs.tv }}" buildtv
+          b "P2000 Apeldoorn" "platform=macOS" buildmac
       - name: Live data to show
         id: data
         run: |
@@ -57,53 +59,81 @@ jobs:
           ws=[x for x in w if x["bron"] in ("burgernet","nlalert")]
           print("wid="+(ws[0]["id"] if ws else ""))
           PY
-          cat "$GITHUB_OUTPUT"
       - name: Screenshots
         run: |
-          mkdir -p shots
-          APP=$(find build/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
           export SIMCTL_CHILD_TZ=Europe/Amsterdam
-          L="-AppleLanguages (nl) -AppleLocale nl_NL -AAlertsScreenshots"
-          shoot() { # device prefix
-            D=$1; P=$2
-            xcrun simctl boot "$D" || true
-            xcrun simctl bootstatus "$D" -b
-            xcrun simctl status_bar "$D" override --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 || true
-            xcrun simctl ui "$D" appearance light || true
-            xcrun simctl location "$D" set 52.2112,5.9699 || true
-            xcrun simctl install "$D" "$APP"
-            xcrun simctl privacy "$D" grant location "$BUNDLE" || true
-            snap() { # name extra-args wait
-              xcrun simctl launch --terminate-running-process "$D" "$BUNDLE" $L $2; sleep $3
-              xcrun simctl io "$D" screenshot "shots/$P-$1.png"
-            }
-            snap pager "" 16
-            snap kaart "-AAlertsTab kaart" 16
-            snap statistieken "-AAlertsTab statistieken" 12
-            snap instellingen "-AAlertsTab instellingen" 10
-            snap melding "-AAlertsMelding ${{ steps.data.outputs.guid }}" 18
-            if [ -n "${{ steps.data.outputs.wid }}" ]; then snap waarschuwing "-AAlertsWaarschuwing ${{ steps.data.outputs.wid }}" 18; fi
-            xcrun simctl shutdown "$D" || true
-          }
-          shoot "${{ steps.dev.outputs.iphone }}" iphone
-          shoot "${{ steps.dev.outputs.ipad }}" ipad
-          # Welcome screen on a fresh install
-          D="${{ steps.dev.outputs.iphone }}"
-          xcrun simctl boot "$D"; xcrun simctl bootstatus "$D" -b
-          xcrun simctl status_bar "$D" override --time "9:41" --batteryState charged --batteryLevel 100 || true
-          xcrun simctl uninstall "$D" "$BUNDLE" || true; xcrun simctl install "$D" "$APP"
-          xcrun simctl launch "$D" "$BUNDLE" -AppleLanguages "(nl)" -AppleLocale nl_NL; sleep 10
-          xcrun simctl io "$D" screenshot "shots/iphone-welkom.png"
-          xcrun simctl shutdown "$D" || true
-          # Apple Watch
-          W="${{ steps.dev.outputs.watch }}"
+          APP=$(find build/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
           WAPP=$(find buildw/Build/Products -name "P2000 Apeldoorn Watch.app" -maxdepth 3 | head -1)
-          xcrun simctl boot "$W"; xcrun simctl bootstatus "$W" -b
-          xcrun simctl status_bar "$W" override --time "9:41" || true
-          xcrun simctl install "$W" "$WAPP"
-          xcrun simctl launch "$W" "$BUNDLE.watchkitapp" -AppleLanguages "(nl)" -AppleLocale nl_NL; sleep 15
-          xcrun simctl io "$W" screenshot "shots/watch-lijst.png"
-          ls -la shots
+          TVAPP=$(find buildtv/Build/Products -name "*.app" -maxdepth 3 | head -1)
+          MACAPP=$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
+          GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"
+          for LANG in nl en; do
+            [ $LANG = nl ] && LOC=nl_NL || LOC=en_US
+            L="-AppleLanguages ($LANG) -AppleLocale $LOC -AAlertsScreenshots"
+            mkdir -p shots/$LANG
+            shoot() { # device prefix
+              D=$1; P=$2
+              xcrun simctl boot "$D" || true
+              xcrun simctl bootstatus "$D" -b
+              xcrun simctl status_bar "$D" override --time "9:41" --dataNetwork wifi --wifiBars 3 --cellularMode active --cellularBars 4 --batteryState charged --batteryLevel 100 || true
+              xcrun simctl ui "$D" appearance light || true
+              xcrun simctl location "$D" set 52.2112,5.9699 || true
+              xcrun simctl install "$D" "$APP"
+              xcrun simctl privacy "$D" grant location "$BUNDLE" || true
+              snap() { xcrun simctl launch --terminate-running-process "$D" "$BUNDLE" $L $2; sleep $3; xcrun simctl io "$D" screenshot "shots/$LANG/$P-$1.png"; }
+              snap pager "" 16
+              snap kaart "-AAlertsTab kaart" 16
+              snap statistieken "-AAlertsTab statistieken" 12
+              snap instellingen "-AAlertsTab instellingen" 10
+              snap melding "-AAlertsMelding $GUID" 18
+              [ -n "$WID" ] && snap waarschuwing "-AAlertsWaarschuwing $WID" 18
+              xcrun simctl shutdown "$D" || true
+            }
+            shoot "${{ steps.dev.outputs.iphone }}" iphone
+            shoot "${{ steps.dev.outputs.ipad }}" ipad
+            # Welcome screen (fresh install)
+            D="${{ steps.dev.outputs.iphone }}"
+            xcrun simctl boot "$D"; xcrun simctl bootstatus "$D" -b
+            xcrun simctl status_bar "$D" override --time "9:41" --batteryState charged --batteryLevel 100 || true
+            xcrun simctl uninstall "$D" "$BUNDLE" || true; xcrun simctl install "$D" "$APP"
+            xcrun simctl launch "$D" "$BUNDLE" -AppleLanguages "($LANG)" -AppleLocale $LOC; sleep 10
+            xcrun simctl io "$D" screenshot "shots/$LANG/iphone-welkom.png"
+            xcrun simctl shutdown "$D" || true
+            # Apple Watch
+            W="${{ steps.dev.outputs.watch }}"
+            xcrun simctl boot "$W"; xcrun simctl bootstatus "$W" -b
+            xcrun simctl status_bar "$W" override --time "9:41" || true
+            xcrun simctl install "$W" "$WAPP"
+            xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC; sleep 15
+            xcrun simctl io "$W" screenshot "shots/$LANG/watch-lijst.png"
+            xcrun simctl shutdown "$W" || true
+            # Apple TV
+            T="${{ steps.dev.outputs.tv }}"
+            if [ -n "$T" ] && [ -n "$TVAPP" ]; then
+              xcrun simctl boot "$T"; xcrun simctl bootstatus "$T" -b
+              xcrun simctl install "$T" "$TVAPP"
+              TVB=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$TVAPP/Info.plist")
+              for tab in meldkamer waarschuwingen statistieken; do
+                xcrun simctl launch --terminate-running-process "$T" "$TVB" $L -AAlertsTab $tab; sleep 18
+                xcrun simctl io "$T" screenshot "shots/$LANG/tv-$tab.png"
+              done
+              xcrun simctl shutdown "$T" || true
+            fi
+            # Mac
+            if [ -n "$MACAPP" ]; then
+              system_profiler SPDisplaysDataType | grep -i resolution || true
+              open -n "$MACAPP" --args $L
+              sleep 14
+              screencapture -x -R0,0,1440,900 "shots/$LANG/mac-pager.png" || true
+              pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              open -n "$MACAPP" --args $L -AAlertsTab kaart
+              sleep 16
+              screencapture -x -R0,0,1440,900 "shots/$LANG/mac-kaart.png" || true
+              pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              screencapture -x "shots/$LANG/mac-full.png" || true
+            fi
+          done
+          find shots -name "*.png" | sort
       - name: Push to branch screenshots
         if: always()
         run: |
