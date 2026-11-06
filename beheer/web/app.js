@@ -220,7 +220,7 @@ async function dashboard(el) {
 // ------------------------------------------------------------------ A-Alerts
 
 const BRON = {
-  nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: ["🌦️", "KNMI", "#FF8A00"],
+  nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: [icon("knmi", "KNMI"), "KNMI", "#3E9FDB"],
   helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
 };
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood" };

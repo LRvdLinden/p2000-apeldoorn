@@ -1,5 +1,12 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 28)
+- NL-Alert-icoon en -kaartmarker op basis van het echte NL-Alert-logo; KNMI heeft een eigen icoon (zon en wolk op blauw).
+- Pager: NL-Alert en Burgernet tonen de tijd van de melding (met eindtijd als hij is afgelopen) in plaats van 'x minuten geleden'.
+- Welkomstscherm: twee nieuwe pagina's, over NL-Alert, Burgernet en KNMI, en over Lifeliners, Zulu's, kazernes en kaartlagen.
+- Statistieken: nieuwe kaart Waarschuwingen met NL-Alert, Burgernet en KNMI (vandaag, gisteren, 7 dagen, nu actief).
+- Apple TV: NL-Alert en Burgernet in de meldkamerlijst en op de kaart, KNMI als balk, detail van een waarschuwing, gealarmeerde kazernes met geschatte aankomst en het verloop bij een melding, en waarschuwingen in de statistieken.
+
 ## A-Alerts 2.0.0 (build 27)
 - Route naar incident: de echte app-iconen van Apple Kaarten en Google Maps (uit de assets routeapp_applemaps en routeapp_googlemaps; zonder die afbeeldingen een symbool).
 

@@ -145,21 +145,13 @@ struct KnmiDrempelView: View {
     }
 }
 
-/// Small source icon: NL-Alert triangle, Burgernet house, KNMI weather tile.
+/// Small source icon: NL-Alert logo, Burgernet house, KNMI weather tile.
 struct BronIcoon: View {
     let bron: Waarschuwing.Bron
     var size: CGFloat = 30
     var body: some View {
-        switch bron {
-        case .nlalert, .burgernet:
-            Image(bron == .nlalert ? "icon_nlalert" : "icon_burgernet").resizable().scaledToFit().frame(width: size, height: size)
-        case .knmi:
-            Image(systemName: "cloud.sun.rain.fill")
-                .font(.system(size: size * 0.5, weight: .semibold))
-                .foregroundStyle(.white)
-                .frame(width: size, height: size)
-                .background(.orange, in: RoundedRectangle(cornerRadius: size * 0.25, style: .continuous))
-        }
+        Image(bron == .nlalert ? "icon_nlalert" : bron == .burgernet ? "icon_burgernet" : "icon_knmi")
+            .resizable().scaledToFit().frame(width: size, height: size)
     }
 }
 

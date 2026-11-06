@@ -20,7 +20,9 @@ struct OnboardingView: View {
                 Group {
                     switch page {
                     case 0: welcome
-                    case 1: push
+                    case 1: waarschuwingen
+                    case 2: kaart
+                    case 3: push
                     default: signIn
                     }
                 }
@@ -28,12 +30,12 @@ struct OnboardingView: View {
                 .transition(.asymmetric(insertion: .move(edge: .trailing).combined(with: .opacity),
                                         removal: .move(edge: .leading).combined(with: .opacity)))
                 .gesture(DragGesture(minimumDistance: 30).onEnded { value in
-                    if value.translation.width < -40, page < 2 { withAnimation { page += 1 } }
+                    if value.translation.width < -40, page < Self.laatste { withAnimation { page += 1 } }
                     if value.translation.width > 40, page > 0 { withAnimation { page -= 1 } }
                 })
 
                 HStack(spacing: 8) {
-                    ForEach(0..<3) { i in
+                    ForEach(0...Self.laatste, id: \.self) { i in
                         Capsule()
                             .fill(.white.opacity(i == page ? 1 : 0.4))
                             .frame(width: i == page ? 22 : 8, height: 8)
@@ -43,9 +45,9 @@ struct OnboardingView: View {
                 .padding(.bottom, 18)
 
                 Button {
-                    if page < 2 { withAnimation { page += 1 } } else { finish() }
+                    if page < Self.laatste { withAnimation { page += 1 } } else { finish() }
                 } label: {
-                    Text(page < 2 ? L("Volgende") : L("Start"))
+                    Text(page < Self.laatste ? L("Volgende") : L("Start"))
                         .font(AppFont.heading(18, relativeTo: .headline))
                         .frame(maxWidth: 420)
                         .padding(.vertical, 15)
@@ -59,6 +61,9 @@ struct OnboardingView: View {
         }
     }
 
+    /// Index of the last page (welcome, warnings, map, push, sign in).
+    static let laatste = 4
+
     private func finish() {
         withAnimation(.easeInOut(duration: 0.4)) { settings.onboardingDone = true }
     }
@@ -68,7 +73,7 @@ struct OnboardingView: View {
     private var welcome: some View {
         pageLayout(icon: { AppMark(size: 110) },
              title: L("Welkom bij A-Alerts"),
-             text: L("Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn – live, op de kaart en met statistieken.")) {
+             text: L("Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn en Teuge – live, op de kaart en met statistieken.")) {
             HStack(spacing: 18) {
                 ForEach(Dienst.selectable) { d in
                     VStack(spacing: 6) {
@@ -82,10 +87,43 @@ struct OnboardingView: View {
         }
     }
 
+    private var waarschuwingen: some View {
+        pageLayout(icon: { bubble("exclamationmark.triangle.fill") },
+             title: L("Ook alle waarschuwingen"),
+             text: L("NL-Alert en Burgernet staan in de pager tussen de meldingen. Een KNMI-weerwaarschuwing staat als balk bovenaan zolang hij geldt. Alleen voor de gemeente Apeldoorn en Teuge.")) {
+            HStack(spacing: 18) {
+                bronItem(L("NL-Alert")) { BronIcoon(bron: .nlalert, size: 34) }
+                bronItem(L("Burgernet")) { BronIcoon(bron: .burgernet, size: 34) }
+                bronItem(L("KNMI")) { BronIcoon(bron: .knmi, size: 34) }
+            }
+        }
+    }
+
+    private var kaart: some View {
+        pageLayout(icon: { bubble("map.fill") },
+             title: L("Zie wie er onderweg is"),
+             text: L("Volg de Lifeliners en de politiehelikopters (Zulu) live op de kaart, zie welke kazernes zijn gealarmeerd en kies zelf welke kaartlagen je ziet.")) {
+            HStack(spacing: 18) {
+                bronItem(L("Lifeliner")) { Image("heli_lifeliner_ec135").resizable().scaledToFit().frame(width: 58, height: 34) }
+                bronItem(L("Zulu")) { Image("heli_politie_ec135").resizable().scaledToFit().frame(width: 58, height: 34) }
+                bronItem(L("Kazernes")) { Image(systemName: "building.2.fill").font(.system(size: 22, weight: .semibold)).foregroundStyle(Theme.iconRed).frame(width: 34, height: 34) }
+            }
+        }
+    }
+
+    private func bronItem<I: View>(_ titel: String, @ViewBuilder icon: () -> I) -> some View {
+        VStack(spacing: 6) {
+            icon()
+                .padding(10)
+                .background(.white, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            Text(titel).font(AppFont.body(11, .semibold, relativeTo: .caption2)).foregroundStyle(.white)
+        }
+    }
+
     private var push: some View {
         pageLayout(icon: { bubble("bell.badge.fill") },
              title: L("Mis geen melding"),
-             text: L("Ontvang een pushmelding zodra er iets gebeurt. Kies later in Instellingen voor welke plaatsen, disciplines en prioriteiten, en stel een stille modus in.")) {
+             text: L("Ontvang een pushmelding zodra er iets gebeurt, ook bij NL-Alert, Burgernet en KNMI. Kies later in Instellingen je profielen met plaatsen, disciplines, prioriteiten en tijden.")) {
             Button {
                 PushManager.enable { _ in pushAsked = true }
             } label: {

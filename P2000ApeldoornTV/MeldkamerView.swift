@@ -10,6 +10,16 @@ struct MeldkamerView: View {
     @State private var focusGuid: String?
     @State private var tourIndex = 0
     @State private var selected: Melding?
+    @State private var selectedWaarschuwing: Waarschuwing?
+    private var waarschuwingen: WaarschuwingStore { WaarschuwingStore.shared }
+
+    /// NL-Alert and Burgernet of the last 24 hours, between the alerts (KNMI is the bar at the top).
+    private var lijst: [TVLijstItem] {
+        let cutoff = Date.now.addingTimeInterval(-24 * 3600)
+        let w = waarschuwingen.items.filter { $0.bron != .knmi && ($0.isActief || $0.start >= cutoff) }.map(TVLijstItem.waarschuwing)
+        return (items.prefix(40).map(TVLijstItem.melding) + w).sorted { $0.datum > $1.datum }
+    }
+    private var knmiActief: [Waarschuwing] { waarschuwingen.items.filter { $0.bron == .knmi && $0.isActief } }
 
     static let apeldoorn = CLLocationCoordinate2D(latitude: 52.2112, longitude: 5.9699)
     static let overview = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 52.205, longitude: 5.95),
@@ -31,6 +41,7 @@ struct MeldkamerView: View {
                 .ignoresSafeArea()
         )
         .fullScreenCover(item: $selected) { m in TVDetailView(melding: m) }
+        .fullScreenCover(item: $selectedWaarschuwing) { w in TVWaarschuwingDetail(waarschuwing: w) }
         .onChange(of: items.first?.guid) { _, guid in
             // A new alert: fly to it.
             guard let guid, let m = items.first(where: { $0.guid == guid }) else { return }
@@ -57,6 +68,16 @@ struct MeldkamerView: View {
                         TVMarker(melding: pin.melding, highlighted: pin.melding.guid == focusGuid)
                     }
                     .annotationTitles(.hidden)
+                }
+                // Active NL-Alert areas and Burgernet calls (A-Alerts).
+                ForEach(waarschuwingen.items.filter { $0.isActief && $0.bron != .knmi }) { w in
+                    ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
+                        MapPolygon(coordinates: ring).foregroundStyle(w.color.opacity(0.2)).stroke(w.color, lineWidth: 2)
+                    }
+                    if let c = w.coordinate {
+                        Annotation(w.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: w, size: 56) }
+                            .annotationTitles(.hidden)
+                    }
                 }
                 // Live trauma and police helicopters (A-Alerts).
                 if AppSettings.shared.laag(.helikopters) {
@@ -189,12 +210,22 @@ struct MeldkamerView: View {
                 }
             }
 
+            if !knmiActief.isEmpty {
+                TVKnmiBalk(items: knmiActief) { selectedWaarschuwing = $0 }
+            }
+
             Text(L("Laatste meldingen")).font(AppFont.body(22, .semibold)).foregroundStyle(.secondary)
             ScrollView {
                 LazyVStack(spacing: 14) {
-                    ForEach(items.prefix(40)) { m in
-                        Button { selected = m } label: { TVRow(melding: m, read: settings.isRead(m)) }
-                            .buttonStyle(.card)
+                    ForEach(lijst) { item in
+                        switch item {
+                        case .melding(let m):
+                            Button { selected = m } label: { TVRow(melding: m, read: settings.isRead(m)) }
+                                .buttonStyle(.card)
+                        case .waarschuwing(let w):
+                            Button { selectedWaarschuwing = w } label: { TVWaarschuwingRow(waarschuwing: w) }
+                                .buttonStyle(.card)
+                        }
                     }
                     if items.isEmpty {
                         Text(L("Geen meldingen in de laatste 24 uur"))

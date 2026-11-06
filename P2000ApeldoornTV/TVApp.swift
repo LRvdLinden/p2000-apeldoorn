@@ -92,14 +92,17 @@ struct TVRootView: View {
                 if alarm == nil { nextAlarm() }
             }
             store.startPolling()
+            WaarschuwingStore.shared.startPolling()
             InstallPing.send()
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 store.startPolling()
+                WaarschuwingStore.shared.startPolling()
                 InstallPing.send()
             } else if phase == .background {
                 store.stopPolling()
+                WaarschuwingStore.shared.stopPolling()
             }
         }
     }

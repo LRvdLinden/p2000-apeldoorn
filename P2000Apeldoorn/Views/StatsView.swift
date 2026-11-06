@@ -20,6 +20,7 @@ struct StatsView: View {
                         hourCard(today, yesterday)
                         priorityCard(today, yesterday)
                         categoryCard(today, yesterday)
+                        waarschuwingCard
                     }
                 }
                 .padding()
@@ -28,7 +29,11 @@ struct StatsView: View {
             }
             .background(Color.groupedBackground)
             .navigationTitle(L("Statistieken"))
-            .refreshable { await store.refresh() }
+            .refreshable {
+                await store.refresh()
+                await WaarschuwingStore.shared.refresh()
+            }
+            .task { if WaarschuwingStore.shared.lastUpdated == nil { await WaarschuwingStore.shared.refresh() } }
         }
     }
 
@@ -86,6 +91,43 @@ struct StatsView: View {
                     }
                 }
                 Text(L("Vandaag / gisteren (hele dag)"))
+                    .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    // MARK: Waarschuwingen
+
+    /// NL-Alert, Burgernet and KNMI: today, yesterday and the last seven days, and how many apply right now.
+    private var waarschuwingCard: some View {
+        let items = WaarschuwingStore.shared.items
+        let cal = Calendar.current
+        let week = Date.now.addingTimeInterval(-7 * 86_400)
+        return Card(title: L("Waarschuwingen"), icon: "exclamationmark.triangle") {
+            VStack(spacing: 10) {
+                ForEach([Waarschuwing.Bron.nlalert, .burgernet, .knmi], id: \.self) { bron in
+                    let eigen = items.filter { $0.bron == bron }
+                    let a = eigen.filter { cal.isDateInToday($0.start) }.count
+                    let b = eigen.filter { cal.isDateInYesterday($0.start) }.count
+                    let w = eigen.filter { $0.start >= week }.count
+                    let nu = eigen.filter(\.isActief).count
+                    HStack(spacing: 10) {
+                        BronIcoon(bron: bron, size: 26)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: bron == .nlalert ? "NL-Alert" : bron == .burgernet ? "Burgernet" : "KNMI")
+                                .font(AppFont.body(16, .semibold, relativeTo: .callout)).lineLimit(1)
+                            Text(nu > 0 ? Lf("%lld nu actief", nu) : Lf("%lld in 7 dagen", w))
+                                .font(AppFont.body(12, .regular, relativeTo: .caption))
+                                .foregroundStyle(nu > 0 ? AnyShapeStyle(Theme.red) : AnyShapeStyle(.secondary))
+                        }
+                        Spacer()
+                        Text("\(a)").font(AppFont.heading(20, relativeTo: .title3).monospacedDigit())
+                        Text("/ \(b)").font(AppFont.body(16, .light, relativeTo: .callout).monospacedDigit()).foregroundStyle(.secondary)
+                        DeltaBadge(diff: a - b, compact: true)
+                    }
+                }
+                Text(L("Vandaag / gisteren · gemeente Apeldoorn en Teuge"))
                     .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
             }

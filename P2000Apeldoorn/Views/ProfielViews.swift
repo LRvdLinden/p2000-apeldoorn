@@ -152,7 +152,6 @@ struct ProfielEditView: View {
 struct WaarschuwingBronIcon: View {
     let bron: Waarschuwing.Bron
     var body: some View {
-        Image(bron == .nlalert ? "icon_nlalert" : "icon_burgernet")
-            .resizable().scaledToFit().frame(width: 24, height: 24)
+        BronIcoon(bron: bron, size: 24)
     }
 }

@@ -36,6 +36,7 @@ struct TVDetailView: View {
                     }
                     infoRow("mappin.and.ellipse", melding.plaatsText)
                     infoRow("clock", "\(melding.datum.formatted(date: .complete, time: .standard)) · \(melding.agoText)")
+                    TVInzetBlok(melding: melding)
                     if let w = weather { weatherBlock(w) }
                     if !melding.eenheden.isEmpty {
                         section(Lf("Capcodes (%lld)", melding.eenheden.count))

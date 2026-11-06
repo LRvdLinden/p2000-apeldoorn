@@ -18,9 +18,8 @@ struct WaarschuwingRow: View {
                         .foregroundStyle(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color)
                     StatusChip(waarschuwing: waarschuwing)
                     Spacer(minLength: 4)
-                    TimelineView(.periodic(from: .now, by: 30)) { ctx in
-                        Text("\(Fmt.ago(waarschuwing.start, now: ctx.date)) - \(Fmt.time(waarschuwing.start))")
-                    }
+                    Text(verbatim: tijdTekst)
+                        .monospacedDigit()
                     .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
                 }
@@ -39,6 +38,18 @@ struct WaarschuwingRow: View {
         .padding(.vertical, 4)
         .opacity(waarschuwing.isBeeindigd ? 0.7 : 1)
         .accessibilityElement(children: .combine)
+    }
+
+    /// The time of the warning (with the end time once it has ended), not "x minutes ago".
+    private var tijdTekst: String {
+        let start = waarschuwing.start
+        let begin = Calendar.current.isDateInToday(start)
+            ? Fmt.time(start)
+            : "\(start.formatted(.dateTime.day().month(.abbreviated))) \(Fmt.time(start))"
+        if waarschuwing.isBeeindigd, let einde = waarschuwing.einde, einde > start {
+            return "\(begin)–\(Fmt.time(einde))"
+        }
+        return begin
     }
 }
 

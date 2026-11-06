@@ -30,6 +30,7 @@ struct TVStatsView: View {
                         }
                     }
                 }
+                waarschuwingBlok
             }
             .frame(width: 640)
 
@@ -64,6 +65,30 @@ struct TVStatsView: View {
         }
         .padding(.horizontal, 80)
         .padding(.vertical, 40)
+    }
+
+    /// NL-Alert, Burgernet and KNMI: today / yesterday.
+    private var waarschuwingBlok: some View {
+        let items = WaarschuwingStore.shared.items
+        let cal = Calendar.current
+        return VStack(spacing: 12) {
+            ForEach([Waarschuwing.Bron.nlalert, .burgernet, .knmi], id: \.self) { bron in
+                let eigen = items.filter { $0.bron == bron }
+                HStack(spacing: 18) {
+                    Image(bron == .nlalert ? "icon_nlalert" : bron == .burgernet ? "icon_burgernet" : "icon_knmi")
+                        .resizable().scaledToFit().frame(width: 40, height: 40)
+                    Text(verbatim: bron == .nlalert ? "NL-Alert" : bron == .burgernet ? "Burgernet" : "KNMI").font(AppFont.body(24, .semibold))
+                    if eigen.contains(where: \.isActief) {
+                        Text(L("Actief")).font(AppFont.body(16, .bold)).padding(.horizontal, 10).padding(.vertical, 3)
+                            .background(Theme.red, in: Capsule()).foregroundStyle(.white)
+                    }
+                    Spacer()
+                    Text("\(eigen.filter { cal.isDateInToday($0.start) }.count)").font(AppFont.heading(32).monospacedDigit())
+                    Text("/ \(eigen.filter { cal.isDateInYesterday($0.start) }.count)").font(AppFont.body(22, .regular).monospacedDigit()).foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.top, 10)
     }
 
     private func big(_ title: String, _ value: Int, _ color: Color) -> some View {

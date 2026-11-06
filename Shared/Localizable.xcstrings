@@ -188,6 +188,23 @@
         }
       }
     },
+    "%lld in 7 dagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in 7 days"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld in 7 dagen"
+          }
+        }
+      }
+    },
     "%lld meldingen binnen %lld min": {
       "extractionState": "manual",
       "localizations": {
@@ -303,6 +320,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld min later"
+          }
+        }
+      }
+    },
+    "%lld nu actief": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld active now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld nu actief"
           }
         }
       }
@@ -715,19 +749,19 @@
         }
       }
     },
-    "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn – live, op de kaart en met statistieken.": {
+    "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn en Teuge – live, op de kaart en met statistieken.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Every P2000 alert for fire brigade, ambulance, police and trauma helicopter in the municipality of Apeldoorn – live, on the map and with statistics."
+            "value": "Every P2000 alert for fire brigade, ambulance, police and trauma helicopter in the municipality of Apeldoorn and Teuge – live, on the map and with statistics."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn – live, op de kaart en met statistieken."
+            "value": "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn en Teuge – live, op de kaart en met statistieken."
           }
         }
       }
@@ -1238,6 +1272,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Buiten het gebied"
+          }
+        }
+      }
+    },
+    "Burgernet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burgernet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burgernet"
           }
         }
       }
@@ -2194,6 +2245,23 @@
         }
       }
     },
+    "Gealarmeerde kazernes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerted stations"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gealarmeerde kazernes"
+          }
+        }
+      }
+    },
     "Gealarmeerde kazernes (%lld)": {
       "extractionState": "manual",
       "localizations": {
@@ -2598,6 +2666,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschatte aanrijtijd"
+          }
+        }
+      }
+    },
+    "Geschatte tijden, zonder voertuigposities.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated times, without vehicle positions."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschatte tijden, zonder voertuigposities."
           }
         }
       }
@@ -3061,6 +3146,23 @@
         }
       }
     },
+    "KNMI": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI"
+          }
+        }
+      }
+    },
     "KNMI code geel": {
       "extractionState": "manual",
       "localizations": {
@@ -3261,6 +3363,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaarttype"
+          }
+        }
+      }
+    },
+    "Kazernes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stations"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kazernes"
           }
         }
       }
@@ -4047,6 +4166,23 @@
         }
       }
     },
+    "Mogelijk verband, geen zekerheid.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Possible link, not certain."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mogelijk verband, geen zekerheid."
+          }
+        }
+      }
+    },
     "N": {
       "extractionState": "manual",
       "localizations": {
@@ -4077,6 +4213,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "NIEUWE MELDING"
+          }
+        }
+      }
+    },
+    "NL-Alert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert"
+          }
+        }
+      }
+    },
+    "NL-Alert en Burgernet staan in de pager tussen de meldingen. Een KNMI-weerwaarschuwing staat als balk bovenaan zolang hij geldt. Alleen voor de gemeente Apeldoorn en Teuge.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert and Burgernet appear in the pager between the alerts. A KNMI weather warning shows as a bar at the top while it applies. Only for the municipality of Apeldoorn and Teuge."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert en Burgernet staan in de pager tussen de meldingen. Een KNMI-weerwaarschuwing staat als balk bovenaan zolang hij geldt. Alleen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -4557,19 +4727,36 @@
         }
       }
     },
-    "Ontvang een pushmelding zodra er iets gebeurt. Kies later in Instellingen voor welke plaatsen, disciplines en prioriteiten, en stel een stille modus in.": {
+    "Ontvang een pushmelding zodra er iets gebeurt, ook bij NL-Alert, Burgernet en KNMI. Kies later in Instellingen je profielen met plaatsen, disciplines, prioriteiten en tijden.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Get a push notification as soon as something happens. Later, choose places, services and priorities in Settings, and set quiet hours."
+            "value": "Get a push notification as soon as something happens, also for NL-Alert, Burgernet and KNMI. Later, set up your profiles with places, services, priorities and times in Settings."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ontvang een pushmelding zodra er iets gebeurt. Kies later in Instellingen voor welke plaatsen, disciplines en prioriteiten, en stel een stille modus in."
+            "value": "Ontvang een pushmelding zodra er iets gebeurt, ook bij NL-Alert, Burgernet en KNMI. Kies later in Instellingen je profielen met plaatsen, disciplines, prioriteiten en tijden."
+          }
+        }
+      }
+    },
+    "Ook alle waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All the warnings too"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook alle waarschuwingen"
           }
         }
       }
@@ -6121,6 +6308,23 @@
         }
       }
     },
+    "Vandaag / gisteren · gemeente Apeldoorn en Teuge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Today / yesterday · municipality of Apeldoorn and Teuge"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vandaag / gisteren · gemeente Apeldoorn en Teuge"
+          }
+        }
+      }
+    },
     "Vandaag is de brandweer %lld keer en de ambulance %lld keer gealarmeerd in gem. Apeldoorn; gisteren waren dat %lld en %lld keer.": {
       "extractionState": "manual",
       "localizations": {
@@ -6461,6 +6665,23 @@
         }
       }
     },
+    "Volg de Lifeliners en de politiehelikopters (Zulu) live op de kaart, zie welke kazernes zijn gealarmeerd en kies zelf welke kaartlagen je ziet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Follow the Lifeliners and the police helicopters (Zulu) live on the map, see which stations were alerted and choose the map layers yourself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volg de Lifeliners en de politiehelikopters (Zulu) live op de kaart, zie welke kazernes zijn gealarmeerd en kies zelf welke kaartlagen je ziet."
+          }
+        }
+      }
+    },
     "Volg ons": {
       "extractionState": "manual",
       "localizations": {
@@ -6542,6 +6763,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "W"
+          }
+        }
+      }
+    },
+    "Waarschijnlijk ter plaatse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probably on scene"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschijnlijk ter plaatse"
           }
         }
       }
@@ -7005,6 +7243,23 @@
         }
       }
     },
+    "Zie wie er onderweg is": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "See who is on the way"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zie wie er onderweg is"
+          }
+        }
+      }
+    },
     "Zoek een adres of plaats": {
       "extractionState": "manual",
       "localizations": {
@@ -7103,6 +7358,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zuidwesten"
+          }
+        }
+      }
+    },
+    "Zulu": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zulu"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zulu"
           }
         }
       }
