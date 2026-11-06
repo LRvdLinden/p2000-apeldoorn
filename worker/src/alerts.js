@@ -6,6 +6,8 @@ import { polygonOverlaps, inWerkgebied, inRing, distanceKm, PLAATSEN_ALL, plaats
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
   burgernet: "https://api.112meldkamer.nl/v1/burgernet",
+  // Burgernet's own site: the list of recent actions per municipality, and one page per action.
+  burgernetSite: "https://www.burgernet.nl",
   knmi: "https://www.knmi.nl/api/v1/weather-warnings",
 };
 const UA = { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" };
@@ -100,13 +102,73 @@ export function fromBurgernet(a, now = Date.now()) {
   const [d, mth, y] = String(a.date || "").split("/").map(Number);
   let start = y ? Date.UTC(y, mth - 1, d, 12) : now;
   const t = String(a.time || "").match(/(\d{1,2}):(\d{2})/);
-  if (y && t) start = Date.parse(`${y}-${String(mth).padStart(2, "0")}-${String(d).padStart(2, "0")}T${t[1].padStart(2, "0")}:${t[2]}:00+01:00`);
+  if (y && t) start = amsterdamTime(a.date, `${t[1]}:${t[2]}`) ?? start;
   return {
     id: `burgernet:${id}`, bron: "burgernet",
     titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/i, "").slice(0, 140), tekst: report, tekst_en: null,
     plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
     start_at: start, end_at: null, status: a.isClosed === true ? "beeindigd" : "actief",
     gebied: null, lat: plaats.lat, lon: plaats.lon, link: link || null,
+  };
+}
+
+/** Dutch local time ("06/11/2026", "13:15") to epoch ms, with the right summer/winter offset. */
+export function amsterdamTime(dmy, hm = "12:00") {
+  const [d, m, y] = String(dmy || "").split("/").map(Number);
+  const [h, mi] = String(hm || "12:00").split(":").map(Number);
+  if (!y || !m || !d) return null;
+  const guess = Date.UTC(y, m - 1, d, h || 0, mi || 0);
+  const parts = new Intl.DateTimeFormat("en-GB", { timeZone: "Europe/Amsterdam", hour: "2-digit", minute: "2-digit", hourCycle: "h23", day: "2-digit" }).formatToParts(new Date(guess));
+  const get = (k) => Number(parts.find((x) => x.type === k)?.value);
+  let diff = (get("hour") * 60 + get("minute")) - ((h || 0) * 60 + (mi || 0));
+  if (get("day") !== new Date(guess).getUTCDate()) diff += get("day") > new Date(guess).getUTCDate() || (get("day") === 1 && new Date(guess).getUTCDate() > 27) ? 1440 : -1440;
+  return guess - diff * 60_000;
+}
+
+const decode = (s) => String(s || "").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/&quot;/g, '"')
+  .replace(/&#0?39;|&apos;/g, "'").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/[ \t]+/g, " ").replace(/\s*\n\s*/g, "\n").trim();
+
+/** The ids on a municipality page of burgernet.nl (/gemeente/Oost-Nederland/APELDOORN), newest first. */
+export function burgernetSiteIds(html) {
+  return [...new Set([...String(html || "").matchAll(/href="\/burgernet\/(\d{4,})"/g)].map((m) => m[1]))];
+}
+
+/** One action page of burgernet.nl (/burgernet/<id>) in the shape of fromBurgernet. */
+export function fromBurgernetSite(id, html, now = Date.now()) {
+  const h = String(html || "");
+  const spec = (label) => {
+    const m = h.match(new RegExp(`${label}</p>\\s*<p[^>]*>([^<]*)</p>`, "i"));
+    return m ? decode(m[1]) : "";
+  };
+  const message = (label) => {
+    const m = h.match(new RegExp(`>${label}</h5>[\\s\\S]*?<h3[^>]*>([\\s\\S]*?)</h3>`, "i"));
+    return m ? decode(m[1]) : "";
+  };
+  const location = spec("Locatie");
+  const key = plaatsKey(location);
+  if (key !== "apeldoorn" && key !== "voorst") return null;
+  const report = message("Startbericht") || message("Afloopbericht");
+  const plaats = burgernetPlaats(report, location);
+  if (!plaats || (key === "voorst" && plaats.naam !== "Teuge")) return null;
+  const [sd, st] = spec("Start actie").split(/\s+/);
+  const [ed2, et] = spec("Einde actie").split(/\s+/);
+  const status = spec("Status van deze actie");
+  const ended = /afgerond|be[eë]indigd|gesloten/i.test(status) || /Afgeronde actie/i.test(h.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)?.[1] || "");
+  const center = h.match(/data-center="(-?\d+\.\d+),(-?\d+\.\d+)"/);
+  let lat = center ? Number(center[1]) : plaats.lat, lon = center ? Number(center[2]) : plaats.lon;
+  // Burgernet centres on the town when it has no address; outside the area means a wrong guess.
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || distanceKm({ lat, lon }, plaats) > 25) { lat = plaats.lat; lon = plaats.lon; }
+  const clean = report.replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
+  const firstSentence = clean.split(/(?<=[.:!?])\s/)[0] || clean;
+  const afloop = message("Afloopbericht");
+  return {
+    id: `burgernet:${id}`, bron: "burgernet",
+    titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/is, "").slice(0, 140),
+    tekst: afloop && ended ? `${report}\n\n${afloop}` : report, tekst_en: null,
+    plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
+    start_at: amsterdamTime(sd, st) ?? now, end_at: ended ? (amsterdamTime(ed2, et) ?? now) : null,
+    status: ended ? "beeindigd" : "actief",
+    gebied: null, lat, lon, link: `https://www.burgernet.nl/burgernet/${id}`,
   };
 }
 
@@ -280,6 +342,38 @@ async function markNotified(env, id, value) {
   await env.DB.prepare("UPDATE waarschuwingen SET notified = ? WHERE id = ?").bind(value, id).run();
 }
 
+async function fetchText(url, budget) {
+  if (!budget.take()) throw new Error("budget");
+  const res = await fetch(url, { headers: { accept: "text/html", "user-agent": UA["user-agent"] }, signal: AbortSignal.timeout(10_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.text();
+}
+
+/**
+ * Burgernet from its own site: the recent actions of Apeldoorn and Voorst (for Teuge), with one action page each.
+ * An action page is only read again while the action runs; finished actions in the database are skipped.
+ */
+async function burgernetFromSite(env, budget, now) {
+  const ids = [];
+  for (const gemeente of ["APELDOORN", "VOORST"]) {
+    const html = await fetchText(`${SOURCES.burgernetSite}/gemeente/Oost-Nederland/${gemeente}`, budget);
+    ids.push(...burgernetSiteIds(html));
+  }
+  const out = [];
+  let reads = 0;
+  for (const id of [...new Set(ids)]) {
+    const prev = await env.DB.prepare("SELECT status FROM waarschuwingen WHERE id = ?").bind(`burgernet:${id}`).first();
+    if (prev?.status === "beeindigd") continue;
+    if (reads >= 4) break;
+    reads++;
+    try {
+      const w = fromBurgernetSite(id, await fetchText(`${SOURCES.burgernetSite}/burgernet/${id}`, budget), now);
+      if (w) out.push(w);
+    } catch (e) { console.warn("[burgernet]", id, e.message || e); }
+  }
+  return { ids: new Set(ids.map((i) => `burgernet:${i}`)), list: out };
+}
+
 async function fetchJSON(url, budget) {
   if (!budget.take()) throw new Error("budget");
   const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(10_000) });
@@ -309,12 +403,14 @@ export async function ingestWarnings(env, budget, kv) {
       else if (w.bron === "knmi" && levelRank(w.niveau) > levelRank(prev.notified)) toPush.push({ id: w.id, upgrade: true });
       if (!prev?.notified || (w.bron === "knmi" && levelRank(w.niveau) > levelRank(prev.notified))) await markNotified(env, w.id, w.niveau || "1");
     }
-    // Burgernet: an active call that left the feed has ended (that is how Burgernet "closes" most actions).
-    if (bron === "burgernet") {
-      const { results } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'burgernet' AND status = 'actief'").all();
-      for (const r of results) if (!seen.has(r.id)) {
-        await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', end_at = ?, updated_at = ? WHERE id = ?").bind(now, now, r.id).run();
-      }
+    return seen;
+  };
+  // Burgernet: an active call that is on neither source any more has ended.
+  const handleBurgernet = async (items, listed) => {
+    await handle("burgernet", items);
+    const { results } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'burgernet' AND status = 'actief'").all();
+    for (const r of results) if (!listed.has(r.id)) {
+      await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', end_at = ?, updated_at = ? WHERE id = ?").bind(now, now, r.id).run();
     }
   };
 
@@ -325,12 +421,28 @@ export async function ingestWarnings(env, budget, kv) {
     status.nlalert = `ok ${list.length}`;
   } catch (e) { status.nlalert = `fout: ${e.message}`; }
 
-  try {
-    const d = await fetchJSON(SOURCES.burgernet, budget);
-    const list = (Array.isArray(d) ? d : []).map((a) => fromBurgernet(a, now)).filter(Boolean);
-    await handle("burgernet", list);
-    status.burgernet = `ok ${list.length}`;
-  } catch (e) { status.burgernet = `fout: ${e.message}`; }
+  // Burgernet: burgernet.nl first (reliable, with start, end and position), the 112meldkamer feed as extra source.
+  {
+    const merged = new Map();
+    const listed = new Set();
+    const fouten = [];
+    let siteOk = false, feedOk = false;
+    try {
+      const d = await fetchJSON(SOURCES.burgernet, budget);
+      for (const w of (Array.isArray(d) ? d : []).map((a) => fromBurgernet(a, now)).filter(Boolean)) { merged.set(w.id, w); listed.add(w.id); }
+      feedOk = true;
+    } catch (e) { fouten.push(`112meldkamer ${e.message}`); }
+    try {
+      const site = await burgernetFromSite(env, budget, now);
+      site.ids.forEach((i) => listed.add(i));
+      for (const w of site.list) merged.set(w.id, w);
+      siteOk = true;
+    } catch (e) { fouten.push(`burgernet.nl ${e.message}`); }
+    if (siteOk || feedOk) {
+      await handleBurgernet([...merged.values()], listed);
+      status.burgernet = `ok ${[...merged.values()].filter((w) => w.status === "actief").length}${fouten.length ? ` (${fouten.join(", ")})` : ""}`;
+    } else status.burgernet = `fout: ${fouten.join(", ")}`;
+  }
 
   try {
     // Only download the full set when KNMI's revision changed.
