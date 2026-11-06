@@ -249,7 +249,7 @@ struct MapScreen: View {
                                     position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 20000, longitudinalMeters: 20000))
                                 }
                             } label: {
-                                Label(h.naam, systemImage: "helicopter.fill")
+                                Label(h.naam, systemImage: "helicopter")
                                     .font(AppFont.body(12, .semibold, relativeTo: .caption))
                                     .padding(.horizontal, 9).padding(.vertical, 5)
                                     .background(h.color.opacity(0.2), in: Capsule())
@@ -299,7 +299,7 @@ struct KaartLagenView: View {
                         }
                         ForEach(helis.items) { h in
                             HStack {
-                                Image(systemName: "helicopter.fill").foregroundStyle(h.color)
+                                Image(systemName: "helicopter").foregroundStyle(h.color)
                                 Text(h.naam)
                                 Spacer()
                                 Text(h.opGrond ? L("Op de grond") : (h.hoogteMeter.map { "\($0) m" } ?? "–")).foregroundStyle(.secondary)

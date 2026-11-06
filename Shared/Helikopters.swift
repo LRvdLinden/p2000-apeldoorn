@@ -128,7 +128,7 @@ struct HeliMarker: View {
                     .frame(width: size, height: size)
                     .overlay(Circle().strokeBorder(.white, lineWidth: selected ? 3 : 2))
                     .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
-                Image(systemName: "helicopter.fill")
+                Image(systemName: "helicopter")
                     .font(.system(size: size * 0.48, weight: .bold))
                     .foregroundStyle(.white)
                 if let k = heli.koers, !heli.opGrond {
