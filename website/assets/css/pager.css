@@ -238,3 +238,52 @@
 .cp-list img { width: 28px; height: 28px; object-fit: contain; flex: none; }
 .cp-list small { display: block; color: var(--muted); font-size: .75rem; }
 .cp-list b { font-size: .9rem; font-weight: 600; }
+
+/* A-Alerts: warnings, KNMI bar, layers, verloop, stations, helicopters */
+.knmi-bar { display: grid; gap: 8px; margin-bottom: 10px; }
+.knmi-bar:empty { display: none; }
+.knmi { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 16px; background: var(--c); color: var(--on); text-decoration: none; box-shadow: var(--shadow); }
+.knmi img { width: 30px; height: 30px; border-radius: 8px; }
+.knmi span { display: grid; flex: 1; min-width: 0; line-height: 1.25; }
+.knmi b { font-size: .92rem; }
+.knmi small { font-size: .78rem; opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.knmi i { font-style: normal; font-size: 1.3rem; opacity: .7; }
+.row.warn > img { border-radius: 9px; }
+.row.warn .when b { font-weight: 700; }
+.row.warn .wstatus { display: inline-block; padding: 0 6px; border-radius: 8px; font-size: .68rem; font-weight: 700; background: color-mix(in srgb, var(--tc) 18%, transparent); color: var(--text); }
+.row.warn.ended { opacity: .7; }
+.hint { color: var(--muted); font-size: .82rem; margin: -6px 0 12px; }
+.detail h1 small { display: block; font-size: .8rem; font-family: var(--body, inherit); font-weight: 700; margin-bottom: 2px; }
+.verloop { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.verloop li { display: grid; grid-template-columns: 62px 1fr; gap: 10px; position: relative; padding: 8px 0; }
+.verloop li::before { content: ""; position: absolute; left: 70px; top: 0; bottom: 0; width: 2px; background: var(--line); }
+.verloop time { font-weight: 700; font-size: .9rem; font-variant-numeric: tabular-nums; display: grid; }
+.verloop time small { color: var(--muted); font-weight: 500; font-size: .72rem; }
+.verloop a { display: flex; gap: 10px; align-items: flex-start; text-decoration: none; color: inherit; padding-left: 14px; }
+.verloop a img { width: 26px; height: 26px; object-fit: contain; flex: none; }
+.verloop a span { display: grid; min-width: 0; }
+.verloop a b { font-size: .88rem; font-weight: 600; }
+.verloop a small { color: var(--muted); font-size: .75rem; }
+.verloop li.zelf a b { font-weight: 800; }
+.verloop em { font-style: normal; color: var(--red); font-size: .75rem; font-weight: 700; }
+.kz { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.kz:last-of-type { border: 0; }
+.kz img { width: 30px; height: 30px; object-fit: contain; }
+.kz div { flex: 1; display: grid; min-width: 0; }
+.kz b { font-size: .92rem; }
+.kz small { color: var(--muted); font-size: .78rem; }
+.kz span { font-size: .78rem; font-weight: 700; white-space: nowrap; }
+.kz .ter { color: #16a34a; } .kz .onderweg { color: #d97706; }
+.chips.lagen .chip { font-size: .78rem; padding-right: 10px; }
+.chips.lagen .chip img { width: 20px; height: 20px; border-radius: 5px; object-fit: contain; }
+.chips.lagen .chip small { font-weight: 800; opacity: .75; }
+.heli-marker { display: grid; justify-items: center; gap: 2px; transform: translateY(-50%); }
+.heli-marker img { width: 84px; height: auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); transition: transform .3s; }
+.heli-marker span { font-size: .68rem; font-weight: 700; padding: 1px 6px; border-radius: 8px; background: color-mix(in srgb, var(--surface) 88%, transparent); }
+.kazerne-marker { width: 28px; height: 28px; border-radius: 8px; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--c), 0 3px 8px rgba(0,0,0,.3); }
+.kazerne-marker img { width: 20px; height: 20px; object-fit: contain; }
+.warn-marker img { width: 34px; }
+.drow em.nu { font-style: normal; font-size: .72rem; font-weight: 700; color: #fff; background: var(--red); padding: 1px 6px; border-radius: 8px; margin-left: 4px; }
+a.drow { text-decoration: none; color: inherit; }
+.chips.lagen { flex-wrap: wrap; }
+@media (max-width: 1100px) { .map-ui { justify-content: flex-start; } }

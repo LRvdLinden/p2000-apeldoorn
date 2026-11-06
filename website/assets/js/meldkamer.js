@@ -5,6 +5,7 @@ import {
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
 } from "./core.js";
+import { BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, heliAnnotation, warnAnnotation, warnOverlays } from "./aalerts.js";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -16,6 +17,7 @@ const state = {
   list: [], known: new Set(), first: true, online: false,
   tour: prefs.get("mk.tour", true), sound: false, urgentOnly: prefs.get("mk.urgentOnly", false),
   focus: null, tourIndex: 0, lastFly: 0,
+  warnings: [], helis: [],
 };
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
@@ -96,7 +98,29 @@ async function renderMap() {
     }),
   ];
   if (add.length) map.addAnnotations(add);
+  renderExtra(kit);
   setFocus(state.focus);
+}
+
+// A-Alerts: active NL-Alert / Burgernet / KNMI areas and live helicopters, redrawn as a separate layer.
+let extraAnn = [], extraOv = [];
+function renderExtra(kit) {
+  if (!kit || !map) return;
+  if (extraAnn.length) map.removeAnnotations(extraAnn);
+  if (extraOv.length) map.removeOverlays(extraOv);
+  const actief = state.warnings.filter(isActief);
+  extraOv = actief.flatMap((w) => warnOverlays(kit, w));
+  extraAnn = [
+    ...actief.filter((w) => w.bron !== "knmi" && w.lat != null).map((w) => warnAnnotation(kit, w)),
+    ...state.helis.map((h) => heliAnnotation(kit, h)),
+  ];
+  if (extraOv.length) map.addOverlays(extraOv);
+  if (extraAnn.length) map.addAnnotations(extraAnn);
+}
+
+async function refreshHelis() {
+  state.helis = await fetchHelikopters();
+  renderExtra(await mapReady);
 }
 
 const openTown = () => window.open("../pager/#kaart", "_self");
@@ -201,9 +225,25 @@ function renderTiles() {
     <div class="vs-note"><span class="delta" style="--dc:${dc}">${diff === 0 ? "=" : diff > 0 ? `↗ +${diff}` : `↘ −${-diff}`}</span>Gisteren om deze tijd: ${y.totaalTotNu} meldingen</div>`;
 }
 
+function warnRow(w) {
+  const b = BRONNEN[w.bron];
+  return `<a class="row warn${isBeeindigd(w) ? " ended" : ""}" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${b.text}">
+      <img src="${wIcon(w)}" alt="">
+      <div><div class="meta"><span style="color:${b.text};font-weight:700">${esc(wKop(w))}</span><span>${esc(wTijd(w))}</span></div>
+        <b>${esc(w.titel)}</b><div class="where">${esc(w.plaats || "Gemeente Apeldoorn")}</div></div></a>`;
+}
+
+function renderKnmi() {
+  $("knmi").innerHTML = state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
+    `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}</small></span></a>`).join("");
+}
+
 function renderList(fresh = new Set()) {
-  const list = inWindow().slice(0, 40);
-  $("list").innerHTML = list.length ? list.map((m) => {
+  renderKnmi();
+  const warns = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || Date.now() - wStart(w).getTime() < WINDOW_MS)).map((w) => ({ w, t: wStart(w) }));
+  const list = [...inWindow().slice(0, 40).map((m) => ({ m, t: date(m) })), ...warns].sort((a, b) => b.t - a.t);
+  $("list").innerHTML = list.length ? list.map(({ m, w }) => {
+    if (w) return warnRow(w);
     const pr = prioText(m);
     return `<a class="row${fresh.has(m.guid) ? " is-new" : ""}${m.guid === state.focus ? " is-focus" : ""}" href="${pagerLink(m)}" data-guid="${esc(m.guid)}" style="--c:${dienstOf(m).text}">
       <img src="${icon(m)}" alt="">
@@ -303,7 +343,8 @@ keepAwake();
 // ------------------------------------------------------------------ loading
 
 async function refresh() {
-  const { list, online } = await fetchMeldingen(400);
+  const [{ list, online }, warnings] = await Promise.all([fetchMeldingen(400), fetchWaarschuwingen(2)]);
+  state.warnings = warnings;
   state.online = online;
   const fresh = state.first ? [] : list.filter((m) => !state.known.has(m.guid) && Date.now() - date(m).getTime() < 30 * 60_000);
   list.forEach((m) => state.known.add(m.guid));
@@ -330,5 +371,7 @@ document.addEventListener("visibilitychange", () => {
 });
 
 await refresh();
+refreshHelis();
 setInterval(() => { if (!document.hidden) refresh(); }, 15_000);
+setInterval(() => { if (!document.hidden) refreshHelis(); }, 15_000);
 setInterval(() => { if (!document.hidden) { renderList(); $("latest").dataset.guid = ""; renderLatest(); } }, 60_000);

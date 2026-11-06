@@ -129,3 +129,17 @@ body.mk {
   .tile b { font-size: 1.5em; }
   .tile small { font-size: .7em; }
 }
+
+/* A-Alerts */
+.knmi-bar { display: grid; gap: 8px; margin-bottom: 12px; }
+.knmi-bar:empty { display: none; }
+.knmi { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 16px; background: var(--c); color: var(--on); text-decoration: none; }
+.knmi img { width: 30px; height: 30px; border-radius: 8px; }
+.knmi span { display: grid; min-width: 0; }
+.knmi small { opacity: .9; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row.warn > img { border-radius: 9px; }
+.row.warn.ended { opacity: .65; }
+.heli-marker { display: grid; justify-items: center; gap: 2px; transform: translateY(-50%); }
+.heli-marker img { width: 96px; height: auto; filter: drop-shadow(0 3px 4px rgba(0,0,0,.45)); }
+.heli-marker span { font-size: .75rem; font-weight: 700; padding: 1px 7px; border-radius: 8px; background: rgba(20,20,26,.85); color: #fff; }
+.warn-marker img { width: 40px; }

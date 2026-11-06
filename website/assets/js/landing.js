@@ -1,3 +1,4 @@
+import { fetchWaarschuwingen, fetchHelikopters } from "./aalerts.js";
 import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js";
 
 reveal();
@@ -140,3 +141,19 @@ if (tvSection) new IntersectionObserver((entries, io) => {
     setTimeout(() => (el.hidden = true), 5000);
   }, 1200);
 }, { threshold: 0.5 }).observe(tvSection);
+
+// A-Alerts: warnings today and helicopters in the air.
+async function renderAAlerts() {
+  const [w, h] = await Promise.all([fetchWaarschuwingen(2), fetchHelikopters()]);
+  const key = (d) => d.toLocaleDateString("en-CA", { timeZone: "Europe/Amsterdam" });
+  const vandaag = key(new Date());
+  const n = (bron) => w.filter((x) => x.bron === bron && key(new Date(x.start)) === vandaag).length;
+  const set = (id, v) => { const el = document.getElementById(id); if (el) countUp(el, v); };
+  set("wNlalert", n("nlalert"));
+  set("wBurgernet", n("burgernet"));
+  set("wKnmi", w.filter((x) => x.bron === "knmi" && x.status === "actief").length);
+  set("hTrauma", h.filter((x) => x.soort === "trauma" && !x.op_grond).length);
+  set("hPolitie", h.filter((x) => x.soort === "politie" && !x.op_grond).length);
+}
+renderAAlerts();
+setInterval(() => { if (!document.hidden) renderAAlerts(); }, 60_000);

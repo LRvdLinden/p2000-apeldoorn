@@ -2,8 +2,12 @@ import {
   trackVisit, fetchMeldingen, fetchMelding, fetchWeather, addView, DIENSTEN, SELECTABLE, PLAATSEN, dienstOf, asset, date,
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
-  loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
+  API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js";
+import {
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
+  wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
+} from "./aalerts.js";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -27,6 +31,11 @@ const state = {
   hideRead: prefs.get("p2000.hideRead", false),
   mapHours: 24,
   mapDiensten: new Set(SELECTABLE),
+  // A-Alerts
+  warnings: [],
+  bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
+  helis: [],
+  lagen: new Set(prefs.get("p2000.lagen", ["waarschuwingen", "knmi", "helikopters"])),
 };
 
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
@@ -91,6 +100,7 @@ function renderActiveFilters() {
   if (state.prio) chips.push(["prio", state.prio === "urgent" ? "Alleen spoed" : state.prio === "B" ? "B1 / B2" : state.prio]);
   if (state.radiusKm) chips.push(["radius", `Binnen ${state.radiusKm} km`]);
   if (state.hideRead) chips.push(["read", "Bekeken verborgen"]);
+  if (state.bron) chips.push(["bron", `Alleen ${BRONNEN[state.bron].label}`]);
   $("activeFilters").innerHTML = chips.map(([k, t]) => `<button class="afilter" data-k="${k}">${esc(t)} ✕</button>`).join("");
   const n = chips.length;
   $("filterCount").hidden = !n;
@@ -105,6 +115,7 @@ $("activeFilters").addEventListener("click", (e) => {
   if (k === "prio") state.prio = "";
   if (k === "radius") state.radiusKm = 0;
   if (k === "read") state.hideRead = false;
+  if (k === "bron") { state.bron = ""; history.replaceState(history.state, "", location.pathname + location.hash); }
   syncFilterInputs(); saveFilters(); render();
 });
 
@@ -200,22 +211,58 @@ function rowHTML(m, isNew) {
 }
 
 let firstRender = true;
+/** NL-Alert and Burgernet rows: the time of the warning, never "x minutes ago". */
+function warnRowHTML(w) {
+  const b = BRONNEN[w.bron];
+  return `
+  <a class="row warn${isBeeindigd(w) ? " ended" : ""}${state.selected === `w:${w.id}` ? " sel" : ""}" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--tc:${b.text}">
+    <img src="${wIcon(w)}" alt="${esc(b.label)}">
+    <div class="body">
+      <div class="when"><b style="color:${b.text}">${esc(wKop(w))}</b> <span class="wstatus">${esc(wStatus(w))}</span> · ${esc(wTijd(w))}</div>
+      <h3>${esc(w.titel)}</h3>
+      <div class="where">${PIN}${esc(w.plaats || "Gemeente Apeldoorn")}</div>
+    </div>
+  </a>`;
+}
+
+/** Warnings shown in the timeline: NL-Alert and Burgernet of the last 24 hours (or still active). */
+function timelineWarnings() {
+  if (state.diensten.size || state.prio || state.radiusKm) return [];
+  if (state.bron && state.bron !== "nlalert" && state.bron !== "burgernet") return [];
+  const q = state.search.toLowerCase();
+  return state.warnings.filter((w) => w.bron !== "knmi" && (!state.bron || w.bron === state.bron)
+    && (isActief(w) || Date.now() - wStart(w).getTime() < WINDOW_MS)
+    && (!state.plaats || (w.plaats || "Apeldoorn") === state.plaats)
+    && (!q || `${w.titel} ${w.tekst || ""} ${w.plaats || ""}`.toLowerCase().includes(q)));
+}
+
+function renderKnmi() {
+  const items = state.warnings.filter((w) => w.bron === "knmi" && isActief(w));
+  $("knmiBar").innerHTML = items.map((w) => `
+    <a class="knmi" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
+      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small></span><i>›</i>
+    </a>`).join("");
+}
+
 function renderList(newGuids = new Set()) {
-  const items = state.list.filter((m) => matches(m));
+  renderKnmi();
+  const onlyWarnings = Boolean(state.bron);
+  const items = [...(onlyWarnings ? [] : state.list.filter((m) => matches(m)).map((m) => ({ m, t: date(m) }))),
+    ...timelineWarnings().map((w) => ({ w, t: wStart(w) }))].sort((a, b) => b.t - a.t);
   const box = $("list");
   if (!state.list.length && firstRender) {
     box.innerHTML = Array.from({ length: 6 }, () => `<div class="skeleton"></div>`).join("");
     return;
   }
   if (!items.length) {
-    box.innerHTML = `<div class="empty"><b>Geen meldingen</b>${state.search || state.diensten.size || state.plaats || state.prio || state.radiusKm ? "Er zijn geen meldingen die passen bij je filters." : "In de laatste 24 uur zijn er geen meldingen."}</div>`;
+    box.innerHTML = `<div class="empty"><b>${onlyWarnings ? `Geen ${esc(BRONNEN[state.bron].label)}` : "Geen meldingen"}</b>${state.search || state.diensten.size || state.plaats || state.prio || state.radiusKm || onlyWarnings ? "Er is niets dat past bij je filters in de laatste 24 uur." : "In de laatste 24 uur zijn er geen meldingen."}</div>`;
     return;
   }
   let html = "", lastDay = "";
-  for (const m of items) {
-    const k = dayKey(date(m));
-    if (k !== lastDay) { html += `<div class="day">${fmtDay(date(m))}</div>`; lastDay = k; }
-    html += rowHTML(m, newGuids.has(m.guid));
+  for (const it of items) {
+    const k = dayKey(it.t);
+    if (k !== lastDay) { html += `<div class="day">${fmtDay(it.t)}</div>`; lastDay = k; }
+    html += it.m ? rowHTML(it.m, newGuids.has(it.m.guid)) : warnRowHTML(it.w);
   }
   box.innerHTML = html;
   firstRender = false;
@@ -225,7 +272,13 @@ $("list").addEventListener("click", (e) => {
   const row = e.target.closest(".row");
   if (!row || e.metaKey || e.ctrlKey) return;
   e.preventDefault();
-  select(row.dataset.guid);
+  if (row.dataset.wid) selectWarning(row.dataset.wid); else select(row.dataset.guid);
+});
+$("knmiBar").addEventListener("click", (e) => {
+  const a = e.target.closest("[data-wid]");
+  if (!a || e.metaKey || e.ctrlKey) return;
+  e.preventDefault();
+  selectWarning(a.dataset.wid);
 });
 
 // ------------------------------------------------------------------ detail
@@ -297,6 +350,8 @@ function renderDetail(m) {
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
       <a class="amaps" href="${appleMapsURL(m)}" target="_blank" rel="noopener">${ICO.maps} Apple Kaarten</a>
     </section>
+    <section class="card" id="kazernesCard" hidden></section>
+    ${verloopHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
       <div class="unit"><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>`).join("")}</div></section>` : ""}
@@ -326,8 +381,99 @@ function renderDetail(m) {
     } catch {}
   });
 
-  drawDetailMap(m);
+  const mapReady = drawDetailMap(m);
   loadMeteo(m);
+  loadKazernes(m, mapReady);
+  $("detail").querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
+}
+
+/** Alerts that may belong to the same incident, as a timeline. Always a possible link, never a fact. */
+function verloopHTML(m) {
+  const links = verband(m, state.list, 8);
+  if (!links.length) return "";
+  const lijst = [m, ...links.map((l) => l.melding)].sort((a, b) => date(a) - date(b));
+  const t0 = date(lijst[0]);
+  return `<section class="card"><h2>Verloop</h2><p class="hint">Meldingen die mogelijk bij dezelfde inzet horen. Een mogelijk verband, geen zekerheid.</p>
+    <ol class="verloop">${lijst.map((x) => {
+      const plus = Math.round((date(x) - t0) / 60_000);
+      const reden = links.find((l) => l.melding.guid === x.guid)?.redenen.join(" · ") || "";
+      const zelf = x.guid === m.guid;
+      return `<li class="${zelf ? "zelf" : ""}" style="--c:${dienstOf(x).color}"><time>${fmtTime(date(x))}${plus ? `<small>+${plus} min</small>` : ""}</time>
+        <a href="?melding=${encodeURIComponent(x.guid)}" ${zelf ? "" : `data-goto="${esc(x.guid)}"`}><img src="${icon(x)}" alt=""><span><b>${esc(x.title)}</b>${zelf ? `<em>Deze melding</em>` : reden ? `<small>${esc(reden)}</small>` : ""}</span></a></li>`;
+    }).join("")}</ol></section>`;
+}
+
+/** Alarmed stations with an estimated arrival time (no vehicle positions). */
+async function loadKazernes(m, mapReady) {
+  const routes = await kazerneRoutes(m);
+  await mapReady;
+  const box = $("kazernesCard");
+  if (!box || state.selected !== m.guid || !routes.length) return;
+  box.hidden = false;
+  const now = Date.now();
+  box.innerHTML = `<h2>${routes[0].genoemd ? "Gealarmeerde kazernes" : "Dichtstbijzijnde kazerne"}</h2>
+    ${routes.map((r) => {
+      const ter = now >= r.aankomst.getTime();
+      return `<div class="kz"><img src="${asset(`assets/img/icon_${r.kazerne.soort}.png`)}" alt=""><div><b>${esc(r.kazerne.naam)}</b><small>${r.km < 1 ? `${Math.round(r.km * 100) * 10} m` : `${r.km.toFixed(1).replace(".", ",")} km`} · ± ${Math.max(1, Math.round(r.rij))} min rijden</small></div>
+        <span class="${ter ? "ter" : "onderweg"}">${ter ? "Ter plaatse" : `Onderweg · ± ${fmtTime(r.aankomst)}`}</span></div>`;
+    }).join("")}
+    <p class="hint">Geschatte tijden op basis van afstand en prioriteit, zonder voertuigposities.</p>`;
+  const mk = detailMap && window.mapkit;
+  if (mk && state.selected === m.guid) {
+    routes.forEach((r) => {
+      detailMap.addAnnotation(kazerneAnnotation(mk, r.kazerne, dienstOf(m).color));
+      detailMap.addOverlay(new mk.PolylineOverlay([new mk.Coordinate(r.kazerne.lat, r.kazerne.lon), new mk.Coordinate(m.lat, m.lon)],
+        { style: new mk.Style({ strokeColor: dienstOf(m).color, lineWidth: 4, lineDash: [10, 8], lineCap: "round" }) }));
+    });
+    try { detailMap.showItems(detailMap.annotations, { animate: true, padding: new mk.Padding(60, 40, 40, 40) }); } catch {}
+  }
+}
+
+// ------------------------------------------------------------------ warning detail
+
+async function selectWarning(id, { push = true } = {}) {
+  let w = state.warnings.find((x) => x.id === id);
+  let near = [];
+  try {
+    const r = await fetch(`${API}/v1/waarschuwingen/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(10_000) });
+    if (r.ok) { const full = await r.json(); w = full; near = full.meldingen || []; }
+  } catch {}
+  if (!w) { toast("Deze waarschuwing is niet meer beschikbaar"); closeDetail(push); return; }
+  state.selected = `w:${w.id}`;
+  shell.classList.add("has-detail");
+  if (push) history.pushState({ wid: w.id }, "", `?waarschuwing=${encodeURIComponent(w.id)}${location.hash}`);
+  document.title = `${wKop(w)}: ${w.titel} – A-Alerts`;
+  setMeta(`${wKop(w)} · ${w.titel} · ${w.plaats || "Gemeente Apeldoorn"}`, `?waarschuwing=${encodeURIComponent(w.id)}`);
+  const b = BRONNEN[w.bron];
+  $("detail").innerHTML = `
+  <article class="detail">
+    <button class="d-back" data-close>‹ Pager</button>
+    <button class="d-close" data-close aria-label="Sluiten">✕</button>
+    <div class="d-map" id="dMap"></div>
+    <section class="card">
+      <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1></div>
+      <div class="info"><span class="ico" style="background:${isActief(w) ? "#DC2626" : "#6b7280"}">${ICO.warn}</span><div><b>${esc(wStatus(w))}</b><small>${esc(wTijd(w))}</small></div></div>
+      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : "Plaats van de oproep"}</small></div></div>
+      ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} Bekijk bij ${esc(b.label)}</a>` : ""}
+    </section>
+    ${w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
+    ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
+    ${near.length ? `<section class="card"><h2>Meldingen in de buurt</h2><p class="hint">P2000-meldingen in hetzelfde gebied rond dezelfde tijd. Mogelijk verband, geen zekerheid.</p>
+      <div class="cp-list">${near.slice(0, 10).map((m) => `<button data-goto="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(fmtTime(date(m)))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div></section>` : ""}
+  </article>`;
+  $("detail").querySelectorAll("[data-close]").forEach((x) => x.addEventListener("click", () => closeDetail()));
+  $("detail").querySelectorAll("[data-goto]").forEach((x) => x.addEventListener("click", () => select(x.dataset.goto)));
+  $("detailPane").scrollTop = 0;
+  renderList();
+  const mk = await loadMapKit();
+  if (!mk || state.selected !== `w:${w.id}`) return;
+  if (detailMap) { try { detailMap.destroy(); } catch {} }
+  const div = document.createElement("div"); div.className = "mk"; $("dMap").prepend(div);
+  detailMap = new mk.Map(div, { center: new mk.Coordinate(w.lat ?? 52.2112, w.lon ?? 5.9699), cameraDistance: 9000, showsMapTypeControl: false,
+    colorScheme: matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light });
+  const overlays = warnOverlays(mk, w);
+  if (overlays.length) { detailMap.addOverlays(overlays); try { detailMap.showItems(overlays, { padding: new mk.Padding(30, 30, 30, 30) }); } catch {} }
+  if (w.lat != null && w.bron !== "knmi") detailMap.addAnnotation(warnAnnotation(mk, w));
 }
 
 async function drawDetailMap(m) {
@@ -336,6 +482,7 @@ async function drawDetailMap(m) {
   if (!mk || state.selected !== m.guid) return;
   const host = $("dMap");
   host.querySelector(".static-pin")?.remove();
+  if (detailMap) { try { detailMap.destroy(); } catch {} detailMap = null; }
   const div = document.createElement("div");
   div.className = "mk";
   host.prepend(div);
@@ -378,8 +525,9 @@ async function loadMeteo(m) {
 }
 
 addEventListener("popstate", () => {
-  const g = new URLSearchParams(location.search).get("melding");
-  g ? select(g, { push: false }) : closeDetail(false);
+  const sp = new URLSearchParams(location.search);
+  const g = sp.get("melding"), wid = sp.get("waarschuwing");
+  wid ? selectWarning(wid, { push: false }) : g ? select(g, { push: false }) : closeDetail(false);
   setTab((location.hash || "#pager").slice(1), false);
 });
 addEventListener("keydown", (e) => { if (e.key === "Escape" && state.selected) closeDetail(); });
@@ -397,7 +545,12 @@ function setTab(tab, push = true) {
     if (b.getAttribute("role") === "tab") b.setAttribute("aria-selected", String(on));
   });
   if (push) history.replaceState(history.state, "", location.pathname + location.search + (tab === "pager" ? "" : `#${tab}`));
-  if (tab === "kaart") renderMap();
+  if (tab === "kaart") {
+    renderMap();
+    pollHelis();
+    clearInterval(heliTimer);
+    heliTimer = setInterval(pollHelis, 15_000);
+  } else clearInterval(heliTimer);
   if (tab === "stats") renderStats();
   scrollTo({ top: 0 });
 }
@@ -406,6 +559,12 @@ document.querySelectorAll("button[data-tab]").forEach((b) => b.addEventListener(
 // ------------------------------------------------------------------ map
 
 let bigMap = null, bigMapReady = null;
+const LAGEN = [
+  ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800"],
+  ["knmi", "KNMI", "icon_knmi", "#3E9FDB"],
+  ["helikopters", "Heli's", "icon_traumaheli", "#9333EA"],
+  ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
+];
 function renderMapChips() {
   const cutoff = Date.now() - state.mapHours * 3600_000;
   const recent = state.list.filter((m) => date(m).getTime() >= cutoff);
@@ -413,6 +572,25 @@ function renderMapChips() {
     const n = recent.filter((m) => m.dienst === d).length;
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("");
+  $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
+    const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? state.warnings.filter((w) => w.bron !== "knmi" && isActief(w)).length
+      : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+  }).join("");
+}
+$("mapLagen").addEventListener("click", (e) => {
+  const k = e.target.closest("[data-laag]")?.dataset.laag;
+  if (!k) return;
+  state.lagen.has(k) ? state.lagen.delete(k) : state.lagen.add(k);
+  prefs.set("p2000.lagen", [...state.lagen]);
+  renderMap();
+});
+
+let heliTimer = null;
+async function pollHelis() {
+  if (state.tab !== "kaart" || !state.lagen.has("helikopters") || document.hidden) return;
+  state.helis = await fetchHelikopters();
+  renderMap();
 }
 $("mapChips").addEventListener("click", (e) => {
   const d = e.target.closest(".chip")?.dataset.d;
@@ -454,9 +632,22 @@ async function renderMap() {
   const mk = await bigMapReady;
   if (!mk) { renderStaticMarkers(pins, clusters); return; }
   bigMap.removeAnnotations(bigMap.annotations);
+  bigMap.removeOverlays(bigMap.overlays);
+  const actief = state.warnings.filter((w) => isActief(w));
+  const extra = [];
+  if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
+  if (state.lagen.has("waarschuwingen")) {
+    actief.filter((w) => w.bron !== "knmi").forEach((w) => {
+      bigMap.addOverlays(warnOverlays(mk, w));
+      if (w.lat != null) extra.push(warnAnnotation(mk, w, (x) => selectWarning(x.id)));
+    });
+  }
+  if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613")));
+  if (state.lagen.has("helikopters")) state.helis.forEach((h) => extra.push(heliAnnotation(mk, h)));
   bigMap.addAnnotations([
     ...clusters.map((c) => clusterAnnotation(mk, c, openCluster)),
     ...pins.map((m) => markerAnnotation(mk, m, (x) => select(x.guid))),
+    ...extra,
   ]);
 }
 
@@ -519,6 +710,17 @@ function hourChart(t, y) {
   return `<svg class="chart bars" viewBox="0 0 ${W} ${H}" role="img" aria-label="Meldingen per uur, vandaag en gisteren">${grid}${bars}${labels}</svg>`;
 }
 
+function warnStatsHTML() {
+  const key = (d) => d.toLocaleDateString("en-CA", { timeZone: "Europe/Amsterdam" });
+  const vandaag = key(new Date()), gisteren = key(new Date(Date.now() - 86_400_000));
+  return Object.entries(BRONNEN).map(([bron, b]) => {
+    const eigen = state.warnings.filter((w) => w.bron === bron);
+    const a = eigen.filter((w) => key(wStart(w)) === vandaag).length, y = eigen.filter((w) => key(wStart(w)) === gisteren).length;
+    const nu = eigen.filter(isActief).length;
+    return `<a class="drow" href="?bron=${bron}"><img src="${asset(`assets/img/${b.icon}.png`)}" alt=""><span>${b.label}${nu ? ` <em class="nu">${nu} actief</em>` : ""}</span><b>${a}</b><i>/ ${y}</i>${delta(a - y)}</a>`;
+  }).join("");
+}
+
 function renderStats() {
   const t = todayStats(state.list), y = yesterdayStats(state.list);
   const dayFmt = (d) => d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long", timeZone: "Europe/Amsterdam" });
@@ -560,6 +762,7 @@ function renderStats() {
       </section>
       <section class="card"><h2>Per prioriteit</h2><div class="legend"><span style="--c:#DC2626">Vandaag</span><span style="--c:#9ca3af">Gisteren</span></div>${prioHTML}</section>
       <section class="card"><h2>Meest voorkomend</h2>${catHTML}</section>
+      <section class="card"><h2>Waarschuwingen</h2>${warnStatsHTML()}<p class="source" style="text-align:left;margin:.6rem 0 0">Vandaag / gisteren · gemeente Apeldoorn en Teuge</p></section>
     </div>
     <p class="source">Statistieken van vandaag en gisteren · Bron: <a href="https://p2000.page" rel="noopener">p2000.page</a></p>
   </div>`;
@@ -577,7 +780,8 @@ function render(newGuids) {
 }
 
 async function refresh() {
-  const { list, online } = await fetchMeldingen(500);
+  const [{ list, online }, warnings] = await Promise.all([fetchMeldingen(500), fetchWaarschuwingen(7)]);
+  state.warnings = warnings;
   state.online = online;
   if (online) state.lastOk = new Date();
   $("demoBanner").hidden = !demoMode;
@@ -599,5 +803,6 @@ setTab((location.hash || "#pager").slice(1), false);
 await refresh();
 setInterval(() => { if (!document.hidden) refresh(); }, 15_000);
 setInterval(() => { if (!document.hidden) renderList(); }, 60_000); // "x min geleden"
-const initial = params.get("melding");
-if (initial) select(initial, { push: false });
+const initial = params.get("melding"), initialW = params.get("waarschuwing");
+if (initialW) selectWarning(initialW, { push: false });
+else if (initial) select(initial, { push: false });

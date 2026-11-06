@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Live pager – A-Alerts</title>
-<meta name="description" content="Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.">
+<meta name="description" content="Alle P2000-meldingen, NL-Alert, Burgernet en KNMI van de laatste 24 uur in de gemeente Apeldoorn, live en op de kaart, met live helikopters.">
 <meta name="theme-color" content="#cf0a1e">
 <meta property="og:title" content="Live pager – A-Alerts">
 <meta property="og:image" content="https://a-alerts.nl/assets/img/og-image.png">
 <meta property="og:type" content="website">
-<meta property="og:description" content="Alle P2000-meldingen van de laatste 24 uur in gemeente Apeldoorn, live en op de kaart.">
+<meta property="og:description" content="Alle P2000-meldingen, NL-Alert, Burgernet en KNMI van de laatste 24 uur in de gemeente Apeldoorn, live en op de kaart, met live helikopters.">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://a-alerts.nl/pager/">
 <meta property="og:url" content="https://a-alerts.nl/pager/">
@@ -49,6 +49,7 @@
 <main class="shell" id="shell" data-tab="pager">
   <!-- LIST -->
   <section class="pane list-pane" aria-label="Meldingen">
+    <div class="knmi-bar" id="knmiBar"></div>
     <div class="tiles" id="tiles"></div>
     <div class="toolbar">
       <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -83,6 +84,7 @@
     <div class="map-ui">
       <div class="seg" id="period"><button data-h="6">6 uur</button><button data-h="24" class="on">24 uur</button></div>
       <div class="chips" id="mapChips"></div>
+      <div class="chips lagen" id="mapLagen" aria-label="Kaartlagen"></div>
     </div>
     <div class="cluster-panel" id="clusterPanel" hidden></div>
     <div class="map-fallback" id="mapFallback" hidden>
