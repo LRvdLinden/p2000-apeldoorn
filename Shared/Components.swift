@@ -23,11 +23,23 @@ struct AppMark: View {
     var showsTile = true
 
     var body: some View {
+        if showsTile {
+            // The real app icon (built from the Apple TV icon layers), so it always matches the home screen.
+            Image("AppIconDisplay")
+                .resizable()
+                .interpolation(.high)
+                .scaledToFill()
+                .frame(width: size, height: size)
+                .clipShape(RoundedRectangle(cornerRadius: size * 0.225, style: .continuous))
+                .accessibilityHidden(true)
+        } else {
+            shield
+        }
+    }
+
+    /// The white shield alone (lock screen, splash), on whatever background is behind it.
+    private var shield: some View {
         ZStack {
-            if showsTile {
-                RoundedRectangle(cornerRadius: size * 0.225, style: .continuous)
-                    .fill(Theme.iconRed)
-            }
             ShieldShape()
                 .fill(LinearGradient(colors: [.white, Color(white: 0.84)], startPoint: .top, endPoint: .bottom))
                 .frame(width: size * 0.52, height: size * 0.62)
