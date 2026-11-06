@@ -29,11 +29,17 @@ final class AppSettings {
     /// KNMI codes that give a push: "yellow", "orange", "red".
     var pushKnmi: Set<String> = ["orange", "red"] { didSet { save(.pushKnmi, Array(pushKnmi).sorted()); notificationsChanged() } }
 
+    // MARK: Notification profiles (A-Alerts)
+    /// Up to five profiles; the first one is mirrored into the older single notification settings.
+    var profielen: [MeldingProfiel] = [] { didSet { saveProfielen() } }
+
     // MARK: Appearance
     /// "systeem", "licht" or "donker".
     var appearance: String = "systeem" { didSet { save(.appearance, appearance) } }
     /// "standard", "satellite" or "hybrid".
     var mapType: String = "standard" { didSet { save(.mapType, mapType) } }
+    /// Map layers that are switched on (see KaartLaag).
+    var kaartLagen: Set<String> = KaartLaag.standaard { didSet { save(.kaartLagen, Array(kaartLagen).sorted()) } }
 
     // MARK: Notifications
     var notificationsEnabled: Bool = false { didSet { save(.notificationsEnabled, notificationsEnabled); notificationsChanged() } }
@@ -73,7 +79,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi
+        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, profielen, kaartLagen
 
         var synced: Bool {
             switch self {
@@ -104,6 +110,42 @@ final class AppSettings {
         }
         cloud.synchronize()
         pullFromCloud()
+        migrateToProfielen()
+    }
+
+    /// A-Alerts: the existing notification choices become the first profile ("Standaard"), so nothing is lost.
+    private func migrateToProfielen() {
+        guard profielen.isEmpty else { return }
+        profielen = [legacyProfiel()]
+    }
+
+    private func legacyProfiel() -> MeldingProfiel {
+        var p = MeldingProfiel(naam: L("Standaard"))
+        p.diensten = notifDiensten
+        p.plaatsen = notifPlaatsen
+        p.prioriteiten = notifPrioriteiten
+        p.nlalert = pushNLAlert
+        p.burgernet = pushBurgernet
+        p.knmi = pushKnmi
+        return p
+    }
+
+    private func saveProfielen() {
+        if let data = try? JSONEncoder().encode(profielen), let json = String(data: data, encoding: .utf8) {
+            save(.profielen, json)
+        }
+        guard !isLoading else { return }
+        // Keep the older settings equal to the first profile (older app versions and servers read those).
+        if let p = profielen.first {
+            if notifDiensten != p.diensten { notifDiensten = p.diensten }
+            if notifPlaatsen != p.plaatsen { notifPlaatsen = p.plaatsen }
+            if notifPrioriteiten != p.prioriteiten { notifPrioriteiten = p.prioriteiten }
+            if pushNLAlert != profielen.contains(where: { $0.actief && $0.nlalert }) { pushNLAlert.toggle() }
+            if pushBurgernet != profielen.contains(where: { $0.actief && $0.burgernet }) { pushBurgernet.toggle() }
+            let knmi = Set(profielen.filter(\.actief).flatMap(\.knmi))
+            if pushKnmi != knmi { pushKnmi = knmi }
+        }
+        notificationsChanged()
     }
 
     /// Build 1 stored settings in UserDefaults.standard; move them into the App Group once.
@@ -169,6 +211,11 @@ final class AppSettings {
         if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
+        if let v = set(.kaartLagen) { kaartLagen = v }
+        if let s = source(Key.profielen.storageKey) as? String, let data = s.data(using: .utf8),
+           let list = try? JSONDecoder().decode([MeldingProfiel].self, from: data), !list.isEmpty {
+            profielen = Array(list.prefix(MeldingProfiel.maximum))
+        }
     }
 
     private func save(_ key: Key, _ value: Any) {
@@ -197,6 +244,8 @@ final class AppSettings {
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
         radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
         waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]
+        profielen = [MeldingProfiel(naam: L("Standaard"))]
+        kaartLagen = KaartLaag.standaard
         isLoading = false
         onNotificationSettingsChanged?()
     }
@@ -256,9 +305,13 @@ final class AppSettings {
     /// Whether this alert should produce a notification right now.
     func matchesNotification(_ m: Melding, at date: Date = .now) -> Bool {
         guard notificationsEnabled, withinRadius(m) else { return false }
-        if !notifDiensten.isEmpty, !notifDiensten.contains(m.dienst.rawValue) { return false }
-        if !Werkgebied.shared.matches(m, selected: notifPlaatsen) { return false }
-        if !notifPrioriteiten.isEmpty, !notifPrioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
+        if profielen.isEmpty {
+            if !notifDiensten.isEmpty, !notifDiensten.contains(m.dienst.rawValue) { return false }
+            if !Werkgebied.shared.matches(m, selected: notifPlaatsen) { return false }
+            if !notifPrioriteiten.isEmpty, !notifPrioriteiten.contains((m.prioriteit ?? "").uppercased()) { return false }
+        } else if !profielen.contains(where: { $0.geldt(op: date) && $0.matches(m) }) {
+            return false
+        }
         if isQuiet(at: date) && !(criticalAlerts && m.isUrgent) { return false }
         return true
     }

@@ -104,6 +104,8 @@ enum PushManager {
                     "burgernet": s.pushBurgernet,
                     "knmi": Array(s.pushKnmi).sorted(),
                 ] as [String: Any],
+                // A-Alerts: up to five notification profiles (older servers ignore this).
+                "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),
             ]
             if s.radiusEnabled, let c = s.radiusCenter {
                 settings["radius_km"] = s.radiusKm

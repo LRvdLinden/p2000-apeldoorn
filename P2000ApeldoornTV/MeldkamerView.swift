@@ -58,7 +58,18 @@ struct MeldkamerView: View {
                     }
                     .annotationTitles(.hidden)
                 }
+                // Live trauma and police helicopters (A-Alerts).
+                if AppSettings.shared.laag(.helikopters) {
+                    ForEach(HeliStore.shared.items) { h in
+                        Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                            HeliMarker(heli: h, size: 56)
+                        }
+                        .annotationTitles(.hidden)
+                    }
+                }
             }
+            .onAppear { HeliStore.shared.start() }
+            .onDisappear { HeliStore.shared.stop() }
             .mapStyle(mapStyle)
             .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).stroke(.white.opacity(0.08), lineWidth: 2))

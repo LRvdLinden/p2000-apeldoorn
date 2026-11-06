@@ -477,43 +477,16 @@ struct NotificationSettingsView: View {
             }
 
             if settings.notificationsEnabled {
+                ProfielenSection()
+
                 Section {
-                    NavigationLink {
-                        MultiSelectView(title: L("Plaatsen"), options: Config.plaatsen, selection: $settings.notifPlaatsen,
-                                        footer: L("Kies je plaatsen voor notificaties. Niets geselecteerd = alle plaatsen."),
-                                        groups: Config.plaatsGroepen)
-                    } label: {
-                        LabeledContent(L("Plaatsen"), value: AppSettings.summary(settings.notifPlaatsen) { $0 })
-                    }
-                    NavigationLink {
-                        MultiSelectView(title: L("Disciplines"), options: Dienst.selectable.map(\.rawValue),
-                                        label: { Dienst(rawValue: $0)?.label ?? $0 }, selection: $settings.notifDiensten,
-                                        icon: { Dienst(rawValue: $0) })
-                    } label: {
-                        LabeledContent(L("Disciplines"), value: AppSettings.summary(settings.notifDiensten) { Dienst(rawValue: $0)?.label ?? $0 })
-                    }
-                    NavigationLink {
-                        MultiSelectView(title: L("Prioriteit"), options: Config.prioriteiten, selection: $settings.notifPrioriteiten)
-                    } label: {
-                        LabeledContent(L("Prioriteit"), value: AppSettings.summary(settings.notifPrioriteiten) { $0 })
-                    }
                     NavigationLink {
                         RadiusSettingsView()
                     } label: {
                         LabeledContent(L("Mijn buurt"), value: settings.radiusEnabled ? Lf("%@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1)))) : L("Uit"))
                     }
-                } header: {
-                    Text(L("Waarvoor"))
-                }
-
-                Section {
-                    NavigationLink {
-                        WaarschuwingenSettingsView()
-                    } label: {
-                        LabeledContent(L("Waarschuwingen"), value: waarschuwingSummary)
-                    }
                 } footer: {
-                    Text(L("NL-Alert, Burgernet en KNMI-weerwaarschuwingen voor de gemeente Apeldoorn."))
+                    Text(L("Met Mijn buurt krijg je voor alle profielen alleen meldingen binnen de gekozen afstand."))
                 }
 
                 Section {

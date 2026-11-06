@@ -1,5 +1,13 @@
 # Changelog
 
+## A-Alerts 1.0.0 (build 17) – fase 4 t/m 8
+- Mogelijk verband: op een melding zie je andere P2000-meldingen op hetzelfde adres of vlakbij, rond hetzelfde tijdstip of met dezelfde eenheid, met de reden erbij. Altijd als mogelijk verband, nooit als feit.
+- Kaartlagen: P2000, NL-Alert, Burgernet, KNMI-gebieden, grens werkgebied, kazernes en posten, en live helikopters, elk aan of uit (gesynchroniseerd via iCloud).
+- Helikopters: live posities van Lifeliner 1–4 en Zulu 01–06 en 24–26 (adsb.lol, open data) met koers, hoogte en snelheid. Ook op de Apple TV-kaart.
+- Notificatieprofielen: tot 5 profielen met eigen plaatsen, disciplines, prioriteiten, waarschuwingen en tijden. Je bestaande keuzes zijn automatisch profiel 'Standaard'.
+- Kazernes en aanrijtijden: brandweerkazernes, ambulanceposten en politieposten rond Apeldoorn (OpenStreetMap) op de kaart, en per melding een geschatte aanrijtijd vanaf de genoemde of dichtstbijzijnde kazerne. Altijd een schatting.
+- p2000.page wordt alleen nog onderaan Instellingen genoemd.
+
 ## A-Alerts 1.0.0 (build 16)
 - Nieuwe typografie: alle titels in Social Gothic, overige tekst in Poppins (Light voor lopende tekst), op iPhone, iPad, Mac, Apple TV, Apple Watch en in de widgets. Navigatietitels, tabbalk en segmentknoppen gebruiken dezelfde fonts. Teksten schalen mee met de systeemtekstgrootte.
 

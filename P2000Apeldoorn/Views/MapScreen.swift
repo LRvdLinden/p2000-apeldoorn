@@ -1,10 +1,12 @@
 import SwiftUI
 import MapKit
 
-/// "Kaart": all recent alerts with the website's marker pins.
+/// "Kaart": recent alerts with the website's marker pins, plus layers for NL-Alert, Burgernet,
+/// KNMI areas, the working-area border, stations and live helicopters (each can be switched on or off).
 struct MapScreen: View {
     @Environment(MeldingStore.self) private var store
     @Environment(AppSettings.self) private var settings
+    @Environment(WaarschuwingStore.self) private var waarschuwingen
 
     enum Range: Int, CaseIterable, Identifiable {
         case uur6 = 6, uur24 = 24, dagen7 = 168
@@ -21,15 +23,23 @@ struct MapScreen: View {
     @State private var range: Range = .uur24
     @State private var selected: Melding?
     @State private var selectedCluster: PlaatsCluster?
+    @State private var selectedHeli: Helikopter.ID?
+    @State private var selectedKazerne: Kazerne?
+    @State private var openedWaarschuwing: WaarschuwingRef?
     @State private var position: MapCameraPosition = .region(MapScreen.apeldoorn)
     @State private var visibleDiensten: Set<Dienst> = Set(Dienst.selectable)
+    @State private var showLagen = false
+    @State private var helis = HeliStore.shared
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
 
+    private var cutoff: Date { Date.now.addingTimeInterval(-Double(range.rawValue) * 3600) }
+
     /// Alerts with a street get their own pin; alerts with only a town name are grouped into one marker per town.
     private var layout: (pins: [MapPin], clusters: [PlaatsCluster]) {
-        let cutoff = Date.now.addingTimeInterval(-Double(range.rawValue) * 3600)
+        guard settings.laag(.p2000) else { return ([], []) }
+        let cutoff = cutoff
         return MapLayout.build(store.meldingen.filter {
             $0.datum >= cutoff
                 && (visibleDiensten.contains($0.dienst) || !Dienst.selectable.contains($0.dienst))
@@ -37,10 +47,51 @@ struct MapScreen: View {
         })
     }
 
+    /// NL-Alert and Burgernet within the period (or still active), KNMI while it applies.
+    private var zichtbareWaarschuwingen: [Waarschuwing] {
+        let cutoff = cutoff
+        return waarschuwingen.items.filter { w in
+            switch w.bron {
+            case .nlalert: guard settings.laag(.nlalert) else { return false }
+            case .burgernet: guard settings.laag(.burgernet) else { return false }
+            case .knmi: guard settings.laag(.knmi), !w.isBeeindigd else { return false }
+            }
+            guard !w.isBeeindigd || (w.einde ?? w.start) >= cutoff else { return false }
+            return settings.matchesList(w)
+        }
+    }
+
+    private var heli: Helikopter? { selectedHeli.flatMap { id in helis.items.first { $0.id == id } } }
+
     var body: some View {
         NavigationStack {
             let groups = layout
+            let ws = zichtbareWaarschuwingen
             Map(position: $position) {
+                if settings.laag(.werkgebied) {
+                    ForEach(Array(Werkgebied.shared.gemeente.gebied.enumerated()), id: \.offset) { _, ring in
+                        MapPolyline(coordinates: (ring + ring.prefix(1)).compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[1], longitude: $0[0]) : nil })
+                            .stroke(Theme.red.opacity(0.75), style: StrokeStyle(lineWidth: 2.5, dash: [10, 6]))
+                    }
+                }
+                ForEach(ws) { w in
+                    ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
+                        MapPolygon(coordinates: ring)
+                            .foregroundStyle(w.color.opacity(w.bron == .knmi ? 0.16 : 0.22))
+                            .stroke(w.bron == .nlalert ? Color.orange : w.color, lineWidth: 2)
+                    }
+                }
+                if settings.laag(.kazernes) {
+                    ForEach(Kazernes.all) { k in
+                        Annotation(k.naam, coordinate: k.coordinate, anchor: .center) {
+                            KazerneIcon(soort: k.soort, size: selectedKazerne?.id == k.id ? 30 : 24)
+                                .onTapGesture { withAnimation { selectedKazerne = k; selected = nil; selectedHeli = nil } }
+                                .accessibilityAddTraits(.isButton)
+                                .accessibilityLabel("\(k.soortLabel) \(k.naam)")
+                        }
+                        .annotationTitles(.hidden)
+                    }
+                }
                 ForEach(groups.clusters) { cluster in
                     Annotation(cluster.plaats, coordinate: cluster.coordinate, anchor: .bottom) {
                         ClusterMarker(cluster: cluster, selected: selectedCluster?.id == cluster.id)
@@ -52,7 +103,16 @@ struct MapScreen: View {
                 ForEach(groups.pins) { pin in
                     Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
                         DienstMarker(dienst: pin.melding.dienst, size: 44, selected: selected?.guid == pin.melding.guid)
-                            .onTapGesture { withAnimation { selected = pin.melding } }
+                            .onTapGesture { withAnimation { selected = pin.melding; selectedHeli = nil; selectedKazerne = nil } }
+                            .accessibilityAddTraits(.isButton)
+                    }
+                    .annotationTitles(.hidden)
+                }
+                ForEach(ws.filter { $0.bron != .knmi && $0.coordinate != nil }) { w in
+                    Annotation(w.kop, coordinate: w.coordinate ?? CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon), anchor: .bottom) {
+                        WaarschuwingMarker(waarschuwing: w, size: 44)
+                            .opacity(w.isBeeindigd ? 0.6 : 1)
+                            .onTapGesture { openedWaarschuwing = WaarschuwingRef(id: w.id) }
                             .accessibilityAddTraits(.isButton)
                     }
                     .annotationTitles(.hidden)
@@ -61,6 +121,16 @@ struct MapScreen: View {
                     MapCircle(center: CLLocationCoordinate2D(latitude: c.lat, longitude: c.lon), radius: settings.radiusKm * 1000)
                         .foregroundStyle(Theme.red.opacity(0.08))
                         .stroke(Theme.red, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+                }
+                if settings.laag(.helikopters) {
+                    ForEach(helis.items) { h in
+                        Annotation(h.naam, coordinate: h.coordinate, anchor: .center) {
+                            HeliMarker(heli: h, selected: selectedHeli == h.id)
+                                .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
+                                .accessibilityAddTraits(.isButton)
+                        }
+                        .annotationTitles(.hidden)
+                    }
                 }
                 UserAnnotation()
             }
@@ -72,15 +142,28 @@ struct MapScreen: View {
             }
             .safeAreaInset(edge: .top) { controls }
             .safeAreaInset(edge: .bottom) {
-                if let selected {
-                    MapPreviewCard(melding: selected) { self.selected = nil }
-                        .padding(.horizontal)
-                        .padding(.bottom, 8)
-                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                Group {
+                    if let selected {
+                        MapPreviewCard(melding: selected) { self.selected = nil }
+                    } else if let heli {
+                        HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon)) { selectedHeli = nil }
+                    } else if let k = selectedKazerne {
+                        KazerneKaart(kazerne: k) { selectedKazerne = nil }
+                    }
                 }
+                .padding(.horizontal)
+                .padding(.bottom, 8)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
             }
             .sheet(item: $selectedCluster) { cluster in
                 ClusterSheet(cluster: cluster)
+                    .presentationDetents([.medium, .large])
+            }
+            .sheet(item: $openedWaarschuwing) { ref in
+                NavigationStack { WaarschuwingDetailView(id: ref.id) }
+            }
+            .sheet(isPresented: $showLagen) {
+                KaartLagenView()
                     .presentationDetents([.medium, .large])
             }
             .navigationTitle(L("Kaart"))
@@ -89,6 +172,11 @@ struct MapScreen: View {
             .toolbarBackground(.visible, for: .navigationBar)
             #endif
             .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { showLagen = true } label: {
+                        Label(L("Kaartlagen"), systemImage: "square.3.layers.3d")
+                    }
+                }
                 ToolbarItem(placement: .primaryAction) {
                     Menu {
                         Picker(L("Kaarttype"), selection: Bindable(settings).mapType) {
@@ -106,7 +194,17 @@ struct MapScreen: View {
                     }
                 }
             }
+            .onAppear { if settings.laag(.helikopters) { helis.start() } }
+            .onDisappear { if settings.laag(.helikopters) { helis.stop() } }
+            .onChange(of: settings.laag(.helikopters)) { _, on in
+                if on { helis.start() } else { helis.stop(); selectedHeli = nil }
+            }
         }
+    }
+
+    private func afstand(_ lat: Double, _ lon: Double) -> Double? {
+        guard settings.currentLat != 0 else { return nil }
+        return AppSettings.distanceKm(settings.currentLat, settings.currentLon, lat, lon)
     }
 
     private var controls: some View {
@@ -117,26 +215,49 @@ struct MapScreen: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            HStack(spacing: 6) {
-                ForEach(Dienst.selectable) { d in
-                    let on = visibleDiensten.contains(d)
-                    Button {
-                        withAnimation {
-                            if on { visibleDiensten.remove(d) } else { visibleDiensten.insert(d) }
+            if settings.laag(.p2000) {
+                HStack(spacing: 6) {
+                    ForEach(Dienst.selectable) { d in
+                        let on = visibleDiensten.contains(d)
+                        Button {
+                            withAnimation {
+                                if on { visibleDiensten.remove(d) } else { visibleDiensten.insert(d) }
+                            }
+                        } label: {
+                            HStack(spacing: 4) {
+                                DienstIcon(dienst: d, size: 14)
+                                Text("\(count(d))").font(AppFont.body(12, .bold, relativeTo: .caption).monospacedDigit())
+                            }
+                            .padding(.horizontal, 9).padding(.vertical, 5)
+                            .background(on ? d.color.opacity(0.22) : Color.secondary.opacity(0.08), in: Capsule())
+                            .overlay(Capsule().strokeBorder(on ? d.color : .clear, lineWidth: 1))
+                            .opacity(on ? 1 : 0.5)
                         }
-                    } label: {
-                        HStack(spacing: 4) {
-                            DienstIcon(dienst: d, size: 14)
-                            Text("\(count(d))").font(AppFont.body(12, .bold, relativeTo: .caption).monospacedDigit())
-                        }
-                        .padding(.horizontal, 9).padding(.vertical, 5)
-                        .background(on ? d.color.opacity(0.22) : Color.secondary.opacity(0.08), in: Capsule())
-                        .overlay(Capsule().strokeBorder(on ? d.color : .clear, lineWidth: 1))
-                        .opacity(on ? 1 : 0.5)
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("\(d.label): \(count(d))")
+                        .accessibilityValue(on ? L("Zichtbaar") : L("Verborgen"))
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel("\(d.label): \(count(d))")
-                    .accessibilityValue(on ? L("Zichtbaar") : L("Verborgen"))
+                }
+            }
+            if settings.laag(.helikopters), !helis.items.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 6) {
+                        ForEach(helis.items) { h in
+                            Button {
+                                withAnimation {
+                                    selectedHeli = h.id; selected = nil; selectedKazerne = nil
+                                    position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 20000, longitudinalMeters: 20000))
+                                }
+                            } label: {
+                                Label(h.naam, systemImage: "helicopter.fill")
+                                    .font(AppFont.body(12, .semibold, relativeTo: .caption))
+                                    .padding(.horizontal, 9).padding(.vertical, 5)
+                                    .background(h.color.opacity(0.2), in: Capsule())
+                                    .overlay(Capsule().strokeBorder(h.color, lineWidth: 1))
+                            }
+                            .buttonStyle(.plain)
+                        }
+                    }
                 }
             }
         }
@@ -147,8 +268,82 @@ struct MapScreen: View {
     }
 
     private func count(_ d: Dienst) -> Int {
-        let cutoff = Date.now.addingTimeInterval(-Double(range.rawValue) * 3600)
+        let cutoff = cutoff
         return store.meldingen.filter { $0.dienst == d && $0.hasCoordinate && $0.datum >= cutoff }.count
+    }
+}
+
+/// "Kaartlagen": switch each layer on or off (synced between devices).
+struct KaartLagenView: View {
+    @Environment(AppSettings.self) private var settings
+    @Environment(\.dismiss) private var dismiss
+    @State private var helis = HeliStore.shared
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    ForEach(KaartLaag.allCases) { laag in
+                        Toggle(isOn: Binding(get: { settings.laag(laag) }, set: { settings.setLaag(laag, $0) })) {
+                            Label(laag.titel, systemImage: laag.systemImage)
+                        }
+                    }
+                } footer: {
+                    Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten komen uit OpenStreetMap."))
+                }
+                if settings.laag(.helikopters) {
+                    Section {
+                        if helis.items.isEmpty {
+                            Text(helis.failed ? L("Helikopterposities zijn nu niet beschikbaar.") : L("Er is nu geen trauma- of politiehelikopter in de lucht."))
+                                .foregroundStyle(.secondary)
+                        }
+                        ForEach(helis.items) { h in
+                            HStack {
+                                Image(systemName: "helicopter.fill").foregroundStyle(h.color)
+                                Text(h.naam)
+                                Spacer()
+                                Text(h.opGrond ? L("Op de grond") : (h.hoogteMeter.map { "\($0) m" } ?? "–")).foregroundStyle(.secondary)
+                            }
+                        }
+                    } header: {
+                        Text(L("Nu in de lucht"))
+                    }
+                }
+            }
+            .formStyle(.grouped)
+            .navigationTitle(L("Kaartlagen"))
+            #if os(iOS)
+            .navigationBarTitleDisplayMode(.inline)
+            #endif
+            .toolbar {
+                ToolbarItem(placement: .confirmationAction) { Button(L("Klaar")) { dismiss() } }
+            }
+        }
+    }
+}
+
+/// Card for a tapped station.
+struct KazerneKaart: View {
+    let kazerne: Kazerne
+    var onClose: () -> Void
+
+    var body: some View {
+        HStack(spacing: 12) {
+            KazerneIcon(soort: kazerne.soort, size: 40)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(kazerne.naam).font(AppFont.heading(20))
+                Text("\(kazerne.soortLabel) · \(kazerne.plaats)").font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(action: onClose) {
+                Image(systemName: "xmark.circle.fill").font(.title3).foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(L("Sluit"))
+        }
+        .padding(14)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
     }
 }
 

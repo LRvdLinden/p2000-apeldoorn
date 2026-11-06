@@ -36,6 +36,8 @@ struct MeldingDetailView: View {
                     incidentLine
                     mainCard
                     descriptionCard
+                    AanrijtijdKaart(melding: melding)
+                    GerelateerdeMeldingen(melding: melding)
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }

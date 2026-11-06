@@ -23,6 +23,8 @@ import {
   warningsHousekeeping,
 } from "./alerts.js";
 import { SELECT, toAPI as meldingAPI } from "./db.js";
+import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
+import { helikopters } from "./heli.js";
 
 const CONTENT = { privacy, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -114,6 +116,11 @@ async function handle(req, env) {
     return reply(200, { ...w, meldingen: await linkedMeldingen(env, w, meldingAPI, SELECT) }, { "cache-control": "public, max-age=30" });
   }
 
+  // A-Alerts: live positions of the trauma and police helicopters (adsb.lol, ODbL).
+  if (method === "GET" && path === "/v1/helikopters") {
+    return reply(200, await helikopters(env), { "cache-control": "public, max-age=10" });
+  }
+
   if (method === "GET" && path === "/v1/mapkit-token") {
     const token = await mapkitToken(env, req.headers.get("origin") || "");
     if (!token) return reply(mapkitConfigured(env) ? 403 : 503, { error: "MapKit JS unavailable" });
@@ -138,7 +145,9 @@ async function handle(req, env) {
     const body = await readJSON(req);
     const device = deviceFrom(body);
     await upsertDevice(env, device);
-    await savePrefs(env, device.token, prefsFrom(body.settings?.waarschuwingen));
+    const w = prefsFrom(body.settings?.waarschuwingen);
+    const profielen = profielenFrom(body.settings?.profielen);
+    if (w || profielen) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }), ...(profielen ? { profielen } : {}) });
     return reply(200, { ok: true });
   }
   m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200})$/);
@@ -254,7 +263,8 @@ async function poll(env, budget) {
     const recent = fresh.filter((m) => Date.now() - m.datum < 15 * 60_000).sort((a, b) => a.datum - b.datum);
     if (recent.length) {
       const devices = await activeDevices(env);
-      for (const m of recent) await queue(env, m.guid, devices.filter((d) => matches(d, m)).map((d) => d.token));
+      const prefs = await devicePrefs(env);
+      for (const m of recent) await queue(env, m.guid, devices.filter((d) => meldingWanted(d, prefs.get(d.token), m)).map((d) => d.token));
     }
   } catch (e) {
     await kvSet(env, "feed_error", String(e.message || e));
@@ -332,7 +342,7 @@ async function warnings(env, budget) {
     const w = await getWarning(env, id);
     if (!w) continue;
     const wr = { ...w, gebied: w.gebied };
-    const tokens = devices.filter((d) => wantsPush(d, prefs.get(d.token), wr)).map((d) => d.token);
+    const tokens = devices.filter((d) => warningWanted(d, prefs.get(d.token), wr)).map((d) => d.token);
     if (tokens.length) await queue(env, `w:${upgrade ? "u" : "n"}:${id}`, tokens);
   }
 }
