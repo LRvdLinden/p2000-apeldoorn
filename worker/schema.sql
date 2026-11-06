@@ -101,3 +101,21 @@ CREATE TABLE IF NOT EXISTS admin_devices (
   created_at INTEGER NOT NULL,
   updated_at INTEGER NOT NULL
 );
+
+-- A-Alerts: NL-Alert, Burgernet and KNMI warnings for the working area.
+CREATE TABLE IF NOT EXISTS waarschuwingen (
+  id TEXT PRIMARY KEY,            -- "nlalert:<id>", "burgernet:<id>", "knmi:<event>:<start>"
+  bron TEXT NOT NULL,             -- nlalert | burgernet | knmi
+  titel TEXT, tekst TEXT, tekst_en TEXT, plaats TEXT,
+  niveau TEXT,                    -- KNMI: yellow | orange | red
+  soort TEXT,                     -- KNMI phenomenon, Burgernet kind
+  start_at INTEGER NOT NULL, end_at INTEGER,
+  status TEXT NOT NULL,           -- actief | verwacht | beeindigd
+  gebied TEXT,                    -- JSON rings of [lon, lat]
+  lat REAL, lon REAL, link TEXT,
+  first_seen INTEGER NOT NULL, updated_at INTEGER NOT NULL,
+  notified TEXT                   -- level (KNMI) or "1" once pushed
+);
+CREATE INDEX IF NOT EXISTS waarschuwingen_start ON waarschuwingen (start_at);
+-- Per-device choices for the new sources (old app versions have no row and get no warning pushes).
+CREATE TABLE IF NOT EXISTS device_prefs (token TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at INTEGER);

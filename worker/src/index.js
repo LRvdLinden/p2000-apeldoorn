@@ -18,6 +18,11 @@ import privacy from "../content/privacy.json";
 import terms from "../content/terms.json";
 import disclaimer from "../content/disclaimer.json";
 import changelog from "../content/changelog.json";
+import {
+  ingestWarnings, listWarnings, getWarning, linkedMeldingen, payloadForWarning, wantsPush, devicePrefs, savePrefs, prefsFrom,
+  warningsHousekeeping,
+} from "./alerts.js";
+import { SELECT, toAPI as meldingAPI } from "./db.js";
 
 const CONTENT = { privacy, terms, disclaimer, changelog };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -68,6 +73,7 @@ async function handle(req, env) {
       meldingen: await meldingCount(env),
       apns: apnsConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
       devices: await deviceCount(env),
+      waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
     });
   }
 
@@ -97,6 +103,17 @@ async function handle(req, env) {
     return w ? reply(200, w, { "cache-control": "public, max-age=3600" }) : reply(503, { error: "Weather unavailable" });
   }
 
+  // A-Alerts: NL-Alert, Burgernet and KNMI for the working area.
+  if (method === "GET" && path === "/v1/waarschuwingen") {
+    return reply(200, await listWarnings(env, url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
+  }
+  m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%]{4,160})$/);
+  if (method === "GET" && m) {
+    const w = await getWarning(env, decodeURIComponent(m[1]));
+    if (!w) return reply(404, { error: "Not found" });
+    return reply(200, { ...w, meldingen: await linkedMeldingen(env, w, meldingAPI, SELECT) }, { "cache-control": "public, max-age=30" });
+  }
+
   if (method === "GET" && path === "/v1/mapkit-token") {
     const token = await mapkitToken(env, req.headers.get("origin") || "");
     if (!token) return reply(mapkitConfigured(env) ? 403 : 503, { error: "MapKit JS unavailable" });
@@ -118,7 +135,10 @@ async function handle(req, env) {
   }
 
   if (method === "POST" && path === "/v1/devices") {
-    await upsertDevice(env, deviceFrom(await readJSON(req)));
+    const body = await readJSON(req);
+    const device = deviceFrom(body);
+    await upsertDevice(env, device);
+    await savePrefs(env, device.token, prefsFrom(body.settings?.waarschuwingen));
     return reply(200, { ok: true });
   }
   m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200})$/);
@@ -251,7 +271,11 @@ async function drain(env, budget) {
   const items = new Map();
   for (const row of results) {
     if (!items.has(row.guid)) {
-      if (row.guid.startsWith("broadcast:")) {
+      if (row.guid.startsWith("w:")) {
+        const [, upgrade, ...rest] = row.guid.split(":");
+        const w = await getWarning(env, rest.join(":"));
+        items.set(row.guid, w ? { warning: w, upgrade: upgrade === "u" } : null);
+      } else if (row.guid.startsWith("broadcast:")) {
         const b = await kvGet(env, row.guid);
         items.set(row.guid, b ? { broadcast: JSON.parse(b.value) } : null);
       } else {
@@ -264,7 +288,10 @@ async function drain(env, budget) {
     const item = items.get(row.guid);
     const done = env.DB.prepare("DELETE FROM outbox WHERE guid = ? AND token = ?").bind(row.guid, row.token);
     if (!item || !budget.take()) { if (!item) await done.run(); return; }
-    const r = item.melding
+    const r = item.warning
+      ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { upgrade: item.upgrade }),
+        { urgent: item.warning.bron === "nlalert" || item.warning.niveau === "red", collapseId: item.warning.id.slice(0, 64) })
+      : item.melding
       ? await sendPush(env, row, payloadFor(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
       : await sendPush(env, row, { aps: { alert: { title: item.broadcast.title, body: item.broadcast.body }, sound: "default" }, ...(item.broadcast.guid ? { guid: item.broadcast.guid } : {}) });
     if (isDeadToken(r)) await deleteDevice(env, row.token);
@@ -294,6 +321,22 @@ async function backfill(env, budget) {
   console.log(`[backfill] ${rows.length} meldingen`);
 }
 
+/** NL-Alert, Burgernet and KNMI: read once per run, queue pushes for new warnings (and KNMI upgrades). */
+async function warnings(env, budget) {
+  const kv = { get: (k) => kvGet(env, k), set: (k, v) => kvSet(env, k, v) };
+  const toPush = await ingestWarnings(env, budget, kv);
+  if (!toPush.length) return;
+  const devices = await activeDevices(env);
+  const prefs = await devicePrefs(env);
+  for (const { id, upgrade } of toPush) {
+    const w = await getWarning(env, id);
+    if (!w) continue;
+    const wr = { ...w, gebied: w.gebied };
+    const tokens = devices.filter((d) => wantsPush(d, prefs.get(d.token), wr)).map((d) => d.token);
+    if (tokens.length) await queue(env, `w:${upgrade ? "u" : "n"}:${id}`, tokens);
+  }
+}
+
 async function catchUp(env) {
   try {
     const last = await kvGet(env, "feed_try");
@@ -318,6 +361,7 @@ async function cron(env, event) {
     await kvSet(env, "backfill_error", String(e.message || e));
     console.error("[backfill]", e.message || e);
   }
+  try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
   // Five reads per minute: new alerts show up (and are pushed) within ~12 seconds.
   const runs = Number(env.POLLS_PER_RUN || 5);
   for (let i = 0; i < runs; i++) {
@@ -328,6 +372,7 @@ async function cron(env, event) {
   try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
+    await warningsHousekeeping(env);
     await adminHousekeeping(env);
   }
 }
