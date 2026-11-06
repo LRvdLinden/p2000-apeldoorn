@@ -1,0 +1,278 @@
+package nl.lrvdlinden.aalerts.ui
+
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.delay
+import nl.lrvdlinden.aalerts.BuildConfig
+import nl.lrvdlinden.aalerts.Fmt
+import nl.lrvdlinden.aalerts.R
+import nl.lrvdlinden.aalerts.data.*
+import nl.lrvdlinden.aalerts.tr
+import java.time.Instant
+import kotlin.math.roundToInt
+
+@Composable
+fun MeldingDetail(guid: String, nav: Nav) {
+    var m by remember(guid) { mutableStateOf(Store.melding(guid)) }
+    var loaded by remember(guid) { mutableStateOf(m != null) }
+    var weer by remember(guid) { mutableStateOf<AlertWeather?>(null) }
+    LaunchedEffect(guid) {
+        if (m == null) { m = Api.melding(guid); loaded = true }
+        Settings.markRead(guid)
+        Api.addView(guid)
+        weer = Api.weather(guid)
+    }
+    val melding = m
+    if (melding == null) {
+        Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { BackBar(tr("Melding", "Alert"), nav) }) { pad ->
+            Box(Modifier.padding(pad).fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (!loaded) CircularProgressIndicator()
+                else EmptyState(tr("Melding niet gevonden", "Alert not found"), tr("Meldingen blijven 3 dagen beschikbaar.", "Alerts stay available for 3 days."))
+            }
+        }
+        return
+    }
+    MeldingContent(melding, weer, nav)
+}
+
+@Composable
+private fun MeldingContent(m: Melding, weer: AlertWeather?, nav: Nav) {
+    val ctx = LocalContext.current
+    var now by remember { mutableStateOf(Instant.now()) }
+    LaunchedEffect(Unit) { while (true) { delay(20_000); now = Instant.now() } }
+    val routes = remember(m.guid) { Kazernes.routes(m) }
+    val verband = remember(m.guid, Store.meldingen) { Verband.gekoppeld(m, Store.meldingen) }
+    val waarschuwingen = remember(m.guid, Store.waarschuwingen) { Store.waarschuwingen.filter { it.bron != "knmi" && it.relates(m) } }
+    val knmi = remember(m.guid, Store.waarschuwingen) {
+        Store.waarschuwingen.filter { it.bron == "knmi" && (m.lat == null || m.lon == null || it.contains(m.lat, m.lon) || it.gebied == null) && !m.datum.isBefore(it.startAt) && (it.eindeAt?.let { e -> !m.datum.isAfter(e) } ?: true) }
+    }
+
+    Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
+            // Map header
+            BoxWithConstraints(Modifier.fillMaxWidth()) {
+                val h = (maxWidth * 0.9f).coerceIn(300.dp, 440.dp)
+                if (m.hasCoordinate) {
+                    val la = m.lat!!; val lo = m.lon!!
+                    val pts = mutableListOf<MapPoint>()
+                    routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false) }
+                    m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
+                    AMap(
+                        Modifier.fillMaxWidth().height(h),
+                        points = pts,
+                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong()) },
+                        camera = MapCamera(la, lo, if (m.hasStreet) 15.0 else 12.5, fit = if (routes.isNotEmpty()) routes.map { it.kazerne.lat to it.kazerne.lon } + listOf(la to lo) else emptyList(), key = m.guid),
+                        interactive = false,
+                        onMapClick = { nav.toonOpKaart(m.guid) },
+                    )
+                } else {
+                    Box(Modifier.fillMaxWidth().height(200.dp).background(m.soort.color.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) { DienstIcon(m.soort, 72.dp) }
+                }
+            }
+            Column(Modifier.padding(horizontal = 14.dp).offset(y = (-24).dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                // Main card
+                SectionCard {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        DienstIcon(m.soort, 44.dp)
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(1f)) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                                Text(m.soort.label, color = m.soort.textColor, fontWeight = FontWeight.Bold)
+                                PrioBadge(m)
+                                if (m.isRecent) LiveBadge()
+                            }
+                            Text(Fmt.day(m.datum) + " · " + Fmt.time(m.datum), color = Muted, fontSize = 13.sp)
+                        }
+                    }
+                    Text(m.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
+                        Text(m.plaatsText, color = Muted)
+                    }
+                    if (m.prioriteitText.isNotBlank()) Text(m.prioriteitText, fontSize = 14.sp)
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
+                        if (!m.grip.isNullOrBlank()) Pill("GRIP ${m.grip}", Color(0xFF7C3AED))
+                        if (!m.opschaling.isNullOrBlank()) Pill(tr("Opschaling: ", "Scaled up: ") + m.opschaling, Color(0xFFE3001B))
+                        Pill(Fmt.ago(m.datum), Muted)
+                        if (m.views > 0) Pill("${m.views}× " + tr("bekeken", "viewed"), Muted)
+                    }
+                }
+                // Actions
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    val saved = m.guid in Settings.bewaard
+                    ActionButton(if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, if (saved) tr("Bewaard", "Saved") else tr("Bewaar", "Save"), Modifier.weight(1f)) { Settings.toggleBewaard(m.guid) }
+                    ActionButton(Icons.Outlined.Share, tr("Delen", "Share"), Modifier.weight(1f)) { share(ctx, m) }
+                    if (m.hasCoordinate) ActionButton(Icons.Outlined.Map, tr("Kaart", "Map"), Modifier.weight(1f)) { nav.toonOpKaart(m.guid) }
+                    if (m.hasCoordinate && m.hasStreet) ActionButton(Icons.Outlined.Directions, tr("Route", "Route"), Modifier.weight(1f)) { openRoute(ctx, m.lat!!, m.lon!!, m.plaatsText) }
+                }
+                m.fullMelding?.takeIf { it.isNotBlank() }?.let {
+                    SectionCard(tr("Oproep", "Call-out"), Icons.Outlined.Sms) {
+                        Text(it, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
+                    }
+                }
+                if (routes.isNotEmpty()) SectionCard(tr("Kazernes en aanrijtijd", "Stations and arrival"), Icons.Outlined.LocalFireDepartment) {
+                    routes.forEach { r ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            DienstIcon(r.kazerne.dienst, 30.dp)
+                            Spacer(Modifier.width(10.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(r.kazerne.naam, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                                Text((if (r.genoemd) tr("Genoemd in de oproep", "Named in the call-out") else tr("Dichtstbijzijnde volgens de kaart", "Nearest on the map")) + " · ${r.afstandTekst} · ${r.rijtijdTekst}", color = Muted, fontSize = 12.sp)
+                            }
+                            Column(horizontalAlignment = Alignment.End) {
+                                Text("± " + Fmt.time(r.aankomst), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                                Text(if (r.terPlaatse(now)) tr("Ter plaatse", "On scene") else tr("Onderweg", "En route"), color = if (r.terPlaatse(now)) Color(0xFF16A34A) else Color(0xFFF59E0B), fontSize = 12.sp)
+                            }
+                        }
+                    }
+                    Text(tr("Schatting op basis van afstand, uitruktijd en spoed. Geen echte voertuigposities.", "Estimate based on distance, turnout time and urgency. Not real vehicle positions."), color = Muted, fontSize = 11.sp)
+                }
+                if (m.eenheden.isNotEmpty()) SectionCard(tr("Eenheden", "Units"), Icons.Outlined.Groups) {
+                    m.eenheden.forEach { e ->
+                        Row {
+                            Text(e.naam ?: e.code ?: "–", fontSize = 14.sp, modifier = Modifier.weight(1f))
+                            e.code?.let { Text(it, color = Muted, fontSize = 12.sp, fontFamily = FontFamily.Monospace) }
+                        }
+                    }
+                }
+                WeerCard(weer)
+                if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {
+                    (waarschuwingen + knmi).forEach { w ->
+                        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.waarschuwing(w.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            WaarschuwingIcon(w, 28.dp); Spacer(Modifier.width(10.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(w.kop, fontWeight = FontWeight.Medium, fontSize = 14.sp)
+                                Text(w.titel, color = Muted, fontSize = 12.sp, maxLines = 1)
+                            }
+                            Icon(Icons.Filled.ChevronRight, null, tint = Muted)
+                        }
+                    }
+                }
+                if (verband.isNotEmpty()) SectionCard(tr("Verloop", "Timeline"), Icons.Outlined.Timeline) {
+                    Text(tr("Meldingen die mogelijk bij dit incident horen.", "Alerts that may belong to this incident."), color = Muted, fontSize = 12.sp)
+                    verband.forEach { v ->
+                        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.melding(v.melding.guid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            DienstIcon(v.melding.soort, 28.dp); Spacer(Modifier.width(10.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(v.melding.title, fontSize = 14.sp, fontWeight = FontWeight.Medium, maxLines = 1)
+                                Text(v.redenen.joinToString(" · "), color = Muted, fontSize = 12.sp, maxLines = 2)
+                            }
+                            Text(Fmt.time(v.melding.datum), color = Muted, fontSize = 12.sp)
+                        }
+                    }
+                }
+                SectionCard(tr("Gegevens", "Details"), Icons.Outlined.Info) {
+                    InfoRow(tr("Discipline", "Service"), m.soort.label)
+                    InfoRow(tr("Prioriteit", "Priority"), m.prioriteit)
+                    InfoRow(tr("Categorie", "Category"), m.categorie)
+                    InfoRow(tr("Plaats", "Place"), m.plaatsNaam)
+                    InfoRow(tr("Regio", "Region"), m.regio)
+                    InfoRow("Capcode", m.capcode)
+                    InfoRow(tr("Tijd", "Time"), Fmt.day(m.datum) + " " + Fmt.time(m.datum))
+                    if (m.lat != null && m.lon != null) InfoRow(tr("Coördinaten", "Coordinates"), "%.5f, %.5f".format(m.lat, m.lon))
+                }
+                Spacer(Modifier.height(24.dp))
+            }
+        }
+        // Floating top bar over the map
+        Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 6.dp)) {
+            RoundIcon(Icons.AutoMirrored.Filled.ArrowBack, tr("Terug", "Back")) { nav.back() }
+            Spacer(Modifier.weight(1f))
+            RoundIcon(Icons.Outlined.Share, tr("Delen", "Share")) { share(ctx, m) }
+        }
+    }
+}
+
+@Composable
+fun RoundIcon(icon: ImageVector, desc: String, onClick: () -> Unit) {
+    Box(Modifier.size(40.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surface.copy(alpha = 0.92f)).clickable(onClick = onClick), contentAlignment = Alignment.Center) {
+        Icon(icon, desc, tint = MaterialTheme.colorScheme.onSurface, modifier = Modifier.size(22.dp))
+    }
+}
+
+@Composable
+fun ActionButton(icon: ImageVector, label: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(14.dp), color = MaterialTheme.colorScheme.surface, modifier = modifier) {
+        Column(Modifier.padding(vertical = 10.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(icon, null, tint = MaterialTheme.colorScheme.primary)
+            Text(label, fontSize = 12.sp, maxLines = 1)
+        }
+    }
+}
+
+@Composable
+fun WeerCard(w: AlertWeather?) {
+    w ?: return
+    SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
+        w.condition?.let { Text(conditie(it), fontWeight = FontWeight.Medium) }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            w.temperature?.let { Stat("${it.roundToInt()}°", tr("Temperatuur", "Temperature")) }
+            w.apparent?.let { Stat("${it.roundToInt()}°", tr("Gevoel", "Feels like")) }
+            w.windSpeed?.let { Stat("${it.roundToInt()} km/u", tr("Wind", "Wind") + (w.windDirection?.let { d -> " " + windRichting(d) } ?: "")) }
+        }
+        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            w.windGust?.let { Stat("${it.roundToInt()} km/u", tr("Windstoten", "Gusts")) }
+            w.humidity?.let { Stat("${(it * 100).roundToInt()}%", tr("Luchtvochtigheid", "Humidity")) }
+            w.precipitation?.let { Stat("%.1f mm".format(it), tr("Neerslag", "Rain")) }
+        }
+        Text("Apple Weer", color = Muted, fontSize = 11.sp)
+    }
+}
+
+@Composable
+private fun Stat(value: String, label: String) {
+    Column { Text(value, fontWeight = FontWeight.Bold, fontSize = 18.sp); Text(label, color = Muted, fontSize = 11.sp) }
+}
+
+fun windRichting(d: Double): String {
+    val dirs = if (nl.lrvdlinden.aalerts.isDutch) listOf("N", "NO", "O", "ZO", "Z", "ZW", "W", "NW") else listOf("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+    return dirs[(((d + 22.5) % 360) / 45).toInt().coerceIn(0, 7)]
+}
+
+fun conditie(c: String): String {
+    val nl = mapOf("Clear" to "Helder", "MostlyClear" to "Overwegend helder", "PartlyCloudy" to "Half bewolkt", "MostlyCloudy" to "Overwegend bewolkt",
+        "Cloudy" to "Bewolkt", "Foggy" to "Mist", "Haze" to "Nevel", "Drizzle" to "Motregen", "Rain" to "Regen", "HeavyRain" to "Zware regen",
+        "Showers" to "Buien", "ScatteredThunderstorms" to "Lokaal onweer", "Thunderstorms" to "Onweer", "Snow" to "Sneeuw", "Flurries" to "Sneeuwvlokken",
+        "Sleet" to "Natte sneeuw", "Windy" to "Winderig", "Breezy" to "Fris", "Hail" to "Hagel", "FreezingRain" to "IJzel", "Frigid" to "Streng koud", "Hot" to "Heet")
+    val en = c.replace(Regex("([a-z])([A-Z])"), "$1 $2")
+    return if (nl.lrvdlinden.aalerts.isDutch) nl[c] ?: en else en
+}
+
+fun share(ctx: Context, m: Melding) {
+    val text = "${m.title}\n${m.plaatsText} · ${Fmt.dayTime(m.datum)}\n${m.prioriteitText}\n\nA-Alerts – ${BuildConfig.WEBSITE}/melding/${m.guid}"
+    ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), tr("Delen", "Share")))
+}
+
+/** Opens navigation in Google Maps (or another maps app). */
+fun openRoute(ctx: Context, lat: Double, lon: Double, label: String) {
+    val nav = Intent(Intent.ACTION_VIEW, Uri.parse("google.navigation:q=$lat,$lon"))
+    val geo = Intent(Intent.ACTION_VIEW, Uri.parse("geo:$lat,$lon?q=$lat,$lon(${Uri.encode(label)})"))
+    runCatching { ctx.startActivity(nav) }.recoverCatching { ctx.startActivity(geo) }
+        .recoverCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lon"))) }
+}
