@@ -64,8 +64,10 @@ jobs:
             if echo "$R" | grep -qE '"success": *true'; then echo "Subdomein geregistreerd: $NAME.workers.dev"; exit 0; fi
             echo "$NAME niet beschikbaar: $R"
           done
-          echo "::error::Kon geen workers.dev-subdomein registreren. Kies er zelf een in Cloudflare (Workers & Pages → je subdomein)."
-          exit 1
+          # The subdomain endpoint is sometimes unavailable at Cloudflare ("no healthy upstream"). The subdomain was
+          # registered long ago, so carry on with the deploy instead of failing.
+          echo "::warning::Kon het workers.dev-subdomein niet controleren; deploy gaat door met het bestaande subdomein."
+          exit 0
 
       - name: Deploy
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
