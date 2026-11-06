@@ -103,7 +103,16 @@ struct RootView: View {
         #if DEBUG
         // Screenshots for the website and App Store (CI): skip the welcome screen.
         .onAppear {
-            if ProcessInfo.processInfo.arguments.contains("-AAlertsScreenshots") { settings.onboardingDone = true }
+            let args = ProcessInfo.processInfo.arguments
+            guard args.contains("-AAlertsScreenshots") else { return }
+            settings.onboardingDone = true
+            func value(_ key: String) -> String? { args.firstIndex(of: key).flatMap { $0 + 1 < args.count ? args[$0 + 1] : nil } }
+            if let tab = value("-AAlertsTab").flatMap(Router.Destination.init(rawValue:)) { router.tab = tab }
+            Task { @MainActor in
+                try? await Task.sleep(for: .seconds(4))
+                if let guid = value("-AAlertsMelding") { router.open(guid: guid) }
+                if let id = value("-AAlertsWaarschuwing") { router.openWaarschuwing(id: id) }
+            }
         }
         #endif
         .onOpenURL { url in
