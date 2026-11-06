@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 22)
+- Gealarmeerde kazernes op de melding: alle kazernes uit de oproep, met afstand, rijtijd en een geschatte status (onderweg met tijd, of ter plaatse); hun routes als stippellijn op de kaart. Altijd een schatting, zonder voertuigposities.
+- Instellingen › Waarschuwingen: pushmeldingen voor NL-Alert, Burgernet en KNMI (vanaf welke code) voor al je profielen tegelijk.
+- Alle waarschuwingen: NL-Alert, Burgernet en KNMI van de laatste twee weken, per dag, met status en tijd.
+
 ## A-Alerts 2.0.0 (build 21)
 - Detailpagina vernieuwd: glazen balk bovenaan met terug, plaats en straat, en knoppen voor route, bewaren en delen.
 - Kaart met knoppen voor je eigen locatie (melding en jij samen in beeld), 3D en een grote kaart met een balk onderin om terug te gaan.

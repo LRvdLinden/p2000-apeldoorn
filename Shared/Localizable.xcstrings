@@ -766,6 +766,23 @@
         }
       }
     },
+    "Alle waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle waarschuwingen"
+          }
+        }
+      }
+    },
     "Alleen bij spoed (A1, P1)": {
       "extractionState": "manual",
       "localizations": {
@@ -779,6 +796,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alleen bij spoed (A1, P1)"
+          }
+        }
+      }
+    },
+    "Alleen code rood": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Code red only"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen code rood"
           }
         }
       }
@@ -1102,6 +1136,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Beëindigd"
+          }
+        }
+      }
+    },
+    "Bij een hogere code krijg je opnieuw een pushmelding (bijvoorbeeld als geel oranje wordt).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When the code is raised you get another notification (for example when yellow becomes orange)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bij een hogere code krijg je opnieuw een pushmelding (bijvoorbeeld als geel oranje wordt)."
           }
         }
       }
@@ -1565,6 +1616,23 @@
         }
       }
     },
+    "De oproep noemt geen kazerne. Dit is de dichtstbijzijnde kazerne van deze dienst; de tijden zijn een schatting op basis van de uitruktijd en de rijtijd volgens Apple Kaarten.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The call-out names no station. This is the nearest station of this service; the times are an estimate based on the turnout time and the driving time from Apple Maps."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De oproep noemt geen kazerne. Dit is de dichtstbijzijnde kazerne van deze dienst; de tijden zijn een schatting op basis van de uitruktijd en de rijtijd volgens Apple Kaarten."
+          }
+        }
+      }
+    },
     "De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw.": {
       "extractionState": "manual",
       "localizations": {
@@ -1752,6 +1820,23 @@
         }
       }
     },
+    "Dichtstbijzijnde kazerne": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearest station"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dichtstbijzijnde kazerne"
+          }
+        }
+      }
+    },
     "Dichtstbijzijnde volgens de kaart": {
       "extractionState": "manual",
       "localizations": {
@@ -1922,6 +2007,23 @@
         }
       }
     },
+    "Een NL-Alert komt ook via je telefoon zelf binnen (Instellingen › Meldingen › Overheidsmeldingen), vaak iets eerder dan via deze app. Hier lees je hem rustig terug en zie je het gebied op de kaart.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "An NL-Alert also arrives through your phone itself (Settings › Notifications › Government Alerts), often a little earlier than through this app. Here you can read it back calmly and see the area on the map."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een NL-Alert komt ook via je telefoon zelf binnen (Instellingen › Meldingen › Overheidsmeldingen), vaak iets eerder dan via deze app. Hier lees je hem rustig terug en zie je het gebied op de kaart."
+          }
+        }
+      }
+    },
     "Eenheden": {
       "extractionState": "manual",
       "localizations": {
@@ -1952,6 +2054,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Er is nu geen trauma- of politiehelikopter in de lucht."
+          }
+        }
+      }
+    },
+    "Er waren de afgelopen twee weken geen waarschuwingen voor de gemeente Apeldoorn en Teuge.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There were no warnings for the municipality of Apeldoorn and Teuge in the past two weeks."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er waren de afgelopen twee weken geen waarschuwingen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -2075,6 +2194,23 @@
         }
       }
     },
+    "Gealarmeerde kazernes (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerted stations (%lld)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gealarmeerde kazernes (%lld)"
+          }
+        }
+      }
+    },
     "Gebied": {
       "extractionState": "manual",
       "localizations": {
@@ -2122,6 +2258,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gebruiksvoorwaarden"
+          }
+        }
+      }
+    },
+    "Geel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yellow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geel"
           }
         }
       }
@@ -2190,6 +2343,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen in de laatste 24 uur"
+          }
+        }
+      }
+    },
+    "Geen waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen waarschuwingen"
           }
         }
       }
@@ -2292,6 +2462,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geldig vanaf"
+          }
+        }
+      }
+    },
+    "Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies to all your profiles. You can change it per profile under Notifications › Profiles. You only get warnings for the municipality of Apeldoorn and Teuge."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldt voor al je profielen. Per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt alleen waarschuwingen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -3159,6 +3346,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kon de tekst niet laden"
+          }
+        }
+      }
+    },
+    "Kon de waarschuwingen niet laden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn't load the warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kon de waarschuwingen niet laden"
           }
         }
       }
@@ -4251,6 +4455,23 @@
         }
       }
     },
+    "Onderweg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "En route"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderweg"
+          }
+        }
+      }
+    },
     "Online": {
       "extractionState": "manual",
       "localizations": {
@@ -4434,6 +4655,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opschaling"
+          }
+        }
+      }
+    },
+    "Oranje": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Orange"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oranje"
           }
         }
       }
@@ -4999,6 +5237,23 @@
         }
       }
     },
+    "Rood": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Red"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rood"
+          }
+        }
+      }
+    },
     "Route": {
       "extractionState": "manual",
       "localizations": {
@@ -5097,6 +5352,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Satelliet"
+          }
+        }
+      }
+    },
+    "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimate based on the alert time, the usual turnout time and the driving time from Apple Maps, a quarter shorter for an urgent drive with blue lights and siren. A-Alerts receives no vehicle positions: 'On scene' means a unit could be there according to that estimate."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn."
           }
         }
       }
@@ -5369,6 +5641,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Temperatuur"
+          }
+        }
+      }
+    },
+    "Ter plaatse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On scene"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ter plaatse"
           }
         }
       }
@@ -5726,6 +6015,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vanaf %@ tot %@"
+          }
+        }
+      }
+    },
+    "Vanaf code geel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From code yellow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf code geel"
+          }
+        }
+      }
+    },
+    "Vanaf code oranje": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From code orange"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vanaf code oranje"
           }
         }
       }
@@ -7005,6 +7328,40 @@
         }
       }
     },
+    "rijtijd %lld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld min drive"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rijtijd %lld min"
+          }
+        }
+      }
+    },
+    "rijtijd < 1 min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "< 1 min drive"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "rijtijd < 1 min"
+          }
+        }
+      }
+    },
     "route via Apple Kaarten": {
       "extractionState": "manual",
       "localizations": {
@@ -7154,6 +7511,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "zo"
+          }
+        }
+      }
+    },
+    "± %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "± %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "± %@"
           }
         }
       }

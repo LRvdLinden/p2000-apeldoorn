@@ -25,6 +25,13 @@ struct SettingsView: View {
                     SettingsRow(icon: "bell.badge.fill", color: .red, title: L("Notificaties"),
                                 value: settings.notificationsEnabled ? L("Aan") : L("Uit"))
                 }
+                NavigationLink {
+                    WaarschuwingenOverzichtView()
+                } label: {
+                    SettingsRow(icon: "exclamationmark.triangle.fill", color: .orange, title: L("Waarschuwingen"),
+                                value: [settings.pushAan(.nlalert) ? "NL-Alert" : nil, settings.pushAan(.burgernet) ? "Burgernet" : nil,
+                                        settings.pushAan(.knmi) ? "KNMI" : nil].compactMap { $0 }.joined(separator: ", "))
+                }
                 Toggle(isOn: Bindable(InAppAlarm.shared).soundOn) {
                     SettingsRow(icon: "speaker.wave.2.fill", color: .pink, title: L("Alarmgeluid in de app"))
                 }

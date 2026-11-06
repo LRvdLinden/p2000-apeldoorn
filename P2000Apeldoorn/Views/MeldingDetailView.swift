@@ -31,6 +31,7 @@ struct MeldingDetailView: View {
     @State private var kaartGroot = false
     @State private var toonRoute = false
     @State private var toonDelen = false
+    @State private var kazerneRoutes: [KazerneRoute] = []
 
     /// Visible map below the top bar (the bar floats over the map like the reference design).
     private let mapHeight: CGFloat = 300
@@ -85,6 +86,10 @@ struct MeldingDetailView: View {
             settings.markRead(melding)
         }
         .task(id: melding.guid) { await loadLookAround() }
+        .task(id: melding.guid) {
+            kazerneRoutes = await Aanrijtijd.routes(voor: melding)
+            if !kazerneRoutes.isEmpty, !drieD, !opMij { withAnimation(.easeInOut(duration: 0.6)) { position = .rect(routeRect) } }
+        }
         .task(id: melding.guid) { await loadWeather() }
     }
 
@@ -96,7 +101,7 @@ struct MeldingDetailView: View {
                     incidentLine
                     mainCard
                     descriptionCard
-                    AanrijtijdKaart(melding: melding)
+                    GealarmeerdeKazernesKaart(routes: kazerneRoutes)
                     VerloopKaart(melding: melding)
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
@@ -152,6 +157,7 @@ struct MeldingDetailView: View {
 
     private var mapHeader: some View {
         Map(position: $position) {
+            kazerneLaag
             Annotation(melding.title, coordinate: coordinate, anchor: .bottom) {
                 DienstMarker(dienst: melding.dienst, size: 52)
             }
@@ -196,6 +202,30 @@ struct MeldingDetailView: View {
         }
     }
 
+    /// Dashed routes from the alarmed stations, and the stations themselves.
+    @MapContentBuilder private var kazerneLaag: some MapContent {
+        ForEach(kazerneRoutes) { r in
+            if let line = r.polyline {
+                MapPolyline(line)
+                    .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 4, lineCap: .round, dash: [10, 7]))
+            }
+        }
+        ForEach(kazerneRoutes) { r in
+            Annotation(r.kazerne.naam, coordinate: r.kazerne.coordinate, anchor: .center) {
+                KazerneIcon(soort: r.kazerne.soort, size: 28)
+            }
+            .annotationTitles(.hidden)
+        }
+    }
+
+    /// The alert and its stations together in view.
+    private var routeRect: MKMapRect {
+        let pts = [MKMapPoint(coordinate)] + kazerneRoutes.map { MKMapPoint($0.kazerne.coordinate) }
+        var rect = pts.map { MKMapRect(origin: $0, size: MKMapSize(width: 1, height: 1)) }.reduce(MKMapRect.null) { $0.union($1) }
+        rect = rect.insetBy(dx: -max(rect.width * 0.3, 500), dy: -max(rect.height * 0.3, 500))
+        return rect
+    }
+
     private var showsBack: Bool {
         #if os(iOS)
         return isPresented
@@ -210,7 +240,7 @@ struct MeldingDetailView: View {
         withAnimation(.easeInOut(duration: 0.6)) {
             position = drieD
                 ? .camera(MapCamera(centerCoordinate: coordinate, distance: 900, heading: 30, pitch: 65))
-                : .region(startRegion)
+                : (kazerneRoutes.isEmpty ? .region(startRegion) : .rect(routeRect))
         }
     }
 

@@ -1,6 +1,6 @@
 // Shared build settings.
 MARKETING_VERSION = 2.0.0
-CURRENT_PROJECT_VERSION = 21
+CURRENT_PROJECT_VERSION = 22
 DEVELOPMENT_TEAM = EU3UY476T6
 
 // The app's own API (Cloudflare Worker in worker/). "//" starts a comment in .xcconfig, hence https:/$()/

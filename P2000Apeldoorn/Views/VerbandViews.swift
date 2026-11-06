@@ -107,3 +107,49 @@ struct AanrijtijdKaart: View {
         }
     }
 }
+
+/// "Gealarmeerde kazernes": the stations named in the call-out with distance, driving time and an estimated status.
+struct GealarmeerdeKazernesKaart: View {
+    let routes: [KazerneRoute]
+
+    var body: some View {
+        if !routes.isEmpty {
+            let genoemd = routes.first?.genoemd ?? false
+            VStack(alignment: .leading, spacing: 10) {
+                Text(genoemd ? Lf("Gealarmeerde kazernes (%lld)", routes.count) : L("Dichtstbijzijnde kazerne"))
+                    .font(.title3.bold())
+                    .padding(.horizontal, 4)
+                TimelineView(.periodic(from: .now, by: 30)) { ctx in
+                    VStack(spacing: 0) {
+                        ForEach(Array(routes.enumerated()), id: \.element.id) { i, r in
+                            HStack(alignment: .top, spacing: 12) {
+                                KazerneIcon(soort: r.kazerne.soort, size: 34)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(r.kazerne.naam).font(.body).fixedSize(horizontal: false, vertical: true)
+                                    Text("\(r.afstandTekst) · \(r.rijtijdTekst)").font(.footnote).foregroundStyle(.secondary)
+                                }
+                                Spacer(minLength: 8)
+                                if r.terPlaatse(op: ctx.date) {
+                                    Text(L("Ter plaatse")).font(.footnote.weight(.semibold)).foregroundStyle(.green)
+                                } else {
+                                    VStack(alignment: .trailing, spacing: 1) {
+                                        Text(L("Onderweg")).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
+                                        Text(Lf("± %@", Fmt.time(r.aankomst))).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                                    }
+                                }
+                            }
+                            .padding(.horizontal, 16).padding(.vertical, 12)
+                            if i < routes.count - 1 { Divider().padding(.leading, 62) }
+                        }
+                    }
+                }
+                .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                Text(genoemd
+                     ? L("Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn.")
+                     : L("De oproep noemt geen kazerne. Dit is de dichtstbijzijnde kazerne van deze dienst; de tijden zijn een schatting op basis van de uitruktijd en de rijtijd volgens Apple Kaarten."))
+                    .font(.footnote).foregroundStyle(.secondary)
+                    .padding(.horizontal, 4)
+            }
+        }
+    }
+}

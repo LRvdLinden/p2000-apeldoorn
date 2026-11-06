@@ -133,3 +133,91 @@ struct KazerneIcon: View {
         .accessibilityHidden(true)
     }
 }
+
+// MARK: - Alarmed stations with routes (detail page)
+
+/// One alarmed (or nearest) station with its route to the alert and an estimated arrival time.
+struct KazerneRoute: Identifiable {
+    let kazerne: Kazerne
+    /// Named in the call-out (capcode / unit names); otherwise the nearest station of that service.
+    let genoemd: Bool
+    let km: Double
+    /// Driving time with blue lights and siren (a quarter shorter than normal), in minutes.
+    let rijMinuten: Double
+    let uitrukMinuten: Double
+    let polyline: MKPolyline?
+    let aankomst: Date
+    var id: String { kazerne.id }
+
+    /// "Onderweg" until the estimated arrival, then "Ter plaatse".
+    func terPlaatse(op nu: Date = .now) -> Bool { nu >= aankomst }
+
+    var rijtijdTekst: String {
+        rijMinuten < 1 ? L("rijtijd < 1 min") : Lf("rijtijd %lld min", Int(rijMinuten.rounded()))
+    }
+
+    var afstandTekst: String {
+        km < 1 ? "\(Int((km * 1000 / 10).rounded() * 10)) m" : Lf("%@ km", km.formatted(.number.precision(.fractionLength(1))))
+    }
+}
+
+extension Aanrijtijd {
+    /// Usual turnout time (alarm → driving): volunteer fire crews need a few minutes, ambulances are on standby.
+    static func uitrukMinuten(_ soort: Kazerne.Soort) -> Double {
+        switch soort {
+        case .brandweer: return 4
+        case .ambulance: return 1
+        case .politie: return 0
+        }
+    }
+
+    @MainActor private static var routeCache: [String: [KazerneRoute]] = [:]
+
+    /// All stations named in the alert (or, when none is named, the nearest one), with route and estimate.
+    @MainActor
+    static func routes(voor m: Melding) async -> [KazerneRoute] {
+        if let hit = routeCache[m.guid] { return hit }
+        guard m.hasStreet, m.hasCoordinate, let lat = m.lat, let lon = m.lon,
+              let soort = Kazernes.soort(for: m.dienst) else { return [] }
+        let kandidaten = Kazernes.all.filter { $0.soort == soort }
+        let namen = m.eenheden.compactMap(\.naam).map { $0.lowercased() } + [m.fullMelding?.lowercased() ?? ""]
+        var gekozen = kandidaten.filter { k in
+            (k.aliassen ?? []).contains { alias in
+                let pattern = "\\b" + NSRegularExpression.escapedPattern(for: alias.lowercased()) + "\\b"
+                return namen.contains { $0.range(of: pattern, options: .regularExpression) != nil }
+            }
+        }
+        let genoemd = !gekozen.isEmpty
+        if gekozen.isEmpty, let dichtst = kandidaten.min(by: {
+            Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < Werkgebied.distanceKm($1.lat, $1.lon, lat, lon)
+        }) { gekozen = [dichtst] }
+        gekozen = Array(gekozen.filter { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < 40 }.prefix(5))
+
+        let doel = CLLocationCoordinate2D(latitude: lat, longitude: lon)
+        let spoed = m.isUrgent || ["A2", "P2"].contains((m.prioriteit ?? "").uppercased())
+        var result: [KazerneRoute] = []
+        for k in gekozen {
+            var km = Werkgebied.distanceKm(k.lat, k.lon, lat, lon) * 1.3
+            var rij = km / 50 * 60
+            var line: MKPolyline?
+            #if os(iOS) || os(macOS)
+            let request = MKDirections.Request()
+            request.source = MKMapItem(placemark: MKPlacemark(coordinate: k.coordinate))
+            request.destination = MKMapItem(placemark: MKPlacemark(coordinate: doel))
+            request.transportType = .automobile
+            if let route = try? await MKDirections(request: request).calculate().routes.first {
+                km = route.distance / 1000
+                rij = route.expectedTravelTime / 60
+                line = route.polyline
+            }
+            #endif
+            if spoed { rij *= 0.75 }
+            let uitruk = uitrukMinuten(k.soort)
+            result.append(KazerneRoute(kazerne: k, genoemd: genoemd, km: km, rijMinuten: rij, uitrukMinuten: uitruk,
+                                       polyline: line, aankomst: m.datum.addingTimeInterval((uitruk + rij) * 60)))
+        }
+        result.sort { $0.aankomst < $1.aankomst }
+        routeCache[m.guid] = result
+        return result
+    }
+}
