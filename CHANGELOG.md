@@ -1,5 +1,11 @@
 # Changelog
 
+## A-Alerts 2.0.0 (build 20) – fase 9 en 10
+- Versie 2.0.0 (hoger dan 1.0.1 in de App Store).
+- Pushmeldingen met een kaartje van de plek (nieuwe push-extensie) en knoppen *Bewaar* en *Open in Apple Kaarten*; waarschuwingen met *Open in Apple Kaarten*.
+- Migratiecontrole tegen 1.0.1: bundle-ID's, entitlements, App Group, URL-schema, widget-kinds en instellingen-sleutels ongewijzigd (docs/A-ALERTS-TEST.md).
+- App Store-teksten en notities voor App Review voor A-Alerts 2.0.0 (appstore/A-Alerts-2.0.0).
+
 ## A-Alerts 1.0.0 (build 19)
 - Detailpagina: de knoppen op de kaart en de Look Around-preview staan hoger, direct onder de statusbalk of de bovenrand van het venster.
 

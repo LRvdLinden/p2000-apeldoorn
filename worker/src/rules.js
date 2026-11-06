@@ -187,9 +187,14 @@ export function payloadFor(m, lang = "nl") {
       "thread-id": m.dienst,
       "interruption-level": urgent ? "time-sensitive" : "active",
       "relevance-score": urgent ? 1 : 0.5,
+      // A-Alerts: the notification service extension adds a map of the spot; buttons "Bewaar" and "Toon op kaart".
+      "mutable-content": 1,
+      category: "MELDING",
     },
     guid: m.guid,
     dienst: m.dienst,
+    // Only a street location is precise enough for a map (town-only alerts sit on the town centre).
+    ...(m.locatie && m.lat != null && m.lon != null ? { lat: m.lat, lon: m.lon } : {}),
   };
 }
 

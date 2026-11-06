@@ -190,8 +190,13 @@ export function payloadForWarning(w, lang = "nl", { upgrade = false } = {}) {
       "thread-id": w.bron,
       "interruption-level": urgent ? "time-sensitive" : "active",
       "relevance-score": urgent ? 1 : 0.6,
+      "mutable-content": 1,
+      category: "WAARSCHUWING",
     },
     waarschuwing: w.id,
+    bron: w.bron,
+    ...(w.niveau ? { niveau: w.niveau } : {}),
+    ...(w.lat != null && w.lon != null ? { lat: w.lat, lon: w.lon } : {}),
   };
 }
 

@@ -10,6 +10,7 @@
 		FD2336DF84AEB3E008BA961D /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		054146E4C18F80A7C31E81FD /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9B9287EBA647D0439E489C80 /* P2000 Apeldoorn Watch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		30958075CC8903454E713044 /* P2000 Apeldoorn Notifications.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 74B9C695586C24D0F5087354 /* P2000 Apeldoorn Notifications.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -34,6 +35,13 @@
 			remoteGlobalIDString = 361B7D4D928FEE083F87C595;
 			remoteInfo = "P2000 Apeldoorn Watch";
 		};
+		DA1CEF73F74728EA56D892CF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 46F86FAA6BBF9AC94A7E4595 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 57A112754D6DB53120233F6C;
+			remoteInfo = "P2000 Apeldoorn Notifications";
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -44,6 +52,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				FD2336DF84AEB3E008BA961D /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */,
+				30958075CC8903454E713044 /* P2000 Apeldoorn Notifications.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -78,6 +87,7 @@
 		81918909E83595C8F4212CCC /* P2000 Apeldoorn.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		F4E06BDFE22D32A32441ABBE /* P2000 Apeldoorn Watch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		265E12D28595106FED9EEFF6 /* P2000 Apeldoorn TV.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn TV.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		74B9C695586C24D0F5087354 /* P2000 Apeldoorn Notifications.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "P2000 Apeldoorn Notifications.appex"; sourceTree = BUILT_PRODUCTS_DIR; };
 		55DD020B327986A9172F33E5 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Base.xcconfig"; sourceTree = "<group>"; };
 		3C4514C04A5CC3C92BE5203E /* Secrets.example.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Secrets.example.xcconfig"; sourceTree = "<group>"; };
 		9A20A0560662F29B2881F893 /* P2000Apeldoorn-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "P2000Apeldoorn-Info.plist"; sourceTree = "<group>"; };
@@ -92,6 +102,7 @@
 		5992590146A9F619F6F3A3FF /* WatchWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "WatchWidgets.entitlements"; sourceTree = "<group>"; };
 		011C0FF2B6F08FC6639358B0 /* P2000ApeldoornTV-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "P2000ApeldoornTV-Info.plist"; sourceTree = "<group>"; };
 		39175893BE4E142D9E11CE45 /* P2000ApeldoornTV.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "P2000ApeldoornTV.entitlements"; sourceTree = "<group>"; };
+		861935F11CCF1EC50B7CE94A /* Notifications-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Notifications-Info.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -100,6 +111,7 @@
 		9D254543540250A73DA109E9 /* Shared */ = {isa = PBXFileSystemSynchronizedRootGroup; path = Shared; sourceTree = "<group>"; };
 		F33036C6125B3CE37D900505 /* P2000ApeldoornWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornWatch; sourceTree = "<group>"; };
 		7B759F0B4F1689D07580D23E /* P2000ApeldoornTV */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornTV; sourceTree = "<group>"; };
+		D2503F19A3C19FFD1A398C47 /* P2000ApeldoornNotifications */ = {isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornNotifications; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,6 +150,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		47C5E85C839268FD6C9D75A9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -149,6 +168,7 @@
 				F33036C6125B3CE37D900505 /* P2000ApeldoornWatch */,
 				EB8CA8D1CCE6CA70621B7C5C /* P2000ApeldoornWidgets */,
 				7B759F0B4F1689D07580D23E /* P2000ApeldoornTV */,
+				D2503F19A3C19FFD1A398C47 /* P2000ApeldoornNotifications */,
 				2245023265AE4CF87D02C8B6 /* Config */,
 				86024CAD1E83101D97359D73 /* Products */,
 			);
@@ -171,6 +191,7 @@
 				5992590146A9F619F6F3A3FF /* WatchWidgets.entitlements */,
 				011C0FF2B6F08FC6639358B0 /* P2000ApeldoornTV-Info.plist */,
 				39175893BE4E142D9E11CE45 /* P2000ApeldoornTV.entitlements */,
+				861935F11CCF1EC50B7CE94A /* Notifications-Info.plist */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -183,6 +204,7 @@
 				1C7052EC5FC02E5BD365EC48 /* P2000 Apeldoorn Widgets.appex */,
 				D30427FAF2383672B52BA97E /* P2000 Apeldoorn Watch Widgets.appex */,
 				265E12D28595106FED9EEFF6 /* P2000 Apeldoorn TV.app */,
+				74B9C695586C24D0F5087354 /* P2000 Apeldoorn Notifications.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -251,6 +273,7 @@
 			dependencies = (
 				1FE4145645A1A997E920D435 /* PBXTargetDependency */,
 				615AA1906207512488C3BBEF /* PBXTargetDependency */,
+				EBD6FCB8CAB32D597AE6CE72 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				6CB77480E0F0214B7AC1764B /* P2000Apeldoorn */,
@@ -311,6 +334,28 @@
 			productReference = 265E12D28595106FED9EEFF6 /* P2000 Apeldoorn TV.app */;
 			productType = "com.apple.product-type.application";
 		};
+		57A112754D6DB53120233F6C /* P2000 Apeldoorn Notifications */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 52D7E1AD293BF39E367E9C0A /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Notifications" */;
+			buildPhases = (
+				130A20AAE8F59FF5DF144F6A /* Sources */,
+				47C5E85C839268FD6C9D75A9 /* Frameworks */,
+				29FFD405500DAD88332D248A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				D2503F19A3C19FFD1A398C47 /* P2000ApeldoornNotifications */,
+			);
+			name = "P2000 Apeldoorn Notifications";
+			packageProductDependencies = (
+			);
+			productName = "P2000 Apeldoorn Notifications";
+			productReference = 74B9C695586C24D0F5087354 /* P2000 Apeldoorn Notifications.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -336,6 +381,9 @@
 					875DB0412B0CDC30080F4A00 = {
 						CreatedOnToolsVersion = 26.0;
 					};
+					57A112754D6DB53120233F6C = {
+						CreatedOnToolsVersion = 26.0;
+					};
 				};
 			};
 			buildConfigurationList = 71371EFA15DA3BB408E93DEB /* Build configuration list for PBXProject "P2000Apeldoorn" */;
@@ -358,6 +406,7 @@
 				E8173D1080A28ECDFD3BF6B2 /* P2000 Apeldoorn Widgets */,
 				640645859680FECE10D3AC8A /* P2000 Apeldoorn Watch Widgets */,
 				875DB0412B0CDC30080F4A00 /* P2000 Apeldoorn TV */,
+				57A112754D6DB53120233F6C /* P2000 Apeldoorn Notifications */,
 			);
 		};
 /* End PBXProject section */
@@ -392,6 +441,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		D327F9DCFC67719C5917C5D9 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		29FFD405500DAD88332D248A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -436,6 +492,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		130A20AAE8F59FF5DF144F6A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -454,6 +517,11 @@
 			platformFilters = (ios, );
 			target = 361B7D4D928FEE083F87C595 /* P2000 Apeldoorn Watch */;
 			targetProxy = 1090DF891EA5F07439DD036B /* PBXContainerItemProxy */;
+		};
+		EBD6FCB8CAB32D597AE6CE72 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 57A112754D6DB53120233F6C /* P2000 Apeldoorn Notifications */;
+			targetProxy = DA1CEF73F74728EA56D892CF /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -808,6 +876,58 @@
 			};
 			name = Release;
 		};
+		EACE1626A8306A412396F9A9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Notifications-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.notificationservice;
+				PRODUCT_MODULE_NAME = P2000ApeldoornNotifications;
+				PRODUCT_NAME = "P2000 Apeldoorn Notifications";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		DC79BE00719D58E05D2E0683 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = EU3UY476T6;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "Config/Notifications-Info.plist";
+				INFOPLIST_KEY_CFBundleDisplayName = "A-Alerts";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "© 2026 P2000 Apeldoorn · PixelForges";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]" = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = nl.lrvdlinden.p2000apeldoorn.notificationservice;
+				PRODUCT_MODULE_NAME = P2000ApeldoornNotifications;
+				PRODUCT_NAME = "P2000 Apeldoorn Notifications";
+				SDKROOT = auto;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -861,6 +981,15 @@
 			buildConfigurations = (
 				D8300E40A622BAB7B19A3F8B /* Debug */,
 				3A912DF05A7FD1690C56E5CA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		52D7E1AD293BF39E367E9C0A /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Notifications" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EACE1626A8306A412396F9A9 /* Debug */,
+				DC79BE00719D58E05D2E0683 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

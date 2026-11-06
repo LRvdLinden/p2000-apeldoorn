@@ -1,0 +1,54 @@
+A-Alerts 2.0.0 – App Store-teksten (Nederlands)
+
+Naam (max 30)
+A-Alerts
+
+Ondertitel (max 30)
+P2000 en alerts in Apeldoorn
+
+Promotietekst (max 170)
+Nieuw: NL-Alert, Burgernet en KNMI-waarschuwingen tussen de P2000-meldingen, live trauma- en politiehelikopters op de kaart en tot vijf eigen meldingsprofielen.
+
+Beschrijving
+A-Alerts is de app van P2000 Apeldoorn, met een nieuwe naam. Je ziet live wat er gebeurt in de gemeente Apeldoorn en Teuge: meldingen van brandweer, ambulance, politie en traumahelikopter, samen met NL-Alert, Burgernet en KNMI-weerwaarschuwingen.
+
+Live pager
+Alle P2000-meldingen van 26 plaatsen en buurtschappen, met NL-Alert en Burgernet ertussen. Een KNMI-waarschuwing (code geel, oranje of rood) staat als balk bovenaan zolang hij geldt.
+
+Kaart met lagen
+Zet zelf lagen aan of uit: P2000-meldingen, NL-Alert- en Burgernet-gebieden, KNMI-waarschuwingsgebieden, de grens van het werkgebied, kazernes en posten, en live helikopters.
+
+Helikopters
+Volg Lifeliner 1 tot en met 4 en de politiehelikopters live op de kaart, met koers, hoogte en snelheid. Posities komen uit open data (adsb.lol); een helikopter die laag vliegt is soms niet te zien.
+
+Details
+Per melding een grote kaart met Look Around, prioriteit, eenheden, het weer op dat moment, een geschatte aanrijtijd vanaf de kazerne en meldingen die er mogelijk mee samenhangen. Een verband tonen we altijd als mogelijk, nooit als feit. Ook de aanrijtijd is altijd een schatting.
+
+Meldingsprofielen
+Maak tot vijf profielen, elk met eigen plaatsen, disciplines, prioriteiten, waarschuwingen en tijden. Bijvoorbeeld Thuis voor je eigen dorp en Nacht met alleen de spoedmeldingen. Een pushmelding toont meteen een kaartje van de plek, met knoppen om de melding te bewaren of te openen in Apple Kaarten.
+
+Overal
+iPhone, iPad, Mac, Apple Watch en Apple TV, met widgets, iCloud-synchronisatie van je instellingen en Face ID-vergrendeling.
+
+A-Alerts is een onafhankelijke app en geen officiële dienst van hulpdiensten of overheid. Bel bij nood altijd 112.
+
+Trefwoorden (max 100)
+p2000,apeldoorn,brandweer,ambulance,politie,lifeliner,nl-alert,burgernet,knmi,112,meldingen,pager
+
+Nieuw in deze versie
+P2000 Apeldoorn heet nu A-Alerts.
+- NL-Alert en Burgernet in de pager, KNMI-waarschuwingen als balk bovenaan
+- Kaartlagen die je zelf aan of uit zet, met kazernes en live helikopters
+- Mogelijk verband tussen meldingen en een geschatte aanrijtijd
+- Tot vijf meldingsprofielen met eigen tijden; je huidige instellingen staan in profiel Standaard
+- Pushmeldingen met een kaartje en knoppen voor Bewaar en Apple Kaarten
+- Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
+
+Notities voor App Review
+A-Alerts is de nieuwe naam van P2000 Apeldoorn (zelfde app, zelfde bundle-ID). Er is geen account nodig; alle functies zijn zonder inloggen te gebruiken.
+
+Wat de app doet: hij toont openbare P2000-meldingen (het open semafoonnetwerk van de Nederlandse hulpdiensten) voor de gemeente Apeldoorn en Teuge, aangevuld met openbare waarschuwingen van NL-Alert, Burgernet en het KNMI. Helikopterposities komen uit de open ADS-B-data van adsb.lol (ODbL). Kazernes komen uit OpenStreetMap. De gegevens worden verzameld en gefilterd door onze eigen server (Cloudflare Worker); de app praat alleen met die server.
+
+Testen: open de app, de pager toont direct de meldingen van de laatste 24 uur. Tik op een melding voor de details. Het tabblad Kaart heeft rechtsboven het knopje Kaartlagen. Instellingen > Notificaties > Profielen toont de meldingsprofielen. Pushmeldingen komen alleen bij een nieuwe echte melding; met Instellingen > Notificaties > Stuur een testmelding stuurt de server direct een testmelding.
+
+De app is geen officiële dienst van hulpdiensten of overheid en zegt dat in de app (Instellingen > Disclaimer). Een gekoppelde melding wordt altijd als mogelijk verband getoond, en de aanrijtijd altijd als schatting.

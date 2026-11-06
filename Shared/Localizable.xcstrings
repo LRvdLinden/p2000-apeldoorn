@@ -4098,6 +4098,23 @@
         }
       }
     },
+    "Open in Apple Kaarten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Apple Maps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open in Apple Kaarten"
+          }
+        }
+      }
+    },
     "Oproepen van de politie om mee te kijken, bijvoorbeeld bij een vermissing.": {
       "extractionState": "manual",
       "localizations": {

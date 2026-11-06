@@ -41,7 +41,49 @@ enum PushManager {
         #endif
     }
 
+    /// Buttons under a notification (A-Alerts, phase 9). The server sets the category; the push extension adds the map.
+    static let actionBewaar = "BEWAAR"
+    static let actionKaarten = "KAARTEN"
+
+    static func registerCategories() {
+        let bewaar = UNNotificationAction(identifier: actionBewaar, title: L("Bewaar"),
+                                          options: [], icon: UNNotificationActionIcon(systemImageName: "bookmark"))
+        let kaarten = UNNotificationAction(identifier: actionKaarten, title: L("Open in Apple Kaarten"),
+                                           options: [.foreground], icon: UNNotificationActionIcon(systemImageName: "map"))
+        let melding = UNNotificationCategory(identifier: "MELDING", actions: [bewaar, kaarten], intentIdentifiers: [],
+                                             options: [.hiddenPreviewsShowTitle])
+        let waarschuwing = UNNotificationCategory(identifier: "WAARSCHUWING", actions: [kaarten], intentIdentifiers: [],
+                                                  options: [.hiddenPreviewsShowTitle])
+        UNUserNotificationCenter.current().setNotificationCategories([melding, waarschuwing])
+    }
+
+    /// "Bewaar" from the notification, without opening the app.
+    static func bewaar(guid: String) {
+        let s = AppSettings.shared
+        if !s.bewaard.contains(guid) { s.bewaard.insert(guid) }
+    }
+
+    /// "Open in Apple Kaarten" from the notification.
+    static func openInKaarten(lat: Double, lon: Double, naam: String) {
+        var c = URLComponents(string: "https://maps.apple.com/")!
+        c.queryItems = [URLQueryItem(name: "ll", value: "\(lat),\(lon)"), URLQueryItem(name: "q", value: naam)]
+        guard let url = c.url else { return }
+        #if os(iOS)
+        UIApplication.shared.open(url)
+        #elseif os(macOS)
+        NSWorkspace.shared.open(url)
+        #endif
+    }
+
+    static func number(_ v: Any?) -> Double? {
+        if let d = v as? Double { return d }
+        if let n = v as? NSNumber { return n.doubleValue }
+        if let s = v as? String { return Double(s) }
+        return nil
+    }
+
     static func start() {
+        registerCategories()
         UNUserNotificationCenter.current().delegate = NotificationDelegate.shared
         AppSettings.shared.onNotificationSettingsChanged = { syncDevice() }
         if AppSettings.shared.notificationsEnabled { registerForRemote() }
@@ -161,10 +203,25 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
     }
 
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        let info = response.notification.request.content.userInfo
+        let content = response.notification.request.content
+        let info = content.userInfo
+        let action = response.actionIdentifier
         await MainActor.run {
-            if let id = PushManager.waarschuwingID(from: info) { PushManager.openWaarschuwing?(id) }
-            else if let guid = PushManager.guid(from: info) { PushManager.openMelding?(guid) }
+            switch action {
+            case PushManager.actionBewaar:
+                if let guid = PushManager.guid(from: info) { PushManager.bewaar(guid: guid) }
+            case PushManager.actionKaarten:
+                if let lat = PushManager.number(info["lat"]), let lon = PushManager.number(info["lon"]) {
+                    PushManager.openInKaarten(lat: lat, lon: lon, naam: content.title)
+                } else if let id = PushManager.waarschuwingID(from: info) {
+                    PushManager.openWaarschuwing?(id)
+                } else if let guid = PushManager.guid(from: info) {
+                    PushManager.openMelding?(guid)
+                }
+            default:
+                if let id = PushManager.waarschuwingID(from: info) { PushManager.openWaarschuwing?(id) }
+                else if let guid = PushManager.guid(from: info) { PushManager.openMelding?(guid) }
+            }
         }
     }
 }

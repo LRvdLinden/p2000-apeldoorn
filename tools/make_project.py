@@ -19,12 +19,15 @@ I = {k: oid(k) for k in [
     "widgetSources", "widgetResources", "widgetFrameworks", "wwSources", "wwResources", "wwFrameworks",
     "widgetDebug", "widgetRelease", "widgetList", "wwDebug", "wwRelease", "wwList",
     "tvTarget", "tvProduct", "grpTV", "tvSources", "tvResources", "tvFrameworks", "tvDebug", "tvRelease", "tvList",
-    "appEmbedExt", "watchEmbedExt", "bfEmbedWidget", "bfEmbedWatchWidget", "depWidget", "proxyWidget", "depWW", "proxyWW"]}
+    "appEmbedExt", "watchEmbedExt", "bfEmbedWidget", "bfEmbedWatchWidget", "depWidget", "proxyWidget", "depWW", "proxyWW",
+    "nsTarget", "nsProduct", "grpNS", "nsSources", "nsResources", "nsFrameworks", "nsDebug", "nsRelease", "nsList",
+    "bfEmbedNS", "depNS", "proxyNS"]}
 
 config_files = ["Base.xcconfig", "Secrets.example.xcconfig", "P2000Apeldoorn-Info.plist", "P2000Apeldoorn-iOS.entitlements",
                 "P2000Apeldoorn-macOS.entitlements", "P2000ApeldoornWatch-Info.plist", "P2000ApeldoornWatch.entitlements",
                 "Widgets-Info.plist", "Widgets-iOS.entitlements", "Widgets-macOS.entitlements",
-                "WatchWidgets-Info.plist", "WatchWidgets.entitlements", "P2000ApeldoornTV-Info.plist", "P2000ApeldoornTV.entitlements"]
+                "WatchWidgets-Info.plist", "WatchWidgets.entitlements", "P2000ApeldoornTV-Info.plist", "P2000ApeldoornTV.entitlements",
+                "Notifications-Info.plist"]
 cfg_refs = {f: oid("cfg-" + f) for f in config_files}
 I["baseXC"] = cfg_refs["Base.xcconfig"]
 
@@ -198,6 +201,30 @@ tv = {
     "TARGETED_DEVICE_FAMILY": "3",
 }
 
+# A-Alerts push extension (phase 9): a map of the spot in the notification. iPhone/iPad and Mac, embedded in the app.
+notifications = {
+    "APPLICATION_EXTENSION_API_ONLY": "YES",
+    "CODE_SIGN_STYLE": "Automatic",
+    "DEVELOPMENT_TEAM": "EU3UY476T6",
+    "ENABLE_HARDENED_RUNTIME": "YES",
+    "GENERATE_INFOPLIST_FILE": "YES",
+    "INFOPLIST_FILE": "Config/Notifications-Info.plist",
+    "INFOPLIST_KEY_CFBundleDisplayName": "A-Alerts",
+    "INFOPLIST_KEY_NSHumanReadableCopyright": "© 2026 P2000 Apeldoorn · PixelForges",
+    "LD_RUNPATH_SEARCH_PATHS[sdk=iphoneos*]": "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks",
+    "LD_RUNPATH_SEARCH_PATHS[sdk=iphonesimulator*]": "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks",
+    "LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]": "$(inherited) @executable_path/../Frameworks @executable_path/../../../../Frameworks",
+    "PRODUCT_BUNDLE_IDENTIFIER": APP_BUNDLE + ".notificationservice",
+    "PRODUCT_MODULE_NAME": "P2000ApeldoornNotifications",
+    "PRODUCT_NAME": "P2000 Apeldoorn Notifications",
+    "SDKROOT": "auto",
+    "SKIP_INSTALL": "YES",
+    "SUPPORTED_PLATFORMS": "iphoneos iphonesimulator macosx",
+    "SUPPORTS_MACCATALYST": "NO",
+    "SWIFT_EMIT_LOC_STRINGS": "YES",
+    "TARGETED_DEVICE_FAMILY": "1,2",
+}
+
 def xcconf(key, name, d, base=None):
     b = f"\t\t\tbaseConfigurationReference = {base} /* Base.xcconfig */;\n" if base else ""
     return f"""\t\t{key} /* {name} */ = {{
@@ -226,6 +253,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t{I['bfEmbedWidget']} /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {I['widgetProduct']} /* P2000 Apeldoorn Widgets.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
 \t\t{I['bfEmbedWatchWidget']} /* P2000 Apeldoorn Watch Widgets.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {I['watchWidgetProduct']} /* P2000 Apeldoorn Watch Widgets.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
 \t\t{I['bfEmbedWatch']} /* P2000 Apeldoorn Watch.app in Embed Watch Content */ = {{isa = PBXBuildFile; fileRef = {I['watchProduct']} /* P2000 Apeldoorn Watch.app */; platformFilters = (ios, ); settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
+\t\t{I['bfEmbedNS']} /* P2000 Apeldoorn Notifications.appex in Embed Foundation Extensions */ = {{isa = PBXBuildFile; fileRef = {I['nsProduct']} /* P2000 Apeldoorn Notifications.appex */; settings = {{ATTRIBUTES = (RemoveHeadersOnCopy, ); }}; }};
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -250,6 +278,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tremoteGlobalIDString = {I['watchTarget']};
 \t\t\tremoteInfo = "P2000 Apeldoorn Watch";
 \t\t}};
+\t\t{I['proxyNS']} /* PBXContainerItemProxy */ = {{
+\t\t\tisa = PBXContainerItemProxy;
+\t\t\tcontainerPortal = {I['project']} /* Project object */;
+\t\t\tproxyType = 1;
+\t\t\tremoteGlobalIDString = {I['nsTarget']};
+\t\t\tremoteInfo = "P2000 Apeldoorn Notifications";
+\t\t}};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -260,6 +295,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tdstSubfolderSpec = 13;
 \t\t\tfiles = (
 \t\t\t\t{I['bfEmbedWidget']} /* P2000 Apeldoorn Widgets.appex in Embed Foundation Extensions */,
+\t\t\t\t{I['bfEmbedNS']} /* P2000 Apeldoorn Notifications.appex in Embed Foundation Extensions */,
 \t\t\t);
 \t\t\tname = "Embed Foundation Extensions";
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
@@ -294,6 +330,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t{I['appProduct']} /* P2000 Apeldoorn.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
 \t\t{I['watchProduct']} /* P2000 Apeldoorn Watch.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn Watch.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
 \t\t{I['tvProduct']} /* P2000 Apeldoorn TV.app */ = {{isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "P2000 Apeldoorn TV.app"; sourceTree = BUILT_PRODUCTS_DIR; }};
+\t\t{I['nsProduct']} /* P2000 Apeldoorn Notifications.appex */ = {{isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = "P2000 Apeldoorn Notifications.appex"; sourceTree = BUILT_PRODUCTS_DIR; }};
 {cfg_file_refs}/* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -302,6 +339,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t{I['grpShared']} /* Shared */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = Shared; sourceTree = "<group>"; }};
 \t\t{I['grpWatch']} /* P2000ApeldoornWatch */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornWatch; sourceTree = "<group>"; }};
 \t\t{I['grpTV']} /* P2000ApeldoornTV */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornTV; sourceTree = "<group>"; }};
+\t\t{I['grpNS']} /* P2000ApeldoornNotifications */ = {{isa = PBXFileSystemSynchronizedRootGroup; path = P2000ApeldoornNotifications; sourceTree = "<group>"; }};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -340,6 +378,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
+\t\t{I['nsFrameworks']} /* Frameworks */ = {{
+\t\t\tisa = PBXFrameworksBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -351,6 +396,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['grpWatch']} /* P2000ApeldoornWatch */,
 \t\t\t\t{I['grpWidgets']} /* P2000ApeldoornWidgets */,
 \t\t\t\t{I['grpTV']} /* P2000ApeldoornTV */,
+\t\t\t\t{I['grpNS']} /* P2000ApeldoornNotifications */,
 \t\t\t\t{I['config']} /* Config */,
 \t\t\t\t{I['products']} /* Products */,
 \t\t\t);
@@ -371,6 +417,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['widgetProduct']} /* P2000 Apeldoorn Widgets.appex */,
 \t\t\t\t{I['watchWidgetProduct']} /* P2000 Apeldoorn Watch Widgets.appex */,
 \t\t\t\t{I['tvProduct']} /* P2000 Apeldoorn TV.app */,
+\t\t\t\t{I['nsProduct']} /* P2000 Apeldoorn Notifications.appex */,
 \t\t\t);
 \t\t\tname = Products;
 \t\t\tsourceTree = "<group>";
@@ -439,6 +486,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tdependencies = (
 \t\t\t\t{I['depWatch']} /* PBXTargetDependency */,
 \t\t\t\t{I['depWidget']} /* PBXTargetDependency */,
+\t\t\t\t{I['depNS']} /* PBXTargetDependency */,
 \t\t\t);
 \t\t\tfileSystemSynchronizedGroups = (
 \t\t\t\t{I['grpApp']} /* P2000Apeldoorn */,
@@ -499,6 +547,28 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tproductReference = {I['tvProduct']} /* P2000 Apeldoorn TV.app */;
 \t\t\tproductType = "com.apple.product-type.application";
 \t\t}};
+\t\t{I['nsTarget']} /* P2000 Apeldoorn Notifications */ = {{
+\t\t\tisa = PBXNativeTarget;
+\t\t\tbuildConfigurationList = {I['nsList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Notifications" */;
+\t\t\tbuildPhases = (
+\t\t\t\t{I['nsSources']} /* Sources */,
+\t\t\t\t{I['nsFrameworks']} /* Frameworks */,
+\t\t\t\t{I['nsResources']} /* Resources */,
+\t\t\t);
+\t\t\tbuildRules = (
+\t\t\t);
+\t\t\tdependencies = (
+\t\t\t);
+\t\t\tfileSystemSynchronizedGroups = (
+\t\t\t\t{I['grpNS']} /* P2000ApeldoornNotifications */,
+\t\t\t);
+\t\t\tname = "P2000 Apeldoorn Notifications";
+\t\t\tpackageProductDependencies = (
+\t\t\t);
+\t\t\tproductName = "P2000 Apeldoorn Notifications";
+\t\t\tproductReference = {I['nsProduct']} /* P2000 Apeldoorn Notifications.appex */;
+\t\t\tproductType = "com.apple.product-type.app-extension";
+\t\t}};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -524,6 +594,9 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t\t{I['tvTarget']} = {{
 \t\t\t\t\t\tCreatedOnToolsVersion = 26.0;
 \t\t\t\t\t}};
+\t\t\t\t\t{I['nsTarget']} = {{
+\t\t\t\t\t\tCreatedOnToolsVersion = 26.0;
+\t\t\t\t\t}};
 \t\t\t\t}};
 \t\t\t}};
 \t\t\tbuildConfigurationList = {I['projList']} /* Build configuration list for PBXProject "P2000Apeldoorn" */;
@@ -546,6 +619,7 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t\t{I['widgetTarget']} /* P2000 Apeldoorn Widgets */,
 \t\t\t\t{I['watchWidgetTarget']} /* P2000 Apeldoorn Watch Widgets */,
 \t\t\t\t{I['tvTarget']} /* P2000 Apeldoorn TV */,
+\t\t\t\t{I['nsTarget']} /* P2000 Apeldoorn Notifications */,
 \t\t\t);
 \t\t}};
 /* End PBXProject section */
@@ -580,6 +654,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
 \t\t{I['tvResources']} /* Resources */ = {{
+\t\t\tisa = PBXResourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
+\t\t{I['nsResources']} /* Resources */ = {{
 \t\t\tisa = PBXResourcesBuildPhase;
 \t\t\tbuildActionMask = 2147483647;
 \t\t\tfiles = (
@@ -624,6 +705,13 @@ pbx = f"""// !$*UTF8*$!
 \t\t\t);
 \t\t\trunOnlyForDeploymentPostprocessing = 0;
 \t\t}};
+\t\t{I['nsSources']} /* Sources */ = {{
+\t\t\tisa = PBXSourcesBuildPhase;
+\t\t\tbuildActionMask = 2147483647;
+\t\t\tfiles = (
+\t\t\t);
+\t\t\trunOnlyForDeploymentPostprocessing = 0;
+\t\t}};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -643,10 +731,15 @@ pbx = f"""// !$*UTF8*$!
 \t\t\ttarget = {I['watchTarget']} /* P2000 Apeldoorn Watch */;
 \t\t\ttargetProxy = {I['proxyWatch']} /* PBXContainerItemProxy */;
 \t\t}};
+\t\t{I['depNS']} /* PBXTargetDependency */ = {{
+\t\t\tisa = PBXTargetDependency;
+\t\t\ttarget = {I['nsTarget']} /* P2000 Apeldoorn Notifications */;
+\t\t\ttargetProxy = {I['proxyNS']} /* PBXContainerItemProxy */;
+\t\t}};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
-{xcconf(I['projDebug'], 'Debug', proj_debug, I['baseXC'])}{xcconf(I['projRelease'], 'Release', proj_release, I['baseXC'])}{xcconf(I['appDebug'], 'Debug', app)}{xcconf(I['appRelease'], 'Release', app)}{xcconf(I['watchDebug'], 'Debug', watch)}{xcconf(I['watchRelease'], 'Release', watch)}{xcconf(I['widgetDebug'], 'Debug', widget)}{xcconf(I['widgetRelease'], 'Release', widget)}{xcconf(I['wwDebug'], 'Debug', watch_widget)}{xcconf(I['wwRelease'], 'Release', watch_widget)}{xcconf(I['tvDebug'], 'Debug', tv)}{xcconf(I['tvRelease'], 'Release', tv)}/* End XCBuildConfiguration section */
+{xcconf(I['projDebug'], 'Debug', proj_debug, I['baseXC'])}{xcconf(I['projRelease'], 'Release', proj_release, I['baseXC'])}{xcconf(I['appDebug'], 'Debug', app)}{xcconf(I['appRelease'], 'Release', app)}{xcconf(I['watchDebug'], 'Debug', watch)}{xcconf(I['watchRelease'], 'Release', watch)}{xcconf(I['widgetDebug'], 'Debug', widget)}{xcconf(I['widgetRelease'], 'Release', widget)}{xcconf(I['wwDebug'], 'Debug', watch_widget)}{xcconf(I['wwRelease'], 'Release', watch_widget)}{xcconf(I['tvDebug'], 'Debug', tv)}{xcconf(I['tvRelease'], 'Release', tv)}{xcconf(I['nsDebug'], 'Debug', notifications)}{xcconf(I['nsRelease'], 'Release', notifications)}/* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 \t\t{I['widgetList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Widgets" */ = {{
@@ -699,6 +792,15 @@ pbx = f"""// !$*UTF8*$!
 \t\t\tbuildConfigurations = (
 \t\t\t\t{I['tvDebug']} /* Debug */,
 \t\t\t\t{I['tvRelease']} /* Release */,
+\t\t\t);
+\t\t\tdefaultConfigurationIsVisible = 0;
+\t\t\tdefaultConfigurationName = Release;
+\t\t}};
+\t\t{I['nsList']} /* Build configuration list for PBXNativeTarget "P2000 Apeldoorn Notifications" */ = {{
+\t\t\tisa = XCConfigurationList;
+\t\t\tbuildConfigurations = (
+\t\t\t\t{I['nsDebug']} /* Debug */,
+\t\t\t\t{I['nsRelease']} /* Release */,
 \t\t\t);
 \t\t\tdefaultConfigurationIsVisible = 0;
 \t\t\tdefaultConfigurationName = Release;
