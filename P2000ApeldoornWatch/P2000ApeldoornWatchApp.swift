@@ -23,15 +23,16 @@ struct WatchRootView: View {
     @Environment(\.scenePhase) private var scenePhase
     @State private var showSplash = true
     @State private var opened: Melding?
+    @State private var pagina = 0
 
     var body: some View {
         ZStack {
             // One NavigationStack around the paged TabView (watchOS 10+ pattern). A NavigationStack inside each
             // page gives two navigation bars and crashes on launch on watchOS 26.
             NavigationStack {
-                TabView {
-                    WatchListView()
-                    WatchStatsView()
+                TabView(selection: $pagina) {
+                    WatchListView().tag(0)
+                    WatchStatsView().tag(1)
                 }
                 .tabViewStyle(.verticalPage)
             }
@@ -51,6 +52,13 @@ struct WatchRootView: View {
         .task {
             store.startPolling()
             InstallPing.send()
+            #if DEBUG
+            // Screenshots: -AAlertsTab statistieken, -AAlertsMelding <guid>.
+            let args = ProcessInfo.processInfo.arguments
+            func value(_ key: String) -> String? { args.firstIndex(of: key).flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } }
+            if value("-AAlertsTab") == "statistieken" { showSplash = false; pagina = 1 }
+            if let guid = value("-AAlertsMelding") { showSplash = false; opened = await store.melding(guid: guid) }
+            #endif
         }
         .onChange(of: scenePhase) { _, phase in
             if phase == .active { store.startPolling() } else if phase == .background { store.stopPolling() }

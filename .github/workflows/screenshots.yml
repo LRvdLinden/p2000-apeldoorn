@@ -85,7 +85,7 @@ jobs:
               xcrun simctl install "$D" "$APP"
               xcrun simctl privacy "$D" grant location "$BUNDLE" || true
               snap() { xcrun simctl launch --terminate-running-process "$D" "$BUNDLE" $L $2; sleep $3; xcrun simctl io "$D" screenshot "shots/$LANG/$P-$1.png"; }
-              snap pager "" 16
+              snap pager "" 16; snap pager "" 12
               snap kaart "-AAlertsTab kaart" 16
               snap statistieken "-AAlertsTab statistieken" 12
               snap instellingen "-AAlertsTab instellingen" 10
@@ -111,6 +111,10 @@ jobs:
             xcrun simctl install "$W" "$WAPP"
             xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC; sleep 15
             xcrun simctl io "$W" screenshot "shots/$LANG/watch-lijst.png"
+            xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC -AAlertsMelding "$GUID"; sleep 15
+            xcrun simctl io "$W" screenshot "shots/$LANG/watch-melding.png"
+            xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC -AAlertsTab statistieken; sleep 15
+            xcrun simctl io "$W" screenshot "shots/$LANG/watch-statistieken.png"
             xcrun simctl shutdown "$W" || true
             # Apple TV
             T="${{ steps.dev.outputs.tv }}"
@@ -135,6 +139,20 @@ jobs:
               sleep 16
               screencapture -x -R0,0,1440,900 "shots/$LANG/mac-kaart.png" || true
               pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              open -n "$MACAPP" --args $L -AAlertsMelding "$GUID"
+              sleep 16
+              screencapture -x -R0,0,1440,900 "shots/$LANG/mac-melding.png" || true
+              pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              open -n "$MACAPP" --args $L -AAlertsTab statistieken
+              sleep 14
+              screencapture -x -R0,0,1440,900 "shots/$LANG/mac-statistieken.png" || true
+              pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              if [ -n "$WID" ]; then
+                open -n "$MACAPP" --args $L -AAlertsWaarschuwing "$WID"
+                sleep 16
+                screencapture -x -R0,0,1440,900 "shots/$LANG/mac-waarschuwing.png" || true
+                pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              fi
               screencapture -x "shots/$LANG/mac-full.png" || true
             fi
           done
