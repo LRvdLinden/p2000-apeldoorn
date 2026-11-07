@@ -124,6 +124,7 @@ struct RootView: View {
                 try? await Task.sleep(for: .seconds(4))
                 if let guid = value("-AAlertsMelding") { router.open(guid: guid) }
                 if let id = value("-AAlertsWaarschuwing") { router.openWaarschuwing(id: id) }
+                if let id = value("-AAlertsHeli") { router.volg(heli: id) }
             }
         }
         #endif

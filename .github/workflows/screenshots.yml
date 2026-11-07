@@ -50,6 +50,7 @@ jobs:
         run: |
           curl -sS "$API/v1/meldingen?limit=80" -o m.json
           curl -sS "$API/v1/waarschuwingen?days=14" -o w.json
+          curl -sS "$API/v1/helikopters" -o h.json
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           m=json.load(open("m.json")); w=json.load(open("w.json"))
@@ -58,6 +59,9 @@ jobs:
           print("guid="+pref[0]["guid"])
           ws=[x for x in w if x["bron"] in ("burgernet","nlalert")]
           print("wid="+(ws[0]["id"] if ws else ""))
+          hs=json.load(open("h.json")).get("helikopters", [])
+          hs=sorted(hs, key=lambda h: (h.get("op_grond", True), h.get("soort") != "trauma"))
+          print("heli="+(hs[0]["id"] if hs else ""))
           PY
       - name: Screenshots
         run: |
@@ -66,7 +70,7 @@ jobs:
           WAPP=$(find buildw/Build/Products -name "P2000 Apeldoorn Watch.app" -maxdepth 3 | head -1)
           TVAPP=$(find buildtv/Build/Products -name "*.app" -maxdepth 3 | head -1)
           MACAPP=$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
-          GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"
+          GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"; HELI="${{ steps.data.outputs.heli }}"
           for LANG in nl en; do
             [ $LANG = nl ] && LOC=nl_NL || LOC=en_US
             L="-AppleLanguages ($LANG) -AppleLocale $LOC -AAlertsScreenshots"
@@ -87,6 +91,7 @@ jobs:
               snap instellingen "-AAlertsTab instellingen" 10
               snap melding "-AAlertsMelding $GUID" 18
               [ -n "$WID" ] && snap waarschuwing "-AAlertsWaarschuwing $WID" 18
+              [ -n "$HELI" ] && snap heli "-AAlertsHeli $HELI" 22
               xcrun simctl shutdown "$D" || true
             }
             shoot "${{ steps.dev.outputs.iphone }}" iphone
