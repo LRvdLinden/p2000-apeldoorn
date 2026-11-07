@@ -16,8 +16,9 @@ Beide praten met het beheerdeel van de API (Cloudflare Worker in `../worker`), a
 - **Teksten:** privacyverklaring, cookies, voorwaarden, disclaimer en changelog bewerken (direct live in app en website).
 - **Waarschuwingen (A-Alerts):** NL-Alert, Burgernet en KNMI zoeken en filteren, verbergen in apps en website, of handmatig beëindigen (brongegevens blijven ongewijzigd).
 - **Dashboard (A-Alerts):** status van NL-Alert, Burgernet, KNMI en adsb.lol, helikopters in de lucht, waarschuwingen per bron en het gebruik van de notificatieprofielen.
+- **Status:** alle onderdelen van a-alerts.nl/status met uptime en de ruwe foutmelding, afwijkingen die alleen het beheer ziet (push-wachtrij, lange stilte zonder meldingen), en storingen of gepland onderhoud plaatsen, bijwerken, afronden en verwijderen (direct op de statuspagina en in de apps).
 - **Android-app:** downloads van de APK op a-alerts.nl/android/ (totaal, 30 dagen, vandaag, per dag en per versie), Android-installaties, toestellen met push en de status van Firebase-push.
-- **App:** Face ID / Touch ID, en een pushmelding bij storingen van de P2000-feed (> 10 min) en, met de schakelaar *Storing bronnen*, van NL-Alert, Burgernet of KNMI (> 30 min).
+- **App:** Face ID / Touch ID, en met de schakelaar *Storingen en afwijkingen* een pushmelding zodra een onderdeel van de statuspagina 3 minuten afwijkt van normaal, bij een push-wachtrij die achterloopt of een ongewoon lange stilte zonder meldingen, en weer als alles normaal is.
 
 ## App bouwen
 Open `P2000Beheer.xcodeproj` (Xcode 16+), bundle ID `nl.lrvdlinden.p2000beheer`. Zet bij de App ID **Push Notifications** aan. Het projectbestand maak je opnieuw met `python3 tools/make_project.py`.

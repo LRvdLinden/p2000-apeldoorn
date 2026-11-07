@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -91,7 +91,7 @@ function route() {
   $("updated").textContent = "";
   clearInterval(timer);
   run();
-  if (fn === dashboard) timer = setInterval(run, 60_000);
+  if (fn === dashboard || fn === statusView) timer = setInterval(run, 60_000);
 }
 async function run() {
   try { await current($("view")); $("error").hidden = true; }
@@ -387,6 +387,102 @@ function editMelding(m) {
     if (Object.keys(change).length) { await api("PATCH", `/v1/beheer/meldingen/${m.guid}`, change); toast("Bewaard"); }
     closeModal();
     run();
+  };
+}
+
+// ------------------------------------------------------------------ status (a-alerts.nl/status)
+
+const ST = { ok: ["Werkt", "#16A34A"], warn: ["Verstoord", "#F59E0B"], down: ["Storing", "#DC2626"], maint: ["Onderhoud", "#3B82F6"], geen: ["Geen gegevens", "#9CA3AF"] };
+const SOORT = { storing: "Storing", vertraagd: "Verstoord", onderhoud: "Onderhoud" };
+const FASEN = { onderzoek: "Onderzoek", oorzaak: "Oorzaak gevonden", herstel: "Herstel", monitoren: "Monitoren", opgelost: "Opgelost", gepland: "Gepland", bezig: "Bezig", afgerond: "Afgerond" };
+const stDot = (s) => `<i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${(ST[s] || ST.geen)[1]}"></i>`;
+
+async function statusView(el) {
+  const d = await api("GET", "/v1/beheer/status");
+  const ond = d.groepen.flatMap((g) => g.onderdelen);
+  const naam = Object.fromEntries(ond.map((o) => [o.id, o.naam]));
+  const inc = (i, open) => `<div class="row" style="align-items:flex-start"><div class="grow">
+      <span class="tag ${i.soort === "onderhoud" ? "blue" : i.soort === "vertraagd" ? "orange" : ""}">${SOORT[i.soort] || i.soort}</span>
+      <b>${esc(i.titel)}</b><br><small>${i.onderdelen.map((o) => esc(naam[o] || o)).join(", ") || "Algemeen"} · ${i.gepland_start ? `gepland ${dt(i.gepland_start)}${i.gepland_einde ? ` – ${dt(i.gepland_einde)}` : ""}` : `sinds ${dt(i.start)}`}${i.einde ? ` · klaar ${dt(i.einde)}` : ""}</small>
+      ${i.updates.map((u) => `<div style="margin-top:6px"><small><b>${esc(FASEN[u.fase] || u.fase)}</b> · ${dt(u.at)}</small><br>${esc(u.tekst)}</div>`).join("")}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">${open ? `<button class="btn" data-upd="${i.id}">Update</button><button class="btn primary" data-klaar="${i.id}">${i.soort === "onderhoud" ? "Afgerond" : "Opgelost"}</button>` : ""}<button class="btn danger" data-del="${i.id}">Verwijder</button></div></div>`;
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+      ${stDot(d.staat)}<b style="font-size:1.1rem">${d.staat === "ok" ? "Alle systemen werken" : `Status: ${(ST[d.staat] || ST.geen)[0]}`}</b>
+      <small class="muted">bijgewerkt ${dt(d.bijgewerkt)}</small>
+      <a class="btn" style="margin-left:auto" href="https://a-alerts.nl/status/" target="_blank" rel="noopener">Openbare pagina ↗</a>
+      <button class="btn primary" id="nieuwInc">Storing of onderhoud melden</button>
+    </div>
+    ${d.afwijkingen?.length ? `<div class="card" style="margin-bottom:16px"><h2>Afwijkingen (alleen beheer)</h2>${d.afwijkingen.map((a) => `<div class="row">🟠 ${esc(a.tekst)}</div>`).join("")}</div>` : ""}
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(360px,1fr))">
+      ${d.groepen.map((g) => `<div class="card"><h2>${esc(g.naam)}</h2>${g.onderdelen.map((o) => `<div class="row" style="align-items:flex-start">
+        <div style="padding-top:5px">${stDot(o.staat)}</div>
+        <div class="grow"><b>${esc(o.naam)}</b> <small class="muted">${(ST[o.staat] || ST.geen)[0]}${o.uptime != null ? ` · ${String(o.uptime).replace(".", ",")}% (90 d)` : ""}</small>
+          ${o.detail ? `<br><small>${esc(o.detail)}</small>` : ""}${o.fout ? `<br><small style="color:var(--red)">${esc(o.fout)}</small>` : ""}
+          <div style="display:flex;gap:1px;height:14px;margin-top:6px">${o.dagen.slice(-30).map((x) => `<span title="${esc(x.dag)} · ${(ST[x.staat] || ST.geen)[0]}" style="flex:1;border-radius:2px;background:${(ST[x.staat] || ST.geen)[1]}"></span>`).join("")}</div>
+        </div></div>`).join("")}</div>`).join("")}
+    </div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(360px,1fr));margin-top:16px">
+      <div class="card"><h2>Lopend</h2>${d.incidenten.actief.length ? d.incidenten.actief.map((i) => inc(i, true)).join("") : `<p class="muted">Geen lopende storingen</p>`}</div>
+      <div class="card"><h2>Gepland onderhoud</h2>${d.incidenten.gepland.length ? d.incidenten.gepland.map((i) => inc(i, true)).join("") : `<p class="muted">Niets gepland</p>`}</div>
+      <div class="card"><h2>Afgelopen 30 dagen</h2>${d.incidenten.recent.length ? d.incidenten.recent.map((i) => inc(i, false)).join("") : `<p class="muted">Geen storingen</p>`}</div>
+    </div>
+    <p class="muted" style="font-size:.8rem;margin-top:12px">Pushmeldingen naar dit beheer bij afwijkingen schakel je in de beheer-app bij Instellingen › Storingen en afwijkingen.</p>`;
+  $("nieuwInc").onclick = () => nieuwIncident(ond);
+  el.querySelectorAll("[data-upd]").forEach((b) => (b.onclick = () => incidentUpdate(Number(b.dataset.upd), false)));
+  el.querySelectorAll("[data-klaar]").forEach((b) => (b.onclick = () => incidentUpdate(Number(b.dataset.klaar), true)));
+  el.querySelectorAll("[data-del]").forEach((b) => (b.onclick = async () => {
+    if (!confirm("Deze storing verwijderen? Hij verdwijnt ook van de statuspagina.")) return;
+    await api("DELETE", `/v1/beheer/status/incidenten/${b.dataset.del}`); toast("Verwijderd"); run();
+  }));
+}
+
+function nieuwIncident(ond) {
+  openModal(`<h2>Storing of onderhoud melden</h2>
+    <form class="form" id="incf">
+      <label>Soort<select name="soort"><option value="storing">Storing</option><option value="vertraagd">Verstoord / vertraagd</option><option value="onderhoud">Gepland onderhoud</option></select></label>
+      <label>Titel<input name="titel" maxlength="140" required placeholder="Bijv. Vertraagde pushmeldingen op Android"></label>
+      <label>Titel (Engels, optioneel)<input name="titel_en" maxlength="140"></label>
+      <div><b style="font-size:.85rem">Onderdelen</b><div class="chips" style="margin-top:8px">${ond.map((o) => `<label><input type="checkbox" name="ond" value="${o.id}"> ${esc(o.naam)}</label>`).join("")}</div></div>
+      <label>Eerste bericht<textarea name="tekst" maxlength="1000" required placeholder="Wat merken gebruikers en wat doen we eraan?"></textarea></label>
+      <label>Bericht (Engels, optioneel)<textarea name="tekst_en" maxlength="1000"></textarea></label>
+      <div id="planVelden" hidden style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <label>Begin<input type="datetime-local" name="gepland_start"></label>
+        <label>Einde<input type="datetime-local" name="gepland_einde"></label>
+      </div>
+      <p class="muted" style="font-size:.8rem;margin:0">Komt direct op a-alerts.nl/status en in de apps (Instellingen › Status). Er gaat geen pushmelding naar gebruikers.</p>
+      <div class="actions"><button type="button" class="btn" id="incCancel">Annuleer</button><button class="btn primary" type="submit">Plaats</button></div>
+    </form>`);
+  const f = $("incf");
+  f.soort.onchange = () => { $("planVelden").hidden = f.soort.value !== "onderhoud"; };
+  $("incCancel").onclick = closeModal;
+  f.onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(f);
+    const iso = (v) => v ? new Date(v).toISOString() : null;
+    await api("POST", "/v1/beheer/status/incidenten", {
+      soort: fd.get("soort"), titel: fd.get("titel"), titel_en: fd.get("titel_en"), onderdelen: fd.getAll("ond"),
+      tekst: fd.get("tekst"), tekst_en: fd.get("tekst_en"),
+      ...(fd.get("soort") === "onderhoud" ? { gepland_start: iso(fd.get("gepland_start")), gepland_einde: iso(fd.get("gepland_einde")) } : {}),
+    });
+    closeModal(); toast("Geplaatst op de statuspagina"); run();
+  };
+}
+
+function incidentUpdate(id, klaar) {
+  openModal(`<h2>${klaar ? "Afronden" : "Update plaatsen"}</h2>
+    <form class="form" id="updf">
+      ${klaar ? "" : `<label>Fase<select name="fase">${Object.entries(FASEN).filter(([k]) => !["opgelost", "afgerond", "gepland"].includes(k)).map(([k, v]) => `<option value="${k}">${v}</option>`).join("")}</select></label>`}
+      <label>Bericht<textarea name="tekst" maxlength="1000" ${klaar ? "" : "required"} placeholder="${klaar ? "Bijv. Opgelost: pushmeldingen komen weer direct binnen." : ""}">${klaar ? "Opgelost: alles werkt weer normaal." : ""}</textarea></label>
+      <label>Bericht (Engels, optioneel)<textarea name="tekst_en" maxlength="1000">${klaar ? "Resolved: everything is working normally again." : ""}</textarea></label>
+      <div class="actions"><button type="button" class="btn" id="updCancel">Annuleer</button><button class="btn primary" type="submit">${klaar ? "Rond af" : "Plaats"}</button></div>
+    </form>`);
+  $("updCancel").onclick = closeModal;
+  $("updf").onsubmit = async (e) => {
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    await api("POST", `/v1/beheer/status/incidenten/${id}`, { fase: fd.get("fase") || undefined, tekst: fd.get("tekst"), tekst_en: fd.get("tekst_en"), opgelost: klaar });
+    closeModal(); toast(klaar ? "Afgerond" : "Update geplaatst"); run();
   };
 }
 
