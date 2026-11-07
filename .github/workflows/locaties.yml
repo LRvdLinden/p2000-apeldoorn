@@ -1,6 +1,9 @@
 name: Ziekenhuizen en bases (eenmalig)
 on:
   workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [tools/geodata/fetch_locaties.py, .github/workflows/locaties.yml]
 permissions:
   contents: write
 jobs:
