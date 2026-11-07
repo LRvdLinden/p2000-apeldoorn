@@ -3,12 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=36";
+} from "./core.js?v=37";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat,
-} from "./aalerts.js?v=36";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=37";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -456,7 +455,7 @@ async function loadHeli(m, mapReady) {
       const eta = km != null && v > 40 && !h.op_grond ? Math.round((km / v) * 60) : null;
       box.innerHTML = `<h2>${esc(h.naam)} <span class="live-tag">LIVE</span></h2>
         <div class="kz heli-live"><img src="${heliImg(h)}" alt="" style="width:84px;height:auto;${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">
-        <div><b>${esc(heliInfo(h))}</b>${km != null ? `<small>${km.toFixed(1).replace(".", ",")} km van de melding${eta ? ` · ± ${eta} min` : ""}</small>` : ""}</div></div>
+        <div><b>${esc(heliInfo(h))}</b>${km != null ? `<small>${km.toFixed(1).replace(".", ",")} km van de melding${eta ? ` · ± ${eta} min` : ""}</small>` : ""}${h.voorspelling ? `<small>${esc(voorspellingTekst(h.voorspelling))}</small>` : ""}</div></div>
         <button class="btn btn-red" id="volgHeli" style="width:100%;margin-top:10px">Volg ${esc(h.naam)} op de kaart</button>
         <p class="hint">Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.</p>`;
       $("volgHeli").onclick = () => { state.volgHeli = h.id; if (innerWidth <= 900) closeDetail(); setTab("kaart"); };
@@ -684,6 +683,7 @@ const LAGEN = [
   ["knmi", "KNMI", "icon_knmi", "#3E9FDB"],
   ["helikopters", "Heli's", "icon_traumaheli", "#9333EA"],
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
+  ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626"],
 ];
 function renderMapChips() {
@@ -696,7 +696,7 @@ function renderMapChips() {
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
   }).join("");
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -771,10 +771,18 @@ async function renderMap() {
     });
   }
   if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613")));
+  if (state.lagen.has("ziekenhuizen")) (await fetchLocaties()).forEach((l) => extra.push(locatieAnnotation(mk, l, openLocatie)));
   heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
+  if (state.lagen.has("helikopters")) {
+    // Probable destination of every helicopter (or only the selected one).
+    state.helis.filter((h) => !heliSpoor.id || h.id === heliSpoor.id).forEach((h) => { const v = voorspellingOverlay(mk, h); if (v) bigMap.addOverlay(v); });
+  }
   if (state.lagen.has("helikopters") && heliSpoor.id) {
-    const ov = spoorOverlay(mk, heliSpoor.punten, state.helis.find((h) => h.id === heliSpoor.id));
+    const h = state.helis.find((x) => x.id === heliSpoor.id);
+    const ov = spoorOverlay(mk, heliSpoor.punten, h, Date.now(), afspelen.f == null ? {} : { live: false, opacity: 0.35 });
     if (ov) bigMap.addOverlay(ov);
+    afspelen.ov = null; // removed with the other overlays above
+    renderAfspeel(mk, h);
   }
   if (state.lagen.has("werkgebied")) bigMap.addOverlays(await werkgebiedOverlays(mk));
   bigMap.addAnnotations([
@@ -816,21 +824,80 @@ function renderStaticMarkers(pins, clusters) {
   box.onclick = (e) => { const g = e.target.dataset.guid; if (g) select(g); };
 }
 
+/** Hospital or base tapped: what it is and which helicopter is probably heading there. */
+function openLocatie(l) {
+  const box = $("clusterPanel");
+  const op = state.helis.filter((h) => h.voorspelling?.id === l.id);
+  box.innerHTML = `<header><b>${esc(l.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    <p><img src="${locatieIcon(l)}" alt="" style="width:18px;height:18px;vertical-align:-3px"> ${esc([locatieSoort(l), l.plaats].filter(Boolean).join(" · "))}</p>
+    ${op.map((h) => `<p><b>${esc(h.naam)}</b> is waarschijnlijk onderweg hierheen${h.voorspelling.eta_min ? ` · ± ${h.voorspelling.eta_min} min` : ""}</p>`).join("")}
+    <p class="hint" style="margin:8px 0 0">Bron: OpenStreetMap (ODbL)</p>`;
+  box.hidden = false;
+}
+
+// Playback of the selected trail ("Vlucht terugspelen"): f = 0..1, null = live.
+const afspelen = { f: null, speelt: false, snelheid: 60, timer: null, ann: null, ov: null };
+function renderAfspeel(mk, h) {
+  // Only the played part and the marker are redrawn (cheap enough four times a second).
+  if (afspelen.ann) { bigMap.removeAnnotation(afspelen.ann); afspelen.ann = null; }
+  if (afspelen.ov) { bigMap.removeOverlay(afspelen.ov); afspelen.ov = null; }
+  const p = afspelen.f == null ? null : afspeelPunt(heliSpoor.punten, afspelen.f);
+  const label = $("afspeelTijd");
+  if (label) label.textContent = p ? `Terugspelen: ${fmtTime(p.t)}${p.hoogte_ft != null ? ` · ${Math.round((p.hoogte_ft * 0.3048) / 10) * 10} m` : ""}` : "";
+  if (!p || !h) return;
+  afspelen.ov = spoorOverlay(mk, p.gespeeld, h, Date.now(), { live: false, breedte: 6, opacity: 1 });
+  if (afspelen.ov) bigMap.addOverlay(afspelen.ov);
+  afspelen.ann = new mk.Annotation(new mk.Coordinate(p.lat, p.lon), () => {
+    const el = document.createElement("div");
+    el.innerHTML = `<img src="${heliImg(h)}" alt="" style="width:56px;height:auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,.4))">`;
+    return el;
+  }, { calloutEnabled: false });
+  afspelen.ann._heli = true;
+  bigMap.addAnnotation(afspelen.ann);
+}
+const afspeelTick = async () => {
+  const mk = await bigMapReady;
+  if (mk && bigMap) renderAfspeel(mk, state.helis.find((x) => x.id === heliSpoor.id));
+};
+function speelAf(aan) {
+  clearInterval(afspelen.timer);
+  const was = afspelen.f;
+  afspelen.speelt = aan && heliSpoor.punten.length >= 2;
+  const btn = $("afspeelKnop");
+  if (btn) btn.textContent = afspelen.speelt ? "❚❚" : "▶";
+  if (!afspelen.speelt) return;
+  if (afspelen.f == null || afspelen.f >= 1) afspelen.f = 0;
+  if (was == null) renderMap(); // dim the full trail once
+  const duur = Math.max(1, (Date.parse(heliSpoor.punten.at(-1).t) - Date.parse(heliSpoor.punten[0].t)) / 1000);
+  afspelen.timer = setInterval(() => {
+    afspelen.f = Math.min(1, afspelen.f + (0.25 * afspelen.snelheid) / duur);
+    const sl = $("afspeelSlider"); if (sl) sl.value = String(afspelen.f);
+    if (afspelen.f >= 1) speelAf(false);
+    afspeelTick();
+  }, 250);
+}
+function stopAfspelen() {
+  speelAf(false); afspelen.f = null;
+  if (afspelen.ann && bigMap) { bigMap.removeAnnotation(afspelen.ann); afspelen.ann = null; }
+  const label = $("afspeelTijd"); if (label) label.textContent = "";
+}
+
 // Route trail and flights of the selected helicopter (refreshed every 20 seconds while its panel is open).
 let heliMarkers = null;
-const heliSpoor = { id: null, scope: prefs.get("p2000.spoorScope", "vlucht"), punten: [], vluchten: [], timer: null };
+const heliSpoor = { id: null, scope: (({ vandaag: "lang" })[prefs.get("p2000.spoorScope", "vlucht")] || prefs.get("p2000.spoorScope", "vlucht")), punten: [], vluchten: [], timer: null };
 async function loadSpoor() {
   const id = heliSpoor.id;
   if (!id) return;
   const [punten, vluchten] = await Promise.all([fetchSpoor(id, heliSpoor.scope), fetchVluchten(id)]);
   if (heliSpoor.id !== id) return;
-  Object.assign(heliSpoor, { punten, vluchten });
+  Object.assign(heliSpoor, afspelen.f == null ? { punten, vluchten } : { vluchten });
   const box = $("heliVluchten");
   if (box) box.innerHTML = vluchten.length ? vluchten.slice(0, 4).map((v) => `<li class="${v.onderweg ? "on" : ""}">${esc(vluchtTekst(v))}</li>`).join("") : `<li class="hint">Nog geen vluchten opgeslagen.</li>`;
   renderMap();
 }
 function selectSpoor(id) {
   clearInterval(heliSpoor.timer);
+  stopAfspelen();
   Object.assign(heliSpoor, { id, punten: [], vluchten: [] });
   if (!id) { renderMap(); return; }
   loadSpoor();
@@ -849,7 +916,13 @@ function openHeli(h) {
     <p>${esc([h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
-    <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["vandaag", "Vandaag"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
+    ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
+    <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["lang", "2 uur"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
+    <div class="afspeel"><button id="afspeelKnop" class="icon-btn" aria-label="Vlucht terugspelen">▶</button>
+      <input type="range" id="afspeelSlider" min="0" max="1" step="0.001" value="${afspelen.f ?? 1}" aria-label="Afspeelpositie">
+      <button id="afspeelSnelheid" class="icon-btn" aria-label="Afspeelsnelheid">${afspelen.snelheid}×</button>
+      <button id="afspeelStop" class="icon-btn" aria-label="Terug naar live">⟲</button></div>
+    <small class="hint" id="afspeelTijd"></small>
     <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
     <p class="hint" style="margin:8px 0 0">Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>`;
   box.hidden = false;
@@ -857,8 +930,18 @@ function openHeli(h) {
     e.stopPropagation();
     heliSpoor.scope = b.dataset.scope; prefs.set("p2000.spoorScope", heliSpoor.scope);
     box.querySelectorAll("[data-scope]").forEach((x) => x.classList.toggle("on", x === b));
+    stopAfspelen();
     loadSpoor();
   }));
+  $("afspeelKnop").addEventListener("click", (e) => { e.stopPropagation(); speelAf(!afspelen.speelt); });
+  $("afspeelSlider").addEventListener("input", (e) => { const was = afspelen.f; speelAf(false); afspelen.f = Number(e.target.value); if (was == null) renderMap(); else afspeelTick(); });
+  $("afspeelSnelheid").addEventListener("click", (e) => {
+    e.stopPropagation();
+    afspelen.snelheid = { 30: 60, 60: 120, 120: 300 }[afspelen.snelheid] || 30;
+    e.target.textContent = `${afspelen.snelheid}×`;
+    if (afspelen.speelt) speelAf(true);
+  });
+  $("afspeelStop").addEventListener("click", (e) => { e.stopPropagation(); stopAfspelen(); renderMap(); });
   if (heliSpoor.id !== h.id) selectSpoor(h.id); else loadSpoor();
 }
 

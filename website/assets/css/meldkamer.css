@@ -157,3 +157,4 @@ body.mk {
 .heli-row span { display: grid; line-height: 1.2; }
 .heli-row small { color: var(--muted); font-size: .8em; }
 @media (max-width: 700px) { .helis { display: none; } }
+.heli-row .dest { color: #fff; font-weight: 600; }

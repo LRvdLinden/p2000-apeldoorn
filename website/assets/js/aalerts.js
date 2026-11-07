@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=36";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=37";
 
 const TZ = "Europe/Amsterdam";
 
@@ -212,7 +212,7 @@ export function heliVoor(m, helis) {
 
 // ------------------------------------------------------------------ route trail, flights and smooth movement
 
-/** Trail of one helicopter: scope "vlucht" (this flight), "kort" (30 min) or "vandaag". Points old → new. */
+/** Trail of one helicopter: scope "vlucht" (this flight), "kort" (30 min) or "lang" (2 hours). Points old → new. */
 export async function fetchSpoor(id, scope = "vlucht") {
   try {
     const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/spoor?scope=${scope}`, { signal: AbortSignal.timeout(10_000) });
@@ -221,7 +221,7 @@ export async function fetchSpoor(id, scope = "vlucht") {
 }
 export async function fetchVluchten(id) {
   try {
-    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/vluchten?days=2`, { signal: AbortSignal.timeout(10_000) });
+    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/vluchten`, { signal: AbortSignal.timeout(10_000) });
     return r.ok ? (await r.json()).vluchten || [] : [];
   } catch { return []; }
 }
@@ -238,13 +238,13 @@ export function geschat(h, now = Date.now()) {
 export const heliKleur = (h) => (h.soort === "trauma" ? "#9333EA" : "#15428B");
 
 /** MapKit JS line for a trail (thinned out to ~400 points), ending at the live position. */
-export function spoorOverlay(mk, punten, h, now = Date.now()) {
+export function spoorOverlay(mk, punten, h, now = Date.now(), { kleur, live = true, breedte = 4, opacity = 0.9 } = {}) {
   const step = Math.max(1, Math.floor(punten.length / 400));
   const pts = punten.filter((_, i) => i % step === 0 || i === punten.length - 1).map((p) => [p.lat, p.lon]);
-  if (h) { const g = geschat(h, now); pts.push([g.lat, g.lon]); }
+  if (h && live) { const g = geschat(h, now); pts.push([g.lat, g.lon]); }
   if (pts.length < 2) return null;
   return new mk.PolylineOverlay(pts.map(([la, lo]) => new mk.Coordinate(la, lo)), {
-    style: new mk.Style({ strokeColor: h ? heliKleur(h) : "#9333EA", lineWidth: 4, lineCap: "round", lineJoin: "round", strokeOpacity: 0.9 }),
+    style: new mk.Style({ strokeColor: kleur || (h ? heliKleur(h) : "#9333EA"), lineWidth: breedte, lineCap: "round", lineJoin: "round", strokeOpacity: opacity }),
   });
 }
 
@@ -297,4 +297,50 @@ export async function werkgebiedLijnen(mk, kleur = "#DC2626") {
   const { gebied = [] } = await werkgebiedCache;
   return gebied.map((ring) => new mk.PolylineOverlay([...ring, ring[0]].map(([lon, lat]) => new mk.Coordinate(lat, lon)),
     { style: new mk.Style({ strokeColor: kleur, strokeOpacity: 0.8, lineWidth: 2.5, lineDash: [10, 6] }) }));
+}
+
+// ------------------------------------------------------------------ hospitals, bases, prediction, playback
+
+let locatiesCache = null;
+/** Hospitals (emergency department, helipad or trauma centre) and helicopter bases. */
+export async function fetchLocaties() {
+  locatiesCache ||= fetch(`${API}/v1/locaties`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json())
+    .then((d) => [...(d.bases || []).map((b) => ({ ...b, basis: true })), ...(d.ziekenhuizen || [])]).catch(() => { locatiesCache = null; return []; });
+  return locatiesCache;
+}
+export const locatieIcon = (l) => asset(`assets/img/locatie_${l.basis ? "basis" : l.trauma ? "trauma" : "ziekenhuis"}.png`);
+export const locatieSoort = (l) => l.basis ? "Helikopterbasis / vliegveld" : l.trauma ? "Traumacentrum" : l.helipad ? "Ziekenhuis met helipad" : "Ziekenhuis met SEH";
+export function locatieAnnotation(mk, l, onSelect) {
+  const factory = () => {
+    const el = document.createElement("div");
+    el.innerHTML = `<img src="${locatieIcon(l)}" alt="" style="width:24px;height:24px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">`;
+    el.title = `${l.naam} – ${locatieSoort(l)}`;
+    return el;
+  };
+  const a = new mk.Annotation(new mk.Coordinate(l.lat, l.lon), factory, { calloutEnabled: false, title: l.naam });
+  if (onSelect) a.addEventListener("select", () => onSelect(l));
+  return a;
+}
+/** "Waarschijnlijk naar Isala · ± 12 min" */
+export const voorspellingTekst = (v) => v ? `Waarschijnlijk naar ${v.naam}${v.eta_min ? ` · ± ${v.eta_min} min` : ""}` : "";
+/** Thin dashed line from the helicopter to where it is probably heading. */
+export function voorspellingOverlay(mk, h, now = Date.now()) {
+  const v = h?.voorspelling;
+  if (!v) return null;
+  const g = geschat(h, now);
+  return new mk.PolylineOverlay([new mk.Coordinate(g.lat, g.lon), new mk.Coordinate(v.lat, v.lon)],
+    { style: new mk.Style({ strokeColor: heliKleur(h), strokeOpacity: 0.7, lineWidth: 2, lineDash: [3, 7], lineCap: "round" }) });
+}
+/** Playback: interpolated point at fraction f (0..1) of a trail, with the time and the trail up to it. */
+export function afspeelPunt(punten, f) {
+  if (!punten || punten.length < 2) return null;
+  const t0 = Date.parse(punten[0].t), t1 = Date.parse(punten[punten.length - 1].t);
+  const t = t0 + (t1 - t0) * f;
+  let i = punten.findIndex((p) => Date.parse(p.t) >= t);
+  if (i < 0) i = punten.length - 1;
+  const b = punten[i], a = punten[Math.max(0, i - 1)];
+  const ta = Date.parse(a.t), tb = Date.parse(b.t);
+  const k = tb > ta ? (t - ta) / (tb - ta) : 1;
+  const p = { lat: a.lat + (b.lat - a.lat) * k, lon: a.lon + (b.lon - a.lon) * k, hoogte_ft: a.hoogte_ft ?? b.hoogte_ft };
+  return { ...p, t: new Date(t), gespeeld: [...punten.slice(0, i), p] };
 }
