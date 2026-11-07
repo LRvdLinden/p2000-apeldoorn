@@ -30,6 +30,7 @@ import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
+import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
@@ -115,6 +116,7 @@ async function handle(req, env) {
     const item = await getMelding(env, m[1]);
     if (!item) return reply(404, { error: "Not found" });
     const w = await weatherFor(env, item);
+    if (item.lat != null) await noteWeer(env, Boolean(w)).catch(() => {});
     return w ? reply(200, w, { "cache-control": "public, max-age=3600" }) : reply(503, { error: "Weather unavailable" });
   }
 
@@ -128,6 +130,7 @@ async function handle(req, env) {
     const w = await getWarning(env, decodeURIComponent(m[1]));
     if (!w) return reply(404, { error: "Not found" });
     const data = await weatherFor(env, { guid: `w:${w.id}`, lat: w.lat ?? null, lon: w.lon ?? null, datum_tijd: w.start });
+    if (w.lat != null) await noteWeer(env, Boolean(data)).catch(() => {});
     return data ? reply(200, data, { "cache-control": "public, max-age=3600" }) : reply(503, { error: "Weather unavailable" });
   }
   m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})$/);
@@ -148,6 +151,9 @@ async function handle(req, env) {
   if (method === "GET" && m) return reply(200, await vluchten(env, m[1]), { "cache-control": "public, max-age=30" });
   if (method === "GET" && path === "/v1/helikopters") {
     return reply(200, metVoorspelling(await helikopters(env)), { "cache-control": "public, max-age=10" });
+  }
+  if (method === "GET" && path === "/v1/status") {
+    return reply(200, await statusOverzicht(env), { "cache-control": "public, max-age=30" });
   }
   if (method === "GET" && path === "/v1/locaties") {
     return reply(200, locatiesData(), { "cache-control": "public, max-age=86400" });
@@ -262,6 +268,15 @@ async function handleBeheer(req, env, url, path, method) {
     }
   }
 
+  // Status: the same overview with the raw errors, plus outages and maintenance.
+  if (method === "GET" && path === "/v1/beheer/status") return reply(200, await statusOverzicht(env, { beheer: true }));
+  if (method === "POST" && path === "/v1/beheer/status/incidenten") {
+    try { return reply(200, await maakIncident(env, await readJSON(req))); } catch (e) { return reply(e.status || 500, { error: e.message }); }
+  }
+  m = path.match(/^\/v1\/beheer\/status\/incidenten\/(\d+)$/);
+  if (m && method === "POST") { const r = await updateIncident(env, Number(m[1]), await readJSON(req)); return r ? reply(200, r) : reply(404, { error: "Not found" }); }
+  if (m && method === "DELETE") { await verwijderIncident(env, Number(m[1])); return reply(200, { ok: true }); }
+
   if (method === "POST" && path === "/v1/beheer/devices") {
     const body = await readJSON(req);
     await registerAdminDevice(env, body);
@@ -336,7 +351,7 @@ function broadcastPayload(b, lang) {
 async function drain(env, budget) {
   if (budget.left <= 0) return;
   const { results } = await env.DB.prepare(`
-    SELECT o.guid, o.token, d.environment, d.language FROM outbox o JOIN devices d ON d.token = o.token
+    SELECT o.guid, o.token, o.created_at, d.environment, d.language FROM outbox o JOIN devices d ON d.token = o.token
     ORDER BY o.created_at LIMIT ?`).bind(budget.left).all();
   if (!results.length) return;
   const items = new Map();
@@ -355,6 +370,7 @@ async function drain(env, budget) {
       }
     }
   }
+  const verstuurd = [];
   await Promise.all(results.map(async (row) => {
     const item = items.get(row.guid);
     const done = env.DB.prepare("DELETE FROM outbox WHERE guid = ? AND token = ?").bind(row.guid, row.token);
@@ -365,10 +381,13 @@ async function drain(env, budget) {
       : item.melding
       ? await sendPush(env, row, payloadFor(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
       : await sendPush(env, row, broadcastPayload(item.broadcast, row.language), item.broadcast.heli ? { collapseId: row.guid.slice(-64) } : {});
-    if (isDeadToken(r)) await deleteDevice(env, row.token);
+    const dead = isDeadToken(r);
+    verstuurd.push({ platform: row.token.startsWith("fcm:") ? "android" : "apple", ok: r.ok, dead, latency: item.melding && r.ok ? Date.now() - row.created_at : null });
+    if (dead) await deleteDevice(env, row.token);
     else if (!r.ok) console.warn("[push]", row.token.slice(0, 8), r.status, r.reason);
     await done.run();
   }));
+  try { await notePushes(env, verstuurd); } catch (e) { console.error("[status]", e.message || e); }
 }
 
 /** One-time import of the last ~2 days from the old website (set BACKFILL = "1"). */
@@ -412,6 +431,7 @@ async function warnings(env, budget) {
 /** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */
 async function heliRun(env) {
   const data = await helikopters(env);
+  await noteHeli(env, !data.fout);
   const { prev } = await recordPositions(env, data);
   if (!prev || data.fout) return;
   let devices = null, prefs = null;
@@ -463,13 +483,14 @@ async function cron(env, event) {
     if (i % 2 === 0) { try { if (budget.take()) await heliRun(env); } catch (e) { console.error("[spoor]", e.message || e); } }
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
-  try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
-  try { await checkBronnen(env, pushAdmins); } catch (e) { console.error("[bronnen-push]", e.message || e); }
+  // Status page and beheer pushes (replaces the old P2000 and source outage checks).
+  try { await checkWebsite(env, budget); await statusTick(env, pushAdmins); } catch (e) { console.error("[status]", e.message || e); }
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
+    try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }
   }
 }
 

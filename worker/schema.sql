@@ -134,3 +134,19 @@ CREATE TABLE IF NOT EXISTS heli_posities (
   hoogte_ft INTEGER, snelheid_kt INTEGER, koers INTEGER, grond INTEGER NOT NULL DEFAULT 0,
   PRIMARY KEY (heli, at)
 );
+
+-- A-Alerts status (a-alerts.nl/status): minutes per state per component per day (90 days),
+-- pushes per 10 minutes and platform (2 days), and the outages/maintenance posted from the beheer (90 days).
+CREATE TABLE IF NOT EXISTS status_dag (
+  onderdeel TEXT NOT NULL, dag TEXT NOT NULL, ok INTEGER NOT NULL DEFAULT 0, warn INTEGER NOT NULL DEFAULT 0,
+  down INTEGER NOT NULL DEFAULT 0, maint INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (onderdeel, dag)
+);
+CREATE TABLE IF NOT EXISTS status_push (
+  bucket INTEGER NOT NULL, platform TEXT NOT NULL, ok INTEGER NOT NULL DEFAULT 0, fail INTEGER NOT NULL DEFAULT 0,
+  lat_sum INTEGER NOT NULL DEFAULT 0, lat_n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (bucket, platform)
+);
+CREATE TABLE IF NOT EXISTS status_incidenten (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, titel TEXT NOT NULL, titel_en TEXT, soort TEXT NOT NULL, onderdelen TEXT NOT NULL,
+  start_at INTEGER NOT NULL, eind_at INTEGER, gepland_start INTEGER, gepland_eind INTEGER, updates TEXT NOT NULL,
+  created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
+);
