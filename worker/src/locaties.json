@@ -1,0 +1,266 @@
+{
+ "bron": "OpenStreetMap (ODbL)",
+ "ziekenhuizen": [
+  {
+   "id": "zh-w1380333739",
+   "naam": "Adrz",
+   "lat": 51.48474,
+   "lon": 3.91042,
+   "plaats": "Goes",
+   "trauma": false
+  },
+  {
+   "id": "zh-w25723907",
+   "naam": "Amsterdam UMC",
+   "lat": 52.33439,
+   "lon": 4.85909,
+   "plaats": "Amsterdam",
+   "trauma": true
+  },
+  {
+   "id": "zh-w11575103",
+   "naam": "Amsterdam UMC locatie AMC",
+   "lat": 52.2892,
+   "lon": 4.95927,
+   "plaats": "Amsterdam",
+   "trauma": true
+  },
+  {
+   "id": "zh-w990976406",
+   "naam": "Antonius Ziekenhuis",
+   "lat": 53.0349,
+   "lon": 5.64005,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-w398806410",
+   "naam": "Centraal Dierenlaboratorium",
+   "lat": 51.82346,
+   "lon": 5.86291,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-w432075134",
+   "naam": "De Honte",
+   "lat": 51.30824,
+   "lon": 3.86232,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-r18378890",
+   "naam": "ETZ Elisabeth Ziekenhuis",
+   "lat": 51.53889,
+   "lon": 5.10457,
+   "plaats": null,
+   "trauma": true
+  },
+  {
+   "id": "zh-n1599898060",
+   "naam": "Erasmus MC - Sophia",
+   "lat": 51.90992,
+   "lon": 4.47082,
+   "plaats": null,
+   "trauma": true
+  },
+  {
+   "id": "zh-w585340828",
+   "naam": "Frisius Medisch Centrum Leeuwarden",
+   "lat": 53.18866,
+   "lon": 5.80284,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-n2724262973",
+   "naam": "HMC Westeinde",
+   "lat": 52.07406,
+   "lon": 4.30011,
+   "plaats": "'s-Gravenhage",
+   "trauma": false
+  },
+  {
+   "id": "zh-n7197108613",
+   "naam": "HagaZiekenhuis Juliana Kinderziekenhuis",
+   "lat": 52.05581,
+   "lon": 4.26266,
+   "plaats": "'s-Gravenhage",
+   "trauma": false
+  },
+  {
+   "id": "zh-w52587917",
+   "naam": "Isala",
+   "lat": 52.51343,
+   "lon": 6.1223,
+   "plaats": "Zwolle",
+   "trauma": true
+  },
+  {
+   "id": "zh-w151233702",
+   "naam": "Leids Universitair Medisch Centrum",
+   "lat": 52.16639,
+   "lon": 4.47791,
+   "plaats": null,
+   "trauma": true
+  },
+  {
+   "id": "zh-w745654427",
+   "naam": "Maastricht UMC+",
+   "lat": 50.8344,
+   "lon": 5.71249,
+   "plaats": "Maastricht",
+   "trauma": true
+  },
+  {
+   "id": "zh-w445796853",
+   "naam": "Medisch Spectrum Twente",
+   "lat": 52.21542,
+   "lon": 6.89133,
+   "plaats": null,
+   "trauma": true
+  },
+  {
+   "id": "zh-w391072829",
+   "naam": "Mondriaan",
+   "lat": 50.87031,
+   "lon": 5.97735,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-w336433952",
+   "naam": "Nij Smellinghe",
+   "lat": 53.09839,
+   "lon": 6.11194,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-r5918380",
+   "naam": "Prinses Máxima Centrum Utrecht",
+   "lat": 52.08676,
+   "lon": 5.18136,
+   "plaats": null,
+   "trauma": false
+  },
+  {
+   "id": "zh-w52415420",
+   "naam": "Rode Kruis Ziekenhuis",
+   "lat": 52.47913,
+   "lon": 4.65149,
+   "plaats": "Beverwijk",
+   "trauma": false
+  },
+  {
+   "id": "zh-w682496173",
+   "naam": "Scheper Ziekenhuis",
+   "lat": 52.78418,
+   "lon": 6.91158,
+   "plaats": "Emmen",
+   "trauma": false
+  },
+  {
+   "id": "zh-n2801555310",
+   "naam": "Streekziekenhuis Koningin Beatrix",
+   "lat": 51.97971,
+   "lon": 6.70039,
+   "plaats": "Winterswijk",
+   "trauma": false
+  },
+  {
+   "id": "zh-w400026613",
+   "naam": "Universitair Medisch Centrum Groningen",
+   "lat": 53.22191,
+   "lon": 6.57627,
+   "plaats": "Groningen",
+   "trauma": true
+  },
+  {
+   "id": "zh-n3042024357",
+   "naam": "Wilhelmina Kinderziekenhuis (WKZ)",
+   "lat": 52.08676,
+   "lon": 5.18136,
+   "plaats": "Utrecht",
+   "trauma": false
+  },
+  {
+   "id": "zh-n656208042",
+   "naam": "ZGT Almelo",
+   "lat": 52.3359,
+   "lon": 6.63842,
+   "plaats": "Almelo",
+   "trauma": false
+  },
+  {
+   "id": "zh-w660693635",
+   "naam": "Ziekenhuis Rivierenland",
+   "lat": 51.88971,
+   "lon": 5.41378,
+   "plaats": "Tiel",
+   "trauma": false
+  }
+ ],
+ "bases": [
+  {
+   "id": "basis-ll1",
+   "naam": "Lifeliner 1 · Amsterdam UMC (VUmc)",
+   "lat": 52.3343,
+   "lon": 4.8597,
+   "heli": [
+    "lifeliner1"
+   ]
+  },
+  {
+   "id": "basis-ll2",
+   "naam": "Lifeliner 2 · Rotterdam The Hague Airport",
+   "lat": 51.9569,
+   "lon": 4.4372,
+   "heli": [
+    "lifeliner2"
+   ]
+  },
+  {
+   "id": "basis-ll3",
+   "naam": "Lifeliner 3 · Vliegbasis Volkel",
+   "lat": 51.6564,
+   "lon": 5.7086,
+   "heli": [
+    "lifeliner3"
+   ]
+  },
+  {
+   "id": "basis-ll4",
+   "naam": "Lifeliner 4 · Groningen Airport Eelde",
+   "lat": 53.1197,
+   "lon": 6.5794,
+   "heli": [
+    "lifeliner4"
+   ]
+  },
+  {
+   "id": "basis-politie",
+   "naam": "Politie Luchtvaart · Schiphol-Oost",
+   "lat": 52.3103,
+   "lon": 4.7836,
+   "heli": [
+    "zulu"
+   ]
+  },
+  {
+   "id": "basis-teuge",
+   "naam": "Vliegveld Teuge",
+   "lat": 52.2447,
+   "lon": 6.0467,
+   "heli": []
+  },
+  {
+   "id": "basis-deelen",
+   "naam": "Vliegbasis Deelen",
+   "lat": 52.0606,
+   "lon": 5.8731,
+   "heli": []
+  }
+ ]
+}
