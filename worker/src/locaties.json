@@ -362,16 +362,6 @@
    "trauma": true
   },
   {
-   "id": "zh-w1064956644",
-   "naam": "Isala Meppel",
-   "lat": 52.69031,
-   "lon": 6.2131,
-   "plaats": "Meppel",
-   "helipad": false,
-   "seh": false,
-   "trauma": false
-  },
-  {
    "id": "zh-w751012327",
    "naam": "Jeroen Bosch Ziekenhuis",
    "lat": 51.68513,
