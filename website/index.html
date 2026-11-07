@@ -32,11 +32,11 @@
 <link rel="icon" href="assets/img/aalerts-icon-32.png">
 <link rel="apple-touch-icon" href="assets/img/aalerts-icon-180.png">
 <link rel="preload" href="assets/fonts/overpass-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="assets/css/base.css?v=39">
-<link rel="stylesheet" href="assets/css/landing.css?v=39">
-<script src="config.js?v=39"></script>
-<script src="assets/js/consent.js?v=39" defer></script>
-<script type="module" src="assets/js/landing.js?v=39"></script>
+<link rel="stylesheet" href="assets/css/base.css?v=40">
+<link rel="stylesheet" href="assets/css/landing.css?v=40">
+<script src="config.js?v=40"></script>
+<script src="assets/js/consent.js?v=40" defer></script>
+<script type="module" src="assets/js/landing.js?v=40"></script>
 </head>
 <body class="landing">
 
@@ -159,26 +159,26 @@
 
   <!-- DISCIPLINES -->
   <section class="disciplines" aria-label="Hulpdiensten">
-    <a class="dis" href="pager/?dienst=brandweer" data-reveal style="--img:url(../img/banner_brand.webp?v=39);--c:var(--brandweer)">
+    <a class="dis" href="pager/?dienst=brandweer" data-reveal style="--img:url(../img/banner_brand.webp?v=40);--c:var(--brandweer)">
       <b>Brandweer</b><span><em id="dBrandweer">–</em> vandaag</span>
     </a>
-    <a class="dis" href="pager/?dienst=ambulance" data-reveal style="--d:.08s;--img:url(../img/banner_ambu.webp?v=39);--c:var(--ambulance)">
+    <a class="dis" href="pager/?dienst=ambulance" data-reveal style="--d:.08s;--img:url(../img/banner_ambu.webp?v=40);--c:var(--ambulance)">
       <b>Ambulance</b><span><em id="dAmbulance">–</em> vandaag</span>
     </a>
-    <a class="dis" href="pager/?dienst=politie" data-reveal style="--d:.16s;--img:url(../img/banner_pol.webp?v=39);--c:var(--politie)">
+    <a class="dis" href="pager/?dienst=politie" data-reveal style="--d:.16s;--img:url(../img/banner_pol.webp?v=40);--c:var(--politie)">
       <b>Politie</b><span><em id="dPolitie">–</em> vandaag</span>
     </a>
-    <a class="dis" href="pager/?dienst=traumaheli" data-reveal style="--d:.24s;--img:url(../img/banner_life.webp?v=39);--c:var(--traumaheli)">
+    <a class="dis" href="pager/?dienst=traumaheli" data-reveal style="--d:.24s;--img:url(../img/banner_life.webp?v=40);--c:var(--traumaheli)">
       <b>Lifeliner</b><span><em id="dTraumaheli">–</em> vandaag</span>
     </a>
   </section>
 
   <!-- WARNINGS AND HELICOPTERS (A-Alerts) -->
   <section class="disciplines extra" aria-label="Waarschuwingen en helikopters">
-    <a class="dis" href="pager/?bron=nlalert" data-reveal style="--img:url(../img/banner_nlalert.webp?v=39)">
+    <a class="dis" href="pager/?bron=nlalert" data-reveal style="--img:url(../img/banner_nlalert.webp?v=40)">
       <b>NL-Alert</b><span><em id="wNlalert">–</em> vandaag</span>
     </a>
-    <a class="dis" href="pager/?bron=burgernet" data-reveal style="--d:.06s;--img:url(../img/banner_burgernet.webp?v=39)">
+    <a class="dis" href="pager/?bron=burgernet" data-reveal style="--d:.06s;--img:url(../img/banner_burgernet.webp?v=40)">
       <b>Burgernet</b><span><em id="wBurgernet">–</em> vandaag</span>
     </a>
     <a class="dis" href="pager/?bron=knmi" data-reveal style="--d:.12s;--img:url(../img/banner_knmi.webp)">
@@ -289,6 +289,41 @@
       <img class="drop" style="--x:63%;--y:63%;--d:1s" src="assets/img/marker_politie.png" alt="">
       <img class="drop out" style="--x:88%;--y:18%;--d:1.4s" src="assets/img/marker_ambulance.png" alt="">
       <img class="drop out" style="--x:12%;--y:86%;--d:1.8s" src="assets/img/marker_traumaheli.png" alt="">
+      <!-- Helicopters: a Zulu on the ground, the Lifeliner flying in with its route, the other police helicopter circling. -->
+      <svg class="heli-anim" viewBox="0 0 100 100" preserveAspectRatio="none">
+        <!-- Zulu on the ground at Teuge (offline) -->
+        <g transform="translate(78 30)" class="geland">
+          <image href="assets/img/heli_politie.png" x="-9" y="-3.2" width="18" height="6.3"/>
+          <rect x="-7.5" y="3.8" width="15" height="3.6" rx="1.8" fill="rgba(20,20,26,.85)"/>
+          <text x="0" y="6.35" text-anchor="middle" font-size="2.2" fill="#c8c8d0" font-family="Poppins, sans-serif">op de grond</text>
+        </g>
+        <!-- Lifeliner: route drawn while it flies in, then it hovers above the scene -->
+        <path id="llRoute" d="M-10 106 C 4 88, 14 76, 20 66 S 28 52, 33 47" fill="none" stroke="#a855f7" stroke-width=".7" stroke-linecap="round" pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" opacity=".9">
+          <animate attributeName="stroke-dashoffset" values="100;0;0;0" keyTimes="0;.45;.85;1" dur="14s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".9;.9;.9;0" keyTimes="0;.45;.85;1" dur="14s" repeatCount="indefinite"/>
+        </path>
+        <g>
+          <animateMotion dur="14s" repeatCount="indefinite" keyPoints="0;1;1;1" keyTimes="0;.45;.85;1" calcMode="spline" keySplines=".4 0 .3 1;0 0 1 1;0 0 1 1">
+            <mpath href="#llRoute"/>
+          </animateMotion>
+          <g>
+            <animateTransform attributeName="transform" type="rotate" values="-10;-10;0;0" keyTimes="0;.4;.5;1" dur="14s" repeatCount="indefinite"/>
+            <image href="assets/img/heli_lifeliner.png" x="-10" y="-3.6" width="20" height="7.1"/>
+          </g>
+          <animate attributeName="opacity" values="0;1;1;1;0" keyTimes="0;.04;.85;.95;1" dur="14s" repeatCount="indefinite"/>
+        </g>
+        <!-- Police helicopter circling with its circular trail -->
+        <circle cx="65" cy="62" r="13" fill="none" stroke="#3b82f6" stroke-width=".6" stroke-dasharray="1.6 1.6" opacity=".75">
+          <animate attributeName="stroke-dashoffset" values="0;-38" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <g>
+          <animateMotion dur="8s" repeatCount="indefinite" path="M52 62 a13 13 0 1 1 26 0 a13 13 0 1 1 -26 0"/>
+          <g>
+            <animateTransform attributeName="transform" type="scale" values="1 1;-1 1" keyTimes="0;.5" calcMode="discrete" dur="8s" repeatCount="indefinite"/>
+            <image href="assets/img/heli_politie_aw139.png" x="-9" y="-3.2" width="18" height="6.3"/>
+          </g>
+        </g>
+      </svg>
     </div>
     <div class="buurt-copy" data-reveal>
       <p class="kicker">Mijn buurt</p>

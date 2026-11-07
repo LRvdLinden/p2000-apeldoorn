@@ -1,5 +1,5 @@
-import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=39";
-import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=39";
+import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=40";
+import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=40";
 
 reveal();
 trackVisit();
@@ -53,8 +53,19 @@ setInterval(() => {
 
 // Radius section plays its animation once it is visible.
 const buurt = document.getElementById("buurt");
+// Helicopters (SVG animation): start when visible, never with "reduce motion".
+const heliAnim = buurt.querySelector(".heli-anim");
+const stilVoorkeur = matchMedia("(prefers-reduced-motion: reduce)").matches;
+try { heliAnim?.pauseAnimations(); } catch {}
 new IntersectionObserver((entries, io) => {
-  if (entries[0].isIntersecting) { buurt.classList.add("is-play"); io.disconnect(); }
+  if (entries[0].isIntersecting) {
+    buurt.classList.add("is-play");
+    try {
+      if (stilVoorkeur) heliAnim?.setCurrentTime(8); // still image: Lifeliner above the scene
+      else { heliAnim?.setCurrentTime(0); heliAnim?.unpauseAnimations(); }
+    } catch {}
+    io.disconnect();
+  }
 }, { threshold: 0.35 }).observe(buurt);
 
 // ------------------------------------------------------------------ live data
