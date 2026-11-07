@@ -936,6 +936,23 @@
         }
       }
     },
+    "Alle systemen werken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All systems operational"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle systemen werken"
+          }
+        }
+      }
+    },
     "Alle waarschuwingen": {
       "extractionState": "manual",
       "localizations": {
@@ -1888,6 +1905,23 @@
         }
       }
     },
+    "De status kan nu niet worden opgehaald.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The status can't be loaded right now."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De status kan nu niet worden opgehaald."
+          }
+        }
+      }
+    },
     "De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw.": {
       "extractionState": "manual",
       "localizations": {
@@ -2326,6 +2360,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "English"
+          }
+        }
+      }
+    },
+    "Er is een storing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is an outage"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is een storing"
           }
         }
       }
@@ -2921,6 +2972,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Genoemd in de oproep"
+          }
+        }
+      }
+    },
+    "Gepland onderhoud": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scheduled maintenance"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gepland onderhoud"
           }
         }
       }
@@ -3928,6 +3996,23 @@
         }
       }
     },
+    "Laatst gecontroleerd %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last checked %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatst gecontroleerd %@"
+          }
+        }
+      }
+    },
     "Laatste 24 uur": {
       "extractionState": "manual",
       "localizations": {
@@ -4693,6 +4778,23 @@
         }
       }
     },
+    "Niet alles werkt normaal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not everything is working normally"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet alles werkt normaal"
+          }
+        }
+      }
+    },
     "Niet meer bewaren": {
       "extractionState": "manual",
       "localizations": {
@@ -4978,6 +5080,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Onbekend"
+          }
+        }
+      }
+    },
+    "Onderhoud": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenance"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderhoud"
+          }
+        }
+      }
+    },
+    "Onderhoud bezig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maintenance in progress"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderhoud bezig"
           }
         }
       }
@@ -6240,6 +6376,23 @@
         }
       }
     },
+    "Status niet beschikbaar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status unavailable"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Status niet beschikbaar"
+          }
+        }
+      }
+    },
     "Stille modus": {
       "extractionState": "manual",
       "localizations": {
@@ -6253,6 +6406,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stille modus"
+          }
+        }
+      }
+    },
+    "Storing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Outage"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Storing"
           }
         }
       }
@@ -7073,6 +7243,23 @@
         }
       }
     },
+    "Verstoord": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Degraded"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verstoord"
+          }
+        }
+      }
+    },
     "Verwacht": {
       "extractionState": "manual",
       "localizations": {
@@ -7273,6 +7460,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Volledige melding"
+          }
+        }
+      }
+    },
+    "Volledige status op a-alerts.nl/status": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full status at a-alerts.nl/status"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Volledige status op a-alerts.nl/status"
           }
         }
       }
@@ -7528,6 +7732,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Welkom bij A-Alerts"
+          }
+        }
+      }
+    },
+    "Werkt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Working"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werkt"
           }
         }
       }

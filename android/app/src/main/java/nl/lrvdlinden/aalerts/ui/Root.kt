@@ -93,6 +93,7 @@ fun AAlertsRoot(activity: MainActivity) {
                     composable("profiel/{id}") { ProfielScreen(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("content/{name}") { ContentScreen(it.arguments?.getString("name") ?: "privacy", nav) }
                     composable("changelog") { ChangelogScreen(nav) }
+                    composable("status") { StatusScreen(nav) }
                     composable("buurt") { RadiusScreen(nav) }
                 }
                 ReviewPrompt()

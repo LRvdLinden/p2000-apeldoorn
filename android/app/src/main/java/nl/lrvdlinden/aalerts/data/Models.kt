@@ -365,3 +365,43 @@ data class Kazerne(
 /** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
 @Serializable
 data class ApkInfo(val version: String = "", val build: Int = 0, val url: String = "", val notes: String? = null, val size: Long? = null)
+
+
+// ------------------------------------------------------------------ status (a-alerts.nl/status)
+
+@Serializable
+data class AppStatus(val bijgewerkt: String, val staat: String, val groepen: List<StatusGroep> = emptyList(), val incidenten: StatusIncidenten = StatusIncidenten())
+
+@Serializable
+data class StatusGroep(val id: String, val naam: String, @SerialName("naam_en") val naamEn: String? = null, val onderdelen: List<StatusOnderdeel> = emptyList()) {
+    val titel get() = if (isDutch) naam else naamEn ?: naam
+}
+
+@Serializable
+data class StatusOnderdeel(
+    val id: String, val naam: String, @SerialName("naam_en") val naamEn: String? = null, val staat: String,
+    val detail: String? = null, @SerialName("detail_en") val detailEn: String? = null, val uptime: Double? = null,
+) {
+    val titel get() = if (isDutch) naam else naamEn ?: naam
+    val uitleg get() = if (isDutch) detail else detailEn ?: detail
+}
+
+@Serializable
+data class StatusIncidenten(val actief: List<StatusIncident> = emptyList(), val gepland: List<StatusIncident> = emptyList())
+
+@Serializable
+data class StatusIncident(val id: Int, val titel: String, @SerialName("titel_en") val titelEn: String? = null, val soort: String, val updates: List<StatusUpdate> = emptyList()) {
+    val kop get() = if (isDutch) titel else titelEn ?: titel
+}
+
+@Serializable
+data class StatusUpdate(val tekst: String, @SerialName("tekst_en") val tekstEn: String? = null) {
+    val regel get() = if (isDutch) tekst else tekstEn ?: tekst
+}
+
+object StatusStijl {
+    fun kleur(s: String): Long = when (s) { "ok" -> 0xFF16A34A; "warn" -> 0xFFF59E0B; "down" -> 0xFFDC2626; "maint" -> 0xFF3B82F6; else -> 0xFF9CA3AF }
+    fun achtergrond(s: String): Long = when (s) { "ok" -> 0xFF15803D; "warn" -> 0xFFB45309; "down" -> 0xFFB91C1C; "maint" -> 0xFF1D4ED8; else -> 0xFF6B7280 }
+    fun label(s: String) = when (s) { "ok" -> tr("Werkt", "Working"); "warn" -> tr("Verstoord", "Degraded"); "down" -> tr("Storing", "Outage"); "maint" -> tr("Onderhoud", "Maintenance"); else -> tr("Onbekend", "Unknown") }
+    fun kop(s: String) = when (s) { "ok" -> tr("Alle systemen werken", "All systems operational"); "maint" -> tr("Onderhoud bezig", "Maintenance in progress"); "down" -> tr("Er is een storing", "There is an outage"); else -> tr("Niet alles werkt normaal", "Not everything is working normally") }
+}
