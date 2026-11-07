@@ -1,0 +1,17 @@
+name: Ziekenhuizen en bases (eenmalig)
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/geodata/fetch_locaties.py
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add worker/src/locaties.json
+          git commit -m "Geodata: ziekenhuizen met helipad en helikopterbases (OSM)" || echo "geen wijzigingen"
+          git push
