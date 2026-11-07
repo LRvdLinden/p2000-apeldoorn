@@ -8,7 +8,7 @@ Alles voor App Store Connect, voor iPhone, iPad, Mac, Apple Watch en Apple TV.
 - **App Review-notities:** Engels (`metadata/review_information/notes.txt`), Nederlandse kopie ter referentie (`notes-nl.txt`, niet uploaden).
 
 ## Herkomst van de schermen
-Echte schermen uit de app, gemaakt in de simulator met live data (workflow `.github/workflows/screenshots.yml`, branch `screenshots`). Mac: venster van de echte Mac-app (runner-scherm 1024×768, daarom één Mac-screenshot). Apple Watch en Apple TV: alleen het scherm, zonder kader (Apple-richtlijn).
+Echte schermen uit de app (build 39), gemaakt in de simulator met live data (workflow `.github/workflows/screenshots.yml`, branch `screenshots`). De pager-screenshot van de iPhone komt uit de vorige ronde (6 nov), omdat de app bij de nieuwe opname nog aan het laden was. Een screenshot van een helikopter met route ontbreekt: op het moment van de opname vloog er geen heli; de workflow neemt hem vanzelf mee (`-AAlertsHeli`) als je hem draait terwijl er een Lifeliner of Zulu vliegt. Mac: venster van de echte Mac-app (runner-scherm 1024×768, daarom één Mac-screenshot). Apple Watch en Apple TV: alleen het scherm, zonder kader (Apple-richtlijn).
 
 ## Inhoud
 | Map | Maten | Aantal per taal |

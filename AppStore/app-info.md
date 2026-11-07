@@ -12,7 +12,7 @@
 | Version | 2.0.0 |
 | Primary Category | News – live meldingen en waarschuwingen in je eigen gemeente |
 | Secondary Category | Navigation – kaart met meldingen, routes en live helikopters (zoals bij 1.0.0) |
-| Content Rights | Ja, de app toont inhoud van derden: openbare P2000-meldingen, NL-Alert, Burgernet (burgernet.nl), KNMI-waarschuwingen, adsb.lol (ODbL), OpenStreetMap (ODbL) en WeatherKit. Allemaal openbare bronnen; bronvermelding in de app (Instellingen, onderaan) en op de website. |
+| Content Rights | Ja, de app toont inhoud van derden: openbare P2000-meldingen, NL-Alert, Burgernet (burgernet.nl), KNMI-waarschuwingen, adsb.lol (ODbL), OpenStreetMap (ODbL: kazernes, ziekenhuizen en vliegbases) en WeatherKit. Allemaal openbare bronnen; bronvermelding in de app (Instellingen, onderaan) en op de website. |
 | License Agreement | Apple Standard EULA |
 | Copyright | © 2026 PixelForges |
 
