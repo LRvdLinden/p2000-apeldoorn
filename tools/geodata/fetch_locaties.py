@@ -47,22 +47,30 @@ els = json.load(urllib.request.urlopen(req, timeout=240))["elements"]
 hospitals = [e for e in els if e.get("tags", {}).get("amenity") == "hospital" and pos(e) and e["tags"].get("name")]
 pads = [pos(e) for e in els if e.get("tags", {}).get("aeroway") == "helipad" and pos(e)]
 
+SKIP = ["dier", "revalid", "psychiatr", "ggz", "hospice", "verpleeg", "kliniek voor", "tandarts", "polikliniek", "buitenpoli", "zorgcentrum"]
 out, seen = [], set()
 for h in hospitals:
     p = pos(h)
-    name = h["tags"]["name"].strip()
-    pad = min(pads, key=lambda q: km(p, q), default=None)
-    if not pad or km(p, pad) > 0.6:
-        continue
-    key = name.lower()
-    if key in seen or any(km(p, (o["lat"], o["lon"])) < 0.4 for o in out):
-        continue
-    seen.add(key)
+    tags = h["tags"]
+    name = tags["name"].strip()
     low = name.lower()
-    out.append({"id": f"zh-{h['type'][0]}{h['id']}", "naam": name, "lat": round(pad[0], 5), "lon": round(pad[1], 5),
-                "plaats": h["tags"].get("addr:city"), "trauma": any(t in low for t in TRAUMA)})
+    if any(x in low for x in SKIP):
+        continue
+    pad = min(pads, key=lambda q: km(p, q), default=None)
+    has_pad = bool(pad) and km(p, pad) <= 0.8
+    seh = tags.get("emergency") == "yes"
+    trauma = any(t in low for t in TRAUMA)
+    # Hospitals with an emergency department (SEH), a helipad or a trauma centre.
+    if not (seh or has_pad or trauma):
+        continue
+    if low in seen or any(km(p, (o["lat"], o["lon"])) < 0.8 for o in out):
+        continue
+    seen.add(low)
+    lat, lon = pad if has_pad else p
+    out.append({"id": f"zh-{h['type'][0]}{h['id']}", "naam": name, "lat": round(lat, 5), "lon": round(lon, 5),
+                "plaats": tags.get("addr:city"), "helipad": has_pad, "seh": seh, "trauma": trauma})
 
 out.sort(key=lambda o: o["naam"])
 data = {"bron": "OpenStreetMap (ODbL)", "ziekenhuizen": out, "bases": BASES}
 json.dump(data, open("worker/src/locaties.json", "w"), ensure_ascii=False, indent=1)
-print(len(out), "ziekenhuizen met helipad;", sum(o["trauma"] for o in out), "traumacentra")
+print(len(out), "ziekenhuizen;", sum(o["helipad"] for o in out), "met helipad;", sum(o["trauma"] for o in out), "traumacentra")
