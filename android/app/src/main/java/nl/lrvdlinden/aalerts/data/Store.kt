@@ -35,6 +35,10 @@ object Store {
     suspend fun refreshAlleWaarschuwingen() { runCatching { alleWaarschuwingen = Api.waarschuwingen(14) } }
     suspend fun refreshHelikopters() { helikopters = Api.helikopters() }
 
+    /** Hospitals and bases: loaded once. */
+    var locaties by mutableStateOf<List<Locatie>>(emptyList()); private set
+    suspend fun loadLocaties() { if (locaties.isEmpty()) locaties = Api.locaties() }
+
     fun melding(guid: String) = meldingen.firstOrNull { it.guid == guid }
     fun waarschuwing(id: String) = (waarschuwingen + alleWaarschuwingen).firstOrNull { it.id == id }
 

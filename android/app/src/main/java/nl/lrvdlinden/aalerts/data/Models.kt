@@ -211,6 +211,7 @@ data class Helikopter(
     @SerialName("op_grond") val opGrond: Boolean = false,
     @SerialName("snelheid_kt") val snelheidKt: Double? = null,
     val gezien: String? = null,
+    val voorspelling: HeliVoorspelling? = null,
 ) {
     val isTrauma get() = soort == "trauma"
     val afbeelding: Int get() = when {
@@ -282,10 +283,38 @@ data class HeliVlucht(
 @Serializable
 data class HeliVluchten(val vluchten: List<HeliVlucht> = emptyList())
 
+/** Where a helicopter is probably heading (worked out by the server from its course). */
+@Serializable
+data class HeliVoorspelling(
+    val id: String, val naam: String, val soort: String = "ziekenhuis", val lat: Double, val lon: Double,
+    @SerialName("afstand_km") val afstandKm: Double = 0.0, @SerialName("eta_min") val etaMin: Int? = null, val zekerheid: Double = 0.0,
+) {
+    val tekst: String get() = tr("Waarschijnlijk naar $naam", "Probably heading to $naam") + (etaMin?.let { " · ± $it min" } ?: "")
+}
+
+/** A hospital (emergency department, helipad or trauma centre) or a helicopter base. */
+@Serializable
+data class Locatie(
+    val id: String, val naam: String, val lat: Double, val lon: Double, val plaats: String? = null,
+    val trauma: Boolean = false, val helipad: Boolean = false,
+) {
+    val isBasis get() = id.startsWith("basis-")
+    val icon: Int get() = when { isBasis -> R.drawable.locatie_basis; trauma -> R.drawable.locatie_trauma; else -> R.drawable.locatie_ziekenhuis }
+    val soortLabel: String get() = when {
+        isBasis -> tr("Helikopterbasis / vliegveld", "Helicopter base / airfield")
+        trauma -> tr("Traumacentrum", "Trauma centre")
+        helipad -> tr("Ziekenhuis met helipad", "Hospital with helipad")
+        else -> tr("Ziekenhuis met SEH", "Hospital with emergency department")
+    }
+}
+
+@Serializable
+data class Locaties(val ziekenhuizen: List<Locatie> = emptyList(), val bases: List<Locatie> = emptyList())
+
 /** Which part of the route to draw: this flight, the last 30 minutes or today. */
 enum class SpoorBereik(val key: String) {
-    VLUCHT("vlucht"), KORT("kort"), VANDAAG("vandaag");
-    val label get() = when (this) { VLUCHT -> tr("Deze vlucht", "This flight"); KORT -> "30 min"; VANDAAG -> tr("Vandaag", "Today") }
+    VLUCHT("vlucht"), KORT("kort"), LANG("lang");
+    val label get() = when (this) { VLUCHT -> tr("Deze vlucht", "This flight"); KORT -> "30 min"; LANG -> tr("2 uur", "2 hours") }
 }
 
 /** Route points thinned to at most [max] (first and last always kept), as (lat, lon). */

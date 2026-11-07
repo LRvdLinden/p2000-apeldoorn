@@ -211,7 +211,11 @@ final class AppSettings {
         if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
-        if let v = set(.kaartLagen) { kaartLagen = v }
+        if let v = set(.kaartLagen) {
+            // New layer "ziekenhuizen" (build 37): on once for everyone who already chose layers.
+            kaartLagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
+            UserDefaults.standard.set(true, forKey: "laag.ziekenhuizen.v1")
+        }
         if let s = source(Key.profielen.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([MeldingProfiel].self, from: data), !list.isEmpty {
             profielen = Array(list.prefix(MeldingProfiel.maximum))

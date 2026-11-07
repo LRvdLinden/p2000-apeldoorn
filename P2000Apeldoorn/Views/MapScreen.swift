@@ -35,6 +35,8 @@ struct MapScreen: View {
     @State private var spoor = HeliSpoorStore()
     /// Clock for the smooth (dead-reckoned) helicopter positions.
     @State private var nu = Date.now
+    @State private var locaties = LocatieStore.shared
+    @State private var selectedLocatie: Locatie?
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
@@ -91,6 +93,7 @@ struct MapScreen: View {
                 werkgebiedLaag
                 gebiedenLaag(ws)
                 kazernesLaag
+                ziekenhuizenLaag
                 meldingenLaag(groups)
                 waarschuwingMarkers(ws)
                 radiusLaag
@@ -145,6 +148,7 @@ struct MapScreen: View {
                 }
             }
             .onAppear { if settings.laag(.helikopters) { helis.start() }; volgGevraagd() }
+            .task { await locaties.load() }
             .onChange(of: Router.shared.volgHeli) { _, _ in volgGevraagd() }
             // Following a helicopter: the camera moves along with every new position, until the user moves the map.
             .onChange(of: heli?.lat) { _, _ in
@@ -201,7 +205,7 @@ struct MapScreen: View {
             ForEach(Kazernes.all) { k in
                 Annotation(k.naam, coordinate: k.coordinate, anchor: .center) {
                     KazerneIcon(soort: k.soort, size: selectedKazerne?.id == k.id ? 30 : 24)
-                        .onTapGesture { withAnimation { selectedKazerne = k; selected = nil; selectedHeli = nil } }
+                        .onTapGesture { withAnimation { selectedKazerne = k; selected = nil; selectedHeli = nil; selectedLocatie = nil } }
                         .accessibilityAddTraits(.isButton)
                         .accessibilityLabel("\(k.soortLabel) \(k.naam)")
                 }
@@ -249,19 +253,52 @@ struct MapScreen: View {
         }
     }
 
+    @MapContentBuilder private var ziekenhuizenLaag: some MapContent {
+        if settings.laag(.ziekenhuizen) {
+            ForEach(locaties.items) { l in
+                Annotation(l.naam, coordinate: l.coordinate, anchor: .center) {
+                    LocatieIcon(locatie: l, size: selectedLocatie?.id == l.id ? 30 : 22)
+                        .onTapGesture { withAnimation { selectedLocatie = l; selected = nil; selectedHeli = nil; selectedKazerne = nil } }
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityLabel("\(l.soortLabel) \(l.naam)")
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+    }
+
     @MapContentBuilder private var helikoptersLaag: some MapContent {
         if settings.laag(.helikopters) {
             if let h = heli, spoor.heliID == h.id {
-                let lijn = spoor.coordinates(live: h.geschat(op: nu))
+                let lijn = spoor.coordinates(live: spoor.afspeel == nil ? h.geschat(op: nu) : nil)
                 if lijn.count >= 2 {
                     MapPolyline(coordinates: lijn)
-                        .stroke(h.color, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                        .stroke(h.color.opacity(spoor.afspeel == nil ? 1 : 0.35), style: StrokeStyle(lineWidth: 3.5, lineCap: .round, lineJoin: .round))
+                }
+                // Playback: the flown part bold, with the helicopter at the playback position.
+                if spoor.afspeel != nil, let p = spoor.afspeelPunt {
+                    let gespeeld = spoor.afgespeeldeLijn
+                    if gespeeld.count >= 2 {
+                        MapPolyline(coordinates: gespeeld).stroke(h.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
+                    }
+                    Annotation(L("Terugspelen"), coordinate: p.coordinate, anchor: .center) {
+                        Image(h.afbeelding).resizable().scaledToFit().frame(width: 54, height: 20)
+                            .padding(4).background(.thinMaterial, in: Capsule())
+                    }
+                    .annotationTitles(.hidden)
+                }
+            }
+            // Where each helicopter is probably heading: a thin dashed line to the hospital or base.
+            ForEach(helis.items.filter { $0.voorspelling != nil && (selectedHeli == nil || selectedHeli == $0.id) }) { h in
+                if let v = h.voorspelling {
+                    MapPolyline(coordinates: [h.geschat(op: nu), v.coordinate])
+                        .stroke(h.color.opacity(0.7), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [3, 6]))
                 }
             }
             ForEach(helis.items) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                     HeliMarker(heli: h, size: 24, selected: selectedHeli == h.id)
-                        .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil } }
+                        .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
                         .accessibilityAddTraits(.isButton)
                 }
                 .annotationTitles(.hidden)
@@ -277,6 +314,8 @@ struct MapScreen: View {
                 HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor) { selectedHeli = nil }
             } else if let k = selectedKazerne {
                 KazerneKaart(kazerne: k) { selectedKazerne = nil }
+            } else if let l = selectedLocatie {
+                LocatieKaart(locatie: l, helis: helis.items.filter { $0.voorspelling?.id == l.id }) { selectedLocatie = nil }
             }
         }
         .padding(.horizontal)
@@ -405,6 +444,36 @@ struct KaartLagenView: View {
 }
 
 /// Card for a tapped station.
+/// Card for a hospital or base: what it is, and which helicopter is probably heading there.
+struct LocatieKaart: View {
+    let locatie: Locatie
+    var helis: [Helikopter] = []
+    var onClose: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack(spacing: 12) {
+                LocatieIcon(locatie: locatie, size: 40)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(locatie.naam).font(AppFont.heading(20))
+                    Text([locatie.soortLabel, locatie.plaats].compactMap { $0 }.joined(separator: " · "))
+                        .font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
+                }
+                Spacer()
+                Button(action: onClose) { Image(systemName: "xmark.circle.fill").font(.title3).foregroundStyle(.secondary) }
+                    .buttonStyle(.plain).accessibilityLabel(L("Sluit"))
+            }
+            ForEach(helis) { h in
+                Label(Lf("%@ is waarschijnlijk onderweg hierheen", h.naam) + (h.voorspelling?.etaMin.map { " · ± \($0) min" } ?? ""), systemImage: "helicopter")
+                    .font(AppFont.body(13, .medium, relativeTo: .footnote))
+            }
+        }
+        .padding(14)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+    }
+}
+
 struct KazerneKaart: View {
     let kazerne: Kazerne
     var onClose: () -> Void

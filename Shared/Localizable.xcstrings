@@ -52,6 +52,23 @@
         }
       }
     },
+    "%@ is waarschijnlijk onderweg hierheen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is probably on its way here"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is waarschijnlijk onderweg hierheen"
+          }
+        }
+      }
+    },
     "%@ km": {
       "extractionState": "manual",
       "localizations": {
@@ -460,6 +477,23 @@
         }
       }
     },
+    "2 uur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "2 uur"
+          }
+        }
+      }
+    },
     "24 uur": {
       "extractionState": "manual",
       "localizations": {
@@ -711,6 +745,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afgelopen om %@"
+          }
+        }
+      }
+    },
+    "Afspeelpositie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback position"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afspeelpositie"
           }
         }
       }
@@ -3010,6 +3061,23 @@
         }
       }
     },
+    "Helikopterbasis / vliegveld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helicopter base / airfield"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helikopterbasis / vliegveld"
+          }
+        }
+      }
+    },
     "Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten komen uit OpenStreetMap.": {
       "extractionState": "manual",
       "localizations": {
@@ -5288,6 +5356,23 @@
         }
       }
     },
+    "Pauze": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pauze"
+          }
+        }
+      }
+    },
     "Per discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -5849,6 +5934,23 @@
         }
       }
     },
+    "Routespoor": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route trail"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Routespoor"
+          }
+        }
+      }
+    },
     "SPOED": {
       "extractionState": "manual",
       "localizations": {
@@ -6257,6 +6359,57 @@
         }
       }
     },
+    "Terug naar live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Back to live"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terug naar live"
+          }
+        }
+      }
+    },
+    "Terugspelen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terugspelen"
+          }
+        }
+      }
+    },
+    "Terugspelen: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Playback: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terugspelen: %@"
+          }
+        }
+      }
+    },
     "Tijden": {
       "extractionState": "manual",
       "localizations": {
@@ -6389,6 +6542,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tot"
+          }
+        }
+      }
+    },
+    "Traumacentrum": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trauma centre"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traumacentrum"
           }
         }
       }
@@ -6954,6 +7124,23 @@
         }
       }
     },
+    "Vlucht terugspelen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Play back flight"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vlucht terugspelen"
+          }
+        }
+      }
+    },
     "Vluchten": {
       "extractionState": "manual",
       "localizations": {
@@ -7107,6 +7294,23 @@
         }
       }
     },
+    "Voorspelling op basis van de koers.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prediction based on the course."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorspelling op basis van de koers."
+          }
+        }
+      }
+    },
     "W": {
       "extractionState": "manual",
       "localizations": {
@@ -7120,6 +7324,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "W"
+          }
+        }
+      }
+    },
+    "Waarschijnlijk naar %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probably heading to %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschijnlijk naar %@"
           }
         }
       }
@@ -7630,6 +7851,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zie wie er onderweg is"
+          }
+        }
+      }
+    },
+    "Ziekenhuis met SEH": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hospital with emergency department"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziekenhuis met SEH"
+          }
+        }
+      }
+    },
+    "Ziekenhuis met helipad": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hospital with helipad"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziekenhuis met helipad"
+          }
+        }
+      }
+    },
+    "Ziekenhuizen en vliegbases": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hospitals and air bases"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ziekenhuizen en vliegbases"
           }
         }
       }

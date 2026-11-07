@@ -3,7 +3,7 @@ import Observation
 import CoreLocation
 
 // Route trail, flight history and smooth movement of the helicopters (GET /v1/helikopters/<id>/spoor and /vluchten).
-// The Worker stores the adsb.lol positions (ODbL) itself, 3 days long.
+// The Worker stores the adsb.lol positions (ODbL) itself, 2 hours long.
 
 struct HeliSpoorPunt: Decodable, Hashable, Sendable {
     let t: Date
@@ -51,15 +51,15 @@ struct HeliVlucht: Decodable, Hashable, Identifiable, Sendable {
 private struct SpoorResponse: Decodable { let punten: [HeliSpoorPunt] }
 private struct VluchtenResponse: Decodable { let vluchten: [HeliVlucht] }
 
-/// How much of the trail to show: the current (or last) flight, the last 30 minutes, or today.
+/// How much of the trail to show: the current (or last) flight, the last 30 minutes, or everything kept (2 hours).
 enum SpoorBereik: String, CaseIterable, Identifiable, Sendable {
-    case vlucht, kort, vandaag
+    case vlucht, kort, lang
     var id: String { rawValue }
     var label: String {
         switch self {
         case .vlucht: L("Deze vlucht")
         case .kort: L("30 min")
-        case .vandaag: L("Vandaag")
+        case .lang: L("2 uur")
         }
     }
 }
@@ -69,7 +69,7 @@ extension P2000API {
         try await getJSON("/v1/helikopters/\(id)/spoor", query: ["scope": bereik.rawValue], as: SpoorResponse.self).punten
     }
     func heliVluchten(id: String) async throws -> [HeliVlucht] {
-        try await getJSON("/v1/helikopters/\(id)/vluchten", query: ["days": "2"], as: VluchtenResponse.self).vluchten
+        try await getJSON("/v1/helikopters/\(id)/vluchten", as: VluchtenResponse.self).vluchten
     }
 }
 
@@ -95,13 +95,66 @@ final class HeliSpoorStore {
     private(set) var vluchten: [HeliVlucht] = []
     private(set) var heliID: String?
     var bereik: SpoorBereik = .vlucht {
-        didSet { if oldValue != bereik { Task { await load() } } }
+        didSet { if oldValue != bereik { stopAfspelen(); Task { await load() } } }
     }
     @ObservationIgnored private var task: Task<Void, Never>?
+
+    // MARK: Playback ("Vlucht terugspelen")
+    /// 0…1 along the trail while playing back; nil = live.
+    var afspeel: Double?
+    private(set) var speelt = false
+    /// Playback speed: how many seconds of flight per second.
+    var snelheid: Double = 60
+    @ObservationIgnored private var speelTask: Task<Void, Never>?
+
+    var duur: TimeInterval { guard let a = punten.first?.t, let b = punten.last?.t else { return 0 }; return b.timeIntervalSince(a) }
+
+    func speel() {
+        guard punten.count >= 2, duur > 0 else { return }
+        if afspeel == nil || (afspeel ?? 0) >= 1 { afspeel = 0 }
+        speelt = true
+        speelTask?.cancel()
+        speelTask = Task { [weak self] in
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .milliseconds(100))
+                guard let self, self.speelt else { return }
+                let stap = 0.1 * self.snelheid / max(self.duur, 1)
+                let volgende = min(1, (self.afspeel ?? 0) + stap)
+                self.afspeel = volgende
+                if volgende >= 1 { self.speelt = false; return }
+            }
+        }
+    }
+    func pauze() { speelt = false; speelTask?.cancel() }
+    func stopAfspelen() { pauze(); afspeel = nil }
+
+    /// Moment of the playback position.
+    var afspeelMoment: Date? {
+        guard let f = afspeel, let a = punten.first?.t else { return nil }
+        return a.addingTimeInterval(duur * f)
+    }
+    /// Interpolated point at the playback position: coordinate and altitude.
+    var afspeelPunt: (coordinate: CLLocationCoordinate2D, hoogteFt: Double?)? {
+        guard let t = afspeelMoment, punten.count >= 2 else { return nil }
+        guard let i = punten.firstIndex(where: { $0.t >= t }) else { return (punten.last!.coordinate, punten.last!.hoogteFt) }
+        if i == 0 { return (punten[0].coordinate, punten[0].hoogteFt) }
+        let a = punten[i - 1], b = punten[i]
+        let span = b.t.timeIntervalSince(a.t)
+        let f = span > 0 ? t.timeIntervalSince(a.t) / span : 1
+        return (CLLocationCoordinate2D(latitude: a.lat + (b.lat - a.lat) * f, longitude: a.lon + (b.lon - a.lon) * f), a.hoogteFt ?? b.hoogteFt)
+    }
+    /// Trail up to the playback position.
+    var afgespeeldeLijn: [CLLocationCoordinate2D] {
+        guard let t = afspeelMoment else { return [] }
+        var out = punten.filter { $0.t <= t }.map(\.coordinate)
+        if let p = afspeelPunt?.coordinate { out.append(p) }
+        return out
+    }
 
     func volg(_ id: String?) {
         guard id != heliID else { return }
         heliID = id
+        stopAfspelen()
         punten = []; vluchten = []
         task?.cancel()
         guard id != nil else { return }
@@ -119,7 +172,7 @@ final class HeliSpoorStore {
         async let v = try? P2000API.shared.heliVluchten(id: id)
         let (pp, vv) = await (p, v)
         guard id == heliID else { return }
-        if let pp { punten = pp }
+        if let pp, afspeel == nil { punten = pp }
         if let vv { vluchten = vv }
     }
 
@@ -185,5 +238,157 @@ final class HeliSporen {
     func lijn(_ h: Helikopter, nu: Date) -> [CLLocationCoordinate2D] {
         guard let l = lijnen[h.id], !l.isEmpty else { return [] }
         return l + [h.geschat(op: nu)]
+    }
+}
+
+// MARK: - Prediction
+
+/// Where a helicopter is probably heading (from the server, based on its course).
+struct HeliVoorspelling: Decodable, Hashable, Sendable {
+    let id: String
+    let naam: String
+    let soort: String       // "ziekenhuis" or "basis"
+    let lat: Double
+    let lon: Double
+    let afstandKm: Double
+    let etaMin: Int?
+    let zekerheid: Double
+
+    enum CodingKeys: String, CodingKey { case id, naam, soort, lat, lon, zekerheid, afstandKm = "afstand_km", etaMin = "eta_min" }
+    var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
+    var tekst: String {
+        let eta = etaMin.map { " · ± \($0) min" } ?? ""
+        return Lf("Waarschijnlijk naar %@", naam) + eta
+    }
+}
+
+/// "Waarschijnlijk naar Isala · ± 12 min" with a hospital or base icon.
+struct VoorspellingRegel: View {
+    let voorspelling: HeliVoorspelling
+    var body: some View {
+        Label {
+            Text(voorspelling.tekst).lineLimit(2)
+        } icon: {
+            Image(systemName: voorspelling.soort == "basis" ? "house.fill" : "cross.case.fill")
+                .foregroundStyle(voorspelling.soort == "basis" ? Color.secondary : Color.red)
+        }
+        .font(AppFont.body(13, .medium, relativeTo: .footnote))
+        .accessibilityLabel(voorspelling.tekst + ". " + L("Voorspelling op basis van de koers."))
+    }
+}
+
+#if !os(watchOS) && !os(tvOS)
+/// Play back the trail shown: play/pause, a slider and the speed.
+struct AfspeelBalk: View {
+    @Bindable var spoor: HeliSpoorStore
+
+    var body: some View {
+        if spoor.punten.count >= 2 {
+            VStack(alignment: .leading, spacing: 4) {
+                HStack(spacing: 10) {
+                    Button {
+                        spoor.speelt ? spoor.pauze() : spoor.speel()
+                    } label: {
+                        Image(systemName: spoor.speelt ? "pause.circle.fill" : "play.circle.fill").font(.title2)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(spoor.speelt ? L("Pauze") : L("Vlucht terugspelen"))
+                    Slider(value: Binding(get: { spoor.afspeel ?? 1 }, set: { spoor.pauze(); spoor.afspeel = $0 }), in: 0...1)
+                        .accessibilityLabel(L("Afspeelpositie"))
+                    Menu {
+                        ForEach([30.0, 60, 120, 300], id: \.self) { v in
+                            Button("\(Int(v))×") { spoor.snelheid = v }
+                        }
+                    } label: {
+                        Text("\(Int(spoor.snelheid))×").font(AppFont.body(12, .semibold, relativeTo: .caption)).monospacedDigit()
+                    }
+                    if spoor.afspeel != nil {
+                        Button { spoor.stopAfspelen() } label: { Image(systemName: "xmark.circle") }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(L("Terug naar live"))
+                    }
+                }
+                if let t = spoor.afspeelMoment {
+                    let h = spoor.afspeelPunt?.hoogteFt.map { " · \(Int(($0 * 0.3048 / 10).rounded()) * 10) m" } ?? ""
+                    Text(Lf("Terugspelen: %@", t.formatted(date: .omitted, time: .standard)) + h)
+                        .font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary).monospacedDigit()
+                }
+            }
+        }
+    }
+}
+#endif
+
+// MARK: - Hospitals and bases
+
+struct Locatie: Decodable, Identifiable, Hashable, Sendable {
+    let id: String
+    let naam: String
+    let lat: Double
+    let lon: Double
+    let plaats: String?
+    let trauma: Bool
+    let helipad: Bool
+    let isBasis: Bool
+
+    enum CodingKeys: String, CodingKey { case id, naam, lat, lon, plaats, trauma, helipad }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        naam = try c.decode(String.self, forKey: .naam)
+        lat = try c.decode(Double.self, forKey: .lat)
+        lon = try c.decode(Double.self, forKey: .lon)
+        plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
+        trauma = (try? c.decodeIfPresent(Bool.self, forKey: .trauma)) ?? false
+        helipad = (try? c.decodeIfPresent(Bool.self, forKey: .helipad)) ?? false
+        isBasis = id.hasPrefix("basis-")
+    }
+    var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
+    var soortLabel: String {
+        if isBasis { return L("Helikopterbasis / vliegveld") }
+        return trauma ? L("Traumacentrum") : (helipad ? L("Ziekenhuis met helipad") : L("Ziekenhuis met SEH"))
+    }
+}
+
+private struct LocatiesResponse: Decodable { let ziekenhuizen: [Locatie]; let bases: [Locatie] }
+
+/// Hospitals (emergency department, helipad or trauma centre) and helicopter bases, loaded once per launch.
+@MainActor
+@Observable
+final class LocatieStore {
+    static let shared = LocatieStore()
+    private(set) var items: [Locatie] = []
+    @ObservationIgnored private var loading = false
+
+    func load() async {
+        guard items.isEmpty, !loading else { return }
+        loading = true
+        defer { loading = false }
+        if let r = try? await P2000API.shared.getJSON("/v1/locaties", as: LocatiesResponse.self) {
+            items = r.bases + r.ziekenhuizen
+        }
+    }
+}
+
+/// Map icon for a hospital (white square, red cross; trauma centre with a red border) or a base (helipad "H").
+struct LocatieIcon: View {
+    let locatie: Locatie
+    var size: CGFloat = 24
+
+    var body: some View {
+        let kleur: Color = locatie.isBasis ? Dienst.traumaheli.color : .red
+        ZStack {
+            RoundedRectangle(cornerRadius: size * 0.28, style: .continuous).fill(Color.white)
+            if locatie.isBasis {
+                Text(verbatim: "H").font(.system(size: size * 0.62, weight: .black, design: .rounded)).foregroundStyle(kleur)
+            } else {
+                Image(systemName: "cross.fill").font(.system(size: size * 0.5, weight: .bold)).foregroundStyle(kleur)
+            }
+        }
+        .frame(width: size, height: size)
+        .overlay(RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
+            .strokeBorder(locatie.trauma || locatie.isBasis ? kleur : Color.gray.opacity(0.5), lineWidth: max(1.5, size * 0.07)))
+        .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
+        .accessibilityHidden(true)
     }
 }

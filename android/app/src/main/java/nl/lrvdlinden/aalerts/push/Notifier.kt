@@ -23,6 +23,7 @@ object Notifier {
     const val CH_WAARSCHUWINGEN = "waarschuwingen"
     const val CH_NLALERT = "nlalert"
     const val CH_ALGEMEEN = "algemeen"
+    const val CH_LIFELINER = "lifeliner"
 
     fun createChannels(ctx: Context) {
         if (Build.VERSION.SDK_INT < 26) return
@@ -42,6 +43,7 @@ object Notifier {
         nm.createNotificationChannels(listOf(
             ch(CH_MELDINGEN, tr("Meldingen", "Alerts"), tr("Nieuwe P2000-meldingen die bij je profielen passen", "New P2000 alerts that match your profiles"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_URGENT, tr("Spoedmeldingen (A0, A1, P1)", "Urgent alerts (A0, A1, P1)"), tr("Meldingen met de hoogste prioriteit", "Alerts with the highest priority"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
+            ch(CH_LIFELINER, tr("Lifeliner opgestegen", "Lifeliner took off"), tr("Een Lifeliner stijgt op voor een melding in de gemeente Apeldoorn", "A Lifeliner takes off for an alert in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_NLALERT, "NL-Alert", tr("NL-Alerts in de gemeente Apeldoorn", "NL-Alerts in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_WAARSCHUWINGEN, tr("Burgernet en KNMI", "Burgernet and KNMI"), tr("Burgernet-acties en KNMI-weercodes", "Burgernet calls and KNMI weather codes"), NotificationManager.IMPORTANCE_DEFAULT, "warn"),
             ch(CH_ALGEMEEN, tr("Algemeen", "General"), tr("Berichten van A-Alerts en testmeldingen", "Messages from A-Alerts and test notifications"), NotificationManager.IMPORTANCE_DEFAULT, null),
@@ -61,9 +63,11 @@ object Notifier {
         val guid = data["guid"]
         val waarschuwing = data["waarschuwing"]
         val bron = data["bron"]
-        val soort = data["dienst"] ?: bron ?: data["thread"]
+        val heli = data["heli"]
+        val soort = if (heli != null) "traumaheli" else data["dienst"] ?: bron ?: data["thread"]
         val urgent = data["urgent"] == "1"
         val channel = when {
+            heli != null -> CH_LIFELINER
             bron == "nlalert" -> CH_NLALERT
             waarschuwing != null -> CH_WAARSCHUWINGEN
             guid != null && urgent -> CH_URGENT
@@ -75,7 +79,7 @@ object Notifier {
             guid?.let { putExtra(MainActivity.EXTRA_GUID, it) }
             waarschuwing?.let { putExtra(MainActivity.EXTRA_WAARSCHUWING, it) }
         }
-        val id = (guid ?: waarschuwing ?: title).hashCode()
+        val id = ((heli ?: "") + (guid ?: waarschuwing ?: title)).hashCode()
         val pi = PendingIntent.getActivity(ctx, id, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val b = NotificationCompat.Builder(ctx, channel)
             .setSmallIcon(R.drawable.ic_notification)

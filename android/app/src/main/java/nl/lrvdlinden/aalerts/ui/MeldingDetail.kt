@@ -335,6 +335,7 @@ fun HeliLiveCard(m: Melding, h: Helikopter?, naam: String?, onFollow: (String) -
                 }
             }
         }
+        h.voorspelling?.let { Text(it.tekst, fontSize = 13.sp, fontWeight = FontWeight.Medium) }
         Button(onClick = { onFollow(h.id) }, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Outlined.MyLocation, null); Spacer(Modifier.width(8.dp)); Text(tr("Volg ${h.naam} op de kaart", "Follow ${h.naam} on the map"))
         }

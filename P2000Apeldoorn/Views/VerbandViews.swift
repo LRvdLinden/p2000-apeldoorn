@@ -186,6 +186,7 @@ struct HeliLiveKaart: View {
                             }
                         }
                     }
+                    if let v = h.voorspelling { VoorspellingRegel(voorspelling: v) }
                     if let onVolg {
                         Button { onVolg(h.id) } label: {
                             Label(Lf("Volg %@ op de kaart", h.naam), systemImage: "scope").frame(maxWidth: .infinity)

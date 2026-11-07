@@ -81,6 +81,13 @@ struct MeldkamerView: View {
                             .annotationTitles(.hidden)
                     }
                 }
+                // Hospitals and helicopter bases.
+                if settings.laag(.ziekenhuizen) {
+                    ForEach(LocatieStore.shared.items) { l in
+                        Annotation(l.naam, coordinate: l.coordinate, anchor: .center) { LocatieIcon(locatie: l, size: 28) }
+                            .annotationTitles(.hidden)
+                    }
+                }
                 ForEach(groups.clusters) { c in
                     Annotation(c.plaats, coordinate: c.coordinate, anchor: .bottom) {
                         ClusterMarker(cluster: c, size: 64, selected: c.meldingen.contains { $0.guid == focusGuid })
@@ -113,6 +120,13 @@ struct MeldkamerView: View {
                                 .stroke(h.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
                         }
                     }
+                    // Probable destination: dashed line to the hospital or base.
+                    ForEach(HeliStore.shared.items.filter { $0.voorspelling != nil }) { h in
+                        if let v = h.voorspelling {
+                            MapPolyline(coordinates: [h.geschat(op: nu), v.coordinate])
+                                .stroke(h.color.opacity(0.75), style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [4, 8]))
+                        }
+                    }
                     ForEach(HeliStore.shared.items) { h in
                         Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                             HeliMarker(heli: h, size: 34)
@@ -122,6 +136,7 @@ struct MeldkamerView: View {
                 }
             }
             .onAppear { HeliStore.shared.start() }
+            .task { await LocatieStore.shared.load() }
             .onDisappear { HeliStore.shared.stop() }
             .task {
                 while !Task.isCancelled {
@@ -154,6 +169,9 @@ struct MeldkamerView: View {
                                 Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst]
                                         .compactMap { $0 }.joined(separator: " · "))
                                     .font(AppFont.body(14, .regular)).foregroundStyle(.secondary)
+                                if let v = h.voorspelling {
+                                    Text(v.tekst).font(AppFont.body(14, .semibold)).lineLimit(1)
+                                }
                             }
                         }
                         .padding(.horizontal, 16).padding(.vertical, 10)

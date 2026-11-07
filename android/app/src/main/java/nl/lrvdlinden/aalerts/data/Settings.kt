@@ -99,7 +99,7 @@ object Settings {
 
     // Appearance
     var appearance by str("appearance", "systeem")
-    var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "helikopters", "werkgebied"))
+    var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"))
     var kaartPeriode by int("kaartPeriode", 24)
 
     // Notifications

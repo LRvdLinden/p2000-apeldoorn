@@ -21,9 +21,11 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let gezien: Date
     /// How the server recognised it: "callsign", "registratie", "toestel" (same airframe, other callsign) or "operator".
     let herkenning: String?
+    /// Where it is probably heading (hospital or its base), worked out by the server from its course.
+    let voorspelling: HeliVoorspelling?
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
 
@@ -45,6 +47,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         let raw = (try? c.decode(String.self, forKey: .gezien)) ?? ""
         gezien = Fmt.parseISO(raw) ?? .now
         herkenning = try? c.decodeIfPresent(String.self, forKey: .herkenning)
+        voorspelling = try? c.decodeIfPresent(HeliVoorspelling.self, forKey: .voorspelling)
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
@@ -215,6 +218,7 @@ struct HeliInfoKaart: View {
                 waarde(L("Hoogte"), heli.opGrond ? L("Op de grond") : (heli.hoogteMeter.map { "\($0) m" } ?? "–"), "arrow.up.and.down")
                 waarde(L("Snelheid"), heli.snelheidKmh.map { "\($0) km/u" } ?? "–", "speedometer")
             }
+            if let v = heli.voorspelling { VoorspellingRegel(voorspelling: v) }
             #if !os(watchOS)
             if let spoor {
                 @Bindable var s = spoor
@@ -222,6 +226,9 @@ struct HeliInfoKaart: View {
                     ForEach(SpoorBereik.allCases) { Text($0.label).tag($0) }
                 }
                 .pickerStyle(.segmented)
+                #if !os(tvOS)
+                AfspeelBalk(spoor: spoor)
+                #endif
                 HeliVluchtenLijst(vluchten: spoor.vluchten, aantal: 3)
             }
             #endif
