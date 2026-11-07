@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Status | A-Alerts</title>
+<meta name="description" content="Actuele status van A-Alerts: P2000-meldingen, NL-Alert, Burgernet, KNMI, pushmeldingen, helikopters en de website. Met uptime van de afgelopen 90 dagen.">
+<link rel="canonical" href="https://a-alerts.nl/status/">
+<meta name="robots" content="index, follow">
+<meta name="theme-color" content="#cf0a1e">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="A-Alerts">
+<meta property="og:locale" content="nl_NL">
+<meta property="og:title" content="Status – A-Alerts">
+<meta property="og:description" content="Werken meldingen en pushmeldingen van A-Alerts? Bekijk de actuele status en storingen.">
+<meta property="og:url" content="https://a-alerts.nl/status/">
+<meta property="og:image" content="https://a-alerts.nl/assets/img/og-image.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://a-alerts.nl/assets/img/og-image.jpg">
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" href="/assets/img/aalerts-icon-32.png">
+<link rel="apple-touch-icon" href="/assets/img/aalerts-icon-180.png">
+<link rel="manifest" href="/site.webmanifest">
+<link rel="stylesheet" href="/assets/css/base.css?v=38">
+<link rel="stylesheet" href="/assets/css/status.css?v=38">
+<script src="/config.js?v=38"></script>
+<script src="/assets/js/consent.js?v=38" defer></script>
+<script type="module" src="/assets/js/status.js?v=38"></script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","@id":"https://a-alerts.nl/status/","url":"https://a-alerts.nl/status/","name":"Status van A-Alerts","inLanguage":"nl-NL","isPartOf":{"@id":"https://a-alerts.nl/#website"}}</script>
+</head>
+<body>
+<header class="st-head">
+  <div class="wrap">
+    <a href="/" class="brand"><span class="shield appmark"><img src="/assets/img/aalerts-icon-180.png" alt="" width="36" height="36"></span><b>A-Alerts</b><span class="sub">Status</span></a>
+    <nav aria-label="Navigatie"><a href="/pager/">Live pager</a><a href="/" class="pill-dark">Download de app</a></nav>
+  </div>
+</header>
+
+<main class="wrap st-main" id="main" aria-busy="true">
+  <section class="hero" id="hero" data-staat="laden" aria-live="polite">
+    <span class="hero-icon" aria-hidden="true"></span>
+    <div class="hero-text">
+      <h1 id="heroTitel">Status laden…</h1>
+      <p id="heroSub">Even geduld.</p>
+    </div>
+    <div class="hero-tijd">Laatst gecontroleerd<br><b id="bijgewerkt">–</b> · elke minuut</div>
+  </section>
+
+  <div id="actief"></div>
+
+  <section aria-labelledby="ondTitel" class="ond">
+    <div class="ond-head">
+      <h2 id="ondTitel">Onderdelen</h2>
+      <span class="muted">Uptime van de afgelopen 90 dagen</span>
+      <span class="legenda" aria-hidden="true"><i class="ok"></i>Werkt <i class="warn"></i>Verstoord <i class="down"></i>Storing <i class="maint"></i>Onderhoud <i class="geen"></i>Geen gegevens</span>
+    </div>
+    <div id="groepen"></div>
+  </section>
+
+  <section aria-labelledby="vandaagTitel">
+    <h2 id="vandaagTitel">Vandaag</h2>
+    <div class="tegels" id="vandaag"></div>
+  </section>
+
+  <section aria-labelledby="geplandTitel" id="geplandBlok" hidden>
+    <h2 id="geplandTitel">Gepland onderhoud</h2>
+    <div id="gepland"></div>
+  </section>
+
+  <section aria-labelledby="histTitel">
+    <h2 id="histTitel">Afgelopen 30 dagen</h2>
+    <div id="historie"></div>
+  </section>
+</main>
+
+<footer class="st-foot">
+  <div class="wrap">
+    <span>© PixelForges · A-Alerts</span>
+    <a href="/pager/">Live pager</a>
+    <a href="/meldkamer/">Meldkamer</a>
+    <a href="/privacy/">Privacy</a>
+    <a href="mailto:hallo@pixelforges.nl">hallo@pixelforges.nl</a>
+    <span class="right">Deze pagina ververst elke minuut</span>
+  </div>
+</footer>
+</body>
+</html>
