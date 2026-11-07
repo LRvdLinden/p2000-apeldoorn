@@ -150,6 +150,7 @@ async function renderExtra(kit) {
   heliMarkers ||= heliLaag(kit, map);
   heliMarkers.update(L.has("helikopters") ? state.helis : []);
   renderHeliList();
+  renderChips();
 }
 
 async function refreshHelis() {
@@ -252,8 +253,17 @@ setInterval(() => {
 
 function renderChips() {
   const items = mapped();
+  const dag = Date.now() - WINDOW_MS;
+  const n = (b) => state.warnings.filter((w) => w.bron === b && (isActief(w) || new Date(w.einde || w.start).getTime() >= dag)).length;
+  const heli = (soort, label) => {
+    const list = state.helis.filter((h) => h.soort === soort);
+    return list.length ? `<span class="chip heli-chip"><img src="${heliImg(list[0])}" alt="${label}">${list.length}</span>` : "";
+  };
   $("chips").innerHTML = SELECTABLE.map((d) =>
-    `<span class="chip"><img src="${icon({ dienst: d })}" alt="${DIENSTEN[d].label}">${items.filter((m) => m.dienst === d).length}</span>`).join("");
+    `<span class="chip"><img src="${icon({ dienst: d })}" alt="${DIENSTEN[d].label}">${items.filter((m) => m.dienst === d).length}</span>`).join("")
+    + `<span class="chip"><img src="${asset("assets/img/icon_burgernet.png")}" alt="Burgernet">${n("burgernet")}</span>`
+    + (n("nlalert") ? `<span class="chip"><img src="${asset("assets/img/icon_nlalert.png")}" alt="NL-Alert">${n("nlalert")}</span>` : "")
+    + heli("trauma", "Lifeliner") + heli("politie", "Zulu");
 }
 
 function renderLatest() {

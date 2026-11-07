@@ -191,12 +191,30 @@ struct MeldkamerView: View {
                     .padding(.horizontal, 16).padding(.vertical, 8)
                     .background(.ultraThinMaterial, in: Capsule())
                 }
+                // Burgernet (always), NL-Alert (when there is one), Lifeliners and Zulu's (when in the list).
+                let dag = Date.now.addingTimeInterval(-86_400)
+                let telling = { (b: Waarschuwing.Bron) in waarschuwingen.items.filter { $0.bron == b && (!$0.isBeeindigd || ($0.einde ?? $0.start) >= dag) }.count }
+                teller(Image("icon_burgernet"), telling(.burgernet), breed: false)
+                if telling(.nlalert) > 0 { teller(Image("icon_nlalert"), telling(.nlalert), breed: false) }
+                ForEach(["trauma", "politie"], id: \.self) { soort in
+                    let list = HeliStore.shared.items.filter { $0.soort == soort }
+                    if let h = list.first { teller(Image(h.afbeelding), list.count, breed: true) }
+                }
                 Text(L("Laatste 24 uur")).font(AppFont.body(20, .semibold))
                     .padding(.horizontal, 16).padding(.vertical, 10)
                     .background(.ultraThinMaterial, in: Capsule())
             }
             .padding(24)
         }
+    }
+
+    private func teller(_ img: Image, _ n: Int, breed: Bool) -> some View {
+        HStack(spacing: 8) {
+            img.resizable().scaledToFit().frame(width: breed ? 52 : 28, height: 28)
+            Text("\(n)").font(AppFont.body(24, .bold).monospacedDigit())
+        }
+        .padding(.horizontal, 16).padding(.vertical, 8)
+        .background(.ultraThinMaterial, in: Capsule())
     }
 
     private var mapStyle: MapStyle {

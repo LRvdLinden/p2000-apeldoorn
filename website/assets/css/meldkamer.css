@@ -158,3 +158,4 @@ body.mk {
 .heli-row small { color: var(--muted); font-size: .8em; }
 @media (max-width: 700px) { .helis { display: none; } }
 .heli-row .dest { color: #fff; font-weight: 600; }
+.chip.heli-chip img { width: 44px; object-fit: contain; }
