@@ -29,6 +29,7 @@ import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
+import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
@@ -144,9 +145,12 @@ async function handle(req, env) {
     return reply(200, await spoor(env, m[1], scope), { "cache-control": "public, max-age=10" });
   }
   m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/vluchten$/);
-  if (method === "GET" && m) return reply(200, await vluchten(env, m[1], url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
+  if (method === "GET" && m) return reply(200, await vluchten(env, m[1]), { "cache-control": "public, max-age=30" });
   if (method === "GET" && path === "/v1/helikopters") {
-    return reply(200, await helikopters(env), { "cache-control": "public, max-age=10" });
+    return reply(200, metVoorspelling(await helikopters(env)), { "cache-control": "public, max-age=10" });
+  }
+  if (method === "GET" && path === "/v1/locaties") {
+    return reply(200, locatiesData(), { "cache-control": "public, max-age=86400" });
   }
 
   if (method === "GET" && path === "/v1/mapkit-token") {
@@ -319,6 +323,16 @@ async function poll(env, budget) {
   }
 }
 
+/** Broadcast (beheer) or take-off push; the latter has an English text and the helicopter. */
+function broadcastPayload(b, lang) {
+  const t = b.en && !String(lang || "nl").startsWith("nl") ? b.en : b;
+  return {
+    aps: { alert: { title: t.title, body: t.body }, sound: "default", ...(b.heli ? { "thread-id": "lifeliner", "interruption-level": "time-sensitive" } : {}) },
+    ...(b.guid ? { guid: b.guid } : {}),
+    ...(b.heli ? { heli: b.heli } : {}),
+  };
+}
+
 async function drain(env, budget) {
   if (budget.left <= 0) return;
   const { results } = await env.DB.prepare(`
@@ -350,7 +364,7 @@ async function drain(env, budget) {
         { urgent: item.warning.bron === "nlalert" || item.warning.niveau === "red", collapseId: item.warning.id.slice(0, 64) })
       : item.melding
       ? await sendPush(env, row, payloadFor(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
-      : await sendPush(env, row, { aps: { alert: { title: item.broadcast.title, body: item.broadcast.body }, sound: "default" }, ...(item.broadcast.guid ? { guid: item.broadcast.guid } : {}) });
+      : await sendPush(env, row, broadcastPayload(item.broadcast, row.language), item.broadcast.heli ? { collapseId: row.guid.slice(-64) } : {});
     if (isDeadToken(r)) await deleteDevice(env, row.token);
     else if (!r.ok) console.warn("[push]", row.token.slice(0, 8), r.status, r.reason);
     await done.run();
@@ -395,6 +409,23 @@ async function warnings(env, budget) {
   }
 }
 
+/** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */
+async function heliRun(env) {
+  const data = await helikopters(env);
+  const { prev } = await recordPositions(env, data);
+  if (!prev || data.fout) return;
+  let devices = null, prefs = null;
+  await checkOpstijgen(env, data.helikopters || [], prev, async (m, key, texts) => {
+    devices ||= await activeDevices(env);
+    prefs ||= await devicePrefs(env);
+    const melding = { ...m, datum: Date.parse(m.datum_tijd) };
+    const tokens = devices.filter((d) => meldingWanted(d, prefs.get(d.token), melding)).map((d) => d.token);
+    if (!tokens.length) return;
+    await kvSet(env, `broadcast:${key}`, JSON.stringify({ ...texts.nl, en: texts.en, guid: m.guid, heli: texts.heli }));
+    await queue(env, `broadcast:${key}`, tokens);
+  });
+}
+
 async function catchUp(env) {
   try {
     const last = await kvGet(env, "feed_try");
@@ -429,7 +460,7 @@ async function cron(env, event) {
     await poll(env, budget);
     await drain(env, budget);
     await homey();
-    if (i % 2 === 0) { try { if (budget.take()) await recordPositions(env, await helikopters(env)); } catch (e) { console.error("[spoor]", e.message || e); } }
+    if (i % 2 === 0) { try { if (budget.take()) await heliRun(env); } catch (e) { console.error("[spoor]", e.message || e); } }
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
   try { await checkOutage(env); } catch (e) { console.error("[outage]", e.message || e); }
@@ -437,7 +468,7 @@ async function cron(env, event) {
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
-    try { await spoorHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
+    try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
   }
 }

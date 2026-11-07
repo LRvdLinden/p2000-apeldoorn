@@ -1,5 +1,7 @@
 package nl.lrvdlinden.aalerts.ui
 
+import androidx.compose.ui.draw.shadow
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -50,6 +52,16 @@ fun DienstIcon(d: Dienst, size: Dp = 40.dp) {
     if (res != null) Image(painterResource(res), null, Modifier.size(size))
     else Box(Modifier.size(size).clip(CircleShape).background(d.color), contentAlignment = Alignment.Center) {
         Text(d.label.take(1), color = Color.White, fontWeight = FontWeight.Bold)
+    }
+}
+
+/** Station icon, same as the web meldkamer and the Apple apps: white rounded square, border in the service colour. */
+@Composable
+fun KazerneIcon(d: Dienst, size: Dp = 30.dp) {
+    val shape = RoundedCornerShape(size * 0.28f)
+    Box(Modifier.size(size).shadow(2.dp, shape).clip(shape).background(Color.White).border(maxOf(2.dp, size * 0.07f), d.color, shape),
+        contentAlignment = Alignment.Center) {
+        d.icon?.let { Image(painterResource(it), null, Modifier.size(size * 0.72f)) }
     }
 }
 

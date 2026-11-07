@@ -299,7 +299,7 @@ export async function broadcast(env, body, queue) {
 }
 
 export async function broadcastHistory(env) {
-  const list = await rows(env, "SELECT key, value, at FROM kv WHERE key LIKE 'broadcast:%' ORDER BY at DESC LIMIT 25");
+  const list = await rows(env, "SELECT key, value, at FROM kv WHERE key LIKE 'broadcast:%' AND key NOT LIKE 'broadcast:heli:%' ORDER BY at DESC LIMIT 25");
   return list.map((r) => ({ id: r.key, at: new Date(r.at).toISOString(), ...JSON.parse(r.value) }));
 }
 

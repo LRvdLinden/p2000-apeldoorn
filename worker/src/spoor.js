@@ -1,8 +1,8 @@
 // Route trail and flight history of the trauma and police helicopters. The Worker stores the positions it
-// already reads from adsb.lol (ODbL) a few times per minute in D1 (kept 3 days) and cuts them into flights.
+// already reads from adsb.lol (ODbL) a few times per minute in D1 (kept 2 hours) and cuts them into flights.
 import { helikopters } from "./heli.js";
 
-const KEEP_DAYS = 3;
+export const KEEP_MS = 2 * 3600_000; // two hours is plenty; older lines only clutter the map
 const GAP_MS = 10 * 60_000; // no position for 10 minutes = flight over (landed or out of range)
 const MIN_MOVE_KM = 0.05;   // do not store a new point when the helicopter stood still
 
@@ -34,11 +34,11 @@ export async function recordPositions(env, data) {
       .bind(h.id, at, h.lat, h.lon, h.hoogte_ft, h.snelheid_kt, h.koers, ground));
   }
   if (rows.length) await env.DB.batch(rows);
-  return rows.length;
+  return { stored: rows.length, prev };
 }
 
 export async function spoorHousekeeping(env) {
-  await env.DB.prepare("DELETE FROM heli_posities WHERE at < ?").bind(Date.now() - KEEP_DAYS * 86_400_000).run();
+  await env.DB.prepare("DELETE FROM heli_posities WHERE at < ?").bind(Date.now() - KEEP_MS).run();
 }
 
 const punt = (r) => ({ t: new Date(r.at).toISOString(), lat: r.lat, lon: r.lon, hoogte_ft: r.hoogte_ft, snelheid_kt: r.snelheid_kt, koers: r.koers, grond: Boolean(r.grond) });
@@ -76,13 +76,11 @@ export function vluchtenUit(rows, now = Date.now()) {
 
 /**
  * Trail of one helicopter. scope: "vlucht" (the current or last flight), "kort" (last 30 minutes),
- * "vandaag" (since midnight, Dutch time). Points old → new.
+ * "lang" (everything kept: the last 2 hours; "vandaag" is the old name). Points old → new.
  */
 export async function spoor(env, id, scope = "vlucht") {
   const now = Date.now();
-  const since = scope === "kort" ? now - 30 * 60_000
-    : scope === "vandaag" ? startOfDayAmsterdam(now)
-      : now - 24 * 3600_000;
+  const since = scope === "kort" ? now - 30 * 60_000 : now - KEEP_MS;
   const { results } = await env.DB.prepare("SELECT * FROM heli_posities WHERE heli = ? AND at >= ? ORDER BY at ASC LIMIT 5000").bind(id, since).all();
   let rows = results;
   let vlucht = null;
@@ -94,16 +92,8 @@ export async function spoor(env, id, scope = "vlucht") {
   return { id, scope, vlucht, punten: rows.map(punt), bron: "adsb.lol (ODbL)" };
 }
 
-export async function vluchten(env, id, days = 2) {
-  const since = Date.now() - Math.min(Math.max(Number(days) || 2, 1), KEEP_DAYS) * 86_400_000;
+export async function vluchten(env, id) {
+  const since = Date.now() - KEEP_MS;
   const { results } = await env.DB.prepare("SELECT * FROM heli_posities WHERE heli = ? AND at >= ? ORDER BY at ASC LIMIT 20000").bind(id, since).all();
   return { id, vluchten: vluchtenUit(results).slice(0, 30), bron: "adsb.lol (ODbL)" };
-}
-
-function startOfDayAmsterdam(now) {
-  const d = new Date(now);
-  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Amsterdam", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hour12: false }).formatToParts(d);
-  const hour = Number(parts.find((p) => p.type === "hour").value) % 24;
-  const mins = d.getUTCMinutes(), secs = d.getUTCSeconds();
-  return now - ((hour * 60 + mins) * 60 + secs) * 1000 - d.getUTCMilliseconds();
 }

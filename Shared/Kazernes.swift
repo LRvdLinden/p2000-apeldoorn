@@ -111,7 +111,8 @@ enum Aanrijtijd {
     }
 }
 
-/// Round station icon in the colour of the service, with a building glyph.
+/// Station icon, same as the web meldkamer: a white rounded square with a border in the colour of the
+/// service and the service icon inside.
 struct KazerneIcon: View {
     let soort: Kazerne.Soort
     var size: CGFloat = 30
@@ -120,16 +121,17 @@ struct KazerneIcon: View {
         let d: Dienst = soort == .brandweer ? .brandweer : soort == .ambulance ? .ambulance : .politie
         ZStack {
             RoundedRectangle(cornerRadius: size * 0.28, style: .continuous)
-                .fill(d.color)
-            Image(systemName: soort == .brandweer ? "flame.fill" : soort == .ambulance ? "cross.fill" : "shield.lefthalf.filled")
-                .font(.system(size: size * 0.46, weight: .bold))
-                .foregroundStyle(soort == .ambulance ? Color.black : Color.white)
+                .fill(Color.white)
+            Image("icon_\(d.rawValue)")
+                .resizable()
+                .scaledToFit()
+                .frame(width: size * 0.72, height: size * 0.72)
         }
         .frame(width: size, height: size)
         .overlay(
-            RoundedRectangle(cornerRadius: size * 0.28, style: .continuous).strokeBorder(.white, lineWidth: max(1.5, size * 0.06))
+            RoundedRectangle(cornerRadius: size * 0.28, style: .continuous).strokeBorder(d.color, lineWidth: max(2, size * 0.07))
         )
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+        .shadow(color: .black.opacity(0.3), radius: 3, y: 2)
         .accessibilityHidden(true)
     }
 }

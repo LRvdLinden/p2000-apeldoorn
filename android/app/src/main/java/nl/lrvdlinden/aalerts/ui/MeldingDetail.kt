@@ -102,7 +102,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                 if (m.hasCoordinate) {
                     val la = m.lat!!; val lo = m.lon!!
                     val pts = mutableListOf<MapPoint>()
-                    routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false) }
+                    routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong()) }
                     m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
                     heli?.let { h -> pts += MapPoint("h:${h.id}", heliPos!!.first, heliPos.second, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
                     AMap(
@@ -171,7 +171,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                 if (routes.isNotEmpty()) SectionCard(tr("Kazernes en aanrijtijd", "Stations and arrival"), Icons.Outlined.LocalFireDepartment) {
                     routes.forEach { r ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            DienstIcon(r.kazerne.dienst, 30.dp)
+                            KazerneIcon(r.kazerne.dienst, 30.dp)
                             Spacer(Modifier.width(10.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(r.kazerne.naam, fontWeight = FontWeight.Medium, fontSize = 14.sp)

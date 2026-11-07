@@ -88,7 +88,7 @@ fun MapScreen(nav: Nav) {
         if (w.bron == "nlalert") areas += MapArea(w.id, w.gebied ?: emptyList(), w.color.toArgb().toLong(), if (w.isBeeindigd) 0.06 else 0.2)
         if (w.hasCoordinate) points += MapPoint("w:${w.id}", w.lat!!, w.lon!!, w.marker, 34, dim = w.isBeeindigd)
     }
-    if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, 20, anchorBottom = false) } }
+    if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, if (selected == "k:${k.id}") 30 else 24, anchorBottom = false, kazerne = k.dienst.color.toArgb().toLong()) } }
     if (KaartLaag.MELDINGEN.key in lagen) meldingen.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
     val lines = mutableListOf<MapLine>()
     if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h ->
@@ -152,7 +152,7 @@ fun MapScreen(nav: Nav) {
                 sel.startsWith("k:") -> Werkgebied.kazernes.firstOrNull { it.id == sel.removePrefix("k:") }?.let { k ->
                     PreviewCard(onClose = { selected = null }) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            DienstIcon(k.dienst, 32.dp); Spacer(Modifier.width(10.dp))
+                            KazerneIcon(k.dienst, 36.dp); Spacer(Modifier.width(10.dp))
                             Column { Text(k.naam, fontWeight = FontWeight.SemiBold); Text(k.plaats ?: "", color = Muted, fontSize = 12.sp) }
                         }
                     }

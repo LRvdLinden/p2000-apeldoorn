@@ -35,6 +35,8 @@ import org.maplibre.geojson.Polygon
 data class MapPoint(
     val id: String, val lat: Double, val lon: Double, val image: Int, val widthDp: Int = 34,
     val label: String? = null, val flip: Boolean = false, val dim: Boolean = false, val anchorBottom: Boolean = true,
+    /** Station style (like the web meldkamer): white rounded square with a border in this colour around the icon. */
+    val kazerne: Long? = null,
 )
 /** An area of rings of [lon, lat]. */
 data class MapArea(val id: String, val rings: List<List<List<Double>>>, val color: Long, val fill: Double = 0.18, val dashed: Boolean = false, val width: Double = 2.0)
@@ -149,13 +151,13 @@ fun AMap(
         val s = style ?: return@LaunchedEffect
         val density = ctx.resources.displayMetrics.density
         for (p in points) {
-            val name = "img-${p.image}-${p.widthDp}-${p.flip}"
-            if (s.getImage(name) == null) bitmap(ctx, p.image, (p.widthDp * density).toInt(), p.flip)?.let { s.addImage(name, it) }
+            val name = imgName(p)
+            if (s.getImage(name) == null) (if (p.kazerne != null) kazerneBitmap(ctx, p.image, (p.widthDp * density).toInt(), p.kazerne) else bitmap(ctx, p.image, (p.widthDp * density).toInt(), p.flip))?.let { s.addImage(name, it) }
         }
         s.getSourceAs<GeoJsonSource>("a-points")?.setGeoJson(FeatureCollection.fromFeatures(points.mapIndexed { i, p ->
             Feature.fromGeometry(Point.fromLngLat(p.lon, p.lat)).apply {
                 addStringProperty("id", p.id)
-                addStringProperty("icon", "img-${p.image}-${p.widthDp}-${p.flip}")
+                addStringProperty("icon", imgName(p))
                 addStringProperty("anchor", if (p.anchorBottom) "bottom" else "center")
                 addNumberProperty("opacity", if (p.dim) 0.45 else 1.0)
                 addNumberProperty("sort", i)
@@ -191,7 +193,31 @@ fun AMap(
     AndroidView(factory = { mapView }, modifier = modifier)
 }
 
+private fun imgName(p: MapPoint) = "img-${p.image}-${p.widthDp}-${p.flip}" + (p.kazerne?.let { "-k$it" } ?: "")
+
 private val cache = mutableMapOf<String, Bitmap>()
+
+/** Station marker: white rounded square, border in the service colour, service icon inside. */
+private fun kazerneBitmap(ctx: Context, res: Int, sizePx: Int, color: Long): Bitmap? {
+    val key = "k-$res-$sizePx-$color"
+    cache[key]?.let { return it }
+    val icon = bitmap(ctx, res, (sizePx * 0.72f).toInt(), false) ?: return null
+    val pad = (sizePx * 0.12f)
+    val total = (sizePx + pad * 2).toInt()
+    val b = Bitmap.createBitmap(total, total, Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(b)
+    val r = sizePx * 0.28f
+    val rect = android.graphics.RectF(pad, pad, pad + sizePx, pad + sizePx)
+    val shadow = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { this.color = 0x55000000; maskFilter = android.graphics.BlurMaskFilter(pad * 0.8f, android.graphics.BlurMaskFilter.Blur.NORMAL) }
+    c.drawRoundRect(android.graphics.RectF(rect.left, rect.top + pad * 0.4f, rect.right, rect.bottom + pad * 0.4f), r, r, shadow)
+    c.drawRoundRect(rect, r, r, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { this.color = android.graphics.Color.WHITE })
+    val stroke = maxOf(2f, sizePx * 0.07f)
+    c.drawRoundRect(android.graphics.RectF(rect.left + stroke / 2, rect.top + stroke / 2, rect.right - stroke / 2, rect.bottom - stroke / 2), r, r,
+        android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { style = android.graphics.Paint.Style.STROKE; strokeWidth = stroke; this.color = (color and 0xFFFFFFFF).toInt() })
+    c.drawBitmap(icon, (total - icon.width) / 2f, (total - icon.height) / 2f, null)
+    cache[key] = b
+    return b
+}
 private fun bitmap(ctx: Context, res: Int, widthPx: Int, flip: Boolean): Bitmap? {
     val key = "$res-$widthPx-$flip"
     cache[key]?.let { return it }
