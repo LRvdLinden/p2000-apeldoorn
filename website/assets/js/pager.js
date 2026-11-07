@@ -3,11 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=37";
+} from "./core.js?v=39";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=37";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=39";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -31,6 +31,7 @@ const state = {
   hideRead: prefs.get("p2000.hideRead", false),
   mapHours: 24,
   mapDiensten: new Set(SELECTABLE),
+  mapBronnen: new Set(["nlalert", "burgernet"]),
   // A-Alerts
   warnings: [],
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
@@ -689,10 +690,24 @@ const LAGEN = [
 function renderMapChips() {
   const cutoff = Date.now() - state.mapHours * 3600_000;
   const recent = state.list.filter((m) => date(m).getTime() >= cutoff);
+  // Disciplines, Burgernet (always), NL-Alert (when there is one), and Lifeliner / Zulu (tap: to the helicopter, or all of that type).
+  const alle = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || new Date(w.einde || w.start).getTime() >= cutoff));
+  const bronChip = (b, label, c) => {
+    const n = alle.filter((w) => w.bron === b).length;
+    if (b === "nlalert" && !n) return "";
+    const on = state.lagen.has("waarschuwingen") && state.mapBronnen.has(b);
+    return `<button class="chip${on ? "" : " off"}" data-bron="${b}" style="--c:${c}" aria-pressed="${on}" title="${label}"><img src="${asset(`assets/img/icon_${b}.png`)}" alt="${label}">${n}</button>`;
+  };
+  const heliChip = (soort, label) => {
+    const list = state.helis.filter((h) => h.soort === soort);
+    if (!list.length) return "";
+    return `<button class="chip heli-chip${state.lagen.has("helikopters") ? "" : " off"}" data-heli="${soort}" style="--c:${soort === "trauma" ? "#9333EA" : "#15428B"}" title="${label}"><img src="${heliImg(list[0])}" alt="${label}">${list.length}</button>`;
+  };
   $("mapChips").innerHTML = SELECTABLE.map((d) => {
     const n = recent.filter((m) => m.dienst === d).length;
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
-  }).join("");
+  }).join("") + bronChip("burgernet", "Burgernet", "#0067B1") + bronChip("nlalert", "NL-Alert", "#E3001B")
+    + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu");
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
@@ -709,17 +724,44 @@ $("mapLagen").addEventListener("click", (e) => {
 
 function mapWarnings() {
   const cutoff = Date.now() - state.mapHours * 3600_000;
-  return state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || new Date(w.einde || w.start).getTime() >= cutoff));
+  return state.warnings.filter((w) => w.bron !== "knmi" && state.mapBronnen.has(w.bron) && (isActief(w) || new Date(w.einde || w.start).getTime() >= cutoff));
 }
 
 let heliTimer = null;
 async function pollHelis() {
-  if (state.tab !== "kaart" || !state.lagen.has("helikopters") || document.hidden) return;
+  if (state.tab !== "kaart" || document.hidden) return;
   state.helis = await fetchHelikopters();
   renderMap();
 }
-$("mapChips").addEventListener("click", (e) => {
-  const d = e.target.closest(".chip")?.dataset.d;
+$("mapChips").addEventListener("click", async (e) => {
+  const chip = e.target.closest(".chip");
+  if (!chip) return;
+  if (chip.dataset.bron) {
+    const b = chip.dataset.bron;
+    if (!state.lagen.has("waarschuwingen")) { state.lagen.add("waarschuwingen"); state.mapBronnen.add(b); prefs.set("p2000.lagen", [...state.lagen]); }
+    else state.mapBronnen.has(b) ? state.mapBronnen.delete(b) : state.mapBronnen.add(b);
+    renderMap();
+    return;
+  }
+  if (chip.dataset.heli) {
+    const list = state.helis.filter((h) => h.soort === chip.dataset.heli);
+    if (!state.lagen.has("helikopters")) { state.lagen.add("helikopters"); prefs.set("p2000.lagen", [...state.lagen]); }
+    await renderMap();
+    const mk = await bigMapReady;
+    if (!mk || !bigMap || !list.length) return;
+    if (list.length === 1) {
+      const g = geschat(list[0]);
+      bigMap.setCenterAnimated(new mk.Coordinate(g.lat, g.lon));
+      if (bigMap.cameraDistance > 40000) bigMap.cameraDistance = 25000;
+      openHeli(list[0]);
+    } else {
+      const lats = list.map((h) => geschat(h).lat), lons = list.map((h) => geschat(h).lon);
+      const c = new mk.Coordinate((Math.min(...lats) + Math.max(...lats)) / 2, (Math.min(...lons) + Math.max(...lons)) / 2);
+      bigMap.setRegionAnimated(new mk.CoordinateRegion(c, new mk.CoordinateSpan(Math.max(0.2, (Math.max(...lats) - Math.min(...lats)) * 1.5), Math.max(0.2, (Math.max(...lons) - Math.min(...lons)) * 1.5))), true);
+    }
+    return;
+  }
+  const d = chip.dataset.d;
   if (!d) return;
   state.mapDiensten.has(d) ? state.mapDiensten.delete(d) : state.mapDiensten.add(d);
   renderMap();

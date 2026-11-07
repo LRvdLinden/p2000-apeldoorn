@@ -1,5 +1,17 @@
 package nl.lrvdlinden.aalerts.ui
 
+import nl.lrvdlinden.aalerts.data.Dienst
+
+import androidx.compose.ui.graphics.Color
+
+import androidx.compose.ui.semantics.semantics
+
+import androidx.compose.ui.semantics.contentDescription
+
+import androidx.compose.ui.draw.alpha
+
+import androidx.compose.ui.graphics.compositeOver
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -47,9 +59,13 @@ fun MapScreen(nav: Nav) {
     var showLayers by remember { mutableStateOf(false) }
     val periode = Settings.kaartPeriode
     val focus = nav.kaartFocus
+    // Filter chips on the map: hidden disciplines and sources (dienst keys, "burgernet", "nlalert").
+    var verborgen by remember { mutableStateOf(setOf<String>()) }
+    // Tapping a Lifeliner/Zulu chip with more than one: show all of them.
+    var heliFit by remember { mutableStateOf<MapCamera?>(null) }
 
-    LaunchedEffect(KaartLaag.HELIKOPTERS.key in lagen) {
-        if (KaartLaag.HELIKOPTERS.key !in lagen) return@LaunchedEffect
+    // Always loaded: the Lifeliner and Zulu chips show even when the helicopter layer is off.
+    LaunchedEffect(Unit) {
         while (true) { Store.refreshHelikopters(); delay(10_000) }
     }
     // Smooth movement: between updates the helicopters fly on along speed and heading (like AirAssist/iOS).
@@ -111,13 +127,13 @@ fun MapScreen(nav: Nav) {
     val cutoff = System.currentTimeMillis() - periode * 3600_000L
     val meldingen = remember(Store.meldingen, periode, Settings.diensten, Settings.plaatsen, Settings.prioriteiten, Settings.radiusEnabled) {
         Store.meldingen.filter { it.millis >= cutoff && it.hasCoordinate && it.hasStreet && Settings.matchesList(it) }
-    }
+    }.filter { it.soort.key !in verborgen }
     val warns = Store.waarschuwingen.filter { (it.startAt.toEpochMilli() >= cutoff || it.isActief) }
     val points = mutableListOf<MapPoint>()
     val areas = mutableListOf<MapArea>()
     if (KaartLaag.WERKGEBIED.key in lagen) areas += MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.03, width = 1.5)
     if (KaartLaag.KNMI.key in lagen) warns.filter { it.bron == "knmi" && !it.isBeeindigd }.forEach { areas += MapArea(it.id, it.gebied ?: emptyList(), it.color.toArgb().toLong(), 0.18) }
-    if (KaartLaag.WAARSCHUWINGEN.key in lagen) warns.filter { it.bron != "knmi" }.forEach { w ->
+    if (KaartLaag.WAARSCHUWINGEN.key in lagen) warns.filter { it.bron != "knmi" && it.bron !in verborgen }.forEach { w ->
         if (w.bron == "nlalert") areas += MapArea(w.id, w.gebied ?: emptyList(), w.color.toArgb().toLong(), if (w.isBeeindigd) 0.06 else 0.2)
         if (w.hasCoordinate) points += MapPoint("w:${w.id}", w.lat!!, w.lon!!, w.marker, 34, dim = w.isBeeindigd)
     }
@@ -149,13 +165,14 @@ fun MapScreen(nav: Nav) {
         if (focus?.startsWith("h:") == true && KaartLaag.HELIKOPTERS.key !in Settings.kaartLagen) Settings.kaartLagen = Settings.kaartLagen + KaartLaag.HELIKOPTERS.key
     }
     val camera = when {
+        heliFit != null -> heliFit!!
         focusHeli != null -> MapCamera(focusHeli.lat, focusHeli.lon, 12.5, key = "${focusHeli.id}${focusHeli.gezien}")
         focusMelding?.hasCoordinate == true -> MapCamera(focusMelding.lat!!, focusMelding.lon!!, 15.0, key = focus)
         else -> APELDOORN
     }
 
     Box(Modifier.fillMaxSize()) {
-        AMap(Modifier.fillMaxSize(), points = points, areas = areas, lines = lines, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
+        AMap(Modifier.fillMaxSize(), points = points, areas = areas, lines = lines, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; heliFit = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
 
         // Period and layers
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp)) {
@@ -170,15 +187,44 @@ fun MapScreen(nav: Nav) {
                 Spacer(Modifier.width(8.dp))
                 SmallFloatingActionButton(onClick = { showLayers = true }, containerColor = MaterialTheme.colorScheme.surface) { Icon(Icons.Outlined.Layers, tr("Kaartlagen", "Map layers")) }
             }
-            if (Store.helikopters.isNotEmpty() && KaartLaag.HELIKOPTERS.key in lagen) {
-                LazyRow(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    items(Store.helikopters, key = { it.id }) { h ->
-                        Surface(shape = RoundedCornerShape(50), color = MaterialTheme.colorScheme.surface, onClick = { selected = "h:${h.id}"; nav.kaartFocus = "h:${h.id}" }) {
-                            Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically) {
-                                Image(painterResource(h.afbeelding), null, Modifier.width(34.dp).graphicsLayer { scaleX = if (h.vliegtWest) -1f else 1f })
-                                Spacer(Modifier.width(6.dp)); Text(h.naam, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-                            }
-                        }
+            // Filter chips: disciplines, Burgernet (always), NL-Alert (when there is one), Lifeliner and Zulu (when in the list).
+            val alleMeldingen = Store.meldingen.filter { it.millis >= cutoff && it.hasCoordinate && Settings.matchesList(it) }
+            val aantalBron = { b: String -> Store.waarschuwingen.count { it.bron == b && (it.startAt.toEpochMilli() >= cutoff || it.isActief) } }
+            val heliGroepen = listOf("trauma" to "Lifeliner", "politie" to "Zulu").mapNotNull { (soort, naam) ->
+                Store.helikopters.filter { it.soort == soort }.takeIf { it.isNotEmpty() }?.let { Triple(soort, naam, it) }
+            }
+            LazyRow(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                items(listOf(Dienst.BRANDWEER, Dienst.AMBULANCE, Dienst.POLITIE, Dienst.TRAUMAHELI), key = { it.key }) { d ->
+                    val on = d.key !in verborgen && KaartLaag.MELDINGEN.key in lagen
+                    KaartChip(on, d.color, "${d.label}: ${alleMeldingen.count { it.soort == d }}", {
+                        if (KaartLaag.MELDINGEN.key !in lagen) { Settings.kaartLagen = Settings.kaartLagen + KaartLaag.MELDINGEN.key; verborgen = verborgen - d.key }
+                        else verborgen = if (on) verborgen + d.key else verborgen - d.key
+                    }) {
+                        d.icon?.let { Image(painterResource(it), null, Modifier.size(16.dp)) }
+                        Spacer(Modifier.width(4.dp)); Text("${alleMeldingen.count { it.soort == d }}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                val bronnen = listOf(Triple("burgernet", "Burgernet", Color(0xFF0067B1)), Triple("nlalert", "NL-Alert", Color(0xFFE3001B)))
+                    .filter { (b, _, _) -> b == "burgernet" || aantalBron(b) > 0 }
+                items(bronnen, key = { it.first }) { (b, naam, kleur) ->
+                    val n = aantalBron(b)
+                    val on = b !in verborgen && KaartLaag.WAARSCHUWINGEN.key in lagen
+                    KaartChip(on, kleur, "$naam: $n", {
+                        if (KaartLaag.WAARSCHUWINGEN.key !in lagen) { Settings.kaartLagen = Settings.kaartLagen + KaartLaag.WAARSCHUWINGEN.key; verborgen = verborgen - b }
+                        else verborgen = if (on) verborgen + b else verborgen - b
+                    }) {
+                        Image(painterResource(if (b == "burgernet") R.drawable.icon_burgernet else R.drawable.icon_nlalert), null, Modifier.size(16.dp))
+                        Spacer(Modifier.width(4.dp)); Text("$n", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
+                items(heliGroepen, key = { it.first }) { (_, naam, list) ->
+                    KaartChip(KaartLaag.HELIKOPTERS.key in lagen, Color(list[0].kleur), "$naam: ${list.size}", {
+                        if (KaartLaag.HELIKOPTERS.key !in lagen) Settings.kaartLagen = Settings.kaartLagen + KaartLaag.HELIKOPTERS.key
+                        if (list.size == 1) { heliFit = null; selected = "h:${list[0].id}"; nav.kaartFocus = "h:${list[0].id}" }
+                        else { selected = null; nav.kaartFocus = null; heliFit = MapCamera(list[0].lat, list[0].lon, 9.0, fit = list.map { it.lat to it.lon }, key = "fit-$naam-${System.nanoTime()}") }
+                    }) {
+                        Image(painterResource(list[0].afbeelding), null, Modifier.width(30.dp).height(15.dp))
+                        Spacer(Modifier.width(4.dp)); Text("${list.size}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
@@ -299,5 +345,15 @@ private fun AfspeelBalk(a: Afspelen) {
             if (a.positie != null) IconButton(onClick = a.onStop) { Icon(Icons.Filled.Close, tr("Terug naar live", "Back to live")) }
         }
         a.moment?.let { Text(tr("Terugspelen: ", "Playback: ") + Fmt.time(java.time.Instant.ofEpochMilli(it)), color = Muted, fontSize = 11.sp) }
+    }
+}
+
+/** Filter chip on the map: coloured outline when on, faded when off. */
+@Composable
+private fun KaartChip(on: Boolean, color: Color, label: String, onClick: () -> Unit, content: @Composable RowScope.() -> Unit) {
+    Surface(onClick = onClick, shape = RoundedCornerShape(50), color = if (on) color.copy(alpha = 0.22f).compositeOver(MaterialTheme.colorScheme.surface) else MaterialTheme.colorScheme.surface,
+        border = if (on) androidx.compose.foundation.BorderStroke(1.dp, color) else null,
+        modifier = Modifier.alpha(if (on) 1f else 0.55f).semantics { contentDescription = label }) {
+        Row(Modifier.padding(horizontal = 10.dp, vertical = 5.dp), verticalAlignment = Alignment.CenterVertically, content = content)
     }
 }

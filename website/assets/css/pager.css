@@ -319,3 +319,4 @@ a.drow { text-decoration: none; color: inherit; }
 .afspeel input[type=range] { flex: 1; accent-color: #9333EA; }
 .afspeel .icon-btn { min-width: 34px; font-variant-numeric: tabular-nums; }
 #afspeelTijd { display: block; min-height: 1em; font-variant-numeric: tabular-nums; }
+.chip.heli-chip img { width: 34px; height: 18px; object-fit: contain; }

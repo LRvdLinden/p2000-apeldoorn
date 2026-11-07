@@ -147,7 +147,7 @@ struct MapScreen: View {
                     }
                 }
             }
-            .onAppear { if settings.laag(.helikopters) { helis.start() }; volgGevraagd() }
+            .onAppear { helis.start(); volgGevraagd() }
             .task { await locaties.load() }
             .onChange(of: Router.shared.volgHeli) { _, _ in volgGevraagd() }
             // Following a helicopter: the camera moves along with every new position, until the user moves the map.
@@ -158,7 +158,7 @@ struct MapScreen: View {
             .onMapCameraChange(frequency: .onEnd) { ctx in
                 if volgen, let h = heli, Werkgebied.distanceKm(ctx.region.center.latitude, ctx.region.center.longitude, h.lat, h.lon) > 3 { volgen = false }
             }
-            .onDisappear { if settings.laag(.helikopters) { helis.stop() }; spoor.volg(nil) }
+            .onDisappear { helis.stop(); spoor.volg(nil) }
             .onChange(of: selectedHeli) { _, id in spoor.volg(id) }
             // Smooth movement: every 2 seconds a new estimated position while a helicopter is in the air.
             .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
@@ -166,7 +166,7 @@ struct MapScreen: View {
                 withAnimation(.linear(duration: 2)) { nu = t }
             }
             .onChange(of: settings.laag(.helikopters)) { _, on in
-                if on { helis.start() } else { helis.stop(); selectedHeli = nil }
+                if !on { selectedHeli = nil }
             }
         }
     }
@@ -336,56 +336,101 @@ struct MapScreen: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            if settings.laag(.p2000) {
+            // One row of filter chips: the disciplines, Burgernet (always), NL-Alert (when there is one) and the
+            // Lifeliners / Zulu's in the air (tap: to the helicopter, or all of that type when there are more).
+            ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
-                    ForEach(Dienst.selectable) { d in
-                        let on = visibleDiensten.contains(d)
-                        Button {
-                            withAnimation {
-                                if on { visibleDiensten.remove(d) } else { visibleDiensten.insert(d) }
-                            }
-                        } label: {
-                            HStack(spacing: 4) {
+                    if settings.laag(.p2000) || !visibleDiensten.isEmpty {
+                        ForEach(Dienst.selectable) { d in
+                            let on = settings.laag(.p2000) && visibleDiensten.contains(d)
+                            chip(on: on, color: d.color, label: "\(d.label): \(count(d))") {
+                                if !settings.laag(.p2000) { settings.setLaag(.p2000, true); visibleDiensten = [d] }
+                                else if on { visibleDiensten.remove(d) } else { visibleDiensten.insert(d) }
+                            } content: {
                                 DienstIcon(dienst: d, size: 14)
-                                Text("\(count(d))").font(AppFont.body(12, .bold, relativeTo: .caption).monospacedDigit())
+                                Text("\(count(d))")
                             }
-                            .padding(.horizontal, 9).padding(.vertical, 5)
-                            .background(on ? d.color.opacity(0.22) : Color.secondary.opacity(0.08), in: Capsule())
-                            .overlay(Capsule().strokeBorder(on ? d.color : .clear, lineWidth: 1))
-                            .opacity(on ? 1 : 0.5)
                         }
-                        .buttonStyle(.plain)
-                        .accessibilityLabel("\(d.label): \(count(d))")
-                        .accessibilityValue(on ? L("Zichtbaar") : L("Verborgen"))
                     }
-                }
-            }
-            if settings.laag(.helikopters), !helis.items.isEmpty {
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 6) {
-                        ForEach(helis.items) { h in
-                            Button {
-                                withAnimation {
-                                    selectedHeli = h.id; selected = nil; selectedKazerne = nil
-                                    position = .region(MKCoordinateRegion(center: h.coordinate, latitudinalMeters: 20000, longitudinalMeters: 20000))
-                                }
-                            } label: {
-                                Label(h.naam, systemImage: "helicopter")
-                                    .font(AppFont.body(12, .semibold, relativeTo: .caption))
-                                    .padding(.horizontal, 9).padding(.vertical, 5)
-                                    .background(h.color.opacity(0.2), in: Capsule())
-                                    .overlay(Capsule().strokeBorder(h.color, lineWidth: 1))
-                            }
-                            .buttonStyle(.plain)
+                    let bn = aantal(.burgernet)
+                    chip(on: settings.laag(.burgernet), color: Color(hex: 0x0067B1), label: "Burgernet: \(bn)") {
+                        settings.setLaag(.burgernet, !settings.laag(.burgernet))
+                    } content: {
+                        Image("icon_burgernet").resizable().scaledToFit().frame(width: 16, height: 16)
+                        Text("\(bn)")
+                    }
+                    let nl = aantal(.nlalert)
+                    if nl > 0 {
+                        chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {
+                            settings.setLaag(.nlalert, !settings.laag(.nlalert))
+                        } content: {
+                            Image("icon_nlalert").resizable().scaledToFit().frame(width: 16, height: 16)
+                            Text("\(nl)")
+                        }
+                    }
+                    ForEach(heliSoorten, id: \.soort) { g in
+                        chip(on: settings.laag(.helikopters), color: g.color, label: "\(g.naam): \(g.items.count)") {
+                            naarHelis(g.items)
+                        } content: {
+                            Image(g.items[0].afbeelding).resizable().scaledToFit().frame(width: 28, height: 14)
+                            Text("\(g.items.count)")
                         }
                     }
                 }
+                .padding(.horizontal, 1)
             }
         }
         .padding(10)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
         .padding(.horizontal)
         .padding(.top, 6)
+    }
+
+    /// A filter chip: coloured outline when on, faded when off.
+    private func chip<C: View>(on: Bool, color: Color, label: String, action: @escaping () -> Void, @ViewBuilder content: () -> C) -> some View {
+        Button { withAnimation { action() } } label: {
+            HStack(spacing: 4) { content() }
+                .font(AppFont.body(12, .bold, relativeTo: .caption).monospacedDigit())
+                .padding(.horizontal, 9).padding(.vertical, 5)
+                .background(on ? color.opacity(0.22) : Color.secondary.opacity(0.08), in: Capsule())
+                .overlay(Capsule().strokeBorder(on ? color : .clear, lineWidth: 1))
+                .opacity(on ? 1 : 0.5)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(label)
+        .accessibilityValue(on ? L("Zichtbaar") : L("Verborgen"))
+    }
+
+    /// NL-Alert or Burgernet in the chosen period (or still active).
+    private func aantal(_ bron: Waarschuwing.Bron) -> Int {
+        let cutoff = cutoff
+        return waarschuwingen.items.filter { $0.bron == bron && (!$0.isBeeindigd || ($0.einde ?? $0.start) >= cutoff) && settings.matchesList($0) }.count
+    }
+
+    private struct HeliSoort { let soort: String; let naam: String; let color: Color; let items: [Helikopter] }
+    /// Lifeliners and police helicopters in the air, one chip per type.
+    private var heliSoorten: [HeliSoort] {
+        let lucht = helis.items
+        return [("trauma", "Lifeliner"), ("politie", "Zulu")].compactMap { soort, naam in
+            let items = lucht.filter { $0.soort == soort }
+            return items.isEmpty ? nil : HeliSoort(soort: soort, naam: naam, color: items[0].color, items: items)
+        }
+    }
+
+    /// One helicopter: select and follow it. More: show all of them on the map.
+    private func naarHelis(_ items: [Helikopter]) {
+        if !settings.laag(.helikopters) { settings.setLaag(.helikopters, true) }
+        selected = nil; selectedKazerne = nil; selectedLocatie = nil
+        if items.count == 1, let h = items.first {
+            selectedHeli = h.id
+            position = .region(MKCoordinateRegion(center: h.geschat(op: nu), latitudinalMeters: 20000, longitudinalMeters: 20000))
+            return
+        }
+        selectedHeli = nil
+        let lats = items.map(\.lat), lons = items.map(\.lon)
+        let c = CLLocationCoordinate2D(latitude: (lats.min()! + lats.max()!) / 2, longitude: (lons.min()! + lons.max()!) / 2)
+        position = .region(MKCoordinateRegion(center: c, span: MKCoordinateSpan(latitudeDelta: max(0.2, (lats.max()! - lats.min()!) * 1.5),
+                                                                                longitudeDelta: max(0.2, (lons.max()! - lons.min()!) * 1.5))))
     }
 
     private func count(_ d: Dienst) -> Int {
