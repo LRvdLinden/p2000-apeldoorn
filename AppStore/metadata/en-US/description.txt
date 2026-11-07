@@ -6,13 +6,21 @@ LIVE PAGER
 • A KNMI warning (code yellow, orange or red) as a bar at the top while it applies
 • All warnings of the last two weeks
 
-MAP WITH LAYERS
-• Switch layers on or off: alerts, NL-Alert, Burgernet, KNMI areas, the border of the area, stations and helicopters
-• Follow Lifeliner 1 to 4 and the police helicopters live, with heading, altitude and speed
+MAP WITH LAYERS AND FILTERS
+• Filter with one tap on fire, ambulance, police, trauma helicopter, Burgernet and NL-Alert
+• Switch on or off: KNMI areas, the border of the area, stations, hospitals and air bases
+• Lifeliner 1 to 4 and the police helicopters live, moving smoothly, with heading, altitude and speed
+
+LIFELINER AND POLICE HELICOPTER
+• Route of this flight, the last 30 minutes or 2 hours
+• Likely destination: the hospital or base it is heading for, with arrival time
+• Play back flights at 30× to 300× speed
+• A notification when a Lifeliner takes off for an alert in Apeldoorn
 
 EVERY DETAIL
 • Large map with Look Around and 3D
 • Alerted stations with their route and an estimated arrival time
+• The alert's Lifeliner live on the map, with its route
 • Timeline of alerts that may belong to the same incident
 • Capcodes, vehicles and the weather at the time of the alert
 • Route via Apple Maps or Google Maps, and share with one tap
@@ -28,6 +36,7 @@ NOTIFICATIONS
 EVERYWHERE
 • iPhone, iPad, Mac, Apple Watch and Apple TV (control-room view)
 • Widgets, iCloud sync of your settings and Face ID lock
+• Status of every component in Settings and at a-alerts.nl/status
 
 No account, no ads and no tracking. The app is available in Dutch and English.
 

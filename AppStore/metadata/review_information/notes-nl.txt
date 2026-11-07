@@ -1,11 +1,32 @@
 (Alleen ter referentie, niet uploaden)
-A-Alerts is de nieuwe naam van P2000 Apeldoorn (zelfde app en bundle-ID). Geen account nodig; Inloggen met Apple is optioneel en synchroniseert alleen instellingen via iCloud.
+A-Alerts is de nieuwe naam van P2000 Apeldoorn (zelfde app, zelfde bundle-ID, update naar 2.0.0). Geen account nodig; Inloggen met Apple is optioneel en synchroniseert alleen instellingen via iCloud.
 
-Wat de app doet: openbare P2000-meldingen voor de gemeente Apeldoorn en Teuge, met openbare waarschuwingen van NL-Alert, Burgernet en KNMI. Onze eigen server (Cloudflare Worker) verzamelt en filtert; de app praat alleen met die server.
+WAT DE APP DOET
+Openbare P2000-meldingen voor één gemeente, Apeldoorn (met Teuge), met openbare waarschuwingen van NL-Alert, Burgernet en KNMI en live trauma- en politiehelikopters. Onze eigen server (Cloudflare Worker) verzamelt en filtert; de app praat alleen met die server. Een lokale app met één doel van één ontwikkelaar, geen template en geen kopie van een andere app; het is de Apple-versie van mijn eigen P2000-app voor Homey.
 
-Testen: welkomstscherm doorlopen; tab Pager toont de meldingen van 24 uur (met NL-Alert en Burgernet ertussen als die er zijn); tik op een melding voor kaart, Look Around, kazernes, verloop en weer; routeknop opent Apple Kaarten/Google Maps; deelknop deelt een a-alerts.nl-link; tab Kaart > lagenknop; tab Statistieken; Instellingen > Notificaties > Profielen en Stuur een testmelding; Instellingen > Waarschuwingen > Alle waarschuwingen; Watch, Mac en Apple TV tonen dezelfde gegevens.
+ZO TEST JE
+1. Open de app en doorloop het welkomstscherm. Meldingen en locatie zijn optioneel.
+2. Pager: meldingen van de laatste 24 uur, met NL-Alert/Burgernet ertussen. Tik op een melding: kaart, Look Around, kazernes met aankomsttijd, verloop, weer, route en delen.
+3. Kaart: chips bovenaan filteren diensten, Burgernet en NL-Alert; Lifeliner/Zulu-chips springen naar de heli. De lagenknop zet kazernes, ziekenhuizen/vliegbases en helikopters aan of uit.
+4. Tik op een helikopter: route (deze vlucht / 30 min / 2 uur), waarschijnlijke bestemming, laatste vluchten en terugspelen.
+5. Statistieken: vandaag tegenover gisteren.
+6. Instellingen › Notificaties › Profielen; "Stuur testmelding" stuurt direct een pushmelding. Instellingen › Status toont alle onderdelen.
+7. Apple Watch, Mac en Apple TV tonen dezelfde gegevens; Apple TV heeft een meldkamerweergave.
 
-Regio: alleen één gemeente; waarschuwingen zijn zeldzaam, een lege lijst is normaal; helikopters alleen als ze vliegen.
-Bronnen: P2000, NL-Alert, Burgernet, KNMI, adsb.lol (ODbL), OpenStreetMap, WeatherKit. Onafhankelijk, geen officiële dienst.
-Toestemmingen: meldingen (optioneel), locatie bij gebruik (alleen Mijn buurt en afstand).
-Geen aankopen, abonnementen, advertenties of tracking. Reviewvraag maximaal wekelijks; kaart 'Meer apps van de ontwikkelaar' in Instellingen.
+REGIO / DATA
+Alleen één Nederlandse gemeente. Meldingen komen een paar keer per uur; waarschuwingen zijn zeldzaam, lijsten kunnen leeg zijn. Helikopters alleen als ze gevolgd worden. Dat is normaal, geen fout.
+
+BRONNEN
+P2000, NL-Alert, Burgernet, KNMI, helikopterposities uit open ADS-B-data (adsb.lol, ODbL), kazernes en ziekenhuizen uit OpenStreetMap (ODbL), weer uit WeatherKit. Geen band met hulpdiensten of overheid; de disclaimer in de app zegt dat.
+
+TOESTEMMINGEN
+Meldingen: voor pushmeldingen. Locatie (tijdens gebruik): alleen voor Mijn buurt en afstanden; de app werkt volledig zonder.
+
+AANKOPEN / RECLAME
+Geen aankopen, abonnementen, advertenties of tracking.
+
+OVERIG
+Beoordelingsvraag hooguit één keer per week op een rustig moment. In Instellingen een kaart "Meer apps van de ontwikkelaar".
+
+NIEUW IN 2.0.0
+Nieuwe naam en icoon; NL-Alert/Burgernet/KNMI; kaartfilters en lagen; live helikopters met route, bestemming en terugspelen; pushmelding bij opstijgen Lifeliner; meldingsprofielen; statusscherm; Apple TV-meldkamer.

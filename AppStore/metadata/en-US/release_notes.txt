@@ -1,8 +1,11 @@
-P2000 Apeldoorn is now A-Alerts.
+P2000 Apeldoorn is now A-Alerts, with a new icon. Your settings and saved alerts stay.
 • NL-Alert and Burgernet in the pager, KNMI warnings as a bar at the top, and all warnings of the last two weeks
-• Map layers you switch on or off, with live trauma and police helicopters and stations
-• New alert page: alerted stations with estimated arrival, incident timeline, route via Apple Maps or Google Maps, and sharing
+• Map with filters per service, Burgernet and NL-Alert, and layers for stations, hospitals and air bases
+• Lifeliners and police helicopters live, with route, likely destination and flight playback
+• A notification when a Lifeliner takes off for an alert in Apeldoorn
+• New alert page: stations with estimated arrival, the Lifeliner live, incident timeline, route and sharing
 • Up to five notification profiles with their own times; your current settings are in the profile Standaard
 • Notifications with a small map and buttons for Save and Apple Maps
+• Status of every component in Settings
 • Area extended to 26 towns and hamlets, including Teuge
-• Apple TV: warnings, map layers, helicopters and stations
+• Apple TV: control room with warnings, map layers, helicopters with route and stations

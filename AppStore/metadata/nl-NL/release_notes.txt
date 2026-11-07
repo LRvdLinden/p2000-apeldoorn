@@ -1,8 +1,11 @@
-P2000 Apeldoorn heet nu A-Alerts.
+P2000 Apeldoorn heet nu A-Alerts, met een nieuw icoon. Je instellingen en bewaarde meldingen blijven staan.
 • NL-Alert en Burgernet in de pager, KNMI-waarschuwingen als balk bovenaan, en alle waarschuwingen van twee weken terug te lezen
-• Kaartlagen die je zelf aan of uit zet, met live trauma- en politiehelikopters en kazernes
-• Nieuwe meldingpagina: gealarmeerde kazernes met geschatte aankomst, verloop van de inzet, route via Apple Kaarten of Google Maps, en delen
+• Kaart met filters per dienst, Burgernet en NL-Alert, en lagen voor kazernes, ziekenhuizen en vliegbases
+• Lifeliners en politiehelikopters live, met routespoor, waarschijnlijke bestemming en vluchten terugspelen
+• Pushmelding wanneer een Lifeliner opstijgt voor een melding in Apeldoorn
+• Nieuwe meldingpagina: kazernes met geschatte aankomst, de Lifeliner live, verloop van de inzet, route en delen
 • Tot vijf meldingsprofielen met eigen tijden; je huidige instellingen staan in profiel Standaard
 • Pushmeldingen met een kaartje en knoppen voor Bewaar en Apple Kaarten
+• Status van alle onderdelen in Instellingen
 • Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
-• Apple TV: waarschuwingen, kaartlagen, helikopters en kazernes
+• Apple TV: meldkamer met waarschuwingen, kaartlagen, helikopters met route en kazernes

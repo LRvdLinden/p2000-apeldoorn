@@ -6,13 +6,21 @@ LIVE PAGER
 • KNMI-waarschuwing (code geel, oranje of rood) als balk bovenaan zolang hij geldt
 • Alle waarschuwingen van de laatste twee weken terug te lezen
 
-KAART MET LAGEN
-• Zet zelf aan of uit: meldingen, NL-Alert, Burgernet, KNMI-gebieden, grens werkgebied, kazernes en helikopters
-• Volg Lifeliner 1 tot en met 4 en de politiehelikopters live, met koers, hoogte en snelheid
+KAART MET LAGEN EN FILTERS
+• Filter met één tik op brandweer, ambulance, politie, traumaheli, Burgernet en NL-Alert
+• Zet zelf aan of uit: KNMI-gebieden, grens werkgebied, kazernes, ziekenhuizen en vliegbases
+• Lifeliner 1 tot en met 4 en de politiehelikopters live, vloeiend bewegend, met koers, hoogte en snelheid
+
+LIFELINER EN POLITIEHELIKOPTER
+• Routespoor van deze vlucht, de laatste 30 minuten of 2 uur
+• Waarschijnlijke bestemming: het ziekenhuis of de basis waar hij naartoe vliegt, met aankomsttijd
+• Vluchten terugspelen op 30× tot 300× snelheid
+• Pushmelding wanneer een Lifeliner opstijgt voor een melding in Apeldoorn
 
 ALLES OVER DE MELDING
 • Grote kaart met Look Around en 3D
 • Gealarmeerde kazernes met hun route en een geschatte aankomsttijd
+• De Lifeliner van de melding live op de kaart, met zijn route
 • Verloop: meldingen die mogelijk bij dezelfde inzet horen, als tijdlijn
 • Capcodes, voertuigen en het weer op het moment van de melding
 • Route via Apple Kaarten of Google Maps, en delen met één tik
@@ -28,6 +36,7 @@ PUSHMELDINGEN
 OVERAL
 • iPhone, iPad, Mac, Apple Watch en Apple TV (meldkamerweergave)
 • Widgets, iCloud-synchronisatie van je instellingen en Face ID-vergrendeling
+• Status van alle onderdelen in Instellingen en op a-alerts.nl/status
 
 Geen account nodig, geen advertenties en geen tracking.
 
