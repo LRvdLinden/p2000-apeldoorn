@@ -1,0 +1,70 @@
+name: Website live (a-alerts.nl)
+
+# Zet website/ via FTPS (certificaat gecontroleerd) live op a-alerts.nl, met de nieuwste APK uit de branch android-build.
+# Secrets: AALERTS_FTP_SERVER, AALERTS_FTP_USERNAME, AALERTS_FTP_PASSWORD, optioneel AALERTS_FTP_DIR
+# (anders FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_DIR). Ontbreekt er een, dan alleen een waarschuwing.
+# Nooit --delete: bestanden die alleen op de server staan blijven staan.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/website-deploy.yml', 'website/.deploy']
+
+concurrency:
+  group: website-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Teksten en APK
+        run: |
+          mkdir -p website/data && cp worker/content/*.json website/data/
+          git fetch --depth 1 origin android-build && git show origin/android-build:A-Alerts.apk > website/downloads/A-Alerts.apk \
+            && git show origin/android-build:android.json > /tmp/android.json && echo "APK: $(stat -c %s website/downloads/A-Alerts.apk) bytes" \
+            || echo "::warning::Geen APK in android-build"
+          rm -f website/.deploy
+      - name: Controleren
+        id: check
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+        run: |
+          missing=""
+          for k in FTP_SERVER FTP_USERNAME FTP_PASSWORD; do [ -n "${!k:-}" ] || missing="$missing $k"; done
+          if [ -n "$missing" ]; then echo "::warning::Secrets ontbreken:$missing — website niet geüpload."; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
+      - name: lftp installeren
+        if: steps.check.outputs.skip != '1'
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+      - name: Uploaden via FTPS
+        if: steps.check.outputs.skip != '1'
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+        run: |
+          set -euo pipefail
+          source tools/ftps.sh
+          ftps_connect
+          T="$FTPS_TARGET"
+          [ "$T" != "." ] && { ftps_run "mkdir -p -f \"$T\"" >/dev/null 2>&1 || true; }
+          ftps_run "mirror -R --parallel=4 --exclude-glob .DS_Store --exclude-glob .git* ./website/ \"$T\"" >/dev/null 2>&1 \
+            || { echo "::error::Uploaden naar de FTP-server mislukt."; exit 1; }
+          echo "::notice::Website geüpload."
+      - name: Controleren of a-alerts.nl de nieuwe versie toont
+        if: steps.check.outputs.skip != '1' && success()
+        run: |
+          sleep 5
+          v=$(grep -o 'v=[0-9]*' website/pager/index.html | head -1)
+          curl -sL --max-time 20 https://a-alerts.nl/pager/ | grep -q "$v" && echo "::notice::a-alerts.nl/pager toont $v" || echo "::warning::a-alerts.nl/pager toont $v nog niet (cache?)"
+          code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -I https://a-alerts.nl/downloads/A-Alerts.apk || true)
+          echo "::notice::APK: HTTP $code"
