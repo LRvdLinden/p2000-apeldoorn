@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], fouten: ["Gemelde fouten", fouten], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -484,6 +484,30 @@ function incidentUpdate(id, klaar) {
     await api("POST", `/v1/beheer/status/incidenten/${id}`, { fase: fd.get("fase") || undefined, tekst: fd.get("tekst"), tekst_en: fd.get("tekst_en"), opgelost: klaar });
     closeModal(); toast(klaar ? "Afgerond" : "Update geplaatst"); run();
   };
+}
+
+// "Klopt deze melding niet?": reports from users (apps and website), kept 90 days.
+const REDEN = { locatie: "De plek klopt niet", dienst: "Verkeerde hulpdienst", prioriteit: "Verkeerde prioriteit", dubbel: "Dubbele melding", test: "Test- of proefalarm", anders: "Iets anders" };
+let foutFilter = "open";
+async function fouten(el) {
+  const d = await api("GET", `/v1/beheer/feedback${foutFilter ? `?status=${foutFilter}` : ""}`);
+  const knop = (k, l) => `<button class="btn${foutFilter === k ? " primary" : ""}" data-ff="${k}">${l}</button>`;
+  el.innerHTML = `<div class="toolbar">${knop("open", `Open (${d.open})`)}${knop("afgehandeld", "Afgehandeld")}${knop("", "Alles")}</div>
+    <div class="card">${d.items.length ? d.items.map((f) => `<div class="row" style="align-items:flex-start"><div class="grow">
+      <span class="tag ${f.status === "open" ? "orange" : "blue"}">${esc(REDEN[f.reden] || f.reden)}</span>
+      <b>${esc(f.title || "(melding verwijderd)")}</b> <small class="muted">${esc(f.stad || "")}${f.datum ? ` · ${dt(f.datum)}` : ""}</small>
+      ${f.toelichting ? `<br>${esc(f.toelichting)}` : ""}
+      <br><small class="muted">Gemeld ${dt(f.at)} · ${esc(f.platform || "?")}${f.lat != null ? ` · <a href="https://maps.apple.com/?ll=${f.lat},${f.lon}&q=Juiste%20plek" target="_blank" rel="noopener">juiste plek ↗</a>` : ""} · <a href="https://a-alerts.nl/melding/${encodeURIComponent(f.guid)}" target="_blank" rel="noopener">melding ↗</a></small>
+    </div><div style="display:flex;flex-direction:column;gap:6px">
+      ${f.status === "open" ? `<button class="btn primary" data-fok="${f.id}">Afgehandeld</button>` : `<button class="btn" data-fopen="${f.id}">Heropen</button>`}
+      ${f.title ? `<button class="btn" data-fedit="${esc(f.guid)}">Bewerk melding</button>` : ""}
+      <button class="btn danger" data-fdel="${f.id}">Verwijder</button></div></div>`).join("") : `<p class="muted">Geen gemelde fouten</p>`}</div>
+    <p class="muted" style="font-size:.8rem;margin-top:12px">Gebruikers melden dit anoniem via "Klopt deze melding niet?" onderaan een melding. Een foute plek of titel pas je aan bij Meldingen.</p>`;
+  el.querySelectorAll("[data-ff]").forEach((b) => (b.onclick = () => { foutFilter = b.dataset.ff; run(); }));
+  el.querySelectorAll("[data-fok]").forEach((b) => (b.onclick = async () => { await api("POST", `/v1/beheer/feedback/${b.dataset.fok}`, { status: "afgehandeld" }); toast("Afgehandeld"); run(); }));
+  el.querySelectorAll("[data-fopen]").forEach((b) => (b.onclick = async () => { await api("POST", `/v1/beheer/feedback/${b.dataset.fopen}`, { status: "open" }); run(); }));
+  el.querySelectorAll("[data-fedit]").forEach((b) => (b.onclick = async () => editMelding(await api("GET", `/v1/beheer/meldingen/${encodeURIComponent(b.dataset.fedit)}`))));
+  el.querySelectorAll("[data-fdel]").forEach((b) => (b.onclick = async () => { if (!confirm("Deze melding van een fout verwijderen?")) return; await api("DELETE", `/v1/beheer/feedback/${b.dataset.fdel}`); toast("Verwijderd"); run(); }));
 }
 
 async function push(el) {
