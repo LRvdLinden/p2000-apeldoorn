@@ -81,6 +81,10 @@ fun StatsScreen(nav: Nav) {
                     }
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { listOf("00", "06", "12", "18", "23").forEach { Text(it, color = Muted, fontSize = 10.sp) } }
                     Legend(gray)
+                    // As on iOS: the busiest hour today.
+                    t.perUur.withIndex().maxByOrNull { it.value }?.takeIf { it.value > 0 }?.let { (h, n) ->
+                        Text(tr("Drukste uur vandaag: %02d:00 (%d meldingen)".format(h, n), "Busiest hour today: %02d:00 (%d alerts)".format(h, n)), color = Muted, fontSize = 12.sp)
+                    }
                 }
                 if (t.perPrioriteit.isNotEmpty() || y.perPrioriteit.isNotEmpty()) SectionCard(tr("Per prioriteit", "By priority"), Icons.Outlined.PriorityHigh) {
                     (t.perPrioriteit.keys + y.perPrioriteit.keys).sorted().forEach { p -> InfoRow(p, "${t.perPrioriteit[p] ?: 0}  ·  " + tr("gisteren", "yesterday") + " ${y.perPrioriteit[p] ?: 0}") }

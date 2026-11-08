@@ -5,7 +5,9 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -14,6 +16,8 @@ import androidx.compose.material.icons.filled.Bookmark
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -82,11 +86,23 @@ fun PrioBadge(m: Melding) {
 @Composable
 fun LiveBadge() = Tag("LIVE", Color(0xFFE3001B))
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MeldingRow(m: Melding, onClick: () -> Unit) {
     val read = m.guid in Settings.gelezen
+    val ctx = androidx.compose.ui.platform.LocalContext.current
+    var menu by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+    // Long press: save and share (as the context menu on iOS).
+    Box {
+    DropdownMenu(menu, onDismissRequest = { menu = false }) {
+        val bewaard = m.guid in Settings.bewaard
+        DropdownMenuItem(text = { Text(if (bewaard) tr("Niet meer bewaren", "Remove from saved") else tr("Bewaar", "Save")) },
+            leadingIcon = { Icon(if (bewaard) Icons.Outlined.BookmarkRemove else Icons.Outlined.BookmarkBorder, null) },
+            onClick = { Settings.toggleBewaard(m.guid); menu = false })
+        DropdownMenuItem(text = { Text(tr("Deel", "Share")) }, leadingIcon = { Icon(Icons.Outlined.Share, null) }, onClick = { menu = false; share(ctx, m) })
+    }
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp).alpha(if (read) 0.55f else 1f),
+        Modifier.fillMaxWidth().combinedClickable(onClick = onClick, onLongClick = { menu = true }).padding(horizontal = 16.dp, vertical = 10.dp).alpha(if (read) 0.55f else 1f),
         verticalAlignment = Alignment.Top,
     ) {
         DienstIcon(m.soort, 40.dp)
@@ -105,6 +121,7 @@ fun MeldingRow(m: Melding, onClick: () -> Unit) {
             Text(m.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
             Text(m.plaatsText, color = Muted, fontSize = 13.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
+    }
     }
 }
 
