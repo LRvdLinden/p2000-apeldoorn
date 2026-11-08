@@ -351,8 +351,8 @@ struct WaarschuwingDetailView: View {
     /// KNMI: what to expect and what to do, as KNMI writes it per area.
     private func knmiCard(_ w: Waarschuwing) -> some View {
         VStack(alignment: .leading, spacing: 16) {
-            if let v = w.verwachting { knmiBlok("exclamationmark.triangle.fill", Waarschuwing.codeColor(w.niveau), L("Wat kun je verwachten?"), v) }
-            if let a = w.advies { knmiBlok("checkmark.shield.fill", .accentColor, L("Wat moet je doen?"), a) }
+            if let v = w.verwachting { knmiBlok("exclamationmark.triangle.fill", Waarschuwing.codeColor(w.niveau), L("Wat kun je verwachten?"), v.replacingOccurrences(of: "\n", with: " ")) }
+            if let a = w.advies { knmiBlok("checkmark.shield.fill", .accentColor, L("Wat moet je doen?"), a.split(separator: "\n").map { "•  \($0)" }.joined(separator: "\n")) }
             if let p = w.plaats, !p.isEmpty { knmiBlok("map.fill", .secondary, L("Gebied"), p) }
             if let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
                 Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)

@@ -3,11 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=41";
+} from "./core.js?v=42";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=41";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=42";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -243,7 +243,7 @@ function renderKnmi() {
   const items = state.warnings.filter((w) => w.bron === "knmi" && isActief(w));
   $("knmiBar").innerHTML = items.map((w) => `
     <a class="knmi" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
-      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small></span><i>›</i>
+      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small>${w.verwachting ? `<small>${esc(String(w.verwachting).split("\n")[0])}</small>` : ""}</span><i>›</i>
     </a>`).join("");
 }
 
@@ -566,8 +566,11 @@ async function selectWarning(id, { push = true } = {}) {
       <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : "Plaats van de oproep"}</small></div></div>
       ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} Bekijk bij ${esc(b.label)}</a>` : ""}
     </section>
-    ${w.verwachting || w.advies ? [["Wat kun je verwachten?", w.verwachting], ["Wat moet je doen?", w.advies]].filter(([, t]) => t)
-      .map(([h, t]) => `<section class="card story"><h2>${h}</h2>${String(t).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>`).join("")
+    ${w.verwachting || w.advies ? `<section class="card story knmi-advies"><h2>Advies</h2>
+      <div class="code" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small></span></div>
+      <div class="box">${w.verwachting ? `<h3>Wat kun je verwachten?</h3><p>${esc(String(w.verwachting).split(/\n+/).join(" "))}</p>` : ""}
+      ${w.advies ? `<h3>Wat moet je doen?</h3><ul>${String(w.advies).split(/\n+/).map((p) => `<li>${esc(p)}</li>`).join("")}</ul>` : ""}</div>
+      ${w.plaats ? `<p class="hint">Geldt voor: ${esc(w.plaats)}</p>` : ""}</section>`
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}

@@ -89,6 +89,9 @@ struct KnmiBanner: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: w.kop).font(AppFont.body(15, .bold, relativeTo: .subheadline))
                             Text(validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
+                            if let regel = w.verwachting?.split(separator: "\n").first {
+                                Text(String(regel)).font(AppFont.body(12, .regular, relativeTo: .caption)).lineLimit(1).opacity(0.9)
+                            }
                         }
                         Spacer(minLength: 0)
                         Image(systemName: "chevron.right").font(.caption.weight(.bold)).opacity(0.7)

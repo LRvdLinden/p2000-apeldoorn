@@ -76,6 +76,9 @@ struct TVKnmiBalk: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: w.kop).font(AppFont.body(20, .bold))
                             Text(w.titel).font(AppFont.body(16, .regular)).lineLimit(1)
+                            if let regel = (w.advies ?? w.verwachting)?.split(separator: "\n").first {
+                                Text(String(regel)).font(AppFont.body(15, .regular)).lineLimit(1).opacity(0.9)
+                            }
                         }
                         Spacer(minLength: 0)
                     }
@@ -142,7 +145,9 @@ struct TVWaarschuwingDetail: View {
                         }
                         if let a = waarschuwing.advies {
                             Text(L("Wat moet je doen?")).font(AppFont.body(22, .bold))
-                            Text(a).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
+                            ForEach(Array(a.split(separator: "\n").enumerated()), id: \.offset) { _, regel in
+                                Text(verbatim: "•  \(regel)").font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
+                            }
                         }
                     } else if let t = waarschuwing.tekst, !t.isEmpty {
                         Text(t).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)

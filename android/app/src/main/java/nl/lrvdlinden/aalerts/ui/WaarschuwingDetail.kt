@@ -96,8 +96,8 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 }
                 if (x.bron == "knmi" && (x.verwachting != null || x.advies != null)) {
                     // KNMI writes these per area, in Dutch only.
-                    x.verwachting?.let { SectionCard(tr("Wat kun je verwachten?", "What to expect"), Icons.Outlined.Warning) { Text(it, fontSize = 15.sp) } }
-                    x.advies?.let { SectionCard(tr("Wat moet je doen?", "What to do"), Icons.Outlined.VerifiedUser) { Text(it, fontSize = 15.sp) } }
+                    x.verwachting?.let { SectionCard(tr("Wat kun je verwachten?", "What to expect"), Icons.Outlined.Warning) { Text(it.replace("\n", " "), fontSize = 15.sp) } }
+                    x.advies?.let { SectionCard(tr("Wat moet je doen?", "What to do"), Icons.Outlined.VerifiedUser) { it.split("\n").filter { r -> r.isNotBlank() }.forEach { r -> Text("•  $r", fontSize = 15.sp) } } }
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
                 }

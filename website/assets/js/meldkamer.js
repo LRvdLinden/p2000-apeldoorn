@@ -4,11 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=41";
+} from "./core.js?v=42";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
-} from "./aalerts.js?v=41";
+} from "./aalerts.js?v=42";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -308,7 +308,7 @@ function warnRow(w) {
 
 function renderKnmi() {
   $("knmi").innerHTML = state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
-    `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}</small></span></a>`).join("");
+    `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}` : ""}</small>${w.advies ? `<small>${esc(String(w.advies).split("\n")[0])}</small>` : w.verwachting ? `<small>${esc(String(w.verwachting).split("\n")[0])}</small>` : ""}</span></a>`).join("");
 }
 
 function renderList(fresh = new Set()) {
