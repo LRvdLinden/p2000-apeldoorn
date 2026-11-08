@@ -16,6 +16,8 @@ jobs:
         with: { node-version: 24 }
       - run: npm ci >/dev/null
       - run: |
+          ID=$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const i=s.indexOf("[");const d=JSON.parse(s.slice(i)).find(x=>x.name==="p2000-apeldoorn");console.log(d?d.uuid:"")})')
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
           q() { echo "== $1"; npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{try{const i=s.indexOf("[");for(const r of JSON.parse(s.slice(i))[0].results)console.log(JSON.stringify(r))}catch(e){console.log(s.slice(0,500))}})'; }
           q "SELECT platform, environment, enabled, COUNT(*) n, MAX(updated_at) last_upd, MAX(app_version) v FROM devices GROUP BY platform, environment, enabled"
           q "SELECT substr(token,1,10) t, platform, environment, app_version, enabled, datetime(updated_at/1000,'unixepoch') upd FROM devices ORDER BY updated_at DESC LIMIT 12"
