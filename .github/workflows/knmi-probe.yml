@@ -1,0 +1,20 @@
+name: KNMI probe (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/knmi-probe.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sS -A "Mozilla/5.0" https://www.knmi.nl/nederland-nu/weer/waarschuwingen -o p.html
+          wc -c p.html
+          python3 - <<'PY'
+          import re
+          s=open("p.html",encoding="utf-8").read()
+          i=s.find("Vanochtend")
+          if i<0: i=s.find("dichte mist")
+          print("POS",i)
+          print(s[max(0,i-6000):i+9000])
+          PY
