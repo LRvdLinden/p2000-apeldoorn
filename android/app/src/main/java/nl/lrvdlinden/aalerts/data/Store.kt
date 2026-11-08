@@ -24,6 +24,7 @@ object Store {
         loading = true
         try {
             meldingen = Api.meldingen(300).sortedByDescending { it.millis }
+            InAppAlarm.handle(meldingen)
             error = null
             lastUpdated = Instant.now()
         } catch (e: Exception) {

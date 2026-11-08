@@ -9,6 +9,7 @@ import android.provider.Settings as AndroidSettings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +54,8 @@ fun SettingsScreen(nav: Nav) {
         systemAllowed = Push.systemAllowed
         if (ok) Settings.notificationsEnabled = true
     }
+    val locPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { updateLocation(ctx) }
+    LaunchedEffect(Settings.toonAfstand) { if (Settings.toonAfstand) updateLocation(ctx) }
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, contentWindowInsets = WindowInsets.statusBars,
         topBar = { TopAppBar(title = { Text(tr("Instellingen", "Settings"), fontWeight = FontWeight.Bold) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)) }) { pad ->
@@ -112,8 +115,21 @@ fun SettingsScreen(nav: Nav) {
                 testResult?.let { Text(it, color = Muted, fontSize = 13.sp) }
             }
 
+            // In-app alarm sound (as on iOS).
+            SectionCard(tr("Meldingen in de app", "Alerts in the app"), Icons.Outlined.VolumeUp) {
+                SwitchRow(tr("Alarmgeluid in de app", "Alarm sound in the app"), tr("Een geluid als er een nieuwe melding binnenkomt terwijl de app open is. Het volgt je filters en de stille uren.", "A sound when a new alert comes in while the app is open. It follows your filters and quiet hours."), Settings.alarmSound) { Settings.alarmSound = it }
+                if (Settings.alarmSound) {
+                    SwitchRow(tr("Alleen bij spoed", "Only for urgent alerts"), tr("A0, A1 en P1", "A0, A1 and P1"), Settings.alarmOnlyUrgent) { Settings.alarmOnlyUrgent = it }
+                    OutlinedButton(onClick = { InAppAlarm.test(Settings.alarmOnlyUrgent) }, modifier = Modifier.fillMaxWidth()) { Text(tr("Geluid testen", "Test sound")) }
+                }
+            }
+
             SectionCard(tr("Mijn buurt", "My area"), Icons.Outlined.MyLocation) {
                 NavRow(tr("Gevolgde capcodes", "Followed capcodes"), if (Settings.gevolgd.isEmpty()) tr("Geen", "None") else "${Settings.gevolgd.size}", Icons.Outlined.StarBorder) { nav.open("capcodes") }
+                SwitchRow(tr("Afstand tonen", "Show distance"), tr("Hoe ver een melding van je locatie is", "How far an alert is from your location"), Settings.toonAfstand) {
+                    Settings.toonAfstand = it
+                    if (it) locPerm.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                }
                 NavRow(tr("Straal rond een locatie", "Radius around a location"), if (Settings.radiusEnabled) "${Settings.radiusKm.toInt()} km · " + (if (Settings.radiusMode == "vast") Settings.fixedPlaats else tr("huidige locatie", "current location")) else tr("Uit", "Off")) { nav.open("buurt") }
             }
 
@@ -143,6 +159,10 @@ fun SettingsScreen(nav: Nav) {
                 }
             }
 
+            SectionCard(tr("Volg ons", "Follow us"), Icons.Outlined.Groups) {
+                NavRow(tr("WhatsApp-groep", "WhatsApp group"), icon = Icons.Outlined.Forum) { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf"))) }
+            }
+
             MoreAppsCard()
 
             Column(Modifier.fillMaxWidth().padding(vertical = 12.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -150,7 +170,9 @@ fun SettingsScreen(nav: Nav) {
                 Text("A-Alerts", fontWeight = FontWeight.Bold)
                 Text(tr("Versie", "Version") + " ${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE}) · Android", color = Muted, fontSize = 12.sp)
                 Text(tr("Bel bij nood altijd 112.", "In an emergency always call 112."), color = Muted, fontSize = 12.sp)
-                Text("© PixelForges · LRvdLinden", color = Muted, fontSize = 12.sp)
+                Text("© ${java.time.Year.now().value} A-Alerts. All rights reserved.", color = Muted, fontSize = 12.sp)
+                Text(tr("Made & Powered by PixelForges", "Made & Powered by PixelForges"), color = Muted, fontSize = 12.sp,
+                    modifier = Modifier.clickable { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://pixelforges.nl"))) })
                 Spacer(Modifier.height(6.dp))
                 Text(tr("P2000-gegevens via p2000.page", "P2000 data via p2000.page"), color = Muted, fontSize = 11.sp, textAlign = TextAlign.Center,
                     modifier = Modifier.clip(RoundedCornerShape(6.dp)).padding(4.dp))

@@ -73,6 +73,7 @@ data class Melding(
     val grip: String? = null,
     val opschaling: String? = null,
     val eenheden: List<Eenheid> = emptyList(),
+    val voertuigen: List<Voertuig> = emptyList(),
     val views: Int = 0,
 ) {
     val datum: Instant get() = parseInstant(datumTijd) ?: Instant.EPOCH
@@ -214,6 +215,9 @@ data class Waarschuwing(
         }
     }
 }
+
+@Serializable
+data class Voertuig(val nra: String? = null, val nrb: String? = null, val label: String? = null)
 
 @Serializable
 data class Tijdvak(val niveau: String = "yellow", val start: String? = null, val einde: String? = null) {

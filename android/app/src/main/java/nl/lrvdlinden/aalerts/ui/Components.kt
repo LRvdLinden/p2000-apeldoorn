@@ -32,6 +32,7 @@ import nl.lrvdlinden.aalerts.data.Melding
 import nl.lrvdlinden.aalerts.data.Settings
 import nl.lrvdlinden.aalerts.data.Waarschuwing
 import nl.lrvdlinden.aalerts.tr
+import kotlin.math.roundToInt
 
 @Composable
 fun SectionCard(title: String? = null, icon: ImageVector? = null, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
@@ -98,6 +99,7 @@ fun MeldingRow(m: Melding, onClick: () -> Unit) {
                 if (!m.grip.isNullOrBlank()) Tag("GRIP ${m.grip}", Color(0xFF7C3AED))
                 Spacer(Modifier.weight(1f))
                 if (m.guid in Settings.bewaard) Icon(Icons.Filled.Bookmark, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(14.dp))
+                Settings.afstandKm(m)?.let { Text(if (it < 1) "${(it * 1000).roundToInt() / 10 * 10} m" else "%.1f km".format(it).replace('.', ','), color = Muted, fontSize = 12.sp) }
                 Text(Fmt.time(m.datum), color = Muted, fontSize = 12.sp)
             }
             Text(m.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)

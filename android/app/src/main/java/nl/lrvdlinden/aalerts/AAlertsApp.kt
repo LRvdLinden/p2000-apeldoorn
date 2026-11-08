@@ -13,6 +13,7 @@ class AAlertsApp : Application() {
         Settings.init(this)
         if (Settings.firstUse == 0L) Settings.firstUse = System.currentTimeMillis()
         Werkgebied.load(this)
+        nl.lrvdlinden.aalerts.data.InAppAlarm.init(this)
         Push.init(this)
         Notifier.createChannels(this)
         MapLibre.getInstance(this)

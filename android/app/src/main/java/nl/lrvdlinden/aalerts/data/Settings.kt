@@ -107,6 +107,11 @@ object Settings {
     // Notifications
     var notificationsEnabled by bool("notificationsEnabled", false, push = true)
     var quietMode by bool("quietMode", false, push = true)
+    /** In-app alarm sound when a new alert comes in while the app is open (as on iOS). */
+    var alarmSound by bool("alarmSound", true)
+    var alarmOnlyUrgent by bool("alarmOnlyUrgent", false)
+    /** Show the distance from your location in the list and on the alert page (as on iOS). */
+    var toonAfstand by bool("toonAfstand", false)
     /** KNMI: a push one hour before a code starts, and one when it is lifted (code green). For all profiles. */
     var pushKnmiVooraf by bool("pushKnmiVooraf", true, push = true)
     var pushKnmiOpgeheven by bool("pushKnmiOpgeheven", true, push = true)
@@ -255,6 +260,13 @@ object Settings {
             out["lon"] = Math.round(c.second * 1000) / 1000.0
         }
         return out
+    }
+
+    /** Distance in km from your (last known) location, when "Afstand tonen" is on. */
+    fun afstandKm(m: Melding): Double? {
+        if (!toonAfstand || currentLat == 0.0) return null
+        val la = m.lat ?: return null; val lo = m.lon ?: return null
+        return Geo.distanceKm(currentLat, currentLon, la, lo)
     }
 
     fun isQuiet(at: Instant = Instant.now()): Boolean {

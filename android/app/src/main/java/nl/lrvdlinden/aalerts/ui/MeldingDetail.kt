@@ -21,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.graphicsLayer
@@ -217,6 +218,14 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                         }
                     }
                 }
+                if (m.voertuigen.isNotEmpty()) SectionCard(tr("Voertuigen (${m.voertuigen.size})", "Vehicles (${m.voertuigen.size})"), Icons.Outlined.LocalShipping) {
+                    m.voertuigen.forEach { v ->
+                        Column {
+                            Text(v.label ?: tr("Voertuig", "Vehicle"), fontSize = 14.sp)
+                            (v.nrb ?: v.nra)?.let { Text(it, color = Color(0xFFDC2626), fontSize = 12.sp, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.SemiBold) }
+                        }
+                    }
+                }
                 Settings.geenPushReden(m)?.let { reden ->
                     // Why this device got no push (the alert is in the list, but not in your notifications), as on iOS.
                     SectionCard(tr("Geen pushmelding op dit toestel", "No notification on this device"), Icons.Outlined.NotificationsOff) {
@@ -257,6 +266,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     InfoRow(tr("Regio", "Region"), m.regio)
                     InfoRow("Capcode", m.capcode)
                     InfoRow(tr("Tijd", "Time"), Fmt.day(m.datum) + " " + Fmt.time(m.datum))
+                    Settings.afstandKm(m)?.let { InfoRow(tr("Afstand", "Distance"), "%.1f km".format(it).replace(".", ",")) }
                     if (m.lat != null && m.lon != null) InfoRow(tr("Coördinaten", "Coordinates"), "%.5f, %.5f".format(m.lat, m.lon))
                 }
                 Spacer(Modifier.height(24.dp))
@@ -293,20 +303,48 @@ fun ActionButton(icon: ImageVector, label: String, modifier: Modifier = Modifier
 @Composable
 fun WeerCard(w: AlertWeather?, live: Boolean = false) {
     w ?: return
-    SectionCard(if (live) tr("Het weer nu", "Weather now") else tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
-        if (live) Text(tr("Live · Apeldoorn · elke 5 minuten bijgewerkt", "Live · Apeldoorn · updated every 5 minutes"), color = Color(0xFF16A34A), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
-        w.condition?.let { Text(conditie(it), fontWeight = FontWeight.Medium) }
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            w.temperature?.let { Stat("${it.roundToInt()}°", tr("Temperatuur", "Temperature")) }
-            w.apparent?.let { Stat("${it.roundToInt()}°", tr("Gevoel", "Feels like")) }
-            w.windSpeed?.let { Stat("${it.roundToInt()} km/u", tr("Wind", "Wind") + (w.windDirection?.let { d -> " " + windRichting(d) } ?: "")) }
+    val ctx = LocalContext.current
+    val blauw = Color(0xFF60A5FA)
+    // Same layout as iOS: "METEO-gegevens" with a row per value.
+    SectionCard {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(tr("METEO-gegevens", "Weather data"), fontWeight = FontWeight.Bold, fontSize = 18.sp, modifier = Modifier.weight(1f))
+            if (live) Text("● " + tr("Live", "Live"), color = Color(0xFF16A34A), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         }
-        Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-            w.windGust?.let { Stat("${it.roundToInt()} km/u", tr("Windstoten", "Gusts")) }
-            w.humidity?.let { Stat("${(it * 100).roundToInt()}%", tr("Luchtvochtigheid", "Humidity")) }
-            w.precipitation?.let { Stat("%.1f mm".format(it), tr("Neerslag", "Rain")) }
+        w.temperature?.let { t ->
+            MeteoRij(Icons.Outlined.Thermostat, blauw, tr("Temperatuur", "Temperature"), w.apparent?.let { tr("Gevoelstemperatuur ${it.roundToInt()}°C", "Feels like ${it.roundToInt()}°C") }, "${t.roundToInt()}°C")
         }
-        Text("Apple Weer", color = Muted, fontSize = 11.sp)
+        w.cloudCover?.let { c ->
+            HorizontalDivider()
+            MeteoRij(Icons.Outlined.Cloud, blauw, tr("Bewolking", "Cloud cover"), w.condition?.let { conditie(it) }, "${(if (c <= 1) c * 100 else c).roundToInt()}%")
+        }
+        w.windDirection?.let { d ->
+            HorizontalDivider()
+            MeteoRij(Icons.Outlined.Navigation, blauw, tr("Windrichting", "Wind direction"), tr("De wind waait vanuit het ${windRichting(d)}", "The wind blows from the ${windRichting(d)}"), windRichting(d), rotatie = (d + 180).toFloat())
+        }
+        w.windSpeed?.let { v ->
+            HorizontalDivider()
+            MeteoRij(Icons.Outlined.Air, blauw, tr("Windsnelheid", "Wind speed"), tr("Windvlagen tot ${(w.windGust ?: v * 1.5).roundToInt()} km/h", "Gusts up to ${(w.windGust ?: v * 1.5).roundToInt()} km/h"), "${v.roundToInt()} km/h")
+        }
+        Text(if (live) tr("Het weer van nu in Apeldoorn, elke 5 minuten bijgewerkt", "The weather right now in Apeldoorn, updated every 5 minutes") else tr("Gegevens zijn op basis van incident tijdstip en locatie", "Data based on the time and place of the incident"),
+            color = Muted, fontSize = 11.sp, modifier = Modifier.fillMaxWidth(), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+            Text("Apple Weather", fontSize = 11.sp, fontWeight = FontWeight.SemiBold, color = Muted)
+            TextButton(onClick = { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://weatherkit.apple.com/legal-attribution.html"))) }) { Text(tr("Overige gegevensbronnen", "Other data sources"), fontSize = 11.sp) }
+        }
+    }
+}
+
+@Composable
+private fun MeteoRij(icon: ImageVector, kleur: Color, titel: String, sub: String?, waarde: String, rotatie: Float = 0f) {
+    Row(Modifier.fillMaxWidth().padding(vertical = 6.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, null, tint = kleur, modifier = Modifier.size(24.dp).rotate(rotatie))
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(titel, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            sub?.let { Text(it, color = Muted, fontSize = 12.sp) }
+        }
+        Text(waarde, fontWeight = FontWeight.Bold, fontSize = 17.sp)
     }
 }
 
