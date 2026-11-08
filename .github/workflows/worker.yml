@@ -2,7 +2,7 @@ name: Worker
 
 # Tests the Cloudflare Worker and deploys it (when the Cloudflare secrets are set).
 # Needs repo secrets CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID; all other values come from the
-# existing secrets (P2000_PAGE_API_URL, APN_*, WEB_*, MAPS_SERVER_API_*).
+# existing secrets (P2000_PAGE_API_URL, APN_*, WEB_*, MAPS_SERVER_API_*, KNMI_WMS_KEY for the rain radar).
 on:
   push:
     branches: [main]
@@ -95,12 +95,13 @@ jobs:
           BEHEER_PASSWORD: ${{ secrets.BEHEER_PASSWORD }}
           FCM_SERVICE_ACCOUNT: ${{ secrets.FCM_SERVICE_ACCOUNT }}
           HOMEY_WEBHOOK_ID: ${{ secrets.HOMEY_WEBHOOK_ID }}
+          KNMI_WMS_KEY: ${{ secrets.KNMI_WMS_KEY }}
           BACKFILL: "1"
         run: |
           node -e '
             const keys = ["P2000_PAGE_API_URL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
               "WEB_MAPKIT_JS_P8","WEB_WEATHERKIT_KEY_ID","WEB_WEATHERKIT_TEAM_ID","WEB_WEATHERKIT_P8","MAPS_SERVER_API_KEY_ID",
-              "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","BEHEER_USER","BEHEER_PASSWORD","FCM_SERVICE_ACCOUNT","HOMEY_WEBHOOK_ID","BACKFILL"];
+              "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","BEHEER_USER","BEHEER_PASSWORD","FCM_SERVICE_ACCOUNT","HOMEY_WEBHOOK_ID","KNMI_WMS_KEY","BACKFILL"];
             const out = {}; for (const k of keys) if (process.env[k]) out[k] = process.env[k];
             require("fs").writeFileSync("secrets.json", JSON.stringify(out));
             console.log("Secrets:", Object.keys(out).join(", "));'

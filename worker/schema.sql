@@ -155,3 +155,11 @@ CREATE TABLE IF NOT EXISTS status_incidenten (
 );
 -- A-Alerts: alerted stations with road route and estimated arrival per alert (computed once; JSON).
 CREATE TABLE IF NOT EXISTS melding_routes (guid TEXT PRIMARY KEY, data TEXT NOT NULL, at INTEGER NOT NULL);
+
+-- "Klopt deze melding niet?": reports from users (90 days), handled in the beheer.
+CREATE TABLE IF NOT EXISTS melding_feedback (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  guid TEXT NOT NULL, reden TEXT NOT NULL, toelichting TEXT, lat REAL, lon REAL, platform TEXT,
+  bron TEXT, at INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'open'
+);
+CREATE INDEX IF NOT EXISTS melding_feedback_at ON melding_feedback (at);

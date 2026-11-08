@@ -31,7 +31,10 @@ import { routesVoor } from "./routes.js";
 import { profielenFrom, capcodesFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
+import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
+import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, recenteHeliMeldingen, meldingVoorspelling,
+  noteerTerPlaatse, terPlaatseSet, saveFeedback, feedbackLijst, updateFeedback, deleteFeedback } from "./extra.js";
 import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
@@ -72,7 +75,7 @@ async function kvSet(env, key, value) {
   await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, value, Date.now()).run();
 }
 
-async function handle(req, env) {
+async function handle(req, env, ctx) {
   const url = new URL(req.url);
   const path = url.pathname.replace(/\/+$/, "") || "/";
   const method = req.method;
@@ -89,7 +92,7 @@ async function handle(req, env) {
       backfill: (await kvGet(env, "backfill_status"))?.value || null,
       backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
-      apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env),
+      apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env), radar: radarConfigured(env),
       devices: await deviceCount(env),
       waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
     });
@@ -168,7 +171,19 @@ async function handle(req, env) {
   m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/vluchten$/);
   if (method === "GET" && m) return reply(200, await vluchten(env, m[1]), { "cache-control": "public, max-age=30" });
   if (method === "GET" && path === "/v1/helikopters") {
-    return reply(200, metVoorspelling(await helikopters(env)), { "cache-control": "public, max-age=10" });
+    const data = metVoorspelling(await helikopters(env));
+    // A Lifeliner on its way to a recent alert: that alert is the destination, then the hospital.
+    try {
+      const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.op_grond);
+      if (lucht.length) {
+        const [meldingen, ter] = [await recenteHeliMeldingen(env), await terPlaatseSet(env)];
+        data.helikopters = data.helikopters.map((h) => {
+          const v = meldingVoorspelling(h, meldingen, ter);
+          return v ? { ...h, voorspelling: v } : h;
+        });
+      }
+    } catch (e) { console.error("[voorspelling]", e.message || e); }
+    return reply(200, data, { "cache-control": "public, max-age=10" });
   }
   if (method === "GET" && path === "/v1/status") {
     return reply(200, await statusOverzicht(env), { "cache-control": "public, max-age=30" });
@@ -209,8 +224,10 @@ async function handle(req, env) {
     const w = prefsFrom(body.settings?.waarschuwingen);
     const profielen = profielenFrom(body.settings?.profielen);
     const capcodes = capcodesFrom(body.settings?.capcodes);
-    if (w || profielen || capcodes) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }),
-      ...(profielen ? { profielen } : {}), ...(capcodes ? { capcodes } : {}) });
+    const heli = heliPrefsFrom(body.settings?.heli);
+    const groot = grootPrefsFrom(body.settings?.groot);
+    if (w || profielen || capcodes || heli || groot) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }),
+      ...(profielen ? { profielen } : {}), ...(capcodes ? { capcodes } : {}), ...(heli ? { heli } : {}), ...(groot ? { groot } : {}) });
     return reply(200, { ok: true });
   }
   // APNs token (hex) or Android token ("fcm:<token>", URL-encoded by the app).
@@ -229,6 +246,20 @@ async function handle(req, env) {
     return reply(r.ok ? 200 : 502, { ...r, platform: device.platform, environment: device.environment });
   }
 
+  // Rain radar (KNMI): one image of the Netherlands, or map tiles.
+  if (method === "GET" && path === "/v1/radar") return reply(200, radarInfo(env, url.origin), { "cache-control": "public, max-age=60" });
+  if (method === "GET" && path === "/v1/radar.png") return radarImage(env, ctx);
+  m = path.match(/^\/v1\/radar\/(\d{1,2})\/(\d{1,5})\/(\d{1,5})\.png$/);
+  if (method === "GET" && m) return radarTile(env, ctx, Number(m[1]), Number(m[2]), Number(m[3]));
+
+  // "Klopt deze melding niet?": a user reports a wrong alert (reason, note, optionally the right spot).
+  m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/feedback$/);
+  if (method === "POST" && m) {
+    const r = await saveFeedback(env, req, m[1], await readJSON(req));
+    try { await pushAdmins(env, "Melding gemeld als onjuist", "Bekijk het in het beheer onder Gemelde fouten."); } catch {}
+    return reply(200, r);
+  }
+
   if (path.startsWith("/v1/beheer/")) return handleBeheer(req, env, url, path, method);
 
   return reply(404, { error: "Not found" });
@@ -242,7 +273,7 @@ async function statusInfo(env) {
   return {
     feed: { lastOk: ok ? new Date(Number(ok)).toISOString() : null, lastError: await get("feed_error") },
     cron: cron ? new Date(Number(cron)).toISOString() : null,
-    apns: apnsConfigured(env), fcm: fcmConfigured(env), homey: homeyConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env),
+    apns: apnsConfigured(env), fcm: fcmConfigured(env), homey: homeyConfigured(env), weatherkit: weatherConfigured(env), mapkit: mapkitConfigured(env), mapsServer: mapsServerConfigured(env), radar: radarConfigured(env),
     meldingenInDatabase: await meldingCount(env),
     outbox: (await env.DB.prepare("SELECT COUNT(*) AS n FROM outbox").first()).n,
     beheerApparaten: (await env.DB.prepare("SELECT COUNT(*) AS n FROM admin_devices").first()).n,
@@ -277,6 +308,12 @@ async function handleBeheer(req, env, url, path, method) {
   if (m && (method === "PATCH" || method === "PUT")) return reply(200, await updateMelding(env, m[1], await readJSON(req)));
 
   if (method === "POST" && path === "/v1/beheer/push") return reply(200, await broadcast(env, await readJSON(req), queue));
+
+  // Reports from users that an alert is wrong.
+  if (method === "GET" && path === "/v1/beheer/feedback") return reply(200, await feedbackLijst(env, url));
+  m = path.match(/^\/v1\/beheer\/feedback\/(\d+)$/);
+  if (m && (method === "POST" || method === "PATCH")) return reply(200, await updateFeedback(env, Number(m[1]), await readJSON(req)));
+  if (m && method === "DELETE") return reply(200, await deleteFeedback(env, Number(m[1])));
   if (method === "GET" && path === "/v1/beheer/push") return reply(200, await broadcastHistory(env));
 
   m = path.match(/^\/v1\/beheer\/content\/(\w+)$/);
@@ -351,7 +388,7 @@ async function poll(env, budget) {
     if (recent.length) {
       const devices = await activeDevices(env);
       const prefs = await devicePrefs(env);
-      for (const m of recent) await queue(env, m.guid, devices.filter((d) => meldingWanted(d, prefs.get(d.token), m)).map((d) => d.token));
+      for (const m of recent) await queue(env, m.guid, devices.filter((d) => meldingWanted(d, prefs.get(d.token), m) || grootWanted(d, prefs.get(d.token), m)).map((d) => d.token));
     }
   } catch (e) {
     await kvSet(env, "feed_error", String(e.message || e));
@@ -367,6 +404,16 @@ function broadcastPayload(b, lang) {
     ...(b.guid ? { guid: b.guid } : {}),
     ...(b.heli ? { heli: b.heli } : {}),
   };
+}
+
+/** The alert push; a large incident gets "Groot incident" in front of the title. */
+function meldingPayload(m, lang) {
+  const p = payloadFor(m, lang);
+  if (isGrootIncident(m)) {
+    p.aps.alert.title = `${String(lang || "nl").startsWith("nl") ? "Groot incident" : "Large incident"} · ${p.aps.alert.title}`;
+    p.groot = true;
+  }
+  return p;
 }
 
 async function drain(env, budget) {
@@ -400,7 +447,7 @@ async function drain(env, budget) {
       ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { kind: item.kind }),
         { urgent: item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"), collapseId: item.warning.id.slice(0, 64) })
       : item.melding
-      ? await sendPush(env, row, payloadFor(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
+      ? await sendPush(env, row, meldingPayload(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
       : await sendPush(env, row, broadcastPayload(item.broadcast, row.language), item.broadcast.heli ? { collapseId: row.guid.slice(-64) } : {});
     const dead = isDeadToken(r);
     verstuurd.push({ platform: row.token.startsWith("fcm:") ? "android" : "apple", ok: r.ok, dead, latency: item.melding && r.ok ? Date.now() - row.created_at : null });
@@ -462,6 +509,21 @@ async function heliRun(env) {
   const { prev } = await recordPositions(env, data);
   if (!prev || data.fout) return;
   let devices = null, prefs = null;
+  // Helicopter zones: take-off, landing or entering a zone of a device.
+  try {
+    const events = heliEvents(data.helikopters || [], prev);
+    if (events.length) {
+      devices ||= await activeDevices(env);
+      prefs ||= await devicePrefs(env);
+      for (const g of heliZonePushes(devices, prefs, events)) {
+        if (await kvGet(env, `broadcast:${g.key}`)) continue;
+        await kvSet(env, `broadcast:${g.key}`, JSON.stringify({ ...g.texts.nl, en: g.texts.en, heli: g.heli, zone: true }));
+        await queue(env, `broadcast:${g.key}`, g.tokens);
+      }
+    }
+    const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma");
+    if (lucht.length) await noteerTerPlaatse(env, lucht, await recenteHeliMeldingen(env));
+  } catch (e) { console.error("[heli-zones]", e.message || e); }
   await checkOpstijgen(env, data.helikopters || [], prev, async (m, key, texts) => {
     devices ||= await activeDevices(env);
     prefs ||= await devicePrefs(env);
@@ -516,6 +578,8 @@ async function cron(env, event) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
     await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM melding_feedback WHERE at < ?").bind(Date.now() - 90 * 86_400_000).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'broadcast:hz:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }
@@ -527,7 +591,7 @@ export default {
     try {
       // Backup for the cron: an API call also reads the feed when the last read is over 45 s old.
       if (req.method === "GET" && new URL(req.url).pathname.startsWith("/v1/meldingen")) ctx.waitUntil(catchUp(env));
-      return await handle(req, env);
+      return await handle(req, env, ctx);
     } catch (err) {
       const status = err.status || 500;
       if (status >= 500) console.error(err);
