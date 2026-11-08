@@ -68,6 +68,7 @@ fun SettingsScreen(nav: Nav) {
                 }
             }
 
+            MeldingenUitBanner()
             SectionCard(tr("Pushmeldingen", "Push notifications"), Icons.Outlined.Notifications) {
                 if (!Push.available) {
                     Text(tr("Deze versie is gebouwd zonder pushmeldingen.", "This version was built without push notifications."), color = Muted, fontSize = 13.sp)
@@ -98,6 +99,8 @@ fun SettingsScreen(nav: Nav) {
                     nav.open("profiel/${enc(p.id)}")
                 }) { Icon(Icons.Filled.Add, null); Spacer(Modifier.width(6.dp)); Text(tr("Profiel toevoegen", "Add profile")) }
             }
+
+            ExtraMeldingenCard(nav)
 
             SectionCard(tr("Stille uren", "Quiet hours"), Icons.Outlined.Bedtime) {
                 SwitchRow(tr("Stille uren", "Quiet hours"), tr("Geen meldingen tussen ${hm(Settings.quietFrom)} en ${hm(Settings.quietTo)}", "No notifications between ${hm(Settings.quietFrom)} and ${hm(Settings.quietTo)}"), Settings.quietMode) { Settings.quietMode = it }
@@ -139,6 +142,8 @@ fun SettingsScreen(nav: Nav) {
                         SegmentedButton(selected = Settings.appearance == k, onClick = { Settings.appearance = k }, shape = SegmentedButtonDefaults.itemShape(i, 3)) { Text(l, fontSize = 13.sp) }
                     }
                 }
+                NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Donkere kaart, routespoor, eenheden, prestatiemodus", "Dark map, route trail, units, performance mode"), Icons.Outlined.Map) { nav.open("kaartweergave") }
+                Text(tr("Je instellingen gaan mee in de Android-back-up (Google), zodat je ze op een nieuwe telefoon terugkrijgt.", "Your settings are part of the Android backup (Google), so you get them back on a new phone."), color = Muted, fontSize = 12.sp)
             }
 
             SectionCard(tr("Privacy", "Privacy"), Icons.Outlined.Lock) {

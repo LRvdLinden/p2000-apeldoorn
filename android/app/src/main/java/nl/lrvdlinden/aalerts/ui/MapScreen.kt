@@ -43,11 +43,12 @@ import nl.lrvdlinden.aalerts.tr
 
 /** Map layers (same as the app, the website and Apple TV). */
 enum class KaartLaag(val key: String) {
-    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), WERKGEBIED("werkgebied");
+    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
         HELIKOPTERS -> tr("Helikopters (live)", "Helicopters (live)"); KAZERNES -> tr("Kazernes en posten", "Stations")
         ZIEKENHUIZEN -> tr("Ziekenhuizen en vliegbases", "Hospitals and air bases"); WERKGEBIED -> tr("Gemeentegrens", "Municipal border")
+        BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
     }
 }
 
@@ -71,7 +72,7 @@ fun MapScreen(nav: Nav) {
     // Smooth movement: between updates the helicopters fly on along speed and heading (like AirAssist/iOS).
     var nu by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(KaartLaag.HELIKOPTERS.key in lagen) {
-        while (KaartLaag.HELIKOPTERS.key in Settings.kaartLagen) { delay(1_000); nu = System.currentTimeMillis() }
+        while (KaartLaag.HELIKOPTERS.key in Settings.kaartLagen) { delay(if (Settings.prestatieModus) 10_000 else 1_000); nu = System.currentTimeMillis() }
     }
     // Route of the last 30 minutes for every helicopter in the air (at most 6), refreshed every 30 s.
     var sporen by remember { mutableStateOf<Map<String, List<HeliSpoorPunt>>>(emptyMap()) }
@@ -84,7 +85,16 @@ fun MapScreen(nav: Nav) {
     }
     // Selected helicopter: its route in the chosen range and its recent flights.
     val selHeli = selected?.takeIf { it.startsWith("h:") }?.removePrefix("h:")
-    var bereik by remember { mutableStateOf(SpoorBereik.VLUCHT) }
+    var bereik by remember { mutableStateOf(SpoorBereik.entries.firstOrNull { it.key == Settings.spoorStandaard } ?: SpoorBereik.VLUCHT) }
+    // Rain radar (KNMI) tiles, refreshed every 5 minutes; null when off or not available.
+    var radar by remember { mutableStateOf<RadarInfo?>(null) }
+    LaunchedEffect(KaartLaag.BUIENRADAR.key in lagen) {
+        radar = null
+        while (KaartLaag.BUIENRADAR.key in Settings.kaartLagen) { radar = Api.radar(); delay(60_000) }
+    }
+    // Long press on the map: make a helicopter zone or plan a route there.
+    var langGedrukt by remember { mutableStateOf<Pair<Double, Double>?>(null) }
+    val ctx = androidx.compose.ui.platform.LocalContext.current
     var selSpoor by remember { mutableStateOf<List<HeliSpoorPunt>>(emptyList()) }
     var selVluchten by remember { mutableStateOf<List<HeliVlucht>?>(null) }
     LaunchedEffect(selHeli, bereik) {
@@ -145,7 +155,7 @@ fun MapScreen(nav: Nav) {
     }
     if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h ->
         val (la, lo) = h.geschat(nu)
-        points += MapPoint("h:${h.id}", la, lo, h.afbeelding, 70, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
+        points += MapPoint("h:${h.id}", la, lo, h.afbeelding, Settings.heliBreedte, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
         val spoor = if (h.id == selHeli && selSpoor.isNotEmpty()) selSpoor else sporen[h.id].orEmpty()
         val afspelen = h.id == selHeli && afspeelPunt != null
         if (spoor.isNotEmpty()) lines += MapLine("spoor:${h.id}", spoor.lijn() + listOfNotNull((la to lo).takeIf { !afspelen }),
@@ -172,7 +182,9 @@ fun MapScreen(nav: Nav) {
     }
 
     Box(Modifier.fillMaxSize()) {
-        AMap(Modifier.fillMaxSize(), points = points, areas = areas, lines = lines, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; heliFit = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null })
+        AMap(Modifier.fillMaxSize(), points = points, areas = areas, lines = lines, camera = camera, onPointClick = { selected = it }, onMapClick = { selected = null; heliFit = null; if (nav.kaartFocus?.startsWith("h:") == true) nav.kaartFocus = null },
+            onLongPress = { la, lo -> langGedrukt = la to lo },
+            radarTiles = radar?.takeIf { it.beschikbaar && KaartLaag.BUIENRADAR.key in lagen }?.tiles)
 
         // Period and layers
         Column(Modifier.fillMaxWidth().statusBarsPadding().padding(top = 8.dp)) {
@@ -266,12 +278,34 @@ fun MapScreen(nav: Nav) {
             }
         }
     }
+    langGedrukt?.let { (la, lo) ->
+        AlertDialog(onDismissRequest = { langGedrukt = null }, title = { Text(tr("Deze plek", "This spot")) },
+            text = {
+                Column {
+                    if (Settings.heliZones.size < HeliZone.MAX) TextButton(onClick = {
+                        ZoneConcept.nieuw = HeliZone(naam = if (Settings.heliZones.isEmpty()) tr("Thuis", "Home") else tr("Zone ${Settings.heliZones.size + 1}", "Zone ${Settings.heliZones.size + 1}"),
+                            lat = Math.round(la * 1e4) / 1e4, lon = Math.round(lo * 1e4) / 1e4)
+                        langGedrukt = null; nav.open("helizones")
+                    }) { Text(tr("Maak hier een heli-zone", "Create a helicopter zone here")) }
+                    TextButton(onClick = {
+                        langGedrukt = null
+                        runCatching { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("google.navigation:q=$la,$lo"))) }
+                            .onFailure { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("geo:$la,$lo?q=$la,$lo"))) }
+                    }) { Text(tr("Route hierheen", "Route here")) }
+                }
+            },
+            confirmButton = {}, dismissButton = { TextButton(onClick = { langGedrukt = null }) { Text(tr("Annuleer", "Cancel")) } })
+    }
     if (showLayers) ModalBottomSheet(onDismissRequest = { showLayers = false }, containerColor = MaterialTheme.colorScheme.background) {
         Column(Modifier.padding(horizontal = 16.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(tr("Kaartlagen", "Map layers"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             KaartLaag.entries.forEach { l ->
                 SwitchRow(l.label, checked = l.key in Settings.kaartLagen) { Settings.kaartLagen = Settings.kaartLagen.toggle(l.key) }
             }
+            if (KaartLaag.BUIENRADAR.key in Settings.kaartLagen) Text(
+                if (radar?.beschikbaar == false) tr("De buienradar is nog niet beschikbaar.", "The rain radar is not available yet.") else tr("Buienradar: KNMI, elke 5 minuten nieuw.", "Rain radar: KNMI, updated every 5 minutes."),
+                color = Muted, fontSize = 12.sp)
+            NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Donkere kaart, routespoor, eenheden", "Dark map, route trail, units")) { showLayers = false; nav.open("kaartweergave") }
             Text(tr("Kaart: © OpenFreeMap, © OpenMapTiles, © OpenStreetMap. Helikopters: adsb.lol (ODbL), posities kunnen achterlopen.",
                 "Map: © OpenFreeMap, © OpenMapTiles, © OpenStreetMap. Helicopters: adsb.lol (ODbL), positions may lag."), color = Muted, fontSize = 11.sp)
         }
@@ -298,8 +332,8 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                 Spacer(Modifier.width(12.dp))
                 Column { Text(h.naam, fontWeight = FontWeight.Bold, fontSize = 17.sp); Text(h.soortLabel + (h.basis?.let { " · $it" } ?: ""), color = Muted, fontSize = 13.sp) }
             }
-            InfoRow(tr("Hoogte", "Altitude"), if (h.opGrond) tr("Op de grond", "On the ground") else h.hoogteMeter?.let { "$it m" })
-            InfoRow(tr("Snelheid", "Speed"), h.snelheidKmh?.let { "$it km/u" })
+            InfoRow(tr("Hoogte", "Altitude"), h.hoogteTekst)
+            InfoRow(tr("Snelheid", "Speed"), h.snelheidTekst)
             InfoRow(tr("Koers", "Heading"), h.koersTekst)
             InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) })
             h.voorspelling?.let { Text(it.tekst, fontWeight = FontWeight.Medium, fontSize = 13.sp) }

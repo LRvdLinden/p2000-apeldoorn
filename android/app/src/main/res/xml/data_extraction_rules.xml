@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 12+: settings in the cloud backup and when moving to a new phone; the push token never. -->
+<data-extraction-rules>
+    <cloud-backup>
+        <include domain="sharedpref" path="settings.xml" />
+        <exclude domain="sharedpref" path="push.xml" />
+    </cloud-backup>
+    <device-transfer>
+        <include domain="sharedpref" path="settings.xml" />
+        <exclude domain="sharedpref" path="push.xml" />
+    </device-transfer>
+</data-extraction-rules>

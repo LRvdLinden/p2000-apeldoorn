@@ -86,6 +86,7 @@ fun PagerScreen(nav: Nav) {
     ) { pad ->
         PullToRefreshBox(isRefreshing = Store.loading && Store.meldingen.isNotEmpty(), onRefresh = { scope.launch { Store.refresh() } }, modifier = Modifier.padding(pad).fillMaxSize()) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
+                item(key = "uit") { MeldingenUitBanner(Modifier.padding(horizontal = 12.dp, vertical = 4.dp)) }
                 item(key = "knmi") { KnmiBar(Store.knmiActief) { nav.waarschuwing(it.id) } }
                 val verborgen = if (Settings.hideRead) Store.meldingen.count { it.guid in gelezen } else 0
                 if (items.isEmpty()) item(key = "empty") {

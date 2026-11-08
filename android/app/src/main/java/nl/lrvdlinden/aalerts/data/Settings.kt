@@ -120,6 +120,33 @@ object Settings {
     var criticalAlerts by bool("criticalAlerts", true, push = true)
     private var profielenRaw by str("profielen", "", push = true)
 
+    // Helicopter zones and large incidents (same as iOS)
+    private var heliZonesRaw by str("heliZones", "", push = true)
+    var heliOpstijgen by bool("heliOpstijgen", true, push = true)
+    var heliLanden by bool("heliLanden", true, push = true)
+    var heliBinnen by bool("heliBinnen", true, push = true)
+    var heliSoorten by set("heliSoorten", setOf("trauma"), push = true)
+    /** Zone notifications paused until (epoch ms; 0 = not paused). */
+    var heliPauzeTot by P("heliPauzeTot", 0L, true, { p, k, x -> p.getLong(k, x) }, { e, k, v -> e.putLong(k, v) }).also { all += it }
+    var grootIncident by bool("grootIncident", false, push = true)
+    var grootPlaatsen by set("grootPlaatsen", emptySet(), push = true)
+
+    // Map display ("Kaart en helikopters")
+    var spoorStandaard by str("spoorStandaard", "vlucht")
+    var heliKleurPerToestel by bool("heliKleurPerToestel", false)
+    var heliIcoon by str("heliIcoon", "normaal")
+    var eenheden by str("eenheden", "metrisch")
+    var donkereKaart by bool("donkereKaart", false)
+    var gedemptKaart by bool("gedemptKaart", false)
+    var prestatieModus by bool("prestatieModus", false)
+
+    var heliZones: List<HeliZone>
+        get() = runCatching { AppJson.decodeFromString<List<HeliZone>>(heliZonesRaw) }.getOrDefault(emptyList())
+        set(v) { heliZonesRaw = AppJson.encodeToString(v.take(HeliZone.MAX)) }
+    val heliGepauzeerd get() = heliPauzeTot > System.currentTimeMillis()
+    /** Width of the helicopter drawing on the map in dp. */
+    val heliBreedte get() = when (heliIcoon) { "klein" -> 46; "groot" -> 84; else -> 64 }
+
     // Radius
     var radiusEnabled by bool("radiusEnabled", false, push = true)
     var radiusKm by dbl("radiusKm", 5.0, push = true)
@@ -149,6 +176,7 @@ object Settings {
     fun geenPushReden(m: Melding): String? {
         if (!notificationsEnabled) return tr("Pushmeldingen staan uit in Instellingen.", "Notifications are off in Settings.")
         if (volgtCapcode(m)) return null
+        if (grootWanted(m)) return null
         val km = if (radiusKm % 1.0 == 0.0) radiusKm.toInt().toString() else radiusKm.toString()
         if (radiusEnabled) radiusCenter?.let { c ->
             val la = m.lat; val lo = m.lon
@@ -178,6 +206,19 @@ object Settings {
         if (p.diensten.isNotEmpty() && m.soort.key !in p.diensten) return tr("Profiel ‘${p.naam}’ volgt ${m.soort.label.lowercase()} niet.", "Profile ‘${p.naam}’ does not follow ${m.soort.label.lowercase()}.")
         if (p.prioriteiten.isNotEmpty() && (m.prioriteit ?: "").uppercase() !in p.prioriteiten) return tr("Profiel ‘${p.naam}’ volgt prioriteit ${m.prioriteit ?: "onbekend"} niet.", "Profile ‘${p.naam}’ does not follow priority ${m.prioriteit ?: "unknown"}.")
         return tr("De plaats valt buiten de plaatsen van profiel ‘${p.naam}’.", "The place is outside the places of profile ‘${p.naam}’.")
+    }
+
+    /** "Groot incident": on, in the chosen places, and not in quiet hours (unless critical and urgent). */
+    fun grootWanted(m: Melding): Boolean {
+        if (!grootIncident || !m.isGrootIncident) return false
+        if (grootPlaatsen.isNotEmpty() && !Werkgebied.matches(m, grootPlaatsen)) return false
+        if (quietMode) {
+            val t = java.time.Instant.ofEpochMilli(m.millis).atZone(java.time.ZoneId.of("Europe/Amsterdam"))
+            val min = t.hour * 60 + t.minute
+            val stil = if (quietFrom == quietTo) true else if (quietFrom < quietTo) min in quietFrom until quietTo else (min >= quietFrom || min < quietTo)
+            if (stil && !(criticalAlerts && m.isUrgent)) return false
+        }
+        return true
     }
 
     private fun capKey(c: String) = c.filter { it.isDigit() }
@@ -247,6 +288,11 @@ object Settings {
                 "knmiOpgeheven" to pushKnmiOpgeheven,
             ),
             "capcodes" to gevolgd.keys.sorted(),
+            "heli" to mutableMapOf<String, Any?>(
+                "zones" to heliZones.map { mapOf("id" to it.id, "naam" to it.naam, "lat" to it.lat, "lon" to it.lon, "km" to it.km) },
+                "opstijgen" to heliOpstijgen, "landen" to heliLanden, "binnen" to heliBinnen, "soorten" to heliSoorten.sorted(),
+            ).also { if (heliGepauzeerd) it["pauze_tot"] = heliPauzeTot },
+            "groot" to mapOf("aan" to grootIncident, "plaatsen" to grootPlaatsen.sorted()),
             "profielen" to p.map {
                 mapOf("id" to it.id, "naam" to it.naam, "actief" to it.actief, "diensten" to it.diensten.sorted(), "plaatsen" to it.plaatsen.sorted(),
                     "prioriteiten" to it.prioriteiten.sorted(), "nlalert" to it.nlalert, "burgernet" to it.burgernet, "knmi" to it.knmi.sorted(),

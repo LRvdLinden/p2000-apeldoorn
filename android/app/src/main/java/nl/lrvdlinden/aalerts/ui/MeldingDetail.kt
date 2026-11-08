@@ -70,6 +70,7 @@ fun MeldingDetail(guid: String, nav: Nav) {
 @Composable
 private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, nav: Nav) {
     val ctx = LocalContext.current
+    var toonFeedback by remember(m.guid) { mutableStateOf(false) }
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(5_000); now = Instant.now() } }
     // Road route and estimate from the A-Alerts API (same as iOS and the website); until then the local estimate.
@@ -111,7 +112,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     routes.forEach { r -> r.geschattePositie(now, la to lo)?.let { (pla, plo) ->
                         pts += MapPoint("v:${r.kazerne.id}", pla, plo, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 22, tr("schatting", "estimate"), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong())
                     } }
-                    heli?.let { h -> pts += MapPoint("h:${h.id}", heliPos!!.first, heliPos.second, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
+                    heli?.let { h -> pts += MapPoint("h:${h.id}", heliPos!!.first, heliPos.second, h.afbeelding, Settings.heliBreedte, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
                     AMap(
                         Modifier.fillMaxWidth().height(h),
                         points = pts,
@@ -144,6 +145,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                             Text(Fmt.day(m.datum) + " · " + Fmt.time(m.datum), color = Muted, fontSize = 13.sp)
                         }
                     }
+                    if (m.isGrootIncident) GrootIncidentBadge(m)
                     Text(m.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
@@ -269,9 +271,13 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     Settings.afstandKm(m)?.let { InfoRow(tr("Afstand", "Distance"), "%.1f km".format(it).replace(".", ",")) }
                     if (m.lat != null && m.lon != null) InfoRow(tr("Coördinaten", "Coordinates"), "%.5f, %.5f".format(m.lat, m.lon))
                 }
+                OutlinedButton(onClick = { toonFeedback = true }, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Outlined.Feedback, null); Spacer(Modifier.width(8.dp)); Text(tr("Klopt deze melding niet?", "Is this alert wrong?"))
+                }
                 Spacer(Modifier.height(24.dp))
             }
         }
+        if (toonFeedback) MeldingFeedbackDialog(m) { toonFeedback = false }
         // Floating top bar over the map
         // Bar behind the status bar once the content scrolls over the map.
         if (scroll.value > 200) Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f)).statusBarsPadding().height(52.dp))

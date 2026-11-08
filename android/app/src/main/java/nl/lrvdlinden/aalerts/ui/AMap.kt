@@ -48,6 +48,7 @@ data class MapCamera(val lat: Double, val lon: Double, val zoom: Double = 12.0, 
 
 private const val STYLE_LIGHT = "https://tiles.openfreemap.org/styles/liberty"
 private const val STYLE_DARK = "https://tiles.openfreemap.org/styles/dark"
+private const val STYLE_MUTED = "https://tiles.openfreemap.org/styles/positron"
 val APELDOORN = MapCamera(52.2112, 5.9699, 10.6)
 
 private fun hex(c: Long) = String.format("#%06X", c and 0xFFFFFF)
@@ -66,9 +67,19 @@ fun AMap(
     interactive: Boolean = true,
     onPointClick: (String) -> Unit = {},
     onMapClick: () -> Unit = {},
+    /** Long press: the spot that was pressed (lat, lon). */
+    onLongPress: ((Double, Double) -> Unit)? = null,
+    /** Called when the map stops moving, with the centre (lat, lon). */
+    onCameraIdle: ((Double, Double) -> Unit)? = null,
+    /** Rain radar tile URL ({z}/{x}/{y}); null = off. */
+    radarTiles: String? = null,
 ) {
     val ctx = LocalContext.current
-    val dark = LocalDark.current
+    // "Donkere kaart" and "Rustige kaartkleuren" (Kaart en helikopters).
+    val dark = LocalDark.current || nl.lrvdlinden.aalerts.data.Settings.donkereKaart
+    val muted = !dark && nl.lrvdlinden.aalerts.data.Settings.gedemptKaart
+    val longPress = rememberUpdatedState(onLongPress)
+    val idle = rememberUpdatedState(onCameraIdle)
     val lifecycle = LocalLifecycleOwner.current.lifecycle
     val mapView = remember { MapView(ctx).also { it.onCreate(null) } }
     var map by remember { mutableStateOf<MapLibreMap?>(null) }
@@ -95,7 +106,7 @@ fun AMap(
         }
     }
 
-    LaunchedEffect(dark) {
+    LaunchedEffect(dark, muted) {
         mapView.getMapAsync { m ->
             map = m
             m.uiSettings.apply {
@@ -114,8 +125,10 @@ fun AMap(
                 if (id != null) click.value(id) else mapClick.value()
                 true
             }
+            m.addOnMapLongClickListener { ll -> longPress.value?.let { it(ll.latitude, ll.longitude); true } ?: false }
+            m.addOnCameraIdleListener { m.cameraPosition.target?.let { t -> idle.value?.invoke(t.latitude, t.longitude) } }
             style = null
-            m.setStyle(Style.Builder().fromUri(if (dark) STYLE_DARK else STYLE_LIGHT)) { s ->
+            m.setStyle(Style.Builder().fromUri(if (dark) STYLE_DARK else if (muted) STYLE_MUTED else STYLE_LIGHT)) { s ->
                 s.addSource(GeoJsonSource("a-areas"))
                 s.addSource(GeoJsonSource("a-lines"))
                 s.addSource(GeoJsonSource("a-points"))
@@ -176,6 +189,17 @@ fun AMap(
                 addStringProperty("color", hex(l.color)); addBooleanProperty("dashed", l.dashed); addNumberProperty("width", l.width)
             }
         }))
+    }
+
+    // Rain radar: KNMI tiles through the A-Alerts API, under the alerts and areas.
+    LaunchedEffect(style, radarTiles) {
+        val s = style ?: return@LaunchedEffect
+        s.getLayer("a-radar")?.let { s.removeLayer(it) }
+        s.getSource("a-radar")?.let { s.removeSource(it) }
+        val url = radarTiles ?: return@LaunchedEffect
+        s.addSource(org.maplibre.android.style.sources.RasterSource("a-radar",
+            org.maplibre.android.style.sources.TileSet("2.1.0", url).apply { minZoom = 5f; maxZoom = 12f }, 256))
+        s.addLayerBelow(org.maplibre.android.style.layers.RasterLayer("a-radar", "a-radar").withProperties(rasterOpacity(0.6f)), "a-fill")
     }
 
     LaunchedEffect(map, camera.key, camera.lat, camera.lon) {

@@ -82,6 +82,11 @@ object Api {
     suspend fun content(name: String): ContentPage? = runCatching { AppJson.decodeFromString<ContentPage>(getText("${base}v1/content/$name")) }.getOrNull()
     suspend fun changelog(): List<ChangelogEntry> = runCatching { AppJson.decodeFromString<List<ChangelogEntry>>(getText("${base}v1/changelog")) }.getOrDefault(emptyList())
 
+    suspend fun radar(): RadarInfo? = runCatching { AppJson.decodeFromString<RadarInfo>(getText("${base}v1/radar")) }.getOrNull()
+    /** "Klopt deze melding niet?" – null when sent, otherwise the error text. */
+    suspend fun meldingFeedback(guid: String, body: Map<String, Any?>): String? =
+        runCatching { send("POST", "v1/meldingen/${enc(guid)}/feedback", body) }.exceptionOrNull()?.message
+
     suspend fun recordInstall(body: Map<String, Any?>) = send("POST", "v1/installs", body)
     suspend fun registerDevice(body: Map<String, Any?>) = send("POST", "v1/devices", body)
     suspend fun unregisterDevice(token: String) = send("DELETE", "v1/devices/${enc("fcm:$token")}")

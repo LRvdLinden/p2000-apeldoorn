@@ -97,6 +97,14 @@ data class Melding(
     }
     val isRecent: Boolean get() = System.currentTimeMillis() - millis < 10 * 60_000
     val isUrgent: Boolean get() = (prioriteit ?: "").uppercase() in setOf("A0", "A1", "P1")
+    /** A large incident (same rule as the server and iOS): GRIP, scaling up, a (very) large or medium fire, or 10+ units. */
+    val isGrootIncident: Boolean get() {
+        if ((grip?.toIntOrNull() ?: 0) > 0) return true
+        if (!opschaling.isNullOrBlank() && opschaling != "0") return true
+        val tekst = listOfNotNull(title, fullMelding, categorie).joinToString(" ")
+        if (GROOT_RE.containsMatchIn(tekst)) return true
+        return eenheden.size >= 10
+    }
     val isBesteld: Boolean get() = (prioriteit ?: "").uppercase() in setOf("B1", "B2", "B3")
 }
 
@@ -256,7 +264,20 @@ data class Helikopter(
         return h > 180 && h < 360
     }
     /** Route colour: purple for the Lifeliners, police blue for Zulu (same as iOS and the website). */
-    val kleur: Long get() = if (isTrauma) 0xFF9333EA else 0xFF15428B
+    val kleur: Long get() = if (Settings.heliKleurPerToestel) eigenKleur else if (isTrauma) 0xFF9333EA else 0xFF15428B
+    /** Fixed colour per helicopter ("Eigen kleur per helikopter"; same as iOS and the website). */
+    val eigenKleur: Long get() = when (id) {
+        "lifeliner1" -> 0xFFE11D48; "lifeliner2" -> 0xFFF59E0B; "lifeliner3" -> 0xFF16A34A; "lifeliner4" -> 0xFF7C3AED; "lifeliner5" -> 0xFF0891B2
+        else -> listOf(0xFF1D4ED8, 0xFF0EA5E9, 0xFF4F46E5, 0xFF0284C7, 0xFF2563EB, 0xFF6366F1)[(id.filter { it.isDigit() }.toIntOrNull() ?: 0) % 6]
+    }
+    /** Height and speed in the chosen units (metres and km/h, or feet and knots). */
+    val hoogteTekst: String get() = when {
+        opGrond -> tr("Op de grond", "On the ground")
+        hoogteFt == null -> "–"
+        Settings.eenheden == "luchtvaart" -> "${(Math.round(hoogteFt / 50.0) * 50)} ft"
+        else -> "$hoogteMeter m"
+    }
+    val snelheidTekst: String get() = snelheidKt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it)} kn" else tr("${Math.round(it * 1.852)} km/u", "${Math.round(it * 1.852)} km/h") } ?: "–"
     val soortLabel get() = if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
     val hoogteMeter: Int? get() = if (opGrond) 0 else hoogteFt?.let { Math.round(it * 0.3048 / 10).toInt() * 10 }
     val snelheidKmh: Int? get() = snelheidKt?.let { Math.round(it * 1.852).toInt() }
@@ -266,9 +287,7 @@ data class Helikopter(
         return "${k.toInt()}° ${dirs[(((k + 22.5) % 360) / 45).toInt().coerceIn(0, 7)]}"
     }
     val info: String get() {
-        val hoogte = if (opGrond) tr("op de grond", "on the ground") else hoogteMeter?.let { "$it m" } ?: "–"
-        val snelheid = snelheidKmh?.let { "$it km/u" } ?: "–"
-        return "$soortLabel · $hoogte · $snelheid"
+        return "$soortLabel · ${hoogteTekst.lowercase()} · $snelheidTekst"
     }
 }
 
@@ -318,9 +337,23 @@ data class HeliVluchten(val vluchten: List<HeliVlucht> = emptyList())
 data class HeliVoorspelling(
     val id: String, val naam: String, val soort: String = "ziekenhuis", val lat: Double, val lon: Double,
     @SerialName("afstand_km") val afstandKm: Double = 0.0, @SerialName("eta_min") val etaMin: Int? = null, val zekerheid: Double = 0.0,
+    /** soort "melding": on its way to the alert it was called for, then probably to [daarna]. */
+    val guid: String? = null, val plaats: String? = null, val daarna: HeliDaarna? = null,
 ) {
-    val tekst: String get() = tr("Waarschijnlijk naar $naam", "Probably heading to $naam") + (etaMin?.let { " · ± $it min" } ?: "")
+    val isMelding get() = soort == "melding"
+    val tekst: String get() {
+        val eta = etaMin?.let { " · ± $it min" } ?: ""
+        if (isMelding) {
+            val p = plaats?.lowercase()?.replaceFirstChar { it.uppercase() }
+            val doel = if (p != null) tr("Onderweg naar de melding in $p", "On its way to the alert in $p") else tr("Onderweg naar de melding", "On its way to the alert")
+            return doel + eta + (daarna?.let { "\n" + tr("Daarna waarschijnlijk naar ${it.naam}", "Then probably to ${it.naam}") } ?: "")
+        }
+        return tr("Waarschijnlijk naar $naam", "Probably heading to $naam") + eta
+    }
 }
+
+@Serializable
+data class HeliDaarna(val id: String, val naam: String)
 
 /** A hospital (emergency department, helipad or trauma centre) or a helicopter base. */
 @Serializable
@@ -446,3 +479,15 @@ object StatusStijl {
     fun label(s: String) = when (s) { "ok" -> tr("Werkt", "Working"); "warn" -> tr("Verstoord", "Degraded"); "down" -> tr("Storing", "Outage"); "maint" -> tr("Onderhoud", "Maintenance"); else -> tr("Onbekend", "Unknown") }
     fun kop(s: String) = when (s) { "ok" -> tr("Alle systemen werken", "All systems operational"); "maint" -> tr("Onderhoud bezig", "Maintenance in progress"); "down" -> tr("Er is een storing", "There is an outage"); else -> tr("Niet alles werkt normaal", "Not everything is working normally") }
 }
+
+private val GROOT_RE = Regex("""\bGRIP\s*[1-5]\b|zeer\s+grote\s+brand|\bgrote\s+brand\b|middel\s*brand|\bopschaling\b|\bramp\b|\bCoPI\b|grootschalig|\bMMA\b|multi\s*trauma""", RegexOption.IGNORE_CASE)
+
+/** A zone for helicopter notifications (same shape as iOS and the server). */
+@Serializable
+data class HeliZone(val id: String = java.util.UUID.randomUUID().toString(), val naam: String, val lat: Double, val lon: Double, val km: Double = 5.0) {
+    companion object { const val MAX = 5 }
+}
+
+/** GET /v1/radar */
+@Serializable
+data class RadarInfo(val beschikbaar: Boolean = false, val tiles: String? = null)
