@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
   push:
     branches: [a-alerts]
-    paths: ['.github/workflows/website-deploy.yml', 'website/.deploy']
+    paths: ['.github/workflows/website-deploy.yml', 'website/**', 'worker/content/**', 'tools/ftps.sh']
 
 concurrency:
   group: website-deploy
