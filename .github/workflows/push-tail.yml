@@ -4,9 +4,8 @@ on:
     branches: [a-alerts]
     paths: ['.github/workflows/push-tail.yml']
 jobs:
-  tail:
+  test:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
     defaults: { run: { working-directory: worker } }
     env:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -16,13 +15,17 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
       - run: npm ci >/dev/null
-      - name: Logs van de worker (10 min, alleen /v1/devices en push)
+      - name: Testpush naar recente toestellen (alleen status, geen tokens)
         run: |
-          timeout 600 npx wrangler tail p2000-apeldoorn-api --format json 2>/dev/null | node -e '
-            const rl=require("readline").createInterface({input:process.stdin});
-            const kort=(s)=>String(s).replace(/(devices\/)(fcm(%3A|:))?([A-Za-z0-9_-]{6})[A-Za-z0-9_:%-]*/i,"$1$2$4…");
-            rl.on("line",(l)=>{try{const e=JSON.parse(l);const r=e.event&&e.event.request;const url=r?new URL(r.url).pathname:"(cron)";
-              const logs=(e.logs||[]).map(x=>x.message.join(" ")).filter(m=>/push|fcm|apns|device|test/i.test(m));
-              if(/\/v1\/devices/.test(url)||logs.length||(e.exceptions||[]).length){
-                console.log(new Date(e.eventTimestamp).toISOString().slice(11,19), r?r.method:"", kort(url), e.event&&e.event.response?e.event.response.status:"", e.outcome, logs.map(kort).join(" | "), (e.exceptions||[]).map(x=>x.message).join(" | "));
-              }}catch{}});' || true
+          ID=$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).find(d=>d.name==="p2000-apeldoorn").uuid))')
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
+          npx wrangler d1 execute p2000-apeldoorn --remote --json --command "SELECT token, platform, environment, app_version, enabled, updated_at FROM devices ORDER BY updated_at DESC LIMIT 12" 2>/dev/null > /tmp/d.json
+          node -e '
+            const rows=JSON.parse(require("fs").readFileSync("/tmp/d.json","utf8"))[0].results;
+            (async()=>{for(const r of rows){
+              const kort=r.token.replace(/^(fcm:)?(.{6}).*/,"$1$2…");
+              const recent=Date.now()-new Date(r.updated_at.replace(" ","T")+(r.updated_at.endsWith("Z")?"":"Z")).getTime()<3*3600e3;
+              let res="(niet getest)";
+              if(recent){const x=await fetch("https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/devices/"+encodeURIComponent(r.token)+"/test",{method:"POST"});res=x.status+" "+(await x.text()).slice(0,200);}
+              console.log(kort,r.platform,r.environment,r.app_version,"enabled="+r.enabled,r.updated_at,"→",res);
+            }})();'
