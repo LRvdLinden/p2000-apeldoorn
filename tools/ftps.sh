@@ -1,7 +1,7 @@
 # shellcheck shell=bash
 # FTPS-verbinding met de hosting van a-alerts.nl (zelfde aanpak als de dashboards van Tunr).
 # Gebruik:  source tools/ftps.sh; ftps_connect; ftps_run "cd \"$FTPS_TARGET\"; cls -1"
-# Omgeving: FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, optioneel FTP_DIR en FTP_USERNAME_ALT.
+# Omgeving: FTP_SERVER, FTP_USERNAME (of FTP_USER), FTP_PASSWORD, optioneel FTP_PORT (standaard 21), FTP_DIR en FTP_USERNAME_ALT.
 # Nodig: lftp, openssl, curl, python3 (werkt op Ubuntu- en macOS-runners; macOS: brew install lftp).
 #
 # Alleen FTPS met een gecontroleerd certificaat (nooit gewone FTP). Gedeelde hosting toont vaak een certificaat op naam
@@ -22,6 +22,7 @@ if [ "$(uname -s)" = "Darwin" ] && ! openssl version 2>/dev/null | grep -q '^Ope
   fi
 fi
 FTPS_TMP="${FTPS_TMP:-$(mktemp -d)}"
+FTPS_PORT=$(printf '%s' "${FTP_PORT:-21}" | tr -cd '0-9'); FTPS_PORT="${FTPS_PORT:-21}"
 _ftps_ca="$FTPS_TMP/ca.pem"
 _ftps_common="set cmd:fail-exit true; set net:max-retries 3; set net:timeout 30; set net:reconnect-interval-base 5; set ftp:passive-mode true"
 _ftps_common="$_ftps_common; set ftp:ssl-force true; set ftp:ssl-protect-data true; set ftp:ssl-protect-list true"
@@ -51,7 +52,7 @@ _ftps_ca_init(){
 # onvolledige keten (tussencertificaat niet meegestuurd): via het AIA-adres ophalen; controle blijft tegen een vertrouwde root
 _ftps_add_chain(){
   local h="$1" aia
-  aia=$(_ftps_to 30 openssl s_client -connect "$h:21" -starttls ftp -servername "$h" </dev/null 2>/dev/null \
+  aia=$(_ftps_to 30 openssl s_client -connect "$h:$FTPS_PORT" -starttls ftp -servername "$h" </dev/null 2>/dev/null \
     | openssl x509 -noout -text 2>/dev/null | grep -oE 'CA Issuers - URI:[^ ]+' | sed 's/CA Issuers - URI://' | head -1 || true)
   [ -n "$aia" ] || return 0
   curl -fsSL --max-time 20 "$aia" -o "$FTPS_TMP/inter.bin" 2>/dev/null || return 0
@@ -61,14 +62,14 @@ _ftps_add_chain(){
 }
 # certificaat geldig voor precies deze hostnaam (keten + naam)?
 _ftps_cert_ok(){
-  _ftps_to 40 openssl s_client -connect "$1:21" -starttls ftp -servername "$1" -verify_hostname "$1" -verify_return_error \
+  _ftps_to 40 openssl s_client -connect "$1:$FTPS_PORT" -starttls ftp -servername "$1" -verify_hostname "$1" -verify_return_error \
     -CAfile "$_ftps_ca" </dev/null 2>/dev/null | grep -q 'Verify return code: 0 (ok)'
 }
 # naam met een geldig certificaat die naar dezelfde server wijst als $1 (alle IP's van de kandidaat zijn IP's van $1)
 _ftps_cert_host(){
   local host="$1" names n want got ptr cands="" first
   want=$(_ftps_ips "$host"); [ -n "$want" ] || return 1
-  names=$(_ftps_to 30 openssl s_client -connect "$host:21" -starttls ftp -servername "$host" </dev/null 2>/dev/null \
+  names=$(_ftps_to 30 openssl s_client -connect "$host:$FTPS_PORT" -starttls ftp -servername "$host" </dev/null 2>/dev/null \
     | openssl x509 -noout -text 2>/dev/null | grep -E 'DNS:|Subject:' \
     | grep -oE '(DNS:|CN ?= ?)(\*\.)?[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)+' | sed -E 's/^(DNS:|CN ?= ?)//' | tr 'A-Z' 'a-z' | sort -u) || true
   ptr=$(_ftps_ptr "$(echo "$want" | head -1)")
@@ -83,11 +84,12 @@ _ftps_cert_host(){
   done
   return 1
 }
-_ftps_login(){ lftp -e "$_ftps_common; open --env-password -u \"$2\" \"$1\"; cls -1 > \"$FTPS_TMP/root.txt\"; bye" >/dev/null 2>"$FTPS_TMP/err.txt"; }
+_ftps_login(){ lftp -e "$_ftps_common; open --env-password -p $FTPS_PORT -u \"$2\" \"$1\"; cls -1 > \"$FTPS_TMP/root.txt\"; bye" >/dev/null 2>"$FTPS_TMP/err.txt"; }
 
 # Zet FTPS_USER, FTPS_SERVER en FTPS_TARGET (de webmap van a-alerts.nl); geeft 1 bij een fout.
 ftps_connect(){
   local k v base host="" attempt u alt
+  [ -n "${FTP_USERNAME:-}" ] || FTP_USERNAME="${FTP_USER:-}"
   for k in FTP_SERVER FTP_USERNAME FTP_PASSWORD; do
     v="${!k:-}"; [ -n "$v" ] || { echo "::error::Secret $k ontbreekt."; return 1; }
     printf -v "$k" '%s' "$(_ftps_trim "$v")"
@@ -119,14 +121,15 @@ ftps_connect(){
   rm -f "$FTPS_TMP/err.txt"
   [ -n "$FTPS_USER" ] || { echo "::error::Inloggen op de FTP-server mislukt (controleer gebruikersnaam en wachtwoord)."; return 1; }
   FTPS_SERVER="$host"
-  # 3. doelmap: FTP_DIR, anders de hoofdmap van de FTP-login
+  # 3. doelmap: FTP_DIR, anders public_html als de login die heeft, anders de hoofdmap van de FTP-login
   FTPS_TARGET="${FTP_DIR:-}"; FTPS_TARGET="${FTPS_TARGET%/}"
+  if [ -z "$FTPS_TARGET" ] && grep -qx 'public_html/\?' "$FTPS_TMP/root.txt" 2>/dev/null; then FTPS_TARGET="public_html"; echo "::notice::Doelmap: public_html."; fi
   [ -n "$FTPS_TARGET" ] || FTPS_TARGET="."
   rm -f "$FTPS_TMP/root.txt"
   echo "::notice::Verbonden met de server (FTPS, certificaat gecontroleerd)."
 }
 
 # lftp-commando's op de server; uitvoer naar stdout (niet naar het log sturen als er servergegevens in staan)
-ftps_run(){ lftp -e "$_ftps_common; open --env-password -u \"$FTPS_USER\" \"$FTPS_SERVER\"; $1; bye"; }
+ftps_run(){ lftp -e "$_ftps_common; open --env-password -p $FTPS_PORT -u \"$FTPS_USER\" \"$FTPS_SERVER\"; $1; bye"; }
 # zoals ftps_run, maar fouten negeren (bv. een bestand dat nog niet bestaat)
-ftps_try(){ lftp -e "$_ftps_common; set cmd:fail-exit false; open --env-password -u \"$FTPS_USER\" \"$FTPS_SERVER\"; $1; bye"; }
+ftps_try(){ lftp -e "$_ftps_common; set cmd:fail-exit false; open --env-password -p $FTPS_PORT -u \"$FTPS_USER\" \"$FTPS_SERVER\"; $1; bye"; }

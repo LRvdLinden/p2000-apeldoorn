@@ -2,7 +2,7 @@ name: Website live (a-alerts.nl)
 
 # Zet website/ via FTPS (certificaat gecontroleerd) live op a-alerts.nl, met de nieuwste APK uit de branch android-build.
 # Secrets: AALERTS_FTP_SERVER, AALERTS_FTP_USERNAME, AALERTS_FTP_PASSWORD, optioneel AALERTS_FTP_DIR
-# (anders FTP_SERVER, FTP_USERNAME, FTP_PASSWORD, FTP_DIR). Ontbreekt er een, dan alleen een waarschuwing.
+# (anders FTP_SERVER, FTP_USERNAME of FTP_USER, FTP_PASSWORD, FTP_PORT, FTP_DIR). Ontbreekt er een, dan alleen een waarschuwing.
 # Nooit --delete: bestanden die alleen op de server staan blijven staan.
 
 on:
@@ -35,7 +35,7 @@ jobs:
         id: check
         env:
           FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
           FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
         run: |
           missing=""
@@ -48,9 +48,10 @@ jobs:
         if: steps.check.outputs.skip != '1'
         env:
           FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
-          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
           FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
           FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
         run: |
           set -euo pipefail
           source tools/ftps.sh
