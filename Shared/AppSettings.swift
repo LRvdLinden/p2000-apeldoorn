@@ -28,6 +28,10 @@ final class AppSettings {
     var pushBurgernet: Bool = false { didSet { save(.pushBurgernet, pushBurgernet); notificationsChanged() } }
     /// KNMI codes that give a push: "yellow", "orange", "red".
     var pushKnmi: Set<String> = ["orange", "red"] { didSet { save(.pushKnmi, Array(pushKnmi).sorted()); notificationsChanged() } }
+    /// KNMI: a push one hour before a code starts (when it was announced well before).
+    var pushKnmiVooraf: Bool = true { didSet { save(.pushKnmiVooraf, pushKnmiVooraf); notificationsChanged() } }
+    /// KNMI: a push when a code is lifted (code green).
+    var pushKnmiOpgeheven: Bool = true { didSet { save(.pushKnmiOpgeheven, pushKnmiOpgeheven); notificationsChanged() } }
 
     // MARK: Notification profiles (A-Alerts)
     /// Up to five profiles; the first one is mirrored into the older single notification settings.
@@ -79,7 +83,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, profielen, kaartLagen
+        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
 
         var synced: Bool {
             switch self {
@@ -211,6 +215,8 @@ final class AppSettings {
         if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
+        if let v = source(Key.pushKnmiVooraf.storageKey) as? Bool { pushKnmiVooraf = v }
+        if let v = source(Key.pushKnmiOpgeheven.storageKey) as? Bool { pushKnmiOpgeheven = v }
         if let v = set(.kaartLagen) {
             // New layer "ziekenhuizen" (build 37): on once for everyone who already chose layers.
             kaartLagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])

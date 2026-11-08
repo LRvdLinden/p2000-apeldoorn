@@ -268,7 +268,13 @@ export function fromKnmi(data, now = Date.now(), pagina = new Map()) {
     }
     joined.push(w);
   }
-  return joined.map(({ _ev, ...w }) => w);
+  // Time slots of the whole warning for the working area, per code ("geel 06–09 · oranje 09–10"), on every record of it.
+  const slots = new Map();
+  for (const w of joined) {
+    if (!slots.has(w._ev)) slots.set(w._ev, []);
+    slots.get(w._ev).push({ niveau: w.niveau, start: new Date(w.start_at).toISOString(), einde: new Date(w.end_at).toISOString() });
+  }
+  return joined.map(({ _ev, ...w }) => ({ ...w, tijdvakken: slots.get(_ev) }));
 }
 
 // ------------------------------------------------------------------ device preferences
@@ -277,7 +283,9 @@ export function fromKnmi(data, now = Date.now(), pagina = new Map()) {
 export function prefsFrom(s) {
   if (!s || typeof s !== "object") return null;
   const knmi = Array.isArray(s.knmi) ? s.knmi.map(normLevel).filter((l) => l !== "green") : [];
-  return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)] };
+  return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)],
+    // KNMI extras (default on): a push one hour before the code starts, and one when it is lifted (code green).
+    knmiVooraf: s.knmiVooraf !== false, knmiOpgeheven: s.knmiOpgeheven !== false };
 }
 
 /** Whether a warning reaches the device's radius: its area covers the centre or comes within the radius. */
@@ -308,16 +316,23 @@ export function wantsPush(device, prefs, w) {
 }
 
 const LABELS = {
-  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood" }, update: "Update", upgrade: "Opgeschaald naar" },
-  en: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red" }, update: "Update", upgrade: "Raised to" },
+  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" }, update: "Update", upgrade: "Opgeschaald naar",
+    vooraf: (code, tijd) => `Om ${tijd} gaat ${code.toLowerCase()} in`, opgeheven: (soort) => `De waarschuwing${soort ? ` voor ${soort.toLowerCase()}` : ""} is opgeheven. Er geldt nu code groen.` },
+  en: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red", green: "Code green" }, update: "Update", upgrade: "Raised to",
+    vooraf: (code, tijd) => `${code} starts at ${tijd}`, opgeheven: (soort) => `The warning${soort ? ` for ${soort.toLowerCase()}` : ""} has been lifted. Code green applies now.` },
 };
 
-export function payloadForWarning(w, lang = "nl", { upgrade = false } = {}) {
+/** kind: "n" new, "u" raised, "v" one hour before a KNMI code starts, "g" KNMI code lifted (green). */
+export function payloadForWarning(w, lang = "nl", { upgrade = false, kind = upgrade ? "u" : "n" } = {}) {
   const L = LABELS[(lang || "nl").startsWith("nl") ? "nl" : "en"];
-  const head = w.bron === "knmi" ? `${upgrade ? `${L.upgrade} ` : ""}${L.knmi[w.niveau] || "KNMI"} · ${w.soort || ""}`.trim()
+  const tijd = (iso) => new Date(iso).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" });
+  const code = L.knmi[w.niveau] || "KNMI";
+  let head = w.bron === "knmi" ? `${kind === "u" ? `${L.upgrade} ` : ""}${code} · ${w.soort || ""}`.trim()
     : w.bron === "burgernet" ? `${L.burgernet} · ${w.plaats || "Apeldoorn"}` : L.nlalert;
-  const body = w.bron === "knmi" ? (w.tekst || w.plaats || "") : w.bron === "nlalert" ? w.tekst : `${w.titel}`;
-  const urgent = w.bron === "nlalert" || w.niveau === "red";
+  let body = w.bron === "knmi" ? (w.tekst || w.plaats || "") : w.bron === "nlalert" ? w.tekst : `${w.titel}`;
+  if (w.bron === "knmi" && kind === "v") head = `${L.vooraf(code, tijd(w.start))} · ${w.soort || ""}`.replace(/ · $/, "");
+  if (w.bron === "knmi" && kind === "g") { head = `${L.knmi.green} · ${w.soort || ""}`.replace(/ · $/, ""); body = L.opgeheven(w.soort); }
+  const urgent = kind !== "g" && (w.bron === "nlalert" || w.niveau === "red");
   return {
     aps: {
       alert: { title: head, body: String(body || w.titel || "").slice(0, 400) },
@@ -350,7 +365,8 @@ export function toAPI(row, { withArea = true } = {}) {
     eerst_gezien: new Date(row.first_seen).toISOString(), bijgewerkt: new Date(row.updated_at).toISOString(),
     ...(row.bron === "knmi" ? (() => {
       const k = parse(row.knmi_data) || {};
-      return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null };
+      return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null,
+        tijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length > 1 ? k.tijdvakken : null };
     })() : {}),
   };
 }
@@ -426,7 +442,8 @@ async function upsert(env, w, now) {
     .bind(w.id, w.bron, w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status,
       json(w.gebied), w.lat, w.lon, w.link, prev?.first_seen ?? now, now, prev?.notified ?? null).run();
   if (w.bron === "knmi") {
-    const extra = { verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte };
+    const extra = { verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte,
+      tijdvakken: w.tijdvakken || null };
     await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
       .bind(w.id, JSON.stringify(extra)).run();
   }
@@ -563,6 +580,8 @@ export async function ingestWarnings(env, budget, kv) {
       await kv.set("knmi_revision", rev);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";
+    // Pushes around a KNMI code: one hour before it starts (when it was issued well before), and when it is lifted.
+    if (!firstRun) toPush.push(...(await knmiExtraPushes(env, kv, now)));
     // Status follows the clock (verwacht → actief → beeindigd) even when KNMI did not change.
     await env.DB.batch([
       env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', updated_at = ? WHERE bron = 'knmi' AND end_at < ? AND status != 'beeindigd'").bind(now, now),
@@ -573,6 +592,42 @@ export async function ingestWarnings(env, budget, kv) {
 
   await kv.set("warnings_status", JSON.stringify({ at: new Date(now).toISOString(), ...status }));
   return toPush;
+}
+
+/**
+ * "v": a KNMI code starts within the hour and was issued more than an hour before its start (else the new push said it).
+ * "g": a pushed KNMI code has ended or was withdrawn and nothing of that weather type applies now or within the hour:
+ *      one push for the whole warning (all its codes). Each is sent once (kv "knmi_push:<kind>:<id>").
+ */
+export async function knmiExtraPushes(env, kv, now = Date.now()) {
+  const uit = [];
+  const { results } = await env.DB.prepare(`SELECT id, titel, niveau, status, start_at, end_at, first_seen, notified FROM waarschuwingen
+    WHERE bron = 'knmi' AND end_at >= ?`).bind(now - 3 * 3_600_000).all();
+  const actief = results.filter((r) => r.start_at <= now && r.end_at >= now && r.status !== "beeindigd");
+  for (const r of results) {
+    if (!r.notified || r.status === "beeindigd") continue;
+    if (r.start_at > now && r.start_at - now <= 3_600_000 && r.start_at - r.first_seen > 3_600_000) {
+      const key = `knmi_push:v:${r.id}`;
+      if (!(await kv.get(key))) { await kv.set(key, "1"); uit.push({ id: r.id, kind: "v" }); }
+    }
+  }
+  const groepen = new Map();
+  for (const r of results) {
+    if (!r.notified || !(r.status === "beeindigd" || r.end_at < now)) continue;
+    if (actief.some((a) => a.titel === r.titel)) continue;
+    if (results.some((x) => x.titel === r.titel && x.status !== "beeindigd" && x.start_at > now && x.start_at - now <= 3_600_000)) continue;
+    if (!groepen.has(r.titel)) groepen.set(r.titel, []);
+    groepen.get(r.titel).push(r);
+  }
+  for (const groep of groepen.values()) {
+    const open = [];
+    for (const r of groep) if (!(await kv.get(`knmi_push:g:${r.id}`))) open.push(r);
+    if (!open.length) continue;
+    for (const r of open) await kv.set(`knmi_push:g:${r.id}`, "1");
+    const top = open.reduce((a, b) => (levelRank(b.niveau) > levelRank(a.niveau) || (b.niveau === a.niveau && b.end_at > a.end_at) ? b : a));
+    uit.push({ id: top.id, kind: "g", levels: [...new Set(open.map((r) => r.niveau))] });
+  }
+  return uit;
 }
 
 export async function devicePrefs(env) {
@@ -590,6 +645,7 @@ export async function warningsHousekeeping(env) {
     env.DB.prepare("DELETE FROM waarschuwingen WHERE status = 'beeindigd' AND COALESCE(end_at, updated_at) < ?").bind(Date.now() - 14 * DAY),
     env.DB.prepare("DELETE FROM device_prefs WHERE token NOT IN (SELECT token FROM devices)"),
     env.DB.prepare("DELETE FROM waarschuwing_knmi WHERE id NOT IN (SELECT id FROM waarschuwingen)"),
+    env.DB.prepare("DELETE FROM kv WHERE key LIKE 'knmi_push:%' AND at < ?").bind(Date.now() - 3 * DAY),
   ]);
 }
 

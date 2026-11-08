@@ -89,6 +89,9 @@ fun ProfielScreen(id: String, nav: Nav) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("yellow", "orange", "red").forEach { c -> SelectChip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }
                 }
+                // Same as iOS: extra KNMI pushes, for all profiles.
+                SwitchRow(tr("Een uur voordat de code ingaat", "One hour before the code starts"), tr("Als de waarschuwing al eerder bekend was", "When the warning was known earlier"), Settings.pushKnmiVooraf) { Settings.pushKnmiVooraf = it }
+                SwitchRow(tr("Als de code is opgeheven", "When the code is lifted"), tr("Code groen: er geldt voor dit weer geen code meer", "Code green: no code applies for this weather any more"), Settings.pushKnmiOpgeheven) { Settings.pushKnmiOpgeheven = it }
             }
             SectionCard(tr("Wanneer", "When"), Icons.Outlined.Schedule) {
                 SwitchRow(tr("Altijd", "Always"), checked = p.altijd) { save(p.copy(altijd = it)) }

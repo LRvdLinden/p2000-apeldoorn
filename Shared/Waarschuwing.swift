@@ -35,11 +35,25 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     /// KNMI: headline, description, details and issue time from knmi.nl.
     let knmiKop: String?
     let omschrijving: String?
+    /// KNMI: the time slots of the whole warning per code (only when there is more than one).
+    let tijdvakken: [Tijdvak]?
+    struct Tijdvak: Decodable, Hashable, Sendable {
+        let niveau: String
+        let start: Date
+        let einde: Date
+        enum CodingKeys: String, CodingKey { case niveau, start, einde }
+        init(from decoder: Decoder) throws {
+            let c = try decoder.container(keyedBy: CodingKeys.self)
+            niveau = (try? c.decode(String.self, forKey: .niveau)) ?? "yellow"
+            start = (try? c.decode(String.self, forKey: .start)).flatMap(Fmt.parseISO) ?? .now
+            einde = (try? c.decode(String.self, forKey: .einde)).flatMap(Fmt.parseISO) ?? .now
+        }
+    }
     let details: String?
     let uitgifte: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken
         case knmiKop = "kop"
         case tekstEn = "tekst_en"
     }
@@ -67,6 +81,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         omschrijving = (try? c.decodeIfPresent(String.self, forKey: .omschrijving)).flatMap { $0 }
         details = (try? c.decodeIfPresent(String.self, forKey: .details)).flatMap { $0 }
         uitgifte = (try? c.decodeIfPresent(String.self, forKey: .uitgifte)).flatMap { $0 }
+        tijdvakken = (try? c.decodeIfPresent([Tijdvak].self, forKey: .tijdvakken)).flatMap { $0 }
     }
 
     var isActief: Bool { status == "actief" }
@@ -125,6 +140,13 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
 
     /// KNMI: the code that applies now. A lifted (ended) warning is code green; `niveau` keeps the code it had.
     var codeNu: String? { bron == .knmi && isBeeindigd ? "green" : niveau }
+    /// Spoken description of the map for VoiceOver ("Code geel voor mist in Flevoland …").
+    var kaartBeschrijving: String {
+        bron == .knmi
+            ? Lf("Kaart: %@ voor %@ in %@.", Self.codeLabel(codeNu), (soort ?? titel).lowercased(), plaats ?? L("de gemeente Apeldoorn"))
+            : Lf("Kaart: %@ in %@.", kop, plaats ?? L("de gemeente Apeldoorn"))
+    }
+
     /// Ended KNMI warning: lifted, code green now.
     var isOpgeheven: Bool { bron == .knmi && isBeeindigd }
     /// Link to this warning on a-alerts.nl (for sharing).

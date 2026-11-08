@@ -336,3 +336,8 @@ a.drow { text-decoration: none; color: inherit; }
 .opgeheven .groen div { display: grid; }
 .opgeheven .groen b { font-size: 1.1rem; }
 .opgeheven .groen small { color: var(--muted); }
+.verloop .vak { display: flex; align-items: center; gap: 10px; padding: 6px 0; }
+.verloop .vak i { width: 8px; height: 28px; border-radius: 4px; flex: none; }
+.verloop .vak b { flex: 1; }
+.verloop .vak span { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .9rem; }
+.verloop .vak.voorbij { opacity: .5; }

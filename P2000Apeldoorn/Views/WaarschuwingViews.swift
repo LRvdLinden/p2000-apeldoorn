@@ -256,6 +256,15 @@ struct KnmiCodesView: View {
             } footer: {
                 Text(L("Kies per code of je een melding wilt. Je krijgt een melding bij een nieuwe waarschuwing of als hij wordt opgeschaald, niet bij elke aanpassing. Bron: KNMI."))
             }
+            Section {
+                @Bindable var s = settings
+                Toggle(L("Een uur voordat de code ingaat"), isOn: $s.pushKnmiVooraf)
+                Toggle(L("Als de code is opgeheven"), isOn: $s.pushKnmiOpgeheven)
+            } header: {
+                Text(L("Extra meldingen"))
+            } footer: {
+                Text(L("Alleen voor de codes die je hierboven kiest. Vooraf: als de waarschuwing al eerder bekend was. Opgeheven: als er voor dit weer geen code meer geldt (code groen)."))
+            }
         }
         .navigationTitle(Text(verbatim: "KNMI"))
     }

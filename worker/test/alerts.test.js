@@ -94,6 +94,7 @@ test("knmi: consecutive periods of one warning are joined, phenomenon in Dutch",
   assert.equal(list[0].titel, "Mist");
   assert.equal(list[0].end_at, Date.parse("2026-11-08T09:00:00Z"));
   assert.equal(list[1].niveau, "orange");
+  assert.deepEqual(list[0].tijdvakken.map((t) => t.niveau), ["yellow", "orange"]);
   assert.equal(list[0]._ev, undefined);
   assert.equal(list[0].verwachting, "Houd rekening met vertragingen op de weg.");
   assert.equal(list[0].advies, "Rijd langzamer.");

@@ -366,9 +366,9 @@ async function drain(env, budget) {
   for (const row of results) {
     if (!items.has(row.guid)) {
       if (row.guid.startsWith("w:")) {
-        const [, upgrade, ...rest] = row.guid.split(":");
+        const [, kind, ...rest] = row.guid.split(":");
         const w = await getWarning(env, rest.join(":"));
-        items.set(row.guid, w ? { warning: w, upgrade: upgrade === "u" } : null);
+        items.set(row.guid, w ? { warning: w, kind } : null);
       } else if (row.guid.startsWith("broadcast:")) {
         const b = await kvGet(env, row.guid);
         items.set(row.guid, b ? { broadcast: JSON.parse(b.value) } : null);
@@ -384,8 +384,8 @@ async function drain(env, budget) {
     const done = env.DB.prepare("DELETE FROM outbox WHERE guid = ? AND token = ?").bind(row.guid, row.token);
     if (!item || !budget.take()) { if (!item) await done.run(); return; }
     const r = item.warning
-      ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { upgrade: item.upgrade }),
-        { urgent: item.warning.bron === "nlalert" || item.warning.niveau === "red", collapseId: item.warning.id.slice(0, 64) })
+      ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { kind: item.kind }),
+        { urgent: item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"), collapseId: item.warning.id.slice(0, 64) })
       : item.melding
       ? await sendPush(env, row, payloadFor(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
       : await sendPush(env, row, broadcastPayload(item.broadcast, row.language), item.broadcast.heli ? { collapseId: row.guid.slice(-64) } : {});
@@ -427,12 +427,18 @@ async function warnings(env, budget) {
   if (!toPush.length) return;
   const devices = await activeDevices(env);
   const prefs = await devicePrefs(env);
-  for (const { id, upgrade } of toPush) {
+  for (const { id, upgrade, kind = upgrade ? "u" : "n", levels } of toPush) {
     const w = await getWarning(env, id);
     if (!w) continue;
     const wr = { ...w, gebied: w.gebied };
-    const tokens = devices.filter((d) => warningWanted(d, prefs.get(d.token), wr)).map((d) => d.token);
-    if (tokens.length) await queue(env, `w:${upgrade ? "u" : "n"}:${id}`, tokens);
+    // "v" (one hour before) and "g" (lifted) only for devices that keep those on; "g" for anyone who wanted one of its codes.
+    const extra = (p) => kind === "v" ? p?.knmiVooraf !== false : kind === "g" ? p?.knmiOpgeheven !== false : true;
+    const tokens = devices.filter((d) => {
+      const p = prefs.get(d.token);
+      if (!extra(p)) return false;
+      return kind === "g" ? (levels || [w.niveau]).some((niveau) => warningWanted(d, p, { ...wr, niveau, status: "actief" })) : warningWanted(d, p, wr);
+    }).map((d) => d.token);
+    if (tokens.length) await queue(env, `w:${kind}:${id}`, tokens);
   }
 }
 

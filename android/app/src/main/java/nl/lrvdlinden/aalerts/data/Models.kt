@@ -126,6 +126,8 @@ data class Waarschuwing(
     val advies: String? = null,
     /** KNMI: headline, description, details and issue time from knmi.nl. */
     @SerialName("kop") val knmiKop: String? = null,
+    /** KNMI: the time slots of the whole warning per code (only when there is more than one). */
+    val tijdvakken: List<Tijdvak>? = null,
     val omschrijving: String? = null,
     val details: String? = null,
     val uitgifte: String? = null,
@@ -211,6 +213,12 @@ data class Waarschuwing(
             else -> Color(0xFFF7C600)
         }
     }
+}
+
+@Serializable
+data class Tijdvak(val niveau: String = "yellow", val start: String? = null, val einde: String? = null) {
+    val startAt: Instant? get() = parseInstant(start)
+    val eindeAt: Instant? get() = parseInstant(einde)
 }
 
 @Serializable

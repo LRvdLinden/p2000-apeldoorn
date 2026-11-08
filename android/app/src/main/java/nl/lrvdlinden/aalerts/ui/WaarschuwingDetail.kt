@@ -26,6 +26,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -68,7 +70,11 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
     Box(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val scroll = rememberScrollState()
         Column(Modifier.fillMaxSize().verticalScroll(scroll)) {
-            BoxWithConstraints(Modifier.fillMaxWidth()) {
+            // TalkBack: a spoken description of the map, as on iOS.
+            val kaartTekst = if (x.bron == "knmi") tr("Kaart: ${Waarschuwing.codeLabel(x.codeNu)} voor ${(x.soort ?: x.titel).lowercase()} in ${x.plaats ?: "de gemeente Apeldoorn"}.",
+                "Map: ${Waarschuwing.codeLabel(x.codeNu)} for ${(x.soort ?: x.titel).lowercase()} in ${x.plaats ?: "the municipality of Apeldoorn"}.")
+                else tr("Kaart: ${x.kop} in ${x.plaats ?: "de gemeente Apeldoorn"}.", "Map: ${x.kop} in ${x.plaats ?: "the municipality of Apeldoorn"}.")
+            BoxWithConstraints(Modifier.fillMaxWidth().semantics { contentDescription = kaartTekst }) {
                 val h = (maxWidth * 0.9f).coerceIn(300.dp, 440.dp)
                 val rings = x.gebied ?: emptyList()
                 val fit = rings.flatten().map { it[1] to it[0] }
@@ -118,6 +124,19 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         x.knmiKop?.let { Text(it, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
                         x.omschrijving?.let { Text(it, fontSize = 15.sp) }
                         x.uitgifte?.let { Text(tr("Uitgifte: ", "Issued: ") + it, color = Muted, fontSize = 12.sp) }
+                    }
+                    x.tijdvakken?.takeIf { it.size > 1 }?.let { vakken ->
+                        // The course of the whole warning per code, as on iOS.
+                        SectionCard(tr("Verloop", "Course"), Icons.Outlined.Schedule) {
+                            vakken.forEach { t ->
+                                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.alpha(if ((t.eindeAt ?: java.time.Instant.MAX).isBefore(java.time.Instant.now())) 0.5f else 1f)) {
+                                    Box(Modifier.size(8.dp, 28.dp).clip(RoundedCornerShape(4.dp)).background(Waarschuwing.codeColor(t.niveau)))
+                                    Spacer(Modifier.width(10.dp))
+                                    Text(Waarschuwing.codeLabel(t.niveau), fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
+                                    Text((t.startAt?.let { Fmt.day(it) + " " + Fmt.time(it) } ?: "") + " – " + (t.eindeAt?.let { Fmt.time(it) } ?: ""), color = Muted, fontSize = 14.sp)
+                                }
+                            }
+                        }
                     }
                     val regels = x.knmiAdviesRegels
                     if (regels.isNotEmpty() || x.details != null) SectionCard(tr("Risico's en advies", "Risks and advice"), Icons.Outlined.Warning) {

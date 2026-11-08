@@ -190,6 +190,7 @@ struct WaarschuwingDetailView: View {
         }
         .mapStyle(MapStyleSetting.style(for: settings.mapType, pointsOfInterest: true))
         .mapControls { MapCompass() }
+        .accessibilityLabel(w.kaartBeschrijving)
         .safeAreaPadding(.top, topSafeArea + 66)
         .overlay(alignment: .top) { topBar(w).padding(.top, topInset) }
         .overlay(alignment: .topLeading) {
@@ -396,6 +397,24 @@ struct WaarschuwingDetailView: View {
                     Text(o).font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                 }
                 if let u = w.uitgifte { Text(Lf("Uitgifte: %@", u)).font(AppFont.body(12)).foregroundStyle(.secondary) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .wCard()
+        }
+        if let vakken = w.tijdvakken, vakken.count > 1 {
+            // The course of the whole warning per code, e.g. yellow 06–09, orange 09–10.
+            VStack(alignment: .leading, spacing: 10) {
+                Text(L("Verloop")).font(AppFont.heading(18))
+                ForEach(vakken, id: \.self) { t in
+                    HStack(spacing: 10) {
+                        RoundedRectangle(cornerRadius: 4, style: .continuous).fill(Waarschuwing.codeColor(t.niveau)).frame(width: 8, height: 28)
+                        Text(Waarschuwing.codeLabel(t.niveau)).font(AppFont.body(15, .semibold))
+                        Spacer()
+                        Text(verbatim: "\(Fmt.dayTime(t.start)) – \(Fmt.time(t.einde))").font(AppFont.body(14).monospacedDigit()).foregroundStyle(.secondary)
+                    }
+                    .opacity(t.einde < .now ? 0.5 : 1)
+                    .accessibilityElement(children: .combine)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .wCard()

@@ -155,6 +155,8 @@ enum PushManager {
                     "nlalert": s.pushNLAlert,
                     "burgernet": s.pushBurgernet,
                     "knmi": Array(s.pushKnmi).sorted(),
+                    "knmiVooraf": s.pushKnmiVooraf,
+                    "knmiOpgeheven": s.pushKnmiOpgeheven,
                 ] as [String: Any],
                 // A-Alerts: up to five notification profiles (older servers ignore this).
                 "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),

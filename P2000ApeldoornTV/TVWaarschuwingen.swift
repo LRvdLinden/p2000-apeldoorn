@@ -153,6 +153,13 @@ struct TVWaarschuwingDetail: View {
                             }
                         }
                         if let d = waarschuwing.details { Text(d).font(AppFont.body(20, .regular)).foregroundStyle(.secondary) }
+                        if let vakken = waarschuwing.tijdvakken, vakken.count > 1 {
+                            Text(L("Verloop")).font(AppFont.body(22, .bold)).padding(.top, 4)
+                            ForEach(vakken, id: \.self) { t in
+                                Text(verbatim: "\(Waarschuwing.codeLabel(t.niveau))  \(Fmt.dayTime(t.start)) – \(Fmt.time(t.einde))")
+                                    .font(AppFont.body(20, .regular)).foregroundStyle(Waarschuwing.codeColor(t.niveau))
+                            }
+                        }
                     } else if let t = waarschuwing.tekst, !t.isEmpty {
                         Text(t).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
                     }

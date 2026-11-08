@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=45";
+} from "./core.js?v=46";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=45";
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=46";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -256,7 +256,12 @@ function opgehevenHTML(w) {
 /** KNMI as on knmi.nl: headline and description, then risks and advice, details and the area. */
 function knmiHTML(w) {
   const advies = [...regels(w.verwachting), ...regels(w.advies)];
-  return `${w.kop || w.omschrijving ? `<section class="card story"><h2>${esc(w.kop || "Bericht")}</h2>${regels(w.omschrijving).map((p) => `<p>${esc(p)}</p>`).join("")}
+  const vakken = Array.isArray(w.tijdvakken) && w.tijdvakken.length > 1 ? w.tijdvakken : [];
+  const verloop = vakken.length ? `<section class="card verloop"><h2>Verloop</h2>${vakken.map((t) => {
+    const s = new Date(t.start), e = new Date(t.einde);
+    return `<div class="vak${e < new Date() ? " voorbij" : ""}"><i style="background:${(CODES[t.niveau] || CODES.yellow)[1]}"></i><b>${(CODES[t.niveau] || CODES.yellow)[0]}</b><span>${esc(fmtDateTime(s))} – ${esc(fmtTime(e))}</span></div>`;
+  }).join("")}</section>` : "";
+  return `${verloop}${w.kop || w.omschrijving ? `<section class="card story"><h2>${esc(w.kop || "Bericht")}</h2>${regels(w.omschrijving).map((p) => `<p>${esc(p)}</p>`).join("")}
       ${w.uitgifte ? `<p class="hint">Uitgifte: ${esc(w.uitgifte)}</p>` : ""}</section>` : ""}
     ${advies.length || w.details ? `<section class="card story knmi-advies"><h2>Risico's en advies</h2>
       ${advies.length ? `<div class="code"><img src="${wIcon(w)}" alt="" style="background:${wKleur(w)}"><span><b>${esc(wKop(w))}</b><small>Advies</small></span></div>
@@ -585,7 +590,9 @@ async function selectWarning(id, { push = true } = {}) {
   <article class="detail">
     <button class="d-back" data-close>‹ Pager</button>
     <button class="d-close" data-close aria-label="Sluiten">✕</button>
-    <div class="d-map" id="dMap">${w.bron === "burgernet" ? `<div class="lookaround" id="lookAround" title="Look Around"></div>` : ""}</div>
+    <div class="d-map" id="dMap" role="img" aria-label="${esc(w.bron === "knmi"
+      ? `Kaart: ${(CODES[isOpgeheven(w) ? "green" : w.niveau] || CODES.yellow)[0]} voor ${String(w.soort || w.titel).toLowerCase()} in ${w.plaats || "de gemeente Apeldoorn"}.`
+      : `Kaart: ${wKop(w)} in ${w.plaats || "de gemeente Apeldoorn"}.`)}">${w.bron === "burgernet" ? `<div class="lookaround" id="lookAround" title="Look Around"></div>` : ""}</div>
     <section class="card">
       <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${w.bron === "knmi" ? wKleur(w) : b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1>
         <button class="share" id="wShareBtn" aria-label="Delen">${ICO.share}</button></div>

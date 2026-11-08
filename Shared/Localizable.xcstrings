@@ -1055,6 +1055,23 @@
         }
       }
     },
+    "Alleen voor de codes die je hierboven kiest. Vooraf: als de waarschuwing al eerder bekend was. Opgeheven: als er voor dit weer geen code meer geldt (code groen).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only for the codes you choose above. In advance: when the warning was known earlier. Lifted: when no code applies for this weather any more (code green)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen voor de codes die je hierboven kiest. Vooraf: als de waarschuwing al eerder bekend was. Opgeheven: als er voor dit weer geen code meer geldt (code groen)."
+          }
+        }
+      }
+    },
     "Alles": {
       "extractionState": "manual",
       "localizations": {
@@ -1068,6 +1085,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alles"
+          }
+        }
+      }
+    },
+    "Als de code is opgeheven": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "When the code is lifted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Als de code is opgeheven"
           }
         }
       }
@@ -2415,6 +2449,23 @@
         }
       }
     },
+    "Een uur voordat de code ingaat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One hour before the code starts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een uur voordat de code ingaat"
+          }
+        }
+      }
+    },
     "Eenheden": {
       "extractionState": "manual",
       "localizations": {
@@ -2564,6 +2615,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Er zijn op dit moment geen meldingen."
+          }
+        }
+      }
+    },
+    "Extra meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra notifications"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Extra meldingen"
           }
         }
       }
@@ -3805,6 +3873,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaart kleiner"
+          }
+        }
+      }
+    },
+    "Kaart: %@ in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map: %@ in %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart: %@ in %@."
+          }
+        }
+      }
+    },
+    "Kaart: %@ voor %@ in %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map: %@ for %@ in %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart: %@ voor %@ in %@."
           }
         }
       }
@@ -7436,7 +7538,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Timeline"
+            "value": "Course"
           }
         },
         "nl": {
@@ -8565,6 +8667,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "binnen %@ km"
+          }
+        }
+      }
+    },
+    "de gemeente Apeldoorn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "the municipality of Apeldoorn"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "de gemeente Apeldoorn"
           }
         }
       }

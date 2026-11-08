@@ -105,6 +105,9 @@ object Settings {
     // Notifications
     var notificationsEnabled by bool("notificationsEnabled", false, push = true)
     var quietMode by bool("quietMode", false, push = true)
+    /** KNMI: a push one hour before a code starts, and one when it is lifted (code green). For all profiles. */
+    var pushKnmiVooraf by bool("pushKnmiVooraf", true, push = true)
+    var pushKnmiOpgeheven by bool("pushKnmiOpgeheven", true, push = true)
     var quietFrom by int("quietFrom", 23 * 60, push = true)
     var quietTo by int("quietTo", 7 * 60, push = true)
     var criticalAlerts by bool("criticalAlerts", true, push = true)
@@ -186,6 +189,8 @@ object Settings {
                 "nlalert" to p.any { it.actief && it.nlalert },
                 "burgernet" to p.any { it.actief && it.burgernet },
                 "knmi" to p.filter { it.actief }.flatMap { it.knmi }.toSet().sorted(),
+                "knmiVooraf" to pushKnmiVooraf,
+                "knmiOpgeheven" to pushKnmiOpgeheven,
             ),
             "profielen" to p.map {
                 mapOf("id" to it.id, "naam" to it.naam, "actief" to it.actief, "diensten" to it.diensten.sorted(), "plaatsen" to it.plaatsen.sorted(),
