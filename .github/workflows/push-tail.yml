@@ -24,7 +24,7 @@ jobs:
             const rows=JSON.parse(require("fs").readFileSync("/tmp/d.json","utf8"))[0].results;
             (async()=>{for(const r of rows){
               const kort=r.token.replace(/^(fcm:)?(.{6}).*/,"$1$2…");
-              const recent=Date.now()-new Date(r.updated_at.replace(" ","T")+(r.updated_at.endsWith("Z")?"":"Z")).getTime()<3*3600e3;
+              const t=typeof r.updated_at==="number"?(r.updated_at<1e12?r.updated_at*1000:r.updated_at):Date.parse(r.updated_at);const recent=Date.now()-t<3*3600e3;r.updated_at=new Date(t).toISOString();
               let res="(niet getest)";
               if(recent){const x=await fetch("https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/devices/"+encodeURIComponent(r.token)+"/test",{method:"POST"});res=x.status+" "+(await x.text()).slice(0,200);}
               console.log(kort,r.platform,r.environment,r.app_version,"enabled="+r.enabled,r.updated_at,"→",res);
