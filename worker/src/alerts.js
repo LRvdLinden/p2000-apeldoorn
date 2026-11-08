@@ -182,11 +182,24 @@ const normLevel = (v) => {
 };
 const geomRings = (g) => !g ? [] : g.type === "Polygon" ? [g.coordinates[0]] : g.type === "MultiPolygon" ? g.coordinates.map((p) => p[0]) : [];
 
-/** One record per warning period, with only the parts that cover the working area. */
+// KNMI names the phenomenon in English in its feed; the apps are Dutch.
+const KNMI_NL = {
+  fog: "Mist", "dense fog": "Dichte mist", wind: "Wind", "strong wind": "Zware windstoten", "wind gusts": "Windstoten",
+  thunderstorm: "Onweer", thunderstorms: "Onweer", lightning: "Onweer", rain: "Regen", "heavy rain": "Zware regen",
+  snow: "Sneeuw", "snow/ice": "Sneeuw en gladheid", ice: "Gladheid", "slippery roads": "Gladheid", glaze: "IJzel",
+  "freezing rain": "IJzel", heat: "Hitte", "high temperature": "Hitte", "low temperature": "Kou", cold: "Kou",
+  "extreme cold": "Strenge vorst", hail: "Hagel", tornado: "Tornado", "coastal event": "Kustwaarschuwing",
+};
+const knmiNaam = (p) => KNMI_NL[String(p || "").trim().toLowerCase()] || p;
+
+/**
+ * One record per warning, with only the parts that cover the working area. Periods of the same warning that
+ * follow each other with the same level are joined (KNMI often splits one fog warning into hourly periods).
+ */
 export function fromKnmi(data, now = Date.now()) {
   const out = [];
   for (const [ei, ev] of (data?.warning_events || []).entries()) {
-    const phenomenon = txt(ev.phenomenon);
+    const phenomenon = knmiNaam(txt(ev.phenomenon));
     for (const period of ev.periods || []) {
       const start = Date.parse(period.starts_at), end = Date.parse(period.ends_at);
       if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
@@ -204,10 +217,24 @@ export function fromKnmi(data, now = Date.now()) {
         niveau, soort: phenomenon, start_at: start, end_at: end,
         status: end < now ? "beeindigd" : start > now ? "verwacht" : "actief",
         gebied: rings.length ? simplify(rings, 400) : null, lat, lon, link: "https://www.knmi.nl/nederland-nu/weer/waarschuwingen",
+        _ev: ev.id ?? ei,
       });
     }
   }
-  return out;
+  // Join consecutive periods of the same warning and level into one.
+  out.sort((a, b) => String(a._ev).localeCompare(String(b._ev)) || a.start_at - b.start_at);
+  const joined = [];
+  for (const w of out) {
+    const prev = joined[joined.length - 1];
+    if (prev && prev._ev === w._ev && prev.niveau === w.niveau && w.start_at <= prev.end_at + 60_000) {
+      prev.end_at = Math.max(prev.end_at, w.end_at);
+      prev.status = prev.end_at < now ? "beeindigd" : prev.start_at > now ? "verwacht" : "actief";
+      if (w.tekst && !prev.tekst.includes(w.tekst)) prev.tekst = prev.tekst || w.tekst;
+      continue;
+    }
+    joined.push(w);
+  }
+  return joined.map(({ _ev, ...w }) => w);
 }
 
 // ------------------------------------------------------------------ device preferences
@@ -461,6 +488,10 @@ export async function ingestWarnings(env, budget, kv) {
       const d = await fetchJSON(`${SOURCES.knmi}.json`, budget);
       const list = fromKnmi(d, now);
       await handle("knmi", list);
+      // Warnings KNMI no longer lists (withdrawn, or joined into one): remove the ones that have not ended yet.
+      const ids = new Set(list.map((w) => w.id));
+      const { results: open } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'knmi' AND end_at >= ?").bind(now).all();
+      for (const r of open) if (!ids.has(r.id)) await env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id).run();
       await kv.set("knmi_revision", rev);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";
