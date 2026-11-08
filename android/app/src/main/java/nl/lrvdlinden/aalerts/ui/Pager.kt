@@ -87,16 +87,6 @@ fun PagerScreen(nav: Nav) {
         PullToRefreshBox(isRefreshing = Store.loading && Store.meldingen.isNotEmpty(), onRefresh = { scope.launch { Store.refresh() } }, modifier = Modifier.padding(pad).fillMaxSize()) {
             LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 24.dp)) {
                 item(key = "knmi") { KnmiBar(Store.knmiActief) { nav.waarschuwing(it.id) } }
-                if (Settings.listFilterActive) item(key = "filterinfo") {
-                    Row(Modifier.padding(horizontal = 16.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Outlined.FilterList, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
-                        Spacer(Modifier.width(6.dp))
-                        Text(tr("Filter actief", "Filter on"), color = MaterialTheme.colorScheme.primary, fontSize = 13.sp, modifier = Modifier.weight(1f))
-                        TextButton(onClick = { Settings.diensten = emptySet(); Settings.plaatsen = emptySet(); Settings.prioriteiten = emptySet(); Settings.waarschuwingFilter = emptySet(); Settings.radiusEnabled = false }) {
-                            Text(tr("Wissen", "Clear"), fontSize = 13.sp)
-                        }
-                    }
-                }
                 val verborgen = if (Settings.hideRead) Store.meldingen.count { it.guid in gelezen } else 0
                 if (items.isEmpty()) item(key = "empty") {
                     when {

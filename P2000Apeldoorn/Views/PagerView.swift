@@ -133,11 +133,6 @@ struct PagerView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
-                if settings.listFilterActive && scope == .alle {
-                    ActiveFilterBar(showFilters: $showFilters)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                }
             }
 
             if items.isEmpty {
@@ -336,42 +331,6 @@ struct TodayStrip: View {
         .padding(.vertical, 8)
         .background(color.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityElement(children: .combine)
-    }
-}
-
-struct ActiveFilterBar: View {
-    @Environment(AppSettings.self) private var settings
-    @Binding var showFilters: Bool
-
-    var body: some View {
-        HStack {
-            Image(systemName: "line.3.horizontal.decrease")
-            Text(summary).lineLimit(1)
-            Spacer()
-            Button(L("Wis")) {
-                settings.diensten = []
-                settings.plaatsen = []
-                settings.prioriteiten = []
-                settings.radiusEnabled = false
-                settings.waarschuwingFilter = []
-            }
-            .font(AppFont.body(16, .semibold, relativeTo: .callout))
-        }
-        .font(AppFont.body(16, .light, relativeTo: .callout))
-        .padding(.horizontal, 12).padding(.vertical, 8)
-        .background(Theme.red.opacity(0.12), in: Capsule())
-        .contentShape(Capsule())
-        .onTapGesture { showFilters = true }
-    }
-
-    private var summary: String {
-        var parts: [String] = []
-        if !settings.diensten.isEmpty { parts.append(settings.diensten.compactMap { Dienst(rawValue: $0)?.label }.sorted().joined(separator: ", ")) }
-        if !settings.plaatsen.isEmpty { parts.append(Lf("%lld plaatsen", settings.plaatsen.count)) }
-        if !settings.prioriteiten.isEmpty { parts.append(settings.prioriteiten.sorted().joined(separator: ", ")) }
-        if settings.radiusActive { parts.append(Lf("binnen %@ km", settings.radiusKm.formatted(.number.precision(.fractionLength(0...1))))) }
-        if !settings.waarschuwingFilter.isEmpty { parts.append(Lf("%lld soorten waarschuwingen", settings.waarschuwingFilter.count)) }
-        return parts.joined(separator: " · ")
     }
 }
 
