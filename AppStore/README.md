@@ -8,14 +8,14 @@ Alles voor App Store Connect, voor iPhone, iPad, Mac, Apple Watch en Apple TV.
 - **App Review-notities:** Engels (`metadata/review_information/notes.txt`), Nederlandse kopie ter referentie (`notes-nl.txt`, niet uploaden).
 
 ## Herkomst van de schermen
-Echte schermen uit de app (build 39), gemaakt in de simulator en op een Mac met live data (workflows `screenshots.yml` en `mac-shots.yml`, branches `screenshots` en `screenshots-mac`). Afbeeldingen alleen in het Nederlands (nl-NL), op verzoek van Léon; de Engelse winkelpagina toont dan automatisch de Nederlandse beelden. Per apparaat: iPhone 6 (6,3" en 6,1"), iPad 6, Mac 4, Apple Watch 3, Apple TV 3. De pager-screenshot van de iPhone komt uit de opname van 6 november. Een helikopter met route ontbreekt: bij de opnames vloog er geen heli; `screenshots.yml` neemt hem vanzelf mee (`-AAlertsHeli`) als hij draait terwijl er een Lifeliner of Zulu vliegt. Mac: venster van de echte Mac-app (runner-scherm 1024×768, daarom één Mac-screenshot). Apple Watch en Apple TV: alleen het scherm, zonder kader (Apple-richtlijn).
+Echte schermen uit de app (build 47), gemaakt in de simulator en op een Mac met live data (workflows `screenshots.yml` en `mac-shots.yml`, branches `screenshots` en `screenshots-mac`). Afbeeldingen alleen in het Nederlands (nl-NL), op verzoek van Léon; de Engelse winkelpagina toont dan automatisch de Nederlandse beelden. Per apparaat: iPhone 8 (6,3" en 6,1"; met het welkomscherm en een KNMI-weercode), iPad 7, Mac 4, Apple Watch 3, Apple TV 3. Opnames van 8 november. Een helikopter met route ontbreekt: bij de opnames vloog er geen heli; `screenshots.yml` neemt hem vanzelf mee (`-AAlertsHeli`) als hij draait terwijl er een Lifeliner of Zulu vliegt. Mac: venster van de echte Mac-app (runner-scherm 1024×768, daarom één Mac-screenshot). Apple Watch en Apple TV: alleen het scherm, zonder kader (Apple-richtlijn).
 
 ## Inhoud
 | Map | Maten | Aantal per taal |
 |---|---|---|
-| `screenshots/<taal>/iphone-6.3` | 1206×2622 | 6 |
-| `screenshots/<taal>/iphone-6.1` | 1179×2556 | 6 |
-| `screenshots/<taal>/ipad-13` | 2064×2752 | 6 |
+| `screenshots/<taal>/iphone-6.3` | 1206×2622 | 8 |
+| `screenshots/<taal>/iphone-6.1` | 1179×2556 | 8 |
+| `screenshots/<taal>/ipad-13` | 2064×2752 | 7 |
 | `screenshots/<taal>/mac` | 2880×1800 | 1 |
 | `screenshots/<taal>/watch` | 410×502 | 1 |
 | `screenshots/<taal>/appletv` | 1920×1080 | 3 |
