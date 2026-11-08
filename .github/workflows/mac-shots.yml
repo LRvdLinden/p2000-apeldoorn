@@ -42,7 +42,7 @@ jobs:
         run: |
           defaults write -g NSQuitAlwaysKeepsWindows -bool false || true
           screencapture -x -R0,0,1440,900 shots-desktop.png || true
-          MACAPP=$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
+          MACAPP="$PWD/$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)"
           BIN="$MACAPP/Contents/MacOS/P2000 Apeldoorn"
           BID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$MACAPP/Contents/Info.plist")
           GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"
