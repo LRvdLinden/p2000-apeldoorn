@@ -452,7 +452,11 @@ async function drain(env, budget) {
     const dead = isDeadToken(r);
     verstuurd.push({ platform: row.token.startsWith("fcm:") ? "android" : "apple", ok: r.ok, dead, latency: item.melding && r.ok ? Date.now() - row.created_at : null });
     if (dead) await deleteDevice(env, row.token);
-    else if (!r.ok) console.warn("[push]", row.token.slice(0, 8), r.status, r.reason);
+    else if (!r.ok) {
+      console.warn("[push]", row.token.slice(0, 8), r.status, r.reason);
+      // Last failure (no token) for the beheer: which platform, what Apple/Google said.
+      await kvSet(env, "push_laatste_fout", JSON.stringify({ at: new Date().toISOString(), platform: row.token.startsWith("fcm:") ? "android" : row.environment, status: r.status, reason: r.reason || null, soort: row.guid.split(":")[0] }));
+    }
     await done.run();
   }));
   try { await notePushes(env, verstuurd); } catch (e) { console.error("[status]", e.message || e); }
