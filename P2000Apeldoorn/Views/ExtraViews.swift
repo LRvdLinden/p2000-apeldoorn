@@ -254,7 +254,7 @@ struct KaartWeergaveView: View {
 }
 
 extension MapStyleSetting {
-    static func style(for settings: AppSettings, pointsOfInterest: Bool = false) -> MapStyle {
+    @MainActor static func style(for settings: AppSettings, pointsOfInterest: Bool = false) -> MapStyle {
         let poi: PointOfInterestCategories = pointsOfInterest ? .all : .excludingAll
         let nadruk: MapStyle.StandardEmphasis = settings.gedemptKaart ? .muted : .automatic
         switch settings.mapType {
