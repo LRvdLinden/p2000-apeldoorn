@@ -10,9 +10,6 @@ jobs:
       - run: |
           B=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
           echo "radar: $(curl -s $B/v1/radar)"
-          echo "feedback onbekende melding: $(curl -s -o /dev/null -w '%{http_code}' -X POST $B/v1/meldingen/onbestaand123/feedback -H content-type:application/json -d '{"reden":"anders"}')"
-          echo "feedback zonder reden: $(curl -s -X POST $B/v1/meldingen/onbestaand123/feedback -H content-type:application/json -d '{}')"
-          echo "helikopters: $(curl -s $B/v1/helikopters | head -c 400)"
-          echo "changelog: $(curl -s $B/v1/changelog | head -c 300)"
-          echo "beheer feedback zonder login: $(curl -s -o /dev/null -w '%{http_code}' $B/v1/beheer/feedback)"
-          echo "health: $(curl -s $B/v1/status | head -c 300)"
+          curl -s -o nl.png -w "radar.png: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar.png"
+          file nl.png; head -c 300 nl.png | grep -a error || true
+          curl -s -o t.png -w "tegel 8/131/84: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar/8/131/84.png"
