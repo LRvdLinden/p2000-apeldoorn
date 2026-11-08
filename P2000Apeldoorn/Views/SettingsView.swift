@@ -116,6 +116,11 @@ struct SettingsView: View {
                 } label: {
                     SettingsRow(icon: "map.fill", color: .green, title: L("Kaarttype"))
                 }
+                NavigationLink {
+                    KaartWeergaveView()
+                } label: {
+                    SettingsRow(icon: "helicopter", color: .yellow, title: L("Kaart en helikopters"))
+                }
                 Toggle(isOn: $settings.groupByDay) {
                     SettingsRow(icon: "calendar", color: .red, title: L("Meldingen groeperen per dag"))
                 }
@@ -495,7 +500,11 @@ struct NotificationSettingsView: View {
             }
 
             if settings.notificationsEnabled {
+                MeldingenUitBanner()
+                    .listRowInsets(EdgeInsets())
+                    .listRowBackground(Color.clear)
                 ProfielenSection()
+                GrootIncidentSection()
 
                 Section {
                     NavigationLink {

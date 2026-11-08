@@ -67,7 +67,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         return h > 180 && h < 360
     }
     var isTrauma: Bool { soort == "trauma" }
-    var color: Color { isTrauma ? Dienst.traumaheli.color : Dienst.politie.color }
+    var color: Color { HeliWeergave.kleur(id: id, soort: soort) ?? (isTrauma ? Dienst.traumaheli.color : Dienst.politie.color) }
     var soortLabel: String { isTrauma ? L("Traumahelikopter") : L("Politiehelikopter") }
 
     var hoogteMeter: Int? { opGrond ? 0 : hoogteFt.map { Int(($0 * 0.3048 / 10).rounded() * 10) } }
@@ -215,8 +215,8 @@ struct HeliInfoKaart: View {
             }
             HStack(spacing: 8) {
                 waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill")
-                waarde(L("Hoogte"), heli.opGrond ? L("Op de grond") : (heli.hoogteMeter.map { "\($0) m" } ?? "–"), "arrow.up.and.down")
-                waarde(L("Snelheid"), heli.snelheidKmh.map { "\($0) km/u" } ?? "–", "speedometer")
+                waarde(L("Hoogte"), heli.hoogteTekst, "arrow.up.and.down")
+                waarde(L("Snelheid"), heli.snelheidTekst, "speedometer")
             }
             if let v = heli.voorspelling { VoorspellingRegel(voorspelling: v) }
             #if !os(watchOS)

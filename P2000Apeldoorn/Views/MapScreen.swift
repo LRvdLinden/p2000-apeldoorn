@@ -37,6 +37,13 @@ struct MapScreen: View {
     @State private var nu = Date.now
     @State private var locaties = LocatieStore.shared
     @State private var selectedLocatie: Locatie?
+    @Environment(\.colorScheme) private var colorScheme
+    @State private var radar = RadarStore.shared
+    /// Bumped on every camera move while the rain radar is on, so its image follows the map.
+    @State private var cameraTeller = 0
+    /// Long press on the map: make a helicopter zone or plan a route there.
+    @State private var langGedrukt: CLLocationCoordinate2D?
+    @State private var nieuweZone: HeliZone?
 
     static let apeldoorn = MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon),
                                               span: MKCoordinateSpan(latitudeDelta: 0.15, longitudeDelta: 0.15))
@@ -89,6 +96,7 @@ struct MapScreen: View {
         NavigationStack {
             let groups = layout
             let ws = zichtbareWaarschuwingen
+            MapReader { proxy in
             Map(position: $position) {
                 werkgebiedLaag
                 gebiedenLaag(ws)
@@ -100,11 +108,57 @@ struct MapScreen: View {
                 helikoptersLaag
                 UserAnnotation()
             }
-            .mapStyle(MapStyleSetting.style(for: settings.mapType))
+            .mapStyle(MapStyleSetting.style(for: settings))
+            .environment(\.colorScheme, settings.donkereKaart ? .dark : colorScheme)
             .mapControls {
                 MapCompass()
                 MapScaleView()
                 MapUserLocationButton()
+            }
+            .overlay {
+                if settings.laag(.buienradar) { RadarOverlay(proxy: proxy, camera: cameraTeller) }
+            }
+            .onMapCameraChange(frequency: .continuous) { _ in
+                if settings.laag(.buienradar) { cameraTeller &+= 1 }
+            }
+            #if !os(tvOS)
+            .simultaneousGesture(
+                LongPressGesture(minimumDuration: 0.6)
+                    .sequenced(before: DragGesture(minimumDistance: 0))
+                    .onEnded { v in
+                        if case .second(true, let drag?) = v, let c = proxy.convert(drag.location, from: .local) { langGedrukt = c }
+                    }
+            )
+            #endif
+            }
+            .confirmationDialog(L("Deze plek"), isPresented: Binding(get: { langGedrukt != nil }, set: { if !$0 { langGedrukt = nil } }), titleVisibility: .visible) {
+                if let c = langGedrukt {
+                    if settings.heliZones.count < HeliZone.maximum {
+                        Button(L("Maak hier een heli-zone")) {
+                            nieuweZone = HeliZone(naam: settings.heliZones.isEmpty ? L("Thuis") : Lf("Zone %lld", settings.heliZones.count + 1),
+                                                  lat: (c.latitude * 1e4).rounded() / 1e4, lon: (c.longitude * 1e4).rounded() / 1e4)
+                        }
+                    }
+                    Button(L("Route hierheen in Apple Kaarten")) {
+                        let item = MKMapItem(placemark: MKPlacemark(coordinate: c))
+                        item.openInMaps(launchOptions: [MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeDriving])
+                    }
+                }
+                Button(L("Annuleer"), role: .cancel) { langGedrukt = nil }
+            }
+            .sheet(item: $nieuweZone) { zone in
+                NavigationStack {
+                    HeliZoneEditor(zone: zone, isNieuw: true) { z in
+                        if settings.heliZones.count < HeliZone.maximum { settings.heliZones.append(z) }
+                        nieuweZone = nil
+                    }
+                }
+            }
+            .task(id: settings.laag(.buienradar)) {
+                while settings.laag(.buienradar), !Task.isCancelled {
+                    await radar.vernieuw()
+                    try? await Task.sleep(for: .seconds(60))
+                }
             }
             .safeAreaInset(edge: .top) { controls }
             .safeAreaInset(edge: .bottom) { onderkaart }
@@ -159,10 +213,13 @@ struct MapScreen: View {
                 if volgen, let h = heli, Werkgebied.distanceKm(ctx.region.center.latitude, ctx.region.center.longitude, h.lat, h.lon) > 3 { volgen = false }
             }
             .onDisappear { helis.stop(); spoor.volg(nil) }
-            .onChange(of: selectedHeli) { _, id in spoor.volg(id) }
+            .onChange(of: selectedHeli) { _, id in
+                if id != nil, let b = SpoorBereik(rawValue: settings.spoorStandaard), spoor.bereik != b, spoor.heliID == nil { spoor.bereik = b }
+                spoor.volg(id)
+            }
             // Smooth movement: every 2 seconds a new estimated position while a helicopter is in the air.
             .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
-                guard settings.laag(.helikopters), helis.items.contains(where: { !$0.opGrond }) else { return }
+                guard settings.laag(.helikopters), !settings.prestatieModus, helis.items.contains(where: { !$0.opGrond }) else { return }
                 withAnimation(.linear(duration: 2)) { nu = t }
             }
             .onChange(of: settings.laag(.helikopters)) { _, on in
@@ -297,7 +354,7 @@ struct MapScreen: View {
             }
             ForEach(helis.items) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
-                    HeliMarker(heli: h, size: 24, selected: selectedHeli == h.id)
+                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
                         .accessibilityAddTraits(.isButton)
                 }
@@ -454,7 +511,23 @@ struct KaartLagenView: View {
                         }
                     }
                 } footer: {
-                    Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten komen uit OpenStreetMap."))
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten komen uit OpenStreetMap."))
+                        if settings.laag(.buienradar) {
+                            if RadarStore.shared.info?.beschikbaar == false {
+                                Text(L("De buienradar is nog niet beschikbaar.")).foregroundStyle(.orange)
+                            } else {
+                                Text(L("Buienradar: KNMI, elke 5 minuten nieuw."))
+                            }
+                        }
+                    }
+                }
+                Section {
+                    NavigationLink {
+                        KaartWeergaveView()
+                    } label: {
+                        Label(L("Kaart en helikopters"), systemImage: "slider.horizontal.3")
+                    }
                 }
                 if settings.laag(.helikopters) {
                     Section {
@@ -467,7 +540,7 @@ struct KaartLagenView: View {
                                 Image(systemName: "helicopter").foregroundStyle(h.color)
                                 Text(h.naam)
                                 Spacer()
-                                Text(h.opGrond ? L("Op de grond") : (h.hoogteMeter.map { "\($0) m" } ?? "–")).foregroundStyle(.secondary)
+                                Text(h.hoogteTekst).foregroundStyle(.secondary)
                             }
                         }
                     } header: {

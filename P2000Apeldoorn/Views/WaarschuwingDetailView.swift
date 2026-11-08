@@ -188,7 +188,8 @@ struct WaarschuwingDetailView: View {
             }
             UserAnnotation()
         }
-        .mapStyle(MapStyleSetting.style(for: settings.mapType, pointsOfInterest: true))
+        .mapStyle(MapStyleSetting.style(for: settings, pointsOfInterest: true))
+        .environment(\.colorScheme, settings.donkereKaart ? .dark : colorScheme)
         .mapControls { MapCompass() }
         .accessibilityLabel(w.kaartBeschrijving)
         .safeAreaPadding(.top, topSafeArea + 66)

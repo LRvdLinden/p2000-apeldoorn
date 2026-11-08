@@ -39,6 +39,37 @@ final class AppSettings {
     /// Up to five profiles; the first one is mirrored into the older single notification settings.
     var profielen: [MeldingProfiel] = [] { didSet { saveProfielen() } }
 
+    // MARK: Helicopter zones and large incidents (A-Alerts)
+    /// Up to five zones: a push when a helicopter takes off, lands or flies into one of them.
+    var heliZones: [HeliZone] = [] { didSet { saveCodable(.heliZones, heliZones); notificationsChanged() } }
+    var heliOpstijgen: Bool = true { didSet { save(.heliOpstijgen, heliOpstijgen); notificationsChanged() } }
+    var heliLanden: Bool = true { didSet { save(.heliLanden, heliLanden); notificationsChanged() } }
+    var heliBinnen: Bool = true { didSet { save(.heliBinnen, heliBinnen); notificationsChanged() } }
+    /// "trauma" and/or "politie".
+    var heliSoorten: Set<String> = ["trauma"] { didSet { save(.heliSoorten, Array(heliSoorten).sorted()); notificationsChanged() } }
+    /// Zone notifications paused until this moment (seconds since 1970; 0 = not paused).
+    var heliPauzeTot: Double = 0 { didSet { save(.heliPauzeTot, heliPauzeTot); notificationsChanged() } }
+    /// Push for large incidents (GRIP, large fire, many units), also outside the normal profiles.
+    var grootIncident: Bool = false { didSet { save(.grootIncident, grootIncident); notificationsChanged() } }
+    /// Places for "Groot incident"; empty = the whole working area.
+    var grootPlaatsen: Set<String> = [] { didSet { save(.grootPlaatsen, Array(grootPlaatsen).sorted()); notificationsChanged() } }
+
+    // MARK: Map display (A-Alerts)
+    /// Default route trail of a selected helicopter: "vlucht", "kort" (30 min) or "lang" (2 hours).
+    var spoorStandaard: String = "vlucht" { didSet { save(.spoorStandaard, spoorStandaard) } }
+    /// Each helicopter its own colour instead of yellow (trauma) and blue (police).
+    var heliKleurPerToestel: Bool = false { didSet { save(.heliKleurPerToestel, heliKleurPerToestel); HeliWeergave.kleurPerToestel = heliKleurPerToestel } }
+    /// "klein", "normaal" or "groot".
+    var heliIcoon: String = "normaal" { didSet { save(.heliIcoon, heliIcoon) } }
+    /// "metrisch" (m, km/u) or "luchtvaart" (ft, kn).
+    var eenheden: String = "metrisch" { didSet { save(.eenheden, eenheden); HeliWeergave.luchtvaart = eenheden == "luchtvaart" } }
+    /// Map always dark (also in light mode): markers stand out more.
+    var donkereKaart: Bool = false { didSet { save(.donkereKaart, donkereKaart) } }
+    /// Muted map colours.
+    var gedemptKaart: Bool = false { didSet { save(.gedemptKaart, gedemptKaart) } }
+    /// Fewer animations and less frequent updates (older devices); device-only.
+    var prestatieModus: Bool = false { didSet { defaults.set(prestatieModus, forKey: Key.prestatieModus.rawValue) } }
+
     // MARK: Appearance
     /// "systeem", "licht" or "donker".
     var appearance: String = "systeem" { didSet { save(.appearance, appearance) } }
@@ -86,10 +117,12 @@ final class AppSettings {
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
         case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
+        case heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
+        case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, gedemptKaart, prestatieModus
 
         var synced: Bool {
             switch self {
-            case .useLocation, .appLock, .onboardingDone, .currentLat, .currentLon: return false
+            case .useLocation, .appLock, .onboardingDone, .currentLat, .currentLon, .prestatieModus: return false
             default: return true
             }
         }
@@ -109,6 +142,7 @@ final class AppSettings {
         onboardingDone = defaults.bool(forKey: Key.onboardingDone.rawValue)
         currentLat = defaults.double(forKey: Key.currentLat.rawValue)
         currentLon = defaults.double(forKey: Key.currentLon.rawValue)
+        prestatieModus = defaults.bool(forKey: Key.prestatieModus.rawValue)
 
         NotificationCenter.default.addObserver(forName: NSUbiquitousKeyValueStore.didChangeExternallyNotification,
                                                object: cloud, queue: .main) { [weak self] _ in
@@ -225,10 +259,29 @@ final class AppSettings {
             kaartLagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
             UserDefaults.standard.set(true, forKey: "laag.ziekenhuizen.v1")
         }
+        if let s = source(Key.heliZones.storageKey) as? String, let data = s.data(using: .utf8),
+           let list = try? JSONDecoder().decode([HeliZone].self, from: data) { heliZones = Array(list.prefix(HeliZone.maximum)) }
+        if let v = source(Key.heliOpstijgen.storageKey) as? Bool { heliOpstijgen = v }
+        if let v = source(Key.heliLanden.storageKey) as? Bool { heliLanden = v }
+        if let v = source(Key.heliBinnen.storageKey) as? Bool { heliBinnen = v }
+        if let v = set(.heliSoorten), !v.isEmpty { heliSoorten = v }
+        if let v = source(Key.heliPauzeTot.storageKey) as? Double { heliPauzeTot = v }
+        if let v = source(Key.grootIncident.storageKey) as? Bool { grootIncident = v }
+        if let v = set(.grootPlaatsen) { grootPlaatsen = v }
+        if let v = source(Key.spoorStandaard.storageKey) as? String { spoorStandaard = v }
+        if let v = source(Key.heliKleurPerToestel.storageKey) as? Bool { heliKleurPerToestel = v }
+        if let v = source(Key.heliIcoon.storageKey) as? String { heliIcoon = v }
+        if let v = source(Key.eenheden.storageKey) as? String { eenheden = v }
+        if let v = source(Key.donkereKaart.storageKey) as? Bool { donkereKaart = v }
+        if let v = source(Key.gedemptKaart.storageKey) as? Bool { gedemptKaart = v }
         if let s = source(Key.profielen.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([MeldingProfiel].self, from: data), !list.isEmpty {
             profielen = Array(list.prefix(MeldingProfiel.maximum))
         }
+    }
+
+    private func saveCodable<T: Encodable>(_ key: Key, _ value: T) {
+        if let data = try? JSONEncoder().encode(value), let json = String(data: data, encoding: .utf8) { save(key, json) }
     }
 
     private func save(_ key: Key, _ value: Any) {
@@ -259,9 +312,28 @@ final class AppSettings {
         waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
+        heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
+        grootIncident = false; grootPlaatsen = []
+        spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; donkereKaart = false; gedemptKaart = false
         isLoading = false
         onNotificationSettingsChanged?()
     }
+
+    // MARK: - Helicopter zones
+
+    var heliGepauzeerd: Bool { heliPauzeTot > Date.now.timeIntervalSince1970 }
+    var heliIcoonGrootte: CGFloat { heliIcoon == "klein" ? 18 : heliIcoon == "groot" ? 32 : 24 }
+
+    /// settings.heli and settings.groot for the server.
+    var heliServerJSON: [String: Any] {
+        var out: [String: Any] = [
+            "zones": heliZones.map { ["id": $0.id, "naam": $0.naam, "lat": $0.lat, "lon": $0.lon, "km": $0.km] as [String: Any] },
+            "opstijgen": heliOpstijgen, "landen": heliLanden, "binnen": heliBinnen, "soorten": Array(heliSoorten).sorted(),
+        ]
+        if heliGepauzeerd { out["pauze_tot"] = heliPauzeTot * 1000 }
+        return out
+    }
+    var grootServerJSON: [String: Any] { ["aan": grootIncident, "plaatsen": Array(grootPlaatsen).sorted()] }
 
     // MARK: - Filtering
 
@@ -317,7 +389,10 @@ final class AppSettings {
 
     /// Whether this alert should produce a notification right now.
     func matchesNotification(_ m: Melding, at date: Date = .now) -> Bool {
-        guard notificationsEnabled, withinRadius(m) else { return false }
+        guard notificationsEnabled else { return false }
+        if grootIncident, m.isGrootIncident, grootPlaatsen.isEmpty || Werkgebied.shared.matches(m, selected: grootPlaatsen),
+           !(isQuiet(at: date) && !(criticalAlerts && m.isUrgent)) { return true }
+        guard withinRadius(m) else { return false }
         if profielen.isEmpty {
             if !notifDiensten.isEmpty, !notifDiensten.contains(m.dienst.rawValue) { return false }
             if !Werkgebied.shared.matches(m, selected: notifPlaatsen) { return false }
@@ -360,6 +435,8 @@ final class AppSettings {
         guard notificationsEnabled else { return L("Pushmeldingen staan uit in Instellingen.") }
         if volgtCapcode(m) { return nil }
         let urgent = m.isUrgent
+        if grootIncident, m.isGrootIncident, grootPlaatsen.isEmpty || Werkgebied.shared.matches(m, selected: grootPlaatsen),
+           !(isQuiet(at: m.datum) && !(criticalAlerts && urgent)) { return nil }
         if radiusEnabled, let c = radiusCenter {
             guard let lat = m.lat, let lon = m.lon else { return Lf("Je gebruikt Mijn buurt (%@ km) en deze melding heeft geen precieze plek.", radiusKm.formatted(.number.precision(.fractionLength(0...1)))) }
             if Self.distanceKm(c.lat, c.lon, lat, lon) > radiusKm {

@@ -21,6 +21,10 @@ struct RootView: View {
         @Bindable var router = router
         ZStack {
             MainTabs()
+                // Prestatiemodus: no animations (older devices).
+                .transaction { if settings.prestatieModus { $0.disablesAnimations = true } }
+                .task { await MeldingToestemming.shared.controleer() }
+                .onChange(of: scenePhase) { _, p in if p == .active { Task { await MeldingToestemming.shared.controleer() } } }
                 .sheet(item: $router.presented) { melding in
                     NavigationStack {
                         MeldingDetailView(melding: melding)

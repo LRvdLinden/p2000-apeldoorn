@@ -47,6 +47,11 @@ struct P2000API: Sendable {
         try await get(url(path, query: query), as: type)
     }
 
+    /// POST JSON to a path under the API base (used by extensions in other files).
+    func postJSON(_ path: String, _ body: [String: Any]) async throws {
+        try await send("POST", url(path), json: body)
+    }
+
     @discardableResult
     private func send(_ method: String, _ url: URL, json: [String: Any]? = nil) async throws -> Data {
         var request = URLRequest(url: url)

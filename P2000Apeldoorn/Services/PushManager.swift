@@ -213,6 +213,9 @@ enum PushManager {
             // A-Alerts: up to five notification profiles (older servers ignore this).
             "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),
         ]
+        // Helicopter zones and large incidents (older servers ignore these).
+        settings["heli"] = s.heliServerJSON
+        settings["groot"] = s.grootServerJSON
         if s.radiusEnabled, let c = s.radiusCenter {
             settings["radius_km"] = s.radiusKm
             settings["lat"] = c.lat

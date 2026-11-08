@@ -290,6 +290,23 @@
         }
       }
     },
+    "%lld km/u": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km/h"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld km/u"
+          }
+        }
+      }
+    },
     "%lld meldingen binnen %lld min": {
       "extractionState": "manual",
       "localizations": {
@@ -443,23 +460,6 @@
         }
       }
     },
-    "%lld soorten waarschuwingen": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld kinds of warnings"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld soorten waarschuwingen"
-          }
-        }
-      }
-    },
     "%lld uur": {
       "extractionState": "manual",
       "localizations": {
@@ -507,6 +507,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "(verouderd)"
+          }
+        }
+      }
+    },
+    "1 uur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 hour"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "1 uur"
           }
         }
       }
@@ -575,6 +592,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "3D-weergave"
+          }
+        }
+      }
+    },
+    "4 uur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4 hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "4 uur"
           }
         }
       }
@@ -1310,6 +1344,23 @@
         }
       }
     },
+    "Annuleer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cancel"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Annuleer"
+          }
+        }
+      }
+    },
     "Annuleren": {
       "extractionState": "manual",
       "localizations": {
@@ -1374,6 +1425,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apple-account"
+          }
+        }
+      }
+    },
+    "Bedankt! We kijken ernaar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks! We'll look into it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedankt! We kijken ernaar."
           }
         }
       }
@@ -1735,6 +1803,40 @@
         }
       }
     },
+    "Buienradar (KNMI)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain radar (KNMI)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buienradar (KNMI)"
+          }
+        }
+      }
+    },
+    "Buienradar: KNMI, elke 5 minuten nieuw.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rain radar: KNMI, updated every 5 minutes."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buienradar: KNMI, elke 5 minuten nieuw."
+          }
+        }
+      }
+    },
     "Burgernet": {
       "extractionState": "manual",
       "localizations": {
@@ -1990,6 +2092,23 @@
         }
       }
     },
+    "Daarna waarschijnlijk naar %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Then probably to %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Daarna waarschijnlijk naar %@"
+          }
+        }
+      }
+    },
     "Dag": {
       "extractionState": "manual",
       "localizations": {
@@ -2054,6 +2173,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De app vraagt bij het openen direct om te ontgrendelen."
+          }
+        }
+      }
+    },
+    "De buienradar is nog niet beschikbaar.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The rain radar is not available yet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De buienradar is nog niet beschikbaar."
           }
         }
       }
@@ -2313,6 +2449,23 @@
         }
       }
     },
+    "De plek klopt niet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The location is wrong"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De plek klopt niet"
+          }
+        }
+      }
+    },
     "De status kan nu niet worden opgehaald.": {
       "extractionState": "manual",
       "localizations": {
@@ -2496,6 +2649,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deze meldingen vonden rond hetzelfde tijdstip op of vlak bij dezelfde plek plaats, of riepen dezelfde eenheid op. Dat wijst op een mogelijk verband, maar is geen bevestiging dat het om hetzelfde incident gaat."
+          }
+        }
+      }
+    },
+    "Deze plek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This spot"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze plek"
           }
         }
       }
@@ -2738,6 +2908,23 @@
         }
       }
     },
+    "Donkere kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dark map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Donkere kaart"
+          }
+        }
+      }
+    },
     "Donkere modus": {
       "extractionState": "manual",
       "localizations": {
@@ -2768,6 +2955,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Drukste uur vandaag: %@ (%lld meldingen)"
+          }
+        }
+      }
+    },
+    "Dubbele melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Duplicate alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dubbele melding"
           }
         }
       }
@@ -2836,6 +3040,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Eerder gold %@ tot %@."
+          }
+        }
+      }
+    },
+    "Eigen kleur per helikopter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Own colour per helicopter"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Eigen kleur per helikopter"
           }
         }
       }
@@ -3159,6 +3380,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gebruiksvoorwaarden"
+          }
+        }
+      }
+    },
+    "Geef de juiste plek aan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mark the right spot"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geef de juiste plek aan"
           }
         }
       }
@@ -3588,6 +3826,40 @@
         }
       }
     },
+    "Gepauzeerd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gepauzeerd"
+          }
+        }
+      }
+    },
+    "Gepauzeerd tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Paused until %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gepauzeerd tot %@"
+          }
+        }
+      }
+    },
     "Gepland onderhoud": {
       "extractionState": "manual",
       "localizations": {
@@ -3775,6 +4047,108 @@
         }
       }
     },
+    "Groot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groot"
+          }
+        }
+      }
+    },
+    "Groot incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groot incident"
+          }
+        }
+      }
+    },
+    "Groot incident: een pushmelding bij GRIP, opschaling, een grote of middelbrand of een inzet met tien of meer eenheden, ook als het buiten je profielen valt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large incident: a notification for GRIP, scaling up, a large or medium fire or a call-out with ten or more units, also when it falls outside your profiles."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Groot incident: een pushmelding bij GRIP, opschaling, een grote of middelbrand of een inzet met tien of meer eenheden, ook als het buiten je profielen valt."
+          }
+        }
+      }
+    },
+    "Grootte op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Size on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grootte op de kaart"
+          }
+        }
+      }
+    },
+    "Handig als je een dagje weg bent of een helikopterbasis in je zone hebt. De stille modus geldt ook voor zonemeldingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handy when you're away for a day or have a helicopter base in your zone. Quiet mode also applies to zone notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Handig als je een dagje weg bent of een helikopterbasis in je zone hebt. De stille modus geldt ook voor zonemeldingen."
+          }
+        }
+      }
+    },
+    "Hele werkgebied": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whole area"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hele werkgebied"
+          }
+        }
+      }
+    },
     "Helikopterbasis / vliegveld": {
       "extractionState": "manual",
       "localizations": {
@@ -3826,6 +4200,23 @@
         }
       }
     },
+    "Helikopters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helicopters"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helikopters"
+          }
+        }
+      }
+    },
     "Helikopters (live)": {
       "extractionState": "manual",
       "localizations": {
@@ -3839,6 +4230,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Helikopters (live)"
+          }
+        }
+      }
+    },
+    "Helikopters in je zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helicopters in your zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Helikopters in je zone"
           }
         }
       }
@@ -3873,6 +4281,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Herkend aan het toestel; vliegt nu als %@"
+          }
+        }
+      }
+    },
+    "Hervat de zonemeldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Resume zone notifications"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hervat de zonemeldingen"
           }
         }
       }
@@ -3924,6 +4349,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Het middelpunt schuift mee als je de app opent op een andere plek. Je locatie wordt afgerond op zo'n 100 meter."
+          }
+        }
+      }
+    },
+    "Het routespoor is wat je ziet als je een helikopter aantikt: alleen de huidige vlucht, de laatste 30 minuten of de laatste 2 uur.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The route trail is what you see when you tap a helicopter: only the current flight, the last 30 minutes or the last 2 hours."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het routespoor is wat je ziet als je een helikopter aantikt: alleen de huidige vlucht, de laatste 30 minuten of de laatste 2 uur."
           }
         }
       }
@@ -4026,6 +4468,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hybride"
+          }
+        }
+      }
+    },
+    "Iets anders": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Something else"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iets anders"
           }
         }
       }
@@ -4183,6 +4642,23 @@
         }
       }
     },
+    "Je hebt meldingen aangezet in A-Alerts, maar je apparaat houdt ze tegen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You turned on notifications in A-Alerts, but your device blocks them."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt meldingen aangezet in A-Alerts, maar je apparaat houdt ze tegen."
+          }
+        }
+      }
+    },
     "Je krijgt alleen waarschuwingen die gelden voor de gemeente Apeldoorn en je gekozen plaatsen. Een NL-Alert komt ook rechtstreeks via je telefoon binnen; hier lees je hem terug en zie je het gebied op de kaart.": {
       "extractionState": "manual",
       "localizations": {
@@ -4251,6 +4727,23 @@
         }
       }
     },
+    "Je melding gaat anoniem naar de beheerder van A-Alerts. De gegevens komen van P2000; een foute plek of tekst komt meestal uit de meldkamer zelf.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your report goes anonymously to the A-Alerts team. The data comes from P2000; a wrong spot or text usually comes from the dispatch centre itself."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je melding gaat anoniem naar de beheerder van A-Alerts. De gegevens komen van P2000; een foute plek of tekst komt meestal uit de meldkamer zelf."
+          }
+        }
+      }
+    },
     "Je profiel staat klaar": {
       "extractionState": "manual",
       "localizations": {
@@ -4264,6 +4757,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je profiel staat klaar"
+          }
+        }
+      }
+    },
+    "Je zone in vliegen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flying into your zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je zone in vliegen"
           }
         }
       }
@@ -4400,6 +4910,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kaart"
+          }
+        }
+      }
+    },
+    "Kaart en helikopters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map and helicopters"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaart en helikopters"
           }
         }
       }
@@ -4659,6 +5186,40 @@
         }
       }
     },
+    "Klein": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klein"
+          }
+        }
+      }
+    },
+    "Klopt deze melding niet?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is this alert wrong?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klopt deze melding niet?"
+          }
+        }
+      }
+    },
     "Koers": {
       "extractionState": "manual",
       "localizations": {
@@ -4914,6 +5475,23 @@
         }
       }
     },
+    "Landen in je zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landing in your zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landen in je zone"
+          }
+        }
+      }
+    },
     "Let op:": {
       "extractionState": "manual",
       "localizations": {
@@ -5084,6 +5662,23 @@
         }
       }
     },
+    "Maak hier een heli-zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Create a helicopter zone here"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maak hier een heli-zone"
+          }
+        }
+      }
+    },
     "Maak tot %lld profielen, bijvoorbeeld 'Thuis' met alleen je eigen dorp en 'Nacht' met alleen A1 en P1. Je krijgt een pushmelding als minstens één actief profiel past. Veeg naar links om een profiel te verwijderen.": {
       "extractionState": "manual",
       "localizations": {
@@ -5165,6 +5760,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meest voorkomend vandaag"
+          }
+        }
+      }
+    },
+    "Meld mij bij": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notify me on"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meld mij bij"
           }
         }
       }
@@ -5373,6 +5985,40 @@
         }
       }
     },
+    "Met een donkere kaart of rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "With a dark map or muted colours, alerts and helicopters stand out more. Satellite and hybrid also show the terrain in 3D."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Met een donkere kaart of rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D."
+          }
+        }
+      }
+    },
+    "Meter en km/u": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Metres and km/h"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meter en km/u"
+          }
+        }
+      }
+    },
     "Middelpunt": {
       "extractionState": "manual",
       "localizations": {
@@ -5420,6 +6066,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mijn locatie"
+          }
+        }
+      }
+    },
+    "Minder animaties en de helikopters bewegen niet vloeiend tussen twee posities. Fijn op oudere apparaten. Geldt alleen voor dit apparaat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fewer animations, and helicopters don't move smoothly between two positions. Nice on older devices. Only for this device."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minder animaties en de helikopters bewegen niet vloeiend tussen twee posities. Fijn op oudere apparaten. Geldt alleen voor dit apparaat."
           }
         }
       }
@@ -5764,6 +6427,23 @@
         }
       }
     },
+    "Niets geselecteerd = het hele werkgebied.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing selected = the whole area."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets geselecteerd = het hele werkgebied."
+          }
+        }
+      }
+    },
     "Niets gevonden.": {
       "extractionState": "manual",
       "localizations": {
@@ -5777,6 +6457,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niets gevonden."
+          }
+        }
+      }
+    },
+    "Nieuwe zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "New zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuwe zone"
           }
         }
       }
@@ -5896,6 +6593,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Noordwesten"
+          }
+        }
+      }
+    },
+    "Normaal": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normal"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Normaal"
           }
         }
       }
@@ -6104,6 +6818,40 @@
         }
       }
     },
+    "Onderweg naar de melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On its way to the alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderweg naar de melding"
+          }
+        }
+      }
+    },
+    "Onderweg naar de melding in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On its way to the alert in %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Onderweg naar de melding in %@"
+          }
+        }
+      }
+    },
     "Online": {
       "extractionState": "manual",
       "localizations": {
@@ -6291,6 +7039,23 @@
         }
       }
     },
+    "Open instellingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open settings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open instellingen"
+          }
+        }
+      }
+    },
     "Opgeheven · code groen": {
       "extractionState": "manual",
       "localizations": {
@@ -6338,6 +7103,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opschaling"
+          }
+        }
+      }
+    },
+    "Opstijgen in je zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Taking off in your zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opstijgen in je zone"
           }
         }
       }
@@ -6495,6 +7277,23 @@
         }
       }
     },
+    "Pauzeer zonemeldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pause zone notifications"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pauzeer zonemeldingen"
+          }
+        }
+      }
+    },
     "Per discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -6631,6 +7430,23 @@
         }
       }
     },
+    "Plek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spot"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plek"
+          }
+        }
+      }
+    },
     "Politie": {
       "extractionState": "manual",
       "localizations": {
@@ -6682,6 +7498,23 @@
         }
       }
     },
+    "Politiehelikopters (Zulu)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police helicopters (Zulu)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politiehelikopters (Zulu)"
+          }
+        }
+      }
+    },
     "Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging.": {
       "extractionState": "manual",
       "localizations": {
@@ -6729,6 +7562,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen."
+          }
+        }
+      }
+    },
+    "Prestatiemodus": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Performance mode"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Prestatiemodus"
           }
         }
       }
@@ -6971,6 +7821,23 @@
         }
       }
     },
+    "Pushmeldingen staan uit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are off"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pushmeldingen staan uit"
+          }
+        }
+      }
+    },
     "Pushmeldingen staan uit in Instellingen.": {
       "extractionState": "manual",
       "localizations": {
@@ -7090,6 +7957,23 @@
         }
       }
     },
+    "Route hierheen in Apple Kaarten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route here in Apple Maps"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Route hierheen in Apple Kaarten"
+          }
+        }
+      }
+    },
     "Route met de auto in Google Maps": {
       "extractionState": "manual",
       "localizations": {
@@ -7154,6 +8038,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Routespoor"
+          }
+        }
+      }
+    },
+    "Rustige kaartkleuren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Muted map colours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rustige kaartkleuren"
           }
         }
       }
@@ -7239,6 +8140,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Schrijf een recensie"
+          }
+        }
+      }
+    },
+    "Schuif de kaart tot de speld op de juiste plek staat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move the map until the pin is on the right spot."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schuif de kaart tot de speld op de juiste plek staat."
+          }
+        }
+      }
+    },
+    "Schuif de kaart tot het kruisje op de goede plek staat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Move the map until the cross is on the right spot."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Schuif de kaart tot het kruisje op de goede plek staat."
           }
         }
       }
@@ -7583,6 +8518,23 @@
         }
       }
     },
+    "Straal: %@ km": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Radius: %@ km"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Straal: %@ km"
+          }
+        }
+      }
+    },
     "Stuur een testmelding": {
       "extractionState": "manual",
       "localizations": {
@@ -7770,6 +8722,40 @@
         }
       }
     },
+    "Test- of proefalarm": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test or trial alarm"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Test- of proefalarm"
+          }
+        }
+      }
+    },
+    "Thuis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Home"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thuis"
+          }
+        }
+      }
+    },
     "Tijden": {
       "extractionState": "manual",
       "localizations": {
@@ -7855,6 +8841,23 @@
         }
       }
     },
+    "Tip: houd een plek op de kaart ingedrukt om daar meteen een zone te maken. Maximaal vijf zones.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tip: press and hold a spot on the map to create a zone there. Up to five zones."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tip: houd een plek op de kaart ingedrukt om daar meteen een zone te maken. Maximaal vijf zones."
+          }
+        }
+      }
+    },
     "Tip: niets geselecteerd = alles tonen": {
       "extractionState": "manual",
       "localizations": {
@@ -7868,6 +8871,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tip: niets geselecteerd = alles tonen"
+          }
+        }
+      }
+    },
+    "Toelichting (niet verplicht)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Note (optional)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toelichting (niet verplicht)"
           }
         }
       }
@@ -7991,6 +9011,23 @@
         }
       }
     },
+    "Tot morgen 07:00": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until tomorrow 07:00"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot morgen 07:00"
+          }
+        }
+      }
+    },
     "Traumacentrum": {
       "extractionState": "manual",
       "localizations": {
@@ -8038,6 +9075,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Traumahelikopter"
+          }
+        }
+      }
+    },
+    "Traumahelikopters (Lifeliner)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trauma helicopters (Lifeliner)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traumahelikopters (Lifeliner)"
           }
         }
       }
@@ -8501,6 +9555,40 @@
         }
       }
     },
+    "Verkeerde hulpdienst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wrong service"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkeerde hulpdienst"
+          }
+        }
+      }
+    },
+    "Verkeerde prioriteit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wrong priority"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkeerde prioriteit"
+          }
+        }
+      }
+    },
     "Verloop": {
       "extractionState": "manual",
       "localizations": {
@@ -8603,6 +9691,23 @@
         }
       }
     },
+    "Verstuur": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Send"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verstuur"
+          }
+        }
+      }
+    },
     "Verstuurd. Zie je niets binnen een halve minuut? Kijk dan bij Instellingen › Meldingen › A-Alerts of meldingen en banners aanstaan, en of een focus aanstaat.": {
       "extractionState": "manual",
       "localizations": {
@@ -8650,6 +9755,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verwijder"
+          }
+        }
+      }
+    },
+    "Verwijder zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Delete zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verwijder zone"
           }
         }
       }
@@ -8735,6 +9857,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voertuigen (%lld)"
+          }
+        }
+      }
+    },
+    "Voet en knopen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Feet and knots"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voet en knopen"
           }
         }
       }
@@ -9045,6 +10184,23 @@
         }
       }
     },
+    "Wat klopt er niet?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What is wrong?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat klopt er niet?"
+          }
+        }
+      }
+    },
     "Wees alert: het weer kan gevaarlijk zijn.": {
       "extractionState": "manual",
       "localizations": {
@@ -9075,6 +10231,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wees voorbereid: grote kans op gevaar, schade en overlast."
+          }
+        }
+      }
+    },
+    "Welke helikopters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which helicopters"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welke helikopters"
           }
         }
       }
@@ -9228,23 +10401,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Windvlagen tot %lld km/h"
-          }
-        }
-      }
-    },
-    "Wis": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clear"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wis"
           }
         }
       }
@@ -9555,6 +10711,74 @@
         }
       }
     },
+    "Zone": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone"
+          }
+        }
+      }
+    },
+    "Zone %lld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone %lld"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone %lld"
+          }
+        }
+      }
+    },
+    "Zone toevoegen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Add zone"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zone toevoegen"
+          }
+        }
+      }
+    },
+    "Zones": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zones"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zones"
+          }
+        }
+      }
+    },
     "Zuiden": {
       "extractionState": "manual",
       "localizations": {
@@ -9704,23 +10928,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "bijgewerkt %@"
-          }
-        }
-      }
-    },
-    "binnen %@ km": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "within %@ km"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "binnen %@ km"
           }
         }
       }

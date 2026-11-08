@@ -30,6 +30,7 @@ struct MeldingDetailView: View {
     @State private var opMij = false
     @State private var kaartGroot = false
     @State private var toonRoute = false
+    @State private var toonFeedback = false
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
     @State private var helis = HeliStore.shared
@@ -83,6 +84,10 @@ struct MeldingDetailView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(isPresented: $toonFeedback) {
+            MeldingFeedbackSheet(melding: melding)
+                .presentationDetents([.large])
+        }
         .sheet(isPresented: $toonDelen) {
             DeelSheet(melding: melding)
                 .presentationDetents([.medium, .large])
@@ -109,7 +114,7 @@ struct MeldingDetailView: View {
         .onDisappear { if heliRelevant { helis.stop() }; heliSpoor.volg(nil) }
         .onChange(of: liveHeli?.id, initial: true) { _, id in heliSpoor.volg(id) }
         .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
-            guard let h = liveHeli, !h.opGrond else { return }
+            guard let h = liveHeli, !h.opGrond, !settings.prestatieModus else { return }
             withAnimation(.linear(duration: 2)) { nu = t }
         }
         .onChange(of: liveHeli?.id) { _, id in
@@ -125,6 +130,7 @@ struct MeldingDetailView: View {
             VStack(spacing: 0) {
                 VStack(spacing: 16) {
                     if !hasStreet { notice }
+                    if melding.isGrootIncident { grootBadge }
                     incidentLine
                     mainCard
                     descriptionCard
@@ -139,6 +145,13 @@ struct MeldingDetailView: View {
                     if !melding.voertuigen.isEmpty { vehiclesCard }
                     if let reden = settings.geenPushReden(melding) { geenPushCard(reden) }
                     dataCard
+                    Button { toonFeedback = true } label: {
+                        Label(L("Klopt deze melding niet?"), systemImage: "exclamationmark.bubble")
+                            .font(AppFont.body(14, .medium))
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.bordered)
+                    .tint(.secondary)
                     footer.id("einde")
                 }
                 .padding(16)
@@ -205,7 +218,8 @@ struct MeldingDetailView: View {
             .annotationTitles(.hidden)
             UserAnnotation()
         }
-        .mapStyle(MapStyleSetting.style(for: settings.mapType, pointsOfInterest: true))
+        .mapStyle(MapStyleSetting.style(for: settings, pointsOfInterest: true))
+        .environment(\.colorScheme, settings.donkereKaart ? .dark : colorScheme)
         .mapControls { MapCompass() }
         .safeAreaPadding(.top, topSafeArea + 66)
         .overlay(alignment: .top) {
@@ -279,7 +293,7 @@ struct MeldingDetailView: View {
             MapPolyline(coordinates: [h.geschat(op: nu), coordinate])
                 .stroke(h.color, style: StrokeStyle(lineWidth: 3, lineCap: .round, dash: [4, 6]))
             Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
-                HeliMarker(heli: h, size: 22)
+                HeliMarker(heli: h, size: settings.heliIcoonGrootte * 0.92)
                     .onTapGesture { Router.shared.volg(heli: h.id); dismiss() }
             }
             .annotationTitles(.hidden)
@@ -541,6 +555,20 @@ struct MeldingDetailView: View {
                             yesterday.perDienst[.brandweer] ?? 0, yesterday.perDienst[.ambulance] ?? 0))
         }
         return parts.joined(separator: "\n\n")
+    }
+
+    /// "Groot incident" at the top of a large incident.
+    private var grootBadge: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "flame.fill")
+            Text(L("Groot incident")).font(AppFont.body(14, .bold))
+            Spacer()
+            if let g = melding.grip, Int(g) ?? 0 > 0 { Text("GRIP \(g)").font(AppFont.body(13, .bold)) }
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 14).padding(.vertical, 10)
+        .background(Color.red.gradient, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+        .accessibilityElement(children: .combine)
     }
 
     /// Why this device got no push for this alert (it is in the list, but not in your notifications).

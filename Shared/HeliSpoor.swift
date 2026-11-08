@@ -245,19 +245,29 @@ final class HeliSporen {
 
 /// Where a helicopter is probably heading (from the server, based on its course).
 struct HeliVoorspelling: Decodable, Hashable, Sendable {
+    struct Daarna: Decodable, Hashable, Sendable { let id: String; let naam: String }
     let id: String
     let naam: String
-    let soort: String       // "ziekenhuis" or "basis"
+    let soort: String       // "ziekenhuis", "basis" or "melding" (on its way to the alert it was called for)
     let lat: Double
     let lon: Double
     let afstandKm: Double
     let etaMin: Int?
     let zekerheid: Double
+    /// soort "melding": the alert, its town, and the hospital it will probably fly to afterwards.
+    let guid: String?
+    let plaats: String?
+    let daarna: Daarna?
 
-    enum CodingKeys: String, CodingKey { case id, naam, soort, lat, lon, zekerheid, afstandKm = "afstand_km", etaMin = "eta_min" }
+    enum CodingKeys: String, CodingKey { case id, naam, soort, lat, lon, zekerheid, guid, plaats, daarna, afstandKm = "afstand_km", etaMin = "eta_min" }
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
+    var isMelding: Bool { soort == "melding" }
     var tekst: String {
         let eta = etaMin.map { " · ± \($0) min" } ?? ""
+        if isMelding {
+            let doel = plaats.map { Lf("Onderweg naar de melding in %@", $0.capitalizedPlaats) } ?? L("Onderweg naar de melding")
+            return doel + eta + (daarna.map { "\n" + Lf("Daarna waarschijnlijk naar %@", $0.naam) } ?? "")
+        }
         return Lf("Waarschijnlijk naar %@", naam) + eta
     }
 }
@@ -267,9 +277,9 @@ struct VoorspellingRegel: View {
     let voorspelling: HeliVoorspelling
     var body: some View {
         Label {
-            Text(voorspelling.tekst).lineLimit(2)
+            Text(voorspelling.tekst).lineLimit(3)
         } icon: {
-            Image(systemName: voorspelling.soort == "basis" ? "house.fill" : "cross.case.fill")
+            Image(systemName: voorspelling.soort == "basis" ? "house.fill" : voorspelling.isMelding ? "light.beacon.max.fill" : "cross.case.fill")
                 .foregroundStyle(voorspelling.soort == "basis" ? Color.secondary : Color.red)
         }
         .font(AppFont.body(13, .medium, relativeTo: .footnote))

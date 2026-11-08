@@ -126,6 +126,10 @@ struct PagerView: View {
                 StatusHeader()
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                     .listRowBackground(Color.clear)
+                MeldingenUitBanner()
+                    .listRowInsets(EdgeInsets(top: 0, leading: 12, bottom: 0, trailing: 12))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
                     .listRowSeparator(.hidden)
                 if !knmi.isEmpty {
                     KnmiBanner(items: knmi) { selection = $0.selectionTag }

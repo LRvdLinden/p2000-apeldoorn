@@ -113,7 +113,7 @@ struct TVDetailView: View {
             HStack(spacing: 18) {
                 Image(h.afbeelding).resizable().scaledToFit().frame(width: 150, height: 54).scaleEffect(x: h.vliegtWest ? -1 : 1, y: 1)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst].compactMap { $0 }.joined(separator: " · "))
+                    Text([h.hoogteTekst, h.opGrond ? nil : h.snelheidTekst, h.koersTekst].compactMap { $0 }.joined(separator: " · "))
                         .font(AppFont.body(20, .semibold))
                     if let lat = melding.lat, let lon = melding.lon {
                         Text(Lf("%@ km van de melding", Werkgebied.distanceKm(h.lat, h.lon, lat, lon).formatted(.number.precision(.fractionLength(1)))))

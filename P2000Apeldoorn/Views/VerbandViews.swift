@@ -192,7 +192,7 @@ struct HeliLiveKaart: View {
                                 Text(verbatim: "LIVE").font(.caption2.weight(.heavy)).foregroundStyle(.white)
                                     .padding(.horizontal, 5).padding(.vertical, 1).background(Color.red, in: Capsule())
                             }
-                            Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst]
+                            Text([h.hoogteTekst, h.opGrond ? nil : h.snelheidTekst, h.koersTekst]
                                 .compactMap { $0 }.joined(separator: " · "))
                                 .font(.footnote).foregroundStyle(.secondary)
                             if let lat = melding.lat, let lon = melding.lon {

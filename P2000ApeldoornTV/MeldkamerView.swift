@@ -166,7 +166,7 @@ struct MeldkamerView: View {
                                 .scaleEffect(x: h.vliegtWest ? -1 : 1, y: 1)
                             VStack(alignment: .leading, spacing: 2) {
                                 Text(h.naam).font(AppFont.body(18, .bold))
-                                Text([h.opGrond ? L("Op de grond") : h.hoogteMeter.map { "\($0) m" }, h.snelheidKmh.map { "\($0) km/u" }, h.koersTekst]
+                                Text([h.hoogteTekst, h.opGrond ? nil : h.snelheidTekst, h.koersTekst]
                                         .compactMap { $0 }.joined(separator: " · "))
                                     .font(AppFont.body(14, .regular)).foregroundStyle(.secondary)
                                 if let v = h.voorspelling {
