@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=50";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=51";
 
 const TZ = "Europe/Amsterdam";
 
@@ -78,9 +78,21 @@ const UITRUK = { brandweer: 4, ambulance: 1, politie: 0 };
  * The stations named in the alert (or the nearest one), with an estimate: straight line × 1.3 at 50 km/h,
  * ×0.75 with urgency, plus turnout time. Always shown as an estimate, never as vehicle positions.
  */
+const routesCache = new Map();
 export async function kazerneRoutes(m) {
   const soort = SOORT[m.dienst];
   if (!soort || !hasStreet(m) || m.lat == null) return [];
+  // 1. The A-Alerts API: road route by Apple Maps, computed once per alert, the same in every app.
+  if (!routesCache.has(m.guid)) routesCache.set(m.guid, fetch(`${API}/v1/meldingen/${encodeURIComponent(m.guid)}/routes`, { signal: AbortSignal.timeout(12_000) })
+    .then((r) => (r.ok ? r.json() : null)).catch(() => null));
+  const api = await routesCache.get(m.guid);
+  if (api?.kazernes?.length) {
+    return api.kazernes.map((r) => ({
+      kazerne: { id: r.id, naam: r.naam, soort: r.soort, lat: r.lat, lon: r.lon }, genoemd: r.genoemd, km: r.km, rij: r.rij_min,
+      vertrek: new Date(r.vertrek), aankomst: new Date(r.aankomst), route: r.route || [], via: r.via,
+    }));
+  }
+  // 2. Fallback: straight line × 1.3 at 50 km/h.
   const all = (await kazernes()).filter((k) => k.soort === soort);
   const namen = [...(m.eenheden || []).map((u) => String(u.naam || "").toLowerCase()), String(m.full_melding || "").toLowerCase()];
   const reEsc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -88,13 +100,36 @@ export async function kazerneRoutes(m) {
   const genoemd = gekozen.length > 0;
   if (!gekozen.length && all.length) gekozen = [all.reduce((best, k) => (distanceKm(k, m) < distanceKm(best, m) ? k : best))];
   gekozen = gekozen.filter((k) => distanceKm(k, m) < 40).slice(0, 5);
-  const spoed = ["A0", "A1", "P1", "A2", "P2"].includes(String(m.prioriteit || "").toUpperCase());
+  const spoed = ["A0", "A1", "P1"].includes(String(m.prioriteit || "").toUpperCase());
   return gekozen.map((k) => {
     const km = distanceKm(k, m) * 1.3;
     const rij = (km / 50) * 60 * (spoed ? 0.75 : 1);
-    const aankomst = new Date(date(m).getTime() + (UITRUK[soort] + rij) * 60_000);
-    return { kazerne: k, genoemd, km, rij, aankomst };
+    const vertrek = new Date(date(m).getTime() + UITRUK[soort] * 60_000);
+    const aankomst = new Date(vertrek.getTime() + rij * 60_000);
+    return { kazerne: k, genoemd, km, rij, vertrek, aankomst, route: [[k.lat, k.lon], [m.lat, m.lon]] };
   }).sort((a, b) => a.aankomst - b.aankomst);
+}
+
+/** Estimated phase (as in the apps): ["uitrukken"|"onderweg"|"terplaatse"|"geweest", seconds left or null]. */
+export function routeFase(r, now = Date.now()) {
+  if (now < r.vertrek) return ["uitrukken", (r.vertrek - now) / 1000];
+  if (now < r.aankomst) return ["onderweg", (r.aankomst - now) / 1000];
+  return now - r.aankomst < 45 * 60_000 ? ["terplaatse", null] : ["geweest", null];
+}
+
+/** Where the unit would roughly be by this estimate (never a real position): along the route. */
+export function geschattePositie(r, now = Date.now()) {
+  if (routeFase(r, now)[0] !== "onderweg") return null;
+  const lijn = r.route.length > 1 ? r.route : [[r.kazerne.lat, r.kazerne.lon]];
+  const deel = Math.min(1, Math.max(0, (now - r.vertrek) / Math.max(1, r.aankomst - r.vertrek)));
+  const d = (a, b) => distanceKm({ lat: a[0], lon: a[1] }, { lat: b[0], lon: b[1] });
+  const stukken = lijn.slice(1).map((p, i) => d(lijn[i], p));
+  let rest = stukken.reduce((s, x) => s + x, 0) * deel;
+  for (let i = 0; i < stukken.length; i++) {
+    if (rest <= stukken[i] && stukken[i] > 0) { const f = rest / stukken[i], a = lijn[i], b = lijn[i + 1]; return [a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f]; }
+    rest -= stukken[i];
+  }
+  return lijn[lijn.length - 1];
 }
 
 // ------------------------------------------------------------------ possible links between alerts ("verloop")

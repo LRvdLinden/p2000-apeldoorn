@@ -119,7 +119,7 @@ struct GealarmeerdeKazernesKaart: View {
                 Text(genoemd ? Lf("Gealarmeerde kazernes (%lld)", routes.count) : L("Dichtstbijzijnde kazerne"))
                     .font(.headline)
                     .padding(.horizontal, 4)
-                TimelineView(.periodic(from: .now, by: 30)) { ctx in
+                TimelineView(.periodic(from: .now, by: 10)) { ctx in
                     VStack(spacing: 0) {
                         ForEach(Array(routes.enumerated()), id: \.element.id) { i, r in
                             HStack(alignment: .top, spacing: 12) {
@@ -129,14 +129,7 @@ struct GealarmeerdeKazernesKaart: View {
                                     Text("\(r.afstandTekst) · \(r.rijtijdTekst)").font(.footnote).foregroundStyle(.secondary)
                                 }
                                 Spacer(minLength: 8)
-                                if r.terPlaatse(op: ctx.date) {
-                                    Text(L("Ter plaatse")).font(.footnote.weight(.semibold)).foregroundStyle(.green)
-                                } else {
-                                    VStack(alignment: .trailing, spacing: 1) {
-                                        Text(L("Onderweg")).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
-                                        Text(Lf("± %@", Fmt.time(r.aankomst))).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                                    }
-                                }
+                                faseLabel(r, nu: ctx.date)
                             }
                             .padding(.horizontal, 16).padding(.vertical, 12)
                             if i < routes.count - 1 { Divider().padding(.leading, 62) }
@@ -145,11 +138,35 @@ struct GealarmeerdeKazernesKaart: View {
                 }
                 .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
                 Text(genoemd
-                     ? L("Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn.")
+                     ? L("Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed (A1, P1) een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: het voertuigje op de kaart staat waar een eenheid volgens die schatting ongeveer zou rijden.")
                      : L("De oproep noemt geen kazerne. Dit is de dichtstbijzijnde kazerne van deze dienst; de tijden zijn een schatting op basis van de uitruktijd en de rijtijd volgens Apple Kaarten."))
                     .font(.footnote).foregroundStyle(.secondary)
                     .padding(.horizontal, 4)
             }
+        }
+    }
+}
+
+extension GealarmeerdeKazernesKaart {
+    /// Uitrukken / Onderweg / Ter plaatse / Ter plaatse geweest, with the minutes left (an estimate).
+    @ViewBuilder
+    func faseLabel(_ r: KazerneRoute, nu: Date) -> some View {
+        let minuten = { (s: Int) in max(1, Int((Double(s) / 60).rounded(.up))) }
+        switch r.fase(op: nu) {
+        case .uitrukken(let s):
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(L("Uitrukken")).font(.footnote.weight(.semibold)).foregroundStyle(.red)
+                Text(Lf("vertrek over %lld min", minuten(s))).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            }
+        case .onderweg(let s):
+            VStack(alignment: .trailing, spacing: 1) {
+                Text(L("Onderweg")).font(.footnote.weight(.semibold)).foregroundStyle(.orange)
+                Text(Lf("nog %lld min · ± %@", minuten(s), Fmt.time(r.aankomst))).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+            }
+        case .terPlaatse:
+            Text(L("Ter plaatse")).font(.footnote.weight(.semibold)).foregroundStyle(.green)
+        case .geweest:
+            Text(L("Ter plaatse geweest")).font(.footnote.weight(.semibold)).foregroundStyle(.secondary)
         }
     }
 }

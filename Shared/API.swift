@@ -77,6 +77,11 @@ struct P2000API: Sendable {
     }
 
     /// Weather at the time and place of an alert (WeatherKit via the API; used by the Apple TV app).
+    /// Alerted stations with road route and estimated arrival.
+    func routes(guid: String) async -> RoutesAntwoord? {
+        try? await getJSON("v1/meldingen/\(guid)/routes", as: RoutesAntwoord.self)
+    }
+
     func weather(guid: String) async -> AlertWeather? {
         try? await get(url("v1/meldingen/\(guid)/weather"), as: AlertWeather.self)
     }

@@ -112,13 +112,46 @@ object Werkgebied {
 }
 
 /** One alarmed (or nearest) station with an estimated arrival: straight line × 1.3 at 50 km/h, ×0.75 with urgency. */
-data class KazerneRoute(val kazerne: Kazerne, val genoemd: Boolean, val km: Double, val rijMinuten: Double, val uitrukMinuten: Double, val aankomst: Instant) {
+data class KazerneRoute(val kazerne: Kazerne, val genoemd: Boolean, val km: Double, val rijMinuten: Double, val uitrukMinuten: Double, val aankomst: Instant,
+                        /** Road route (from the A-Alerts API); empty = straight line. */
+                        val punten: List<Pair<Double, Double>> = emptyList()) {
     fun terPlaatse(now: Instant = Instant.now()) = !now.isBefore(aankomst)
+    val vertrek: Instant get() = aankomst.minusSeconds((rijMinuten * 60).toLong())
+
+    /** Estimated phase (same as iOS): uitrukken, onderweg, ter plaatse, ter plaatse geweest; seconds left or null. */
+    fun fase(now: Instant = Instant.now()): Pair<String, Long?> = when {
+        now.isBefore(vertrek) -> "uitrukken" to java.time.Duration.between(now, vertrek).seconds
+        now.isBefore(aankomst) -> "onderweg" to java.time.Duration.between(now, aankomst).seconds
+        java.time.Duration.between(aankomst, now).toMinutes() < 45 -> "terplaatse" to null
+        else -> "geweest" to null
+    }
+
+    /** Where the unit would roughly be by this estimate (never a real position), along the route. */
+    fun geschattePositie(now: Instant, doel: Pair<Double, Double>): Pair<Double, Double>? {
+        if (fase(now).first != "onderweg") return null
+        val lijn = if (punten.size > 1) punten else listOf(kazerne.lat to kazerne.lon, doel)
+        val totaal = java.time.Duration.between(vertrek, aankomst).seconds.coerceAtLeast(1)
+        val deel = (java.time.Duration.between(vertrek, now).seconds.toDouble() / totaal).coerceIn(0.0, 1.0)
+        val stukken = lijn.zipWithNext { a, b -> Geo.distanceKm(a.first, a.second, b.first, b.second) }
+        var rest = stukken.sum() * deel
+        stukken.forEachIndexed { i, d ->
+            if (rest <= d && d > 0) { val f = rest / d; val a = lijn[i]; val b = lijn[i + 1]; return (a.first + (b.first - a.first) * f) to (a.second + (b.second - a.second) * f) }
+            rest -= d
+        }
+        return lijn.last()
+    }
     val rijtijdTekst get() = if (rijMinuten < 1) tr("rijtijd < 1 min", "drive < 1 min") else tr("rijtijd ${rijMinuten.roundToInt()} min", "drive ${rijMinuten.roundToInt()} min")
     val afstandTekst get() = Fmt.km(km)
 }
 
 object Kazernes {
+    /** From the A-Alerts API (road route, the same as iOS and the website); null when not available. */
+    fun vanApi(a: RoutesAntwoord): List<KazerneRoute> = a.kazernes.mapNotNull { r ->
+        val k = Werkgebied.kazernes.firstOrNull { it.id == r.id } ?: Kazerne(r.id, r.naam, r.soort, null, r.lat, r.lon)
+        val aankomst = parseInstant(r.aankomst) ?: return@mapNotNull null
+        KazerneRoute(k, r.genoemd, r.km, r.rijMin, r.uitrukMin, aankomst, r.route.filter { it.size == 2 }.map { it[0] to it[1] })
+    }
+
     private fun uitruk(soort: String) = when (soort) { "brandweer" -> 4.0; "ambulance" -> 1.0; else -> 0.0 }
 
     fun routes(m: Melding): List<KazerneRoute> {
@@ -131,7 +164,8 @@ object Kazernes {
         val genoemd = gekozen.isNotEmpty()
         if (gekozen.isEmpty()) all.minByOrNull { Geo.distanceKm(it.lat, it.lon, la, lo) }?.let { gekozen = listOf(it) }
         gekozen = gekozen.filter { Geo.distanceKm(it.lat, it.lon, la, lo) < 40 }.take(5)
-        val spoed = m.isUrgent || (m.prioriteit ?: "").uppercase() in setOf("A2", "P2")
+        // Lights and siren only for A0/A1/P1 (A2/P2 drive with the traffic), as the server does.
+        val spoed = m.isUrgent
         return gekozen.map { k ->
             val km = Geo.distanceKm(k.lat, k.lon, la, lo) * 1.3
             val rij = km / 50 * 60 * (if (spoed) 0.75 else 1.0)

@@ -388,6 +388,17 @@ data class Kazerne(
     val dienst: Dienst get() = when (soort) { "brandweer" -> Dienst.BRANDWEER; "ambulance" -> Dienst.AMBULANCE; else -> Dienst.POLITIE }
 }
 
+/** GET /v1/meldingen/:guid/routes: alerted stations with road route and estimate (same for every app). */
+@Serializable
+data class RoutesAntwoord(val kazernes: List<ApiRoute> = emptyList())
+
+@Serializable
+data class ApiRoute(
+    val id: String, val naam: String, val soort: String, val lat: Double, val lon: Double, val genoemd: Boolean = false, val km: Double = 0.0,
+    @SerialName("rij_min") val rijMin: Double = 0.0, @SerialName("uitruk_min") val uitrukMin: Double = 0.0,
+    val aankomst: String, val route: List<List<Double>> = emptyList(),
+)
+
 /** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
 @Serializable
 data class ApkInfo(val version: String = "", val build: Int = 0, val url: String = "", val notes: String? = null, val size: Long? = null)

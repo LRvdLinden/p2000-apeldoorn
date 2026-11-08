@@ -27,6 +27,7 @@ import {
   warningsHousekeeping,
 } from "./alerts.js";
 import { SELECT, toAPI as meldingAPI } from "./db.js";
+import { routesVoor } from "./routes.js";
 import { profielenFrom, capcodesFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
@@ -112,6 +113,14 @@ async function handle(req, env) {
   }
   m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/view$/);
   if (method === "POST" && m) return reply(200, { views: await addView(env, m[1]) });
+  // Alerted stations with road route and estimated arrival (once per alert, then from D1).
+  m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/routes$/);
+  if (method === "GET" && m) {
+    const item = await getMelding(env, m[1]);
+    if (!item) return reply(404, { error: "Not found" });
+    if (!String(item.locatie || "").trim() || item.lat == null) return reply(200, { guid: item.guid, kazernes: [] });
+    return reply(200, await routesVoor(env, item), { "cache-control": "public, max-age=3600" });
+  }
   m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/weather$/);
   if (method === "GET" && m) {
     const item = await getMelding(env, m[1]);
@@ -505,6 +514,7 @@ async function cron(env, event) {
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
+    await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }

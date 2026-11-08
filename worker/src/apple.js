@@ -187,6 +187,31 @@ async function mapsAccessToken(env) {
   return body.accessToken;
 }
 
+/**
+ * Road route by car from → to ([lat, lon]) with Apple Maps Server API, at the given departure time.
+ * → { km, min, punten: [[lat, lon], …] } or null.
+ */
+export async function mapsDirections(env, from, to, vertrek) {
+  if (!mapsServerConfigured(env)) return null;
+  const q = new URLSearchParams({ origin: from.join(","), destination: to.join(","), transportType: "Automobile", lang: "nl-NL" });
+  if (vertrek && vertrek > Date.now() - 60_000) q.set("departureDate", new Date(vertrek).toISOString());
+  const res = await fetch(`https://maps-api.apple.com/v1/directions?${q}`, { headers: { authorization: `Bearer ${await mapsAccessToken(env)}` } });
+  if (!res.ok) { console.error("[directions]", res.status); return null; }
+  const b = await res.json();
+  const r = b.routes?.[0];
+  if (!r) return null;
+  const punten = [];
+  for (const si of r.stepIndexes || []) {
+    const pad = b.stepPaths?.[b.steps?.[si]?.stepPathIndex] || [];
+    for (const p of pad) {
+      const pt = [Math.round(p.latitude * 1e5) / 1e5, Math.round(p.longitude * 1e5) / 1e5];
+      const last = punten[punten.length - 1];
+      if (!last || last[0] !== pt[0] || last[1] !== pt[1]) punten.push(pt);
+    }
+  }
+  return { km: Number(r.distanceMeters || 0) / 1000, min: Number(r.durationSeconds || 0) / 60, punten };
+}
+
 /** Street + place → [lat, lon] near Apeldoorn, or null. */
 export async function geocode(env, locatie, stad) {
   if (!mapsServerConfigured(env) || !locatie) return null;

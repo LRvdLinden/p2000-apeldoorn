@@ -19,7 +19,7 @@ struct TVDetailView: View {
                 if let lat = melding.lat, let lon = melding.lon, melding.hasCoordinate {
                     let coord = CLLocationCoordinate2D(latitude: lat, longitude: lon)
                     Map(initialPosition: routes.isEmpty && liveHeli == nil ? .camera(MapCamera(centerCoordinate: coord, distance: 1400, heading: 0, pitch: 45)) : .automatic, interactionModes: []) {
-                        // Alarmed stations: a dashed line to the alert (tvOS has no driving routes).
+                        // Alarmed stations: the road route from the A-Alerts API (else a straight dashed line).
                         ForEach(routes) { r in
                             MapPolyline(coordinates: r.polyline.map { line in
                                 var pts = [CLLocationCoordinate2D](repeating: .init(), count: line.pointCount)

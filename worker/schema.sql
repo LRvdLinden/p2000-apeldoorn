@@ -153,3 +153,5 @@ CREATE TABLE IF NOT EXISTS status_incidenten (
   start_at INTEGER NOT NULL, eind_at INTEGER, gepland_start INTEGER, gepland_eind INTEGER, updates TEXT NOT NULL,
   created_at INTEGER NOT NULL, updated_at INTEGER NOT NULL
 );
+-- A-Alerts: alerted stations with road route and estimated arrival per alert (computed once; JSON).
+CREATE TABLE IF NOT EXISTS melding_routes (guid TEXT PRIMARY KEY, data TEXT NOT NULL, at INTEGER NOT NULL);

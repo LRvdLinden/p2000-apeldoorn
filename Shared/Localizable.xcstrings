@@ -35,6 +35,23 @@
         }
       }
     },
+    "%@ (schatting)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (estimate)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ (schatting)"
+          }
+        }
+      }
+    },
     "%@ is een plaats in de provincie Gelderland en valt onder de P2000-regio Noord- en Oost-Gelderland.": {
       "extractionState": "manual",
       "localizations": {
@@ -3550,6 +3567,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschatte aanrijtijd"
+          }
+        }
+      }
+    },
+    "Geschatte positie van de eenheid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Estimated position of the unit"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geschatte positie van de eenheid"
           }
         }
       }
@@ -7090,19 +7124,19 @@
         }
       }
     },
-    "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn.": {
+    "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed (A1, P1) een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: het voertuigje op de kaart staat waar een eenheid volgens die schatting ongeveer zou rijden.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Estimate based on the alert time, the usual turnout time and the driving time from Apple Maps, a quarter shorter for an urgent drive with blue lights and siren. A-Alerts receives no vehicle positions: 'On scene' means a unit could be there according to that estimate."
+            "value": "Estimate based on the alarm time, the usual turnout time and the driving time by Apple Maps, a quarter shorter for urgent calls (A1, P1) with lights and siren. A-Alerts receives no vehicle positions: the vehicle on the map is where a unit would roughly be by this estimate."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: 'Ter plaatse' betekent dat een eenheid er volgens die schatting zou kunnen zijn."
+            "value": "Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed (A1, P1) een kwart korter voor de rit met zwaailicht en sirene. A-Alerts ontvangt geen positie van de voertuigen: het voertuigje op de kaart staat waar een eenheid volgens die schatting ongeveer zou rijden."
           }
         }
       }
@@ -7528,6 +7562,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ter plaatse"
+          }
+        }
+      }
+    },
+    "Ter plaatse geweest": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Has been on scene"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ter plaatse geweest"
           }
         }
       }
@@ -7970,6 +8021,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uitloggen"
+          }
+        }
+      }
+    },
+    "Uitrukken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turning out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitrukken"
           }
         }
       }
@@ -9691,6 +9759,23 @@
         }
       }
     },
+    "nog %lld min · ± %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld min left · ± %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nog %lld min · ± %@"
+          }
+        }
+      }
+    },
     "nu": {
       "extractionState": "manual",
       "localizations": {
@@ -9823,6 +9908,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "tot %@"
+          }
+        }
+      }
+    },
+    "vertrek over %lld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "leaves in %lld min"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vertrek over %lld min"
           }
         }
       }

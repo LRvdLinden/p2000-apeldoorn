@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=50";
+} from "./core.js?v=51";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
-  wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
+  wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=50";
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=51";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -543,60 +543,61 @@ async function loadHeli(m, mapReady) {
 }
 
 /** Alarmed stations with an estimated arrival time (no vehicle positions). */
+let voertuigTimer = null;
+
 async function loadKazernes(m, mapReady) {
   const routes = await kazerneRoutes(m);
   await mapReady;
   const box = $("kazernesCard");
   if (!box || state.selected !== m.guid || !routes.length) return;
   box.hidden = false;
-  const now = Date.now();
-  box.innerHTML = `<h2>${routes[0].genoemd ? "Gealarmeerde kazernes" : "Dichtstbijzijnde kazerne"}</h2>
-    ${routes.map((r) => {
-      const ter = now >= r.aankomst.getTime();
-      return `<div class="kz"><img src="${asset(`assets/img/icon_${r.kazerne.soort}.png`)}" alt=""><div><b>${esc(r.kazerne.naam)}</b><small>${r.km < 1 ? `${Math.round(r.km * 100) * 10} m` : `${r.km.toFixed(1).replace(".", ",")} km`} · ± ${Math.max(1, Math.round(r.rij))} min rijden</small></div>
-        <span class="${ter ? "ter" : "onderweg"}">${ter ? "Ter plaatse" : `Onderweg · ± ${fmtTime(r.aankomst)}`}</span></div>`;
-    }).join("")}
-    <p class="hint">Geschatte tijden op basis van afstand en prioriteit, zonder voertuigposities.</p>`;
+  const fase = (r) => {
+    const [f, s] = routeFase(r);
+    const min = s == null ? 0 : Math.max(1, Math.ceil(s / 60));
+    return f === "uitrukken" ? ["uitrukken", `Uitrukken · vertrek over ${min} min`] : f === "onderweg" ? ["onderweg", `Onderweg · nog ${min} min · ± ${fmtTime(r.aankomst)}`]
+      : f === "terplaatse" ? ["ter", "Ter plaatse"] : ["geweest", "Ter plaatse geweest"];
+  };
+  const regels = () => routes.map((r) => {
+    const [cls, tekst] = fase(r);
+    return `<div class="kz"><img src="${asset(`assets/img/icon_${r.kazerne.soort}.png`)}" alt=""><div><b>${esc(r.kazerne.naam)}</b><small>${r.km < 1 ? `${Math.round(r.km * 100) * 10} m` : `${r.km.toFixed(1).replace(".", ",")} km`} · ± ${Math.max(1, Math.round(r.rij))} min rijden</small></div>
+      <span class="${cls}">${esc(tekst)}</span></div>`;
+  }).join("");
+  box.innerHTML = `<h2>${routes[0].genoemd ? "Gealarmeerde kazernes" : "Dichtstbijzijnde kazerne"}</h2><div id="kzRegels">${regels()}</div>
+    <p class="hint">Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed (A1, P1) een kwart korter. A-Alerts ontvangt geen positie van de voertuigen: het voertuigje op de kaart staat waar een eenheid volgens die schatting ongeveer zou rijden.</p>`;
   const mk = detailMap && window.mapkit;
+  clearInterval(voertuigTimer);
   if (mk && state.selected === m.guid) {
-    const style = new mk.Style({ strokeColor: dienstOf(m).color, lineWidth: 2.5, lineDash: [7, 6], lineCap: "round" });
-    await Promise.all(routes.map(async (r, i) => {
-      detailMap.addAnnotation(kazerneAnnotation(mk, r.kazerne, dienstOf(m).color));
-      // A real route by car when MapKit JS can give one; otherwise a straight dashed line.
-      const route = await drivingRoute(mk, r.kazerne, m);
-      if (state.selected !== m.guid) return;
-      if (route) {
-        route.polyline.style = style;
-        detailMap.addOverlay(route.polyline);
-        const spoed = ["A0", "A1", "P1", "A2", "P2"].includes(String(m.prioriteit || "").toUpperCase());
-        const rij = (route.expectedTravelTime / 60) * (spoed ? 0.75 : 1);
-        const uitruk = { brandweer: 4, ambulance: 1, politie: 0 }[r.kazerne.soort] || 0;
-        Object.assign(r, { km: route.distance / 1000, rij, aankomst: new Date(date(m).getTime() + (uitruk + rij) * 60_000) });
-        const row = $("kazernesCard")?.querySelectorAll(".kz")[i];
-        if (row) {
-          const ter = Date.now() >= r.aankomst.getTime();
-          row.querySelector("small").textContent = `${r.km.toFixed(1).replace(".", ",")} km · ± ${Math.max(1, Math.round(r.rij))} min rijden`;
-          const s = row.querySelector("span"); s.className = ter ? "ter" : "onderweg"; s.textContent = ter ? "Ter plaatse" : `Onderweg · ± ${fmtTime(r.aankomst)}`;
-        }
-      } else {
-        detailMap.addOverlay(new mk.PolylineOverlay([new mk.Coordinate(r.kazerne.lat, r.kazerne.lon), new mk.Coordinate(m.lat, m.lon)], { style }));
-      }
-    }));
+    const kleur = dienstOf(m).color;
+    const style = new mk.Style({ strokeColor: kleur, lineWidth: 2.5, lineDash: [7, 6], lineCap: "round" });
+    for (const r of routes) {
+      detailMap.addAnnotation(kazerneAnnotation(mk, r.kazerne, kleur));
+      const lijn = r.route.length > 1 ? r.route : [[r.kazerne.lat, r.kazerne.lon], [m.lat, m.lon]];
+      detailMap.addOverlay(new mk.PolylineOverlay(lijn.map(([la, lo]) => new mk.Coordinate(la, lo)), { style }));
+    }
     try { detailMap.showItems([...detailMap.annotations, ...detailMap.overlays], { animate: true, padding: new mk.Padding(60, 40, 40, 40) }); } catch {}
+    // Estimated vehicles on their way, moved every 5 seconds (an estimate from the times, not a real position).
+    const voertuigen = new Map();
+    const tik = () => {
+      if (state.selected !== m.guid || !detailMap) { clearInterval(voertuigTimer); return; }
+      for (const r of routes) {
+        const p = geschattePositie(r);
+        let a = voertuigen.get(r.kazerne.id);
+        if (!p) { if (a) { try { detailMap.removeAnnotation(a); } catch {} voertuigen.delete(r.kazerne.id); } continue; }
+        if (!a) {
+          a = new mk.Annotation(new mk.Coordinate(p[0], p[1]), () => {
+            const el = document.createElement("div");
+            el.className = "voertuig"; el.style.setProperty("--c", kleur); el.title = `${r.kazerne.naam} (schatting)`;
+            el.innerHTML = `<img src="${asset(`assets/img/icon_${r.kazerne.soort}.png`)}" alt="">`;
+            return el;
+          }, { calloutEnabled: false, title: `${r.kazerne.naam} (schatting)` });
+          detailMap.addAnnotation(a); voertuigen.set(r.kazerne.id, a);
+        } else a.coordinate = new mk.Coordinate(p[0], p[1]);
+      }
+      const box2 = $("kzRegels"); if (box2) box2.innerHTML = regels();
+    };
+    tik();
+    if (routes.some((r) => r.aankomst > Date.now())) voertuigTimer = setInterval(tik, 5_000);
   }
-}
-
-function drivingRoute(mk, k, m) {
-  if (!mk.Directions) return Promise.resolve(null);
-  return new Promise((resolve) => {
-    try {
-      new mk.Directions().route({
-        origin: new mk.Coordinate(k.lat, k.lon), destination: new mk.Coordinate(m.lat, m.lon),
-        transportType: mk.Directions.Transport.Automobile,
-      }, (err, data) => resolve(!err && data?.routes?.[0] ? data.routes[0] : null));
-    } catch { resolve(null); }
-    setTimeout(() => resolve(null), 8000);
-  });
 }
 
 // ------------------------------------------------------------------ warning detail

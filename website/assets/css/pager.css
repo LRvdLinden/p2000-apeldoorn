@@ -351,3 +351,7 @@ a.drow { text-decoration: none; color: inherit; }
 .unit code { display: block; }
 .ster { border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--muted); cursor: pointer; padding: 4px; }
 .ster.on { color: #f5b800; }
+.kz span.uitrukken { color: #dc2626; }
+.kz span.geweest { color: var(--muted); }
+.voertuig { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--c), 0 0 0 4px #fff, 0 3px 8px rgba(0,0,0,.3); outline: 2px dashed var(--c); outline-offset: 3px; }
+.voertuig img { width: 18px; height: 18px; object-fit: contain; }

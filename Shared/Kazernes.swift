@@ -149,10 +149,39 @@ struct KazerneRoute: Identifiable {
     let uitrukMinuten: Double
     let polyline: MKPolyline?
     let aankomst: Date
+    /// Route over the road (from the A-Alerts API or Apple Maps); empty = straight line.
+    var punten: [CLLocationCoordinate2D] = []
+    /// Departure after the usual turnout time.
+    var vertrek: Date { aankomst.addingTimeInterval(-rijMinuten * 60) }
     var id: String { kazerne.id }
 
     /// "Onderweg" until the estimated arrival, then "Ter plaatse".
     func terPlaatse(op nu: Date = .now) -> Bool { nu >= aankomst }
+
+    /// Estimated phase, from the alarm time, turnout time and driving time (never a real vehicle position).
+    enum Fase: Equatable { case uitrukken(seconden: Int), onderweg(seconden: Int), terPlaatse, geweest }
+    func fase(op nu: Date = .now) -> Fase {
+        if nu < vertrek { return .uitrukken(seconden: Int(vertrek.timeIntervalSince(nu))) }
+        if nu < aankomst { return .onderweg(seconden: Int(aankomst.timeIntervalSince(nu))) }
+        return nu.timeIntervalSince(aankomst) < 45 * 60 ? .terPlaatse : .geweest
+    }
+
+    /// Where the unit would roughly be by this estimate: along the route, by the share of the driving time.
+    func geschattePositie(op nu: Date = .now, doel: CLLocationCoordinate2D) -> CLLocationCoordinate2D? {
+        guard case .onderweg = fase(op: nu) else { return nil }
+        let lijn = punten.count > 1 ? punten : [kazerne.coordinate, doel]
+        let deel = min(1, max(0, nu.timeIntervalSince(vertrek) / max(1, aankomst.timeIntervalSince(vertrek))))
+        let stukken = zip(lijn, lijn.dropFirst()).map { MKMapPoint($0.0).distance(to: MKMapPoint($0.1)) }
+        var rest = stukken.reduce(0, +) * deel
+        for (i, d) in stukken.enumerated() {
+            if rest <= d, d > 0 {
+                let f = rest / d, a = lijn[i], b = lijn[i + 1]
+                return CLLocationCoordinate2D(latitude: a.latitude + (b.latitude - a.latitude) * f, longitude: a.longitude + (b.longitude - a.longitude) * f)
+            }
+            rest -= d
+        }
+        return lijn.last
+    }
 
     var rijtijdTekst: String {
         rijMinuten < 1 ? L("rijtijd < 1 min") : Lf("rijtijd %lld min", Int(rijMinuten.rounded()))
@@ -179,6 +208,19 @@ extension Aanrijtijd {
     @MainActor
     static func routes(voor m: Melding) async -> [KazerneRoute] {
         if let hit = routeCache[m.guid] { return hit }
+        // 1. The A-Alerts API: the same route and estimate in every app and on the website.
+        if let api = await P2000API.shared.routes(guid: m.guid), !api.kazernes.isEmpty {
+            let result: [KazerneRoute] = api.kazernes.compactMap { r in
+                let k = Kazernes.all.first { $0.id == r.id }
+                    ?? Kazerne(id: r.id, naam: r.naam, soort: Kazerne.Soort(rawValue: r.soort) ?? .brandweer, plaats: "", lat: r.lat, lon: r.lon, aliassen: nil)
+                let pts = r.route.compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[0], longitude: $0[1]) : nil }
+                guard let aankomst = Fmt.parseISO(r.aankomst) else { return nil }
+                return KazerneRoute(kazerne: k, genoemd: r.genoemd, km: r.km, rijMinuten: r.rijMin, uitrukMinuten: r.uitrukMin,
+                                    polyline: pts.count > 1 ? MKPolyline(coordinates: pts, count: pts.count) : nil, aankomst: aankomst, punten: pts)
+            }
+            if !result.isEmpty { routeCache[m.guid] = result; return result }
+        }
+        // 2. Fallback: Apple Maps on the device.
         guard m.hasStreet, m.hasCoordinate, let lat = m.lat, let lon = m.lon,
               let soort = Kazernes.soort(for: m.dienst) else { return [] }
         let kandidaten = Kazernes.all.filter { $0.soort == soort }
@@ -196,7 +238,8 @@ extension Aanrijtijd {
         gekozen = Array(gekozen.filter { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < 40 }.prefix(5))
 
         let doel = CLLocationCoordinate2D(latitude: lat, longitude: lon)
-        let spoed = m.isUrgent || ["A2", "P2"].contains((m.prioriteit ?? "").uppercased())
+        // Lights and siren only for A0/A1/P1 (A2/P2 drive with the traffic), as the server does.
+        let spoed = m.isUrgent
         var result: [KazerneRoute] = []
         for k in gekozen {
             var km = Werkgebied.distanceKm(k.lat, k.lon, lat, lon) * 1.3
@@ -215,11 +258,29 @@ extension Aanrijtijd {
             #endif
             if spoed { rij *= 0.75 }
             let uitruk = uitrukMinuten(k.soort)
+            var pts: [CLLocationCoordinate2D] = []
+            if let line { pts = Array(UnsafeBufferPointer(start: line.points(), count: line.pointCount)).map(\.coordinate) }
             result.append(KazerneRoute(kazerne: k, genoemd: genoemd, km: km, rijMinuten: rij, uitrukMinuten: uitruk,
-                                       polyline: line, aankomst: m.datum.addingTimeInterval((uitruk + rij) * 60)))
+                                       polyline: line, aankomst: m.datum.addingTimeInterval((uitruk + rij) * 60), punten: pts))
         }
         result.sort { $0.aankomst < $1.aankomst }
         routeCache[m.guid] = result
         return result
     }
+}
+
+
+/// GET /v1/meldingen/:guid/routes (computed once by the server with Apple Maps, the same for every app).
+struct RoutesAntwoord: Decodable, Sendable {
+    struct Route: Decodable, Sendable {
+        let id: String, naam: String, soort: String
+        let lat: Double, lon: Double
+        let genoemd: Bool
+        let km: Double
+        let rijMin: Double, uitrukMin: Double
+        let aankomst: String
+        let route: [[Double]]
+        enum CodingKeys: String, CodingKey { case id, naam, soort, lat, lon, genoemd, km, aankomst, route, rijMin = "rij_min", uitrukMin = "uitruk_min" }
+    }
+    let kazernes: [Route]
 }

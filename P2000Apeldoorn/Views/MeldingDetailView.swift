@@ -32,6 +32,8 @@ struct MeldingDetailView: View {
     @State private var toonRoute = false
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
+    /// Clock for the estimated vehicle on the route (every 5 seconds while a unit is on its way).
+    @State private var nu = Date.now
     @State private var helis = HeliStore.shared
     /// Route of the alert's helicopter this flight (worker trail), drawn behind the live marker.
     @State private var heliSpoor = HeliSpoorStore()
@@ -96,6 +98,12 @@ struct MeldingDetailView: View {
         .task(id: melding.guid) { await loadLookAround() }
         .task(id: melding.guid) {
             kazerneRoutes = await Aanrijtijd.routes(voor: melding)
+            Task { @MainActor in
+                while !Task.isCancelled, kazerneRoutes.contains(where: { $0.aankomst > .now }) {
+                    try? await Task.sleep(for: .seconds(5))
+                    nu = .now
+                }
+            }
             if !kazerneRoutes.isEmpty || liveHeli != nil, !drieD, !opMij { withAnimation(.easeInOut(duration: 0.6)) { position = .rect(routeRect) } }
         }
         .task(id: melding.guid) { await loadWeather() }
@@ -250,6 +258,15 @@ struct MeldingDetailView: View {
                 KazerneIcon(soort: r.kazerne.soort, size: 28)
             }
             .annotationTitles(.hidden)
+        }
+        // Estimated vehicle on its way (an estimate from the times, not a real position).
+        ForEach(kazerneRoutes) { r in
+            if let p = r.geschattePositie(op: nu, doel: coordinate) {
+                Annotation(Lf("%@ (schatting)", r.kazerne.naam), coordinate: p, anchor: .center) {
+                    GeschatVoertuig(dienst: r.kazerne.dienst)
+                }
+                .annotationTitles(.hidden)
+            }
         }
     }
 
@@ -885,5 +902,21 @@ extension Color {
         #else
         Color.gray.opacity(0.2)
         #endif
+    }
+}
+
+
+/// The estimated unit on its way: a small vehicle in the service colour with a dashed ring ("estimate").
+struct GeschatVoertuig: View {
+    let dienst: Dienst
+    var body: some View {
+        Image(systemName: dienst == .brandweer ? "flame.fill" : dienst == .politie ? "car.fill" : "cross.case.fill")
+            .font(.system(size: 12, weight: .bold))
+            .foregroundStyle(.white)
+            .frame(width: 26, height: 26)
+            .background(dienst.color, in: Circle())
+            .overlay(Circle().strokeBorder(.white, style: StrokeStyle(lineWidth: 2, dash: [3, 2])))
+            .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
+            .accessibilityLabel(L("Geschatte positie van de eenheid"))
     }
 }

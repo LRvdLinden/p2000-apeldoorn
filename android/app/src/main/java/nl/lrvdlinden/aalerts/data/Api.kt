@@ -60,6 +60,7 @@ object Api {
     suspend fun meldingen(limit: Int = 300): List<Melding> = AppJson.decodeFromString(getText("${base}v1/meldingen?limit=$limit"))
     suspend fun melding(guid: String): Melding? = runCatching { AppJson.decodeFromString<Melding>(getText("${base}v1/meldingen/${enc(guid)}")) }.getOrNull()
     suspend fun addView(guid: String) { runCatching { send("POST", "v1/meldingen/${enc(guid)}/view") } }
+    suspend fun routes(guid: String): RoutesAntwoord? = runCatching { AppJson.decodeFromString<RoutesAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/routes")) }.getOrNull()
     suspend fun weather(guid: String): AlertWeather? = runCatching { AppJson.decodeFromString<AlertWeather>(getText("${base}v1/meldingen/${enc(guid)}/weather")) }.getOrNull()
 
     suspend fun waarschuwingen(days: Int = 7): List<Waarschuwing> = AppJson.decodeFromString(getText("${base}v1/waarschuwingen?days=$days"))

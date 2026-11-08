@@ -70,8 +70,10 @@ fun MeldingDetail(guid: String, nav: Nav) {
 private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, nav: Nav) {
     val ctx = LocalContext.current
     var now by remember { mutableStateOf(Instant.now()) }
-    LaunchedEffect(Unit) { while (true) { delay(20_000); now = Instant.now() } }
-    val routes = remember(m.guid) { Kazernes.routes(m) }
+    LaunchedEffect(Unit) { while (true) { delay(5_000); now = Instant.now() } }
+    // Road route and estimate from the A-Alerts API (same as iOS and the website); until then the local estimate.
+    var routes by remember(m.guid) { mutableStateOf(Kazernes.routes(m)) }
+    LaunchedEffect(m.guid) { Api.routes(m.guid)?.let { a -> Kazernes.vanApi(a).takeIf { it.isNotEmpty() }?.let { routes = it } } }
     // Lifeliner/Zulu named in the alert: live on the map (every 10 s).
     val heliRelevant = remember(m.guid) { HeliKoppeling.relevant(m) }
     if (heliRelevant) LaunchedEffect(m.guid) { while (true) { Store.refreshHelikopters(); delay(10_000) } }
@@ -104,11 +106,15 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     val pts = mutableListOf<MapPoint>()
                     routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong()) }
                     m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
+                    // Estimated vehicle on its way (an estimate from the times, not a real position).
+                    routes.forEach { r -> r.geschattePositie(now, la to lo)?.let { (pla, plo) ->
+                        pts += MapPoint("v:${r.kazerne.id}", pla, plo, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 22, tr("schatting", "estimate"), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong())
+                    } }
                     heli?.let { h -> pts += MapPoint("h:${h.id}", heliPos!!.first, heliPos.second, h.afbeelding, 64, label = h.naam, flip = h.vliegtWest, anchorBottom = false) }
                     AMap(
                         Modifier.fillMaxWidth().height(h),
                         points = pts,
-                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong(), width = 2.5) } +
+                        lines = routes.map { r -> MapLine(r.kazerne.id, r.punten.takeIf { it.size > 1 } ?: listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong(), width = 2.5) } +
                             listOfNotNull(
                                 heli?.takeIf { heliSpoor.isNotEmpty() }?.let { h -> MapLine("spoor", heliSpoor.lijn() + heliPos!!, h.kleur, dashed = false, width = 4.0) },
                                 heli?.let { h -> MapLine("heli", listOf(heliPos!!, la to lo), 0xFF9333EA) }),
@@ -178,12 +184,19 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                                 Text((if (r.genoemd) tr("Genoemd in de oproep", "Named in the call-out") else tr("Dichtstbijzijnde volgens de kaart", "Nearest on the map")) + " · ${r.afstandTekst} · ${r.rijtijdTekst}", color = Muted, fontSize = 12.sp)
                             }
                             Column(horizontalAlignment = Alignment.End) {
-                                Text("± " + Fmt.time(r.aankomst), fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                                Text(if (r.terPlaatse(now)) tr("Ter plaatse", "On scene") else tr("Onderweg", "En route"), color = if (r.terPlaatse(now)) Color(0xFF16A34A) else Color(0xFFF59E0B), fontSize = 12.sp)
+                                val (fase, sec) = r.fase(now)
+                                val min = sec?.let { ((it + 59) / 60).coerceAtLeast(1) }
+                                when (fase) {
+                                    "uitrukken" -> { Text(tr("Uitrukken", "Turning out"), color = Color(0xFFDC2626), fontWeight = FontWeight.SemiBold, fontSize = 13.sp); Text(tr("vertrek over $min min", "leaves in $min min"), color = Muted, fontSize = 12.sp) }
+                                    "onderweg" -> { Text(tr("Onderweg", "En route"), color = Color(0xFFF59E0B), fontWeight = FontWeight.SemiBold, fontSize = 13.sp); Text(tr("nog $min min · ± ", "$min min left · ± ") + Fmt.time(r.aankomst), color = Muted, fontSize = 12.sp) }
+                                    "terplaatse" -> Text(tr("Ter plaatse", "On scene"), color = Color(0xFF16A34A), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                    else -> Text(tr("Ter plaatse geweest", "Has been on scene"), color = Muted, fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                                }
                             }
                         }
                     }
-                    Text(tr("Schatting op basis van afstand, uitruktijd en spoed. Geen echte voertuigposities.", "Estimate based on distance, turnout time and urgency. Not real vehicle positions."), color = Muted, fontSize = 11.sp)
+                    Text(tr("Schatting op basis van het alarmeringstijdstip, de gebruikelijke uitruktijd en de rijtijd volgens Apple Kaarten, bij spoed (A1, P1) een kwart korter. A-Alerts ontvangt geen positie van de voertuigen: het voertuigje op de kaart staat waar een eenheid volgens die schatting ongeveer zou rijden.",
+                        "Estimate based on the alarm time, the usual turnout time and the driving time by Apple Maps, a quarter shorter for urgent calls (A1, P1). A-Alerts receives no vehicle positions: the vehicle on the map is where a unit would roughly be by this estimate."), color = Muted, fontSize = 11.sp)
                 }
                 if (m.eenheden.isNotEmpty()) SectionCard(tr("Eenheden", "Units"), Icons.Outlined.Groups) {
                     Text(tr("Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal.",

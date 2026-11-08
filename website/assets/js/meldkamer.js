@@ -4,11 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=50";
+} from "./core.js?v=51";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
-} from "./aalerts.js?v=50";
+} from "./aalerts.js?v=51";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -134,8 +134,9 @@ async function renderExtra(kit) {
   if (f && f.lat != null) {
     for (const r of await kazerneRoutes(f)) {
       if (!L.has("kazernes")) ann.push(kazerneAnnotation(kit, r.kazerne, dienstOf(f).color));
-      ov.push(new kit.PolylineOverlay([new kit.Coordinate(r.kazerne.lat, r.kazerne.lon), new kit.Coordinate(f.lat, f.lon)],
-        { style: new kit.Style({ strokeColor: dienstOf(f).color, lineWidth: 3, lineDash: [8, 7], lineCap: "round" }) }));
+      const lijn = r.route?.length > 1 ? r.route : [[r.kazerne.lat, r.kazerne.lon], [f.lat, f.lon]];
+      ov.push(new kit.PolylineOverlay(lijn.map(([la, lo]) => new kit.Coordinate(la, lo)),
+        { style: new kit.Style({ strokeColor: dienstOf(f).color, lineWidth: 2.5, lineDash: [7, 6], lineCap: "round" }) }));
     }
     const h = heliRelevant(f) ? heliVoor(f, state.helis) : null;
     if (h) {
