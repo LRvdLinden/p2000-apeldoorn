@@ -1,0 +1,15 @@
+name: KNMI probe (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/knmi-probe.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -sS https://www.knmi.nl/api/v1/weather-warnings.json -o k.json
+          echo "== FULL"; python3 -c "import json;d=json.load(open('k.json'));print(json.dumps(d,ensure_ascii=False,indent=1)[:9000])" | grep -v '^\s*\[\?\s*[0-9.,]*\]\?,\?$'
+          echo "== VERSION"; curl -sS https://www.knmi.nl/api/v1/weather-warnings/version | head -c 1500; echo
+          for u in https://www.knmi.nl/api/v1/weather-warnings https://www.knmi.nl/api/v1/weather-warnings/texts.json https://www.knmi.nl/api/v1/weather-warnings/summary.json https://www.knmi.nl/api/v1; do echo "== $u"; curl -sS -o /dev/stdout -w "\nHTTP %{http_code}\n" "$u" | head -c 1500; echo; done
+          echo "== PAGE"; curl -sS https://www.knmi.nl/nederland-nu/weer/waarschuwingen | grep -oE '(src|href)="[^"]*\.js[^"]*"|/api/[a-zA-Z0-9/_.-]+' | sort -u | head -40
