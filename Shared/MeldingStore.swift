@@ -15,6 +15,8 @@ final class MeldingStore {
     private(set) var lastUpdated: Date?
     private(set) var isLoading = false
     private(set) var isOnline = true
+    /// One failed poll is not "offline" yet (a short network blip); two in a row are.
+    @ObservationIgnored private var mislukt = 0
     private(set) var errorMessage: String?
 
     /// Called with alerts that arrived since the previous refresh (used for local notifications on macOS).
@@ -44,6 +46,7 @@ final class MeldingStore {
             knownIDs.formUnion(fresh.map(\.guid))
             lastUpdated = .now
             isOnline = true
+            mislukt = 0
             errorMessage = nil
             saveCache()
             if !newOnes.isEmpty { onNew?(newOnes) }
@@ -54,7 +57,8 @@ final class MeldingStore {
             }
             #endif
         } catch {
-            isOnline = false
+            mislukt += 1
+            if mislukt >= 2 || meldingen.isEmpty { isOnline = false }
             errorMessage = error.localizedDescription
         }
     }
