@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=51";
+} from "./core.js?v=52";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=51";
+  CODES, isOpgeheven, wShareUrl, weergave, zetWeergave, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=52";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -222,7 +222,7 @@ function rowHTML(m, isNew) {
       <div class="where">${PIN}${esc(plaatsText(m))}${dist}</div>
       <div class="pt">${esc(prioText(m))}</div>
     </div>
-    <div class="meta">${m.views ? `<span>👁 ${m.views}x</span>` : ""}${isRecent(m) ? `<span class="live">LIVE</span>` : ""}</div>
+    <div class="meta">${isGrootIncident(m) ? `<span class="live groot" title="Groot incident">🔥</span>` : ""}${m.views ? `<span>👁 ${m.views}x</span>` : ""}${isRecent(m) ? `<span class="live">LIVE</span>` : ""}</div>
   </a>`;
 }
 
@@ -418,6 +418,7 @@ function renderDetail(m) {
       <div class="lookaround" id="lookAround" title="Look Around"></div>
     </div>
     ${hasStreet(m) ? "" : `<div class="notice"><b>Let op:</b> De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen.</div>`}
+    ${isGrootIncident(m) ? `<div class="groot-badge">🔥 <b>Groot incident</b>${Number(m.grip) > 0 ? `<span>GRIP ${esc(m.grip)}</span>` : ""}</div>` : ""}
     <div class="incident"><span>Incident ${esc((m.guid || "").slice(-7).replace(/-/g, ""))}</span><span>${m.views ? `👁 ${m.views}x` : ""}</span></div>
     <section class="card">
       <div class="head">
@@ -450,11 +451,34 @@ function renderDetail(m) {
       ${m.grip ? `<dt>GRIP</dt><dd>${esc(m.grip)}</dd>` : ""}
       <dt>Volledige melding</dt><dd>${esc(m.full_melding || m.title)}</dd>
     </dl></section>
+    <section class="card feedback">
+      <button class="link-btn" id="fbOpen">Klopt deze melding niet?</button>
+      <form id="fbForm" hidden>
+        <label>Wat klopt er niet?
+          <select name="reden">
+            <option value="locatie">De plek klopt niet</option><option value="dienst">Verkeerde hulpdienst</option>
+            <option value="prioriteit">Verkeerde prioriteit</option><option value="dubbel">Dubbele melding</option>
+            <option value="test">Test- of proefalarm</option><option value="anders">Iets anders</option>
+          </select></label>
+        <label>Toelichting (niet verplicht)<textarea name="toelichting" maxlength="500" rows="3"></textarea></label>
+        <button type="submit" class="btn">Verstuur</button>
+        <p class="hint" id="fbStatus">Je melding gaat anoniem naar de beheerder van A-Alerts. Een foute plek of tekst komt meestal uit de meldkamer zelf.</p>
+      </form>
+    </section>
   </article>`;
   $("detailPane").scrollTop = 0;
   if (innerWidth <= 900) document.querySelector(".detail-pane").scrollTop = 0;
 
   $("detail").querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => closeDetail()));
+  $("fbOpen").addEventListener("click", () => { $("fbForm").hidden = !$("fbForm").hidden; });
+  $("fbForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const knop = e.target.querySelector("button"); knop.disabled = true;
+    const fout = await meldingFeedback(m.guid, { reden: f.get("reden"), toelichting: f.get("toelichting") || "" });
+    $("fbStatus").textContent = fout ? `Versturen mislukt: ${fout}` : "Bedankt! We kijken ernaar.";
+    if (fout) knop.disabled = false; else e.target.querySelectorAll("select,textarea,button").forEach((x) => { x.disabled = true; });
+  });
   $("detail").querySelectorAll("[data-volg]").forEach((b) => b.addEventListener("click", () => {
     const v = volgCaps(), k = b.dataset.volg;
     if (v[k]) delete v[k]; else v[k] = b.dataset.naam;
@@ -767,6 +791,7 @@ const LAGEN = [
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626"],
+  ["buienradar", "Buien", "icon_knmi", "#2563EB"],
 ];
 function renderMapChips() {
   const cutoff = Date.now() - state.mapHours * 3600_000;
@@ -791,10 +816,11 @@ function renderMapChips() {
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
-  }).join("");
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+  }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
+  if (e.target.closest("[data-weergave]")) { openWeergave(); return; }
   const k = e.target.closest("[data-laag]")?.dataset.laag;
   if (!k) return;
   state.lagen.has(k) ? state.lagen.delete(k) : state.lagen.add(k);
@@ -871,7 +897,7 @@ async function renderMap() {
         center: new mk.Coordinate(52.2112, 5.9699),
         cameraDistance: 26000,
         showsMapTypeControl: true,
-        colorScheme: matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light,
+        colorScheme: weergave().donker || matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light,
         padding: new mk.Padding(70, 20, 20, 20),
       });
       return mk;
@@ -907,6 +933,7 @@ async function renderMap() {
     renderAfspeel(mk, h);
   }
   if (state.lagen.has("werkgebied")) bigMap.addOverlays(await werkgebiedOverlays(mk));
+  await zetRadar(mk);
   bigMap.addAnnotations([
     ...clusters.map((c) => clusterAnnotation(mk, c, openCluster)),
     ...pins.map((m) => markerAnnotation(mk, m, (x) => select(x.guid))),
@@ -944,6 +971,47 @@ function renderStaticMarkers(pins, clusters) {
     box.appendChild(el);
   }
   box.onclick = (e) => { const g = e.target.dataset.guid; if (g) select(g); };
+}
+
+// Rain radar (KNMI tiles via the A-Alerts API), refreshed every 5 minutes while the layer is on.
+const radar = { ov: null, at: 0 };
+async function zetRadar(mk) {
+  const aan = state.lagen.has("buienradar");
+  if (radar.ov && (!aan || Date.now() - radar.at > 300_000)) { bigMap.removeTileOverlay(radar.ov); radar.ov = null; }
+  if (!aan || radar.ov) return;
+  radar.ov = await radarLaag(mk);
+  radar.at = Date.now();
+  if (radar.ov) bigMap.addTileOverlay(radar.ov);
+  else if (!radar.gemeld) { radar.gemeld = true; toast("De buienradar is nog niet beschikbaar."); }
+}
+
+/** "Kaart en helikopters": the same display choices as in the apps (kept in this browser). */
+function openWeergave() {
+  const v = weergave();
+  const box = $("clusterPanel");
+  const opt = (name, val, label, cur) => `<label class="radio"><input type="radio" name="${name}" value="${val}"${cur === val ? " checked" : ""}> ${label}</label>`;
+  box.innerHTML = `<header><b>Kaart en helikopters</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    <form id="weergaveForm" class="weergave">
+      <label class="check"><input type="checkbox" name="donker"${v.donker ? " checked" : ""}> Donkere kaart</label>
+      <label class="check"><input type="checkbox" name="kleurPerToestel"${v.kleurPerToestel ? " checked" : ""}> Eigen kleur per helikopter</label>
+      <fieldset><legend>Grootte op de kaart</legend>${opt("icoon", "klein", "Klein", v.icoon)}${opt("icoon", "normaal", "Normaal", v.icoon)}${opt("icoon", "groot", "Groot", v.icoon)}</fieldset>
+      <fieldset><legend>Eenheden</legend>${opt("eenheden", "metrisch", "Meter en km/u", v.luchtvaart ? "luchtvaart" : "metrisch")}${opt("eenheden", "luchtvaart", "Voet en knopen", v.luchtvaart ? "luchtvaart" : "metrisch")}</fieldset>
+      <label class="check"><input type="checkbox" name="prestatie"${v.prestatie ? " checked" : ""}> Prestatiemodus (helikopters bewegen niet vloeiend)</label>
+      <p class="hint">Deze keuzes gelden voor deze browser.</p>
+    </form>`;
+  box.hidden = false;
+  $("weergaveForm").addEventListener("change", async (e) => {
+    const f = e.currentTarget;
+    const nieuw = zetWeergave({
+      donker: f.donker.checked, kleurPerToestel: f.kleurPerToestel.checked, prestatie: f.prestatie.checked,
+      icoon: f.icoon.value, luchtvaart: f.eenheden.value === "luchtvaart",
+    });
+    const mk = await bigMapReady;
+    if (mk && bigMap) bigMap.colorScheme = nieuw.donker || matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light;
+    // Redraw the helicopter markers with the new size and colours.
+    heliMarkers?.clear();
+    renderMap();
+  });
 }
 
 /** Hospital or base tapped: what it is and which helicopter is probably heading there. */

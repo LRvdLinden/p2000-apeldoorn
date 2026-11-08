@@ -4,11 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=51";
+} from "./core.js?v=52";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
-  heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
-} from "./aalerts.js?v=51";
+  heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
+} from "./aalerts.js?v=52";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -24,7 +24,7 @@ const state = {
   lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"])),
 };
 // Map layers, like the Apple TV control room and the live pager.
-const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["werkgebied", "Grens"]];
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -109,7 +109,7 @@ async function renderMap() {
 
 // A-Alerts layers: NL-Alert / Burgernet / KNMI areas, municipality border, stations, the helicopters with their
 // route of the last 30 minutes (moving smoothly between updates), and for the focused alert its stations and Lifeliner.
-let extraAnn = [], extraOv = [], heliMarkers = null;
+let extraAnn = [], extraOv = [], heliMarkers = null, radarOv = null, radarAt = 0;
 async function renderExtra(kit) {
   if (!kit || !map) return;
   if (extraAnn.length) map.removeAnnotations(extraAnn);
@@ -148,6 +148,9 @@ async function renderExtra(kit) {
   extraOv = ov; extraAnn = ann;
   if (extraOv.length) map.addOverlays(extraOv);
   if (extraAnn.length) map.addAnnotations(extraAnn);
+  // Rain radar (KNMI), refreshed every 5 minutes while the layer is on.
+  if (radarOv && (!L.has("buienradar") || Date.now() - radarAt > 300_000)) { map.removeTileOverlay(radarOv); radarOv = null; }
+  if (L.has("buienradar") && !radarOv) { radarOv = await radarLaag(kit); radarAt = Date.now(); if (radarOv) map.addTileOverlay(radarOv); }
   heliMarkers ||= heliLaag(kit, map);
   heliMarkers.update(L.has("helikopters") ? state.helis : []);
   renderHeliList();

@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=51";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=52";
 
 const TZ = "Europe/Amsterdam";
 
@@ -175,9 +175,53 @@ export function heliImg(h) {
   return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") : asset("assets/img/heli_politie.png");
 }
 export const vliegtWest = (h) => h.koers != null && !h.op_grond && ((h.koers % 360) + 360) % 360 > 180;
+// "Kaart en helikopters" (same choices as the apps), kept in this browser.
+const WEERGAVE_KEY = "aalerts.weergave";
+export function weergave() {
+  try { return { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", donker: false, prestatie: false, ...JSON.parse(localStorage.getItem(WEERGAVE_KEY) || "{}") }; }
+  catch { return { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", donker: false, prestatie: false }; }
+}
+export function zetWeergave(patch) {
+  const v = { ...weergave(), ...patch };
+  try { localStorage.setItem(WEERGAVE_KEY, JSON.stringify(v)); } catch {}
+  return v;
+}
+const heliBreedte = () => ({ klein: 60, groot: 108 })[weergave().icoon] || 84;
+export const hoogteTekst = (h) => h.op_grond ? "op de grond" : h.hoogte_ft == null ? "–"
+  : weergave().luchtvaart ? `${Math.round(h.hoogte_ft / 50) * 50} ft` : `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m`;
+export const snelheidTekst = (h) => h.snelheid_kt == null ? "–" : weergave().luchtvaart ? `${Math.round(h.snelheid_kt)} kn` : `${Math.round(h.snelheid_kt * 1.852)} km/u`;
+
+/** A large incident (same rule as the apps and the server). */
+const GROOT = /\bGRIP\s*[1-5]\b|zeer\s+grote\s+brand|\bgrote\s+brand\b|middel\s*brand|\bopschaling\b|\bramp\b|\bCoPI\b|grootschalig|\bMMA\b|multi\s*trauma/i;
+export function isGrootIncident(m) {
+  if (Number(m.grip) > 0 || (m.opschaling && m.opschaling !== "0")) return true;
+  if (GROOT.test([m.title, m.full_melding, m.categorie].filter(Boolean).join(" "))) return true;
+  return Array.isArray(m.eenheden) && m.eenheden.length >= 10;
+}
+
+/** Rain radar (KNMI) as a MapKit tile overlay; null when the server has no radar. */
+export async function radarLaag(mk) {
+  try {
+    const r = await fetch(`${API}/v1/radar`).then((x) => x.json());
+    if (!r?.beschikbaar || !r.tiles) return null;
+    const t = r.tiles;
+    return new mk.TileOverlay((x, y, z) => t.replace("{z}", z).replace("{x}", x).replace("{y}", y), { minimumZ: 5, maximumZ: 12, opacity: 0.6 });
+  } catch { return null; }
+}
+
+/** "Klopt deze melding niet?" – null when sent, otherwise the error text. */
+export async function meldingFeedback(guid, body) {
+  try {
+    const r = await fetch(`${API}/v1/meldingen/${encodeURIComponent(guid)}/feedback`, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ ...body, platform: "web" }) });
+    if (r.ok) return null;
+    const j = await r.json().catch(() => ({}));
+    return j.error || `Fout ${r.status}`;
+  } catch (e) { return "Geen verbinding"; }
+}
+
 export function heliInfo(h) {
-  const hoogte = h.op_grond ? "op de grond" : h.hoogte_ft != null ? `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m` : "–";
-  const snelheid = h.snelheid_kt != null ? `${Math.round(h.snelheid_kt * 1.852)} km/u` : "–";
+  const hoogte = hoogteTekst(h);
+  const snelheid = snelheidTekst(h);
   return `${h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter"} · ${hoogte} · ${snelheid}`;
 }
 
@@ -187,8 +231,9 @@ export function heliAnnotation(mk, h) {
     const el = document.createElement("div");
     el.className = "heli-marker";
     // Sizes inline so the drawing never shows at its full size (also with an old stylesheet in the cache).
-    el.style.cssText = "display:grid;justify-items:center;gap:2px;width:96px;transform:translateY(-50%)";
-    el.innerHTML = `<img src="${heliImg(h)}" alt="" width="84" style="width:84px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
+    const b = heliBreedte();
+    el.style.cssText = `display:grid;justify-items:center;gap:2px;width:${b + 12}px;transform:translateY(-50%)`;
+    el.innerHTML = `<img src="${heliImg(h)}" alt="" width="${b}" style="width:${b}px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
       + `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>`;
     el.title = `${h.naam} · ${heliInfo(h)}`;
     return el;
@@ -275,7 +320,12 @@ export function geschat(h, now = Date.now()) {
   return { lat: h.lat + (km * Math.cos(rad)) / 110.574, lon: h.lon + (km * Math.sin(rad)) / (111.32 * Math.cos((h.lat * Math.PI) / 180)) };
 }
 
-export const heliKleur = (h) => (h.soort === "trauma" ? "#9333EA" : "#15428B");
+const PALET = { lifeliner1: "#E11D48", lifeliner2: "#F59E0B", lifeliner3: "#16A34A", lifeliner4: "#7C3AED", lifeliner5: "#0891B2" };
+const BLAUW = ["#1D4ED8", "#0EA5E9", "#4F46E5", "#0284C7", "#2563EB", "#6366F1"];
+/** Route colour: purple (Lifeliner) and police blue, or a colour per helicopter ("Eigen kleur per helikopter"). */
+export const heliKleur = (h) => weergave().kleurPerToestel
+  ? PALET[h.id] || BLAUW[(Number(String(h.id).replace(/\D/g, "")) || 0) % BLAUW.length]
+  : (h.soort === "trauma" ? "#9333EA" : "#15428B");
 
 /** MapKit JS line for a trail (thinned out to ~400 points), ending at the live position. */
 export function spoorOverlay(mk, punten, h, now = Date.now(), { kleur, live = true, breedte = 4, opacity = 0.9 } = {}) {
@@ -303,6 +353,7 @@ export function heliLaag(mk, map, { onSelect } = {}) {
   const anns = new Map();
   let list = [];
   const timer = setInterval(() => {
+    if (weergave().prestatie) return;
     const now = Date.now();
     for (const h of list) { const a = anns.get(h.id); if (a && !h.op_grond) { const g = geschat(h, now); a.coordinate = new mk.Coordinate(g.lat, g.lon); } }
   }, 1000);
@@ -362,7 +413,14 @@ export function locatieAnnotation(mk, l, onSelect) {
   return a;
 }
 /** "Waarschijnlijk naar Isala · ± 12 min" */
-export const voorspellingTekst = (v) => v ? `Waarschijnlijk naar ${v.naam}${v.eta_min ? ` · ± ${v.eta_min} min` : ""}` : "";
+export const voorspellingTekst = (v) => {
+  if (!v) return "";
+  const eta = v.eta_min ? ` · ± ${v.eta_min} min` : "";
+  if (v.soort === "melding") {
+    return `Onderweg naar de melding${v.plaats ? ` in ${capPlaats(v.plaats)}` : ""}${eta}${v.daarna ? ` · daarna waarschijnlijk naar ${v.daarna.naam}` : ""}`;
+  }
+  return `Waarschijnlijk naar ${v.naam}${eta}`;
+};
 /** Thin dashed line from the helicopter to where it is probably heading. */
 export function voorspellingOverlay(mk, h, now = Date.now()) {
   const v = h?.voorspelling;

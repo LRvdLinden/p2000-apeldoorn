@@ -355,3 +355,16 @@ a.drow { text-decoration: none; color: inherit; }
 .kz span.geweest { color: var(--muted); }
 .voertuig { width: 26px; height: 26px; border-radius: 50%; background: #fff; display: grid; place-items: center; box-shadow: 0 0 0 2px var(--c), 0 0 0 4px #fff, 0 3px 8px rgba(0,0,0,.3); outline: 2px dashed var(--c); outline-offset: 3px; }
 .voertuig img { width: 18px; height: 18px; object-fit: contain; }
+
+/* Build 53: large incident, "Klopt deze melding niet?", map display */
+.groot-badge { display: flex; align-items: center; gap: 8px; margin: 10px 0; padding: 10px 14px; border-radius: 14px; background: linear-gradient(135deg, #ef4444, #b91c1c); color: #fff; }
+.groot-badge span { margin-left: auto; font-weight: 700; }
+.row .meta .groot { background: #dc2626; }
+.card.feedback { text-align: center; }
+.card.feedback form { display: grid; gap: 10px; text-align: left; margin-top: 10px; }
+.card.feedback label { display: grid; gap: 4px; font-size: 14px; }
+.card.feedback select, .card.feedback textarea { font: inherit; padding: 8px; border-radius: 10px; border: 1px solid var(--line, #d4d4d8); background: transparent; color: inherit; }
+.weergave { display: grid; gap: 10px; margin-top: 8px; }
+.weergave fieldset { border: 0; padding: 0; margin: 0; display: flex; flex-wrap: wrap; gap: 10px; }
+.weergave legend { font-weight: 600; font-size: 13px; margin-bottom: 4px; width: 100%; }
+.weergave .check, .weergave .radio { display: flex; align-items: center; gap: 6px; font-size: 14px; }
