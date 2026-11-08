@@ -1,5 +1,8 @@
 name: Push tail (tijdelijk)
-on: workflow_dispatch
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
 jobs:
   tail:
     runs-on: ubuntu-latest
