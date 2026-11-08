@@ -49,7 +49,7 @@ jobs:
           let list = (CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]]) ?? []
           let mine = list.filter { pids.contains(($0[kCGWindowOwnerPID as String] as? Int32) ?? -1) && (($0[kCGWindowLayer as String] as? Int) ?? 1) == 0 }
             .sorted { (($0[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) > (($1[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) }
-          for w in mine { print(w[kCGWindowNumber as String] ?? "", w[kCGWindowBounds as String] ?? "", w[kCGWindowIsOnscreen as String] ?? "") }
+          for w in mine where ((w[kCGWindowBounds as String] as? [String: Double])?["Height"] ?? 0) > 100 { print(w[kCGWindowNumber as String] ?? "", "Height = \(Int((w[kCGWindowBounds as String] as? [String: Double])?["Height"] ?? 0))") }
           SW
           screencapture -x -R0,0,1440,900 shots-desktop.png || true
           MACAPP="$PWD/$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)"
@@ -62,9 +62,14 @@ jobs:
             mkdir -p "shots/$LANG"
             rm -rf ~/Library/Saved\ Application\ State/"$BID".savedState ~/Library/Containers/"$BID"/Data/Library/Saved\ Application\ State 2>/dev/null || true
             open -n -F -a "$MACAPP" --args -AppleLanguages "($LANG)" -AppleLocale $([ $LANG = nl ] && echo nl_NL || echo en_US) -AAlertsScreenshots -ApplePersistenceIgnoreState YES "$@"
-            sleep "$W"
+            sleep 6
             osascript -e "tell application id \"$BID\" to activate" || true
-            sleep 2
+            sleep 1
+            # No window after launch (state restoration): open one with Cmd-N.
+            if [ -z "$(swift /tmp/win.swift "$BID" 2>/dev/null | awk '/Height = [0-9]{3}/')" ]; then
+              osascript -e 'tell application "System Events" to keystroke "n" using command down' || echo "keystroke failed"
+            fi
+            sleep "$W"
             screencapture -x -R0,0,1440,900 "shots/$LANG/mac-$NAME-screen.png" || true
             # The window itself (also when it is off screen or behind something)
             WIN=$(swift /tmp/win.swift "$BID" 2>/dev/null | tee -a shots/windows.txt | awk 'NR==1{print $1}')
