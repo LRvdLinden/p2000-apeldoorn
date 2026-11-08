@@ -9,3 +9,8 @@ P2000 Apeldoorn heet nu A-Alerts, met een nieuw icoon. Je instellingen en bewaar
 • Status van alle onderdelen in Instellingen
 • Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
 • Apple TV: meldkamer met waarschuwingen, kaartlagen, helikopters met route en kazernes
+• Nieuw welkomscherm: stel in een paar stappen je eigen meldingsprofiel in
+• Volg een capcode met een ster, ook buiten je plaatsen en straal
+• Verberg bekeken meldingen; bij een melding zonder pushmelding zie je waarom
+• KNMI zoals op knmi.nl, met live weer, verloop per code, een melding vooraf en bij opheffen (code groen)
+• Hulp en veelgestelde vragen in de app

@@ -5,6 +5,7 @@ LIVE PAGER
 • NL-Alert and Burgernet between the alerts, with the time of the warning
 • A KNMI warning (code yellow, orange or red) as a bar at the top while it applies
 • All warnings of the last two weeks
+• Hide alerts you have already seen: when you are up to date you see "You're all caught up"
 
 MAP WITH LAYERS AND FILTERS
 • Filter with one tap on fire, ambulance, police, trauma helicopter, Burgernet and NL-Alert
@@ -26,10 +27,16 @@ EVERY DETAIL
 • Route via Apple Maps or Google Maps, and share with one tap
 
 WARNINGS
-• The same detail page for NL-Alert, Burgernet and KNMI: map with area or place, the message, the weather and nearby alerts
+• The same detail page for NL-Alert, Burgernet and KNMI: map with the area or place, the message and the weather
+• KNMI as on knmi.nl: headline, description, risks and advice, and the course per code
+• Live weather for a weather code; lifted warnings show code green, with the code that applied
 
 NOTIFICATIONS
+• Set up your own notification profile in a few steps on first launch
 • Up to five notification profiles with their own places, services, priorities, warnings and times
+• Follow a capcode with a star, for example your own fire station, also outside your places and radius
+• KNMI: also a notification one hour before a code starts and when it is lifted
+• No notification? The alert tells you why
 • Notifications with a small map and buttons to save or open in Apple Maps
 • My area: only alerts within a radius around you
 
@@ -37,6 +44,7 @@ EVERYWHERE
 • iPhone, iPad, Mac, Apple Watch and Apple TV (control-room view)
 • Widgets, iCloud sync of your settings and Face ID lock
 • Status of every component in Settings and at a-alerts.nl/status
+• Help and FAQ in the app and at a-alerts.nl/hulp
 
 No account, no ads and no tracking. The app is available in Dutch and English.
 

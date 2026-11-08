@@ -5,12 +5,12 @@ WAT DE APP DOET
 Openbare P2000-meldingen voor één gemeente, Apeldoorn (met Teuge), met openbare waarschuwingen van NL-Alert, Burgernet en KNMI en live trauma- en politiehelikopters. Onze eigen server (Cloudflare Worker) verzamelt en filtert; de app praat alleen met die server. Een lokale app met één doel van één ontwikkelaar, geen template en geen kopie van een andere app; het is de Apple-versie van mijn eigen P2000-app voor Homey.
 
 ZO TEST JE
-1. Open de app en doorloop het welkomstscherm. Meldingen en locatie zijn optioneel.
+1. Open de app. Het welkomscherm stelt in stappen een eerste meldingsprofiel in (waar, welke meldingen, waarschuwingen, stille uren); elke keuze is optioneel, tik op Volgende. Meldingen en locatie zijn optioneel.
 2. Pager: meldingen van de laatste 24 uur, met NL-Alert/Burgernet ertussen. Tik op een melding: kaart, Look Around, kazernes met aankomsttijd, verloop, weer, route en delen.
 3. Kaart: chips bovenaan filteren diensten, Burgernet en NL-Alert; Lifeliner/Zulu-chips springen naar de heli. De lagenknop zet kazernes, ziekenhuizen/vliegbases en helikopters aan of uit.
 4. Tik op een helikopter: route (deze vlucht / 30 min / 2 uur), waarschijnlijke bestemming, laatste vluchten en terugspelen.
 5. Statistieken: vandaag tegenover gisteren.
-6. Instellingen › Notificaties › Profielen; "Stuur testmelding" stuurt direct een pushmelding. Instellingen › Status toont alle onderdelen.
+6. Tik in een melding op de ster bij een capcode om die eenheid te volgen (Instellingen › Gevolgde capcodes). De oog-knop in de pager verbergt bekeken meldingen. Instellingen › Hulp en veelgestelde vragen. Instellingen › Notificaties › Profielen; "Stuur testmelding" stuurt direct een pushmelding. Instellingen › Status toont alle onderdelen.
 7. Apple Watch, Mac en Apple TV tonen dezelfde gegevens; Apple TV heeft een meldkamerweergave.
 
 REGIO / DATA
@@ -29,4 +29,4 @@ OVERIG
 Beoordelingsvraag hooguit één keer per week op een rustig moment. In Instellingen een kaart "Meer apps van de ontwikkelaar".
 
 NIEUW IN 2.0.0
-Nieuwe naam en icoon; NL-Alert/Burgernet/KNMI; kaartfilters en lagen; live helikopters met route, bestemming en terugspelen; pushmelding bij opstijgen Lifeliner; meldingsprofielen; statusscherm; Apple TV-meldkamer.
+Nieuwe naam en icoon; NL-Alert/Burgernet/KNMI; kaartfilters en lagen; live helikopters met route, bestemming en terugspelen; pushmelding bij opstijgen Lifeliner; meldingsprofielen; statusscherm; Apple TV-meldkamer; welkomscherm met profiel; capcodes volgen; KNMI-details met live weer en code groen.

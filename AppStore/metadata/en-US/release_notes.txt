@@ -9,3 +9,8 @@ P2000 Apeldoorn is now A-Alerts, with a new icon. Your settings and saved alerts
 • Status of every component in Settings
 • Area extended to 26 towns and hamlets, including Teuge
 • Apple TV: control room with warnings, map layers, helicopters with route and stations
+• New welcome screen: set up your own notification profile in a few steps
+• Follow a capcode with a star, also outside your places and radius
+• Hide viewed alerts; an alert without a notification tells you why
+• KNMI as on knmi.nl, with live weather, course per code, a notification in advance and when lifted (code green)
+• Help and FAQ in the app

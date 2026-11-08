@@ -5,6 +5,7 @@ LIVE PAGER
 • NL-Alert en Burgernet tussen de meldingen, met de tijd van de melding
 • KNMI-waarschuwing (code geel, oranje of rood) als balk bovenaan zolang hij geldt
 • Alle waarschuwingen van de laatste twee weken terug te lezen
+• Verberg meldingen die je al hebt gezien: ben je overal bij, dan zie je ‘Je bent helemaal bij’
 
 KAART MET LAGEN EN FILTERS
 • Filter met één tik op brandweer, ambulance, politie, traumaheli, Burgernet en NL-Alert
@@ -26,10 +27,16 @@ ALLES OVER DE MELDING
 • Route via Apple Kaarten of Google Maps, en delen met één tik
 
 WAARSCHUWINGEN
-• Dezelfde detailpagina voor NL-Alert, Burgernet en KNMI: kaart met gebied of plek, het bericht, het weer en meldingen in de buurt
+• Dezelfde detailpagina voor NL-Alert, Burgernet en KNMI: kaart met gebied of plek, het bericht en het weer
+• KNMI zoals op knmi.nl: kop, omschrijving, risico's en advies, en het verloop per code
+• Het weer live bij een weercode; opgeheven waarschuwingen tonen code groen, met de code die gold
 
 PUSHMELDINGEN
+• Stel bij de eerste start in een paar stappen je eigen meldingsprofiel in
 • Tot vijf meldingsprofielen met eigen plaatsen, disciplines, prioriteiten, waarschuwingen en tijden
+• Volg een capcode met een ster, bijvoorbeeld je eigen kazerne, ook buiten je plaatsen en straal
+• KNMI: ook een melding een uur voordat de code ingaat en als hij wordt opgeheven
+• Kreeg je geen pushmelding? Bij de melding staat waarom
 • Pushmelding met een kaartje van de plek en knoppen voor Bewaar en Apple Kaarten
 • Mijn buurt: alleen meldingen binnen een straal rond jou
 
@@ -37,6 +44,7 @@ OVERAL
 • iPhone, iPad, Mac, Apple Watch en Apple TV (meldkamerweergave)
 • Widgets, iCloud-synchronisatie van je instellingen en Face ID-vergrendeling
 • Status van alle onderdelen in Instellingen en op a-alerts.nl/status
+• Hulp en veelgestelde vragen in de app en op a-alerts.nl/hulp
 
 Geen account nodig, geen advertenties en geen tracking.
 

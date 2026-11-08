@@ -4,12 +4,12 @@ WHAT THE APP DOES
 It shows public P2000 alerts (the open pager network of the Dutch emergency services) for one municipality, Apeldoorn (incl. Teuge), with public NL-Alert, Burgernet and KNMI warnings and live trauma/police helicopters. Our own server (a Cloudflare Worker) collects and filters the data; the app only talks to that server. It is a local, single-purpose app by one developer, not a template or a copy of another app; it is the Apple version of the developer's own P2000 app for Homey (homey.app, nl.lrvdlinden.p2000).
 
 HOW TO TEST
-1. Open the app, go through the welcome screens (Next, Start). Notifications and location are optional.
+1. Open the app. The welcome screens set up a first notification profile (where, which alerts, warnings, quiet hours); every choice is optional, tap Next. Notifications and location are optional.
 2. Pager: alerts of the last 24 hours, with NL-Alert/Burgernet between them when there are any. Tap an alert: map, Look Around, alerted stations with arrival time, timeline, weather, route and share buttons.
 3. Map: chips at the top filter services, Burgernet and NL-Alert; Lifeliner/Zulu chips jump to the helicopter. The layers button switches stations, hospitals/air bases and helicopters.
 4. Tap a helicopter: route (this flight / 30 min / 2 h), likely destination, recent flights and playback (play button).
 5. Statistics: today versus yesterday.
-6. Settings > Notifications > Profiles; "Send a test notification" sends a push right away. Settings > Status shows the state of every component.
+6. In an alert, tap the star next to a capcode to follow that unit (Settings > Followed capcodes). The eye button in the pager hides viewed alerts. Settings > Help and FAQ. Settings > Notifications > Profiles; "Send a test notification" sends a push right away. Settings > Status shows the state of every component.
 7. Apple Watch, Mac and Apple TV show the same data; Apple TV has a control-room view.
 
 REGION / DATA NOTES
@@ -28,4 +28,4 @@ OTHER
 Review prompt at most once a week at a calm moment (requestReview). Settings has a "More apps by the developer" card.
 
 WHAT'S NEW IN 2.0.0
-New name and icon; NL-Alert/Burgernet/KNMI; map filters and layers; live helicopters with route, destination and playback; Lifeliner take-off notification; notification profiles; status screen; Apple TV control room.
+New name and icon; NL-Alert/Burgernet/KNMI; map filters and layers; live helicopters with route, destination and playback; Lifeliner take-off notification; notification profiles; status screen; Apple TV control room; welcome flow with profile setup; followed capcodes; KNMI details with live weather and code green.
