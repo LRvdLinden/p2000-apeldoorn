@@ -1,0 +1,16 @@
+name: Push probe (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-probe.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          API=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          echo "== status"; curl -sS "$API/v1/status" | python3 -c "import sys,json;d=json.load(sys.stdin);print(d['staat']);[print(o['id'],o['staat'],o.get('detail')) for g in d['groepen'] for o in g['onderdelen']];print(d.get('vandaag'))"
+          T=$(python3 -c "print('ab'*32)")
+          echo "== register"; curl -sS -w " HTTP %{http_code}\n" -X POST "$API/v1/devices" -H 'content-type: application/json' -d "{\"token\":\"$T\",\"platform\":\"ios\",\"environment\":\"production\",\"language\":\"nl\",\"enabled\":true,\"diensten\":[],\"plaatsen\":[],\"settings\":{\"waarschuwingen\":{\"nlalert\":true,\"burgernet\":false,\"knmi\":[\"orange\",\"red\"],\"knmiVooraf\":true,\"knmiOpgeheven\":true},\"capcodes\":[]}}"
+          echo "== test"; curl -sS -w " HTTP %{http_code}\n" -X POST "$API/v1/devices/$T/test"
+          echo "== delete"; curl -sS -w " HTTP %{http_code}\n" -X DELETE "$API/v1/devices/$T"
