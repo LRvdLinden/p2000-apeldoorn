@@ -9,7 +9,7 @@ jobs:
     steps:
       - run: |
           B=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          echo "radar: $(curl -s $B/v1/radar)"
+          echo "radar2: $(curl -s $B/v1/radar)"
           curl -s -o nl.png -w "radar.png: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar.png"
           file nl.png; head -c 300 nl.png | grep -a error || true
           curl -s -o t.png -w "tegel 8/131/84: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar/8/131/84.png"
