@@ -140,6 +140,35 @@ export async function weatherFor(env, m) {
   return data;
 }
 
+/**
+ * The weather right now in Apeldoorn (WeatherKit currentWeather), for a weather warning: live, not at the warning's start.
+ * Kept 10 minutes in kv so many viewers cost one WeatherKit call.
+ */
+export async function weatherNow(env) {
+  const row = await env.DB.prepare("SELECT value, at FROM kv WHERE key = 'weer_nu'").first();
+  if (row && Date.now() - row.at < 10 * 60_000) return JSON.parse(row.value);
+  if (!weatherConfigured(env)) return null;
+  const team = env.WEB_WEATHERKIT_TEAM_ID || env.APN_TEAM_ID;
+  const service = env.WEB_WEATHERKIT_SERVICE_ID || "nl.lrvdlinden.p2000apeldoorn.weatherkit";
+  const now = Math.floor(Date.now() / 1000);
+  const token = await es256({ alg: "ES256", kid: env.WEB_WEATHERKIT_KEY_ID, id: `${team}.${service}` },
+    { iss: team, iat: now, exp: now + 3600, sub: service }, env.WEB_WEATHERKIT_P8);
+  const [lat, lon] = APELDOORN;
+  const res = await fetch(`https://weatherkit.apple.com/api/v1/weather/nl/${lat}/${lon}?dataSets=currentWeather&timezone=Europe/Amsterdam`,
+    { headers: { authorization: `Bearer ${token}` } });
+  if (!res.ok) { console.error("[weather-nu]", res.status); return row ? JSON.parse(row.value) : null; }
+  const c = (await res.json()).currentWeather;
+  if (!c) return null;
+  const data = {
+    time: c.asOf, live: true, condition: c.conditionCode, temperature: c.temperature, apparent: c.temperatureApparent,
+    humidity: c.humidity, cloudCover: c.cloudCover, windSpeed: c.windSpeed, windGust: c.windGust,
+    windDirection: c.windDirection, precipitation: c.precipitationIntensity, visibility: c.visibility, daylight: c.daylight,
+    attribution: "https://weatherkit.apple.com/legal-attribution.html",
+  };
+  await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES ('weer_nu', ?, ?)").bind(JSON.stringify(data), Date.now()).run();
+  return data;
+}
+
 // ------------------------------------------------------------------ Apple Maps Server API
 
 export const mapsServerConfigured = (env) => hasKey(env.MAPS_SERVER_API_KEY_ID, env.MAPS_SERVER_API_TEAM_ID || env.APN_TEAM_ID, env.MAPS_SERVER_API_P8);

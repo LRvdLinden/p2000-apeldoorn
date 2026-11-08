@@ -159,3 +159,10 @@ body.mk {
 @media (max-width: 700px) { .helis { display: none; } }
 .heli-row .dest { color: #fff; font-weight: 600; }
 .chip.heli-chip img { width: 44px; object-fit: contain; }
+
+/* KNMI weather codes on the map */
+.map-knmi { flex-basis: 100%; display: flex; gap: .5em; flex-wrap: wrap; }
+.map-knmi:empty { display: none; }
+.mk-code { pointer-events: auto; display: inline-flex; align-items: center; gap: .45em; padding: .45em .9em; border-radius: 999px; background: var(--c); color: var(--on); text-decoration: none; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
+.mk-code img { width: 1.4em; height: 1.4em; border-radius: 6px; }
+.mk-code small { font-weight: 600; opacity: .85; }

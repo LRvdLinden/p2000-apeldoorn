@@ -182,6 +182,7 @@ struct MeldkamerView: View {
             }
         }
         .overlay(alignment: .topLeading) {
+          VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 14) {
                 ForEach(Dienst.selectable) { d in
                     HStack(spacing: 8) {
@@ -204,7 +205,23 @@ struct MeldkamerView: View {
                     .padding(.horizontal, 16).padding(.vertical, 10)
                     .background(.ultraThinMaterial, in: Capsule())
             }
-            .padding(24)
+            // KNMI weather codes on the map.
+            if settings.laag(.knmi) {
+                HStack(spacing: 12) {
+                    ForEach(knmiActief) { w in
+                        HStack(spacing: 10) {
+                            Image(systemName: w.systemImage).font(.system(size: 22, weight: .semibold))
+                            Text(verbatim: "\(Waarschuwing.codeLabel(w.niveau)) · \(w.titel)").font(AppFont.body(20, .bold))
+                            if let e = w.einde { Text(Lf("tot %@", Fmt.time(e))).font(AppFont.body(18, .regular)).opacity(0.85) }
+                        }
+                        .foregroundStyle(w.onColor)
+                        .padding(.horizontal, 18).padding(.vertical, 10)
+                        .background(w.color, in: Capsule())
+                    }
+                }
+            }
+          }
+          .padding(24)
         }
     }
 

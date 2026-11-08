@@ -8,7 +8,7 @@ import {
   activeDevices, deviceCount, housekeeping,
 } from "./db.js";
 import {
-  sendPush, isDeadToken, apnsConfigured, mapkitToken, mapkitConfigured, weatherFor, weatherConfigured, geocode,
+  sendPush, isDeadToken, apnsConfigured, mapkitToken, mapkitConfigured, weatherFor, weatherNow, weatherConfigured, geocode,
   mapsServerConfigured,
 } from "./apple.js";
 import {
@@ -129,6 +129,12 @@ async function handle(req, env) {
   if (method === "GET" && m) {
     const w = await getWarning(env, decodeURIComponent(m[1]));
     if (!w) return reply(404, { error: "Not found" });
+    // KNMI: the weather right now (a weather code is about now), not at the start of the warning.
+    if (w.bron === "knmi") {
+      const nu = await weatherNow(env);
+      await noteWeer(env, Boolean(nu)).catch(() => {});
+      return nu ? reply(200, nu, { "cache-control": "public, max-age=300" }) : reply(503, { error: "Weather unavailable" });
+    }
     const data = await weatherFor(env, { guid: `w:${w.id}`, lat: w.lat ?? null, lon: w.lon ?? null, datum_tijd: w.start });
     if (w.lat != null) await noteWeer(env, Boolean(data)).catch(() => {});
     return data ? reply(200, data, { "cache-control": "public, max-age=3600" }) : reply(503, { error: "Weather unavailable" });
@@ -137,7 +143,9 @@ async function handle(req, env) {
   if (method === "GET" && m) {
     const w = await getWarning(env, decodeURIComponent(m[1]));
     if (!w) return reply(404, { error: "Not found" });
-    return reply(200, { ...w, meldingen: await linkedMeldingen(env, w, meldingAPI, SELECT) }, { "cache-control": "public, max-age=30" });
+    // A weather code covers a whole region: no "alerts nearby" for KNMI.
+    const meldingen = w.bron === "knmi" ? [] : await linkedMeldingen(env, w, meldingAPI, SELECT);
+    return reply(200, { ...w, meldingen }, { "cache-control": "public, max-age=30" });
   }
 
   // A-Alerts: live positions of the trauma and police helicopters (adsb.lol, ODbL).

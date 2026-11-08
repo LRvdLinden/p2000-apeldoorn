@@ -3,11 +3,11 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=43";
+} from "./core.js?v=44";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=43";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=44";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -398,7 +398,7 @@ function renderDetail(m) {
     <section class="card" id="kazernesCard" hidden></section>
     ${verloopHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
-    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
+    <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
       <div class="unit"><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>`).join("")}</div></section>` : ""}
     ${cars.length ? `<section class="card"><h2>Voertuigen (${cars.length})</h2><div class="units">${cars.map((v) => `
@@ -560,7 +560,7 @@ async function selectWarning(id, { push = true } = {}) {
   let near = [];
   try {
     const r = await fetch(`${API}/v1/waarschuwingen/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(10_000) });
-    if (r.ok) { const full = await r.json(); w = full; near = full.meldingen || []; }
+    if (r.ok) { const full = await r.json(); w = full; near = full.bron === "knmi" ? [] : full.meldingen || []; }
   } catch {}
   if (!w) { toast("Deze waarschuwing is niet meer beschikbaar"); closeDetail(push); return; }
   state.selected = `w:${w.id}`;
@@ -591,12 +591,16 @@ async function selectWarning(id, { push = true } = {}) {
   $("detail").querySelectorAll("[data-goto]").forEach((x) => x.addEventListener("click", () => select(x.dataset.goto)));
   $("detailPane").scrollTop = 0;
   renderList();
-  loadMeteo(w, `w:${w.id}`, async () => {
+  const weerLader = async () => {
     try {
       const r = await fetch(`${API}/v1/waarschuwingen/${encodeURIComponent(w.id)}/weather`, { signal: AbortSignal.timeout(12_000) });
       return r.ok ? await r.json() : null;
     } catch { return null; }
-  });
+  };
+  loadMeteo(w, `w:${w.id}`, weerLader);
+  // Weather code: the weather is live (now, in Apeldoorn), refreshed every 5 minutes while the warning is open.
+  clearInterval(weerTimer);
+  if (w.bron === "knmi") weerTimer = setInterval(() => state.selected === `w:${w.id}` ? loadMeteo(w, `w:${w.id}`, weerLader) : clearInterval(weerTimer), 300_000);
   const mk = await loadMapKit();
   if (!mk || state.selected !== `w:${w.id}`) return;
   if (detailMap) { try { detailMap.destroy(); } catch {} }
@@ -639,6 +643,8 @@ async function drawDetailMap(m) {
   } catch { la.innerHTML = ""; }
 }
 
+let weerTimer = null;
+
 async function loadMeteo(m, key = m.guid, loader = () => fetchWeather(m.guid)) {
   const box = $("meteo");
   const w = await loader();
@@ -655,7 +661,7 @@ async function loadMeteo(m, key = m.guid, loader = () => fetchWeather(m.guid)) {
     <div class="mrow"><span class="ico">${ICO.arrow.replace("<svg", `<svg style="transform:rotate(${(w.windDirection ?? 0) + 180}deg)"`)}</span><div><b>Windrichting</b><small>De wind waait vanuit het ${compass(w.windDirection ?? 0)}</small></div><em>${compass(w.windDirection ?? 0)}</em></div>
     <div class="mrow"><span class="ico" style="background:#0ea5e9">💨</span><div><b>Windsnelheid</b><small>Windvlagen tot ${kmh(w.windGust)} km/h</small></div><em>${kmh(w.windSpeed)} km/h</em></div>
     ${w.precipitation ? `<div class="mrow"><span class="ico" style="background:#2563eb">🌧️</span><div><b>Neerslag</b><small>Intensiteit</small></div><em>${w.precipitation.toFixed(1)} mm/u</em></div>` : ""}
-    <div class="attribution">Gegevens zijn op basis van incident tijdstip en locatie · <span> Weather</span> · <a href="${esc(w.attribution)}" target="_blank" rel="noopener">Bronnen</a></div>`;
+    <div class="attribution">${w.live ? `Het weer van nu in Apeldoorn (${esc(fmtTime(new Date(w.time)))}), elke 5 minuten bijgewerkt` : "Gegevens zijn op basis van incident tijdstip en locatie"} · <span> Weather</span> · <a href="${esc(w.attribution)}" target="_blank" rel="noopener">Bronnen</a></div>`;
 }
 
 addEventListener("popstate", () => {

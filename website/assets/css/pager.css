@@ -330,3 +330,4 @@ a.drow { text-decoration: none; color: inherit; }
 .knmi-advies h3 { font-size: .95rem; margin: 16px 0 4px; }
 .knmi-advies .box p { margin: 0 0 12px; }
 .knmi-advies ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.live-tag { font-size: .75rem; font-weight: 600; color: #16a34a; margin-left: 6px; vertical-align: middle; }

@@ -44,6 +44,11 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
         Api.waarschuwing(id)?.let { w = it; gekoppeld = it.meldingen ?: emptyList() }
         loaded = true
         weer = Api.waarschuwingWeather(id)
+        // Weather code: the weather is live, refreshed every 5 minutes while the page is open.
+        while (w?.bron == "knmi") {
+            kotlinx.coroutines.delay(300_000)
+            Api.waarschuwingWeather(id)?.let { weer = it }
+        }
     }
     val x = w
     if (x == null) {
@@ -117,8 +122,9 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                     x.eindeAt?.let { InfoRow(if (ended) tr("Beëindigd", "Ended") else tr("Tot", "Until"), Fmt.day(it) + " " + Fmt.time(it)) }
                     InfoRow(tr("Bron", "Source"), bronNaam(x.bron))
                 }
-                WeerCard(weer)
-                if (nearby.isNotEmpty()) SectionCard(tr("Meldingen in de buurt", "Alerts nearby"), Icons.Outlined.NotificationsActive) {
+                WeerCard(weer, live = x.bron == "knmi")
+                // A weather code covers a whole region: no alerts nearby.
+                if (x.bron != "knmi" && nearby.isNotEmpty()) SectionCard(tr("Meldingen in de buurt", "Alerts nearby"), Icons.Outlined.NotificationsActive) {
                     nearby.forEach { m ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.melding(m.guid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             DienstIcon(m.soort, 28.dp); Spacer(Modifier.width(10.dp))

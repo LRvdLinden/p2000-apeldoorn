@@ -171,8 +171,14 @@ struct TVWaarschuwingDetail: View {
         .background(Color(hex: 0x0B0B0F).ignoresSafeArea())
         .fullScreenCover(item: $selected) { m in TVDetailView(melding: m) }
         .task(id: waarschuwing.id) {
-            if let d = try? await P2000API.shared.waarschuwing(id: waarschuwing.id) { meldingen = d.meldingen }
+            // A weather code covers a whole region: no alerts nearby, and the weather is live.
+            if waarschuwing.bron != .knmi, let d = try? await P2000API.shared.waarschuwing(id: waarschuwing.id) { meldingen = d.meldingen }
             weather = await P2000API.shared.waarschuwingWeather(id: waarschuwing.id)
+            while waarschuwing.bron == .knmi, !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(300))
+                if Task.isCancelled { break }
+                if let w = await P2000API.shared.waarschuwingWeather(id: waarschuwing.id) { weather = w }
+            }
         }
     }
 

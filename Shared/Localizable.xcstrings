@@ -3333,6 +3333,23 @@
         }
       }
     },
+    "Het weer van nu in Apeldoorn, elke 5 minuten bijgewerkt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The weather right now in Apeldoorn, updated every 5 minutes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het weer van nu in Apeldoorn, elke 5 minuten bijgewerkt"
+          }
+        }
+      }
+    },
     "Hoogte": {
       "extractionState": "manual",
       "localizations": {
@@ -4179,6 +4196,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lifeliner"
+          }
+        }
+      }
+    },
+    "Live": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live"
           }
         }
       }
@@ -8684,6 +8718,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "toegangscode"
+          }
+        }
+      }
+    },
+    "tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "until %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tot %@"
           }
         }
       }

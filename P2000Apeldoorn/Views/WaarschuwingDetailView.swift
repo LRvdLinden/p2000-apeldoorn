@@ -97,7 +97,15 @@ struct WaarschuwingDetailView: View {
         .background(Color.pageBackground)
         .onAppear { position = startPosition(w) }
         .task(id: w.id) { await loadLookAround(w) }
-        .task(id: w.id) { await loadWeather(w) }
+        .task(id: w.id) {
+            await loadWeather(w)
+            // Weather code: keep the weather live while the page is open.
+            while w.bron == .knmi, !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(300))
+                if Task.isCancelled { break }
+                await loadWeather(w)
+            }
+        }
     }
 
     private func content(_ w: Waarschuwing) -> some View {
@@ -117,8 +125,9 @@ struct WaarschuwingDetailView: View {
                 mainCard(w)
                 if w.heeftKnmiTekst { knmiCard(w) }
                 else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
-                if let m = meteo { meteoCard(m) }
-                meldingenCard(w)
+                if let m = meteo { meteoCard(m, live: w.bron == .knmi) }
+                // A weather code covers a whole region: no alerts nearby.
+                if w.bron != .knmi { meldingenCard(w) }
                 dataCard(w)
                 Text(w.bron == .nlalert
                      ? L("A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112.")
@@ -483,9 +492,16 @@ struct WaarschuwingDetailView: View {
 
     // MARK: - Weather at the time and place of the warning (WeatherKit)
 
-    private func meteoCard(_ m: MeldingDetailView.Meteo) -> some View {
+    private func meteoCard(_ m: MeldingDetailView.Meteo, live: Bool) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(L("METEO-gegevens")).font(AppFont.heading(18)).padding(.bottom, 10)
+            HStack {
+                Text(L("METEO-gegevens")).font(AppFont.heading(18))
+                Spacer()
+                if live {
+                    Label(L("Live"), systemImage: "dot.radiowaves.left.and.right").font(AppFont.body(12, .semibold)).foregroundStyle(.green)
+                }
+            }
+            .padding(.bottom, 10)
             meteoRow("thermometer.medium", L("Temperatuur"), m.feelsLike.map { Lf("Gevoelstemperatuur %lld°C", Int($0.rounded())) }, "\(Int(m.temperature.rounded()))°C")
             if let c = m.clouds { Divider(); meteoRow(m.symbol, L("Bewolking"), nil, "\(Int(c.rounded()))%") }
             if let dir = m.windDirection {
@@ -496,7 +512,7 @@ struct WaarschuwingDetailView: View {
                 Divider()
                 meteoRow("wind", L("Windsnelheid"), Lf("Windvlagen tot %lld km/h", Int((m.gust ?? s * 1.5).rounded())), "\(Int(s.rounded())) km/h")
             }
-            Text(L("Gegevens zijn op basis van tijdstip en plaats van de waarschuwing"))
+            Text(live ? L("Het weer van nu in Apeldoorn, elke 5 minuten bijgewerkt") : L("Gegevens zijn op basis van tijdstip en plaats van de waarschuwing"))
                 .font(AppFont.body(11)).foregroundStyle(.secondary).frame(maxWidth: .infinity).padding(.top, 10)
             HStack(spacing: 8) {
                 if let a = attribution {
@@ -546,8 +562,8 @@ struct WaarschuwingDetailView: View {
             return
         }
         // 2. Fallback: WeatherKit in the app itself.
-        let c = coordinate(w)
-        let moment = min(w.start, .now)
+        let c = w.bron == .knmi ? CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon) : coordinate(w)
+        let moment = w.bron == .knmi ? Date.now : min(w.start, .now)
         do {
             let hours = try await WeatherService.shared.weather(for: CLLocation(latitude: c.latitude, longitude: c.longitude),
                                                                 including: .hourly(startDate: moment.addingTimeInterval(-3600), endDate: moment.addingTimeInterval(3600)))

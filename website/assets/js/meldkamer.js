@@ -4,11 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=43";
+} from "./core.js?v=44";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
-} from "./aalerts.js?v=43";
+} from "./aalerts.js?v=44";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -183,6 +183,7 @@ $("lagen").addEventListener("click", (e) => {
   prefs.set("mk.lagen", [...state.lagen]);
   renderLagen();
   mapReady.then(renderExtra);
+  renderKnmi();
 });
 renderLagen();
 
@@ -307,6 +308,10 @@ function warnRow(w) {
 }
 
 function renderKnmi() {
+  // Weather codes on the map itself as well.
+  const kaart = $("mapKnmi");
+  if (kaart) kaart.innerHTML = state.lagen.has("knmi") ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
+    `<a class="mk-code" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><b>${esc(wKop(w))}</b>${w.einde ? `<small>tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}</small>` : ""}</a>`).join("") : "";
   $("knmi").innerHTML = state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
     `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}` : ""}</small>${w.kop || w.advies || w.verwachting ? `<small>${esc(String(w.kop || w.advies || w.verwachting).split("\n")[0])}</small>` : ""}</span></a>`).join("");
 }

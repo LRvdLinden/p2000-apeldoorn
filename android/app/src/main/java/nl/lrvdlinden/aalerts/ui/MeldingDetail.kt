@@ -260,9 +260,10 @@ fun ActionButton(icon: ImageVector, label: String, modifier: Modifier = Modifier
 }
 
 @Composable
-fun WeerCard(w: AlertWeather?) {
+fun WeerCard(w: AlertWeather?, live: Boolean = false) {
     w ?: return
-    SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
+    SectionCard(if (live) tr("Het weer nu", "Weather now") else tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
+        if (live) Text(tr("Live · Apeldoorn · elke 5 minuten bijgewerkt", "Live · Apeldoorn · updated every 5 minutes"), color = Color(0xFF16A34A), fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
         w.condition?.let { Text(conditie(it), fontWeight = FontWeight.Medium) }
         Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
             w.temperature?.let { Stat("${it.roundToInt()}°", tr("Temperatuur", "Temperature")) }
