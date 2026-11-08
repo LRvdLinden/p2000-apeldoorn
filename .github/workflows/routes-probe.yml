@@ -1,0 +1,15 @@
+name: Routes probe (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/routes-probe.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          API=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -sS "$API/v1/meldingen?limit=60" -o m.json
+          for g in $(python3 -c "import json;print(' '.join([x['guid'] for x in json.load(open('m.json')) if x.get('locatie') and x.get('lat') and x['dienst'] in ('brandweer','ambulance')][:3]))"); do
+            curl -sS "$API/v1/meldingen/$g/routes" | python3 -c "import sys,json;d=json.load(sys.stdin);[print(k['naam'],k['via'],k['km'],'km',k['rij_min'],'min',len(k['route']),'punten',k['vertrek'],k['aankomst']) for k in d.get('kazernes',[])] or print(d)"
+          done
