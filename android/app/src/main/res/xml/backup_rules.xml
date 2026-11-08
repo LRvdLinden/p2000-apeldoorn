@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Android 11 and older: settings in the Google backup; the push token not (a new phone gets its own). -->
+<!-- Android 11 and older: settings in the Google backup only (the push token stays out: a new phone gets its own). -->
 <full-backup-content>
     <include domain="sharedpref" path="settings.xml" />
-    <exclude domain="sharedpref" path="push.xml" />
 </full-backup-content>
