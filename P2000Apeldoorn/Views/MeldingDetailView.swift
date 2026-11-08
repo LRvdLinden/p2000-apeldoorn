@@ -32,8 +32,6 @@ struct MeldingDetailView: View {
     @State private var toonRoute = false
     @State private var toonDelen = false
     @State private var kazerneRoutes: [KazerneRoute] = []
-    /// Clock for the estimated vehicle on the route (every 5 seconds while a unit is on its way).
-    @State private var nu = Date.now
     @State private var helis = HeliStore.shared
     /// Route of the alert's helicopter this flight (worker trail), drawn behind the live marker.
     @State private var heliSpoor = HeliSpoorStore()
