@@ -41,6 +41,16 @@ jobs:
       - name: Screenshots
         run: |
           defaults write -g NSQuitAlwaysKeepsWindows -bool false || true
+          system_profiler SPDisplaysDataType | grep -i resolution || true
+          cat > /tmp/win.swift <<'SW'
+          import Cocoa
+          let bid = CommandLine.arguments[1]
+          let pids = NSRunningApplication.runningApplications(withBundleIdentifier: bid).map { $0.processIdentifier }
+          let list = (CGWindowListCopyWindowInfo([.optionAll], kCGNullWindowID) as? [[String: Any]]) ?? []
+          let mine = list.filter { pids.contains(($0[kCGWindowOwnerPID as String] as? Int32) ?? -1) && (($0[kCGWindowLayer as String] as? Int) ?? 1) == 0 }
+            .sorted { (($0[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) > (($1[kCGWindowBounds as String] as? [String: Double])?["Width"] ?? 0) }
+          for w in mine { print(w[kCGWindowNumber as String] ?? "", w[kCGWindowBounds as String] ?? "", w[kCGWindowIsOnscreen as String] ?? "") }
+          SW
           screencapture -x -R0,0,1440,900 shots-desktop.png || true
           MACAPP="$PWD/$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)"
           BIN="$MACAPP/Contents/MacOS/P2000 Apeldoorn"
@@ -55,7 +65,10 @@ jobs:
             sleep "$W"
             osascript -e "tell application id \"$BID\" to activate" || true
             sleep 2
-            screencapture -x -R0,0,1440,900 "shots/$LANG/mac-$NAME.png" || true
+            screencapture -x -R0,0,1440,900 "shots/$LANG/mac-$NAME-screen.png" || true
+            # The window itself (also when it is off screen or behind something)
+            WIN=$(swift /tmp/win.swift "$BID" 2>/dev/null | tee -a shots/windows.txt | awk 'NR==1{print $1}')
+            [ -n "$WIN" ] && screencapture -x -o -l "$WIN" "shots/$LANG/mac-$NAME.png" || true
             osascript -e "tell application id \"$BID\" to quit" || true
             sleep 6
             pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
