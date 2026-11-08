@@ -107,7 +107,8 @@ async function pushStaat(env, platform, now) {
   const lat = r?.ln ? r.ls / r.ln : null;
   if (tot < 5) return { staat: "ok", detail: null, detail_en: null, lat };
   const pct = fail / tot;
-  let staat = pct > 0.2 ? "down" : pct > 0.05 ? "warn" : "ok";
+  // One or two failures (e.g. during a deploy, or one old phone) is not an outage: at least 3 (warn) or 5 (down).
+  let staat = pct > 0.2 && fail >= 5 ? "down" : pct > 0.05 && fail >= 3 ? "warn" : "ok";
   if (staat === "ok" && lat != null && lat > 3 * MIN) staat = "warn";
   const afg = `${Math.round((ok / tot) * 1000) / 10}`.replace(".", ",");
   return {
