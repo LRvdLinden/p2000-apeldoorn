@@ -118,3 +118,11 @@ test("knmi: headline, description and details from the warnings page", () => {
   assert.equal(w.kop, p.kop);
   assert.equal(w.titel, "Mist");
 });
+
+test("knmi: an old link shows the warning as lifted (code green)", async () => {
+  const { knmiOpgeheven } = await import("../src/alerts.js");
+  const w = knmiOpgeheven("knmi:2:2026-11-08T06:00:00+01:00");
+  assert.equal(w.niveau, "green");
+  assert.equal(w.status, "beeindigd");
+  assert.equal(knmiOpgeheven("nlalert:12"), null);
+});

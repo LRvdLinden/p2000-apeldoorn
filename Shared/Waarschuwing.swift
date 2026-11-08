@@ -119,8 +119,20 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return "NL-Alert"
         case .burgernet: return "Burgernet"
-        case .knmi: return Self.codeLabel(niveau)
+        case .knmi: return Self.codeLabel(codeNu)
         }
+    }
+
+    /// KNMI: the code that applies now. A lifted (ended) warning is code green; `niveau` keeps the code it had.
+    var codeNu: String? { bron == .knmi && isBeeindigd ? "green" : niveau }
+    /// Ended KNMI warning: lifted, code green now.
+    var isOpgeheven: Bool { bron == .knmi && isBeeindigd }
+    /// Link to this warning on a-alerts.nl (for sharing).
+    var shareURL: URL {
+        var c = URLComponents(string: "https://a-alerts.nl/pager/")!
+        c.queryItems = [URLQueryItem(name: "waarschuwing", value: id)]
+        c.percentEncodedQuery = c.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
+        return c.url!
     }
 
     /// "Code geel · Mist", "Burgernet · Vermissing", "NL-Alert".
@@ -144,7 +156,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return Color(hex: 0xFFC800)
         case .burgernet: return Color(hex: 0x0067B1)
-        case .knmi: return Self.codeColor(niveau)
+        case .knmi: return Self.codeColor(codeNu)
         }
     }
 
@@ -153,7 +165,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return .black
         case .burgernet: return .white
-        case .knmi: return niveau == "yellow" ? .black : .white
+        case .knmi: return codeNu == "yellow" ? .black : .white
         }
     }
 
@@ -169,6 +181,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch niveau {
         case "red": return L("Code rood")
         case "orange": return L("Code oranje")
+        case "green": return L("Code groen")
         default: return L("Code geel")
         }
     }
@@ -177,12 +190,14 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch niveau {
         case "red": return Color(hex: 0xE3001B)
         case "orange": return Color(hex: 0xF28C28)
+        case "green": return Color(hex: 0x2E9E44)
         default: return Color(hex: 0xF7C600)
         }
     }
 
     static func weatherSymbol(_ soort: String?) -> String {
         let s = (soort ?? "").lowercased()
+        if s.isEmpty { return "checkmark.circle.fill" }
         if s.contains("onweer") || s.contains("thunder") { return "cloud.bolt.rain.fill" }
         if s.contains("wind") || s.contains("storm") { return "wind" }
         if s.contains("sneeuw") || s.contains("snow") { return "cloud.snow.fill" }

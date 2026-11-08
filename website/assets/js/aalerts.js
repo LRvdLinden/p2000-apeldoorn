@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=44";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=45";
 
 const TZ = "Europe/Amsterdam";
 
@@ -11,7 +11,12 @@ export const BRONNEN = {
   burgernet: { label: "Burgernet", color: "#0067B1", on: "#fff", icon: "icon_burgernet", text: "#0067B1" },
   knmi: { label: "KNMI", color: "#3E9FDB", on: "#fff", icon: "icon_knmi", text: "#2563eb" },
 };
-const CODES = { yellow: ["Code geel", "#F7C600", "#000"], orange: ["Code oranje", "#F28C28", "#fff"], red: ["Code rood", "#E3001B", "#fff"] };
+export const CODES = { yellow: ["Code geel", "#F7C600", "#000"], orange: ["Code oranje", "#F28C28", "#fff"], red: ["Code rood", "#E3001B", "#fff"], green: ["Code groen", "#2E9E44", "#fff"] };
+/** KNMI: the code that applies now; a lifted (ended) warning is code green. */
+export const codeNu = (w) => (w.bron === "knmi" && w.status === "beeindigd" ? "green" : w.niveau);
+export const isOpgeheven = (w) => w.bron === "knmi" && w.status === "beeindigd";
+/** Link to this warning on a-alerts.nl (for sharing). */
+export const wShareUrl = (w) => `https://a-alerts.nl/pager/?waarschuwing=${encodeURIComponent(w.id)}`;
 
 export async function fetchWaarschuwingen(days = 7) {
   try {
@@ -33,14 +38,14 @@ export const isActief = (w) => w.status === "actief";
 export const isBeeindigd = (w) => w.status === "beeindigd";
 
 export function wKleur(w) {
-  return w.bron === "knmi" ? (CODES[w.niveau] || CODES.yellow)[1] : BRONNEN[w.bron].color;
+  return w.bron === "knmi" ? (CODES[codeNu(w)] || CODES.yellow)[1] : BRONNEN[w.bron].color;
 }
 export function wOpKleur(w) {
-  return w.bron === "knmi" ? (CODES[w.niveau] || CODES.yellow)[2] : BRONNEN[w.bron].on;
+  return w.bron === "knmi" ? (CODES[codeNu(w)] || CODES.yellow)[2] : BRONNEN[w.bron].on;
 }
 /** "Code geel · Mist", "Burgernet · Vermissing", "NL-Alert". */
 export function wKop(w) {
-  if (w.bron === "knmi") return [(CODES[w.niveau] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
+  if (w.bron === "knmi") return [(CODES[codeNu(w)] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
   if (w.bron === "burgernet") return ["Burgernet", w.soort].filter(Boolean).join(" · ");
   return "NL-Alert";
 }

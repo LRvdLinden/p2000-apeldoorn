@@ -331,3 +331,8 @@ a.drow { text-decoration: none; color: inherit; }
 .knmi-advies .box p { margin: 0 0 12px; }
 .knmi-advies ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
 .live-tag { font-size: .75rem; font-weight: 600; color: #16a34a; margin-left: 6px; vertical-align: middle; }
+.opgeheven .groen { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.opgeheven .groen span { width: 44px; height: 44px; border-radius: 12px; background: #2E9E44; color: #fff; display: grid; place-items: center; font-size: 1.3rem; font-weight: 700; flex: none; }
+.opgeheven .groen div { display: grid; }
+.opgeheven .groen b { font-size: 1.1rem; }
+.opgeheven .groen small { color: var(--muted); }

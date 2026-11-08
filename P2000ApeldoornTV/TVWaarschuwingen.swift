@@ -137,6 +137,10 @@ struct TVWaarschuwingDetail: View {
                     Label(waarschuwing.statusLabel, systemImage: waarschuwing.isBeeindigd ? "checkmark.circle" : "dot.radiowaves.left.and.right")
                         .font(AppFont.body(22, .medium))
                     Label(TVWaarschuwingTijd.tekst(waarschuwing), systemImage: "clock").font(AppFont.body(22, .medium))
+                    if waarschuwing.isOpgeheven {
+                        Label(L("Code groen: deze weerwaarschuwing is opgeheven."), systemImage: "checkmark.circle.fill")
+                            .font(AppFont.body(22, .semibold)).foregroundStyle(Waarschuwing.codeColor("green"))
+                    }
                     if let p = waarschuwing.plaats { Label(p, systemImage: "mappin.and.ellipse").font(AppFont.body(22, .medium)) }
                     if waarschuwing.heeftKnmiTekst {
                         if let k = waarschuwing.knmiKop { Text(k).font(AppFont.body(24, .bold)) }

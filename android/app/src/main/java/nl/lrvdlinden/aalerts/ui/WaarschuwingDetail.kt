@@ -99,6 +99,19 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                     Text(x.titel, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     x.plaats?.let { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp)); Text(it, color = Muted) } }
                 }
+                if (x.isOpgeheven) {
+                    // Lifted: code green now, or another warning that applies now.
+                    val ander = Store.waarschuwingen.firstOrNull { it.bron == "knmi" && it.status == "actief" && it.id != x.id }
+                    SectionCard(tr("Code groen", "Code green"), Icons.Outlined.CheckCircle) {
+                        Text(tr("Deze weerwaarschuwing is opgeheven.", "This weather warning has been lifted."), fontSize = 15.sp)
+                        x.niveau?.takeIf { it != "green" }?.let { n ->
+                            Text(tr("Eerder gold ", "Earlier: ") + listOfNotNull(Waarschuwing.codeLabel(n), x.soort).joinToString(" · ") +
+                                (x.eindeAt?.let { tr(" tot ", " until ") + Fmt.day(it) + " " + Fmt.time(it) } ?: "") + ".", color = Muted, fontSize = 14.sp)
+                        }
+                        if (ander != null) TextButton(onClick = { nav.waarschuwing(ander.id) }) { Text(tr("Nu geldt: ", "Now in force: ") + ander.kop) }
+                        else Text(tr("Er geldt nu geen weerwaarschuwing van het KNMI voor de gemeente Apeldoorn.", "No KNMI weather warning applies to the municipality of Apeldoorn now."), fontSize = 14.sp)
+                    }
+                }
                 if (x.heeftKnmiTekst) {
                     // As on knmi.nl, in Dutch only.
                     if (x.knmiKop != null || x.omschrijving != null) SectionCard {
@@ -137,7 +150,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                     }
                 }
                 if (x.bron == "knmi") SectionCard(tr("Wat betekent de code?", "What does the code mean?"), Icons.Outlined.Info) {
-                    Text(codeUitleg(x.niveau), fontSize = 14.sp)
+                    Text(codeUitleg(x.codeNu), fontSize = 14.sp)
                 }
                 x.link?.let { link ->
                     OutlinedButton(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link))) } }, modifier = Modifier.fillMaxWidth()) {
@@ -151,6 +164,12 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
         if (scroll.value > 200) Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f)).statusBarsPadding().height(52.dp))
         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 6.dp)) {
             RoundIcon(Icons.AutoMirrored.Filled.ArrowBack, tr("Terug", "Back")) { nav.back() }
+            Spacer(Modifier.weight(1f))
+            // Share the warning on a-alerts.nl (not the source), so a later visit shows the current state.
+            RoundIcon(Icons.Outlined.Share, tr("Delen", "Share")) {
+                ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain")
+                    .putExtra(Intent.EXTRA_SUBJECT, x.kop).putExtra(Intent.EXTRA_TEXT, "${x.kop}: ${x.titel}\n${x.shareUrl}"), tr("Delen", "Share")))
+            }
         }
     }
 }
@@ -162,6 +181,7 @@ fun codeUitleg(niveau: String?) = when (niveau) {
         "Code red: extreme weather with a high risk of major damage, injury or traffic disruption. Take action and follow government advice.")
     "orange" -> tr("Code oranje: gevaarlijk weer met kans op schade, letsel of grote overlast. Wees voorbereid.",
         "Code orange: dangerous weather with a risk of damage, injury or major disruption. Be prepared.")
+    "green" -> tr("Code groen: er wordt geen gevaarlijk weer verwacht.", "Code green: no dangerous weather is expected.")
     else -> tr("Code geel: het weer kan gevaarlijk zijn. Let op en pas je zo nodig aan.", "Code yellow: the weather can be dangerous. Be aware and adapt if needed.")
 }
 

@@ -3,11 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=44";
+} from "./core.js?v=45";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt } from "./aalerts.js?v=44";
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=45";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -240,6 +241,17 @@ function timelineWarnings() {
 }
 
 const regels = (t) => String(t || "").split(/\n+/).map((r) => r.trim()).filter(Boolean);
+
+/** Lifted KNMI warning: code green now, or the warning that applies now. */
+function opgehevenHTML(w) {
+  const ander = state.warnings.find((x) => x.bron === "knmi" && isActief(x) && x.id !== w.id);
+  const eerder = w.niveau && w.niveau !== "green"
+    ? `<p class="hint">Eerder gold ${esc([(CODES[w.niveau] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · "))}${w.einde ? ` tot ${esc(fmtDateTime(new Date(w.einde)))}` : ""}.</p>` : "";
+  return `<section class="card story opgeheven">
+    <div class="groen"><span>✓</span><div><b>Code groen</b><small>Deze weerwaarschuwing is opgeheven.</small></div></div>${eerder}
+    ${ander ? `<button class="amaps" data-wgoto="${esc(ander.id)}">Nu geldt: ${esc(wKop(ander))}</button>`
+      : `<p>Er geldt nu geen weerwaarschuwing van het KNMI voor de gemeente Apeldoorn.</p>`}</section>`;
+}
 
 /** KNMI as on knmi.nl: headline and description, then risks and advice, details and the area. */
 function knmiHTML(w) {
@@ -575,11 +587,13 @@ async function selectWarning(id, { push = true } = {}) {
     <button class="d-close" data-close aria-label="Sluiten">✕</button>
     <div class="d-map" id="dMap">${w.bron === "burgernet" ? `<div class="lookaround" id="lookAround" title="Look Around"></div>` : ""}</div>
     <section class="card">
-      <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1></div>
+      <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${w.bron === "knmi" ? wKleur(w) : b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1>
+        <button class="share" id="wShareBtn" aria-label="Delen">${ICO.share}</button></div>
       <div class="info"><span class="ico" style="background:${isActief(w) ? "#DC2626" : "#6b7280"}">${ICO.warn}</span><div><b>${esc(wStatus(w))}</b><small>${esc(wTijd(w))}</small></div></div>
       <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : "Plaats van de oproep"}</small></div></div>
       ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} Bekijk bij ${esc(b.label)}</a>` : ""}
     </section>
+    ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
@@ -589,6 +603,15 @@ async function selectWarning(id, { push = true } = {}) {
   </article>`;
   $("detail").querySelectorAll("[data-close]").forEach((x) => x.addEventListener("click", () => closeDetail()));
   $("detail").querySelectorAll("[data-goto]").forEach((x) => x.addEventListener("click", () => select(x.dataset.goto)));
+  $("detail").querySelectorAll("[data-wgoto]").forEach((x) => x.addEventListener("click", () => selectWarning(x.dataset.wgoto)));
+  // Share the warning on a-alerts.nl (not the source), so a later visit shows the current state (code green once lifted).
+  $("wShareBtn").addEventListener("click", async () => {
+    const url = wShareUrl(w);
+    try {
+      if (navigator.share) await navigator.share({ title: wKop(w), text: `${wKop(w)}: ${w.titel}`, url });
+      else { await navigator.clipboard.writeText(url); toast("Link gekopieerd"); }
+    } catch {}
+  });
   $("detailPane").scrollTop = 0;
   renderList();
   const weerLader = async () => {

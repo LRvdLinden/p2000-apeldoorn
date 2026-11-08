@@ -377,7 +377,24 @@ export async function warningsSince(env, since) {
 }
 
 export async function getWarning(env, id) {
-  return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first()));
+  return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first())) || knmiOpgeheven(id);
+}
+
+/**
+ * A KNMI warning that is no longer in the database (cleaned up after 14 days): a shared link then shows it as lifted,
+ * code green, instead of "not found". The id is "knmi:<event>:<start>".
+ */
+export function knmiOpgeheven(id) {
+  const m = /^knmi:[^:]+:(.+)$/.exec(String(id || ""));
+  const start = m ? Date.parse(m[1]) : NaN;
+  if (!Number.isFinite(start)) return null;
+  return {
+    id, bron: "knmi", titel: "Geen weerwaarschuwing", tekst: "Deze weerwaarschuwing is opgeheven. Er geldt nu code groen.", tekst_en: null,
+    plaats: null, niveau: "green", soort: null, status: "beeindigd", start: new Date(start).toISOString(), einde: null,
+    lat: null, lon: null, link: "https://www.knmi.nl/nederland-nu/weer/waarschuwingen", gebied: null,
+    eerst_gezien: new Date(start).toISOString(), bijgewerkt: new Date().toISOString(), opgeheven: true,
+    verwachting: null, advies: null, kop: null, omschrijving: null, details: null, uitgifte: null,
+  };
 }
 
 /** P2000 alerts in the warning's area (or place) around its time. Never presented as a confirmed link. */
@@ -536,10 +553,13 @@ export async function ingestWarnings(env, budget, kv) {
       }
       const list = fromKnmi(d, now, pagina);
       await handle("knmi", list);
-      // Warnings KNMI no longer lists (withdrawn, or joined into one): remove the ones that have not ended yet.
+      // Warnings KNMI no longer lists (withdrawn early): end them now, so a shared link still shows them as lifted (code green).
       const ids = new Set(list.map((w) => w.id));
-      const { results: open } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'knmi' AND end_at >= ?").bind(now).all();
-      for (const r of open) if (!ids.has(r.id)) await env.DB.batch([env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id), env.DB.prepare("DELETE FROM waarschuwing_knmi WHERE id = ?").bind(r.id)]);
+      const { results: open } = await env.DB.prepare("SELECT id, start_at FROM waarschuwingen WHERE bron = 'knmi' AND end_at >= ? AND status != 'beeindigd'").bind(now).all();
+      for (const r of open) {
+        if (ids.has(r.id)) continue;
+        await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', end_at = ?, updated_at = ? WHERE id = ?").bind(Math.max(r.start_at, now), now, r.id).run();
+      }
       await kv.set("knmi_revision", rev);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";

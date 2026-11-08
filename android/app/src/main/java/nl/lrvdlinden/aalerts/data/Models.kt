@@ -142,8 +142,13 @@ data class Waarschuwing(
     val label: String get() = when (bron) {
         "nlalert" -> "NL-Alert"
         "burgernet" -> "Burgernet"
-        else -> codeLabel(niveau)
+        else -> codeLabel(codeNu)
     }
+    /** KNMI: the code that applies now; a lifted (ended) warning is code green. */
+    val codeNu: String? get() = if (bron == "knmi" && status == "beeindigd") "green" else niveau
+    val isOpgeheven: Boolean get() = bron == "knmi" && status == "beeindigd"
+    /** Link to this warning on a-alerts.nl (for sharing). */
+    val shareUrl: String get() = "https://a-alerts.nl/pager/?waarschuwing=" + java.net.URLEncoder.encode(id, "UTF-8")
     val kop: String get() = when (bron) {
         "nlalert" -> label
         else -> listOfNotNull(label, soort?.takeIf { it.isNotBlank() }).joinToString(" · ")
@@ -156,12 +161,12 @@ data class Waarschuwing(
     val color: Color get() = when (bron) {
         "nlalert" -> Color(0xFFFFC800)
         "burgernet" -> Color(0xFF0067B1)
-        else -> codeColor(niveau)
+        else -> codeColor(codeNu)
     }
     val onColor: Color get() = when (bron) {
         "nlalert" -> Color.Black
         "burgernet" -> Color.White
-        else -> if (niveau == "yellow" || niveau == null) Color.Black else Color.White
+        else -> if (codeNu == "yellow" || codeNu == null) Color.Black else Color.White
     }
     val icon: Int get() = when (bron) {
         "nlalert" -> R.drawable.icon_nlalert
@@ -196,11 +201,13 @@ data class Waarschuwing(
         fun codeLabel(niveau: String?) = when (niveau) {
             "red" -> tr("Code rood", "Code red")
             "orange" -> tr("Code oranje", "Code orange")
+            "green" -> tr("Code groen", "Code green")
             else -> tr("Code geel", "Code yellow")
         }
         fun codeColor(niveau: String?) = when (niveau) {
             "red" -> Color(0xFFE3001B)
             "orange" -> Color(0xFFF28C28)
+            "green" -> Color(0xFF2E9E44)
             else -> Color(0xFFF7C600)
         }
     }

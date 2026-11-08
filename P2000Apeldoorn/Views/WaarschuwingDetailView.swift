@@ -112,6 +112,7 @@ struct WaarschuwingDetailView: View {
         ScrollView {
             VStack(spacing: 16) {
                 if w.bron == .burgernet { notice(L("Burgernet geeft de plaats van de oproep, niet het exacte adres. De marker staat daarom ongeveer.")) }
+                if w.isOpgeheven { opgehevenCard(w) }
                 if w.bron == .nlalert && w.isActief { notice(L("A-Alerts is aanvullend op NL-Alert. Volg altijd het advies in het NL-Alert-bericht.")) }
                 HStack {
                     Text(verbatim: "\(MeldingDetailView.bronNaam(w.bron)) \(w.id.split(separator: ":").last.map(String.init) ?? "")")
@@ -237,15 +238,14 @@ struct WaarschuwingDetailView: View {
             .padding(.horizontal, 14)
             .frame(height: 50)
             .glassCapsule()
-            if let link = w.link, let url = URL(string: link) {
-                ShareLink(item: url, subject: Text(verbatim: w.kop), message: Text(verbatim: w.titel)) {
-                    Image(systemName: "square.and.arrow.up").font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.red)
-                        .frame(width: 46, height: 46)
-                }
-                .buttonStyle(.plain)
-                .glassCircle()
-                .accessibilityLabel(L("Deel"))
+            // Share the warning on a-alerts.nl (not the source), so a later visit shows the current state.
+            ShareLink(item: w.shareURL, subject: Text(verbatim: w.kop), message: Text(verbatim: w.titel)) {
+                Image(systemName: "square.and.arrow.up").font(.system(size: 18, weight: .semibold)).foregroundStyle(Theme.red)
+                    .frame(width: 46, height: 46)
             }
+            .buttonStyle(.plain)
+            .glassCircle()
+            .accessibilityLabel(L("Deel"))
         }
         .padding(.horizontal, 14)
     }
@@ -357,6 +357,35 @@ struct WaarschuwingDetailView: View {
         .wCard()
     }
 
+    /// KNMI warning that has been lifted: code green now (or another warning that applies now).
+    private func opgehevenCard(_ w: Waarschuwing) -> some View {
+        let ander = store.items.first { $0.bron == .knmi && $0.isActief && $0.id != w.id }
+        return VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 12) {
+                Image(systemName: "checkmark.circle.fill").font(.system(size: 22, weight: .semibold)).foregroundStyle(.white)
+                    .frame(width: 44, height: 44).background(Waarschuwing.codeColor("green"), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(L("Code groen")).font(AppFont.heading(18))
+                    Text(L("Deze weerwaarschuwing is opgeheven.")).font(AppFont.body(14)).foregroundStyle(.secondary)
+                }
+            }
+            if let n = w.niveau, n != "green" {
+                Text(Lf("Eerder gold %@ tot %@.", [Waarschuwing.codeLabel(n), w.soort].compactMap { $0 }.joined(separator: " · "), w.einde.map { Fmt.dayTime($0) } ?? "?"))
+                    .font(AppFont.body(14)).foregroundStyle(.secondary)
+            }
+            if let ander {
+                Button { Router.shared.openWaarschuwing(id: ander.id) } label: {
+                    Label(Lf("Nu geldt: %@", ander.kop), systemImage: ander.systemImage).font(AppFont.body(15, .semibold))
+                }
+            } else {
+                Text(L("Er geldt nu geen weerwaarschuwing van het KNMI voor de gemeente Apeldoorn.")).font(AppFont.body(14))
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wCard()
+    }
+
     /// KNMI as on knmi.nl: headline and description, then risks and advice, details and the area.
     @ViewBuilder
     private func knmiCard(_ w: Waarschuwing) -> some View {
@@ -407,7 +436,7 @@ struct WaarschuwingDetailView: View {
                 if let p = w.plaats, !p.isEmpty {
                     Text(Lf("Geldt voor: %@", p)).font(AppFont.body(13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                 }
-                if let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
+                if let uitleg = MeldingDetailView.codeUitleg(w.codeNu) {
                     Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)
                 }
             }
