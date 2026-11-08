@@ -9,6 +9,9 @@ on:
     branches: [a-alerts]
     paths: ['.github/workflows/mac-shots.yml']
 
+permissions:
+  contents: write
+
 jobs:
   mac:
     runs-on: macos-15
@@ -54,7 +57,7 @@ jobs:
             screencapture -x -R0,0,1440,900 "shots/$LANG/mac-$NAME.png" || true
             kill $PID 2>/dev/null; sleep 4; kill -9 $PID 2>/dev/null || true; sleep 1
           }
-          for LANG in nl en; do
+          for LANG in nl; do
             snap $LANG pager 16
             snap $LANG melding 18 -AAlertsMelding "$GUID"
             [ -n "$WID" ] && snap $LANG waarschuwing 18 -AAlertsWaarschuwing "$WID"
