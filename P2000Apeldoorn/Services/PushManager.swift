@@ -24,13 +24,56 @@ enum PushManager {
         set { AppGroup.defaults.set(newValue, forKey: tokenKey) }
     }
 
-    /// Debug builds use the APNs sandbox, TestFlight/App Store builds production.
-    static var environment: String {
+    /// APNs environment of this install. Read from the provisioning profile: an app installed from Xcode is signed with
+    /// "development" (sandbox tokens) even in a Release build; TestFlight and the App Store have no profile and use production.
+    static let environment: String = {
         #if DEBUG
         return "sandbox"
         #else
+        #if os(macOS)
+        let url = Bundle.main.bundleURL.appendingPathComponent("Contents/embedded.provisionprofile")
+        #else
+        let url = Bundle.main.bundleURL.appendingPathComponent("embedded.mobileprovision")
+        #endif
+        guard let data = try? Data(contentsOf: url) else { return "production" }
+        let text = String(decoding: data, as: UTF8.self)
+        if let r = text.range(of: "aps-environment</key>") {
+            let rest = text[r.upperBound...].prefix(80)
+            if rest.contains("development") { return "sandbox" }
+        }
         return "production"
         #endif
+    }()
+
+    /// Waits (max. a few seconds) for a fresh token from Apple, so a test never goes to an old one.
+    private static var tokenWaiters: [CheckedContinuation<Void, Never>] = []
+    static func freshToken(timeout: Double = 6) async -> String? {
+        registerForRemote()
+        await withCheckedContinuation { (c: CheckedContinuation<Void, Never>) in
+            tokenWaiters.append(c)
+            Task { try? await Task.sleep(for: .seconds(timeout)); resumeWaiters() }
+        }
+        return token
+    }
+    static func didFail() { resumeWaiters() }
+    private static func resumeWaiters() {
+        let w = tokenWaiters; tokenWaiters = []
+        w.forEach { $0.resume() }
+    }
+
+    /// Short diagnosis for under the test button.
+    static func diagnose() async -> String {
+        let n = await UNUserNotificationCenter.current().notificationSettings()
+        let toestemming: String = switch n.authorizationStatus {
+            case .authorized: L("toegestaan")
+            case .denied: L("geweigerd")
+            case .provisional: L("stil (voorlopig)")
+            case .ephemeral: L("tijdelijk")
+            default: L("niet gevraagd")
+        }
+        let banner = n.alertSetting == .enabled ? L("aan") : L("uit")
+        let t = token.map { String($0.prefix(6)) + "…" } ?? "–"
+        return Lf("Toestel %@ · %@ · meldingen %@ · banners %@", t, environment, toestemming, banner)
     }
 
     static var platform: String {
@@ -128,6 +171,7 @@ enum PushManager {
     static func didRegister(deviceToken: Data) {
         token = deviceToken.map { String(format: "%02x", $0) }.joined()
         registrationError = nil
+        resumeWaiters()
         syncDevice(immediately: true)
     }
 
@@ -193,8 +237,7 @@ enum PushManager {
         if status == .denied || status == .notDetermined {
             return L("Meldingen staan uit voor A-Alerts in de instellingen van je toestel.")
         }
-        guard let token else {
-            registerForRemote()
+        guard let token = await freshToken() else {
             if let e = registrationError { return Lf("Apple gaf geen pushtoken: %@", e) }
             return L("Dit toestel heeft nog geen pushtoken van Apple. Open de app opnieuw met internet en probeer het nog eens.")
         }

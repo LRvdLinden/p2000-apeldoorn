@@ -7872,6 +7872,23 @@
         }
       }
     },
+    "Toestel %@ · %@ · meldingen %@ · banners %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device %@ · %@ · notifications %@ · banners %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toestel %@ · %@ · meldingen %@ · banners %@"
+          }
+        }
+      }
+    },
     "Toon": {
       "extractionState": "manual",
       "localizations": {
@@ -9606,6 +9623,23 @@
         }
       }
     },
+    "aan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "on"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "aan"
+          }
+        }
+      }
+    },
     "alle plaatsen": {
       "extractionState": "manual",
       "localizations": {
@@ -9759,6 +9793,23 @@
         }
       }
     },
+    "geweigerd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "denied"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "geweigerd"
+          }
+        }
+      }
+    },
     "gisteren %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -9857,6 +9908,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "min"
+          }
+        }
+      }
+    },
+    "niet gevraagd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "not asked"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "niet gevraagd"
           }
         }
       }
@@ -9963,6 +10031,23 @@
         }
       }
     },
+    "stil (voorlopig)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "quiet (provisional)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "stil (voorlopig)"
+          }
+        }
+      }
+    },
     "ter plaatse": {
       "extractionState": "manual",
       "localizations": {
@@ -9976,6 +10061,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "ter plaatse"
+          }
+        }
+      }
+    },
+    "tijdelijk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "temporary"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "tijdelijk"
           }
         }
       }
@@ -9997,6 +10099,23 @@
         }
       }
     },
+    "toegestaan": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "allowed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "toegestaan"
+          }
+        }
+      }
+    },
     "tot %@": {
       "extractionState": "manual",
       "localizations": {
@@ -10010,6 +10129,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "tot %@"
+          }
+        }
+      }
+    },
+    "uit": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "off"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "uit"
           }
         }
       }

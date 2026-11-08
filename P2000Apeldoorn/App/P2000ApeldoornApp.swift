@@ -129,7 +129,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("APNs registration failed:", error.localizedDescription)
         let text = error.localizedDescription
-        MainActor.assumeIsolated { PushManager.registrationError = text }
+        MainActor.assumeIsolated { PushManager.registrationError = text; PushManager.didFail() }
     }
 }
 #elseif os(macOS)
@@ -150,7 +150,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
     func application(_ application: NSApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         print("APNs registration failed:", error.localizedDescription)
         let text = error.localizedDescription
-        MainActor.assumeIsolated { PushManager.registrationError = text }
+        MainActor.assumeIsolated { PushManager.registrationError = text; PushManager.didFail() }
     }
 
     func applicationShouldTerminateAfterLastWindowClosed(_ sender: NSApplication) -> Bool { false }

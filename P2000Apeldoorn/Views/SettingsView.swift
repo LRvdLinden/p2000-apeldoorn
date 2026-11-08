@@ -468,6 +468,7 @@ struct NotificationSettingsView: View {
     @State private var denied = false
     @State private var testState: TestState = .idle
     @State private var testFout: String?
+    @State private var diagnose: String?
 
     enum TestState { case idle, sending, sent, failed }
 
@@ -528,6 +529,7 @@ struct NotificationSettingsView: View {
                         Task {
                             testState = .sending
                             testFout = await PushManager.sendTest()
+                            diagnose = await PushManager.diagnose()
                             testState = testFout == nil ? .sent : .failed
                         }
                     } label: {
@@ -541,11 +543,16 @@ struct NotificationSettingsView: View {
                     .buttonStyle(.plain)
                     .disabled(testState == .sending)
                 } footer: {
+                  VStack(alignment: .leading, spacing: 4) {
+                    if let diagnose, testState != .idle, testState != .sending {
+                        Text(diagnose).font(.caption.monospaced())
+                    }
                     if testState == .failed {
                         Text(testFout ?? L("De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw."))
                     } else if testState == .sent {
                         Text(L("Verstuurd. Zie je niets binnen een halve minuut? Kijk dan bij Instellingen › Meldingen › A-Alerts of meldingen en banners aanstaan, en of een focus aanstaat."))
                     }
+                  }
                 }
             }
         }
