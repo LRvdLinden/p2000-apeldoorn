@@ -19,8 +19,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
         with: { distribution: temurin, java-version: 17 }
+      # Gradle-cache via de action; Gradle zelf met retries (services.gradle.org gaf herhaaldelijk HTTP 504).
       - uses: gradle/actions/setup-gradle@v4
-        with: { gradle-version: 8.14.3 }
+        continue-on-error: true
+      - name: Gradle 8.14.3
+        working-directory: ${{ runner.temp }}
+        run: |
+          for url in https://downloads.gradle.org/distributions/gradle-8.14.3-bin.zip https://services.gradle.org/distributions/gradle-8.14.3-bin.zip; do
+            curl -fsSL --retry 6 --retry-delay 10 --retry-all-errors -o gradle.zip "$url" && break
+          done
+          unzip -q gradle.zip && echo "$PWD/gradle-8.14.3/bin" >> "$GITHUB_PATH"
       - name: Build
         working-directory: android
         env: { ANDROID_ALL_ABIS: "1" }
