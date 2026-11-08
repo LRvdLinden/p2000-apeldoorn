@@ -8,7 +8,7 @@ struct OnboardingView: View {
     @Environment(\.colorScheme) private var colorScheme
     @Environment(LocationManager.self) private var location
 
-    @State private var page = 0
+    @State private var page = OnboardingView.startStap
     @State private var pushAsked = false
     @State private var error: String?
     /// Step "Waar": the whole municipality, chosen places, or a radius around you.
@@ -66,6 +66,16 @@ struct OnboardingView: View {
             }
         }
     }
+
+    #if DEBUG
+    /// Screenshots: -AAlertsWelkomStap <n> opens the welcome flow at step n.
+    private static var startStap: Int {
+        let a = ProcessInfo.processInfo.arguments
+        return a.firstIndex(of: "-AAlertsWelkomStap").flatMap { $0 + 1 < a.count ? Int(a[$0 + 1]) : nil } ?? 0
+    }
+    #else
+    private static let startStap = 0
+    #endif
 
     /// Index of the last page: welcome, where, which alerts, warnings, quiet hours, ready (push), sign in.
     static let laatste = 6
