@@ -219,13 +219,14 @@ async function handle(req, env) {
   m = path.match(/^\/v1\/devices\/([0-9a-f]{64,200}|fcm(?::|%3A)[A-Za-z0-9_:%-]{100,420})\/test$/i);
   if (method === "POST" && m) {
     const device = await getDevice(env, deviceKey(m[1]));
-    if (!device) return reply(404, { error: "Unknown device" });
+    if (!device) { console.log("[push-test] onbekend toestel"); return reply(404, { error: "Unknown device" }); }
     const nl = (device.language || "nl").startsWith("nl");
     const r = await sendPush(env, device, {
       aps: { alert: { title: "A-Alerts", body: nl ? "Testmelding: je pushmeldingen werken! 🚨" : "Test notification: your push notifications work! 🚨" }, sound: "default" },
     });
+    console.log(`[push-test] ${device.platform}/${device.environment} ${r.ok ? "ok" : "fout"} ${r.status || ""} ${r.reason || ""}`);
     if (isDeadToken(r)) await deleteDevice(env, device.token);
-    return reply(r.ok ? 200 : 502, r);
+    return reply(r.ok ? 200 : 502, { ...r, platform: device.platform, environment: device.environment });
   }
 
   if (path.startsWith("/v1/beheer/")) return handleBeheer(req, env, url, path, method);
