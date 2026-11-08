@@ -196,7 +196,7 @@ struct MeldkamerView: View {
                 let dag = Date.now.addingTimeInterval(-86_400)
                 let telling = { (b: Waarschuwing.Bron) in waarschuwingen.items.filter { $0.bron == b && (!$0.isBeeindigd || ($0.einde ?? $0.start) >= dag) }.count }
                 teller(Image("icon_burgernet"), telling(.burgernet), breed: false)
-                if telling(.nlalert) > 0 { teller(Image("icon_nlalert"), telling(.nlalert), breed: false) }
+                teller(Image("icon_nlalert"), telling(.nlalert), breed: false)
                 ForEach(["trauma", "politie"], id: \.self) { soort in
                     let list = HeliStore.shared.items.filter { $0.soort == soort }
                     if let h = list.first { teller(Image(h.afbeelding), list.count, breed: true) }

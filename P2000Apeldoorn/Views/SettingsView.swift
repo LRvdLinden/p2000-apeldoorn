@@ -70,6 +70,12 @@ struct SettingsView: View {
                     SettingsRow(icon: "line.3.horizontal.decrease", color: .blue, title: L("Filteren"),
                                 value: settings.listFilterActive ? L("Aan") : L("Uit"))
                 }
+                NavigationLink {
+                    VolgCapcodesView()
+                } label: {
+                    SettingsRow(icon: "star.fill", color: .yellow, title: L("Gevolgde capcodes"),
+                                value: settings.volgCapcodes.isEmpty ? L("Geen") : "\(settings.volgCapcodes.count)")
+                }
             } header: {
                 Text(L("Disciplines"))
             } footer: {
@@ -141,6 +147,11 @@ struct SettingsView: View {
                     SettingsRow(icon: "star.fill", color: .red, title: L("Schrijf een recensie"), chevron: true)
                 }
                 StatusRij()
+                NavigationLink {
+                    ContentPageView(name: "hulp", title: L("Hulp en veelgestelde vragen"))
+                } label: {
+                    SettingsRow(icon: "questionmark.circle.fill", color: .teal, title: L("Hulp en veelgestelde vragen"))
+                }
                 NavigationLink {
                     ChangelogView()
                 } label: {
@@ -545,5 +556,36 @@ struct NotificationSettingsView: View {
             let c = Calendar.current.dateComponents([.hour, .minute], from: date)
             minutes.wrappedValue = (c.hour ?? 0) * 60 + (c.minute ?? 0)
         }
+    }
+}
+
+
+/// Followed capcodes (star in an alert): push and list also outside places, radius and profiles.
+struct VolgCapcodesView: View {
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        List {
+            if settings.volgCapcodes.isEmpty {
+                ContentUnavailableView(L("Nog geen capcodes gevolgd"), systemImage: "star",
+                                       description: Text(L("Open een melding en tik bij Capcodes op de ster van een eenheid, bijvoorbeeld je eigen kazerne.")))
+                    .listRowBackground(Color.clear)
+            } else {
+                Section {
+                    ForEach(settings.volgCapcodes.sorted { $0.value < $1.value }, id: \.key) { code, naam in
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(naam).font(AppFont.body(15, .medium))
+                            Text(code).font(.system(size: 13, weight: .semibold, design: .monospaced)).foregroundStyle(.secondary)
+                        }
+                        .swipeActions {
+                            Button(L("Niet meer volgen"), role: .destructive) { settings.volgCapcodes[code] = nil }
+                        }
+                    }
+                } footer: {
+                    Text(L("Je krijgt een melding en ziet de melding in de lijst als een van deze capcodes wordt opgeroepen, ook buiten je plaatsen, straal en profielen. De stille modus geldt wel."))
+                }
+            }
+        }
+        .navigationTitle(L("Gevolgde capcodes"))
     }
 }

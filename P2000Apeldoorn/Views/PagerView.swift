@@ -29,6 +29,22 @@ struct PagerView: View {
         return all.sorted { $0.date > $1.date }
     }
 
+    /// Viewed alerts that are hidden now ("Verberg bekeken meldingen").
+    private var verborgen: Int { store.meldingen.filter { settings.isRead($0) }.count }
+
+    private var bijRij: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "checkmark.circle.fill").foregroundStyle(.green)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(L("Je bent helemaal bij")).font(AppFont.body(15, .semibold))
+                Text(Lf("%lld bekeken meldingen verborgen", verborgen)).font(AppFont.body(12)).foregroundStyle(.secondary)
+            }
+            Spacer()
+            Button(L("Toon")) { settings.hideRead = false }.font(AppFont.body(14, .semibold))
+        }
+        .listRowBackground(Color.clear)
+    }
+
     private var knmi: [Waarschuwing] { scope == .alle ? warnings.knmiBanner(settings) : [] }
 
     var body: some View {
@@ -59,6 +75,13 @@ struct PagerView: View {
                                 Label(L("Bewaard"), systemImage: settings.bewaard.isEmpty ? "bookmark" : "bookmark.fill")
                             }
                             .accessibilityLabel(L("Bewaarde meldingen"))
+                        }
+                    }
+                    ToolbarItem(placement: .primaryAction) {
+                        // Quick switch: hide viewed alerts.
+                        Button { withAnimation { settings.hideRead.toggle() } } label: {
+                            Label(settings.hideRead ? L("Toon bekeken meldingen") : L("Verberg bekeken meldingen"),
+                                  systemImage: settings.hideRead ? "eye.slash.circle.fill" : "eye.circle")
                         }
                     }
                     ToolbarItem(placement: .primaryAction) {
@@ -133,6 +156,11 @@ struct PagerView: View {
                 Section { rows(items) }
             }
 
+            // Viewed alerts hidden: "you are all caught up", with a way to show them again.
+            if settings.hideRead && scope == .alle && verborgen > 0 && !items.isEmpty {
+                Section { bijRij }
+            }
+
             Section {
                 footer
                     .listRowBackground(Color.clear)
@@ -190,7 +218,15 @@ struct PagerView: View {
 
     @ViewBuilder
     private var emptyState: some View {
-        if store.meldingen.isEmpty && store.isLoading {
+        if settings.hideRead && scope == .alle && search.isEmpty && verborgen > 0 {
+            ContentUnavailableView {
+                Label(L("Je bent helemaal bij"), systemImage: "checkmark.circle")
+            } description: {
+                Text(Lf("Je hebt alle %lld meldingen al bekeken. Nieuwe meldingen verschijnen hier vanzelf.", verborgen))
+            } actions: {
+                Button(L("Toon bekeken meldingen")) { settings.hideRead = false }
+            }
+        } else if store.meldingen.isEmpty && store.isLoading {
             HStack {
                 Spacer()
                 ProgressView(L("Meldingen laden..."))

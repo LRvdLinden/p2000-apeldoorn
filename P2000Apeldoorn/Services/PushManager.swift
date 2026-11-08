@@ -158,6 +158,8 @@ enum PushManager {
                     "knmiVooraf": s.pushKnmiVooraf,
                     "knmiOpgeheven": s.pushKnmiOpgeheven,
                 ] as [String: Any],
+                // Followed capcodes: push also outside places, radius and profiles.
+                "capcodes": Array(s.volgCapcodes.keys).sorted(),
                 // A-Alerts: up to five notification profiles (older servers ignore this).
                 "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),
             ]

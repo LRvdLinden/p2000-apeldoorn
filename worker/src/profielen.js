@@ -1,6 +1,6 @@
 // A-Alerts notification profiles (max 5 per device): own places, services, priorities, warnings and times.
 // The device row keeps the global parts (on/off, radius, quiet hours, critical); profiles decide the rest.
-import { matches, TIME_ZONE } from "./rules.js";
+import { matches, TIME_ZONE, isQuiet, isUrgent } from "./rules.js";
 import { wantsPush } from "./alerts.js";
 
 export const MAX_PROFIELEN = 5;
@@ -55,8 +55,27 @@ export function geldt(p, date = new Date()) {
   return inWindow && p.dagen.includes(dag);
 }
 
-/** P2000 alert: the device's global rules (radius, quiet hours) plus at least one matching active profile. */
+/** Followed capcodes ("ster"): digits only, at most 50. */
+export function capcodesFrom(list) {
+  if (!Array.isArray(list)) return null;
+  return [...new Set(list.map((c) => String(c || "").replace(/\D/g, "")).filter((c) => c.length >= 6 && c.length <= 10))].slice(0, 50);
+}
+
+/** The alert calls one of the capcodes this device follows. */
+export function volgtCapcode(prefs, m) {
+  const volg = prefs?.capcodes;
+  if (!Array.isArray(volg) || !volg.length) return false;
+  const codes = [m.capcode, ...(Array.isArray(m.eenheden) ? m.eenheden.map((e) => e?.code) : [])]
+    .map((c) => String(c || "").replace(/\D/g, "")).filter(Boolean);
+  return codes.some((c) => volg.includes(c));
+}
+
+/**
+ * P2000 alert: the device's global rules (radius, quiet hours) plus at least one matching active profile.
+ * A followed capcode always counts, also outside the radius, places, services or profiles (quiet hours still apply).
+ */
 export function meldingWanted(device, prefs, m, date = new Date()) {
+  if (device.enabled && volgtCapcode(prefs, m) && !(isQuiet(device, date) && !(device.critical && isUrgent(m)))) return true;
   const profielen = prefs?.profielen;
   if (!Array.isArray(profielen) || !profielen.length) return matches(device, m, date);
   return profielen.some((p) => geldt(p, date)

@@ -95,6 +95,8 @@ object Settings {
     var groupByDay by bool("groupByDay", true)
     var hideRead by bool("hideRead", false)
     var bewaard by set("bewaard", emptySet())
+    /** Followed capcodes ("code|naam"): push and list also outside places, radius and profiles (as on iOS). */
+    var volgCapcodes by set("volgCapcodes", emptySet(), push = true)
     private var gelezenRaw by str("gelezen", "")
 
     // Appearance
@@ -138,6 +140,51 @@ object Settings {
         if (guid in list) return
         gelezenRaw = (list + guid).takeLast(600).joinToString(",")
     }
+    /** Why this device got no push for an alert (same rules as the server and iOS), or null when it would have got one. */
+    fun geenPushReden(m: Melding): String? {
+        if (!notificationsEnabled) return tr("Pushmeldingen staan uit in Instellingen.", "Notifications are off in Settings.")
+        if (volgtCapcode(m)) return null
+        val km = if (radiusKm % 1.0 == 0.0) radiusKm.toInt().toString() else radiusKm.toString()
+        if (radiusEnabled) radiusCenter?.let { c ->
+            val la = m.lat; val lo = m.lon
+            if (la == null || lo == null) return tr("Je gebruikt Mijn buurt ($km km) en deze melding heeft geen precieze plek.", "You use My area ($km km) and this alert has no exact location.")
+            if (Geo.distanceKm(c.first, c.second, la, lo) > radiusKm) return tr("De melding ligt buiten je straal van $km km (Mijn buurt).", "The alert is outside your $km km radius (My area).")
+        }
+        val t = java.time.Instant.ofEpochMilli(m.millis).atZone(java.time.ZoneId.of("Europe/Amsterdam"))
+        val min = t.hour * 60 + t.minute
+        fun hm(x: Int) = "%02d:%02d".format(x / 60, x % 60)
+        if (quietMode) {
+            val stil = if (quietFrom == quietTo) true else if (quietFrom < quietTo) min in quietFrom until quietTo else (min >= quietFrom || min < quietTo)
+            if (stil && !(criticalAlerts && m.isUrgent)) return tr("De melding kwam binnen tijdens je stille uren (${hm(quietFrom)}–${hm(quietTo)}).", "The alert came in during your quiet hours (${hm(quietFrom)}–${hm(quietTo)}).")
+        }
+        val dag = t.dayOfWeek.value
+        fun geldt(p: MeldingProfiel): Boolean {
+            if (!p.actief) return false
+            if (p.altijd || p.van == p.tot) return true
+            return if (p.van < p.tot) min >= p.van && min < p.tot && dag in p.dagen
+            else if (min >= p.van) dag in p.dagen else min < p.tot && (if (dag == 1) 7 else dag - 1) in p.dagen
+        }
+        fun past(p: MeldingProfiel) = (p.diensten.isEmpty() || m.soort.key in p.diensten) && Werkgebied.matches(m, p.plaatsen) &&
+            (p.prioriteiten.isEmpty() || (m.prioriteit ?: "").uppercase() in p.prioriteiten)
+        val actief = profielen.filter { geldt(it) }
+        if (actief.isEmpty()) return tr("Geen van je meldingsprofielen was actief op dat moment (tijden of dagen).", "None of your notification profiles was active at that time (times or days).")
+        if (actief.any { past(it) }) return null
+        val p = actief.first()
+        if (p.diensten.isNotEmpty() && m.soort.key !in p.diensten) return tr("Profiel ‘${p.naam}’ volgt ${m.soort.label.lowercase()} niet.", "Profile ‘${p.naam}’ does not follow ${m.soort.label.lowercase()}.")
+        if (p.prioriteiten.isNotEmpty() && (m.prioriteit ?: "").uppercase() !in p.prioriteiten) return tr("Profiel ‘${p.naam}’ volgt prioriteit ${m.prioriteit ?: "onbekend"} niet.", "Profile ‘${p.naam}’ does not follow priority ${m.prioriteit ?: "unknown"}.")
+        return tr("De plaats valt buiten de plaatsen van profiel ‘${p.naam}’.", "The place is outside the places of profile ‘${p.naam}’.")
+    }
+
+    private fun capKey(c: String) = c.filter { it.isDigit() }
+    val gevolgd: Map<String, String> get() = volgCapcodes.associate { it.substringBefore("|") to it.substringAfter("|", it.substringBefore("|")) }
+    fun volgt(code: String) = capKey(code) in gevolgd
+    fun toggleVolg(code: String, naam: String?) {
+        val k = capKey(code); if (k.isEmpty()) return
+        volgCapcodes = if (volgt(k)) volgCapcodes.filterNot { it.substringBefore("|") == k }.toSet()
+            else if (volgCapcodes.size < 50) volgCapcodes + "$k|${naam ?: k}" else volgCapcodes
+    }
+    fun volgtCapcode(m: Melding): Boolean = gevolgd.isNotEmpty() && (listOf(m.capcode) + m.eenheden.map { it.code }).filterNotNull().any { capKey(it) in gevolgd }
+
     fun toggleBewaard(guid: String) { bewaard = if (guid in bewaard) bewaard - guid else bewaard + guid }
 
     val listFilterActive get() = diensten.isNotEmpty() || plaatsen.isNotEmpty() || prioriteiten.isNotEmpty() || radiusActive || waarschuwingFilter.isNotEmpty()
@@ -155,6 +202,8 @@ object Settings {
     }
 
     fun matchesList(m: Melding): Boolean {
+        // A followed capcode is always shown, also outside the list filters.
+        if (volgtCapcode(m)) return true
         if (!withinRadius(m)) return false
         if (diensten.isNotEmpty() && m.soort.key !in diensten) return false
         if (!Werkgebied.matches(m, plaatsen)) return false
@@ -192,6 +241,7 @@ object Settings {
                 "knmiVooraf" to pushKnmiVooraf,
                 "knmiOpgeheven" to pushKnmiOpgeheven,
             ),
+            "capcodes" to gevolgd.keys.sorted(),
             "profielen" to p.map {
                 mapOf("id" to it.id, "naam" to it.naam, "actief" to it.actief, "diensten" to it.diensten.sorted(), "plaatsen" to it.plaatsen.sorted(),
                     "prioriteiten" to it.prioriteiten.sorted(), "nlalert" to it.nlalert, "burgernet" to it.burgernet, "knmi" to it.knmi.sorted(),

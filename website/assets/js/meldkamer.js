@@ -4,11 +4,11 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=47";
+} from "./core.js?v=48";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen,
-} from "./aalerts.js?v=47";
+} from "./aalerts.js?v=48";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -263,7 +263,7 @@ function renderChips() {
   $("chips").innerHTML = SELECTABLE.map((d) =>
     `<span class="chip"><img src="${icon({ dienst: d })}" alt="${DIENSTEN[d].label}">${items.filter((m) => m.dienst === d).length}</span>`).join("")
     + `<span class="chip"><img src="${asset("assets/img/icon_burgernet.png")}" alt="Burgernet">${n("burgernet")}</span>`
-    + (n("nlalert") ? `<span class="chip"><img src="${asset("assets/img/icon_nlalert.png")}" alt="NL-Alert">${n("nlalert")}</span>` : "")
+    + `<span class="chip"><img src="${asset("assets/img/icon_nlalert.png")}" alt="NL-Alert">${n("nlalert")}</span>`
     + heli("trauma", "Lifeliner") + heli("politie", "Zulu");
 }
 

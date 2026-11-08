@@ -336,7 +336,7 @@ struct MapScreen: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            // One row of filter chips: the disciplines, Burgernet (always), NL-Alert (when there is one) and the
+            // One row of filter chips: the disciplines, Burgernet and NL-Alert (always) and the
             // Lifeliners / Zulu's in the air (tap: to the helicopter, or all of that type when there are more).
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
@@ -359,14 +359,13 @@ struct MapScreen: View {
                         Image("icon_burgernet").resizable().scaledToFit().frame(width: 16, height: 16)
                         Text("\(bn)")
                     }
+                    // NL-Alert always, like Burgernet (also at 0).
                     let nl = aantal(.nlalert)
-                    if nl > 0 {
-                        chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {
-                            settings.setLaag(.nlalert, !settings.laag(.nlalert))
-                        } content: {
-                            Image("icon_nlalert").resizable().scaledToFit().frame(width: 16, height: 16)
-                            Text("\(nl)")
-                        }
+                    chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {
+                        settings.setLaag(.nlalert, !settings.laag(.nlalert))
+                    } content: {
+                        Image("icon_nlalert").resizable().scaledToFit().frame(width: 16, height: 16)
+                        Text("\(nl)")
                     }
                     ForEach(heliSoorten, id: \.soort) { g in
                         chip(on: settings.laag(.helikopters), color: g.color, label: "\(g.naam): \(g.items.count)") {

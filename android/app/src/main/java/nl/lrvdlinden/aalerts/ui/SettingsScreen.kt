@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.Article
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -112,6 +113,7 @@ fun SettingsScreen(nav: Nav) {
             }
 
             SectionCard(tr("Mijn buurt", "My area"), Icons.Outlined.MyLocation) {
+                NavRow(tr("Gevolgde capcodes", "Followed capcodes"), if (Settings.gevolgd.isEmpty()) tr("Geen", "None") else "${Settings.gevolgd.size}", Icons.Outlined.StarBorder) { nav.open("capcodes") }
                 NavRow(tr("Straal rond een locatie", "Radius around a location"), if (Settings.radiusEnabled) "${Settings.radiusKm.toInt()} km · " + (if (Settings.radiusMode == "vast") Settings.fixedPlaats else tr("huidige locatie", "current location")) else tr("Uit", "Off")) { nav.open("buurt") }
             }
 
@@ -130,6 +132,7 @@ fun SettingsScreen(nav: Nav) {
 
             SectionCard(tr("Informatie", "Information"), Icons.Outlined.Info) {
                 StatusNavRow { nav.open("status") }
+                NavRow(tr("Hulp en veelgestelde vragen", "Help and FAQ"), icon = Icons.AutoMirrored.Outlined.HelpOutline) { nav.open("content/hulp") }
                 NavRow(tr("Wat is nieuw", "What's new"), icon = Icons.Outlined.NewReleases) { nav.open("changelog") }
                 NavRow(tr("Privacyverklaring", "Privacy policy"), icon = Icons.Outlined.PrivacyTip) { nav.open("content/privacy") }
                 NavRow(tr("Gebruiksvoorwaarden", "Terms of use"), icon = Icons.AutoMirrored.Outlined.Article) { nav.open("content/terms") }

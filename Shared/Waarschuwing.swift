@@ -134,7 +134,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return "NL-Alert"
         case .burgernet: return "Burgernet"
-        case .knmi: return Self.codeLabel(codeNu)
+        case .knmi: return Self.codeLabel(niveau)
         }
     }
 
@@ -167,6 +167,8 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     }
 
     var statusLabel: String {
+        // KNMI: the old code stays visible; ended = lifted, code green now.
+        if isOpgeheven { return L("Opgeheven · code groen") }
         switch status {
         case "beeindigd": return L("Beëindigd")
         case "verwacht": return L("Verwacht")
@@ -178,7 +180,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return Color(hex: 0xFFC800)
         case .burgernet: return Color(hex: 0x0067B1)
-        case .knmi: return Self.codeColor(codeNu)
+        case .knmi: return Self.codeColor(niveau)
         }
     }
 
@@ -187,7 +189,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         switch bron {
         case .nlalert: return .black
         case .burgernet: return .white
-        case .knmi: return codeNu == "yellow" ? .black : .white
+        case .knmi: return niveau == "yellow" ? .black : .white
         }
     }
 

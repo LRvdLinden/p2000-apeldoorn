@@ -16,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -69,6 +70,10 @@ fun PagerScreen(nav: Nav) {
                 actions = {
                     IconButton(onClick = { searching = !searching; if (!searching) query = "" }) { Icon(if (searching) Icons.Filled.Close else Icons.Outlined.Search, tr("Zoeken", "Search")) }
                     IconButton(onClick = { nav.open("waarschuwingen") }) { Icon(Icons.Outlined.WarningAmber, tr("Alle waarschuwingen", "All warnings")) }
+                    // Quick switch: hide viewed alerts (as on iOS).
+                    IconButton(onClick = { Settings.hideRead = !Settings.hideRead }) {
+                        Icon(if (Settings.hideRead) Icons.Filled.VisibilityOff else Icons.Outlined.Visibility, if (Settings.hideRead) tr("Toon bekeken meldingen", "Show viewed alerts") else tr("Verberg bekeken meldingen", "Hide viewed alerts"))
+                    }
                     IconButton(onClick = { showFilter = true }) {
                         BadgedBox(badge = { if (Settings.listFilterActive) Badge(containerColor = MaterialTheme.colorScheme.primary) }) {
                             Icon(Icons.Outlined.FilterList, tr("Filteren", "Filter"))
@@ -92,8 +97,16 @@ fun PagerScreen(nav: Nav) {
                         }
                     }
                 }
+                val verborgen = if (Settings.hideRead) Store.meldingen.count { it.guid in gelezen } else 0
                 if (items.isEmpty()) item(key = "empty") {
                     when {
+                        verborgen > 0 && query.isBlank() -> Column(Modifier.fillMaxWidth().padding(32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(Icons.Outlined.CheckCircle, null, tint = Color(0xFF16A34A), modifier = Modifier.size(44.dp))
+                            Spacer(Modifier.height(8.dp))
+                            Text(tr("Je bent helemaal bij", "You're all caught up"), fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                            Text(tr("Je hebt alle $verborgen meldingen al bekeken. Nieuwe meldingen verschijnen hier vanzelf.", "You've seen all $verborgen alerts. New alerts appear here automatically."), color = Muted, fontSize = 14.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                            TextButton(onClick = { Settings.hideRead = false }) { Text(tr("Toon bekeken meldingen", "Show viewed alerts")) }
+                        }
                         Store.meldingen.isEmpty() && Store.loading -> Box(Modifier.fillMaxWidth().padding(48.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                         Store.meldingen.isEmpty() && Store.error != null -> EmptyState(tr("Geen verbinding", "No connection"), tr("De meldingen konden niet worden geladen. Trek omlaag om het opnieuw te proberen.", "Alerts could not be loaded. Pull down to try again."))
                         else -> EmptyState(tr("Geen meldingen", "No alerts"), tr("Er zijn geen meldingen die bij je filter passen.", "No alerts match your filter."))
@@ -118,6 +131,17 @@ fun PagerScreen(nav: Nav) {
                                 is TWaarschuwing -> WaarschuwingRow(it.w) { nav.waarschuwing(it.w.id) }
                             }
                         }
+                    }
+                }
+                if (verborgen > 0 && items.isNotEmpty()) item(key = "bij") {
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Filled.CheckCircle, null, tint = Color(0xFF16A34A))
+                        Spacer(Modifier.width(10.dp))
+                        Column(Modifier.weight(1f)) {
+                            Text(tr("Je bent helemaal bij", "You're all caught up"), fontWeight = FontWeight.SemiBold)
+                            Text(tr("$verborgen bekeken meldingen verborgen", "$verborgen viewed alerts hidden"), color = Muted, fontSize = 12.sp)
+                        }
+                        TextButton(onClick = { Settings.hideRead = false }) { Text(tr("Toon", "Show")) }
                     }
                 }
                 item(key = "footer") {
@@ -185,6 +209,35 @@ fun BewaardScreen(nav: Nav) {
                 Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(horizontal = 12.dp, vertical = 3.dp).clip(RoundedCornerShape(14.dp))) {
                     MeldingRow(m) { nav.melding(m.guid) }
                 }
+            }
+        }
+    }
+}
+
+/** Followed capcodes (star in an alert), as on iOS. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun VolgCapcodesScreen(nav: Nav) {
+    val list = Settings.gevolgd.entries.sortedBy { it.value }
+    Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { BackBar(tr("Gevolgde capcodes", "Followed capcodes"), nav) }) { pad ->
+        LazyColumn(Modifier.padding(pad).fillMaxSize()) {
+            if (list.isEmpty()) item {
+                EmptyState(tr("Nog geen capcodes gevolgd", "No capcodes followed yet"),
+                    tr("Open een melding en tik bij Eenheden op de ster van een eenheid, bijvoorbeeld je eigen kazerne.", "Open an alert and tap the star of a unit, for example your own fire station."))
+            }
+            items(list, key = { it.key }) { (code, naam) ->
+                Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Column(Modifier.weight(1f)) {
+                        Text(naam, fontWeight = FontWeight.Medium)
+                        Text(code, color = Muted, fontSize = 12.sp)
+                    }
+                    TextButton(onClick = { Settings.toggleVolg(code, naam) }) { Text(tr("Niet meer volgen", "Unfollow")) }
+                }
+            }
+            if (list.isNotEmpty()) item {
+                Text(tr("Je krijgt een melding en ziet de melding in de lijst als een van deze capcodes wordt opgeroepen, ook buiten je plaatsen, straal en profielen. De stille modus geldt wel.",
+                    "You get a notification and see the alert in the list when one of these capcodes is called, also outside your places, radius and profiles. Quiet hours still apply."),
+                    color = Muted, fontSize = 12.sp, modifier = Modifier.padding(16.dp))
             }
         }
     }

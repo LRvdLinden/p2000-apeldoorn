@@ -14,6 +14,8 @@ final class AppSettings {
     var prioriteiten: Set<String> = [] { didSet { save(.prioriteiten, Array(prioriteiten).sorted()) } }
     var groupByDay: Bool = true { didSet { save(.groupByDay, groupByDay) } }
     var bewaard: Set<String> = [] { didSet { save(.bewaard, Array(bewaard).sorted()) } }
+    /// Followed capcodes (star) with their unit name: push and list also outside places, radius and profiles.
+    var volgCapcodes: [String: String] = [:] { didSet { save(.volgCapcodes, volgCapcodes); notificationsChanged() } }
     /// Opened alerts (newest last, max 600) – shown greyed out in the list; synced via iCloud.
     var gelezen: [String] = [] { didSet { save(.gelezen, gelezen) } }
     /// "Verberg bekeken meldingen" (same option as the website).
@@ -83,7 +85,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
+        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
 
         var synced: Bool {
             switch self {
@@ -215,6 +217,7 @@ final class AppSettings {
         if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
+        if let v = source(Key.volgCapcodes.storageKey) as? [String: String] { volgCapcodes = v }
         if let v = source(Key.pushKnmiVooraf.storageKey) as? Bool { pushKnmiVooraf = v }
         if let v = source(Key.pushKnmiOpgeheven.storageKey) as? Bool { pushKnmiOpgeheven = v }
         if let v = set(.kaartLagen) {
@@ -350,6 +353,50 @@ final class AppSettings {
         list.append(m.guid)
         if list.count > 600 { list.removeFirst(list.count - 600) }
         gelezen = list
+    }
+
+    /// Why this device got no push for an alert (same rules as the server), or nil when it would have got one.
+    func geenPushReden(_ m: Melding) -> String? {
+        guard notificationsEnabled else { return L("Pushmeldingen staan uit in Instellingen.") }
+        if volgtCapcode(m) { return nil }
+        let urgent = m.isUrgent
+        if radiusEnabled, let c = radiusCenter {
+            guard let lat = m.lat, let lon = m.lon else { return Lf("Je gebruikt Mijn buurt (%@ km) en deze melding heeft geen precieze plek.", radiusKm.formatted(.number.precision(.fractionLength(0...1)))) }
+            if Self.distanceKm(c.lat, c.lon, lat, lon) > radiusKm {
+                return Lf("De melding ligt buiten je straal van %@ km (Mijn buurt).", radiusKm.formatted(.number.precision(.fractionLength(0...1))))
+            }
+        }
+        if quietMode {
+            let c = Calendar.current.dateComponents([.hour, .minute], from: m.datum)
+            let t = (c.hour ?? 0) * 60 + (c.minute ?? 0)
+            let stil = quietFrom == quietTo ? true : quietFrom < quietTo ? (t >= quietFrom && t < quietTo) : (t >= quietFrom || t < quietTo)
+            if stil && !(criticalAlerts && urgent) {
+                return Lf("De melding kwam binnen tijdens je stille uren (%@–%@).", Self.hm(quietFrom), Self.hm(quietTo))
+            }
+        }
+        let actief = profielen.filter { $0.geldt(op: m.datum) }
+        guard !profielen.isEmpty else { return nil }
+        if actief.isEmpty { return L("Geen van je meldingsprofielen was actief op dat moment (tijden of dagen).") }
+        if actief.contains(where: { $0.matches(m) }) { return nil }
+        let p = actief[0]
+        if !p.diensten.isEmpty, !p.diensten.contains(m.dienst.rawValue) { return Lf("Profiel ‘%@’ volgt %@ niet.", p.naam, m.dienst.label.lowercased()) }
+        if !p.prioriteiten.isEmpty, !p.prioriteiten.contains((m.prioriteit ?? "").uppercased()) { return Lf("Profiel ‘%@’ volgt prioriteit %@ niet.", p.naam, m.prioriteit ?? L("onbekend")) }
+        return Lf("De plaats valt buiten de plaatsen van profiel ‘%@’.", p.naam)
+    }
+
+    static func hm(_ minutes: Int) -> String { String(format: "%02d:%02d", minutes / 60, minutes % 60) }
+
+    static func capcodeKey(_ code: String) -> String { code.filter(\.isNumber) }
+    func volgt(capcode code: String) -> Bool { volgCapcodes[Self.capcodeKey(code)] != nil }
+    func toggleVolg(capcode code: String, naam: String?) {
+        let k = Self.capcodeKey(code)
+        guard !k.isEmpty else { return }
+        if volgCapcodes[k] != nil { volgCapcodes[k] = nil } else if volgCapcodes.count < 50 { volgCapcodes[k] = naam ?? k }
+    }
+    /// The alert calls a followed capcode.
+    func volgtCapcode(_ m: Melding) -> Bool {
+        guard !volgCapcodes.isEmpty else { return false }
+        return ([m.capcode] + m.eenheden.map(\.code)).compactMap { $0 }.contains { volgCapcodes[Self.capcodeKey($0)] != nil }
     }
 
     func toggleBewaard(_ m: Melding) {

@@ -171,6 +171,23 @@
         }
       }
     },
+    "%lld bekeken meldingen verborgen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld viewed alerts hidden"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld bekeken meldingen verborgen"
+          }
+        }
+      }
+    },
     "%lld d": {
       "extractionState": "manual",
       "localizations": {
@@ -613,6 +630,57 @@
         }
       }
     },
+    "A1 en P1 ook tijdens stille uren en als je telefoon op stil staat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1 and P1 also during quiet hours and when your phone is on silent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1 en P1 ook tijdens stille uren en als je telefoon op stil staat"
+          }
+        }
+      }
+    },
+    "A1 en P1: met zwaailicht en sirene": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1 and P1: with lights and siren"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1 en P1: met zwaailicht en sirene"
+          }
+        }
+      }
+    },
+    "A1, A2, P1 en P2": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1, A2, P1 and P2"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A1, A2, P1 en P2"
+          }
+        }
+      }
+    },
     "Aan": {
       "extractionState": "manual",
       "localizations": {
@@ -851,6 +919,23 @@
         }
       }
     },
+    "Alarmberichten van de overheid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Government alert messages"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alarmberichten van de overheid"
+          }
+        }
+      }
+    },
     "Alarmgeluid": {
       "extractionState": "manual",
       "localizations": {
@@ -953,6 +1038,23 @@
         }
       }
     },
+    "Alle plaatsen, en Teuge": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All places, and Teuge"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle plaatsen, en Teuge"
+          }
+        }
+      }
+    },
     "Alle systemen werken": {
       "extractionState": "manual",
       "localizations": {
@@ -1034,6 +1136,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alleen meldingen in mijn buurt"
+          }
+        }
+      }
+    },
+    "Alleen spoed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent only"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen spoed"
           }
         }
       }
@@ -1259,6 +1378,23 @@
         }
       }
     },
+    "Bepaalde plaatsen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Certain places"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bepaalde plaatsen"
+          }
+        }
+      }
+    },
     "Bericht": {
       "extractionState": "manual",
       "localizations": {
@@ -1425,6 +1561,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bij een hogere code krijg je opnieuw een pushmelding (bijvoorbeeld als geel oranje wordt)."
+          }
+        }
+      }
+    },
+    "Binnen %@ km van je locatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within %@ km of your location"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Binnen %@ km van je locatie"
+          }
+        }
+      }
+    },
+    "Binnen %@ km van waar je bent": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Within %@ km of where you are"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Binnen %@ km van waar je bent"
           }
         }
       }
@@ -1837,6 +2007,23 @@
         }
       }
     },
+    "De hele gemeente Apeldoorn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The whole municipality of Apeldoorn"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De hele gemeente Apeldoorn"
+          }
+        }
+      }
+    },
     "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.": {
       "extractionState": "manual",
       "localizations": {
@@ -1884,6 +2071,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "De laatste meldingen als lijst, tik om te openen."
+          }
+        }
+      }
+    },
+    "De melding kwam binnen tijdens je stille uren (%@–%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The alert came in during your quiet hours (%1$@–%2$@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De melding kwam binnen tijdens je stille uren (%@–%@)."
+          }
+        }
+      }
+    },
+    "De melding ligt buiten je straal van %@ km (Mijn buurt).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The alert is outside your %@ km radius (My area)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De melding ligt buiten je straal van %@ km (Mijn buurt)."
+          }
+        }
+      }
+    },
+    "De melding staat wel in de lijst. Pas je meldingen aan in Instellingen › Meldingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The alert is in the list. Change your notifications in Settings › Notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De melding staat wel in de lijst. Pas je meldingen aan in Instellingen › Meldingen."
           }
         }
       }
@@ -2003,6 +2241,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De oproep noemt geen kazerne. Dit is de dichtstbijzijnde kazerne van deze dienst; de tijden zijn een schatting op basis van de uitruktijd en de rijtijd volgens Apple Kaarten."
+          }
+        }
+      }
+    },
+    "De plaats valt buiten de plaatsen van profiel ‘%@’.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The place is outside the places of profile ‘%@’."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De plaats valt buiten de plaatsen van profiel ‘%@’."
           }
         }
       }
@@ -2347,6 +2602,23 @@
         }
       }
     },
+    "Dit is je eerste meldingsprofiel. Later voeg je er meer toe, bijvoorbeeld voor je werk of je ouders.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This is your first notification profile. You can add more later, for example for work or your parents."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit is je eerste meldingsprofiel. Later voeg je er meer toe, bijvoorbeeld voor je werk of je ouders."
+          }
+        }
+      }
+    },
     "Dit profiel geldt alleen tussen deze tijden op de gekozen dagen. Loopt de tijd over middernacht, dan telt de dag waarop hij begint.": {
       "extractionState": "manual",
       "localizations": {
@@ -2619,6 +2891,23 @@
         }
       }
     },
+    "Even rust?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Some quiet?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even rust?"
+          }
+        }
+      }
+    },
     "Extra meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -2823,6 +3112,23 @@
         }
       }
     },
+    "Geen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen"
+          }
+        }
+      }
+    },
     "Geen P2000-meldingen gevonden in het gebied rond dit tijdstip.": {
       "extractionState": "manual",
       "localizations": {
@@ -2887,6 +3193,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen in de laatste 24 uur"
+          }
+        }
+      }
+    },
+    "Geen pushmelding op dit toestel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No notification on this device"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen pushmelding op dit toestel"
+          }
+        }
+      }
+    },
+    "Geen van je meldingsprofielen was actief op dat moment (tijden of dagen).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "None of your notification profiles was active at that time (times or days)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen van je meldingsprofielen was actief op dat moment (tijden of dagen)."
           }
         }
       }
@@ -3265,6 +3605,23 @@
         }
       }
     },
+    "Gevolgde capcodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Followed capcodes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gevolgde capcodes"
+          }
+        }
+      }
+    },
     "Gisteren": {
       "extractionState": "manual",
       "localizations": {
@@ -3503,6 +3860,23 @@
         }
       }
     },
+    "Hoe dringend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "How urgent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hoe dringend"
+          }
+        }
+      }
+    },
     "Hoogte": {
       "extractionState": "manual",
       "localizations": {
@@ -3533,6 +3907,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Huidige locatie"
+          }
+        }
+      }
+    },
+    "Hulp en veelgestelde vragen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Help and FAQ"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hulp en veelgestelde vragen"
           }
         }
       }
@@ -3622,6 +4013,23 @@
         }
       }
     },
+    "Je bent helemaal bij": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You're all caught up"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je bent helemaal bij"
+          }
+        }
+      }
+    },
     "Je bent in het gebied": {
       "extractionState": "manual",
       "localizations": {
@@ -3656,6 +4064,40 @@
         }
       }
     },
+    "Je gebruikt Mijn buurt (%@ km) en deze melding heeft geen precieze plek.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You use My area (%@ km) and this alert has no exact location."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je gebruikt Mijn buurt (%@ km) en deze melding heeft geen precieze plek."
+          }
+        }
+      }
+    },
+    "Je hebt alle %lld meldingen al bekeken. Nieuwe meldingen verschijnen hier vanzelf.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You've seen all %lld alerts. New alerts appear here automatically."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je hebt alle %lld meldingen al bekeken. Nieuwe meldingen verschijnen hier vanzelf."
+          }
+        }
+      }
+    },
     "Je krijgt alleen waarschuwingen die gelden voor de gemeente Apeldoorn en je gekozen plaatsen. Een NL-Alert komt ook rechtstreeks via je telefoon binnen; hier lees je hem terug en zie je het gebied op de kaart.": {
       "extractionState": "manual",
       "localizations": {
@@ -3669,6 +4111,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je krijgt alleen waarschuwingen die gelden voor de gemeente Apeldoorn en je gekozen plaatsen. Een NL-Alert komt ook rechtstreeks via je telefoon binnen; hier lees je hem terug en zie je het gebied op de kaart."
+          }
+        }
+      }
+    },
+    "Je krijgt een melding en ziet de melding in de lijst als een van deze capcodes wordt opgeroepen, ook buiten je plaatsen, straal en profielen. De stille modus geldt wel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You get a notification and see the alert in the list when one of these capcodes is called, also outside your places, radius and profiles. Quiet hours still apply."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je krijgt een melding en ziet de melding in de lijst als een van deze capcodes wordt opgeroepen, ook buiten je plaatsen, straal en profielen. De stille modus geldt wel."
           }
         }
       }
@@ -3703,6 +4162,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je locatie is nog niet bekend. Sta locatietoegang toe voor A-Alerts."
+          }
+        }
+      }
+    },
+    "Je profiel staat klaar": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Your profile is ready"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je profiel staat klaar"
           }
         }
       }
@@ -3788,6 +4264,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "KNMI-waarschuwingsgebieden"
+          }
+        }
+      }
+    },
+    "KNMI-weercodes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI weather codes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "KNMI-weercodes"
           }
         }
       }
@@ -4026,6 +4519,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kies je plaatsen voor dit profiel. Niets geselecteerd = alle plaatsen."
+          }
+        }
+      }
+    },
+    "Kies je wijk of dorp": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose your area or village"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies je wijk of dorp"
           }
         }
       }
@@ -4812,23 +5322,6 @@
         }
       }
     },
-    "Mis geen melding": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Never miss an alert"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mis geen melding"
-          }
-        }
-      }
-    },
     "Mogelijk verband": {
       "extractionState": "manual",
       "localizations": {
@@ -4914,19 +5407,19 @@
         }
       }
     },
-    "NL-Alert en Burgernet staan in de pager tussen de meldingen. Een KNMI-weerwaarschuwing staat als balk bovenaan zolang hij geldt. Alleen voor de gemeente Apeldoorn en Teuge.": {
+    "NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NL-Alert and Burgernet appear in the pager between the alerts. A KNMI weather warning shows as a bar at the top while it applies. Only for the municipality of Apeldoorn and Teuge."
+            "value": "NL-Alert and Burgernet are in the pager between the alerts; a KNMI weather code is a bar at the top while it applies. Choose what you want to be notified about."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "NL-Alert en Burgernet staan in de pager tussen de meldingen. Een KNMI-weerwaarschuwing staat als balk bovenaan zolang hij geldt. Alleen voor de gemeente Apeldoorn en Teuge."
+            "value": "NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt."
           }
         }
       }
@@ -5101,6 +5594,23 @@
         }
       }
     },
+    "Niet meer volgen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Unfollow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niet meer volgen"
+          }
+        }
+      }
+    },
     "Niets aan = alle disciplines.": {
       "extractionState": "manual",
       "localizations": {
@@ -5114,6 +5624,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niets aan = alle disciplines."
+          }
+        }
+      }
+    },
+    "Niets gekozen is alles. Je ziet in de pager altijd alle meldingen; dit bepaalt waarvoor je een pushmelding krijgt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nothing chosen means everything. The pager always shows all alerts; this decides what you get notified about."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Niets gekozen is alles. Je ziet in de pager altijd alle meldingen; dit bepaalt waarvoor je een pushmelding krijgt."
           }
         }
       }
@@ -5148,6 +5675,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Niets gevonden."
+          }
+        }
+      }
+    },
+    "Nog geen capcodes gevolgd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No capcodes followed yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog geen capcodes gevolgd"
           }
         }
       }
@@ -5509,36 +6053,36 @@
         }
       }
     },
-    "Ontvang een pushmelding zodra er iets gebeurt, ook bij NL-Alert, Burgernet en KNMI. Kies later in Instellingen je profielen met plaatsen, disciplines, prioriteiten en tijden.": {
+    "Ook besteld vervoer en meldingen zonder haast": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Get a push notification as soon as something happens, also for NL-Alert, Burgernet and KNMI. Later, set up your profiles with places, services, priorities and times in Settings."
+            "value": "Also planned transport and non-urgent alerts"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ontvang een pushmelding zodra er iets gebeurt, ook bij NL-Alert, Burgernet en KNMI. Kies later in Instellingen je profielen met plaatsen, disciplines, prioriteiten en tijden."
+            "value": "Ook besteld vervoer en meldingen zonder haast"
           }
         }
       }
     },
-    "Ook alle waarschuwingen": {
+    "Ook waarschuwingen?": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "All the warnings too"
+            "value": "Warnings too?"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Ook alle waarschuwingen"
+            "value": "Ook waarschuwingen?"
           }
         }
       }
@@ -5611,6 +6155,23 @@
         }
       }
     },
+    "Open een melding en tik bij Capcodes op de ster van een eenheid, bijvoorbeeld je eigen kazerne.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open an alert and tap the star of a unit under Capcodes, for example your own fire station."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open een melding en tik bij Capcodes op de ster van een eenheid, bijvoorbeeld je eigen kazerne."
+          }
+        }
+      }
+    },
     "Open in Apple Kaarten": {
       "extractionState": "manual",
       "localizations": {
@@ -5624,6 +6185,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Open in Apple Kaarten"
+          }
+        }
+      }
+    },
+    "Opgeheven · code groen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lifted · code green"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeheven · code groen"
           }
         }
       }
@@ -6172,6 +6750,40 @@
         }
       }
     },
+    "Profiel ‘%@’ volgt %@ niet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile ‘%1$@’ does not follow %2$@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiel ‘%@’ volgt %@ niet."
+          }
+        }
+      }
+    },
+    "Profiel ‘%@’ volgt prioriteit %@ niet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profile ‘%1$@’ does not follow priority %2$@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Profiel ‘%@’ volgt prioriteit %@ niet."
+          }
+        }
+      }
+    },
     "Profielen": {
       "extractionState": "manual",
       "localizations": {
@@ -6257,6 +6869,23 @@
         }
       }
     },
+    "Pushmeldingen staan uit in Instellingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are off in Settings."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pushmeldingen staan uit in Instellingen."
+          }
+        }
+      }
+    },
     "Radius": {
       "extractionState": "manual",
       "localizations": {
@@ -6304,6 +6933,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Risico's en advies"
+          }
+        }
+      }
+    },
+    "Rond mijn locatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Around my location"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rond mijn locatie"
           }
         }
       }
@@ -6631,6 +7277,40 @@
         }
       }
     },
+    "Spoed altijd met geluid": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent always with sound"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spoed altijd met geluid"
+          }
+        }
+      }
+    },
+    "Spoed en snel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Urgent and fast"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Spoed en snel"
+          }
+        }
+      }
+    },
     "Standaard": {
       "extractionState": "manual",
       "localizations": {
@@ -6716,6 +7396,23 @@
         }
       }
     },
+    "Stil van %@ tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiet from %1$@ to %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stil van %@ tot %@"
+          }
+        }
+      }
+    },
     "Stille modus": {
       "extractionState": "manual",
       "localizations": {
@@ -6729,6 +7426,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stille modus"
+          }
+        }
+      }
+    },
+    "Stille uren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Quiet hours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stille uren"
           }
         }
       }
@@ -6937,6 +7651,23 @@
         }
       }
     },
+    "Tijdens je stille uren komen meldingen zonder geluid binnen. Spoedmeldingen mogen dan wel geluid maken.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "During your quiet hours notifications arrive silently. Urgent alerts may still make a sound."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tijdens je stille uren komen meldingen zonder geluid binnen. Spoedmeldingen mogen dan wel geluid maken."
+          }
+        }
+      }
+    },
     "Tik op de kaart om het middelpunt te kiezen.": {
       "extractionState": "manual",
       "localizations": {
@@ -6950,6 +7681,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tik op de kaart om het middelpunt te kiezen."
+          }
+        }
+      }
+    },
+    "Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap the star to follow a unit. You then also get alerts for that capcode outside your places and radius."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal."
           }
         }
       }
@@ -6984,6 +7732,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tip: niets geselecteerd = alles tonen"
+          }
+        }
+      }
+    },
+    "Toon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon"
+          }
+        }
+      }
+    },
+    "Toon bekeken meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show viewed alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon bekeken meldingen"
           }
         }
       }
@@ -7239,6 +8021,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Van"
+          }
+        }
+      }
+    },
+    "Van %@ tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "From %1$@ to %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Van %@ tot %@"
           }
         }
       }
@@ -7549,6 +8348,23 @@
         }
       }
     },
+    "Vermissingen en zoekacties": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing persons and searches"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vermissingen en zoekacties"
+          }
+        }
+      }
+    },
     "Vernieuwen": {
       "extractionState": "manual",
       "localizations": {
@@ -7753,19 +8569,19 @@
         }
       }
     },
-    "Volg de Lifeliners en de politiehelikopters (Zulu) live op de kaart, zie welke kazernes zijn gealarmeerd en kies zelf welke kaartlagen je ziet.": {
+    "Volg deze capcode": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Follow the Lifeliners and the police helicopters (Zulu) live on the map, see which stations were alerted and choose the map layers yourself."
+            "value": "Follow this capcode"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Volg de Lifeliners en de politiehelikopters (Zulu) live op de kaart, zie welke kazernes zijn gealarmeerd en kies zelf welke kaartlagen je ziet."
+            "value": "Volg deze capcode"
           }
         }
       }
@@ -7885,6 +8701,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "W"
+          }
+        }
+      }
+    },
+    "Waar wil je meldingen van?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Where do you want alerts from?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waar wil je meldingen van?"
           }
         }
       }
@@ -8055,6 +8888,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wees voorbereid: grote kans op gevaar, schade en overlast."
+          }
+        }
+      }
+    },
+    "Welke meldingen wil je?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Which alerts do you want?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Welke meldingen wil je?"
           }
         }
       }
@@ -8382,6 +9232,23 @@
         }
       }
     },
+    "Zet pushmeldingen aan om ze te ontvangen. Alles pas je later aan in Instellingen › Meldingen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on notifications to receive them. You can change everything later in Settings › Notifications."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zet pushmeldingen aan om ze te ontvangen. Alles pas je later aan in Instellingen › Meldingen."
+          }
+        }
+      }
+    },
     "Zichtbaar": {
       "extractionState": "manual",
       "localizations": {
@@ -8395,23 +9262,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zichtbaar"
-          }
-        }
-      }
-    },
-    "Zie wie er onderweg is": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "See who is on the way"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Zie wie er onderweg is"
           }
         }
       }
@@ -8854,6 +9704,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "nu"
+          }
+        }
+      }
+    },
+    "onbekend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "unknown"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "onbekend"
           }
         }
       }

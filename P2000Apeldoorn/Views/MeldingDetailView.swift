@@ -131,6 +131,7 @@ struct MeldingDetailView: View {
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }
+                    if let reden = settings.geenPushReden(melding) { geenPushCard(reden) }
                     dataCard
                     footer.id("einde")
                 }
@@ -527,18 +528,49 @@ struct MeldingDetailView: View {
         return parts.joined(separator: "\n\n")
     }
 
+    /// Why this device got no push for this alert (it is in the list, but not in your notifications).
+    private func geenPushCard(_ reden: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "bell.slash.fill").font(.system(size: 18, weight: .semibold)).foregroundStyle(.secondary).frame(width: 26)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(L("Geen pushmelding op dit toestel")).font(AppFont.body(15, .semibold))
+                Text(reden).font(AppFont.body(14)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                Text(L("De melding staat wel in de lijst. Pas je meldingen aan in Instellingen › Meldingen.")).font(AppFont.body(12)).foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .detailCard()
+    }
+
     // MARK: - Capcodes / vehicles
 
     private var capcodesCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             heading(Lf("Capcodes (%lld)", melding.eenheden.count))
+            Text(L("Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal."))
+                .font(AppFont.body(12)).foregroundStyle(.secondary)
             ForEach(Array(melding.eenheden.enumerated()), id: \.offset) { _, e in
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(e.naam ?? e.code ?? "–").font(AppFont.body(15, .medium))
-                    let sub = [e.type, e.regio].compactMap { $0 }.joined(separator: " / ")
-                    if !sub.isEmpty { Text(sub).font(AppFont.body(12)).foregroundStyle(.secondary) }
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text(e.naam ?? e.code ?? "–").font(AppFont.body(15, .medium))
+                        let sub = [e.type, e.regio].compactMap { $0 }.joined(separator: " / ")
+                        if !sub.isEmpty { Text(sub).font(AppFont.body(12)).foregroundStyle(.secondary) }
+                        if let code = e.code {
+                            Text(code).font(.system(size: 13, weight: .semibold, design: .monospaced)).foregroundStyle(Theme.red)
+                        }
+                    }
+                    Spacer(minLength: 8)
+                    // Star: follow this unit, also outside your places and radius.
                     if let code = e.code {
-                        Text(code).font(.system(size: 13, weight: .semibold, design: .monospaced)).foregroundStyle(Theme.red)
+                        let volgt = settings.volgt(capcode: code)
+                        Button {
+                            settings.toggleVolg(capcode: code, naam: e.naam)
+                        } label: {
+                            Image(systemName: volgt ? "star.fill" : "star").font(.system(size: 18, weight: .semibold))
+                                .foregroundStyle(volgt ? Color.yellow : Color.secondary).frame(width: 40, height: 40)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(volgt ? L("Niet meer volgen") : L("Volg deze capcode"))
                     }
                 }
                 .innerCard()

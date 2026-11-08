@@ -305,7 +305,7 @@ export async function broadcastHistory(env) {
 
 // ------------------------------------------------------------------ texts
 
-export const CONTENT_NAMES = ["privacy", "cookies", "terms", "disclaimer", "changelog"];
+export const CONTENT_NAMES = ["privacy", "cookies", "terms", "disclaimer", "changelog", "hulp"];
 
 export async function contentFor(env, name, bundled) {
   const row = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(`content:${name}`).first();

@@ -187,7 +187,7 @@ fun MapScreen(nav: Nav) {
                 Spacer(Modifier.width(8.dp))
                 SmallFloatingActionButton(onClick = { showLayers = true }, containerColor = MaterialTheme.colorScheme.surface) { Icon(Icons.Outlined.Layers, tr("Kaartlagen", "Map layers")) }
             }
-            // Filter chips: disciplines, Burgernet (always), NL-Alert (when there is one), Lifeliner and Zulu (when in the list).
+            // Filter chips: disciplines, Burgernet and NL-Alert (always), Lifeliner and Zulu (when in the list).
             val alleMeldingen = Store.meldingen.filter { it.millis >= cutoff && it.hasCoordinate && Settings.matchesList(it) }
             val aantalBron = { b: String -> Store.waarschuwingen.count { it.bron == b && (it.startAt.toEpochMilli() >= cutoff || it.isActief) } }
             val heliGroepen = listOf("trauma" to "Lifeliner", "politie" to "Zulu").mapNotNull { (soort, naam) ->
@@ -205,7 +205,6 @@ fun MapScreen(nav: Nav) {
                     }
                 }
                 val bronnen = listOf(Triple("burgernet", "Burgernet", Color(0xFF0067B1)), Triple("nlalert", "NL-Alert", Color(0xFFE3001B)))
-                    .filter { (b, _, _) -> b == "burgernet" || aantalBron(b) > 0 }
                 items(bronnen, key = { it.first }) { (b, naam, kleur) ->
                     val n = aantalBron(b)
                     val on = b !in verborgen && KaartLaag.WAARSCHUWINGEN.key in lagen

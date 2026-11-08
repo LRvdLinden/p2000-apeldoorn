@@ -346,3 +346,8 @@ a.drow { text-decoration: none; color: inherit; }
 .bij div { flex: 1; display: grid; }
 .bij small { color: var(--muted); }
 .bij button, .linkbtn { border: 0; background: none; color: var(--accent, #dc2626); font-weight: 600; cursor: pointer; font: inherit; }
+.unit { display: flex; align-items: flex-start; gap: 8px; }
+.unit > div { flex: 1; }
+.unit code { display: block; }
+.ster { border: 0; background: none; font-size: 1.4rem; line-height: 1; color: var(--muted); cursor: pointer; padding: 4px; }
+.ster.on { color: #f5b800; }

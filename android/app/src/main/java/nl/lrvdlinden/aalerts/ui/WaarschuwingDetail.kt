@@ -83,7 +83,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 AMap(
                     Modifier.fillMaxWidth().height(h).alpha(if (ended) 0.85f else 1f),
                     points = if (x.bron != "knmi" && x.hasCoordinate) listOf(MapPoint(x.id, x.lat!!, x.lon!!, x.marker, 40, dim = ended)) else emptyList(),
-                    areas = listOf(MapArea(x.id, rings, (if (ended) Color.Gray else x.color).toArgb().toLong(), 0.2)) +
+                    areas = listOf(MapArea(x.id, rings, (if (ended && !x.isOpgeheven) Color.Gray else x.color).toArgb().toLong(), 0.2)) +
                         listOf(MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.0, width = 1.5)),
                     camera = MapCamera(la, lo, if (x.bron == "burgernet") 13.5 else 11.0, fit = if (fit.size > 2) fit else emptyList(), key = x.id),
                     interactive = false,
@@ -96,8 +96,8 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(1f)) {
                             Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                                Tag(x.kop, if (ended) Color.Gray else x.color, if (ended) Color.White else x.onColor)
-                                Tag(x.statusLabel, if (ended) MaterialTheme.colorScheme.surfaceVariant else Color(0xFF16A34A), if (ended) MaterialTheme.colorScheme.onSurface else Color.White)
+                                Tag(x.kop, if (ended && !x.isOpgeheven) Color.Gray else x.color, if (ended && !x.isOpgeheven) Color.White else x.onColor)
+                                Tag(x.statusLabel, if (x.isOpgeheven) Color(0xFF2E9E44) else if (ended) MaterialTheme.colorScheme.surfaceVariant else Color(0xFF16A34A), if (ended && !x.isOpgeheven) MaterialTheme.colorScheme.onSurface else Color.White)
                             }
                             Text(wTijd(x), color = Muted, fontSize = 13.sp)
                         }

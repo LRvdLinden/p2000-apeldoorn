@@ -34,7 +34,8 @@ struct TVWaarschuwingRow: View {
                         .foregroundStyle(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color)
                     Text(waarschuwing.statusLabel).font(AppFont.body(14, .semibold))
                         .padding(.horizontal, 8).padding(.vertical, 2)
-                        .background(Color.white.opacity(0.12), in: Capsule())
+                        .foregroundStyle(waarschuwing.isOpgeheven ? Waarschuwing.codeColor("green") : Color.primary)
+                        .background(waarschuwing.isOpgeheven ? Waarschuwing.codeColor("green").opacity(0.22) : Color.white.opacity(0.12), in: Capsule())
                     Text(verbatim: TVWaarschuwingTijd.tekst(waarschuwing)).font(AppFont.body(16, .regular).monospacedDigit()).foregroundStyle(.secondary)
                 }
                 Text(waarschuwing.titel).font(AppFont.body(22, .semibold)).lineLimit(2)

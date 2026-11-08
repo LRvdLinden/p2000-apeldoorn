@@ -20,13 +20,14 @@ import privacy from "../content/privacy.json";
 import terms from "../content/terms.json";
 import disclaimer from "../content/disclaimer.json";
 import cookies from "../content/cookies.json";
+import hulp from "../content/hulp.json";
 import changelog from "../content/changelog.json";
 import {
   ingestWarnings, listWarnings, getWarning, linkedMeldingen, payloadForWarning, wantsPush, devicePrefs, savePrefs, prefsFrom,
   warningsHousekeeping,
 } from "./alerts.js";
 import { SELECT, toAPI as meldingAPI } from "./db.js";
-import { profielenFrom, meldingWanted, warningWanted } from "./profielen.js";
+import { profielenFrom, capcodesFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
@@ -35,7 +36,7 @@ import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
-const CONTENT = { privacy, cookies, terms, disclaimer, changelog };
+const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
 /** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
 const deviceKey = (s) => {
   const t = decodeURIComponent(s);
@@ -173,7 +174,7 @@ async function handle(req, env) {
     return new Response(token, { headers: { "content-type": "text/plain", "cache-control": "no-store", ...CORS } });
   }
 
-  m = path.match(/^\/v1\/content\/(privacy|cookies|terms|disclaimer)$/);
+  m = path.match(/^\/v1\/content\/(privacy|cookies|terms|disclaimer|hulp)$/);
   if (method === "GET" && m) return reply(200, await contentFor(env, m[1], CONTENT), { "cache-control": "public, max-age=300" });
   if (method === "GET" && path === "/v1/changelog") return reply(200, await contentFor(env, "changelog", CONTENT), { "cache-control": "public, max-age=300" });
 
@@ -198,7 +199,9 @@ async function handle(req, env) {
     await upsertDevice(env, device);
     const w = prefsFrom(body.settings?.waarschuwingen);
     const profielen = profielenFrom(body.settings?.profielen);
-    if (w || profielen) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }), ...(profielen ? { profielen } : {}) });
+    const capcodes = capcodesFrom(body.settings?.capcodes);
+    if (w || profielen || capcodes) await savePrefs(env, device.token, { ...(w || { nlalert: true, burgernet: false, knmi: ["orange", "red"] }),
+      ...(profielen ? { profielen } : {}), ...(capcodes ? { capcodes } : {}) });
     return reply(200, { ok: true });
   }
   // APNs token (hex) or Android token ("fcm:<token>", URL-encoded by the app).

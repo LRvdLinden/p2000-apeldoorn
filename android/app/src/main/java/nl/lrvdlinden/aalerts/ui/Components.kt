@@ -124,10 +124,10 @@ fun WaarschuwingRow(w: Waarschuwing, onClick: () -> Unit) {
     Row(Modifier.fillMaxWidth().clickable(onClick = onClick).padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.Top) {
         WaarschuwingIcon(w)
         Spacer(Modifier.width(12.dp))
-        Column(Modifier.weight(1f).alpha(if (ended) 0.6f else 1f)) {
+        Column(Modifier.weight(1f).alpha(if (ended) (if (w.isOpgeheven) 0.85f else 0.6f) else 1f)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                Tag(w.kop, if (ended) Color.Gray else w.color, if (ended) Color.White else w.onColor)
-                Tag(w.statusLabel, if (ended) MaterialTheme.colorScheme.surfaceVariant else Color(0xFF16A34A), if (ended) MaterialTheme.colorScheme.onSurface else Color.White)
+                Tag(w.kop, if (ended && !w.isOpgeheven) Color.Gray else w.color, if (ended && !w.isOpgeheven) Color.White else w.onColor)
+                Tag(w.statusLabel, if (w.isOpgeheven) Color(0xFF2E9E44) else if (ended) MaterialTheme.colorScheme.surfaceVariant else Color(0xFF16A34A), if (ended && !w.isOpgeheven) MaterialTheme.colorScheme.onSurface else Color.White)
                 Spacer(Modifier.weight(1f))
                 Text(wTijd(w), color = Muted, fontSize = 12.sp)
             }

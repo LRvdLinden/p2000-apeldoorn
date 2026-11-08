@@ -52,3 +52,12 @@ test("knmi: push one hour before, and one code-green push for a whole warning", 
   assert.equal(prefsFrom({ knmi: ["yellow"] }).knmiVooraf, true);
   assert.equal(prefsFrom({ knmi: ["yellow"], knmiOpgeheven: false }).knmiOpgeheven, false);
 });
+
+test("capcode volgen: a followed capcode gets a push outside places and radius", async () => {
+  const { meldingWanted, capcodesFrom } = await import("../src/profielen.js");
+  const device = { enabled: true, diensten: ["ambulance"], plaatsen: ["Ugchelen"], prioriteiten: [], radius_km: 2, lat: 52.2, lon: 5.9, quiet: 0 };
+  const m = { dienst: "brandweer", stad: "Deventer", lat: 52.25, lon: 6.16, prioriteit: "P2", eenheden: [{ code: "0600123", naam: "Kazerne X" }] };
+  assert.equal(meldingWanted(device, { capcodes: capcodesFrom(["0600123"]) }, m), true);
+  assert.equal(meldingWanted(device, { capcodes: capcodesFrom(["0600999"]) }, m), false);
+  assert.deepEqual(capcodesFrom(["06 00 123", "x", "0600123"]), ["0600123"]);
+});

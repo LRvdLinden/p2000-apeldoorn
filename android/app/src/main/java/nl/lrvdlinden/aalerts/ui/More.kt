@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.*
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -185,7 +186,7 @@ fun ContentScreen(name: String, nav: Nav) {
     var page by remember(name) { mutableStateOf<ContentPage?>(null) }
     var loaded by remember(name) { mutableStateOf(false) }
     LaunchedEffect(name) { page = Api.content(name); loaded = true }
-    val title = when (name) { "privacy" -> tr("Privacyverklaring", "Privacy policy"); "terms" -> tr("Gebruiksvoorwaarden", "Terms of use"); "cookies" -> tr("Cookiebeleid", "Cookie policy"); else -> "Disclaimer" }
+    val title = when (name) { "privacy" -> tr("Privacyverklaring", "Privacy policy"); "terms" -> tr("Gebruiksvoorwaarden", "Terms of use"); "cookies" -> tr("Cookiebeleid", "Cookie policy"); "hulp" -> tr("Hulp en veelgestelde vragen", "Help and FAQ"); else -> "Disclaimer" }
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { BackBar(title, nav) }) { pad ->
         Column(Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp)) {
             val p = page
@@ -218,58 +219,137 @@ fun ChangelogScreen(nav: Nav) {
 
 // ------------------------------------------------------------------ welcome
 
+/** First launch, as on iOS: welcome, then the first notification profile in steps (where, which, warnings, quiet), ready. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun Onboarding(onDone: () -> Unit) {
     val ctx = LocalContext.current
     val scope = rememberCoroutineScope()
-    val state = rememberPagerState { 5 }
-    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (ok) Settings.notificationsEnabled = true
-        scope.launch { state.animateScrollToPage(4) }
-    }
-    data class Page(val icon: Int?, val vector: androidx.compose.ui.graphics.vector.ImageVector?, val title: String, val text: String)
-    val pages = listOf(
-        Page(R.drawable.app_icon, null, tr("Welkom bij A-Alerts", "Welcome to A-Alerts"),
-            tr("Live meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn.", "Live alerts from fire, ambulance, police and air ambulance in the municipality of Apeldoorn.")),
-        Page(R.drawable.icon_nlalert, null, tr("NL-Alert, Burgernet en KNMI", "NL-Alert, Burgernet and KNMI"),
-            tr("Ook NL-Alerts, Burgernet-acties en KNMI-weercodes voor de gemeente, in de tijdlijn en op de kaart.", "Also NL-Alerts, Burgernet calls and KNMI weather codes for the municipality, in the timeline and on the map.")),
-        Page(null, Icons.Outlined.Map, tr("Kaart met live helikopters", "Map with live helicopters"),
-            tr("Alle meldingen op de kaart, met kazernes, de Lifeliner en de politiehelikopters live.", "All alerts on the map, with stations, the Lifeliner and the police helicopters live.")),
-        Page(null, Icons.Outlined.NotificationsActive, tr("Pushmeldingen", "Push notifications"),
-            tr("Krijg een melding bij nieuwe meldingen die bij jou passen. Je kiest zelf plaatsen, disciplines en tijden.", "Get notified about new alerts that suit you. You choose places, services and times.")),
-        Page(null, Icons.Outlined.CheckCircle, tr("Klaar!", "All set!"),
-            tr("Bel bij nood altijd 112. A-Alerts is geen officiële dienst van hulpdiensten of overheid.", "In an emergency always call 112. A-Alerts is not an official service of the emergency services or government.")),
-    )
-    Column(Modifier.fillMaxSize().background(Color(0xFFB00A1A)).systemBarsPadding().padding(24.dp)) {
-        HorizontalPager(state, Modifier.weight(1f)) { i ->
-            val p = pages[i]
-            Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                Box(Modifier.size(120.dp).clip(RoundedCornerShape(28.dp)).background(Color.White.copy(alpha = 0.15f)), contentAlignment = Alignment.Center) {
-                    if (p.icon != null) Image(painterResource(p.icon), null, Modifier.size(if (i == 0) 120.dp else 84.dp).clip(RoundedCornerShape(28.dp)))
-                    else p.vector?.let { Icon(it, null, tint = Color.White, modifier = Modifier.size(64.dp)) }
+    val laatste = 5
+    val state = rememberPagerState { laatste + 1 }
+    val rood = Color(0xFFB00A1A)
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok -> if (ok) Settings.notificationsEnabled = true }
+    val locPerm = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { updateLocation(ctx); Push.sync() }
+    var gebied by remember { mutableStateOf(when { Settings.radiusEnabled -> "buurt"; Settings.profielen.firstOrNull()?.plaatsen?.isNotEmpty() == true -> "plaatsen"; else -> "gemeente" }) }
+    val p = Settings.profielen.firstOrNull() ?: MeldingProfiel(naam = tr("Standaard", "Default"))
+    fun save(np: MeldingProfiel) { Settings.profielen = listOf(np) + Settings.profielen.drop(1) }
+
+    @Composable fun Keuze(titel: String, sub: String, gekozen: Boolean, onClick: () -> Unit) {
+        Surface(onClick = onClick, shape = RoundedCornerShape(16.dp), color = if (gekozen) Color.White else Color.White.copy(alpha = 0.12f), modifier = Modifier.fillMaxWidth()) {
+            Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+                Column(Modifier.weight(1f)) {
+                    Text(titel, color = if (gekozen) rood else Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                    Text(sub, color = (if (gekozen) rood else Color.White).copy(alpha = 0.8f), fontSize = 13.sp)
                 }
-                Spacer(Modifier.height(28.dp))
-                Text(p.title, color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
-                Spacer(Modifier.height(12.dp))
-                Text(p.text, color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp, textAlign = TextAlign.Center)
+                Icon(if (gekozen) Icons.Filled.CheckCircle else Icons.Outlined.Circle, null, tint = if (gekozen) rood else Color.White)
+            }
+        }
+    }
+    @Composable fun Chip(titel: String, aan: Boolean, onClick: () -> Unit) {
+        Surface(onClick = onClick, shape = CircleShape, color = if (aan) Color.White else Color.White.copy(alpha = 0.14f),
+            border = if (aan) null else androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.45f))) {
+            Text(titel, color = if (aan) rood else Color.White, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp))
+        }
+    }
+    @Composable fun Schakelaar(titel: String, sub: String, aan: Boolean, onChange: (Boolean) -> Unit) {
+        Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color.White.copy(alpha = 0.12f)).padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            Column(Modifier.weight(1f)) {
+                Text(titel, color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 16.sp)
+                Text(sub, color = Color.White.copy(alpha = 0.8f), fontSize = 13.sp)
+            }
+            Switch(aan, onChange)
+        }
+    }
+    @Composable fun Stap(titel: String, tekst: String, inhoud: @Composable ColumnScope.() -> Unit) {
+        Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Spacer(Modifier.height(24.dp))
+            Text(titel, color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Text(tekst, color = Color.White.copy(alpha = 0.9f), fontSize = 15.sp, textAlign = TextAlign.Center)
+            Spacer(Modifier.height(4.dp))
+            inhoud()
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+    fun hm(x: Int) = "%02d:%02d".format(x / 60, x % 60)
+
+    Column(Modifier.fillMaxSize().background(rood).systemBarsPadding().padding(24.dp)) {
+        HorizontalPager(state, Modifier.weight(1f)) { i ->
+            when (i) {
+                0 -> Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                    Image(painterResource(R.drawable.app_icon), null, Modifier.size(120.dp).clip(RoundedCornerShape(28.dp)))
+                    Spacer(Modifier.height(28.dp))
+                    Text(tr("Welkom bij A-Alerts", "Welcome to A-Alerts"), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+                    Spacer(Modifier.height(12.dp))
+                    Text(tr("Live meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn, met NL-Alert, Burgernet en KNMI. In een paar stappen stel je in waarvoor je een melding wilt.",
+                        "Live alerts from fire, ambulance, police and air ambulance in the municipality of Apeldoorn, with NL-Alert, Burgernet and KNMI. In a few steps you choose what you want to be notified about."),
+                        color = Color.White.copy(alpha = 0.9f), fontSize = 16.sp, textAlign = TextAlign.Center)
+                }
+                1 -> Stap(tr("Waar wil je meldingen van?", "Where do you want alerts from?"), tr("Dit is je eerste meldingsprofiel. Later voeg je er meer toe, bijvoorbeeld voor je werk of je ouders.", "This is your first notification profile. You can add more later, for example for work or your parents.")) {
+                    Keuze(tr("De hele gemeente Apeldoorn", "The whole municipality of Apeldoorn"), tr("Alle plaatsen, en Teuge", "All places, and Teuge"), gebied == "gemeente") {
+                        gebied = "gemeente"; save(p.copy(plaatsen = emptySet())); Settings.radiusEnabled = false
+                    }
+                    Keuze(tr("Bepaalde plaatsen", "Certain places"), tr("Kies je wijk of dorp", "Choose your area or village"), gebied == "plaatsen") { gebied = "plaatsen"; Settings.radiusEnabled = false }
+                    if (gebied == "plaatsen") FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        Werkgebied.namen.forEach { n -> Chip(n, n in p.plaatsen) { save(p.copy(plaatsen = p.plaatsen.toggle(n))) } }
+                    }
+                    Keuze(tr("Rond mijn locatie", "Around my location"), tr("Binnen ${Settings.radiusKm.toInt()} km van waar je bent", "Within ${Settings.radiusKm.toInt()} km of where you are"), gebied == "buurt") {
+                        gebied = "buurt"; save(p.copy(plaatsen = emptySet())); Settings.radiusMode = "huidig"; Settings.radiusEnabled = true
+                        locPerm.launch(arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION, Manifest.permission.ACCESS_FINE_LOCATION))
+                    }
+                    if (gebied == "buurt") Slider(Settings.radiusKm.toFloat(), { Settings.radiusKm = it.toInt().toDouble() }, valueRange = 1f..15f, steps = 13,
+                        colors = SliderDefaults.colors(thumbColor = Color.White, activeTrackColor = Color.White))
+                }
+                2 -> Stap(tr("Welke meldingen wil je?", "Which alerts do you want?"), tr("Niets gekozen is alles. Je ziet in de pager altijd alle meldingen; dit bepaalt waarvoor je een pushmelding krijgt.", "Nothing chosen means everything. The pager always shows all alerts; this decides what you get notified about.")) {
+                    Text(tr("Disciplines", "Services"), color = Color.White.copy(alpha = 0.85f), fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        Dienst.selectable.forEach { d -> Chip(d.label, d.key in p.diensten) { save(p.copy(diensten = p.diensten.toggle(d.key))) } }
+                    }
+                    Text(tr("Hoe dringend", "How urgent"), color = Color.White.copy(alpha = 0.85f), fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+                    Keuze(tr("Alle meldingen", "All alerts"), tr("Ook besteld vervoer en meldingen zonder haast", "Also planned transport and non-urgent alerts"), p.prioriteiten.isEmpty()) { save(p.copy(prioriteiten = emptySet())) }
+                    Keuze(tr("Alleen spoed", "Urgent only"), tr("A1 en P1: met zwaailicht en sirene", "A1 and P1: with lights and siren"), p.prioriteiten == setOf("A1", "P1")) { save(p.copy(prioriteiten = setOf("A1", "P1"))) }
+                    Keuze(tr("Spoed en snel", "Urgent and fast"), tr("A1, A2, P1 en P2", "A1, A2, P1 and P2"), p.prioriteiten == setOf("A1", "A2", "P1", "P2")) { save(p.copy(prioriteiten = setOf("A1", "A2", "P1", "P2"))) }
+                }
+                3 -> Stap(tr("Ook waarschuwingen?", "Warnings too?"), tr("NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.", "NL-Alert and Burgernet are in the pager between the alerts; a KNMI weather code is a bar at the top while it applies. Choose what you want to be notified about.")) {
+                    Schakelaar("NL-Alert", tr("Alarmberichten van de overheid", "Government alert messages"), p.nlalert) { save(p.copy(nlalert = it)) }
+                    Schakelaar("Burgernet", tr("Vermissingen en zoekacties", "Missing persons and searches"), p.burgernet) { save(p.copy(burgernet = it)) }
+                    Text(tr("KNMI-weercodes", "KNMI weather codes"), color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                        listOf("yellow", "orange", "red").forEach { c -> Chip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }
+                    }
+                }
+                4 -> Stap(tr("Even rust?", "Some quiet?"), tr("Tijdens je stille uren komen meldingen zonder geluid binnen. Spoedmeldingen mogen dan wel geluid maken.", "During your quiet hours notifications arrive silently. Urgent alerts may still make a sound.")) {
+                    Schakelaar(tr("Stille uren", "Quiet hours"), tr("Van ${hm(Settings.quietFrom)} tot ${hm(Settings.quietTo)}", "From ${hm(Settings.quietFrom)} to ${hm(Settings.quietTo)}"), Settings.quietMode) { Settings.quietMode = it }
+                    if (Settings.quietMode) Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                        OutlinedButton(onClick = { android.app.TimePickerDialog(ctx, { _, h, m -> Settings.quietFrom = h * 60 + m }, Settings.quietFrom / 60, Settings.quietFrom % 60, true).show() }, Modifier.weight(1f)) { Text(tr("Van ", "From ") + hm(Settings.quietFrom), color = Color.White) }
+                        OutlinedButton(onClick = { android.app.TimePickerDialog(ctx, { _, h, m -> Settings.quietTo = h * 60 + m }, Settings.quietTo / 60, Settings.quietTo % 60, true).show() }, Modifier.weight(1f)) { Text(tr("Tot ", "Until ") + hm(Settings.quietTo), color = Color.White) }
+                    }
+                    Schakelaar(tr("Spoed altijd met geluid", "Urgent always with sound"), tr("A1 en P1 ook tijdens stille uren", "A1 and P1 also during quiet hours"), Settings.criticalAlerts) { Settings.criticalAlerts = it }
+                }
+                else -> Stap(tr("Je profiel staat klaar", "Your profile is ready"), tr("Zet pushmeldingen aan om ze te ontvangen. Alles pas je later aan in Instellingen › Meldingen. Bel bij nood altijd 112.", "Turn on notifications to receive them. You can change everything later in Settings › Notifications. In an emergency always call 112.")) {
+                    val waar = when { Settings.radiusEnabled -> tr("Binnen ${Settings.radiusKm.toInt()} km van je locatie", "Within ${Settings.radiusKm.toInt()} km of your location"); p.plaatsen.isNotEmpty() -> p.plaatsen.sorted().joinToString(", "); else -> tr("De hele gemeente Apeldoorn", "The whole municipality of Apeldoorn") }
+                    val wsch = listOfNotNull("NL-Alert".takeIf { p.nlalert }, "Burgernet".takeIf { p.burgernet },
+                        p.knmi.takeIf { it.isNotEmpty() }?.let { k -> "KNMI " + listOf("yellow", "orange", "red").filter { it in k }.joinToString(", ") { Waarschuwing.codeLabel(it).substringAfter(" ") } })
+                    Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = 0.12f)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(waar, p.samenvatting.substringBefore(" · "), if (p.prioriteiten.isEmpty()) tr("Alle meldingen", "All alerts") else p.prioriteiten.sorted().joinToString(", "),
+                            wsch.ifEmpty { listOf(tr("Geen waarschuwingen", "No warnings")) }.joinToString(" · ")).plus(
+                            if (Settings.quietMode) listOf(tr("Stil van ${hm(Settings.quietFrom)} tot ${hm(Settings.quietTo)}", "Quiet from ${hm(Settings.quietFrom)} to ${hm(Settings.quietTo)}")) else emptyList()
+                        ).forEach { Text("•  $it", color = Color.White, fontSize = 15.sp) }
+                    }
+                    OutlinedButton(onClick = {
+                        if (!Push.available) return@OutlinedButton
+                        if (android.os.Build.VERSION.SDK_INT >= 33) permission.launch(Manifest.permission.POST_NOTIFICATIONS) else Settings.notificationsEnabled = true
+                    }, enabled = !Settings.notificationsEnabled, modifier = Modifier.fillMaxWidth()) {
+                        Text(if (Settings.notificationsEnabled) tr("Pushmeldingen staan aan", "Notifications are on") else tr("Pushmeldingen aanzetten", "Turn on notifications"), color = Color.White, fontWeight = FontWeight.Bold)
+                    }
+                }
             }
         }
         Row(Modifier.fillMaxWidth().padding(vertical = 16.dp), horizontalArrangement = Arrangement.Center) {
-            repeat(5) { i -> Box(Modifier.padding(4.dp).size(if (state.currentPage == i) 10.dp else 7.dp).clip(CircleShape).background(Color.White.copy(alpha = if (state.currentPage == i) 1f else 0.5f))) }
+            repeat(laatste + 1) { i -> Box(Modifier.padding(4.dp).size(if (state.currentPage == i) 10.dp else 7.dp).clip(CircleShape).background(Color.White.copy(alpha = if (state.currentPage == i) 1f else 0.5f))) }
         }
-        val btn = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFFB00A1A))
-        when (state.currentPage) {
-            3 -> {
-                Button(onClick = {
-                    if (!Push.available) { scope.launch { state.animateScrollToPage(4) } }
-                    else if (android.os.Build.VERSION.SDK_INT >= 33) permission.launch(Manifest.permission.POST_NOTIFICATIONS)
-                    else { Settings.notificationsEnabled = true; scope.launch { state.animateScrollToPage(4) } }
-                }, colors = btn, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(tr("Meldingen aanzetten", "Turn on notifications"), fontWeight = FontWeight.Bold) }
-                TextButton(onClick = { scope.launch { state.animateScrollToPage(4) } }, modifier = Modifier.fillMaxWidth()) { Text(tr("Later", "Later"), color = Color.White) }
-            }
-            4 -> Button(onClick = onDone, colors = btn, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(tr("Aan de slag", "Get started"), fontWeight = FontWeight.Bold) }
-            else -> Button(onClick = { scope.launch { state.animateScrollToPage(state.currentPage + 1) } }, colors = btn, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(tr("Volgende", "Next"), fontWeight = FontWeight.Bold) }
-        }
+        val btn = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = rood)
+        if (state.currentPage == laatste) Button(onClick = onDone, colors = btn, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(tr("Aan de slag", "Get started"), fontWeight = FontWeight.Bold) }
+        else Button(onClick = { scope.launch { state.animateScrollToPage(state.currentPage + 1) } }, colors = btn, modifier = Modifier.fillMaxWidth().height(52.dp)) { Text(tr("Volgende", "Next"), fontWeight = FontWeight.Bold) }
     }
 }
 

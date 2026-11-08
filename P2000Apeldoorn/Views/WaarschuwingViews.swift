@@ -40,8 +40,9 @@ struct WaarschuwingRow: View {
         }
         .padding(.vertical, 4)
         // Ended: greyed out like an alert you have already opened.
-        .saturation(waarschuwing.isBeeindigd ? 0 : 1)
-        .opacity(waarschuwing.isBeeindigd ? 0.5 : 1)
+        // KNMI keeps the colour of its old code in the history (with "Opgeheven · code groen").
+        .saturation(waarschuwing.isBeeindigd && !waarschuwing.isOpgeheven ? 0 : 1)
+        .opacity(waarschuwing.isBeeindigd ? (waarschuwing.isOpgeheven ? 0.8 : 0.5) : 1)
         .accessibilityElement(children: .combine)
     }
 
@@ -65,9 +66,10 @@ struct StatusChip: View {
         Text(waarschuwing.statusLabel)
             .font(AppFont.body(11, .semibold, relativeTo: .caption2))
             .padding(.horizontal, 6).padding(.vertical, 2)
-            .background(waarschuwing.isBeeindigd ? Color.secondary.opacity(0.18) : waarschuwing.color.opacity(0.22),
+            .background(waarschuwing.isOpgeheven ? Waarschuwing.codeColor("green").opacity(0.22)
+                        : waarschuwing.isBeeindigd ? Color.secondary.opacity(0.18) : waarschuwing.color.opacity(0.22),
                         in: Capsule())
-            .foregroundStyle(waarschuwing.isBeeindigd ? Color.secondary : Color.primary)
+            .foregroundStyle(waarschuwing.isOpgeheven ? Waarschuwing.codeColor("green") : waarschuwing.isBeeindigd ? Color.secondary : Color.primary)
     }
 }
 

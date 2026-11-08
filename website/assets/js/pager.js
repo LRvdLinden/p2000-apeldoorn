@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=47";
+} from "./core.js?v=48";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=47";
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=48";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -69,8 +69,14 @@ setInterval(tick, 1000);
 
 function inWindow(m) { return Date.now() - date(m).getTime() < WINDOW_MS; }
 
+// Followed capcodes (star), as in the apps: always in the list, also outside the filters.
+const capKey = (c) => String(c || "").replace(/\D/g, "");
+const volgCaps = () => prefs.get("p2000.volgCapcodes", {});
+const volgtCapcode = (m) => { const v = volgCaps(); return [m.capcode, ...(m.eenheden || []).map((u) => u.code)].some((c) => v[capKey(c)]); };
+
 function matches(m, { ignoreSearch = false } = {}) {
   if (!inWindow(m)) return false;
+  if (volgtCapcode(m) && !ignoreSearch && !state.search && !(state.hideRead && isRead(m) && m.guid !== state.selected)) return true;
   if (state.diensten.size && !state.diensten.has(m.dienst)) return false;
   if (state.plaats && capPlaats(m.stad) !== state.plaats) return false;
   if (state.prio) {
@@ -128,6 +134,7 @@ function syncFilterInputs() {
   $("fPrio").value = state.prio;
   $("fRadius").value = String(state.radiusKm);
   $("fHideRead").checked = state.hideRead;
+  $("fBron").value = state.bron || "";
 }
 
 $("fPlaats").innerHTML += PLAATSEN.map((p) => `<option>${p}</option>`).join("");
@@ -139,6 +146,7 @@ $("filterBtn").addEventListener("click", () => {
 });
 $("fPlaats").addEventListener("change", (e) => { state.plaats = e.target.value; saveFilters(); render(); });
 $("fPrio").addEventListener("change", (e) => { state.prio = e.target.value; saveFilters(); render(); });
+$("fBron").addEventListener("change", (e) => { state.bron = e.target.value; saveFilters(); render(); });
 $("fHideRead").addEventListener("change", (e) => { state.hideRead = e.target.checked; saveFilters(); render(); });
 $("list").addEventListener("click", (e) => {
   if (!e.target.closest("[data-toonbekeken]")) return;
@@ -428,7 +436,8 @@ function renderDetail(m) {
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
     <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
-      <div class="unit"><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>`).join("")}</div></section>` : ""}
+      <div class="unit"><div><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>${u.code ? `<button class="ster${volgCaps()[capKey(u.code)] ? " on" : ""}" data-volg="${esc(capKey(u.code))}" data-naam="${esc(u.naam || u.code)}" aria-label="${volgCaps()[capKey(u.code)] ? "Niet meer volgen" : "Volg deze capcode"}">★</button>` : ""}</div>`).join("")}</div>
+      <p class="hint">Tik op de ster om een eenheid te volgen: je ziet die meldingen dan ook buiten je filters.</p></section>` : ""}
     ${cars.length ? `<section class="card"><h2>Voertuigen (${cars.length})</h2><div class="units">${cars.map((v) => `
       <div class="unit"><b>${esc(v.label || "Voertuig")}</b><code>${esc([v.nra, v.nrb].filter(Boolean).join(" · "))}</code></div>`).join("")}</div></section>` : ""}
     <section class="card"><h2>Meldinggegevens</h2><dl class="kv">
@@ -446,6 +455,15 @@ function renderDetail(m) {
   if (innerWidth <= 900) document.querySelector(".detail-pane").scrollTop = 0;
 
   $("detail").querySelectorAll("[data-close]").forEach((b) => b.addEventListener("click", () => closeDetail()));
+  $("detail").querySelectorAll("[data-volg]").forEach((b) => b.addEventListener("click", () => {
+    const v = volgCaps(), k = b.dataset.volg;
+    if (v[k]) delete v[k]; else v[k] = b.dataset.naam;
+    prefs.set("p2000.volgCapcodes", v);
+    b.classList.toggle("on", Boolean(v[k]));
+    b.setAttribute("aria-label", v[k] ? "Niet meer volgen" : "Volg deze capcode");
+    toast(v[k] ? `Je volgt ${b.dataset.naam}` : "Niet meer gevolgd");
+    renderList();
+  }));
   $("shareBtn").addEventListener("click", async () => {
     const url = location.href;
     try {
@@ -756,7 +774,6 @@ function renderMapChips() {
   const alle = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || new Date(w.einde || w.start).getTime() >= cutoff));
   const bronChip = (b, label, c) => {
     const n = alle.filter((w) => w.bron === b).length;
-    if (b === "nlalert" && !n) return "";
     const on = state.lagen.has("waarschuwingen") && state.mapBronnen.has(b);
     return `<button class="chip${on ? "" : " off"}" data-bron="${b}" style="--c:${c}" aria-pressed="${on}" title="${label}"><img src="${asset(`assets/img/icon_${b}.png`)}" alt="${label}">${n}</button>`;
   };

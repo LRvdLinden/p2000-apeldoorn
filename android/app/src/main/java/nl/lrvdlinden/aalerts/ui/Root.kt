@@ -90,6 +90,7 @@ fun AAlertsRoot(activity: MainActivity) {
                     composable("waarschuwing/{id}") { WaarschuwingDetail(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("waarschuwingen") { WaarschuwingenScreen(nav) }
                     composable("bewaard") { BewaardScreen(nav) }
+                    composable("capcodes") { VolgCapcodesScreen(nav) }
                     composable("profiel/{id}") { ProfielScreen(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("content/{name}") { ContentScreen(it.arguments?.getString("name") ?: "privacy", nav) }
                     composable("changelog") { ChangelogScreen(nav) }

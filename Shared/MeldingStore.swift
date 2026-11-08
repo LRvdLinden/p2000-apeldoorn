@@ -97,7 +97,8 @@ final class MeldingStore {
             if onlyBewaard { return settings.bewaard.contains(m.guid) }
             // The timeline only shows the last 24 hours.
             guard m.datum >= cutoff else { return false }
-            guard settings.matchesList(m) else { return false }
+            // A followed capcode is always shown, also outside the list filters.
+            guard settings.matchesList(m) || settings.volgtCapcode(m) else { return false }
             if settings.hideRead && settings.isRead(m) { return false }
             guard !q.isEmpty else { return true }
             return [m.title, m.stad ?? "", m.locatie ?? "", m.categorie ?? "", m.capcode ?? "", m.fullMelding ?? ""]

@@ -186,11 +186,29 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     Text(tr("Schatting op basis van afstand, uitruktijd en spoed. Geen echte voertuigposities.", "Estimate based on distance, turnout time and urgency. Not real vehicle positions."), color = Muted, fontSize = 11.sp)
                 }
                 if (m.eenheden.isNotEmpty()) SectionCard(tr("Eenheden", "Units"), Icons.Outlined.Groups) {
+                    Text(tr("Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal.",
+                        "Tap the star to follow a unit. You then also get alerts for that capcode outside your places and radius."), color = Muted, fontSize = 12.sp)
                     m.eenheden.forEach { e ->
-                        Row {
-                            Text(e.naam ?: e.code ?: "–", fontSize = 14.sp, modifier = Modifier.weight(1f))
-                            e.code?.let { Text(it, color = Muted, fontSize = 12.sp, fontFamily = FontFamily.Monospace) }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column(Modifier.weight(1f)) {
+                                Text(e.naam ?: e.code ?: "–", fontSize = 14.sp)
+                                e.code?.let { Text(it, color = Muted, fontSize = 12.sp, fontFamily = FontFamily.Monospace) }
+                            }
+                            e.code?.let { code ->
+                                val volgt = Settings.volgt(code)
+                                IconButton(onClick = { Settings.toggleVolg(code, e.naam) }) {
+                                    Icon(if (volgt) Icons.Filled.Star else Icons.Outlined.StarBorder, if (volgt) tr("Niet meer volgen", "Unfollow") else tr("Volg deze capcode", "Follow this capcode"),
+                                        tint = if (volgt) Color(0xFFF5B800) else Muted)
+                                }
+                            }
                         }
+                    }
+                }
+                Settings.geenPushReden(m)?.let { reden ->
+                    // Why this device got no push (the alert is in the list, but not in your notifications), as on iOS.
+                    SectionCard(tr("Geen pushmelding op dit toestel", "No notification on this device"), Icons.Outlined.NotificationsOff) {
+                        Text(reden, fontSize = 14.sp)
+                        Text(tr("De melding staat wel in de lijst. Pas je meldingen aan in Instellingen › Meldingen.", "The alert is in the list. Change your notifications in Settings › Notifications."), color = Muted, fontSize = 12.sp)
                     }
                 }
                 if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {

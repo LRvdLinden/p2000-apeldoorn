@@ -144,7 +144,7 @@ data class Waarschuwing(
     val label: String get() = when (bron) {
         "nlalert" -> "NL-Alert"
         "burgernet" -> "Burgernet"
-        else -> codeLabel(codeNu)
+        else -> codeLabel(niveau)
     }
     /** KNMI: the code that applies now; a lifted (ended) warning is code green. */
     val codeNu: String? get() = if (bron == "knmi" && status == "beeindigd") "green" else niveau
@@ -155,7 +155,7 @@ data class Waarschuwing(
         "nlalert" -> label
         else -> listOfNotNull(label, soort?.takeIf { it.isNotBlank() }).joinToString(" · ")
     }
-    val statusLabel: String get() = when (status) {
+    val statusLabel: String get() = if (isOpgeheven) tr("Opgeheven · code groen", "Lifted · code green") else when (status) {
         "beeindigd" -> tr("Beëindigd", "Ended")
         "verwacht" -> tr("Verwacht", "Expected")
         else -> tr("Actief", "Active")
@@ -163,12 +163,12 @@ data class Waarschuwing(
     val color: Color get() = when (bron) {
         "nlalert" -> Color(0xFFFFC800)
         "burgernet" -> Color(0xFF0067B1)
-        else -> codeColor(codeNu)
+        else -> codeColor(niveau)
     }
     val onColor: Color get() = when (bron) {
         "nlalert" -> Color.Black
         "burgernet" -> Color.White
-        else -> if (codeNu == "yellow" || codeNu == null) Color.Black else Color.White
+        else -> if (niveau == "yellow" || niveau == null) Color.Black else Color.White
     }
     val icon: Int get() = when (bron) {
         "nlalert" -> R.drawable.icon_nlalert
