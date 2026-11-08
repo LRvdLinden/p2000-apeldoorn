@@ -40,6 +40,8 @@ jobs:
           PY
       - name: Screenshots
         run: |
+          defaults write -g NSQuitAlwaysKeepsWindows -bool false || true
+          screencapture -x -R0,0,1440,900 shots-desktop.png || true
           MACAPP=$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
           BIN="$MACAPP/Contents/MacOS/P2000 Apeldoorn"
           BID=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$MACAPP/Contents/Info.plist")
@@ -49,13 +51,15 @@ jobs:
             LANG=$1; NAME=$2; W=$3; shift 3
             mkdir -p "shots/$LANG"
             rm -rf ~/Library/Saved\ Application\ State/"$BID".savedState ~/Library/Containers/"$BID"/Data/Library/Saved\ Application\ State 2>/dev/null || true
-            "$BIN" -AppleLanguages "($LANG)" -AppleLocale $([ $LANG = nl ] && echo nl_NL || echo en_US) -AAlertsScreenshots -ApplePersistenceIgnoreState YES "$@" >/dev/null 2>&1 &
-            PID=$!
+            open -n -F -a "$MACAPP" --args -AppleLanguages "($LANG)" -AppleLocale $([ $LANG = nl ] && echo nl_NL || echo en_US) -AAlertsScreenshots -ApplePersistenceIgnoreState YES "$@"
             sleep "$W"
-            osascript -e "tell application \"System Events\" to set frontmost of (first process whose unix id is $PID) to true" || true
+            osascript -e "tell application id \"$BID\" to activate" || true
             sleep 2
             screencapture -x -R0,0,1440,900 "shots/$LANG/mac-$NAME.png" || true
-            kill $PID 2>/dev/null; sleep 4; kill -9 $PID 2>/dev/null || true; sleep 1
+            osascript -e "tell application id \"$BID\" to quit" || true
+            sleep 6
+            pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+            sleep 2
           }
           for LANG in nl; do
             snap $LANG pager 16
