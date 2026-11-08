@@ -82,7 +82,7 @@ test("warnings: Mijn buurt (radius) also limits warning pushes", async () => {
 
 test("knmi: consecutive periods of one warning are joined, phenomenon in Dutch", () => {
   const ring = [[5.8, 52.1], [6.1, 52.1], [6.1, 52.3], [5.8, 52.3], [5.8, 52.1]];
-  const part = (level) => ({ level, area_description: "Gelderland", geometry: { type: "Polygon", coordinates: [ring] } });
+  const part = (level) => ({ level, area_description: "Gelderland", impact: "Houd rekening met vertragingen op de weg.", instruction: "Rijd langzamer.", geometry: { type: "Polygon", coordinates: [ring] } });
   const now = Date.parse("2026-11-08T07:00:00Z");
   const data = { warning_events: [{ id: "e1", phenomenon: "fog", periods: [
     { starts_at: "2026-11-08T05:00:00Z", ends_at: "2026-11-08T08:00:00Z", parts: [part("yellow")] },
@@ -95,4 +95,7 @@ test("knmi: consecutive periods of one warning are joined, phenomenon in Dutch",
   assert.equal(list[0].end_at, Date.parse("2026-11-08T09:00:00Z"));
   assert.equal(list[1].niveau, "orange");
   assert.equal(list[0]._ev, undefined);
+  assert.equal(list[0].verwachting, "Houd rekening met vertragingen op de weg.");
+  assert.equal(list[0].advies, "Rijd langzamer.");
+  assert.equal(list[0].tekst, "Houd rekening met vertragingen op de weg.");
 });

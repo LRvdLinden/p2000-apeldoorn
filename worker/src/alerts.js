@@ -203,16 +203,22 @@ export function fromKnmi(data, now = Date.now()) {
     for (const period of ev.periods || []) {
       const start = Date.parse(period.starts_at), end = Date.parse(period.ends_at);
       if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
-      const parts = (period.parts || []).map((p) => ({ level: normLevel(p.level), area: txt(p.area_description), rings: geomRings(p.geometry) }))
+      const parts = (period.parts || []).map((p) => ({ level: normLevel(p.level), area: txt(p.area_description), rings: geomRings(p.geometry),
+        impact: txt(p.impact), instruction: txt(p.instruction) }))
         .filter((p) => p.level !== "green" && (p.rings.length ? polygonOverlaps(p.rings) : /gelderland|heel nederland|alle provincies/i.test(p.area)));
       if (!parts.length) continue;
       const niveau = parts.reduce((m, p) => (levelRank(p.level) > levelRank(m) ? p.level : m), "green");
       const rings = parts.flatMap((p) => p.rings);
       const [lat, lon] = rings.length ? centroid(rings) : [52.2112, 5.9699];
       const description = txt(period.description) || txt(ev.description) || txt(period.text) || txt(ev.text);
+      // KNMI per area part: "impact" (what to expect) and "instruction" (what to do). The highest level here counts.
+      const top = parts.filter((p) => p.level === niveau);
+      const uniek = (k) => [...new Set(top.map((p) => p[k]).filter(Boolean))].join("\n") || null;
+      const verwachting = uniek("impact"), advies = uniek("instruction");
       out.push({
         id: `knmi:${ev.id ?? ei}:${period.starts_at}`, bron: "knmi",
-        titel: phenomenon || "Weerwaarschuwing", tekst: description || `${[...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ")}`,
+        titel: phenomenon || "Weerwaarschuwing", verwachting, advies,
+        tekst: description || verwachting || `${[...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ")}`,
         tekst_en: null, plaats: [...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ") || null,
         niveau, soort: phenomenon, start_at: start, end_at: end,
         status: end < now ? "beeindigd" : start > now ? "verwacht" : "actief",
@@ -230,6 +236,7 @@ export function fromKnmi(data, now = Date.now()) {
       prev.end_at = Math.max(prev.end_at, w.end_at);
       prev.status = prev.end_at < now ? "beeindigd" : prev.start_at > now ? "verwacht" : "actief";
       if (w.tekst && !prev.tekst.includes(w.tekst)) prev.tekst = prev.tekst || w.tekst;
+      prev.verwachting ||= w.verwachting; prev.advies ||= w.advies;
       continue;
     }
     joined.push(w);
@@ -314,12 +321,13 @@ export function toAPI(row, { withArea = true } = {}) {
     start: new Date(row.start_at).toISOString(), einde: row.end_at ? new Date(row.end_at).toISOString() : null,
     lat: row.lat, lon: row.lon, link: row.link, gebied: withArea ? parse(row.gebied) : undefined,
     eerst_gezien: new Date(row.first_seen).toISOString(), bijgewerkt: new Date(row.updated_at).toISOString(),
+    ...(row.bron === "knmi" ? { verwachting: row.verwachting ?? null, advies: row.advies ?? null } : {}),
   };
 }
 
 // Beheer can hide a warning or end it by hand (table waarschuwing_overrides).
-const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended FROM waarschuwingen w
-  LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
+const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended, we.verwachting, we.advies FROM waarschuwingen w
+  LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id LEFT JOIN waarschuwing_extra we ON we.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
 const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { ...row, status: "beeindigd", end_at: Math.min(row.end_at || row.ov_ended, row.ov_ended) } : row);
 
 export async function listWarnings(env, days = 7) {
@@ -370,6 +378,10 @@ async function upsert(env, w, now) {
       gebied = excluded.gebied, lat = excluded.lat, lon = excluded.lon, link = excluded.link, updated_at = excluded.updated_at`)
     .bind(w.id, w.bron, w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status,
       json(w.gebied), w.lat, w.lon, w.link, prev?.first_seen ?? now, now, prev?.notified ?? null).run();
+  if (w.bron === "knmi") {
+    await env.DB.prepare(`INSERT INTO waarschuwing_extra (id, verwachting, advies) VALUES (?, ?, ?)
+      ON CONFLICT(id) DO UPDATE SET verwachting = excluded.verwachting, advies = excluded.advies`).bind(w.id, w.verwachting ?? null, w.advies ?? null).run();
+  }
   return prev;
 }
 
@@ -491,7 +503,7 @@ export async function ingestWarnings(env, budget, kv) {
       // Warnings KNMI no longer lists (withdrawn, or joined into one): remove the ones that have not ended yet.
       const ids = new Set(list.map((w) => w.id));
       const { results: open } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'knmi' AND end_at >= ?").bind(now).all();
-      for (const r of open) if (!ids.has(r.id)) await env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id).run();
+      for (const r of open) if (!ids.has(r.id)) await env.DB.batch([env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id), env.DB.prepare("DELETE FROM waarschuwing_extra WHERE id = ?").bind(r.id)]);
       await kv.set("knmi_revision", rev);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";
@@ -521,6 +533,7 @@ export async function warningsHousekeeping(env) {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM waarschuwingen WHERE status = 'beeindigd' AND COALESCE(end_at, updated_at) < ?").bind(Date.now() - 14 * DAY),
     env.DB.prepare("DELETE FROM device_prefs WHERE token NOT IN (SELECT token FROM devices)"),
+    env.DB.prepare("DELETE FROM waarschuwing_extra WHERE id NOT IN (SELECT id FROM waarschuwingen)"),
   ]);
 }
 

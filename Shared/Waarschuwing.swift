@@ -28,9 +28,13 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let link: String?
     /// Rings of [lon, lat].
     let gebied: [[[Double]]]?
+    /// KNMI: what to expect.
+    let verwachting: String?
+    /// KNMI: what to do.
+    let advies: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies
         case tekstEn = "tekst_en"
     }
 
@@ -51,6 +55,8 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         lon = try? c.decodeIfPresent(Double.self, forKey: .lon)
         link = try? c.decodeIfPresent(String.self, forKey: .link)
         gebied = try? c.decodeIfPresent([[[Double]]].self, forKey: .gebied)
+        verwachting = (try? c.decodeIfPresent(String.self, forKey: .verwachting)).flatMap { $0 }
+        advies = (try? c.decodeIfPresent(String.self, forKey: .advies)).flatMap { $0 }
     }
 
     var isActief: Bool { status == "actief" }

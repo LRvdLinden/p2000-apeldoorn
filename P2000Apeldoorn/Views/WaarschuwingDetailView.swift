@@ -115,7 +115,8 @@ struct WaarschuwingDetailView: View {
                 .padding(.horizontal, 4)
                 .padding(.bottom, -6)
                 mainCard(w)
-                if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
+                if w.bron == .knmi, w.verwachting != nil || w.advies != nil { knmiCard(w) }
+                else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
                 if let m = meteo { meteoCard(m) }
                 meldingenCard(w)
                 dataCard(w)
@@ -345,6 +346,31 @@ struct WaarschuwingDetailView: View {
             }
         }
         .wCard()
+    }
+
+    /// KNMI: what to expect and what to do, as KNMI writes it per area.
+    private func knmiCard(_ w: Waarschuwing) -> some View {
+        VStack(alignment: .leading, spacing: 16) {
+            if let v = w.verwachting { knmiBlok("exclamationmark.triangle.fill", Waarschuwing.codeColor(w.niveau), L("Wat kun je verwachten?"), v) }
+            if let a = w.advies { knmiBlok("checkmark.shield.fill", .accentColor, L("Wat moet je doen?"), a) }
+            if let p = w.plaats, !p.isEmpty { knmiBlok("map.fill", .secondary, L("Gebied"), p) }
+            if let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
+                Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wCard()
+    }
+
+    private func knmiBlok(_ symbol: String, _ color: Color, _ titel: String, _ tekst: String) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: symbol).font(.system(size: 17, weight: .semibold)).foregroundStyle(color).frame(width: 24).accessibilityHidden(true)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(titel).font(AppFont.body(15, .semibold))
+                Text(tekst).font(AppFont.body(15)).lineSpacing(3).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+            }
+        }
+        .accessibilityElement(children: .combine)
     }
 
     private func meldingenCard(_ w: Waarschuwing) -> some View {

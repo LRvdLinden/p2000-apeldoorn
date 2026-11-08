@@ -120,6 +120,10 @@ data class Waarschuwing(
     val link: String? = null,
     val gebied: List<List<List<Double>>>? = null,
     val meldingen: List<Melding>? = null,
+    /** KNMI: what to expect. */
+    val verwachting: String? = null,
+    /** KNMI: what to do. */
+    val advies: String? = null,
 ) {
     val startAt: Instant get() = parseInstant(start) ?: Instant.now()
     val eindeAt: Instant? get() = parseInstant(einde)

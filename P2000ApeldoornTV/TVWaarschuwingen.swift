@@ -135,7 +135,16 @@ struct TVWaarschuwingDetail: View {
                         .font(AppFont.body(22, .medium))
                     Label(TVWaarschuwingTijd.tekst(waarschuwing), systemImage: "clock").font(AppFont.body(22, .medium))
                     if let p = waarschuwing.plaats { Label(p, systemImage: "mappin.and.ellipse").font(AppFont.body(22, .medium)) }
-                    if let t = waarschuwing.tekst, !t.isEmpty {
+                    if waarschuwing.verwachting != nil || waarschuwing.advies != nil {
+                        if let v = waarschuwing.verwachting {
+                            Text(L("Wat kun je verwachten?")).font(AppFont.body(22, .bold))
+                            Text(v).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
+                        }
+                        if let a = waarschuwing.advies {
+                            Text(L("Wat moet je doen?")).font(AppFont.body(22, .bold))
+                            Text(a).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
+                        }
+                    } else if let t = waarschuwing.tekst, !t.isEmpty {
                         Text(t).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
                     }
                     if let w = weather { TVWeerBlok(weather: w) }

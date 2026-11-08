@@ -7668,6 +7668,40 @@
         }
       }
     },
+    "Wat kun je verwachten?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What to expect"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat kun je verwachten?"
+          }
+        }
+      }
+    },
+    "Wat moet je doen?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "What to do"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wat moet je doen?"
+          }
+        }
+      }
+    },
     "Weergave": {
       "extractionState": "manual",
       "localizations": {

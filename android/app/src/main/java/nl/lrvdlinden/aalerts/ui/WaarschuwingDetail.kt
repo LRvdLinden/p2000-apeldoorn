@@ -94,7 +94,11 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                     Text(x.titel, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     x.plaats?.let { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp)); Text(it, color = Muted) } }
                 }
-                x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
+                if (x.bron == "knmi" && (x.verwachting != null || x.advies != null)) {
+                    // KNMI writes these per area, in Dutch only.
+                    x.verwachting?.let { SectionCard(tr("Wat kun je verwachten?", "What to expect"), Icons.Outlined.Warning) { Text(it, fontSize = 15.sp) } }
+                    x.advies?.let { SectionCard(tr("Wat moet je doen?", "What to do"), Icons.Outlined.VerifiedUser) { Text(it, fontSize = 15.sp) } }
+                } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
                 }
                 SectionCard(tr("Tijden", "Times"), Icons.Outlined.Schedule) {
