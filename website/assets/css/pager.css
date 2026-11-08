@@ -323,10 +323,10 @@ a.drow { text-decoration: none; color: inherit; }
 
 /* KNMI: what to expect and what to do, as on knmi.nl */
 .knmi-advies .code { display: flex; align-items: center; gap: 10px; margin: 4px 0 12px; }
-.knmi-advies .code img { width: 40px; height: 40px; border-radius: 10px; background: var(--c); padding: 4px; box-sizing: border-box; }
+.knmi-advies .code img { width: 40px; height: 40px; border-radius: 10px; padding: 4px; box-sizing: border-box; }
 .knmi-advies .code span { display: grid; line-height: 1.3; }
 .knmi-advies .code small { opacity: .75; }
 .knmi-advies .box { background: color-mix(in srgb, currentColor 5%, transparent); border-radius: 14px; padding: 14px 16px; }
-.knmi-advies h3 { font-size: .95rem; margin: 0 0 4px; }
+.knmi-advies h3 { font-size: .95rem; margin: 16px 0 4px; }
 .knmi-advies .box p { margin: 0 0 12px; }
 .knmi-advies ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }

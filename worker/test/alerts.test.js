@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { fromNlAlert, fromBurgernet, fromKnmi, wantsPush, prefsFrom, payloadForWarning, parseNlAlertRing } from "../src/alerts.js";
+import { knmiPagina, fromNlAlert, fromBurgernet, fromKnmi, wantsPush, prefsFrom, payloadForWarning, parseNlAlertRing } from "../src/alerts.js";
 
 const sample = (f) => JSON.parse(readFileSync(new URL(`../../tools/samples/${f}`, import.meta.url)));
 const ring = (lat, lon, r = 0.02) => [0, 60, 120, 180, 240, 300].map((a) => `${(lat + r * Math.cos(a * Math.PI / 180)).toFixed(5)},${(lon + r * 1.6 * Math.sin(a * Math.PI / 180)).toFixed(5)}`).join(" ");
@@ -98,4 +98,23 @@ test("knmi: consecutive periods of one warning are joined, phenomenon in Dutch",
   assert.equal(list[0].verwachting, "Houd rekening met vertragingen op de weg.");
   assert.equal(list[0].advies, "Rijd langzamer.");
   assert.equal(list[0].tekst, "Houd rekening met vertragingen op de weg.");
+});
+
+test("knmi: headline, description and details from the warnings page", () => {
+  const html = `<section id="waarschuwing-2" class="weather-warnings-card"><article class="weather-warnings-details">
+  <h2 id="warning-title-2" class="weather-warnings-details__title">Vanochtend in het midden en noorden plaatselijk dichte mist</h2>
+  <div class="weather-warnings-details__body"><p>Vanochtend komt er plaatselijk dichte mist voor.</p><p>De mist verplaatst zich.</p></div>
+  <p class="weather-warnings-details__issued">Uitgifte: 08/11/2026 07:50 uur LT</p>
+  <details class="weather-warnings-more"><summary>Details</summary><div><p>Zicht minder dan 200 meter.</p></div></details></article></section>`;
+  const p = knmiPagina(html).get("2");
+  assert.equal(p.kop, "Vanochtend in het midden en noorden plaatselijk dichte mist");
+  assert.equal(p.omschrijving, "Vanochtend komt er plaatselijk dichte mist voor.\nDe mist verplaatst zich.");
+  assert.equal(p.details, "Zicht minder dan 200 meter.");
+  assert.equal(p.uitgifte, "08/11/2026 07:50 uur LT");
+  const ring = [[5.8, 52.1], [6.1, 52.1], [6.1, 52.3], [5.8, 52.3], [5.8, 52.1]];
+  const data = { warning_events: [{ id: 2, phenomenon: "fog", label: "Mist", periods: [{ starts_at: "2026-11-08T05:00:00Z", ends_at: "2026-11-08T08:00:00Z",
+    parts: [{ level: "yellow", area_description: "Gelderland", geometry: { type: "Polygon", coordinates: [ring] } }] }] }] };
+  const [w] = fromKnmi(data, Date.parse("2026-11-08T06:00:00Z"), knmiPagina(html));
+  assert.equal(w.kop, p.kop);
+  assert.equal(w.titel, "Mist");
 });

@@ -124,7 +124,14 @@ data class Waarschuwing(
     val verwachting: String? = null,
     /** KNMI: what to do. */
     val advies: String? = null,
+    /** KNMI: headline, description, details and issue time from knmi.nl. */
+    @SerialName("kop") val knmiKop: String? = null,
+    val omschrijving: String? = null,
+    val details: String? = null,
+    val uitgifte: String? = null,
 ) {
+    val heeftKnmiTekst: Boolean get() = bron == "knmi" && (knmiKop != null || omschrijving != null || verwachting != null || advies != null)
+    val knmiAdviesRegels: List<String> get() = listOfNotNull(verwachting, advies).flatMap { it.split("\n") }.map { it.trim() }.filter { it.isNotEmpty() }
     val startAt: Instant get() = parseInstant(start) ?: Instant.now()
     val eindeAt: Instant? get() = parseInstant(einde)
     val isActief get() = status == "actief"

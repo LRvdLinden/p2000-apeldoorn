@@ -117,8 +117,9 @@ CREATE TABLE IF NOT EXISTS waarschuwingen (
   notified TEXT                   -- level (KNMI) or "1" once pushed
 );
 CREATE INDEX IF NOT EXISTS waarschuwingen_start ON waarschuwingen (start_at);
--- KNMI: what to expect (impact) and what to do (instruction) for the warning detail page.
-CREATE TABLE IF NOT EXISTS waarschuwing_extra (id TEXT PRIMARY KEY, verwachting TEXT, advies TEXT);
+-- KNMI texts for the detail page (JSON): verwachting, advies (feed) and kop, omschrijving, details, uitgifte (knmi.nl page).
+DROP TABLE IF EXISTS waarschuwing_extra;
+CREATE TABLE IF NOT EXISTS waarschuwing_knmi (id TEXT PRIMARY KEY, data TEXT);
 -- Per-device choices for the new sources (old app versions have no row and get no warning pushes).
 CREATE TABLE IF NOT EXISTS device_prefs (token TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at INTEGER);
 -- Beheer: a warning hidden from the apps, or ended by hand (ended_at), without touching the source data.

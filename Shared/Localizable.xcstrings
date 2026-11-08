@@ -715,6 +715,23 @@
         }
       }
     },
+    "Advies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advice"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Advies"
+          }
+        }
+      }
+    },
     "Afgelopen": {
       "extractionState": "manual",
       "localizations": {
@@ -2891,6 +2908,23 @@
         }
       }
     },
+    "Geldt voor: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies to: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldt voor: %@"
+          }
+        }
+      }
+    },
     "Gelezen": {
       "extractionState": "manual",
       "localizations": {
@@ -4247,6 +4281,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Made & Powered by"
+          }
+        }
+      }
+    },
+    "Meer informatie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More information"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meer informatie"
           }
         }
       }
@@ -5985,6 +6036,23 @@
         }
       }
     },
+    "Risico's en advies": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risks and advice"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Risico's en advies"
+          }
+        }
+      }
+    },
     "Rood": {
       "extractionState": "manual",
       "localizations": {
@@ -6814,6 +6882,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uitgezonden"
+          }
+        }
+      }
+    },
+    "Uitgifte: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Issued: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uitgifte: %@"
           }
         }
       }
@@ -7664,40 +7749,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten."
-          }
-        }
-      }
-    },
-    "Wat kun je verwachten?": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What to expect"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wat kun je verwachten?"
-          }
-        }
-      }
-    },
-    "Wat moet je doen?": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "What to do"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Wat moet je doen?"
           }
         }
       }

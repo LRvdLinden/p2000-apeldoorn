@@ -94,10 +94,21 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                     Text(x.titel, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     x.plaats?.let { Row(verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp)); Text(it, color = Muted) } }
                 }
-                if (x.bron == "knmi" && (x.verwachting != null || x.advies != null)) {
-                    // KNMI writes these per area, in Dutch only.
-                    x.verwachting?.let { SectionCard(tr("Wat kun je verwachten?", "What to expect"), Icons.Outlined.Warning) { Text(it.replace("\n", " "), fontSize = 15.sp) } }
-                    x.advies?.let { SectionCard(tr("Wat moet je doen?", "What to do"), Icons.Outlined.VerifiedUser) { it.split("\n").filter { r -> r.isNotBlank() }.forEach { r -> Text("•  $r", fontSize = 15.sp) } } }
+                if (x.heeftKnmiTekst) {
+                    // As on knmi.nl, in Dutch only.
+                    if (x.knmiKop != null || x.omschrijving != null) SectionCard {
+                        x.knmiKop?.let { Text(it, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
+                        x.omschrijving?.let { Text(it, fontSize = 15.sp) }
+                        x.uitgifte?.let { Text(tr("Uitgifte: ", "Issued: ") + it, color = Muted, fontSize = 12.sp) }
+                    }
+                    val regels = x.knmiAdviesRegels
+                    if (regels.isNotEmpty() || x.details != null) SectionCard(tr("Risico's en advies", "Risks and advice"), Icons.Outlined.Warning) {
+                        Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            regels.forEach { r -> Row { Text("•  ", fontSize = 15.sp); Text(r, fontSize = 15.sp) } }
+                        }
+                        x.details?.let { Text(tr("Meer informatie", "More information"), fontWeight = FontWeight.SemiBold); Text(it, fontSize = 15.sp) }
+                        x.plaats?.let { Text(tr("Geldt voor: ", "Applies to: ") + it, color = Muted, fontSize = 13.sp) }
+                    }
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
                 }

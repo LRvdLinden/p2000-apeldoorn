@@ -115,7 +115,7 @@ struct WaarschuwingDetailView: View {
                 .padding(.horizontal, 4)
                 .padding(.bottom, -6)
                 mainCard(w)
-                if w.bron == .knmi, w.verwachting != nil || w.advies != nil { knmiCard(w) }
+                if w.heeftKnmiTekst { knmiCard(w) }
                 else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
                 if let m = meteo { meteoCard(m) }
                 meldingenCard(w)
@@ -348,29 +348,63 @@ struct WaarschuwingDetailView: View {
         .wCard()
     }
 
-    /// KNMI: what to expect and what to do, as KNMI writes it per area.
+    /// KNMI as on knmi.nl: headline and description, then risks and advice, details and the area.
+    @ViewBuilder
     private func knmiCard(_ w: Waarschuwing) -> some View {
-        VStack(alignment: .leading, spacing: 16) {
-            if let v = w.verwachting { knmiBlok("exclamationmark.triangle.fill", Waarschuwing.codeColor(w.niveau), L("Wat kun je verwachten?"), v.replacingOccurrences(of: "\n", with: " ")) }
-            if let a = w.advies { knmiBlok("checkmark.shield.fill", .accentColor, L("Wat moet je doen?"), a.split(separator: "\n").map { "•  \($0)" }.joined(separator: "\n")) }
-            if let p = w.plaats, !p.isEmpty { knmiBlok("map.fill", .secondary, L("Gebied"), p) }
-            if let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
-                Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)
+        if w.knmiKop != nil || w.omschrijving != nil {
+            VStack(alignment: .leading, spacing: 10) {
+                if let k = w.knmiKop { Text(k).font(AppFont.heading(20)).fixedSize(horizontal: false, vertical: true) }
+                if let o = w.omschrijving {
+                    Text(o).font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                }
+                if let u = w.uitgifte { Text(Lf("Uitgifte: %@", u)).font(AppFont.body(12)).foregroundStyle(.secondary) }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .wCard()
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .wCard()
-    }
-
-    private func knmiBlok(_ symbol: String, _ color: Color, _ titel: String, _ tekst: String) -> some View {
-        HStack(alignment: .top, spacing: 12) {
-            Image(systemName: symbol).font(.system(size: 17, weight: .semibold)).foregroundStyle(color).frame(width: 24).accessibilityHidden(true)
-            VStack(alignment: .leading, spacing: 4) {
-                Text(titel).font(AppFont.body(15, .semibold))
-                Text(tekst).font(AppFont.body(15)).lineSpacing(3).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+        let regels = w.knmiAdviesRegels
+        if !regels.isEmpty || w.details != nil {
+            VStack(alignment: .leading, spacing: 14) {
+                if !regels.isEmpty {
+                    Text(L("Risico's en advies")).font(AppFont.heading(18))
+                    HStack(spacing: 12) {
+                        Image(systemName: w.systemImage).font(.system(size: 18, weight: .semibold)).foregroundStyle(w.onColor)
+                            .frame(width: 40, height: 40).background(w.color, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                            .accessibilityHidden(true)
+                        VStack(alignment: .leading, spacing: 1) {
+                            Text(verbatim: w.kop).font(AppFont.body(15, .semibold))
+                            Text(L("Advies")).font(AppFont.body(14)).foregroundStyle(.secondary)
+                        }
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        ForEach(Array(regels.enumerated()), id: \.offset) { _, r in
+                            HStack(alignment: .firstTextBaseline, spacing: 8) {
+                                Text(verbatim: "•").accessibilityHidden(true)
+                                Text(r).fixedSize(horizontal: false, vertical: true)
+                            }
+                            .font(AppFont.body(15))
+                        }
+                    }
+                    .padding(14)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.secondary.opacity(0.08), in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                }
+                if let d = w.details {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(L("Meer informatie")).font(AppFont.body(15, .semibold))
+                        Text(d).font(AppFont.body(15)).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+                if let p = w.plaats, !p.isEmpty {
+                    Text(Lf("Geldt voor: %@", p)).font(AppFont.body(13)).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
+                }
+                if let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
+                    Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)
+                }
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .wCard()
         }
-        .accessibilityElement(children: .combine)
     }
 
     private func meldingenCard(_ w: Waarschuwing) -> some View {

@@ -76,7 +76,7 @@ struct TVKnmiBalk: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: w.kop).font(AppFont.body(20, .bold))
                             Text(w.titel).font(AppFont.body(16, .regular)).lineLimit(1)
-                            if let regel = (w.advies ?? w.verwachting)?.split(separator: "\n").first {
+                            if let regel = (w.knmiKop ?? w.advies ?? w.verwachting)?.split(separator: "\n").first {
                                 Text(String(regel)).font(AppFont.body(15, .regular)).lineLimit(1).opacity(0.9)
                             }
                         }
@@ -138,17 +138,17 @@ struct TVWaarschuwingDetail: View {
                         .font(AppFont.body(22, .medium))
                     Label(TVWaarschuwingTijd.tekst(waarschuwing), systemImage: "clock").font(AppFont.body(22, .medium))
                     if let p = waarschuwing.plaats { Label(p, systemImage: "mappin.and.ellipse").font(AppFont.body(22, .medium)) }
-                    if waarschuwing.verwachting != nil || waarschuwing.advies != nil {
-                        if let v = waarschuwing.verwachting {
-                            Text(L("Wat kun je verwachten?")).font(AppFont.body(22, .bold))
-                            Text(v).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
-                        }
-                        if let a = waarschuwing.advies {
-                            Text(L("Wat moet je doen?")).font(AppFont.body(22, .bold))
-                            ForEach(Array(a.split(separator: "\n").enumerated()), id: \.offset) { _, regel in
-                                Text(verbatim: "•  \(regel)").font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
+                    if waarschuwing.heeftKnmiTekst {
+                        if let k = waarschuwing.knmiKop { Text(k).font(AppFont.body(24, .bold)) }
+                        if let o = waarschuwing.omschrijving { Text(o).font(AppFont.body(22, .regular)).foregroundStyle(.secondary) }
+                        let regels = waarschuwing.knmiAdviesRegels
+                        if !regels.isEmpty {
+                            Text(L("Risico's en advies")).font(AppFont.body(22, .bold)).padding(.top, 4)
+                            ForEach(Array(regels.enumerated()), id: \.offset) { _, r in
+                                Text(verbatim: "•  \(r)").font(AppFont.body(21, .regular)).foregroundStyle(.secondary)
                             }
                         }
+                        if let d = waarschuwing.details { Text(d).font(AppFont.body(20, .regular)).foregroundStyle(.secondary) }
                     } else if let t = waarschuwing.tekst, !t.isEmpty {
                         Text(t).font(AppFont.body(22, .regular)).foregroundStyle(.secondary)
                     }

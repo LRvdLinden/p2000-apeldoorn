@@ -192,14 +192,40 @@ const KNMI_NL = {
 };
 const knmiNaam = (p) => KNMI_NL[String(p || "").trim().toLowerCase()] || p;
 
+const ontHTML = (s) => String(s || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/p>\s*<p[^>]*>/gi, "\n").replace(/<[^>]+>/g, "")
+  .replace(/&#39;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&nbsp;/g, " ").replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&")
+  .split("\n").map((r) => r.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n");
+
+/**
+ * The texts KNMI shows on knmi.nl/nederland-nu/weer/waarschuwingen per warning (section "waarschuwing-<event id>"):
+ * headline, description, details and issue time. The JSON feed does not have these.
+ */
+export function knmiPagina(html) {
+  const uit = new Map();
+  const secties = String(html || "").split(/<section[^>]+id="waarschuwing-/i).slice(1);
+  for (const s of secties) {
+    const id = s.match(/^([^"]+)"/)?.[1];
+    if (!id) continue;
+    const pak = (re) => { const m = s.match(re); return m ? ontHTML(m[1]) || null : null; };
+    uit.set(String(id), {
+      kop: pak(/class="weather-warnings-details__title"[^>]*>([\s\S]*?)<\/h2>/i),
+      omschrijving: pak(/class="weather-warnings-details__body"[^>]*>([\s\S]*?)<\/div>/i),
+      details: pak(/<details class="weather-warnings-more">[\s\S]*?<\/summary>([\s\S]*?)<\/details>/i),
+      uitgifte: pak(/class="weather-warnings-details__issued"[^>]*>\s*(?:Uitgifte:)?([\s\S]*?)<\/p>/i),
+    });
+  }
+  return uit;
+}
+
 /**
  * One record per warning, with only the parts that cover the working area. Periods of the same warning that
  * follow each other with the same level are joined (KNMI often splits one fog warning into hourly periods).
  */
-export function fromKnmi(data, now = Date.now()) {
+export function fromKnmi(data, now = Date.now(), pagina = new Map()) {
   const out = [];
   for (const [ei, ev] of (data?.warning_events || []).entries()) {
-    const phenomenon = knmiNaam(txt(ev.phenomenon));
+    const phenomenon = txt(ev.label) || knmiNaam(txt(ev.phenomenon));
+    const site = pagina.get(String(ev.id ?? ei)) || {};
     for (const period of ev.periods || []) {
       const start = Date.parse(period.starts_at), end = Date.parse(period.ends_at);
       if (!Number.isFinite(start) || !Number.isFinite(end)) continue;
@@ -218,7 +244,8 @@ export function fromKnmi(data, now = Date.now()) {
       out.push({
         id: `knmi:${ev.id ?? ei}:${period.starts_at}`, bron: "knmi",
         titel: phenomenon || "Weerwaarschuwing", verwachting, advies,
-        tekst: description || verwachting || `${[...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ")}`,
+        kop: site.kop || null, omschrijving: site.omschrijving || null, details: site.details || null, uitgifte: site.uitgifte || null,
+        tekst: description || site.omschrijving || verwachting || `${[...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ")}`,
         tekst_en: null, plaats: [...new Set(parts.map((p) => p.area).filter(Boolean))].join(", ") || null,
         niveau, soort: phenomenon, start_at: start, end_at: end,
         status: end < now ? "beeindigd" : start > now ? "verwacht" : "actief",
@@ -316,18 +343,21 @@ const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return n
 export function toAPI(row, { withArea = true } = {}) {
   if (!row) return null;
   return {
-    id: row.id, bron: row.bron, titel: row.titel, tekst: row.tekst, tekst_en: row.tekst_en, plaats: row.plaats,
-    niveau: row.niveau, soort: row.soort, status: row.status,
+    id: row.id, bron: row.bron, titel: row.bron === "knmi" ? knmiNaam(row.titel) : row.titel, tekst: row.tekst, tekst_en: row.tekst_en, plaats: row.plaats,
+    niveau: row.niveau, soort: row.bron === "knmi" ? knmiNaam(row.soort) : row.soort, status: row.status,
     start: new Date(row.start_at).toISOString(), einde: row.end_at ? new Date(row.end_at).toISOString() : null,
     lat: row.lat, lon: row.lon, link: row.link, gebied: withArea ? parse(row.gebied) : undefined,
     eerst_gezien: new Date(row.first_seen).toISOString(), bijgewerkt: new Date(row.updated_at).toISOString(),
-    ...(row.bron === "knmi" ? { verwachting: row.verwachting ?? null, advies: row.advies ?? null } : {}),
+    ...(row.bron === "knmi" ? (() => {
+      const k = parse(row.knmi_data) || {};
+      return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null };
+    })() : {}),
   };
 }
 
 // Beheer can hide a warning or end it by hand (table waarschuwing_overrides).
-const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended, we.verwachting, we.advies FROM waarschuwingen w
-  LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id LEFT JOIN waarschuwing_extra we ON we.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
+const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended, wk.data AS knmi_data FROM waarschuwingen w
+  LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
 const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { ...row, status: "beeindigd", end_at: Math.min(row.end_at || row.ov_ended, row.ov_ended) } : row);
 
 export async function listWarnings(env, days = 7) {
@@ -379,8 +409,9 @@ async function upsert(env, w, now) {
     .bind(w.id, w.bron, w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status,
       json(w.gebied), w.lat, w.lon, w.link, prev?.first_seen ?? now, now, prev?.notified ?? null).run();
   if (w.bron === "knmi") {
-    await env.DB.prepare(`INSERT INTO waarschuwing_extra (id, verwachting, advies) VALUES (?, ?, ?)
-      ON CONFLICT(id) DO UPDATE SET verwachting = excluded.verwachting, advies = excluded.advies`).bind(w.id, w.verwachting ?? null, w.advies ?? null).run();
+    const extra = { verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte };
+    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
+      .bind(w.id, JSON.stringify(extra)).run();
   }
   return prev;
 }
@@ -498,12 +529,17 @@ export async function ingestWarnings(env, budget, kv) {
     const last = await kv.get("knmi_revision");
     if (!rev || rev !== last?.value || Date.now() - Number(last?.at || 0) > 30 * 60_000) {
       const d = await fetchJSON(`${SOURCES.knmi}.json`, budget);
-      const list = fromKnmi(d, now);
+      // Headline, description and details only stand on KNMI's warnings page; without it the feed texts still work.
+      let pagina = new Map();
+      if (d?.warning_events?.length) {
+        try { pagina = knmiPagina(await fetchText("https://www.knmi.nl/nederland-nu/weer/waarschuwingen", budget)); } catch {}
+      }
+      const list = fromKnmi(d, now, pagina);
       await handle("knmi", list);
       // Warnings KNMI no longer lists (withdrawn, or joined into one): remove the ones that have not ended yet.
       const ids = new Set(list.map((w) => w.id));
       const { results: open } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'knmi' AND end_at >= ?").bind(now).all();
-      for (const r of open) if (!ids.has(r.id)) await env.DB.batch([env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id), env.DB.prepare("DELETE FROM waarschuwing_extra WHERE id = ?").bind(r.id)]);
+      for (const r of open) if (!ids.has(r.id)) await env.DB.batch([env.DB.prepare("DELETE FROM waarschuwingen WHERE id = ?").bind(r.id), env.DB.prepare("DELETE FROM waarschuwing_knmi WHERE id = ?").bind(r.id)]);
       await kv.set("knmi_revision", rev);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";
@@ -533,7 +569,7 @@ export async function warningsHousekeeping(env) {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM waarschuwingen WHERE status = 'beeindigd' AND COALESCE(end_at, updated_at) < ?").bind(Date.now() - 14 * DAY),
     env.DB.prepare("DELETE FROM device_prefs WHERE token NOT IN (SELECT token FROM devices)"),
-    env.DB.prepare("DELETE FROM waarschuwing_extra WHERE id NOT IN (SELECT id FROM waarschuwingen)"),
+    env.DB.prepare("DELETE FROM waarschuwing_knmi WHERE id NOT IN (SELECT id FROM waarschuwingen)"),
   ]);
 }
 

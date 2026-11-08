@@ -32,9 +32,15 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let verwachting: String?
     /// KNMI: what to do.
     let advies: String?
+    /// KNMI: headline, description, details and issue time from knmi.nl.
+    let knmiKop: String?
+    let omschrijving: String?
+    let details: String?
+    let uitgifte: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte
+        case knmiKop = "kop"
         case tekstEn = "tekst_en"
     }
 
@@ -57,9 +63,19 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         gebied = try? c.decodeIfPresent([[[Double]]].self, forKey: .gebied)
         verwachting = (try? c.decodeIfPresent(String.self, forKey: .verwachting)).flatMap { $0 }
         advies = (try? c.decodeIfPresent(String.self, forKey: .advies)).flatMap { $0 }
+        knmiKop = (try? c.decodeIfPresent(String.self, forKey: .knmiKop)).flatMap { $0 }
+        omschrijving = (try? c.decodeIfPresent(String.self, forKey: .omschrijving)).flatMap { $0 }
+        details = (try? c.decodeIfPresent(String.self, forKey: .details)).flatMap { $0 }
+        uitgifte = (try? c.decodeIfPresent(String.self, forKey: .uitgifte)).flatMap { $0 }
     }
 
     var isActief: Bool { status == "actief" }
+    /// KNMI has more than the feed's area names (headline, description or advice).
+    var heeftKnmiTekst: Bool { bron == .knmi && (knmiKop != nil || omschrijving != nil || verwachting != nil || advies != nil) }
+    /// KNMI risks and advice as separate lines (what to expect first, then what to do).
+    var knmiAdviesRegels: [String] {
+        [verwachting, advies].compactMap { $0 }.flatMap { $0.split(separator: "\n").map { $0.trimmingCharacters(in: .whitespaces) } }.filter { !$0.isEmpty }
+    }
     var isBeeindigd: Bool { status == "beeindigd" }
     /// Key for the list filter: "nlalert", "burgernet", "knmi:yellow" …
     var filterKey: String { bron == .knmi ? "knmi:\(niveau ?? "yellow")" : bron.rawValue }
