@@ -59,6 +59,8 @@ fun PagerScreen(nav: Nav) {
         contentWindowInsets = WindowInsets.statusBars,
         topBar = {
             TopAppBar(
+                // Saved alerts top left; the Saved screen has a back button to the pager.
+                navigationIcon = { IconButton(onClick = { nav.open("bewaard") }) { Icon(Icons.Outlined.BookmarkBorder, tr("Bewaard", "Saved")) } },
                 title = {
                     if (searching) OutlinedTextField(query, { query = it }, singleLine = true, placeholder = { Text(tr("Zoek in meldingen", "Search alerts")) },
                         modifier = Modifier.fillMaxWidth().padding(end = 8.dp), shape = RoundedCornerShape(12.dp))
@@ -67,7 +69,6 @@ fun PagerScreen(nav: Nav) {
                 actions = {
                     IconButton(onClick = { searching = !searching; if (!searching) query = "" }) { Icon(if (searching) Icons.Filled.Close else Icons.Outlined.Search, tr("Zoeken", "Search")) }
                     IconButton(onClick = { nav.open("waarschuwingen") }) { Icon(Icons.Outlined.WarningAmber, tr("Alle waarschuwingen", "All warnings")) }
-                    IconButton(onClick = { nav.open("bewaard") }) { Icon(Icons.Outlined.BookmarkBorder, tr("Bewaard", "Saved")) }
                     IconButton(onClick = { showFilter = true }) {
                         BadgedBox(badge = { if (Settings.listFilterActive) Badge(containerColor = MaterialTheme.colorScheme.primary) }) {
                             Icon(Icons.Outlined.FilterList, tr("Filteren", "Filter"))

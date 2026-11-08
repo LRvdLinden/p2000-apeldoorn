@@ -34,7 +34,7 @@ struct PagerView: View {
     var body: some View {
         NavigationSplitView {
             content
-                .navigationTitle(Text(verbatim: "A-Alerts"))
+                .navigationTitle(scope == .bewaard ? Text(L("Bewaard")) : Text(verbatim: "A-Alerts"))
                 #if os(iOS)
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
@@ -43,6 +43,24 @@ struct PagerView: View {
                     await store.refresh()
                 }
                 .toolbar {
+                    // Saved alerts behind a button top left; from there back to all alerts.
+                    ToolbarItem(placement: .navigation) {
+                        if scope == .bewaard {
+                            Button {
+                                withAnimation { scope = .alle }
+                            } label: {
+                                Label(L("Pager"), systemImage: "chevron.left").labelStyle(.titleAndIcon)
+                            }
+                            .accessibilityLabel(L("Terug naar alle meldingen"))
+                        } else {
+                            Button {
+                                withAnimation { scope = .bewaard }
+                            } label: {
+                                Label(L("Bewaard"), systemImage: settings.bewaard.isEmpty ? "bookmark" : "bookmark.fill")
+                            }
+                            .accessibilityLabel(L("Bewaarde meldingen"))
+                        }
+                    }
                     ToolbarItem(placement: .primaryAction) {
                         Button {
                             showFilters = true
@@ -86,13 +104,6 @@ struct PagerView: View {
                     .listRowInsets(EdgeInsets(top: 8, leading: 12, bottom: 8, trailing: 12))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                Picker(L("Weergave"), selection: $scope) {
-                    ForEach(Scope.allCases) { Text($0.label).tag($0) }
-                }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.hidden)
                 if !knmi.isEmpty {
                     KnmiBanner(items: knmi) { selection = $0.selectionTag }
                         .listRowInsets(EdgeInsets(top: 4, leading: 0, bottom: 4, trailing: 0))
