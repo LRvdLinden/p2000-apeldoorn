@@ -6,10 +6,12 @@ on:
 jobs:
   check:
     runs-on: ubuntu-latest
+    env:
+      KEY: ${{ secrets.KNMI_WMS_KEY }}
     steps:
       - run: |
-          B=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          echo "radar2: $(curl -s $B/v1/radar)"
-          curl -s -o nl.png -w "radar.png: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar.png"
-          file nl.png; head -c 300 nl.png | grep -a error || true
-          curl -s -o t.png -w "tegel 8/131/84: %{http_code} %{content_type} %{size_download} bytes\n" "$B/v1/radar/8/131/84.png"
+          Q='DATASET=radar_reflectivity_composites&SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&LAYERS=precipitation&STYLES=&CRS=EPSG:3857&BBOX=289000,6540000,868000,7150000&WIDTH=400&HEIGHT=420&FORMAT=image/png&TRANSPARENT=TRUE'
+          echo "lengte sleutel: ${#KEY}"
+          curl -s -o a.out -w "anoniem: %{http_code} %{content_type}\n" "https://anonymous.api.dataplatform.knmi.nl/wms/adaguc-server?$Q"; head -c 200 a.out | tr -cd '[:print:]\n'; echo
+          curl -s -o k.out -w "met sleutel: %{http_code} %{content_type}\n" -H "Authorization: $KEY" "https://api.dataplatform.knmi.nl/wms/adaguc-server?$Q"; head -c 200 k.out | tr -cd '[:print:]\n'; echo
+          curl -s -o c.out -w "capabilities: %{http_code}\n" "https://anonymous.api.dataplatform.knmi.nl/wms/adaguc-server?DATASET=radar_reflectivity_composites&SERVICE=WMS&REQUEST=GetCapabilities"; grep -o "<Name>[^<]*</Name>" c.out | head -8
