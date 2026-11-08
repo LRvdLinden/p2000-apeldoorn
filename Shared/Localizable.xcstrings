@@ -715,6 +715,23 @@
         }
       }
     },
+    "Aanmelden bij de server mislukt: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Registering with the server failed: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aanmelden bij de server mislukt: %@"
+          }
+        }
+      }
+    },
     "Aantal": {
       "extractionState": "manual",
       "localizations": {
@@ -1323,6 +1340,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Apple Kaarten"
+          }
+        }
+      }
+    },
+    "Apple gaf geen pushtoken: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple did not provide a push token: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple gaf geen pushtoken: %@"
           }
         }
       }
@@ -2666,6 +2700,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Dit profiel geldt de hele dag. De stille modus geldt voor alle profielen samen."
+          }
+        }
+      }
+    },
+    "Dit toestel heeft nog geen pushtoken van Apple. Open de app opnieuw met internet en probeer het nog eens.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This device has no push token from Apple yet. Reopen the app with an internet connection and try again."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dit toestel heeft nog geen pushtoken van Apple. Open de app opnieuw met internet en probeer het nog eens."
           }
         }
       }
@@ -5220,6 +5271,23 @@
         }
       }
     },
+    "Meldingen staan uit voor A-Alerts in de instellingen van je toestel.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Notifications are turned off for A-Alerts in your device settings."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen staan uit voor A-Alerts in de instellingen van je toestel."
+          }
+        }
+      }
+    },
     "Meldinggegevens": {
       "extractionState": "manual",
       "localizations": {
@@ -7226,6 +7294,23 @@
         }
       }
     },
+    "Server: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Server: %@"
+          }
+        }
+      }
+    },
     "Sluit": {
       "extractionState": "manual",
       "localizations": {
@@ -8497,6 +8582,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verstoord"
+          }
+        }
+      }
+    },
+    "Verstuurd. Zie je niets binnen een halve minuut? Kijk dan bij Instellingen › Meldingen › A-Alerts of meldingen en banners aanstaan, en of een focus aanstaat.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sent. Nothing within half a minute? Check Settings › Notifications › A-Alerts to see whether notifications and banners are on, and whether a Focus is active."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verstuurd. Zie je niets binnen een halve minuut? Kijk dan bij Instellingen › Meldingen › A-Alerts of meldingen en banners aanstaan, en of een focus aanstaat."
           }
         }
       }

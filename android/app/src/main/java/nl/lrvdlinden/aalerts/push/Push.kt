@@ -3,6 +3,7 @@ package nl.lrvdlinden.aalerts.push
 import android.content.Context
 import nl.lrvdlinden.aalerts.isDutch
 import android.os.Build
+import android.util.Log
 import androidx.core.app.NotificationManagerCompat
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging
@@ -42,6 +43,19 @@ object Push {
 
     fun onNewToken(token: String) { cachedToken = token; sync(immediately = true) }
 
+    /** Last error from registering at the server (shown with the test button). */
+    var lastError: String? = null
+        private set
+
+    private fun body(token: String) = mapOf(
+        "token" to token,
+        "platform" to "android",
+        "environment" to "fcm",
+        "language" to if (isDutch) "nl" else "en",
+        "app_version" to "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+        "settings" to Settings.serverSettings(),
+    )
+
     /** Sends this device's settings to the server (debounced). Notifications off → the device is removed there. */
     fun sync(immediately: Boolean = false) {
         if (!::app.isInitialized) return
@@ -50,24 +64,28 @@ object Push {
             if (!immediately) delay(1500)
             val token = token() ?: return@launch
             if (!Settings.notificationsEnabled) { runCatching { Api.unregisterDevice(token) }; return@launch }
-            runCatching {
-                Api.registerDevice(mapOf(
-                    "token" to token,
-                    "platform" to "android",
-                    "environment" to "fcm",
-                    "language" to if (isDutch) "nl" else "en",
-                    "app_version" to "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
-                    "settings" to Settings.serverSettings(),
-                ))
+            lastError = runCatching { Api.registerDevice(body(token)) }.exceptionOrNull()?.let {
+                Log.w("Push", "Registratie mislukt", it); it.message ?: it.toString()
             }
         }
     }
 
-    suspend fun sendTest(): Boolean {
-        val token = token() ?: return false
-        sync(immediately = true)
-        delay(1200)
-        return runCatching { Api.testPush(token) }.isSuccess
+    /** "Stuur een testmelding": null when the server sent it, otherwise what went wrong. */
+    suspend fun sendTest(): String? {
+        val nl = isDutch
+        if (!BuildConfig.HAS_FIREBASE) return if (nl) "Deze versie is gebouwd zonder Firebase en kan geen pushmeldingen ontvangen." else "This build has no Firebase and cannot receive push notifications."
+        if (!available) return if (nl) "Firebase is niet gestart op dit toestel." else "Firebase did not start on this device."
+        if (!systemAllowed) return if (nl) "Meldingen staan uit voor A-Alerts in de Android-instellingen." else "Notifications are off for A-Alerts in Android settings."
+        val fcm = runCatching { FirebaseMessaging.getInstance().token.await() }
+        val token = fcm.getOrNull()?.also { cachedToken = it } ?: cachedToken
+            ?: return (if (nl) "Geen pushtoken van Firebase: " else "No push token from Firebase: ") + (fcm.exceptionOrNull()?.message ?: "?")
+        syncJob?.cancel()
+        runCatching { Api.registerDevice(body(token)) }.exceptionOrNull()?.let {
+            lastError = it.message
+            return (if (nl) "Aanmelden bij de server mislukt: " else "Registering with the server failed: ") + (it.message ?: it.toString())
+        }
+        lastError = null
+        return runCatching { Api.testPush(token) }.exceptionOrNull()?.let { (if (nl) "Server: " else "Server: ") + (it.message ?: it.toString()) }
     }
 
     val needsPermission: Boolean get() = Build.VERSION.SDK_INT >= 33

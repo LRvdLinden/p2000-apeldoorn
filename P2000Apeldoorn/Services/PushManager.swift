@@ -127,6 +127,7 @@ enum PushManager {
     /// Called by the app delegate with the APNs device token.
     static func didRegister(deviceToken: Data) {
         token = deviceToken.map { String(format: "%02x", $0) }.joined()
+        registrationError = nil
         syncDevice(immediately: true)
     }
 
@@ -141,51 +142,75 @@ enum PushManager {
                 try? await P2000API.shared.unregisterDevice(token: token)
                 return
             }
-            var settings: [String: Any] = [
-                "enabled": true,
-                "plaatsen": Array(s.notifPlaatsen).sorted(),
-                "diensten": Array(s.notifDiensten).sorted(),
-                "prioriteiten": Array(s.notifPrioriteiten).sorted(),
-                "quiet": s.quietMode,
-                "quiet_from": s.quietFrom,
-                "quiet_to": s.quietTo,
-                "critical": s.criticalAlerts,
-                // A-Alerts: NL-Alert, Burgernet and KNMI (older servers ignore this).
-                "waarschuwingen": [
-                    "nlalert": s.pushNLAlert,
-                    "burgernet": s.pushBurgernet,
-                    "knmi": Array(s.pushKnmi).sorted(),
-                    "knmiVooraf": s.pushKnmiVooraf,
-                    "knmiOpgeheven": s.pushKnmiOpgeheven,
-                ] as [String: Any],
-                // Followed capcodes: push also outside places, radius and profiles.
-                "capcodes": Array(s.volgCapcodes.keys).sorted(),
-                // A-Alerts: up to five notification profiles (older servers ignore this).
-                "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),
-            ]
-            if s.radiusEnabled, let c = s.radiusCenter {
-                settings["radius_km"] = s.radiusKm
-                settings["lat"] = c.lat
-                settings["lon"] = c.lon
-            }
-            let body: [String: Any] = [
-                "token": token,
-                "platform": platform,
-                "environment": environment,
-                "language": String(Config.uiLanguage.prefix(2)),
-                "app_version": "\(Config.version) (\(Config.build))",
-                "settings": settings,
-            ]
-            try? await P2000API.shared.registerDevice(body)
+            try? await P2000API.shared.registerDevice(registrationBody(token: token, s: s))
         }
     }
 
-    /// "Stuur een testmelding" in Settings.
-    static func sendTest() async -> Bool {
-        guard let token else { return false }
-        syncDevice(immediately: true)
-        try? await Task.sleep(for: .seconds(1))
-        return (try? await P2000API.shared.sendTestPush(token: token)) != nil
+    static func registrationBody(token: String, s: AppSettings) -> [String: Any] {
+        var settings: [String: Any] = [
+            "enabled": true,
+            "plaatsen": Array(s.notifPlaatsen).sorted(),
+            "diensten": Array(s.notifDiensten).sorted(),
+            "prioriteiten": Array(s.notifPrioriteiten).sorted(),
+            "quiet": s.quietMode,
+            "quiet_from": s.quietFrom,
+            "quiet_to": s.quietTo,
+            "critical": s.criticalAlerts,
+            // A-Alerts: NL-Alert, Burgernet and KNMI (older servers ignore this).
+            "waarschuwingen": [
+                "nlalert": s.pushNLAlert,
+                "burgernet": s.pushBurgernet,
+                "knmi": Array(s.pushKnmi).sorted(),
+                "knmiVooraf": s.pushKnmiVooraf,
+                "knmiOpgeheven": s.pushKnmiOpgeheven,
+            ] as [String: Any],
+            // Followed capcodes: push also outside places, radius and profiles.
+            "capcodes": Array(s.volgCapcodes.keys).sorted(),
+            // A-Alerts: up to five notification profiles (older servers ignore this).
+            "profielen": s.profielen.prefix(MeldingProfiel.maximum).map(\.serverJSON),
+        ]
+        if s.radiusEnabled, let c = s.radiusCenter {
+            settings["radius_km"] = s.radiusKm
+            settings["lat"] = c.lat
+            settings["lon"] = c.lon
+        }
+        return [
+            "token": token,
+            "platform": platform,
+            "environment": environment,
+            "language": String(Config.uiLanguage.prefix(2)),
+            "app_version": "\(Config.version) (\(Config.build))",
+            "settings": settings,
+        ]
+    }
+
+    /// Last APNs registration error (shown with the test button).
+    static var registrationError: String?
+
+    /// "Stuur een testmelding" in Settings. Returns nil when the server sent it, otherwise what went wrong.
+    static func sendTest() async -> String? {
+        let status = await UNUserNotificationCenter.current().notificationSettings().authorizationStatus
+        if status == .denied || status == .notDetermined {
+            return L("Meldingen staan uit voor A-Alerts in de instellingen van je toestel.")
+        }
+        guard let token else {
+            registerForRemote()
+            if let e = registrationError { return Lf("Apple gaf geen pushtoken: %@", e) }
+            return L("Dit toestel heeft nog geen pushtoken van Apple. Open de app opnieuw met internet en probeer het nog eens.")
+        }
+        let s = AppSettings.shared
+        // Register right now (not debounced) and wait for it, so the server knows this device.
+        syncTask?.cancel()
+        do { try await P2000API.shared.registerDevice(registrationBody(token: token, s: s)) }
+        catch { return Lf("Aanmelden bij de server mislukt: %@", error.localizedDescription) }
+        do {
+            try await P2000API.shared.sendTestPush(token: token)
+            return nil
+        } catch let P2000API.APIError.server(code, reason) {
+            return Lf("Server: %@", "\(code) \(reason)")
+        } catch {
+            return error.localizedDescription
+        }
     }
 
     /// Set by the app; called with the warning id when an NL-Alert, Burgernet or KNMI notification is tapped.

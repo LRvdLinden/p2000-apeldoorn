@@ -467,6 +467,7 @@ struct NotificationSettingsView: View {
     }
     @State private var denied = false
     @State private var testState: TestState = .idle
+    @State private var testFout: String?
 
     enum TestState { case idle, sending, sent, failed }
 
@@ -526,7 +527,8 @@ struct NotificationSettingsView: View {
                     Button {
                         Task {
                             testState = .sending
-                            testState = await PushManager.sendTest() ? .sent : .failed
+                            testFout = await PushManager.sendTest()
+                            testState = testFout == nil ? .sent : .failed
                         }
                     } label: {
                         HStack {
@@ -540,7 +542,9 @@ struct NotificationSettingsView: View {
                     .disabled(testState == .sending)
                 } footer: {
                     if testState == .failed {
-                        Text(L("De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw."))
+                        Text(testFout ?? L("De testmelding kon niet worden verstuurd. Controleer je internetverbinding en probeer het later opnieuw."))
+                    } else if testState == .sent {
+                        Text(L("Verstuurd. Zie je niets binnen een halve minuut? Kijk dan bij Instellingen › Meldingen › A-Alerts of meldingen en banners aanstaan, en of een focus aanstaat."))
                     }
                 }
             }

@@ -27,7 +27,13 @@ object Api {
     private val JSON_TYPE = "application/json; charset=utf-8".toMediaType()
     private val base = BuildConfig.API_BASE
 
-    class HttpException(val code: Int) : Exception("HTTP $code")
+    class HttpException(val code: Int, val reason: String? = null) : Exception(if (reason.isNullOrBlank()) "HTTP $code" else "HTTP $code ($reason)")
+
+    /** The worker answers errors with {"error": …} or, for pushes, {"reason": …}. */
+    private fun reasonOf(body: String?): String? = runCatching {
+        val o = AppJson.parseToJsonElement(body ?: "").jsonObject
+        (o["reason"] ?: o["error"])?.jsonPrimitive?.contentOrNull
+    }.getOrNull()
 
     private suspend fun getText(url: String): String = withContext(Dispatchers.IO) {
         client.newCall(Request.Builder().url(url).build()).execute().use { r ->
@@ -39,7 +45,7 @@ object Api {
     private suspend fun send(method: String, path: String, body: Any? = null): String = withContext(Dispatchers.IO) {
         val rb = body?.let { toJson(it).toString().toRequestBody(JSON_TYPE) } ?: if (method == "POST") "".toRequestBody(JSON_TYPE) else null
         client.newCall(Request.Builder().url(base + path).method(method, rb).build()).execute().use { r ->
-            if (!r.isSuccessful) throw HttpException(r.code)
+            if (!r.isSuccessful) throw HttpException(r.code, reasonOf(r.body?.string()))
             r.body?.string() ?: ""
         }
     }

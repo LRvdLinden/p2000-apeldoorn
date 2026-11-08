@@ -15,9 +15,11 @@ struct P2000API: Sendable {
 
     enum APIError: LocalizedError {
         case badStatus(Int)
+        case server(Int, String)
         var errorDescription: String? {
             switch self {
             case .badStatus(let code): return Lf("Server gaf foutcode %lld", code)
+            case .server(let code, let reason): return Lf("Server gaf foutcode %lld", code) + " (\(reason))"
             }
         }
     }
@@ -55,6 +57,11 @@ struct P2000API: Sendable {
         }
         let (data, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
+            // The worker answers errors with {"error": …} or, for pushes, {"reason": …}.
+            if let obj = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let reason = (obj["reason"] as? String) ?? (obj["error"] as? String), !reason.isEmpty {
+                throw APIError.server(http.statusCode, reason)
+            }
             throw APIError.badStatus(http.statusCode)
         }
         return data

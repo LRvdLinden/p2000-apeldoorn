@@ -109,7 +109,7 @@ fun SettingsScreen(nav: Nav) {
             }
 
             if (Push.available && Settings.notificationsEnabled) SectionCard {
-                Button(onClick = { scope.launch { testResult = if (Push.sendTest()) tr("Testmelding verstuurd.", "Test notification sent.") else tr("Versturen mislukt. Probeer het later opnieuw.", "Sending failed. Please try again later.") } }, modifier = Modifier.fillMaxWidth()) {
+                Button(onClick = { scope.launch { testResult = Push.sendTest() ?: tr("Verstuurd. Zie je niets binnen een halve minuut? Kijk bij Instellingen › Apps › A-Alerts › Meldingen en zet batterijbesparing voor A-Alerts uit.", "Sent. Nothing within half a minute? Check Settings › Apps › A-Alerts › Notifications and turn off battery optimisation for A-Alerts.") } }, modifier = Modifier.fillMaxWidth()) {
                     Text(tr("Stuur een testmelding", "Send a test notification"))
                 }
                 testResult?.let { Text(it, color = Muted, fontSize = 13.sp) }
