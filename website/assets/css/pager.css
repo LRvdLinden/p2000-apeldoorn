@@ -341,3 +341,8 @@ a.drow { text-decoration: none; color: inherit; }
 .verloop .vak b { flex: 1; }
 .verloop .vak span { color: var(--muted); font-variant-numeric: tabular-nums; font-size: .9rem; }
 .verloop .vak.voorbij { opacity: .5; }
+.bij { display: flex; align-items: center; gap: 10px; padding: 14px 12px; margin: 6px 0; border-radius: 14px; background: var(--surface); }
+.bij > span { width: 28px; height: 28px; border-radius: 50%; background: #16a34a; color: #fff; display: grid; place-items: center; font-weight: 700; flex: none; }
+.bij div { flex: 1; display: grid; }
+.bij small { color: var(--muted); }
+.bij button, .linkbtn { border: 0; background: none; color: var(--accent, #dc2626); font-weight: 600; cursor: pointer; font: inherit; }

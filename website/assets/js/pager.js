@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=46";
+} from "./core.js?v=47";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=46";
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=47";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -140,6 +140,10 @@ $("filterBtn").addEventListener("click", () => {
 $("fPlaats").addEventListener("change", (e) => { state.plaats = e.target.value; saveFilters(); render(); });
 $("fPrio").addEventListener("change", (e) => { state.prio = e.target.value; saveFilters(); render(); });
 $("fHideRead").addEventListener("change", (e) => { state.hideRead = e.target.checked; saveFilters(); render(); });
+$("list").addEventListener("click", (e) => {
+  if (!e.target.closest("[data-toonbekeken]")) return;
+  e.preventDefault(); state.hideRead = false; $("fHideRead").checked = false; saveFilters(); render();
+});
 $("fRadius").addEventListener("change", (e) => {
   const km = Number(e.target.value);
   if (!km) { state.radiusKm = 0; saveFilters(); render(); return; }
@@ -315,6 +319,13 @@ function renderList(newGuids = new Set()) {
     box.innerHTML = Array.from({ length: 6 }, () => `<div class="skeleton"></div>`).join("");
     return;
   }
+  // Viewed alerts hidden: "you are all caught up".
+  const verborgen = state.hideRead ? state.list.filter((m) => isRead(m) && m.guid !== state.selected).length : 0;
+  const bij = verborgen ? `<div class="bij"><span>✓</span><div><b>Je bent helemaal bij</b><small>${verborgen} bekeken ${verborgen === 1 ? "melding" : "meldingen"} verborgen</small></div><button data-toonbekeken>Toon</button></div>` : "";
+  if (!items.length && verborgen && !state.search) {
+    box.innerHTML = `<div class="empty"><b>Je bent helemaal bij</b>Je hebt alle ${verborgen} meldingen al bekeken. Nieuwe meldingen verschijnen hier vanzelf.<br><button class="linkbtn" data-toonbekeken>Toon bekeken meldingen</button></div>`;
+    return;
+  }
   if (!items.length) {
     box.innerHTML = `<div class="empty"><b>${onlyWarnings ? `Geen ${esc(BRONNEN[state.bron].label)}` : "Geen meldingen"}</b>${state.search || state.diensten.size || state.plaats || state.prio || state.radiusKm || onlyWarnings ? "Er is niets dat past bij je filters in de laatste 24 uur." : "In de laatste 24 uur zijn er geen meldingen."}</div>`;
     return;
@@ -325,7 +336,7 @@ function renderList(newGuids = new Set()) {
     if (k !== lastDay) { html += `<div class="day">${fmtDay(it.t)}</div>`; lastDay = k; }
     html += it.m ? rowHTML(it.m, newGuids.has(it.m.guid)) : warnRowHTML(it.w);
   }
-  box.innerHTML = html;
+  box.innerHTML = html + bij;
   firstRender = false;
 }
 
@@ -415,7 +426,7 @@ function renderDetail(m) {
     <section class="card" id="kazernesCard" hidden></section>
     ${verloopHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
-    <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
+    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
       <div class="unit"><b>${esc(u.naam || u.code)}</b><small>${esc([u.type, u.regio].filter(Boolean).join(" / "))}</small><code>${esc(u.code || "")}</code></div>`).join("")}</div></section>` : ""}
     ${cars.length ? `<section class="card"><h2>Voertuigen (${cars.length})</h2><div class="units">${cars.map((v) => `
@@ -603,7 +614,7 @@ async function selectWarning(id, { push = true } = {}) {
     ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
-    <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
+    <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     ${near.length ? `<section class="card"><h2>Meldingen in de buurt</h2><p class="hint">P2000-meldingen in hetzelfde gebied rond dezelfde tijd. Mogelijk verband, geen zekerheid.</p>
       <div class="cp-list">${near.slice(0, 10).map((m) => `<button data-goto="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(fmtTime(date(m)))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div></section>` : ""}

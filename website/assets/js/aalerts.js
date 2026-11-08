@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=46";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=47";
 
 const TZ = "Europe/Amsterdam";
 
@@ -38,18 +38,18 @@ export const isActief = (w) => w.status === "actief";
 export const isBeeindigd = (w) => w.status === "beeindigd";
 
 export function wKleur(w) {
-  return w.bron === "knmi" ? (CODES[codeNu(w)] || CODES.yellow)[1] : BRONNEN[w.bron].color;
+  return w.bron === "knmi" ? (CODES[w.niveau] || CODES.yellow)[1] : BRONNEN[w.bron].color;
 }
 export function wOpKleur(w) {
-  return w.bron === "knmi" ? (CODES[codeNu(w)] || CODES.yellow)[2] : BRONNEN[w.bron].on;
+  return w.bron === "knmi" ? (CODES[w.niveau] || CODES.yellow)[2] : BRONNEN[w.bron].on;
 }
 /** "Code geel · Mist", "Burgernet · Vermissing", "NL-Alert". */
 export function wKop(w) {
-  if (w.bron === "knmi") return [(CODES[codeNu(w)] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
+  if (w.bron === "knmi") return [(CODES[w.niveau] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
   if (w.bron === "burgernet") return ["Burgernet", w.soort].filter(Boolean).join(" · ");
   return "NL-Alert";
 }
-export const wStatus = (w) => (w.status === "beeindigd" ? "Beëindigd" : w.status === "verwacht" ? "Verwacht" : "Actief");
+export const wStatus = (w) => (isOpgeheven(w) ? "Opgeheven · code groen" : w.status === "beeindigd" ? "Beëindigd" : w.status === "verwacht" ? "Verwacht" : "Actief");
 export const wIcon = (w) => asset(`assets/img/${BRONNEN[w.bron].icon}.png`);
 
 /** The time of the warning ("13:15", or "5 nov 13:15"), with the end time once ended – never "x min ago". */
