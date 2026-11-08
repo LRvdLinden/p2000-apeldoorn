@@ -242,7 +242,7 @@ struct MeldingDetailView: View {
         ForEach(kazerneRoutes) { r in
             if let line = r.polyline {
                 MapPolyline(line)
-                    .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 4, lineCap: .round, dash: [10, 7]))
+                    .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 2.5, lineCap: .round, dash: [7, 6]))
             }
         }
         ForEach(kazerneRoutes) { r in

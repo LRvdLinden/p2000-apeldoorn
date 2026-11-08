@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=49";
+} from "./core.js?v=50";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=49";
+  CODES, isOpgeheven, wShareUrl } from "./aalerts.js?v=50";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -559,7 +559,7 @@ async function loadKazernes(m, mapReady) {
     <p class="hint">Geschatte tijden op basis van afstand en prioriteit, zonder voertuigposities.</p>`;
   const mk = detailMap && window.mapkit;
   if (mk && state.selected === m.guid) {
-    const style = new mk.Style({ strokeColor: dienstOf(m).color, lineWidth: 4, lineDash: [10, 8], lineCap: "round" });
+    const style = new mk.Style({ strokeColor: dienstOf(m).color, lineWidth: 2.5, lineDash: [7, 6], lineCap: "round" });
     await Promise.all(routes.map(async (r, i) => {
       detailMap.addAnnotation(kazerneAnnotation(mk, r.kazerne, dienstOf(m).color));
       // A real route by car when MapKit JS can give one; otherwise a straight dashed line.

@@ -26,7 +26,7 @@ struct TVDetailView: View {
                                 line.getCoordinates(&pts, range: NSRange(location: 0, length: line.pointCount))
                                 return pts
                             } ?? [r.kazerne.coordinate, coord])
-                            .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: [12, 8]))
+                            .stroke(r.kazerne.dienst.color, style: StrokeStyle(lineWidth: 3.5, lineCap: .round, dash: [9, 7]))
                             Annotation(r.kazerne.naam, coordinate: r.kazerne.coordinate, anchor: .center) { KazerneIcon(soort: r.kazerne.soort, size: 36) }
                                 .annotationTitles(.hidden)
                         }

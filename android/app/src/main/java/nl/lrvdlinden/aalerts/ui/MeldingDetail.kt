@@ -108,7 +108,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     AMap(
                         Modifier.fillMaxWidth().height(h),
                         points = pts,
-                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong()) } +
+                        lines = routes.map { r -> MapLine(r.kazerne.id, listOf(r.kazerne.lat to r.kazerne.lon, la to lo), m.soort.color.toArgb().toLong(), width = 2.5) } +
                             listOfNotNull(
                                 heli?.takeIf { heliSpoor.isNotEmpty() }?.let { h -> MapLine("spoor", heliSpoor.lijn() + heliPos!!, h.kleur, dashed = false, width = 4.0) },
                                 heli?.let { h -> MapLine("heli", listOf(heliPos!!, la to lo), 0xFF9333EA) }),
