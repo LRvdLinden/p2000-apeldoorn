@@ -2,6 +2,8 @@
 // (free key from developer.dataplatform.knmi.nl). Served as one image of the Netherlands (Apple apps)
 // and as map tiles (website and Android); both cached for 5 minutes.
 const WMS = "https://api.dataplatform.knmi.nl/wms/adaguc-server";
+// Without (or with a refused) key: KNMI's anonymous endpoint (shared quota, rate-limited per IP).
+const WMS_ANON = "https://anonymous.api.dataplatform.knmi.nl/wms/adaguc-server";
 const HALF = 20037508.342789244;
 
 /** Area of the single image: the Netherlands with a margin. */
@@ -21,11 +23,11 @@ export function tileBbox(z, x, y) {
 
 export function wmsUrl(bbox, width, height) {
   const q = new URLSearchParams({
-    DATASET: "nl_rdr_data_rtcor_5m", SERVICE: "WMS", VERSION: "1.3.0", REQUEST: "GetMap",
-    LAYERS: "precipitation_real_time", STYLES: "", CRS: "EPSG:3857", BBOX: bbox.map((v) => v.toFixed(1)).join(","),
+    DATASET: "radar_reflectivity_composites", SERVICE: "WMS", VERSION: "1.3.0", REQUEST: "GetMap",
+    LAYERS: "precipitation", STYLES: "", CRS: "EPSG:3857", BBOX: bbox.map((v) => v.toFixed(1)).join(","),
     WIDTH: String(width), HEIGHT: String(height), FORMAT: "image/png", TRANSPARENT: "TRUE",
   });
-  return `${WMS}?${q}`;
+  return `?${q}`;
 }
 
 async function cachedPng(env, ctx, key, url) {
@@ -33,7 +35,8 @@ async function cachedPng(env, ctx, key, url) {
   const req = new Request(`https://radar.cache/${key}`);
   const hit = await cache.match(req);
   if (hit) return hit;
-  const res = await fetch(url, { headers: { Authorization: env.KNMI_WMS_KEY }, signal: AbortSignal.timeout(12_000) });
+  let res = await fetch(WMS + url, { headers: { Authorization: env.KNMI_WMS_KEY }, signal: AbortSignal.timeout(12_000) });
+  if (res.status === 401 || res.status === 403) res = await fetch(WMS_ANON + url, { signal: AbortSignal.timeout(12_000) });
   if (!res.ok) return new Response(JSON.stringify({ error: `KNMI ${res.status}` }), { status: 502, headers: { "content-type": "application/json" } });
   const out = new Response(await res.arrayBuffer(), {
     headers: { "content-type": "image/png", "cache-control": "public, max-age=300", "access-control-allow-origin": "*" },
