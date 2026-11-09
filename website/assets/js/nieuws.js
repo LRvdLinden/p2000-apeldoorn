@@ -3,12 +3,13 @@ import { API, esc } from "./core.js?v=58";
 
 const TZ = "Europe/Amsterdam";
 const $ = (s) => document.querySelector(s);
-const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", politie: "#1E3A8C" };
+const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", politie: "#1E3A8C", "112nieuws": "#DC2626" };
 const CODE = { yellow: ["Code geel", "#F7C600"], orange: ["Code oranje", "#F28C28"], red: ["Code rood", "#E3001B"], green: ["Code groen", "#2E9E44"] };
-const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie" };
-const ICOON = (b) => `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi"].includes(b) ? b : "politie"}.png`;
+const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
+const ICOON = (b, cat) => b === "112nieuws" ? `/assets/img/icon_${{ brand: "brandweer", traumaheli: "traumaheli", politie: "politie" }[cat] || "ambulance"}.png`
+  : `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi"].includes(b) ? b : "politie"}.png`;
 const kleur = (x) => (x.bron === "knmi" ? (CODE[x.niveau] || CODE.yellow)[1] : KLEUR[x.bron] || KLEUR.politie);
-const label = (x) => x.soort === "liveblog" ? `Liveblog · ${BRON[x.bron]}` : x.soort === "weer" ? `Weer · ${(CODE[x.niveau] || CODE.yellow)[0]}` : `Politie${x.plaats ? ` · ${x.plaats}` : ""}`;
+const label = (x) => x.soort === "regionaal" ? `112 Nieuws${x.plaats ? ` · ${x.plaats}` : ""}` : x.soort === "liveblog" ? `Liveblog · ${BRON[x.bron]}` : x.soort === "weer" ? `Weer · ${(CODE[x.niveau] || CODE.yellow)[0]}` : `Politie${x.plaats ? ` · ${x.plaats}` : ""}`;
 const isLive = (x) => x.soort === "liveblog" && x.status !== "afgerond";
 
 function wanneer(iso) {
@@ -29,7 +30,7 @@ function meta(x) {
   if (x.soort === "weer") return [wanneer(x.at), x.status === "afgerond" ? "opgeheven" : null].filter(Boolean).join(" · ");
   return wanneer(x.at);
 }
-const labelHTML = (x) => `<span class="nw-label"><img src="${ICOON(x.bron)}" alt="">${esc(label(x))}${isLive(x) ? '<span class="live" aria-label="loopt nog"></span>' : ""}</span>`;
+const labelHTML = (x) => `<span class="nw-label"><img src="${ICOON(x.bron, x.categorie)}" alt="">${esc(label(x))}${isLive(x) ? '<span class="live" aria-label="loopt nog"></span>' : ""}</span>`;
 const veiligUrl = (u) => (/^https:\/\//i.test(u || "") ? u : null);
 
 // ------------------------------------------------------------------ list
@@ -99,7 +100,7 @@ async function toonArtikel(id) {
       ${url ? `<p><a href="${esc(url)}" rel="noopener" target="_blank">${esc(new URL(url).host)} ›</a></p>` : ""}
     </div></li>`;
   }).join("");
-  const bron = x.soort === "politie" ? "Bron: politie.nl. De afbeelding is een stockfoto van Pixabay." : x.soort === "weer" ? "Bron: KNMI."
+  const bron = x.soort === "regionaal" ? "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay." : x.soort === "politie" ? "Bron: politie.nl. De afbeelding is een stockfoto van Pixabay." : x.soort === "weer" ? "Bron: KNMI."
     : x.bron === "burgernet" ? "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts." : "Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.";
   const bronUrl = veiligUrl(x.bron_url);
   el.innerHTML = `
@@ -108,9 +109,10 @@ async function toonArtikel(id) {
     <div class="nw-tekst">
       ${x.intro && x.soort !== "liveblog" ? `<p class="intro">${esc(x.intro)}</p>` : ""}
       ${alineas}
-      ${x.waarschuwing && x.soort !== "politie" ? `<a class="nw-knop" style="background:${k};${x.bron === "vermistkind" ? "color:#F4E005" : ""}" href="/pager/?waarschuwing=${encodeURIComponent(x.waarschuwing)}">${x.soort === "weer" ? "Bekijk de weerwaarschuwing" : "Bekijk de melding"} ›</a>` : ""}
+      ${x.soort === "regionaal" && bronUrl ? `<a class="nw-knop" style="background:#DC2626" href="${esc(bronUrl)}" rel="noopener" target="_blank">Lees verder op 112nieuws.net ›</a>` : ""}
+      ${x.waarschuwing && x.soort !== "politie" && x.soort !== "regionaal" ? `<a class="nw-knop" style="background:${k};${x.bron === "vermistkind" ? "color:#F4E005" : ""}" href="/pager/?waarschuwing=${encodeURIComponent(x.waarschuwing)}">${x.soort === "weer" ? "Bekijk de weerwaarschuwing" : "Bekijk de melding"} ›</a>` : ""}
       ${tl ? `<h2>Tijdlijn <small style="font-weight:400;color:var(--muted);font-size:.8rem">nieuwste boven</small></h2><ol class="nw-tl">${tl}</ol>` : ""}
-      <p class="nw-voet">${esc(bron)}${bronUrl ? ` <a href="${esc(bronUrl)}" rel="noopener" target="_blank">${x.soort === "politie" ? "Lees op politie.nl" : "Bekijk de bron"} ›</a>` : ""}</p>
+      <p class="nw-voet">${esc(bron)}${bronUrl && x.soort !== "regionaal" ? ` <a href="${esc(bronUrl)}" rel="noopener" target="_blank">${x.soort === "politie" ? "Lees op politie.nl" : "Bekijk de bron"} ›</a>` : ""}</p>
     </div>`;
   el.querySelector(".nw-terug").addEventListener("click", (e) => { e.preventDefault(); history.pushState({}, "", "/nieuws/"); route(); });
   el.querySelector(".nw-delen").addEventListener("click", async () => {
@@ -123,8 +125,8 @@ async function toonArtikel(id) {
 
 function route() {
   const delen = location.pathname.split("/").filter(Boolean);
-  const id = (delen[0] === "nieuws" && /^[pwl]-[0-9a-f]{12}$/.test(delen[1] || "") && delen[1]) || new URLSearchParams(location.search).get("id");
-  if (id && /^[pwl]-[0-9a-f]{12}$/.test(id)) { toonArtikel(id); scrollTo(0, 0); return; }
+  const id = (delen[0] === "nieuws" && /^[pwlr]-[0-9a-f]{12}$/.test(delen[1] || "") && delen[1]) || new URLSearchParams(location.search).get("id");
+  if (id && /^[pwlr]-[0-9a-f]{12}$/.test(id)) { toonArtikel(id); scrollTo(0, 0); return; }
   clearTimeout(timer);
   document.title = "Nieuws: politie, weer en liveblogs | A-Alerts";
   $("#artikel").hidden = true; $("#lijst").hidden = false;

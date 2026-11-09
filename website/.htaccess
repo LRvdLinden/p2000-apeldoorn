@@ -44,7 +44,7 @@ ErrorDocument 404 /404.html
   RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind):.+$ /deel/$1.html [L]
 
   # Nieuws: /nieuws/<id> is dezelfde pagina; de JavaScript toont het artikel of liveblog.
-  RewriteRule ^nieuws/[pwl]-[0-9a-f]{12}/?$ /nieuws/index.html [L]
+  RewriteRule ^nieuws/[pwlr]-[0-9a-f]{12}/?$ /nieuws/index.html [L]
 
   # Oudere deellinks: /melding/<guid> en /waarschuwing/<id> → live pager
   RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]
