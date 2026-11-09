@@ -537,7 +537,7 @@ struct KaartLagenView: View {
                         }
                         ForEach(helis.items) { h in
                             HStack {
-                                Image(systemName: "helicopter").foregroundStyle(h.color)
+                                Image(systemName: "airplane").foregroundStyle(h.color)
                                 Text(h.naam)
                                 Spacer()
                                 Text(h.hoogteTekst).foregroundStyle(.secondary)
@@ -581,7 +581,7 @@ struct LocatieKaart: View {
                     .buttonStyle(.plain).accessibilityLabel(L("Sluit"))
             }
             ForEach(helis) { h in
-                Label(Lf("%@ is waarschijnlijk onderweg hierheen", h.naam) + (h.voorspelling?.etaMin.map { " · ± \($0) min" } ?? ""), systemImage: "helicopter")
+                Label(Lf("%@ is waarschijnlijk onderweg hierheen", h.naam) + (h.voorspelling?.etaMin.map { " · ± \($0) min" } ?? ""), systemImage: "airplane")
                     .font(AppFont.body(13, .medium, relativeTo: .footnote))
             }
         }

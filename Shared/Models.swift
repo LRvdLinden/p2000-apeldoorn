@@ -52,7 +52,7 @@ enum Dienst: String, CaseIterable, Codable, Identifiable, Hashable {
         case .brandweer: return "flame.fill"
         case .ambulance: return "cross.case.fill"
         case .politie: return "shield.lefthalf.filled"
-        case .traumaheli: return "helicopter"
+        case .traumaheli: return "airplane"
         case .kustwacht: return "water.waves"
         case .onbekend: return "questionmark.circle.fill"
         }

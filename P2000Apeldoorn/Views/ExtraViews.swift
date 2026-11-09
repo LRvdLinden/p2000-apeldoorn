@@ -190,7 +190,7 @@ struct GrootIncidentSection: View {
             NavigationLink {
                 HeliZonesView()
             } label: {
-                SettingsRow(icon: "helicopter", color: .yellow, title: L("Helikopters in je zone"),
+                SettingsRow(icon: "scope", color: .orange, title: L("Helikopters in je zone"),
                             value: settings.heliZones.isEmpty ? L("Uit") : settings.heliGepauzeerd ? L("Gepauzeerd") : "\(settings.heliZones.count)")
             }
         } header: {

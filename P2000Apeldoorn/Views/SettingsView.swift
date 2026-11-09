@@ -116,10 +116,17 @@ struct SettingsView: View {
                 } label: {
                     SettingsRow(icon: "map.fill", color: .green, title: L("Kaarttype"))
                 }
+                Picker(selection: $settings.kaartThema) {
+                    Text(L("Licht")).tag("licht")
+                    Text(L("Donker")).tag("donker")
+                    Text(L("Automatisch")).tag("auto")
+                } label: {
+                    SettingsRow(icon: "circle.lefthalf.filled", color: .teal, title: L("Kaartkleuren"))
+                }
                 NavigationLink {
                     KaartWeergaveView()
                 } label: {
-                    SettingsRow(icon: "helicopter", color: .yellow, title: L("Kaart en helikopters"))
+                    SettingsRow(icon: "slider.horizontal.3", color: .orange, title: L("Kaart en helikopters"))
                 }
                 Toggle(isOn: $settings.groupByDay) {
                     SettingsRow(icon: "calendar", color: .red, title: L("Meldingen groeperen per dag"))

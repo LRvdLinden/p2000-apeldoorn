@@ -136,11 +136,10 @@ object Settings {
     var heliKleurPerToestel by bool("heliKleurPerToestel", false)
     var heliIcoon by str("heliIcoon", "normaal")
     var eenheden by str("eenheden", "metrisch")
-    private var donkereKaart by bool("donkereKaart", false)
     /** Map colours: "licht" (default), "donker" or "auto" (follow the app/device's light or dark mode). */
     private var kaartThemaRaw by str("kaartThema", "")
     var kaartThema: String
-        get() = kaartThemaRaw.ifEmpty { if (donkereKaart) "donker" else "licht" }
+        get() = kaartThemaRaw.ifEmpty { "licht" }
         set(v) { kaartThemaRaw = v }
     var gedemptKaart by bool("gedemptKaart", false)
     var prestatieModus by bool("prestatieModus", false)

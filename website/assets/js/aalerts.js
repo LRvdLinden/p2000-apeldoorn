@@ -181,7 +181,7 @@ export function weergave() {
   const basis = { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", kaart: "licht", prestatie: false };
   try {
     const v = { ...basis, ...JSON.parse(localStorage.getItem(WEERGAVE_KEY) || "{}") };
-    if (!["licht", "donker", "auto"].includes(v.kaart)) v.kaart = v.donker ? "donker" : "licht"; // old "Donkere kaart" toggle
+    if (!["licht", "donker", "auto"].includes(v.kaart)) v.kaart = "licht";
     return v;
   } catch { return basis; }
 }

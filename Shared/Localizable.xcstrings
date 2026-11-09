@@ -5033,6 +5033,23 @@
         }
       }
     },
+    "Kaartkleuren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Map colours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kaartkleuren"
+          }
+        }
+      }
+    },
     "Kaartlagen": {
       "extractionState": "manual",
       "localizations": {

@@ -273,7 +273,6 @@ final class AppSettings {
         if let v = source(Key.heliIcoon.storageKey) as? String { heliIcoon = v }
         if let v = source(Key.eenheden.storageKey) as? String { eenheden = v }
         if let v = source(Key.kaartThema.storageKey) as? String, ["licht", "donker", "auto"].contains(v) { kaartThema = v }
-        else if source(Key.donkereKaart.storageKey) as? Bool == true { kaartThema = "donker" }  // old toggle (build 53)
         if let v = source(Key.gedemptKaart.storageKey) as? Bool { gedemptKaart = v }
         if let s = source(Key.profielen.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([MeldingProfiel].self, from: data), !list.isEmpty {

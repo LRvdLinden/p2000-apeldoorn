@@ -32,7 +32,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .werkgebied: return "skew"
         case .kazernes: return "building.2.fill"
         case .ziekenhuizen: return "cross.case.fill"
-        case .helikopters: return "helicopter"
+        case .helikopters: return "airplane"
         case .buienradar: return "cloud.rain.fill"
         }
     }
