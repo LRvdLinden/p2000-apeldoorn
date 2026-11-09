@@ -6,6 +6,7 @@
         "components": [
           { "/": "/melding/*", "comment": "Deellink van een P2000-melding" },
           { "/": "/waarschuwing/*", "comment": "Deellink van een NL-Alert, Burgernet of KNMI-waarschuwing" },
+          { "/": "/nieuws/?-*", "comment": "Deellink van een nieuwsbericht of liveblog" },
           { "/": "/pager/", "?": { "melding": "?*" }, "comment": "Melding in de live pager" },
           { "/": "/pager/", "?": { "waarschuwing": "?*" }, "comment": "Waarschuwing in de live pager" }
         ]
