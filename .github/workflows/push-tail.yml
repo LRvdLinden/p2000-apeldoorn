@@ -6,13 +6,18 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: worker
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - uses: actions/checkout@v4
       - run: |
           set +e
-          sleep 200
+          npm ci >/dev/null 2>&1
+          npx wrangler deployments list 2>&1 | tail -25
+          npx wrangler versions list 2>&1 | tail -20
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          curl -s "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('112',json.dumps(d.get('nieuws112')))"
-          curl -s "$A/v1/nieuws?soort=regionaal&limit=30&t=$RANDOM" | python3 -c "
-          import json,sys;d=json.load(sys.stdin);print(len(d))
-          for x in d: print(x['at'][:16],x.get('plaats'),x.get('categorie'),x['afbeelding'].split('/')[-1],'|',x['titel'][:60],'|',(x.get('intro') or '')[:50])"
-          curl -s "$A/v1/nieuws?soort=politie&limit=2&t=$RANDOM" | python3 -c "import json,sys;[print(x['afbeelding']) for x in json.load(sys.stdin)]"
+          curl -s -D - -o /dev/null "$A/health?t=$RANDOM" | grep -i -E "cf-|server|date"
