@@ -372,7 +372,7 @@ struct WaarschuwingDetailView: View {
             HStack(spacing: 10) {
                 if w.bron == .amber { Image("logo_amber").resizable().scaledToFit().frame(height: 26) }
                 if w.bron == .vermistkind {
-                    Text(L("VERMIST KIND ALERT")).font(AppFont.body(11, .heavy)).foregroundStyle(Color(hex: 0x1B265E))
+                    Text(L("VERMIST KIND ALERT")).font(AppFont.body(11, .bold)).foregroundStyle(Color(hex: 0x1B265E))
                         .padding(.horizontal, 8).padding(.vertical, 4).background(Color(hex: 0xF4E005), in: Capsule())
                 }
                 Text(w.isKind ? L("Berichten van de politie") : L("Berichten van Burgernet")).font(AppFont.heading(18))
