@@ -1,0 +1,11 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          sleep 100; A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          ID=$(curl -s "$A/v1/nieuws?soort=weer&limit=1" | jq -r '.[0].id')
+          curl -s "$A/v1/nieuws/$ID" | jq -c '.weer | {kop,gebieden:(.gebieden|length), niveaus:[.gebieden[].niveau]}'
+          curl -s "$A/v1/nieuws/$ID" | wc -c
