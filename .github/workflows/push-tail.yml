@@ -1,0 +1,52 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+permissions:
+  contents: write
+jobs:
+  kaart:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: pip install -q cryptography pillow
+      - env:
+          KID: ${{ secrets.WEB_MAPKIT_JS_KEY_ID }}
+          TID: ${{ secrets.WEB_MAPKIT_JS_TEAM_ID || secrets.APN_TEAM_ID }}
+          P8: ${{ secrets.WEB_MAPKIT_JS_P8 }}
+        run: |
+          python3 - <<'PY'
+          import os, json, base64, urllib.parse, urllib.request
+          from cryptography.hazmat.primitives import serialization, hashes
+          from cryptography.hazmat.primitives.asymmetric import ec
+          from cryptography.hazmat.primitives.asymmetric.utils import decode_dss_signature
+          from PIL import Image
+          key = serialization.load_pem_private_key(os.environ['P8'].encode(), None)
+          os.makedirs('out', exist_ok=True)
+          voorbeelden = [('brandweer', 52.18992, 5.96554), ('ambulance', 52.21030, 5.99519), ('politie', 52.20520, 5.96940)]
+          for dienst, lat, lon in voorbeelden:
+              ann = [{"point": f"{lat},{lon}", "markerStyle": "img", "imgIdx": 0}]
+              imgs = [{"url": f"https://a-alerts.nl/assets/img/marker_{dienst}.png", "width": 48, "height": 48}]
+              q = [('center', f'{lat},{lon}'), ('z', '16'), ('size', '600x600'), ('scale', '2'), ('colorScheme', 'light'), ('poi', '1'), ('lang', 'nl-NL'),
+                   ('annotations', json.dumps(ann, separators=(',', ':'))), ('imgs', json.dumps(imgs, separators=(',', ':'))),
+                   ('teamId', os.environ['TID']), ('keyId', os.environ['KID'])]
+              path = '/api/v1/snapshot?' + urllib.parse.urlencode(q, quote_via=urllib.parse.quote)
+              r, s = decode_dss_signature(key.sign(path.encode(), ec.ECDSA(hashes.SHA256())))
+              sig = base64.urlsafe_b64encode(r.to_bytes(32, 'big') + s.to_bytes(32, 'big')).decode().rstrip('=')
+              try:
+                  data = urllib.request.urlopen('https://snapshot.apple-mapkit.com' + path + '&signature=' + sig, timeout=20).read()
+              except urllib.error.HTTPError as e:
+                  print(dienst, 'HTTP', e.code, e.read()[:300]); continue
+              open(f'out/{dienst}-kaart.png', 'wb').write(data)
+              im = Image.open(f'out/{dienst}-kaart.png').convert('RGBA'); print(dienst, im.size)
+              wm = Image.open('website/assets/img/kaart-watermerk.png').convert('RGBA')
+              f = im.width / 600
+              wm = wm.resize((round(130 * f), round(34 * f)), Image.LANCZOS)
+              im.alpha_composite(wm, (round(14 * f), round(14 * f)))
+              im.convert('RGB').save(f'out/{dienst}-voorbeeld.jpg', quality=88)
+          PY
+      - run: |
+          ls -la out
+          git config user.name "github-actions" && git config user.email "actions@github.com"
+          git checkout --orphan voorbeeld-kaart && git rm -rq --cached . && git add -f out/*.jpg out/*.png && git commit -qm "voorbeeld kaartafbeelding" && git push -fq origin voorbeeld-kaart
