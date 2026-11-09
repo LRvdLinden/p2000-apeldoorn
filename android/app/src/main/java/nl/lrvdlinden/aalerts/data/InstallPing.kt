@@ -8,9 +8,17 @@ import java.util.UUID
 
 /** Anonymous usage ping for the beheer statistics: random install id, platform, model, versions, push on/off. */
 object InstallPing {
+    /** Anonymous install ID (random, kept on this phone). */
+    fun id(ctx: Context): String {
+        val p = ctx.getSharedPreferences("install", Context.MODE_PRIVATE)
+        return p.getString("id", null) ?: UUID.randomUUID().toString().lowercase().also { p.edit().putString("id", it).apply() }
+    }
+    /** "Toestel-ID" for support: first 8 characters of the install ID, e.g. "3F9A-12BC". */
+    fun toestelId(ctx: Context): String = id(ctx).replace("-", "").take(8).uppercase().let { "${it.take(4)}-${it.drop(4)}" }
+
     suspend fun send(ctx: Context, force: Boolean = false) {
         val p = ctx.getSharedPreferences("install", Context.MODE_PRIVATE)
-        val id = p.getString("id", null) ?: UUID.randomUUID().toString().lowercase().also { p.edit().putString("id", it).apply() }
+        val id = id(ctx)
         val push = Settings.notificationsEnabled
         val state = "${BuildConfig.VERSION_NAME}|${BuildConfig.VERSION_CODE}|$push"
         val last = p.getLong("last", 0)

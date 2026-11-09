@@ -4149,6 +4149,23 @@
         }
       }
     },
+    "Heb je een vraag of werkt iets niet? Geef dit toestel-ID door, dan kunnen we jouw toestel terugvinden. Er staat geen naam of telefoonnummer in.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Have a question or is something not working? Share this device ID so we can find your device. It contains no name or phone number."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heb je een vraag of werkt iets niet? Geef dit toestel-ID door, dan kunnen we jouw toestel terugvinden. Er staat geen naam of telefoonnummer in."
+          }
+        }
+      }
+    },
     "Hele werkgebied": {
       "extractionState": "manual",
       "localizations": {
@@ -8824,6 +8841,23 @@
         }
       }
     },
+    "Tik om te kopiëren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap to copy"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik om te kopiëren"
+          }
+        }
+      }
+    },
     "Tik op de kaart om het middelpunt te kiezen.": {
       "extractionState": "manual",
       "localizations": {
@@ -8939,6 +8973,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toestel %@ · %@ · meldingen %@ · banners %@"
+          }
+        }
+      }
+    },
+    "Toestel-ID": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Device ID"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toestel-ID"
           }
         }
       }

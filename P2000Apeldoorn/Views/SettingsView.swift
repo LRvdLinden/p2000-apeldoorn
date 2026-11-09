@@ -184,8 +184,11 @@ struct SettingsView: View {
                 } label: {
                     SettingsRow(icon: "exclamationmark.shield.fill", color: .orange, title: L("Disclaimer"))
                 }
+                ToestelIDRow()
             } header: {
                 Text(L("Over deze app"))
+            } footer: {
+                Text(L("Heb je een vraag of werkt iets niet? Geef dit toestel-ID door, dan kunnen we jouw toestel terugvinden. Er staat geen naam of telefoonnummer in."))
             }
 
             Section {

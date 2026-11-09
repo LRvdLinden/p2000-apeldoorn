@@ -427,3 +427,35 @@ struct MeldingenUitBanner: View {
         #endif
     }
 }
+
+// MARK: - Toestel-ID (support)
+
+/// The short device code for support, under Disclaimer. Tap to copy.
+struct ToestelIDRow: View {
+    @State private var gekopieerd = false
+    var body: some View {
+        Button {
+            #if os(iOS)
+            UIPasteboard.general.string = InstallPing.toestelID
+            #elseif os(macOS)
+            NSPasteboard.general.clearContents(); NSPasteboard.general.setString(InstallPing.toestelID, forType: .string)
+            #endif
+            gekopieerd = true
+            Task { try? await Task.sleep(for: .seconds(2)); gekopieerd = false }
+        } label: {
+            HStack {
+                SettingsRow(icon: "number", color: .gray, title: L("Toestel-ID"))
+                Spacer()
+                Text(gekopieerd ? L("Gekopieerd") : InstallPing.toestelID)
+                    .font(.body.monospaced())
+                    .foregroundStyle(gekopieerd ? Color.green : Color.secondary)
+            }
+        }
+        .buttonStyle(.plain)
+        .contextMenu {
+            ShareLink(item: InstallPing.toestelID) { Label(L("Deel"), systemImage: "square.and.arrow.up") }
+        }
+        .accessibilityLabel(L("Toestel-ID") + " " + InstallPing.toestelID.map(String.init).joined(separator: " "))
+        .accessibilityHint(L("Tik om te kopiëren"))
+    }
+}

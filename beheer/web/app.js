@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], fouten: ["Gemelde fouten", fouten], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -508,6 +508,47 @@ async function fouten(el) {
   el.querySelectorAll("[data-fopen]").forEach((b) => (b.onclick = async () => { await api("POST", `/v1/beheer/feedback/${b.dataset.fopen}`, { status: "open" }); run(); }));
   el.querySelectorAll("[data-fedit]").forEach((b) => (b.onclick = async () => editMelding(await api("GET", `/v1/beheer/meldingen/${encodeURIComponent(b.dataset.fedit)}`))));
   el.querySelectorAll("[data-fdel]").forEach((b) => (b.onclick = async () => { if (!confirm("Deze melding van een fout verwijderen?")) return; await api("DELETE", `/v1/beheer/feedback/${b.dataset.fdel}`); toast("Verwijderd"); run(); }));
+}
+
+// Toestel-ID (Instellingen › onder Disclaimer in de apps): find a user's install and push registration.
+let laatsteCode = "";
+async function toestel(el) {
+  el.innerHTML = `<div class="card"><form id="tzForm" class="toolbar" style="gap:8px">
+      <input id="tzCode" placeholder="Toestel-ID, bijv. 3F9A-12BC" value="${esc(laatsteCode)}" style="flex:1;font-family:monospace;text-transform:uppercase" maxlength="9" autocomplete="off">
+      <button class="btn primary">Zoek</button></form>
+    <p class="muted" style="font-size:.8rem">De gebruiker vindt dit in de app bij Instellingen, onder Disclaimer.</p></div><div id="tzOut"></div>`;
+  const zoek = async () => {
+    laatsteCode = $("tzCode").value.trim().toUpperCase();
+    if (!laatsteCode) return;
+    const out = $("tzOut");
+    out.innerHTML = `<p class="muted">Zoeken…</p>`;
+    try {
+      const r = await api("GET", `/v1/beheer/toestel/${encodeURIComponent(laatsteCode)}`);
+      if (!r.gevonden) { out.innerHTML = `<div class="card"><p class="muted">Geen toestel met dit ID. Heeft de app al eens verbinding gehad?</p></div>`; return; }
+      out.innerHTML = r.toestellen.map((t) => `<div class="card">
+        <h3 style="margin-top:0;font-family:monospace">${esc(t.code)}</h3>
+        <div class="row"><span>Toestel</span><b>${esc(t.model || "?")} · ${esc(t.platform)} ${esc(t.os || "")}</b></div>
+        <div class="row"><span>App</span><b>${esc(t.app_version || "?")} (${esc(t.build || "?")})</b></div>
+        <div class="row"><span>Pushmeldingen in de app</span><b>${t.push_aan ? "aan" : "uit"}</b></div>
+        <div class="row"><span>Inloggen met Apple</span><b>${t.apple_login ? "ja" : "nee"}</b></div>
+        <div class="row"><span>Eerst gezien · laatst</span><b>${dt(t.eerst)} · ${dt(t.laatst)}</b></div>
+        <h4>Pushregistratie</h4>
+        ${t.push.length ? t.push.map((p) => `<div class="row" style="flex-wrap:wrap"><span>${esc(p.platform)} · ${esc(p.omgeving)} · ${esc(p.app_version || "")}</span>
+          <b>${p.aan ? "aan" : "uit"}${p.stille_uren ? " · stille uren" : ""}${p.straal_km ? ` · ${p.straal_km} km` : ""} · ${p.profielen} profiel(en) · ${p.heli_zones} heli-zone(s)${p.groot_incident ? " · groot incident" : ""}${p.capcodes ? ` · ${p.capcodes} capcode(s)` : ""} · bijgewerkt ${p.bijgewerkt ? dt(p.bijgewerkt) : "?"}</b></div>`).join("")
+          + `<button class="btn" data-tztest="${esc(t.code)}" style="margin-top:8px">Stuur testmelding</button><span class="muted" data-tzres style="margin-left:8px"></span>`
+          : `<p class="muted">Geen pushregistratie gekoppeld. Pushmeldingen staan uit, of de app is ouder dan versie 2.0.0 (build 56) / Android van 9 november.</p>`}
+      </div>`).join("");
+      out.querySelectorAll("[data-tztest]").forEach((b) => (b.onclick = async () => {
+        const res = b.nextElementSibling; res.textContent = "Versturen…";
+        try {
+          const t = await api("POST", `/v1/beheer/toestel/${encodeURIComponent(b.dataset.tztest)}/test`);
+          res.textContent = t.resultaten.map((x) => `${x.platform}: ${x.ok ? "verstuurd" : `mislukt (${x.status} ${x.reason || ""})`}`).join(" · ");
+        } catch (e) { res.textContent = e.message; }
+      }));
+    } catch (e) { out.innerHTML = `<div class="card"><p style="color:var(--red)">${esc(e.message)}</p></div>`; }
+  };
+  $("tzForm").onsubmit = (e) => { e.preventDefault(); zoek(); };
+  if (laatsteCode) zoek();
 }
 
 async function push(el) {

@@ -17,6 +17,12 @@ enum InstallPing {
         return id
     }
 
+    /// "Toestel-ID" for support: the first 8 characters of the install ID, e.g. "3F9A-12BC".
+    static var toestelID: String {
+        let hex = installID.replacingOccurrences(of: "-", with: "").prefix(8).uppercased()
+        return "\(hex.prefix(4))-\(hex.suffix(4))"
+    }
+
     private static var platform: String {
         #if os(watchOS)
         return "watchos"

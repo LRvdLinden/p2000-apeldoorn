@@ -31,6 +31,7 @@ import { routesVoor } from "./routes.js";
 import { profielenFrom, capcodesFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
 import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
+import { koppelInstall, zoekToestel, testToestel } from "./toestel.js";
 import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
 import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, recenteHeliMeldingen, meldingVoorspelling,
@@ -221,6 +222,7 @@ async function handle(req, env, ctx) {
     const body = await readJSON(req);
     const device = deviceFrom(body);
     await upsertDevice(env, device);
+    await koppelInstall(env, device.token, body.install_id).catch(() => {});
     const w = prefsFrom(body.settings?.waarschuwingen);
     const profielen = profielenFrom(body.settings?.profielen);
     const capcodes = capcodesFrom(body.settings?.capcodes);
@@ -308,6 +310,12 @@ async function handleBeheer(req, env, url, path, method) {
   if (m && (method === "PATCH" || method === "PUT")) return reply(200, await updateMelding(env, m[1], await readJSON(req)));
 
   if (method === "POST" && path === "/v1/beheer/push") return reply(200, await broadcast(env, await readJSON(req), queue));
+
+  // Toestel-ID from the app (support): find the install and its push registration, or send it a test.
+  m = path.match(/^\/v1\/beheer\/toestel\/([0-9A-Fa-f-]{6,9})$/);
+  if (method === "GET" && m) return reply(200, await zoekToestel(env, m[1]));
+  m = path.match(/^\/v1\/beheer\/toestel\/([0-9A-Fa-f-]{6,9})\/test$/);
+  if (method === "POST" && m) return reply(200, await testToestel(env, m[1]));
 
   // Reports from users that an alert is wrong.
   if (method === "GET" && path === "/v1/beheer/feedback") return reply(200, await feedbackLijst(env, url));

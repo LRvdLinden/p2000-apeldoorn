@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings as AndroidSettings
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -280,5 +281,28 @@ fun GrootIncidentBadge(m: Melding) {
             Text(tr("Groot incident", "Large incident"), color = Color.White, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f))
             m.grip?.toIntOrNull()?.takeIf { it > 0 }?.let { Text("GRIP $it", color = Color.White, fontWeight = FontWeight.Bold) }
         }
+    }
+}
+
+/** "Toestel-ID" for support, under Disclaimer: tap to copy. */
+@Composable
+fun ToestelIdRow() {
+    val ctx = LocalContext.current
+    val code = remember { nl.lrvdlinden.aalerts.data.InstallPing.toestelId(ctx) }
+    var gekopieerd by remember { mutableStateOf(false) }
+    LaunchedEffect(gekopieerd) { if (gekopieerd) { kotlinx.coroutines.delay(2000); gekopieerd = false } }
+    Row(Modifier.fillMaxWidth().clickable {
+        val cm = ctx.getSystemService(android.content.ClipboardManager::class.java)
+        cm?.setPrimaryClip(android.content.ClipData.newPlainText(tr("Toestel-ID", "Device ID"), code))
+        gekopieerd = true
+    }.padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Icon(Icons.Outlined.Tag, null, tint = Muted)
+        Spacer(Modifier.width(12.dp))
+        Column(Modifier.weight(1f)) {
+            Text(tr("Toestel-ID", "Device ID"))
+            Text(tr("Geef dit door als je een vraag hebt; er staat geen naam of nummer in.", "Share this if you have a question; it contains no name or number."), color = Muted, fontSize = 12.sp)
+        }
+        Text(if (gekopieerd) tr("Gekopieerd", "Copied") else code, fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+            color = if (gekopieerd) Color(0xFF16A34A) else Muted)
     }
 }

@@ -53,6 +53,7 @@ object Push {
         "environment" to "fcm",
         "language" to if (isDutch) "nl" else "en",
         "app_version" to "${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})",
+        "install_id" to nl.lrvdlinden.aalerts.data.InstallPing.id(app),
         "settings" to Settings.serverSettings(),
     )
 

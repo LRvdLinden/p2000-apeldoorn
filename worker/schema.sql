@@ -163,3 +163,7 @@ CREATE TABLE IF NOT EXISTS melding_feedback (
   bron TEXT, at INTEGER NOT NULL, status TEXT NOT NULL DEFAULT 'open'
 );
 CREATE INDEX IF NOT EXISTS melding_feedback_at ON melding_feedback (at);
+
+-- Toestel-ID: which install (anonymous install ID) belongs to which push registration, for support in the beheer.
+CREATE TABLE IF NOT EXISTS device_install (token TEXT PRIMARY KEY, install_id TEXT NOT NULL, at INTEGER NOT NULL);
+CREATE INDEX IF NOT EXISTS device_install_id ON device_install (install_id);

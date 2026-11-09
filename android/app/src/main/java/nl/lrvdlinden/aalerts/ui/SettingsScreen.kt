@@ -158,6 +158,7 @@ fun SettingsScreen(nav: Nav) {
                 NavRow(tr("Privacyverklaring", "Privacy policy"), icon = Icons.Outlined.PrivacyTip) { nav.open("content/privacy") }
                 NavRow(tr("Gebruiksvoorwaarden", "Terms of use"), icon = Icons.AutoMirrored.Outlined.Article) { nav.open("content/terms") }
                 NavRow("Disclaimer", icon = Icons.Outlined.Gavel) { nav.open("content/disclaimer") }
+                ToestelIdRow()
                 NavRow(tr("Website a-alerts.nl", "Website a-alerts.nl"), icon = Icons.Outlined.Language) { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(BuildConfig.WEBSITE))) }
                 if (Build.VERSION.SDK_INT >= 33) NavRow(tr("Taal van de app", "App language"), tr("Nederlands of Engels", "Dutch or English"), Icons.Outlined.Translate) {
                     ctx.startActivity(Intent(AndroidSettings.ACTION_APP_LOCALE_SETTINGS, Uri.parse("package:${ctx.packageName}")))

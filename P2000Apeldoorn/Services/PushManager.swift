@@ -227,6 +227,7 @@ enum PushManager {
             "environment": environment,
             "language": String(Config.uiLanguage.prefix(2)),
             "app_version": "\(Config.version) (\(Config.build))",
+            "install_id": InstallPing.installID,
             "settings": settings,
         ]
     }
