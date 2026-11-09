@@ -63,8 +63,8 @@ final class AppSettings {
     var heliIcoon: String = "normaal" { didSet { save(.heliIcoon, heliIcoon) } }
     /// "metrisch" (m, km/u) or "luchtvaart" (ft, kn).
     var eenheden: String = "metrisch" { didSet { save(.eenheden, eenheden); HeliWeergave.luchtvaart = eenheden == "luchtvaart" } }
-    /// Map always dark (also in light mode): markers stand out more.
-    var donkereKaart: Bool = false { didSet { save(.donkereKaart, donkereKaart) } }
+    /// Map colours: "licht" (default), "donker", or "auto" (follow the device's light/dark mode).
+    var kaartThema: String = "licht" { didSet { save(.kaartThema, kaartThema) } }
     /// Muted map colours.
     var gedemptKaart: Bool = false { didSet { save(.gedemptKaart, gedemptKaart) } }
     /// Fewer animations and less frequent updates (older devices); device-only.
@@ -118,7 +118,7 @@ final class AppSettings {
         case useLocation, appLock, onboardingDone, currentLat, currentLon
         case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
         case heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
-        case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, gedemptKaart, prestatieModus
+        case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
         var synced: Bool {
             switch self {
@@ -272,7 +272,8 @@ final class AppSettings {
         if let v = source(Key.heliKleurPerToestel.storageKey) as? Bool { heliKleurPerToestel = v }
         if let v = source(Key.heliIcoon.storageKey) as? String { heliIcoon = v }
         if let v = source(Key.eenheden.storageKey) as? String { eenheden = v }
-        if let v = source(Key.donkereKaart.storageKey) as? Bool { donkereKaart = v }
+        if let v = source(Key.kaartThema.storageKey) as? String, ["licht", "donker", "auto"].contains(v) { kaartThema = v }
+        else if source(Key.donkereKaart.storageKey) as? Bool == true { kaartThema = "donker" }  // old toggle (build 53)
         if let v = source(Key.gedemptKaart.storageKey) as? Bool { gedemptKaart = v }
         if let s = source(Key.profielen.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([MeldingProfiel].self, from: data), !list.isEmpty {
@@ -314,7 +315,7 @@ final class AppSettings {
         kaartLagen = KaartLaag.standaard
         heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
         grootIncident = false; grootPlaatsen = []
-        spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; donkereKaart = false; gedemptKaart = false
+        spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; kaartThema = "licht"; gedemptKaart = false
         isLoading = false
         onNotificationSettingsChanged?()
     }

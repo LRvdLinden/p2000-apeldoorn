@@ -219,7 +219,7 @@ struct MeldingDetailView: View {
             UserAnnotation()
         }
         .mapStyle(MapStyleSetting.style(for: settings, pointsOfInterest: true))
-        .environment(\.colorScheme, settings.donkereKaart ? .dark : colorScheme)
+        .kaartThema()
         .mapControls { MapCompass() }
         .safeAreaPadding(.top, topSafeArea + 66)
         .overlay(alignment: .top) {

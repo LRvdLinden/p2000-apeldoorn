@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=52";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=53";
 
 const TZ = "Europe/Amsterdam";
 
@@ -178,8 +178,22 @@ export const vliegtWest = (h) => h.koers != null && !h.op_grond && ((h.koers % 3
 // "Kaart en helikopters" (same choices as the apps), kept in this browser.
 const WEERGAVE_KEY = "aalerts.weergave";
 export function weergave() {
-  try { return { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", donker: false, prestatie: false, ...JSON.parse(localStorage.getItem(WEERGAVE_KEY) || "{}") }; }
-  catch { return { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", donker: false, prestatie: false }; }
+  const basis = { kleurPerToestel: false, luchtvaart: false, icoon: "normaal", kaart: "licht", prestatie: false };
+  try {
+    const v = { ...basis, ...JSON.parse(localStorage.getItem(WEERGAVE_KEY) || "{}") };
+    if (!["licht", "donker", "auto"].includes(v.kaart)) v.kaart = v.donker ? "donker" : "licht"; // old "Donkere kaart" toggle
+    return v;
+  } catch { return basis; }
+}
+/** Map colours: light (default), dark, or automatic (follows the device). Same choice as in the apps. */
+export function kaartKleur(mk) {
+  const k = weergave().kaart;
+  const donker = k === "donker" || (k === "auto" && matchMedia("(prefers-color-scheme: dark)").matches);
+  return donker ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light;
+}
+/** Keeps maps in automatic mode in step when the device switches between light and dark. */
+export function volgKaartKleur(mk, map) {
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { if (weergave().kaart === "auto") map.colorScheme = kaartKleur(mk); });
 }
 export function zetWeergave(patch) {
   const v = { ...weergave(), ...patch };

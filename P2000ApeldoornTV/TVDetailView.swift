@@ -45,6 +45,7 @@ struct TVDetailView: View {
                     }
                     .id("\(routes.count)-\(liveHeli?.id ?? "")")
                     .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+                    .kaartThema()
                     .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
                 } else {
                     RoundedRectangle(cornerRadius: 34, style: .continuous).fill(.white.opacity(0.06))

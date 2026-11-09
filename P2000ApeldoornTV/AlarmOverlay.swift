@@ -60,6 +60,7 @@ struct AlarmOverlay: View {
                         }
                     }
                     .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+                    .kaartThema()
                     .frame(width: 720, height: 720)
                     .clipShape(RoundedRectangle(cornerRadius: 40, style: .continuous))
                     .shadow(color: .black.opacity(0.5), radius: 40, y: 20)

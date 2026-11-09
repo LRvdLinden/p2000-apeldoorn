@@ -144,6 +144,7 @@ struct WaarschuwingMap: View {
             }
         }
         .mapStyle(.standard(pointsOfInterest: .excludingAll))
+        .kaartThema()
         .onAppear { position = .rect(fitRect) }
     }
 

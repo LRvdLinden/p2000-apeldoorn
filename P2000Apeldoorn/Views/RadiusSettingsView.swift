@@ -126,6 +126,7 @@ struct RadiusSettingsView: View {
                 UserAnnotation()
             }
             .mapStyle(MapStyleSetting.style(for: settings))
+            .kaartThema()
             .onTapGesture { point in
                 guard settings.radiusMode == "vast", let coordinate = proxy.convert(point, from: .local) else { return }
                 setFixed(coordinate, name: String(format: "%.3f, %.3f", coordinate.latitude, coordinate.longitude))

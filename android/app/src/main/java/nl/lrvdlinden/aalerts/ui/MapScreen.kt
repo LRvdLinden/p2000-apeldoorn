@@ -305,7 +305,7 @@ fun MapScreen(nav: Nav) {
             if (KaartLaag.BUIENRADAR.key in Settings.kaartLagen) Text(
                 if (radar?.beschikbaar == false) tr("De buienradar is nog niet beschikbaar.", "The rain radar is not available yet.") else tr("Buienradar: KNMI, elke 5 minuten nieuw.", "Rain radar: KNMI, updated every 5 minutes."),
                 color = Muted, fontSize = 12.sp)
-            NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Donkere kaart, routespoor, eenheden", "Dark map, route trail, units")) { showLayers = false; nav.open("kaartweergave") }
+            NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Licht of donker, routespoor, eenheden", "Light or dark, route trail, units")) { showLayers = false; nav.open("kaartweergave") }
             Text(tr("Kaart: © OpenFreeMap, © OpenMapTiles, © OpenStreetMap. Helikopters: adsb.lol (ODbL), posities kunnen achterlopen.",
                 "Map: © OpenFreeMap, © OpenMapTiles, © OpenStreetMap. Helicopters: adsb.lol (ODbL), positions may lag."), color = Muted, fontSize = 11.sp)
         }

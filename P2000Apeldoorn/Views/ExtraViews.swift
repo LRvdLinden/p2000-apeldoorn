@@ -128,6 +128,7 @@ struct HeliZoneEditor: View {
                             .stroke(Dienst.traumaheli.color, lineWidth: 2)
                     }
                     .onMapCameraChange(frequency: .continuous) { midden = $0.region.center }
+                    .kaartThema()
                     Image(systemName: "plus").font(.title2.weight(.semibold)).foregroundStyle(.primary).allowsHitTesting(false)
                 }
                 .frame(height: 260)
@@ -214,12 +215,16 @@ struct KaartWeergaveView: View {
                     Text(L("Satelliet")).tag("satellite")
                     Text(L("Hybride")).tag("hybrid")
                 }
-                Toggle(L("Donkere kaart"), isOn: $settings.donkereKaart)
+                Picker(L("Kleuren"), selection: $settings.kaartThema) {
+                    Text(L("Licht")).tag("licht")
+                    Text(L("Donker")).tag("donker")
+                    Text(L("Automatisch")).tag("auto")
+                }
                 Toggle(L("Rustige kaartkleuren"), isOn: $settings.gedemptKaart)
             } header: {
                 Text(L("Kaart"))
             } footer: {
-                Text(L("Met een donkere kaart of rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D."))
+                Text(L("Automatisch volgt de lichte of donkere modus van je apparaat. Met rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D."))
             }
             Section {
                 Picker(L("Routespoor"), selection: $settings.spoorStandaard) {
@@ -325,7 +330,7 @@ struct MeldingFeedbackSheet: View {
                         Toggle(L("Geef de juiste plek aan"), isOn: $plekKiezen)
                         if plekKiezen {
                             ZStack {
-                                Map(position: $position).onMapCameraChange(frequency: .continuous) { midden = $0.region.center }
+                                Map(position: $position).onMapCameraChange(frequency: .continuous) { midden = $0.region.center }.kaartThema()
                                 Image(systemName: "mappin").font(.title).foregroundStyle(.red).offset(y: -12).allowsHitTesting(false)
                             }
                             .frame(height: 240)

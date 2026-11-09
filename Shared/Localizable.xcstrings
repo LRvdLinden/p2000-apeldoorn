@@ -1429,6 +1429,40 @@
         }
       }
     },
+    "Automatisch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch"
+          }
+        }
+      }
+    },
+    "Automatisch volgt de lichte of donkere modus van je apparaat. Met rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatic follows your device's light or dark mode. With muted colours, alerts and helicopters stand out more. Satellite and hybrid also show the terrain in 3D."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Automatisch volgt de lichte of donkere modus van je apparaat. Met rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D."
+          }
+        }
+      }
+    },
     "Bedankt! We kijken ernaar.": {
       "extractionState": "manual",
       "localizations": {
@@ -2904,23 +2938,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Donker"
-          }
-        }
-      }
-    },
-    "Donkere kaart": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Dark map"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Donkere kaart"
           }
         }
       }
@@ -5203,6 +5220,23 @@
         }
       }
     },
+    "Kleuren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Colours"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleuren"
+          }
+        }
+      }
+    },
     "Klopt deze melding niet?": {
       "extractionState": "manual",
       "localizations": {
@@ -5981,23 +6015,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Met Mijn buurt krijg je voor alle profielen alleen meldingen binnen de gekozen afstand."
-          }
-        }
-      }
-    },
-    "Met een donkere kaart of rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "With a dark map or muted colours, alerts and helicopters stand out more. Satellite and hybrid also show the terrain in 3D."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Met een donkere kaart of rustige kleuren vallen meldingen en helikopters beter op. Satelliet en hybride tonen ook het reliëf in 3D."
           }
         }
       }

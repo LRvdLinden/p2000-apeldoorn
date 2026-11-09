@@ -123,6 +123,7 @@ struct TVWaarschuwingDetail: View {
                 }
             }
             .mapStyle(.standard(elevation: .realistic, pointsOfInterest: .excludingAll))
+            .kaartThema()
             .clipShape(RoundedRectangle(cornerRadius: 34, style: .continuous))
             .frame(maxWidth: .infinity)
 

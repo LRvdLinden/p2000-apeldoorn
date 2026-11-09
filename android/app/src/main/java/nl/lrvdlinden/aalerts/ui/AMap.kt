@@ -75,8 +75,12 @@ fun AMap(
     radarTiles: String? = null,
 ) {
     val ctx = LocalContext.current
-    // "Donkere kaart" and "Rustige kaartkleuren" (Kaart en helikopters).
-    val dark = LocalDark.current || nl.lrvdlinden.aalerts.data.Settings.donkereKaart
+    // Map colours (light by default, dark or automatic) and "Rustige kaartkleuren" (Kaart en helikopters).
+    val dark = when (nl.lrvdlinden.aalerts.data.Settings.kaartThema) {
+        "donker" -> true
+        "auto" -> LocalDark.current
+        else -> false
+    }
     val muted = !dark && nl.lrvdlinden.aalerts.data.Settings.gedemptKaart
     val longPress = rememberUpdatedState(onLongPress)
     val idle = rememberUpdatedState(onCameraIdle)

@@ -147,6 +147,7 @@ struct WatchDetailView: View {
                             DienstMarker(dienst: melding.dienst, size: 30)
                         }
                     }
+                    .kaartThema()
                     .frame(height: 120)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }

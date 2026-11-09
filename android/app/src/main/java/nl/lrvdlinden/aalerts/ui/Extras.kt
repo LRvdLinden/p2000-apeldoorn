@@ -157,7 +157,9 @@ fun KaartWeergaveScreen(nav: Nav) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { BackBar(tr("Kaart en helikopters", "Map and helicopters"), nav) }) { pad ->
         Column(Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
             SectionCard(tr("Kaart", "Map"), Icons.Outlined.Map) {
-                SwitchRow(tr("Donkere kaart", "Dark map"), tr("Ook als de app licht is", "Also when the app is light"), Settings.donkereKaart) { Settings.donkereKaart = it }
+                Text(tr("Kleuren", "Colours"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+                Keuzes(listOf("licht" to tr("Licht", "Light"), "donker" to tr("Donker", "Dark"), "auto" to tr("Automatisch", "Automatic")), Settings.kaartThema) { Settings.kaartThema = it }
+                Text(tr("Automatisch volgt de lichte of donkere modus van je telefoon.", "Automatic follows your phone's light or dark mode."), color = Muted, fontSize = 12.sp)
                 SwitchRow(tr("Rustige kaartkleuren", "Muted map colours"), tr("Meldingen en helikopters vallen beter op", "Alerts and helicopters stand out more"), Settings.gedemptKaart) { Settings.gedemptKaart = it }
             }
             SectionCard(tr("Helikopters", "Helicopters"), Icons.Outlined.FlightTakeoff) {

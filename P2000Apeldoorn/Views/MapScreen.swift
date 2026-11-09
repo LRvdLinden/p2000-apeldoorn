@@ -109,7 +109,7 @@ struct MapScreen: View {
                 UserAnnotation()
             }
             .mapStyle(MapStyleSetting.style(for: settings))
-            .environment(\.colorScheme, settings.donkereKaart ? .dark : colorScheme)
+            .kaartThema()
             .mapControls {
                 MapCompass()
                 MapScaleView()

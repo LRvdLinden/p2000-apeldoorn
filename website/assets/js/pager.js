@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=52";
+} from "./core.js?v=53";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl, weergave, zetWeergave, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=52";
+  CODES, isOpgeheven, wShareUrl, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=53";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -690,7 +690,7 @@ async function selectWarning(id, { push = true } = {}) {
   if (detailMap) { try { detailMap.destroy(); } catch {} }
   const div = document.createElement("div"); div.className = "mk"; $("dMap").prepend(div);
   detailMap = new mk.Map(div, { center: new mk.Coordinate(w.lat ?? 52.2112, w.lon ?? 5.9699), cameraDistance: 9000, showsMapTypeControl: false,
-    colorScheme: matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light });
+    colorScheme: kaartKleur(mk) });
   const overlays = warnOverlays(mk, w);
   if (overlays.length) { detailMap.addOverlays(overlays); try { detailMap.showItems(overlays, { padding: new mk.Padding(30, 30, 30, 30) }); } catch {} }
   if (w.lat != null && w.bron !== "knmi") detailMap.addAnnotation(warnAnnotation(mk, w));
@@ -714,7 +714,7 @@ async function drawDetailMap(m) {
     cameraDistance: hasStreet(m) ? 900 : 4500,
     showsCompass: mk.FeatureVisibility.Hidden,
     showsMapTypeControl: false,
-    colorScheme: matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light,
+    colorScheme: kaartKleur(mk),
   });
   detailMap.addAnnotation(markerAnnotation(mk, m));
   // Look Around preview (MapKit JS 5.78+), only when imagery exists at this spot.
@@ -897,9 +897,10 @@ async function renderMap() {
         center: new mk.Coordinate(52.2112, 5.9699),
         cameraDistance: 26000,
         showsMapTypeControl: true,
-        colorScheme: weergave().donker || matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light,
+        colorScheme: kaartKleur(mk),
         padding: new mk.Padding(70, 20, 20, 20),
       });
+      volgKaartKleur(mk, bigMap);
       return mk;
     });
   }
@@ -992,7 +993,7 @@ function openWeergave() {
   const opt = (name, val, label, cur) => `<label class="radio"><input type="radio" name="${name}" value="${val}"${cur === val ? " checked" : ""}> ${label}</label>`;
   box.innerHTML = `<header><b>Kaart en helikopters</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
     <form id="weergaveForm" class="weergave">
-      <label class="check"><input type="checkbox" name="donker"${v.donker ? " checked" : ""}> Donkere kaart</label>
+      <fieldset><legend>Kaartkleuren</legend>${opt("kaart", "licht", "Licht", v.kaart)}${opt("kaart", "donker", "Donker", v.kaart)}${opt("kaart", "auto", "Automatisch", v.kaart)}</fieldset>
       <label class="check"><input type="checkbox" name="kleurPerToestel"${v.kleurPerToestel ? " checked" : ""}> Eigen kleur per helikopter</label>
       <fieldset><legend>Grootte op de kaart</legend>${opt("icoon", "klein", "Klein", v.icoon)}${opt("icoon", "normaal", "Normaal", v.icoon)}${opt("icoon", "groot", "Groot", v.icoon)}</fieldset>
       <fieldset><legend>Eenheden</legend>${opt("eenheden", "metrisch", "Meter en km/u", v.luchtvaart ? "luchtvaart" : "metrisch")}${opt("eenheden", "luchtvaart", "Voet en knopen", v.luchtvaart ? "luchtvaart" : "metrisch")}</fieldset>
@@ -1003,11 +1004,11 @@ function openWeergave() {
   $("weergaveForm").addEventListener("change", async (e) => {
     const f = e.currentTarget;
     const nieuw = zetWeergave({
-      donker: f.donker.checked, kleurPerToestel: f.kleurPerToestel.checked, prestatie: f.prestatie.checked,
+      kaart: f.kaart.value, kleurPerToestel: f.kleurPerToestel.checked, prestatie: f.prestatie.checked,
       icoon: f.icoon.value, luchtvaart: f.eenheden.value === "luchtvaart",
     });
     const mk = await bigMapReady;
-    if (mk && bigMap) bigMap.colorScheme = nieuw.donker || matchMedia("(prefers-color-scheme: dark)").matches ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light;
+    if (mk && bigMap) bigMap.colorScheme = kaartKleur(mk);
     // Redraw the helicopter markers with the new size and colours.
     heliMarkers?.clear();
     renderMap();

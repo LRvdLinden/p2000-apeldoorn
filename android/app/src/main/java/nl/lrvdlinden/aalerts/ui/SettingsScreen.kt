@@ -142,7 +142,7 @@ fun SettingsScreen(nav: Nav) {
                         SegmentedButton(selected = Settings.appearance == k, onClick = { Settings.appearance = k }, shape = SegmentedButtonDefaults.itemShape(i, 3)) { Text(l, fontSize = 13.sp) }
                     }
                 }
-                NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Donkere kaart, routespoor, eenheden, prestatiemodus", "Dark map, route trail, units, performance mode"), Icons.Outlined.Map) { nav.open("kaartweergave") }
+                NavRow(tr("Kaart en helikopters", "Map and helicopters"), tr("Licht of donker, routespoor, eenheden, prestatiemodus", "Light or dark, route trail, units, performance mode"), Icons.Outlined.Map) { nav.open("kaartweergave") }
                 Text(tr("Je instellingen gaan mee in de Android-back-up (Google), zodat je ze op een nieuwe telefoon terugkrijgt.", "Your settings are part of the Android backup (Google), so you get them back on a new phone."), color = Muted, fontSize = 12.sp)
             }
 

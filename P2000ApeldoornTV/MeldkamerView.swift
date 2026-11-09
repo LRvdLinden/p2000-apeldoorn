@@ -149,6 +149,7 @@ struct MeldkamerView: View {
                 withAnimation(.linear(duration: 2)) { nu = t }
             }
             .mapStyle(mapStyle)
+            .kaartThema()
             .clipShape(RoundedRectangle(cornerRadius: 36, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 36, style: .continuous).stroke(.white.opacity(0.08), lineWidth: 2))
 

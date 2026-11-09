@@ -4,11 +4,12 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=52";
+} from "./core.js?v=53";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
-} from "./aalerts.js?v=52";
+  kaartKleur, volgKaartKleur,
+} from "./aalerts.js?v=53";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -52,7 +53,7 @@ const mapReady = loadMapKit().then((kit) => {
   mk = kit;
   map = new mk.Map($("map"), {
     region: region(OVERVIEW),
-    colorScheme: mk.Map.ColorSchemes.Dark,
+    colorScheme: kaartKleur(mk),
     mapType: mk.Map.MapTypes.MutedStandard,
     showsCompass: mk.FeatureVisibility.Hidden,
     showsZoomControl: false,
@@ -61,6 +62,7 @@ const mapReady = loadMapKit().then((kit) => {
     isRotationEnabled: false,
     padding: new mk.Padding(70, 30, 150, 30),
   });
+  volgKaartKleur(mk, map);
   return mk;
 });
 
