@@ -200,9 +200,11 @@ export function parse112(xml, plaats) {
 
 export function categorie112(cats) {
   const c = cats.map((x) => x.toLowerCase());
-  if (c.some((x) => /brand|brandweer|explosie|rook/.test(x))) return "brand";
+  // Most accidents also carry "Brandweer": helicopter and traffic first, then fire.
   if (c.some((x) => /traumaheli|lifeliner|helikopter/.test(x))) return "traumaheli";
-  if (c.some((x) => /ongeval|aanrijding|verkeer|eenzijdig/.test(x))) return "verkeer";
+  if (c.some((x) => /ongeval|aanrijding|verkeer|eenzijdig|file/.test(x))) return "verkeer";
+  if (c.some((x) => /^brand$|uitslaande|explosie|rook|bosbrand|autobrand|woningbrand/.test(x))) return "brand";
+  if (c.some((x) => /brandweer/.test(x)) && !c.some((x) => /politie|ambulance/.test(x))) return "brand";
   if (c.some((x) => /ambulance|reanimatie|medisch|letsel/.test(x))) return "ambulance";
   if (c.some((x) => /politie|steekpartij|schiet|overval|inbraak|aanhouding|vermis/.test(x))) return "politie";
   return "algemeen";
