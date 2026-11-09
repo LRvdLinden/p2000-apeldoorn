@@ -70,7 +70,12 @@ class MainActivity : FragmentActivity() {
         intent.data?.let { uri ->
             val segs = uri.pathSegments
             when {
-                uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "melding" -> bestemming = Bestemming.Melding(segs[1])
+                // a-alerts.nl/melding/<guid> and /melding/<dienst>/<guid> (the guid is always the last part)
+                uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "melding" -> bestemming = Bestemming.Melding(segs.last())
+                uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "waarschuwing" -> bestemming = Bestemming.Waarschuwing(segs.drop(1).joinToString("/"))
+                // a-alerts.nl/pager/?melding=… and ?waarschuwing=…
+                uri.host == "a-alerts.nl" && uri.getQueryParameter("melding") != null -> bestemming = Bestemming.Melding(uri.getQueryParameter("melding")!!)
+                uri.host == "a-alerts.nl" && uri.getQueryParameter("waarschuwing") != null -> bestemming = Bestemming.Waarschuwing(uri.getQueryParameter("waarschuwing")!!)
                 uri.scheme == "aalerts" && uri.host == "melding" && segs.isNotEmpty() -> bestemming = Bestemming.Melding(segs[0])
                 uri.scheme == "aalerts" && uri.host == "waarschuwing" && segs.isNotEmpty() -> bestemming = Bestemming.Waarschuwing(segs.joinToString("/"))
             }

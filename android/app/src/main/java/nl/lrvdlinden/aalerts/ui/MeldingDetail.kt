@@ -160,12 +160,14 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     }
                 }
                 // Actions
+                var routeOpen by remember { mutableStateOf(false) }
+                if (routeOpen) RouteSheet(m) { routeOpen = false }
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     val saved = m.guid in Settings.bewaard
                     ActionButton(if (saved) Icons.Filled.Bookmark else Icons.Outlined.BookmarkBorder, if (saved) tr("Bewaard", "Saved") else tr("Bewaar", "Save"), Modifier.weight(1f)) { Settings.toggleBewaard(m.guid) }
                     ActionButton(Icons.Outlined.Share, tr("Delen", "Share"), Modifier.weight(1f)) { share(ctx, m) }
                     if (m.hasCoordinate) ActionButton(Icons.Outlined.Map, tr("Kaart", "Map"), Modifier.weight(1f)) { nav.toonOpKaart(m.guid) }
-                    if (m.hasCoordinate && m.hasStreet) ActionButton(Icons.Outlined.Directions, tr("Route", "Route"), Modifier.weight(1f)) { openRoute(ctx, m.lat!!, m.lon!!, m.plaatsText) }
+                    if (m.hasCoordinate) ActionButton(Icons.Outlined.Directions, tr("Route", "Route"), Modifier.weight(1f)) { routeOpen = true }
                 }
                 if (weer != null) WeerCard(weer) else SectionCard(tr("Weer ter plaatse", "Weather at the scene"), Icons.Outlined.WbSunny) {
                     if (!weerKlaar) LinearProgressIndicator(Modifier.fillMaxWidth())
@@ -374,8 +376,51 @@ fun conditie(c: String): String {
 }
 
 fun share(ctx: Context, m: Melding) {
-    val text = "${m.title}\n${m.plaatsText} · ${Fmt.dayTime(m.datum)}\n${m.prioriteitText}\n\nA-Alerts – ${BuildConfig.WEBSITE}/melding/${m.guid}"
+    val text = "${m.title}\n${m.plaatsText} · ${Fmt.dayTime(m.datum)}\n${m.prioriteitText}\n\nA-Alerts – ${m.shareUrl}"
     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), tr("Delen", "Share")))
+}
+
+/** "Route naar incident": Google Maps, Apple Kaarten or copy the address (same choices as iOS and the live pager). */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RouteSheet(m: Melding, onDismiss: () -> Unit) {
+    val ctx = LocalContext.current
+    var gekopieerd by remember { mutableStateOf(false) }
+    val adres = if (m.hasStreet) "${m.locatie}, ${m.plaatsText}" else m.plaatsText
+    ModalBottomSheet(onDismissRequest = onDismiss, containerColor = MaterialTheme.colorScheme.background) {
+        Column(Modifier.padding(horizontal = 20.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Text(tr("Route naar incident", "Route to incident"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+            Text(adres, color = Muted, fontSize = 14.sp)
+            if (!m.hasStreet) Text(tr("De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.",
+                "The control room gave no street: the route goes to the centre of the town."), color = Muted, fontSize = 12.sp)
+            RouteOptie(R.drawable.routeapp_googlemaps, "Google Maps", tr("Route met de auto in Google Maps", "Driving route in Google Maps")) {
+                openRoute(ctx, m.lat!!, m.lon!!, m.plaatsText); onDismiss()
+            }
+            RouteOptie(R.drawable.routeapp_applemaps, tr("Apple Kaarten", "Apple Maps"), tr("Route met de auto in Apple Kaarten", "Driving route in Apple Maps")) {
+                runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://maps.apple.com/?daddr=${m.lat},${m.lon}&dirflg=d&q=${Uri.encode(adres)}"))) }
+                onDismiss()
+            }
+            RouteOptie(null, if (gekopieerd) tr("Gekopieerd", "Copied") else tr("Kopieer adres", "Copy address"), tr("Om zelf in een andere app te plakken", "To paste into another app yourself")) {
+                val cm = ctx.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                cm.setPrimaryClip(android.content.ClipData.newPlainText("Adres", adres)); gekopieerd = true
+            }
+        }
+    }
+}
+
+@Composable
+private fun RouteOptie(icon: Int?, titel: String, subtitel: String, onClick: () -> Unit) {
+    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(MaterialTheme.colorScheme.surface).clickable(onClick = onClick).padding(14.dp),
+        verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+        Box(Modifier.size(48.dp).clip(RoundedCornerShape(12.dp)).background(Muted.copy(alpha = 0.1f)), contentAlignment = Alignment.Center) {
+            if (icon != null) androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(icon), null, Modifier.size(40.dp).clip(RoundedCornerShape(10.dp)))
+            else Icon(Icons.Outlined.ContentCopy, null, tint = Muted)
+        }
+        Column(Modifier.weight(1f)) {
+            Text(titel, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            Text(subtitel, color = Muted, fontSize = 13.sp)
+        }
+    }
 }
 
 /** Opens navigation in Google Maps (or another maps app). */

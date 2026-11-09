@@ -125,6 +125,10 @@ struct WaarschuwingDetailView: View {
                 .padding(.bottom, -6)
                 mainCard(w)
                 if w.heeftKnmiTekst { knmiCard(w) }
+                else if let afloop = w.afloop, !afloop.isEmpty {
+                    berichtCard(w, w.startbericht ?? w.tekst ?? "")
+                    afloopCard(w, afloop)
+                }
                 else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
                 if let m = meteo { meteoCard(m, live: w.bron == .knmi) }
                 // A weather code covers a whole region: no alerts nearby.
@@ -354,6 +358,20 @@ struct WaarschuwingDetailView: View {
                 .font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
             if w.bron == .knmi, let uitleg = MeldingDetailView.codeUitleg(w.niveau) {
                 Text(uitleg).font(AppFont.body(13)).foregroundStyle(.secondary)
+            }
+        }
+        .wCard()
+    }
+
+    /// Burgernet closing message ("Afloopbericht"), apart from the call-out.
+    private func afloopCard(_ w: Waarschuwing, _ afloop: String) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label(L("Afloopbericht"), systemImage: "checkmark.circle.fill")
+                .font(AppFont.heading(18)).foregroundStyle(.green)
+            Text(afloop)
+                .font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+            if let e = w.einde {
+                Text(Lf("Gesloten om %@", e.formatted(date: .abbreviated, time: .shortened))).font(AppFont.body(13)).foregroundStyle(.secondary)
             }
         }
         .wCard()

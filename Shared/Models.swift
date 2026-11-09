@@ -173,7 +173,7 @@ struct Melding: Identifiable, Hashable, Codable {
     }
 
     var shareText: String {
-        "\(title)\n\(plaatsText) · \(Fmt.dayTime(datum))\n\(prioriteitText)\n\nA-Alerts – \(Config.website.appendingPathComponent("melding").appendingPathComponent(guid).absoluteString)"
+        "\(title)\n\(plaatsText) · \(Fmt.dayTime(datum))\n\(prioriteitText)\n\nA-Alerts – \(Config.website.appendingPathComponent("melding").appendingPathComponent(dienst.rawValue).appendingPathComponent(guid).absoluteString)"
     }
 
     enum CodingKeys: String, CodingKey {

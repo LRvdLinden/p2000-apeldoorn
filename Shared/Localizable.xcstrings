@@ -902,6 +902,23 @@
         }
       }
     },
+    "Afloopbericht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closing message"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afloopbericht"
+          }
+        }
+      }
+    },
     "Afspeelpositie": {
       "extractionState": "manual",
       "localizations": {
@@ -3941,6 +3958,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschatte tijden, zonder voertuigposities."
+          }
+        }
+      }
+    },
+    "Gesloten om %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gesloten om %@"
           }
         }
       }

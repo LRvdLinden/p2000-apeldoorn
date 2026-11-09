@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=53";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=54";
 
 const TZ = "Europe/Amsterdam";
 
@@ -16,7 +16,22 @@ export const CODES = { yellow: ["Code geel", "#F7C600", "#000"], orange: ["Code 
 export const codeNu = (w) => (w.bron === "knmi" && w.status === "beeindigd" ? "green" : w.niveau);
 export const isOpgeheven = (w) => w.bron === "knmi" && w.status === "beeindigd";
 /** Link to this warning on a-alerts.nl (for sharing). */
-export const wShareUrl = (w) => `https://a-alerts.nl/pager/?waarschuwing=${encodeURIComponent(w.id)}`;
+export const wShareUrl = (w) => `https://a-alerts.nl/waarschuwing/${encodeURIComponent(w.id).replace(/%3A/gi, ":")}`;
+/** Link to this alert (for sharing): a-alerts.nl/melding/<dienst>/<guid>. Previews show the banner of the service,
+ *  and with the app installed the link opens in the app. */
+export const mShareUrl = (m) => {
+  const d = String(m.dienst || "").toLowerCase();
+  const dienst = ["lifeliner", "mmt"].includes(d) ? "traumaheli" : ["brandweer", "ambulance", "politie", "traumaheli", "kustwacht"].includes(d) ? d : "onbekend";
+  return `https://a-alerts.nl/melding/${dienst}/${encodeURIComponent(m.guid)}`;
+};
+/** Route links to the alert: Google Maps, Apple Kaarten and the address to copy. */
+export const routeLinks = (m, adres) => {
+  const dest = m.lat != null && m.lon != null ? `${m.lat},${m.lon}` : adres;
+  return {
+    google: `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`,
+    apple: `https://maps.apple.com/?daddr=${encodeURIComponent(dest)}&dirflg=d&q=${encodeURIComponent(adres)}`,
+  };
+};
 
 export async function fetchWaarschuwingen(days = 7) {
   try {

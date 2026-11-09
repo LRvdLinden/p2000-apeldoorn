@@ -36,3 +36,21 @@ enum AppGroup {
         return guid.isEmpty || guid == "/" ? nil : guid
     }
 }
+
+/// Universal links from a-alerts.nl (share links): /melding/<guid>, /melding/<dienst>/<guid>,
+/// /waarschuwing/<id> and /pager/?melding=… or ?waarschuwing=….
+enum DeelLink: Equatable {
+    case melding(String)
+    case waarschuwing(String)
+
+    init?(url: URL) {
+        guard url.scheme == "https", let host = url.host, host.hasSuffix("a-alerts.nl") else { return nil }
+        let delen = url.pathComponents.filter { $0 != "/" }
+        let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
+        if delen.first == "melding", delen.count >= 2, let guid = delen.last { self = .melding(guid); return }
+        if delen.first == "waarschuwing", delen.count >= 2 { self = .waarschuwing(delen.dropFirst().joined(separator: "/")); return }
+        if let g = query.first(where: { $0.name == "melding" })?.value, !g.isEmpty { self = .melding(g); return }
+        if let w = query.first(where: { $0.name == "waarschuwing" })?.value, !w.isEmpty { self = .waarschuwing(w); return }
+        return nil
+    }
+}

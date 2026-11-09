@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=53";
+} from "./core.js?v=54";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=53";
+  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=54";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -364,6 +364,33 @@ $("knmiBar").addEventListener("click", (e) => {
 // ------------------------------------------------------------------ detail
 
 let detailMap = null;
+/** "Route naar incident": the same choices as in the apps — Google Maps, Apple Kaarten or copy the address. */
+function routePopup(m) {
+  document.querySelector(".route-pop")?.remove();
+  const adres = hasStreet(m) ? `${m.locatie}, ${plaatsText(m)}` : plaatsText(m);
+  const r = routeLinks(m, adres);
+  const el = document.createElement("div");
+  el.className = "route-pop";
+  el.innerHTML = `<div class="route-sheet" role="dialog" aria-modal="true" aria-labelledby="routeTitel">
+    <button class="route-x" type="button" aria-label="Sluiten">×</button>
+    <h2 id="routeTitel">Route naar incident</h2>
+    <p class="route-adres">${esc(adres)}</p>
+    ${hasStreet(m) ? "" : `<p class="hint">De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.</p>`}
+    <a class="route-opt" href="${r.google}" target="_blank" rel="noopener"><img src="${asset("assets/img/route_googlemaps.png")}" alt=""><span><b>Google Maps</b><small>Route met de auto in Google Maps</small></span><i>›</i></a>
+    <a class="route-opt" href="${r.apple}" target="_blank" rel="noopener"><img src="${asset("assets/img/route_applemaps.png")}" alt=""><span><b>Apple Kaarten</b><small>Route met de auto in Kaarten</small></span><i>›</i></a>
+    <button class="route-opt" type="button" data-kopieer><span class="route-copy">⧉</span><span><b>Kopieer adres</b><small>Om zelf in een andere app te plakken</small></span></button>
+  </div>`;
+  const sluit = () => { el.remove(); document.removeEventListener("keydown", esc_); };
+  const esc_ = (e) => { if (e.key === "Escape") sluit(); };
+  el.addEventListener("click", (e) => { if (e.target === el || e.target.closest(".route-x") || e.target.closest("a.route-opt")) sluit(); });
+  el.querySelector("[data-kopieer]").addEventListener("click", async (e) => {
+    try { await navigator.clipboard.writeText(adres); e.currentTarget.querySelector("b").textContent = "Gekopieerd"; toast("Adres gekopieerd"); } catch {}
+  });
+  document.addEventListener("keydown", esc_);
+  document.body.append(el);
+  el.querySelector(".route-x").focus();
+}
+
 const ICO = {
   pin: `<svg viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="#fff"/></svg>`,
   warn: `<svg viewBox="0 0 24 24"><path d="M12 3 2 21h20L12 3z" fill="#fff"/><path d="M12 10v5" stroke="#DC2626" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="18" r="1" fill="#DC2626"/></svg>`,
@@ -429,7 +456,7 @@ function renderDetail(m) {
       <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(hasStreet(m) ? m.locatie : stad)}</b><small>${hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div></div>
       <div class="info"><span class="ico" style="background:${isUrgent(m) ? "#DC2626" : "#f59e0b"}">${ICO.warn}</span><div><b>${esc(m.categorie || dienst.label)}</b><small>${m.prioriteit ? `Prioriteit ${esc(m.prioriteit)}` : "Prioriteit onbekend"}</small></div></div>
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
-      <a class="amaps" href="${appleMapsURL(m)}" target="_blank" rel="noopener">${ICO.maps} Apple Kaarten</a>
+      ${m.lat != null || hasStreet(m) ? `<button class="amaps" id="routeBtn" type="button">${ICO.maps} Route naar incident</button>` : ""}
     </section>
     <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
@@ -488,8 +515,9 @@ function renderDetail(m) {
     toast(v[k] ? `Je volgt ${b.dataset.naam}` : "Niet meer gevolgd");
     renderList();
   }));
+  $("routeBtn")?.addEventListener("click", () => routePopup(m));
   $("shareBtn").addEventListener("click", async () => {
-    const url = location.href;
+    const url = mShareUrl(m);
     try {
       if (navigator.share) await navigator.share({ title: m.title, text: `${m.title} – ${plaatsText(m)}`, url });
       else { await navigator.clipboard.writeText(url); toast("Link gekopieerd"); }
@@ -656,6 +684,8 @@ async function selectWarning(id, { push = true } = {}) {
     </section>
     ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
+    : w.afloop ? `<section class="card story"><h2>Oproep</h2>${String(w.startbericht || w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
+      <section class="card story afloop"><h2>✅ Afloopbericht</h2>${String(w.afloop).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${w.einde ? `<p class="hint">Gesloten ${esc(fmtTime(new Date(w.einde)))}</p>` : ""}</section>`
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}

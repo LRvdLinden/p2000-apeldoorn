@@ -1,5 +1,5 @@
-import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=53";
-import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=53";
+import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=54";
+import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=54";
 
 reveal();
 trackVisit();

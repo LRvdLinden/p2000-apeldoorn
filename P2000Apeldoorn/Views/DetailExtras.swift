@@ -126,9 +126,10 @@ extension Melding {
         hasStreet ? "\(locatie ?? ""), \(plaatsNaam)" : plaatsNaam
     }
 
-    /// The alert on the website: a-alerts.nl/melding/<guid> opens it directly in the live pager.
+    /// The alert on the website: a-alerts.nl/melding/<dienst>/<guid>. Opens the app when it is installed,
+    /// otherwise the live pager; link previews show the banner of the service.
     var webLink: URL {
-        Config.website.appendingPathComponent("melding").appendingPathComponent(guid)
+        Config.website.appendingPathComponent("melding").appendingPathComponent(dienst.rawValue).appendingPathComponent(guid)
     }
 
     var deelTekst: String {

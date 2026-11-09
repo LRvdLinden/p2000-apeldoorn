@@ -34,12 +34,13 @@
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            <!-- Share links from the app and the website: https://a-alerts.nl/melding/<guid> -->
+            <!-- Share links: https://a-alerts.nl/melding/<dienst>/<guid> and /waarschuwing/<id> open the app when installed -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="a-alerts.nl" android:pathPrefix="/melding/" />
+                <data android:pathPrefix="/waarschuwing/" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

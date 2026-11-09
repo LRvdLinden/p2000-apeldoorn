@@ -133,7 +133,12 @@ struct RootView: View {
         }
         #endif
         .onOpenURL { url in
-            if url.host == "waarschuwing", url.lastPathComponent.count > 3 {
+            if let doel = DeelLink(url: url) {
+                switch doel {
+                case .melding(let guid): router.open(guid: guid)
+                case .waarschuwing(let id): router.openWaarschuwing(id: id)
+                }
+            } else if url.host == "waarschuwing", url.lastPathComponent.count > 3 {
                 router.openWaarschuwing(id: url.lastPathComponent)
             } else if let guid = AppGroup.guid(from: url) {
                 router.open(guid: guid)

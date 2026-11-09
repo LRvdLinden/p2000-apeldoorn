@@ -165,6 +165,8 @@ export function fromBurgernetSite(id, html, now = Date.now()) {
     id: `burgernet:${id}`, bron: "burgernet",
     titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/is, "").slice(0, 140),
     tekst: afloop && ended ? `${report}\n\n${afloop}` : report, tekst_en: null,
+    // Start and closing message apart, so the apps and Homey can show the closing message on its own.
+    startbericht: report, afloop: afloop || null,
     plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
     start_at: amsterdamTime(sd, st) ?? now, end_at: ended ? (amsterdamTime(ed2, et) ?? now) : null,
     status: ended ? "beeindigd" : "actief",
@@ -368,6 +370,10 @@ export function toAPI(row, { withArea = true } = {}) {
       return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null,
         tijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length > 1 ? k.tijdvakken : null };
     })() : {}),
+    ...(row.bron === "burgernet" ? (() => {
+      const b = parse(row.knmi_data) || {};
+      return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null };
+    })() : {}),
   };
 }
 
@@ -446,6 +452,11 @@ async function upsert(env, w, now) {
       tijdvakken: w.tijdvakken || null };
     await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
       .bind(w.id, JSON.stringify(extra)).run();
+  }
+  // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
+  if (w.bron === "burgernet" && w.afloop) {
+    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
+      .bind(w.id, JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop })).run();
   }
   return prev;
 }

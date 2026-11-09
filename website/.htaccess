@@ -34,12 +34,18 @@ ErrorDocument 404 /404.html
   RewriteCond %{QUERY_STRING} (^|&)p=changelog(&|$)
   RewriteRule ^info/?$ /wat-is-nieuw/? [R=301,L]
 
-  # Korte links (WhatsApp/Homey): /statistieken en /waarschuwing/<id>
+  # Korte link: /statistieken
   RewriteRule ^statistieken/?$ /pager/#stats [R=302,L,NE]
-  RewriteRule ^waarschuwing/(.+)$ /pager/?waarschuwing=$1 [R=302,L,QSA]
 
-  # Deellinks uit de app: /melding/<guid> → live pager met die melding open
+  # Deellinks (apps, website, Homey): een kleine pagina met de banner van de dienst of bron voor de link-preview,
+  # die meteen doorstuurt naar de live pager. Met de app geïnstalleerd opent de link in de app (universal links / app links).
+  RewriteRule ^melding/(brandweer|ambulance|politie|traumaheli)/[A-Za-z0-9_-]+/?$ /deel/$1.html [L]
+  RewriteRule ^melding/[a-z]+/[A-Za-z0-9_-]+/?$ /deel/melding.html [L]
+  RewriteRule ^waarschuwing/(burgernet|nlalert|knmi):.+$ /deel/$1.html [L]
+
+  # Oudere deellinks: /melding/<guid> en /waarschuwing/<id> → live pager
   RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]
+  RewriteRule ^waarschuwing/(.+)$ /pager/?waarschuwing=$1 [R=302,L,QSA]
 </IfModule>
 
 <IfModule mod_headers.c>
@@ -60,6 +66,10 @@ ErrorDocument 404 /404.html
     Header set X-Robots-Tag "noindex"
   </FilesMatch>
 </IfModule>
+
+<Files "apple-app-site-association">
+  ForceType application/json
+</Files>
 
 <IfModule mod_mime.c>
   AddType application/vnd.android.package-archive .apk

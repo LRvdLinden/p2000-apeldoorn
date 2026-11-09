@@ -932,17 +932,25 @@ extension Color {
 }
 
 
-/// The estimated unit on its way: a small vehicle in the service colour with a dashed ring ("estimate").
+/// The estimated unit on its way: the same vehicle as on the live pager (the service icon on a white disc),
+/// with a ring in the service colour and a dashed outer ring ("estimate").
 struct GeschatVoertuig: View {
     let dienst: Dienst
     var body: some View {
-        Image(systemName: dienst == .brandweer ? "flame.fill" : dienst == .politie ? "car.fill" : "cross.case.fill")
-            .font(.system(size: 12, weight: .bold))
-            .foregroundStyle(.white)
-            .frame(width: 26, height: 26)
-            .background(dienst.color, in: Circle())
-            .overlay(Circle().strokeBorder(.white, style: StrokeStyle(lineWidth: 2, dash: [3, 2])))
-            .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
-            .accessibilityLabel(L("Geschatte positie van de eenheid"))
+        Group {
+            if let naam = dienst.iconImage {
+                Image(naam).resizable().scaledToFit().frame(width: 18, height: 18)
+            } else {
+                Image(systemName: "car.fill").font(.system(size: 12, weight: .bold)).foregroundStyle(dienst.color)
+            }
+        }
+        .frame(width: 26, height: 26)
+        .background(.white, in: Circle())
+        .overlay(Circle().strokeBorder(dienst.color, lineWidth: 2))
+        .padding(2)
+        .background(.white, in: Circle())
+        .overlay(Circle().strokeBorder(dienst.color, style: StrokeStyle(lineWidth: 2, dash: [3, 2])).padding(-3))
+        .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
+        .accessibilityLabel(L("Geschatte positie van de eenheid"))
     }
 }

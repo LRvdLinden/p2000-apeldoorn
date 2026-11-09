@@ -79,6 +79,8 @@ data class Melding(
     val datum: Instant get() = parseInstant(datumTijd) ?: Instant.EPOCH
     val millis: Long get() = datum.toEpochMilli()
     val soort: Dienst get() = Dienst.of(dienst)
+    /** Share link: a-alerts.nl/melding/<dienst>/<guid> shows the banner of the service in previews and opens the app when installed. */
+    val shareUrl: String get() = "https://a-alerts.nl/melding/${soort.key}/$guid"
     val hasCoordinate: Boolean get() = lat != null && lon != null && lat != 0.0 && lon != 0.0
     val hasStreet: Boolean get() = !locatie.isNullOrBlank() && locatie.trim().lowercase() != "onbekend"
     val plaatsNaam: String get() = stad?.trim()?.takeIf { it.isNotEmpty() && it.lowercase() != "onbekend" }?.capPlaats() ?: "Apeldoorn"
@@ -119,6 +121,9 @@ data class Waarschuwing(
     val titel: String = "",
     val tekst: String? = null,
     @SerialName("tekst_en") val tekstEn: String? = null,
+    /** Burgernet: call-out and closing message apart. */
+    val startbericht: String? = null,
+    val afloop: String? = null,
     val plaats: String? = null,
     val niveau: String? = null,
     val soort: String? = null,
@@ -160,7 +165,7 @@ data class Waarschuwing(
     val codeNu: String? get() = if (bron == "knmi" && status == "beeindigd") "green" else niveau
     val isOpgeheven: Boolean get() = bron == "knmi" && status == "beeindigd"
     /** Link to this warning on a-alerts.nl (for sharing). */
-    val shareUrl: String get() = "https://a-alerts.nl/pager/?waarschuwing=" + java.net.URLEncoder.encode(id, "UTF-8")
+    val shareUrl: String get() = "https://a-alerts.nl/waarschuwing/" + java.net.URLEncoder.encode(id, "UTF-8")
     val kop: String get() = when (bron) {
         "nlalert" -> label
         else -> listOfNotNull(label, soort?.takeIf { it.isNotBlank() }).joinToString(" · ")

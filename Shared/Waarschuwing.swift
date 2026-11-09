@@ -14,6 +14,9 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let titel: String
     let tekst: String?
     let tekstEn: String?
+    /// Burgernet: the call-out and the closing message apart (afloop is set once the call-out is closed).
+    var startbericht: String? = nil
+    var afloop: String? = nil
     let plaats: String?
     /// KNMI: "yellow", "orange" or "red".
     let niveau: String?
@@ -53,7 +56,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let uitgifte: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken, startbericht, afloop
         case knmiKop = "kop"
         case tekstEn = "tekst_en"
     }
@@ -65,6 +68,8 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         titel = (try? c.decode(String.self, forKey: .titel)) ?? ""
         tekst = try? c.decodeIfPresent(String.self, forKey: .tekst)
         tekstEn = try? c.decodeIfPresent(String.self, forKey: .tekstEn)
+        startbericht = (try? c.decodeIfPresent(String.self, forKey: .startbericht)).flatMap { $0 }
+        afloop = (try? c.decodeIfPresent(String.self, forKey: .afloop)).flatMap { $0 }
         plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
         niveau = try? c.decodeIfPresent(String.self, forKey: .niveau)
         soort = try? c.decodeIfPresent(String.self, forKey: .soort)
@@ -150,11 +155,10 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     /// Ended KNMI warning: lifted, code green now.
     var isOpgeheven: Bool { bron == .knmi && isBeeindigd }
     /// Link to this warning on a-alerts.nl (for sharing).
+    /// a-alerts.nl/waarschuwing/<id>: opens the app when it is installed, otherwise the live pager.
     var shareURL: URL {
-        var c = URLComponents(string: "https://a-alerts.nl/pager/")!
-        c.queryItems = [URLQueryItem(name: "waarschuwing", value: id)]
-        c.percentEncodedQuery = c.percentEncodedQuery?.replacingOccurrences(of: "+", with: "%2B")
-        return c.url!
+        let veilig = id.addingPercentEncoding(withAllowedCharacters: .alphanumerics.union(CharacterSet(charactersIn: "-_.:"))) ?? id
+        return URL(string: "https://a-alerts.nl/waarschuwing/\(veilig)")!
     }
 
     /// "Code geel · Mist", "Burgernet · Vermissing", "NL-Alert".

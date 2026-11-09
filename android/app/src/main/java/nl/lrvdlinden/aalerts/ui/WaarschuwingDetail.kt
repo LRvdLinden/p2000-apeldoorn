@@ -146,6 +146,12 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         x.details?.let { Text(tr("Meer informatie", "More information"), fontWeight = FontWeight.SemiBold); Text(it, fontSize = 15.sp) }
                         x.plaats?.let { Text(tr("Geldt voor: ", "Applies to: ") + it, color = Muted, fontSize = 13.sp) }
                     }
+                } else if (!x.afloop.isNullOrBlank()) {
+                    SectionCard(tr("Oproep", "Call-out"), Icons.Outlined.Campaign) { Text(x.startbericht ?: x.tekstLokaal ?: "", fontSize = 15.sp) }
+                    SectionCard(tr("Afloopbericht", "Closing message"), Icons.Outlined.CheckCircle) {
+                        Text(x.afloop!!, fontSize = 15.sp)
+                        x.eindeAt?.let { Text(tr("Gesloten ", "Closed ") + Fmt.day(it) + " " + Fmt.time(it), color = Muted, fontSize = 13.sp) }
+                    }
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
                 }
