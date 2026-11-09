@@ -167,3 +167,25 @@ CREATE INDEX IF NOT EXISTS melding_feedback_at ON melding_feedback (at);
 -- Toestel-ID: which install (anonymous install ID) belongs to which push registration, for support in the beheer.
 CREATE TABLE IF NOT EXISTS device_install (token TEXT PRIMARY KEY, install_id TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE INDEX IF NOT EXISTS device_install_id ON device_install (install_id);
+
+-- Tab Nieuws: police news, weather articles and liveblogs (+ messages and photos from the beheer).
+CREATE TABLE IF NOT EXISTS nieuws (
+  id TEXT PRIMARY KEY,            -- p-<hash> police, w-<hash> weather, l-<hash> liveblog
+  soort TEXT NOT NULL,            -- politie | weer | liveblog
+  bron TEXT NOT NULL,             -- politie | knmi | burgernet | amber | vermistkind
+  ref TEXT,                       -- police uid or warning id
+  titel TEXT NOT NULL, intro TEXT, plaats TEXT, lat REAL, lon REAL, url TEXT,
+  categorie TEXT, status TEXT, niveau TEXT,
+  at INTEGER NOT NULL, updated_at INTEGER NOT NULL, created_at INTEGER NOT NULL,
+  data TEXT,                      -- JSON: alineas, berichten, plaatsen
+  foto TEXT,                      -- own image from the beheer (nieuws_fotos.id)
+  hidden INTEGER NOT NULL DEFAULT 0,
+  notified TEXT
+);
+CREATE INDEX IF NOT EXISTS nieuws_at ON nieuws (at);
+CREATE TABLE IF NOT EXISTS nieuws_updates (
+  id INTEGER PRIMARY KEY AUTOINCREMENT, nieuws_id TEXT NOT NULL, titel TEXT, tekst TEXT, url TEXT, foto TEXT,
+  at INTEGER NOT NULL, created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS nieuws_updates_n ON nieuws_updates (nieuws_id);
+CREATE TABLE IF NOT EXISTS nieuws_fotos (id TEXT PRIMARY KEY, mime TEXT NOT NULL, data BLOB NOT NULL, at INTEGER NOT NULL);

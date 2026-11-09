@@ -40,6 +40,8 @@ import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, 
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { kaartImage } from "./kaart.js";
+import { listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
+  syncWaarschuwingen, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
@@ -63,9 +65,9 @@ const reply = (status, body, extra = {}) =>
     status, headers: { "content-type": "application/json; charset=utf-8", ...CORS, ...extra },
   });
 
-async function readJSON(req) {
+async function readJSON(req, max = 32_768) {
   const text = await req.text();
-  if (text.length > 32_768) throw new HttpError(413, "Body too large");
+  if (text.length > max) throw new HttpError(413, "Body too large");
   if (!text) return {};
   try { return JSON.parse(text); } catch { throw new HttpError(400, "Invalid JSON"); }
 }
@@ -97,6 +99,7 @@ async function handle(req, env, ctx) {
       apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env), radar: radarConfigured(env),
       devices: await deviceCount(env),
       waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
+      nieuws: JSON.parse((await kvGet(env, "nieuws_politie_status"))?.value || "null"),
     });
   }
 
@@ -161,6 +164,19 @@ async function handle(req, env, ctx) {
     // A weather code covers a whole region: no "alerts nearby" for KNMI.
     const meldingen = w.bron === "knmi" ? [] : await linkedMeldingen(env, w, meldingAPI, SELECT);
     return reply(200, { ...w, meldingen }, { "cache-control": "public, max-age=30" });
+  }
+
+  // Tab Nieuws: police news about our places, weather articles and liveblogs.
+  if (method === "GET" && path === "/v1/nieuws") {
+    const q = url.searchParams;
+    return reply(200, await listNieuws(env, url.origin, { soort: q.get("soort"), limit: q.get("limit"), before: q.get("before") }), { "cache-control": "public, max-age=30" });
+  }
+  m = path.match(/^\/v1\/nieuws\/foto\/([0-9a-f]{32})$/);
+  if (method === "GET" && m) return fotoResponse(env, m[1]);
+  m = path.match(/^\/v1\/nieuws\/([pwl]-[0-9a-f]{12})$/);
+  if (method === "GET" && m) {
+    const item = await getNieuws(env, url.origin, m[1]);
+    return item ? reply(200, item, { "cache-control": "public, max-age=20" }) : reply(404, { error: "Not found" });
   }
 
   // A-Alerts: live positions of the trauma and police helicopters (adsb.lol, ODbL).
@@ -304,6 +320,40 @@ async function handleBeheer(req, env, url, path, method) {
     return item ? reply(200, item) : reply(404, { error: "Niet gevonden" });
   }
 
+  // Tab Nieuws: hide, own photo, add/change/remove messages in the timeline, stock images for police news.
+  if (method === "GET" && path === "/v1/beheer/nieuws") {
+    const q = url.searchParams;
+    return reply(200, await listNieuws(env, url.origin, { soort: q.get("soort"), limit: q.get("limit") || 100, before: q.get("before"), beheer: true }));
+  }
+  if (path === "/v1/beheer/nieuws/stock") {
+    if (method === "GET") return reply(200, await stockLijst(env, url.origin));
+    if (method === "PUT" || method === "POST") { await zetStock(env, await readJSON(req, 3_000_000)); return reply(200, await stockLijst(env, url.origin)); }
+  }
+  let n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})$/);
+  if (n && method === "GET") { const item = await getNieuws(env, url.origin, n[1], { beheer: true }); return item ? reply(200, item) : reply(404, { error: "Niet gevonden" }); }
+  if (n && (method === "PATCH" || method === "PUT")) {
+    const ok = await wijzigNieuws(env, n[1], await readJSON(req, 3_000_000));
+    return ok ? reply(200, await getNieuws(env, url.origin, n[1], { beheer: true })) : reply(404, { error: "Niet gevonden" });
+  }
+  n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})\/updates$/);
+  if (n && method === "POST") {
+    const body = await readJSON(req, 3_000_000);
+    const r = await voegToe(env, n[1], body);
+    if (!r) return reply(404, { error: "Niet gevonden" });
+    let ontvangers = 0;
+    if (body.push !== false) ontvangers = await pushNieuws(env, n[1], "a", r.id);
+    return reply(200, { ...(await getNieuws(env, url.origin, n[1], { beheer: true })), ontvangers });
+  }
+  n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})\/updates\/(\d+)$/);
+  if (n && (method === "PATCH" || method === "PUT")) {
+    const ok = await wijzigUpdate(env, n[1], Number(n[2]), await readJSON(req, 3_000_000));
+    return ok ? reply(200, await getNieuws(env, url.origin, n[1], { beheer: true })) : reply(404, { error: "Niet gevonden" });
+  }
+  if (n && method === "DELETE") {
+    const ok = await verwijderUpdate(env, n[1], Number(n[2]));
+    return ok ? reply(200, await getNieuws(env, url.origin, n[1], { beheer: true })) : reply(404, { error: "Niet gevonden" });
+  }
+
   if (method === "GET" && path === "/v1/beheer/meldingen") return reply(200, await adminMeldingen(env, url));
   let m = path.match(/^\/v1\/beheer\/meldingen\/([\w-]{8,64})$/);
   if (m && method === "GET") {
@@ -440,6 +490,11 @@ async function drain(env, budget) {
         const [, kind, ...rest] = row.guid.split(":");
         const w = await getWarning(env, rest.join(":"));
         items.set(row.guid, w ? { warning: w, kind } : null);
+      } else if (row.guid.startsWith("n:")) {
+        const [, kind, id, uid] = row.guid.split(":");
+        const item = await env.DB.prepare("SELECT id, soort, bron, titel, plaats FROM nieuws WHERE id = ? AND hidden = 0").bind(id).first();
+        const update = kind === "a" ? await env.DB.prepare("SELECT titel, tekst FROM nieuws_updates WHERE id = ?").bind(Number(uid)).first() : null;
+        items.set(row.guid, item && (kind !== "a" || update) ? { nieuws: item, kind, update } : null);
       } else if (row.guid.startsWith("broadcast:")) {
         const b = await kvGet(env, row.guid);
         items.set(row.guid, b ? { broadcast: JSON.parse(b.value) } : null);
@@ -454,7 +509,9 @@ async function drain(env, budget) {
     const item = items.get(row.guid);
     const done = env.DB.prepare("DELETE FROM outbox WHERE guid = ? AND token = ?").bind(row.guid, row.token);
     if (!item || !budget.take()) { if (!item) await done.run(); return; }
-    const r = item.warning
+    const r = item.nieuws
+      ? await sendPush(env, row, payloadVoorNieuws(item.nieuws, row.language, item.kind, item.update), { collapseId: row.guid.slice(-64) })
+      : item.warning
       ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { kind: item.kind }),
         { urgent: ["amber", "vermistkind"].includes(item.warning.bron) ? item.kind !== "a" : item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"),
           collapseId: item.warning.id.slice(0, 64) })
@@ -518,6 +575,33 @@ async function warnings(env, budget) {
   }
 }
 
+/** Queues a push for a news item: "p" new police article, "a" message from the beheer (update id). Returns the number of devices. */
+async function pushNieuws(env, id, kind, updateId = 0) {
+  const row = await env.DB.prepare("SELECT id, soort, bron, ref, titel, plaats, data FROM nieuws WHERE id = ? AND hidden = 0").bind(id).first();
+  if (!row) return 0;
+  const data = JSON.parse(row.data || "{}");
+  const item = { ...row, plaatsen: data.plaatsen || null };
+  const warning = row.soort === "politie" ? null : await getWarning(env, row.ref);
+  const tokens = nieuwsOntvangers(await activeDevices(env), await devicePrefs(env), item, warningWanted, warning);
+  if (tokens.length) await queue(env, `n:${kind}:${id}:${updateId}`, tokens);
+  return tokens.length;
+}
+
+/** Tab Nieuws: police news every 10 minutes, weather articles and liveblogs follow the warnings. */
+async function nieuwsRun(env, budget) {
+  const kv = { get: (k) => kvGet(env, k), set: (k, v) => kvSet(env, k, v) };
+  try { await syncWaarschuwingen(env, kv); } catch (e) { console.error("[nieuws-sync]", e.message || e); }
+  try {
+    for (const id of await syncPolitie(env, budget, kv)) {
+      await env.DB.prepare("UPDATE nieuws SET notified = '1' WHERE id = ?").bind(id).run();
+      await pushNieuws(env, id, "p");
+    }
+  } catch (e) {
+    await kvSet(env, "nieuws_politie_status", JSON.stringify({ ok: false, at: Date.now(), fout: String(e.message || e) }));
+    console.error("[nieuws-politie]", e.message || e);
+  }
+}
+
 /** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */
 async function heliRun(env) {
   const data = await helikopters(env);
@@ -577,6 +661,7 @@ async function cron(env, event) {
     console.error("[backfill]", e.message || e);
   }
   try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
+  await nieuwsRun(env, budget);
   const homey = async () => { try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); } };
   await homey();
   // Five reads per minute: new alerts show up (and are pushed) within ~12 seconds.
@@ -593,6 +678,7 @@ async function cron(env, event) {
   if (new Date(event.scheduledTime).getUTCMinutes() === 7) {
     await housekeeping(env, Number(env.RETENTION_DAYS || 3));
     await warningsHousekeeping(env);
+    try { await nieuwsHousekeeping(env); } catch (e) { console.error("[nieuws]", e.message || e); }
     await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
     await env.DB.prepare("DELETE FROM melding_feedback WHERE at < ?").bind(Date.now() - 90 * 86_400_000).run().catch(() => {});
     await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'broadcast:hz:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});

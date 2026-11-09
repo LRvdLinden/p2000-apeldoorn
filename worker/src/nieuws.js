@@ -1,0 +1,458 @@
+// Tab "Nieuws": police news about our places, an article per KNMI weather warning and a liveblog per
+// Burgernet, AMBER Alert and Vermist Kind Alert. Beheer can add messages (text, photo, link) to any item.
+//
+// Police news comes from the open API of the police (the same messages as politie.nl/nieuws).
+// Text may be reused with the source named; the images of politie.nl may NOT be used. So a police article never
+// carries a photo of politie.nl: it gets an A-Alerts image per subject (or one chosen in the beheer).
+import { PLAATSEN_ALL, distanceKm, inWerkgebied } from "./werkgebied.js";
+import { getWarning } from "./alerts.js";
+
+export const POLITIE_API = "https://api.politie.nl/v4/nieuws";
+export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog"];
+const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind"];
+const KIND = ["amber", "vermistkind"];
+const IMG = "https://a-alerts.nl/assets/img/nieuws/";
+const SITE = "https://a-alerts.nl/nieuws/";
+const DAY = 86_400_000;
+const CENTRUM = { lat: 52.2112, lon: 5.9699 };
+export const VERWIJDERD = "Dit bericht is na afloop verwijderd.";
+export const MAX_FOTO = 1_800_000; // bytes; D1 keeps a value up to 2 MB
+
+// ------------------------------------------------------------------ helpers
+
+/** Short stable id: prefix + 12 hex of SHA-1 of the source id (clean share links). */
+export async function nieuwsId(prefix, bron) {
+  const h = await crypto.subtle.digest("SHA-1", new TextEncoder().encode(String(bron)));
+  return `${prefix}-${[...new Uint8Array(h)].slice(0, 6).map((b) => b.toString(16).padStart(2, "0")).join("")}`;
+}
+
+const ENT = { amp: "&", lt: "<", gt: ">", quot: '"', apos: "'", nbsp: " ", euml: "ë", eacute: "é", egrave: "è", iuml: "ï", ouml: "ö", uuml: "ü", auml: "ä", ecirc: "ê", ccedil: "ç", rsquo: "’", lsquo: "‘", ldquo: "“", rdquo: "”", ndash: "–", mdash: "—", hellip: "…", euro: "€" };
+export function decodeEntities(s) {
+  return String(s || "").replace(/&(#x?[0-9a-f]+|\w+);/gi, (m, e) => {
+    if (e[0] === "#") { const n = e[1] === "x" || e[1] === "X" ? parseInt(e.slice(2), 16) : parseInt(e.slice(1), 10); return Number.isFinite(n) ? String.fromCodePoint(n) : m; }
+    return ENT[e.toLowerCase()] ?? m;
+  });
+}
+
+/** HTML of the police API → plain paragraphs (no tags, no scripts, no images). */
+export function htmlNaarAlineas(html) {
+  const s = String(html || "")
+    .replace(/<(script|style|iframe|figure)[\s\S]*?<\/\1>/gi, "")
+    .replace(/<br\s*\/?>/gi, "\n")
+    .replace(/<\/(p|div|h\d)>/gi, "\n\n")
+    .replace(/<li[^>]*>/gi, "• ")
+    .replace(/<\/li>/gi, "\n")
+    .replace(/<[^>]+>/g, "");
+  return decodeEntities(s).split(/\n{2,}/).map((p) => p.split("\n").map((l) => l.replace(/[ \t ]+/g, " ").trim()).filter(Boolean).join("\n")).filter(Boolean);
+}
+
+const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Names that also exist elsewhere (or are ordinary words): only counted when the article clearly is about our area.
+const ZWAK = new Set(["Engeland", "De Krim", "Groenendaal", "Meerveld", "Hooilanden", "De Jonas", "Oosterhuizen", "Lieren", "Assel", "Loenen", "De Haere", "Woeste Hoeve", "Gerritsflesch", "Teuge"]);
+const REGIO = /\b(apeldoorn|veluwe|oost-nederland|noord-?\s?en oost-gelderland|gelderland)\b/i;
+const PLAATS_RE = PLAATSEN_ALL.map((p) => ({ naam: p.naam, zwak: ZWAK.has(p.naam),
+  re: new RegExp(`(^|[^\\p{L}])(${[p.naam, ...(p.aliassen || [])].map(esc).join("|")})(?![\\p{L}])`, "iu") }));
+
+/** Our places mentioned in a text (police API: title, intro, paragraphs, area). */
+export function plaatsenIn(tekst, { regio = false } = {}) {
+  const t = String(tekst || "");
+  const hits = PLAATS_RE.filter((p) => p.re.test(t));
+  const sterk = hits.filter((p) => !p.zwak);
+  if (sterk.length || regio || REGIO.test(t)) return hits.map((p) => p.naam);
+  return [];
+}
+
+const CATEGORIEEN = [
+  ["vermist", /\b(vermist|vermiste|vermissing)\b/i],
+  ["verkeer", /\b(aanrijding|verkeer\w*|ongeval|ongeluk|snelheid|rijbewijs|bestuurder|automobilist|fietser|scooter|rijden|flitser|A1|A50|alcohol(controle)?)\b/i],
+  ["inbraak", /\b(inbra(ak|ken|ker|kers)|ingebroken|diefstal|gestolen|beroving|overval)\b/i],
+  ["drugs", /\b(drugs|hennep|cocaïne|xtc|wietplantage|drugslab|ondermijning)\b/i],
+  ["brand", /\b(brand|brandstichting|explosie|vuurwerk)\b/i],
+  ["getuigen", /\b(getuigen|tips|opsporing|gezocht|camerabeelden|signalement)\b/i],
+];
+export function categorieVan(tekst) {
+  const t = String(tekst || "");
+  return (CATEGORIEEN.find(([, re]) => re.test(t)) || ["algemeen"])[0];
+}
+export const STOCK_CATEGORIEEN = ["algemeen", "verkeer", "inbraak", "getuigen", "drugs", "brand", "vermist"];
+
+/** "2026-11-09 14:05:00" (Dutch time) → ms. */
+export function politieTijd(s) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})(?::(\d{2}))?/.exec(String(s || ""));
+  if (!m) return null;
+  const [y, mo, d, h, mi, se = "0"] = m.slice(1).map(Number);
+  const guess = Date.UTC(y, mo - 1, d, h, mi, se);
+  // Offset of Europe/Amsterdam at that moment (CET +1 / CEST +2).
+  const local = new Date(guess).toLocaleString("en-US", { timeZone: "Europe/Amsterdam", hour12: false });
+  const [md, tm] = local.split(", ");
+  const [M, D, Y] = md.split("/").map(Number);
+  const [H, MI, SE] = tm.split(":").map(Number);
+  const asLocal = Date.UTC(Y, M - 1, D, H % 24, MI, SE);
+  return guess - (asLocal - guess);
+}
+
+/** One message of the police API → article, or null when it is not about our places. */
+export function politieItem(n) {
+  if (!n || !n.titel || !(n.uid || n.url)) return null;
+  const alineas = [];
+  for (const a of Array.isArray(n.alineas) ? n.alineas : []) {
+    const delen = htmlNaarAlineas(a.opgemaaktetekst || a.tekst || "");
+    if (!delen.length) continue;
+    alineas.push({ titel: a.titel ? decodeEntities(String(a.titel)).trim() || null : null, tekst: delen.join("\n\n") });
+  }
+  const intro = htmlNaarAlineas(n.introductie || "").join("\n\n");
+  const alles = [n.titel, intro, ...alineas.map((a) => `${a.titel || ""} ${a.tekst}`)].join("\n");
+  const locs = (Array.isArray(n.locaties) ? n.locaties : []).map((l) => ({ lat: Number(l.latitude), lon: Number(l.longitude) })).filter((l) => Number.isFinite(l.lat) && Number.isFinite(l.lon));
+  const inGebied = locs.some((l) => inWerkgebied(l.lat, l.lon, 2));
+  const plaatsen = plaatsenIn(alles, { regio: inGebied || REGIO.test(String(n.gebied || "")) });
+  if (!plaatsen.length && !inGebied) return null;
+  const at = politieTijd(n.publicatiedatum) || Date.now();
+  const loc = locs.find((l) => inWerkgebied(l.lat, l.lon, 2)) || null;
+  const plaats = plaatsen.find((p) => p !== "Apeldoorn") || plaatsen[0] || "Apeldoorn";
+  return {
+    bronId: String(n.uid || n.url), titel: decodeEntities(n.titel).trim(), intro, alineas, at, url: n.url || "https://www.politie.nl/nieuws",
+    plaats, plaatsen, gebied: n.gebied || null, lat: loc?.lat ?? null, lon: loc?.lon ?? null, categorie: categorieVan(`${n.titel} ${intro}`),
+  };
+}
+
+// ------------------------------------------------------------------ storage
+
+const parse = (s, d = null) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
+
+async function upsertNieuws(env, it, now = Date.now()) {
+  const prev = await env.DB.prepare("SELECT id, data, status, notified FROM nieuws WHERE id = ?").bind(it.id).first();
+  await env.DB.prepare(`INSERT INTO nieuws (id, soort, bron, ref, titel, intro, plaats, lat, lon, url, categorie, status, niveau, at, updated_at, data, hidden, notified, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?)
+    ON CONFLICT(id) DO UPDATE SET titel = excluded.titel, intro = excluded.intro, plaats = excluded.plaats, lat = excluded.lat, lon = excluded.lon,
+      url = excluded.url, categorie = excluded.categorie, status = excluded.status, niveau = excluded.niveau, at = excluded.at,
+      updated_at = excluded.updated_at, data = excluded.data`)
+    .bind(it.id, it.soort, it.bron, it.ref ?? null, it.titel, it.intro ?? null, it.plaats ?? null, it.lat ?? null, it.lon ?? null, it.url ?? null,
+      it.categorie ?? null, it.status ?? null, it.niveau ?? null, it.at, now, JSON.stringify(it.data || {}), now).run();
+  return prev;
+}
+
+/** Reads the police news (every 10 minutes) and stores the articles about our places. Returns new ones to push. */
+export async function syncPolitie(env, budget, kv, now = Date.now()) {
+  const last = Number((await kv.get("nieuws_politie_at"))?.value || 0);
+  if (now - last < 10 * 60_000 || !budget.take()) return [];
+  await kv.set("nieuws_politie_at", String(now));
+  const eerste = !last;
+  const q = new URLSearchParams({ language: "nl", lat: String(CENTRUM.lat), lon: String(CENTRUM.lon), radius: "25", maxnumberofitems: "25", offset: "0" });
+  const res = await fetch(`${POLITIE_API}?${q}`, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(12_000) });
+  if (res.status === 204) { await kv.set("nieuws_politie_status", JSON.stringify({ ok: true, at: now, n: 0 })); return []; }
+  if (!res.ok) { await kv.set("nieuws_politie_status", JSON.stringify({ ok: false, at: now, fout: `HTTP ${res.status}` })); return []; }
+  const data = await res.json();
+  const lijst = (Array.isArray(data?.nieuwsberichten) ? data.nieuwsberichten : []).map(politieItem).filter(Boolean);
+  const nieuw = [];
+  for (const p of lijst) {
+    const id = await nieuwsId("p", p.bronId);
+    const prev = await upsertNieuws(env, {
+      id, soort: "politie", bron: "politie", ref: p.bronId, titel: p.titel, intro: p.intro, plaats: p.plaats, lat: p.lat, lon: p.lon, url: p.url,
+      categorie: p.categorie, status: null, at: p.at, data: { alineas: p.alineas, plaatsen: p.plaatsen, gebied: p.gebied },
+    }, now);
+    if (!prev && !eerste && now - p.at < 6 * 3_600_000) nieuw.push(id);
+    if (!prev && eerste) await env.DB.prepare("UPDATE nieuws SET notified = '1' WHERE id = ?").bind(id).run();
+  }
+  await kv.set("nieuws_politie_status", JSON.stringify({ ok: true, at: now, n: lijst.length, totaal: data?.nieuwsberichten?.length ?? 0 }));
+  return nieuw;
+}
+
+const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" };
+const tijdNL = (iso) => new Date(iso).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" });
+
+/** KNMI warning (API shape) → weather article. */
+export function weerArtikel(w) {
+  const code = CODE[w.niveau] || "Weerwaarschuwing";
+  const soort = w.soort || "het weer";
+  const opgeheven = w.status === "beeindigd" || w.niveau === "green";
+  const titel = opgeheven ? `Opgeheven: ${code.toLowerCase()} voor ${soort.toLowerCase()} in Gelderland` : `${code} voor ${soort.toLowerCase()} in Gelderland`;
+  const vakken = Array.isArray(w.tijdvakken) && w.tijdvakken.length ? w.tijdvakken : [{ niveau: w.niveau, start: w.start, einde: w.einde }];
+  const alineas = [];
+  if (opgeheven) alineas.push({ titel: null, tekst: "Het KNMI heeft deze waarschuwing opgeheven. Er geldt nu code groen." });
+  alineas.push({ titel: "Wanneer", tekst: vakken.map((v) => `${CODE[v.niveau] || code}: ${tijdNL(v.start)}${v.einde ? ` tot ${tijdNL(v.einde)}` : ""}`).join("\n") });
+  if (w.verwachting) alineas.push({ titel: "Wat wordt er verwacht", tekst: String(w.verwachting) });
+  else if (w.tekst) alineas.push({ titel: "Wat wordt er verwacht", tekst: String(w.tekst) });
+  if (w.details) alineas.push({ titel: "Details", tekst: String(w.details) });
+  if (w.advies) alineas.push({ titel: "Advies van het KNMI", tekst: String(w.advies) });
+  return { titel, intro: w.omschrijving || w.kop || w.tekst || "", alineas, opgeheven };
+}
+
+/** Burgernet / AMBER / Vermist Kind (API shape) → liveblog with the official timeline. */
+export function liveblogVan(w) {
+  const berichten = (Array.isArray(w.berichten) ? w.berichten : []).filter((b) => b && (b.tekst || b.at)).map((b, i) => ({
+    key: `b${i}:${b.id || b.at || ""}`, at: b.at || w.start, soort: b.soort || "update", plaats: b.plaats || null, tekst: b.tekst || "", door: w.bron,
+  }));
+  if (!berichten.length && w.tekst) berichten.push({ key: "b0", at: w.start, soort: "start", plaats: w.plaats || null, tekst: w.tekst, door: w.bron });
+  return { titel: w.titel || "", intro: w.tekst || "", berichten };
+}
+
+/** Weather articles and liveblogs follow the warnings: every changed warning updates its item. */
+export async function syncWaarschuwingen(env, kv, now = Date.now()) {
+  const last = Number((await kv.get("nieuws_sync"))?.value || 0);
+  const since = last ? last - 2 * 60_000 : now - 14 * DAY;
+  const { results } = await env.DB.prepare(`SELECT w.id FROM waarschuwingen w LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id
+    WHERE w.bron IN ('knmi','burgernet','amber','vermistkind') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
+    ORDER BY w.updated_at LIMIT 60`).bind(since, since, since).all();
+  for (const { id } of results) {
+    const w = await getWarning(env, id);
+    if (!w) continue;
+    if (w.bron === "knmi") {
+      const a = weerArtikel(w);
+      await upsertNieuws(env, { id: await nieuwsId("w", w.id), soort: "weer", bron: "knmi", ref: w.id, titel: a.titel, intro: a.intro, plaats: "Gelderland",
+        url: w.link, categorie: null, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas } }, now);
+    } else if (LIVE_BRONNEN.includes(w.bron)) {
+      const l = liveblogVan(w);
+      const nid = await nieuwsId("l", w.id);
+      const klaar = w.status === "beeindigd";
+      await upsertNieuws(env, { id: nid, soort: "liveblog", bron: w.bron, ref: w.id, titel: l.titel, intro: l.intro, plaats: w.plaats, lat: w.lat, lon: w.lon,
+        url: w.link, categorie: null, status: klaar ? "afgerond" : "actief", niveau: null, at: Date.parse(w.start), data: { berichten: l.berichten } }, now);
+      // A missing child: after the end no photo and no description any more, also not in what the beheer added.
+      if (klaar && KIND.includes(w.bron)) await wisKindAanvullingen(env, nid);
+    }
+  }
+  await kv.set("nieuws_sync", String(now));
+}
+
+export async function wisKindAanvullingen(env, nid) {
+  const { results } = await env.DB.prepare("SELECT foto FROM nieuws_updates WHERE nieuws_id = ? AND foto IS NOT NULL").bind(nid).all();
+  await env.DB.batch([
+    env.DB.prepare("UPDATE nieuws_updates SET tekst = ?, foto = NULL, url = NULL WHERE nieuws_id = ? AND tekst != ?").bind(VERWIJDERD, nid, VERWIJDERD),
+    env.DB.prepare("UPDATE nieuws SET foto = NULL WHERE id = ?").bind(nid),
+    ...results.map((r) => env.DB.prepare("DELETE FROM nieuws_fotos WHERE id = ?").bind(r.foto)),
+  ]);
+}
+
+// ------------------------------------------------------------------ API shape
+
+async function stockFotos(env) {
+  const { results } = await env.DB.prepare("SELECT key, value FROM kv WHERE key LIKE 'nieuws_stock:%'").all();
+  return new Map(results.map((r) => [r.key.slice("nieuws_stock:".length), r.value]));
+}
+
+export function afbeeldingVoor(row, origin, stock = new Map()) {
+  if (row.foto) return `${origin}/v1/nieuws/foto/${row.foto}`;
+  if (row.soort === "politie") {
+    const cat = STOCK_CATEGORIEEN.includes(row.categorie) ? row.categorie : "algemeen";
+    const eigen = stock.get(cat) || stock.get("algemeen");
+    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}politie-${cat}.webp`;
+  }
+  if (row.soort === "weer") return `${IMG}knmi.webp`;
+  return `${IMG}${row.bron}.webp`;
+}
+
+function samenvatting(row, origin, stock, extra = {}) {
+  return {
+    id: row.id, soort: row.soort, bron: row.bron, titel: row.titel, intro: row.intro || null, plaats: row.plaats || null,
+    at: new Date(row.at).toISOString(), bijgewerkt: new Date(Math.max(row.updated_at || 0, row.laatste_update || 0, row.at)).toISOString(),
+    status: row.status || null, niveau: row.niveau || null, categorie: row.categorie || null,
+    afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}`, bron_url: row.url || null,
+    waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null,
+    ...(row.hidden !== undefined && extra.beheer ? { hidden: Boolean(row.hidden) } : {}),
+  };
+}
+
+const LIST_SQL = `SELECT n.*, (SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS laatste_update,
+  (SELECT COUNT(*) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS n_updates FROM nieuws n`;
+
+/** Newest first: liveblogs by their last message, the rest by publication. */
+export async function listNieuws(env, origin, { soort, limit, before, beheer = false } = {}) {
+  const lim = Math.min(Math.max(Number(limit) || 40, 1), 100);
+  const where = [beheer ? "1=1" : "n.hidden = 0"], args = [];
+  if (NIEUWS_SOORTEN.includes(soort)) { where.push("n.soort = ?"); args.push(soort); }
+  const sortKey = "MAX(n.at, COALESCE((SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id), 0), CASE WHEN n.soort = 'liveblog' THEN n.updated_at ELSE 0 END)";
+  if (before) { where.push(`${sortKey} < ?`); args.push(Number(new Date(before)) || Number(before)); }
+  const { results } = await env.DB.prepare(`${LIST_SQL} WHERE ${where.join(" AND ")} ORDER BY ${sortKey} DESC, n.created_at DESC LIMIT ?`).bind(...args, lim).all();
+  const stock = await stockFotos(env);
+  return results.map((r) => {
+    const d = parse(r.data, {});
+    const aantal = r.soort === "liveblog" ? (d.berichten?.length || 0) + (r.n_updates || 0) : r.n_updates || 0;
+    // Sort time of a liveblog: its newest message (official or from the beheer).
+    const laatste = r.soort === "liveblog" ? Math.max(r.at, ...((d.berichten || []).map((b) => Date.parse(b.at) || 0)), r.laatste_update || 0) : r.laatste_update || 0;
+    return samenvatting({ ...r, aantal, laatste_update: laatste }, origin, stock, { beheer });
+  });
+}
+
+export async function getNieuws(env, origin, id, { beheer = false } = {}) {
+  const row = await env.DB.prepare(`${LIST_SQL} WHERE n.id = ?`).bind(id).first();
+  if (!row || (row.hidden && !beheer)) return null;
+  const d = parse(row.data, {});
+  const { results: ups } = await env.DB.prepare("SELECT * FROM nieuws_updates WHERE nieuws_id = ? ORDER BY at DESC").bind(id).all();
+  const eigen = ups.map((u) => ({ id: u.id, at: new Date(u.at).toISOString(), soort: "aanvulling", door: "a-alerts", titel: u.titel || null, tekst: u.tekst || "",
+    foto: u.foto ? `${origin}/v1/nieuws/foto/${u.foto}` : null, url: u.url || null }));
+  const officieel = (d.berichten || []).map((b) => ({ id: null, at: b.at, soort: b.soort, door: b.door || row.bron, titel: null, tekst: b.tekst, plaats: b.plaats || null, foto: null, url: null }));
+  const tijdlijn = [...eigen, ...officieel].sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
+  const laatste = Math.max(row.at, ...tijdlijn.map((t) => Date.parse(t.at) || 0));
+  const stock = await stockFotos(env);
+  return {
+    ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste }, origin, stock, { beheer }),
+    alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn,
+    bron_naam: row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
+  };
+}
+
+// ------------------------------------------------------------------ beheer
+
+/** "data:image/jpeg;base64,…" → { mime, bytes } or an error. */
+export function leesFoto(dataUrl) {
+  const m = /^data:(image\/(?:jpeg|png|webp));base64,([A-Za-z0-9+/=\s]+)$/.exec(String(dataUrl || ""));
+  if (!m) throw Object.assign(new Error("Foto moet een JPEG, PNG of WebP zijn"), { status: 400 });
+  const bin = atob(m[2].replace(/\s+/g, ""));
+  if (bin.length > MAX_FOTO) throw Object.assign(new Error("Foto is te groot (max. 1,8 MB)"), { status: 413 });
+  const bytes = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return { mime: m[1], bytes };
+}
+
+export async function bewaarFoto(env, dataUrl) {
+  const { mime, bytes } = leesFoto(dataUrl);
+  const id = crypto.randomUUID().replace(/-/g, "");
+  await env.DB.prepare("INSERT INTO nieuws_fotos (id, mime, data, at) VALUES (?, ?, ?, ?)").bind(id, mime, bytes, Date.now()).run();
+  return id;
+}
+
+export async function fotoResponse(env, id) {
+  if (!/^[0-9a-f]{32}$/.test(id)) return new Response("Niet gevonden", { status: 404 });
+  const row = await env.DB.prepare("SELECT mime, data FROM nieuws_fotos WHERE id = ?").bind(id).first();
+  if (!row) return new Response("Niet gevonden", { status: 404 });
+  const data = row.data instanceof ArrayBuffer ? row.data : new Uint8Array(row.data);
+  return new Response(data, { headers: { "content-type": row.mime, "cache-control": "public, max-age=31536000, immutable", "access-control-allow-origin": "*" } });
+}
+
+const isKindAfgerond = (row) => row && KIND.includes(row.bron) && row.status === "afgerond";
+
+/** PATCH: hide/show, own photo (data URL) or remove it (null), title. */
+export async function wijzigNieuws(env, id, body) {
+  const row = await env.DB.prepare("SELECT * FROM nieuws WHERE id = ?").bind(id).first();
+  if (!row) return null;
+  if ("hidden" in body) await env.DB.prepare("UPDATE nieuws SET hidden = ? WHERE id = ?").bind(body.hidden ? 1 : 0, id).run();
+  if ("foto" in body) {
+    if (body.foto && isKindAfgerond(row)) throw Object.assign(new Error("Na afloop van een kind-alert kan er geen foto meer bij"), { status: 400 });
+    const foto = body.foto ? await bewaarFoto(env, body.foto) : null;
+    await env.DB.batch([
+      env.DB.prepare("UPDATE nieuws SET foto = ? WHERE id = ?").bind(foto, id),
+      ...(row.foto ? [env.DB.prepare("DELETE FROM nieuws_fotos WHERE id = ?").bind(row.foto)] : []),
+    ]);
+  }
+  return true;
+}
+
+/** New message in the timeline of an item. Returns the stored update. */
+export async function voegToe(env, id, body) {
+  const row = await env.DB.prepare("SELECT * FROM nieuws WHERE id = ?").bind(id).first();
+  if (!row) return null;
+  const tekst = String(body.tekst || "").trim().slice(0, 4000);
+  const titel = String(body.titel || "").trim().slice(0, 160) || null;
+  const url = String(body.url || "").trim();
+  if (url && !/^https:\/\/[^\s]+$/i.test(url)) throw Object.assign(new Error("Link moet met https:// beginnen"), { status: 400 });
+  if (!tekst && !body.foto && !url) throw Object.assign(new Error("Vul een tekst, foto of link in"), { status: 400 });
+  if (body.foto && isKindAfgerond(row)) throw Object.assign(new Error("Na afloop van een kind-alert kan er geen foto meer bij"), { status: 400 });
+  const foto = body.foto ? await bewaarFoto(env, body.foto) : null;
+  const at = body.at && Number.isFinite(Date.parse(body.at)) ? Math.min(Date.parse(body.at), Date.now()) : Date.now();
+  const r = await env.DB.prepare("INSERT INTO nieuws_updates (nieuws_id, titel, tekst, url, foto, at, created_at) VALUES (?, ?, ?, ?, ?, ?, ?) RETURNING id")
+    .bind(id, titel, tekst, url || null, foto, at, Date.now()).first();
+  return { id: r.id, nieuws: row };
+}
+
+export async function wijzigUpdate(env, id, uid, body) {
+  const u = await env.DB.prepare("SELECT u.*, n.bron, n.status FROM nieuws_updates u JOIN nieuws n ON n.id = u.nieuws_id WHERE u.id = ? AND u.nieuws_id = ?").bind(uid, id).first();
+  if (!u) return null;
+  const sets = [], args = [];
+  if ("tekst" in body) { sets.push("tekst = ?"); args.push(String(body.tekst || "").trim().slice(0, 4000)); }
+  if ("titel" in body) { sets.push("titel = ?"); args.push(String(body.titel || "").trim().slice(0, 160) || null); }
+  if ("url" in body) {
+    const url = String(body.url || "").trim();
+    if (url && !/^https:\/\/[^\s]+$/i.test(url)) throw Object.assign(new Error("Link moet met https:// beginnen"), { status: 400 });
+    sets.push("url = ?"); args.push(url || null);
+  }
+  const extra = [];
+  if ("foto" in body) {
+    if (body.foto && isKindAfgerond(u)) throw Object.assign(new Error("Na afloop van een kind-alert kan er geen foto meer bij"), { status: 400 });
+    sets.push("foto = ?"); args.push(body.foto ? await bewaarFoto(env, body.foto) : null);
+    if (u.foto) extra.push(env.DB.prepare("DELETE FROM nieuws_fotos WHERE id = ?").bind(u.foto));
+  }
+  if (sets.length) await env.DB.batch([env.DB.prepare(`UPDATE nieuws_updates SET ${sets.join(", ")} WHERE id = ?`).bind(...args, uid), ...extra]);
+  return true;
+}
+
+export async function verwijderUpdate(env, id, uid) {
+  const u = await env.DB.prepare("SELECT foto FROM nieuws_updates WHERE id = ? AND nieuws_id = ?").bind(uid, id).first();
+  if (!u) return false;
+  await env.DB.batch([
+    env.DB.prepare("DELETE FROM nieuws_updates WHERE id = ?").bind(uid),
+    ...(u.foto ? [env.DB.prepare("DELETE FROM nieuws_fotos WHERE id = ?").bind(u.foto)] : []),
+  ]);
+  return true;
+}
+
+/** Stock images per subject for police articles: { categorie: dataURL | null }. */
+export async function stockLijst(env, origin) {
+  const s = await stockFotos(env);
+  return STOCK_CATEGORIEEN.map((c) => ({ categorie: c, eigen: s.has(c), afbeelding: s.has(c) ? `${origin}/v1/nieuws/foto/${s.get(c)}` : `${IMG}politie-${c}.webp` }));
+}
+export async function zetStock(env, body) {
+  for (const c of STOCK_CATEGORIEEN) {
+    if (!(c in (body || {}))) continue;
+    const oud = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(`nieuws_stock:${c}`).first();
+    if (body[c]) {
+      const id = await bewaarFoto(env, body[c]);
+      await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(`nieuws_stock:${c}`, id, Date.now()).run();
+    } else await env.DB.prepare("DELETE FROM kv WHERE key = ?").bind(`nieuws_stock:${c}`).run();
+    if (oud?.value) await env.DB.prepare("DELETE FROM nieuws_fotos WHERE id = ?").bind(oud.value).run();
+  }
+}
+
+// ------------------------------------------------------------------ push
+
+const L = {
+  nl: { live: { burgernet: "Liveblog · Burgernet", amber: "Liveblog · AMBER Alert", vermistkind: "Liveblog · Vermist Kind" }, politie: "Politienieuws", weer: "Weer" },
+  en: { live: { burgernet: "Live blog · Burgernet", amber: "Live blog · AMBER Alert", vermistkind: "Live blog · Missing Child" }, politie: "Police news", weer: "Weather" },
+};
+
+/** kind "p": new police article, "a": message added by the beheer. */
+export function payloadVoorNieuws(item, lang = "nl", kind = "p", update = null) {
+  const t = L[(lang || "nl").startsWith("nl") ? "nl" : "en"];
+  const head = item.soort === "liveblog" ? t.live[item.bron] || "Liveblog" : item.soort === "weer" ? `${t.weer} · ${item.titel}` : `${t.politie}${item.plaats ? ` · ${item.plaats}` : ""}`;
+  const body = kind === "a" && update ? [update.titel, update.tekst].filter(Boolean).join(" – ") || item.titel : item.titel;
+  return {
+    aps: { alert: { title: head.slice(0, 120), body: String(body || "").slice(0, 400), ...(kind === "a" && item.soort !== "liveblog" ? { subtitle: item.titel.slice(0, 120) } : {}) },
+      sound: "default", "thread-id": `nieuws-${item.id}`, "interruption-level": "active", "relevance-score": 0.5, category: "NIEUWS" },
+    nieuws: item.id,
+  };
+}
+
+/** Prefs (from settings.waarschuwingen): only apps with the tab send these; liveblogs default on in the app. */
+export function nieuwsPrefs(p) {
+  return { liveblog: p?.nieuwsLiveblog === true, politie: p?.nieuwsPolitie === true };
+}
+
+/** Which devices get a push for a new police article or a beheer message on an item. */
+export function nieuwsOntvangers(devices, prefs, item, warningWanted, warning) {
+  return devices.filter((d) => {
+    if (!d.enabled) return false;
+    const p = prefs.get(d.token);
+    const n = nieuwsPrefs(p);
+    if (item.soort === "politie") {
+      if (!n.politie) return false;
+      const chosen = d.plaatsen || [];
+      return !chosen.length || chosen.some((c) => (item.plaatsen || [item.plaats]).some((x) => String(x).toLowerCase() === String(c).toLowerCase()));
+    }
+    if (!n.liveblog) return false;
+    // Only for those who follow the source of the liveblog / weather warning.
+    return warning ? warningWanted(d, p, { ...warning, status: "actief" }) : true;
+  }).map((d) => d.token);
+}
+
+export async function nieuwsHousekeeping(env) {
+  const grens = Date.now() - 90 * DAY;
+  const { results } = await env.DB.prepare("SELECT id FROM nieuws WHERE at < ? AND updated_at < ?").bind(grens, grens).all();
+  for (const { id } of results) {
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM nieuws_fotos WHERE id IN (SELECT foto FROM nieuws_updates WHERE nieuws_id = ? AND foto IS NOT NULL)").bind(id),
+      env.DB.prepare("DELETE FROM nieuws_fotos WHERE id IN (SELECT foto FROM nieuws WHERE id = ? AND foto IS NOT NULL)").bind(id),
+      env.DB.prepare("DELETE FROM nieuws_updates WHERE nieuws_id = ?").bind(id),
+      env.DB.prepare("DELETE FROM nieuws WHERE id = ?").bind(id),
+    ]);
+  }
+}
+
+export { distanceKm };

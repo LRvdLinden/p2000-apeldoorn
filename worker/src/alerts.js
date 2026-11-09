@@ -313,6 +313,8 @@ export function prefsFrom(s) {
   return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)],
     // AMBER Alert and Vermist Kind Alert (app 2.0.1+): only when the app sends them, so older apps never get a kind they cannot show.
     amber: s.amber === true, vermistkind: s.vermistkind === true,
+    // Tab Nieuws (app 2.0.1 build 67+): liveblog messages from the beheer and new police news.
+    nieuwsLiveblog: s.nieuwsLiveblog === true, nieuwsPolitie: s.nieuwsPolitie === true,
     // KNMI extras (default on): a push one hour before the code starts, and one when it is lifted (code green).
     knmiVooraf: s.knmiVooraf !== false, knmiOpgeheven: s.knmiOpgeheven !== false };
 }

@@ -1,0 +1,142 @@
+// Tab Nieuws: police news filter, weather articles, liveblogs and the beheer messages (against real SQLite).
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { DatabaseSync } from "node:sqlite";
+import {
+  politieItem, plaatsenIn, categorieVan, htmlNaarAlineas, politieTijd, weerArtikel, liveblogVan, nieuwsId, syncPolitie, syncWaarschuwingen,
+  listNieuws, getNieuws, voegToe, wijzigUpdate, verwijderUpdate, wijzigNieuws, payloadVoorNieuws, nieuwsOntvangers, leesFoto, VERWIJDERD,
+} from "../src/nieuws.js";
+
+function d1() {
+  const db = new DatabaseSync(":memory:");
+  db.exec(readFileSync(new URL("../schema.sql", import.meta.url), "utf8"));
+  const stmt = (sql, args = []) => ({
+    bind: (...a) => stmt(sql, a),
+    first: async () => db.prepare(sql).get(...args) ?? null,
+    all: async () => ({ results: db.prepare(sql).all(...args) }),
+    run: async () => { const r = db.prepare(sql).run(...args); return { meta: { changes: r.changes } }; },
+  });
+  return { prepare: (sql) => stmt(sql), batch: async (list) => { for (const s of list) await s.run(); } };
+}
+const kvOf = (env) => ({
+  get: (k) => env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(k).first(),
+  set: (k, v) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(k, v, Date.now()).run(),
+});
+const budget = () => ({ left: 10, take() { return this.left-- > 0; } });
+const PNG = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+test("police text: html to paragraphs, places, subject, time", () => {
+  assert.deepEqual(htmlNaarAlineas("<p>Een &amp; twee</p><p>Drie<br>vier</p><img src=x>"), ["Een & twee", "Drie\nvier"]);
+  assert.deepEqual(plaatsenIn("Inbraak in Ugchelen en Apeldoorn"), ["Apeldoorn", "Ugchelen"]);
+  assert.deepEqual(plaatsenIn("Wedstrijd tegen Engeland"), [], "Engeland alone is not our hamlet");
+  assert.deepEqual(plaatsenIn("Ongeval in Engeland bij Beekbergen"), ["Beekbergen", "Engeland"]);
+  assert.deepEqual(plaatsenIn("Apeldoornseweg"), [], "a word that only starts with a place does not count");
+  assert.equal(categorieVan("Getuigen gezocht van aanrijding"), "verkeer");
+  assert.equal(categorieVan("Woninginbraak: man aangehouden"), "algemeen");
+  assert.equal(categorieVan("Inbraak in woning"), "inbraak");
+  assert.equal(new Date(politieTijd("2026-11-09 14:05:00")).toISOString(), "2026-11-09T13:05:00.000Z");
+  assert.equal(new Date(politieTijd("2026-07-01 14:05:00")).toISOString(), "2026-07-01T12:05:00.000Z");
+});
+
+test("police item: only about our places, never with the politie.nl image", () => {
+  const raw = { uid: "abc", titel: "Getuigen gezocht na inbraak in Ugchelen", introductie: "<p>De politie zoekt getuigen.</p>", publicatiedatum: "2026-11-09 10:00:00",
+    url: "https://www.politie.nl/nieuws/x.html", gebied: "Apeldoorn", afbeelding: { url: "https://www.politie.nl/foto.jpg" },
+    alineas: [{ titel: "Tips", opgemaaktetekst: "<p>Bel 0900-8844.</p>" }] };
+  const p = politieItem(raw);
+  assert.equal(p.plaats, "Ugchelen");
+  assert.equal(p.intro, "De politie zoekt getuigen.");
+  assert.deepEqual(p.alineas, [{ titel: "Tips", tekst: "Bel 0900-8844." }]);
+  assert.ok(!JSON.stringify(p).includes("foto.jpg"));
+  assert.equal(politieItem({ uid: "z", titel: "Aanhouding in Zwolle", introductie: "", publicatiedatum: "2026-11-09 10:00:00" }), null);
+});
+
+test("weather article and liveblog content", () => {
+  const a = weerArtikel({ niveau: "orange", soort: "Zware windstoten", status: "actief", start: "2026-11-09T12:00:00Z", einde: "2026-11-09T18:00:00Z", verwachting: "Windstoten tot 100 km/u.", advies: "Blijf binnen." });
+  assert.equal(a.titel, "Code oranje voor zware windstoten in Gelderland");
+  assert.deepEqual(a.alineas.map((x) => x.titel), ["Wanneer", "Wat wordt er verwacht", "Advies van het KNMI"]);
+  assert.match(weerArtikel({ niveau: "orange", soort: "Gladheid", status: "beeindigd", start: "2026-11-09T12:00:00Z" }).titel, /^Opgeheven/);
+  const l = liveblogVan({ bron: "burgernet", titel: "Gezocht", tekst: "Man", start: "2026-11-09T20:00:00Z", berichten: [{ soort: "start", at: "2026-11-09T20:00:00Z", tekst: "Man op scooter" }] });
+  assert.equal(l.berichten.length, 1);
+  assert.equal(l.berichten[0].door, "burgernet");
+});
+
+test("photos: only images, not too large", () => {
+  assert.equal(leesFoto(PNG).mime, "image/png");
+  assert.throws(() => leesFoto("data:text/html;base64,PGI+"), /JPEG/);
+});
+
+test("sync: police (first run silent, later new ones pushed), warnings, beheer messages, kind privacy", async () => {
+  const env = { DB: d1() };
+  const kv = kvOf(env);
+  const now = Date.now();
+  const iso = (ms) => new Date(ms).toLocaleString("sv-SE", { timeZone: "Europe/Amsterdam" });
+  const bericht = (uid, titel) => ({ uid, titel, introductie: "<p>Tekst</p>", publicatiedatum: iso(now - 3_600_000), url: `https://www.politie.nl/${uid}`, alineas: [] });
+  let feed = [bericht("1", "Aanrijding in Apeldoorn"), bericht("2", "Inbraak in Deventer")];
+  globalThis.fetch = async () => new Response(JSON.stringify({ nieuwsberichten: feed, iterator: { last: true } }), { status: 200 });
+  assert.deepEqual(await syncPolitie(env, budget(), kv, now), [], "first run: nothing pushed");
+  assert.deepEqual(await syncPolitie(env, budget(), kv, now + 60_000), [], "not again within 10 minutes");
+  feed = [...feed, bericht("3", "Getuigen gezocht in Beekbergen")];
+  const nieuw = await syncPolitie(env, budget(), kv, now + 11 * 60_000);
+  assert.equal(nieuw.length, 1);
+  const lijst = await listNieuws(env, "https://api.test", { soort: "politie" });
+  assert.equal(lijst.length, 2, "Deventer is not ours");
+  assert.equal(lijst[0].afbeelding, "https://a-alerts.nl/assets/img/nieuws/politie-getuigen.webp");
+  assert.match(lijst[0].link, /^https:\/\/a-alerts\.nl\/nieuws\/p-[0-9a-f]{12}$/);
+
+  // A missing child alert with its official messages.
+  const wid = "vermistkind:42";
+  await env.DB.prepare(`INSERT INTO waarschuwingen (id, bron, titel, tekst, plaats, start_at, status, first_seen, updated_at) VALUES (?, 'vermistkind', 'Vermist Kind Alert', 'Meisje, 8 jaar', 'Apeldoorn', ?, 'actief', ?, ?)`)
+    .bind(wid, now - 600_000, now - 600_000, now - 600_000).run();
+  await env.DB.prepare("INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?)").bind(wid, JSON.stringify({ berichten: [{ id: "m1", soort: "start", at: new Date(now - 600_000).toISOString(), tekst: "Meisje, 8 jaar" }] })).run();
+  await env.DB.prepare(`INSERT INTO waarschuwingen (id, bron, titel, tekst, niveau, soort, start_at, end_at, status, first_seen, updated_at) VALUES ('knmi:wind:1', 'knmi', 'Wind', 'Harde wind', 'yellow', 'Windstoten', ?, ?, 'actief', ?, ?)`)
+    .bind(now, now + 3_600_000, now, now).run();
+  await syncWaarschuwingen(env, kv, now + 1000);
+  const lid = await nieuwsId("l", wid);
+  const live = await getNieuws(env, "https://api.test", lid);
+  assert.equal(live.soort, "liveblog");
+  assert.equal(live.tijdlijn.length, 1);
+  assert.equal(live.afbeelding, "https://a-alerts.nl/assets/img/nieuws/vermistkind.webp");
+  const weer = (await listNieuws(env, "https://api.test", { soort: "weer" }))[0];
+  assert.equal(weer.titel, "Code geel voor windstoten in Gelderland");
+
+  // Beheer adds a message with a photo and a link; the newest is on top.
+  const r = await voegToe(env, lid, { tekst: "Extra info", url: "https://www.politie.nl/x", foto: PNG });
+  await assert.rejects(voegToe(env, lid, { url: "http://onveilig" }), /https/);
+  let item = await getNieuws(env, "https://api.test", lid);
+  assert.equal(item.tijdlijn[0].tekst, "Extra info");
+  assert.equal(item.tijdlijn[0].door, "a-alerts");
+  assert.match(item.tijdlijn[0].foto, /\/v1\/nieuws\/foto\/[0-9a-f]{32}$/);
+  await wijzigUpdate(env, lid, r.id, { tekst: "Aangepast" });
+  assert.equal((await getNieuws(env, "https://api.test", lid)).tijdlijn[0].tekst, "Aangepast");
+
+  // The child is found: everything the beheer added loses its text, photo and link too.
+  await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', updated_at = ? WHERE id = ?").bind(now + 5000, wid).run();
+  await syncWaarschuwingen(env, kv, now + 10_000);
+  item = await getNieuws(env, "https://api.test", lid);
+  assert.equal(item.status, "afgerond");
+  const eigen = item.tijdlijn.find((t) => t.door === "a-alerts");
+  assert.equal(eigen.tekst, VERWIJDERD);
+  assert.equal(eigen.foto, null);
+  assert.equal((await env.DB.prepare("SELECT COUNT(*) AS n FROM nieuws_fotos").first()).n, 0);
+  await assert.rejects(voegToe(env, lid, { foto: PNG }), /geen foto/);
+
+  // Hide and delete.
+  await wijzigNieuws(env, lid, { hidden: true });
+  assert.equal(await getNieuws(env, "https://api.test", lid), null);
+  assert.ok(await verwijderUpdate(env, lid, r.id));
+});
+
+test("push: payload and who gets it", () => {
+  const item = { id: "l-000000000001", soort: "liveblog", bron: "burgernet", titel: "Gezocht", plaats: "Ugchelen" };
+  const p = payloadVoorNieuws(item, "nl", "a", { tekst: "Zoekactie afgerond" });
+  assert.equal(p.aps.alert.title, "Liveblog · Burgernet");
+  assert.equal(p.aps.alert.body, "Zoekactie afgerond");
+  assert.equal(p.nieuws, item.id);
+  const devices = [{ token: "a", enabled: 1, plaatsen: [] }, { token: "b", enabled: 1, plaatsen: [] }, { token: "c", enabled: 1, plaatsen: ["Uddel"] }];
+  const prefs = new Map([["a", { nieuwsLiveblog: true, nieuwsPolitie: true }], ["b", { nieuwsLiveblog: false }], ["c", { nieuwsPolitie: true }]]);
+  assert.deepEqual(nieuwsOntvangers(devices, prefs, item, () => true, { bron: "burgernet" }), ["a"]);
+  const pol = { id: "p-000000000001", soort: "politie", bron: "politie", titel: "x", plaats: "Ugchelen", plaatsen: ["Ugchelen"] };
+  assert.deepEqual(nieuwsOntvangers(devices, prefs, pol, () => true, null), ["a"], "c only follows Uddel");
+  assert.equal(payloadVoorNieuws(pol, "en").aps.alert.title, "Police news · Ugchelen");
+});
