@@ -390,3 +390,17 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 .route-opt small { color: var(--muted); }
 .route-opt i { font-style: normal; color: var(--muted); font-size: 1.4rem; }
 @keyframes routeIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* Burgernet: start message, updates and closing message as a timeline */
+.tijdlijn ol { list-style: none; margin: 6px 0 0; padding: 0; }
+.tijdlijn li { position: relative; display: flex; gap: 14px; padding-bottom: 18px; }
+.tijdlijn li:last-child { padding-bottom: 0; }
+.tijdlijn li::before { content: ""; position: absolute; left: 7px; top: 18px; bottom: -2px; width: 2px; background: var(--line); }
+.tijdlijn li:last-child::before { display: none; }
+.tl-dot { flex: none; width: 16px; height: 16px; margin-top: 3px; border-radius: 50%; background: #0067B1; box-shadow: 0 0 0 3px color-mix(in srgb, #0067B1 22%, transparent); }
+.tl-update .tl-dot { background: #F59E0B; box-shadow: 0 0 0 3px color-mix(in srgb, #F59E0B 22%, transparent); }
+.tl-afloop .tl-dot { background: #16A34A; box-shadow: 0 0 0 3px color-mix(in srgb, #16A34A 22%, transparent); }
+.tijdlijn h3 { margin: 0; font-size: 1rem; }
+.tl-afloop h3 { color: #16A34A; }
+.tijdlijn small { display: block; margin: 2px 0 4px; color: var(--muted); text-transform: none; font-size: .8rem; }
+.tijdlijn li p { margin: 4px 0 0; }

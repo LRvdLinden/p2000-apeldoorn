@@ -146,12 +146,8 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         x.details?.let { Text(tr("Meer informatie", "More information"), fontWeight = FontWeight.SemiBold); Text(it, fontSize = 15.sp) }
                         x.plaats?.let { Text(tr("Geldt voor: ", "Applies to: ") + it, color = Muted, fontSize = 13.sp) }
                     }
-                } else if (!x.afloop.isNullOrBlank()) {
-                    SectionCard(tr("Oproep", "Call-out"), Icons.Outlined.Campaign) { Text(x.startbericht ?: x.tekstLokaal ?: "", fontSize = 15.sp) }
-                    SectionCard(tr("Afloopbericht", "Closing message"), Icons.Outlined.CheckCircle) {
-                        Text(x.afloop!!, fontSize = 15.sp)
-                        x.eindeAt?.let { Text(tr("Gesloten ", "Closed ") + Fmt.day(it) + " " + Fmt.time(it), color = Muted, fontSize = 13.sp) }
-                    }
+                } else if (x.bron == "burgernet" && (!x.berichten.isNullOrEmpty() || !x.afloop.isNullOrBlank())) {
+                    BurgernetTijdlijn(x)
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
                 }
@@ -232,6 +228,35 @@ fun WaarschuwingenScreen(nav: Nav) {
                     Surface(color = MaterialTheme.colorScheme.surface, modifier = Modifier.padding(horizontal = 12.dp, vertical = 3.dp).clip(RoundedCornerShape(14.dp))) {
                         WaarschuwingRow(w) { nav.waarschuwing(w.id) }
                     }
+                }
+            }
+        }
+    }
+}
+
+
+/** Burgernet: start message, updates and closing message as a timeline, newest on top (as on burgernet.nl). */
+@Composable
+fun BurgernetTijdlijn(x: Waarschuwing) {
+    val lijst = (x.berichten?.takeIf { it.isNotEmpty() } ?: listOfNotNull(
+        BurgernetBericht("start", x.plaats, x.start, x.startbericht ?: x.tekstLokaal ?: ""),
+        x.afloop?.let { BurgernetBericht("afloop", x.plaats, x.einde, it) },
+    )).reversed()
+    SectionCard(tr("Berichten van Burgernet", "Burgernet messages"), Icons.Outlined.Campaign) {
+        lijst.forEachIndexed { i, b ->
+            val kleur = when (b.soort) { "start" -> Color(0xFF0067B1); "afloop" -> Color(0xFF16A34A); else -> Color(0xFFF59E0B) }
+            Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                Column(Modifier.width(18.dp).fillMaxHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(Modifier.padding(top = 3.dp).size(18.dp).clip(RoundedCornerShape(50)).background(kleur.copy(alpha = 0.25f)), contentAlignment = Alignment.Center) {
+                        Box(Modifier.size(12.dp).clip(RoundedCornerShape(50)).background(kleur))
+                    }
+                    if (i < lijst.size - 1) Box(Modifier.width(2.dp).weight(1f).background(Muted.copy(alpha = 0.3f)))
+                }
+                Column(Modifier.weight(1f).padding(bottom = if (i < lijst.size - 1) 16.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
+                    Text(b.kop, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = if (b.soort == "afloop") kleur else MaterialTheme.colorScheme.onSurface)
+                    val meta = listOfNotNull(b.plaats, b.atInstant?.let { Fmt.day(it) }, b.atInstant?.let { Fmt.time(it) })
+                    if (meta.isNotEmpty()) Text(meta.joinToString(" · "), color = Muted, fontSize = 12.sp)
+                    Text(b.tekst, fontSize = 15.sp)
                 }
             }
         }

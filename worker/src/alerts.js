@@ -133,6 +133,27 @@ export function burgernetSiteIds(html) {
   return [...new Set([...String(html || "").matchAll(/href="\/burgernet\/(\d{4,})"/g)].map((m) => m[1]))];
 }
 
+/** The messages of an action page (Startbericht, updates, Afloopbericht), each with place and time, oldest first. */
+export function burgernetBerichten(html) {
+  const delen = String(html || "").split(/<h5[^>]*action-detail-block__title[^>]*>/i).slice(1);
+  const out = [];
+  for (const deel of delen) {
+    const label = decode(deel.slice(0, deel.indexOf("</h5>")));
+    const tekst = decode((deel.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i) || [])[1] || "");
+    if (!label || !tekst) continue;
+    const items = [...deel.slice(0, deel.search(/<h3/i)).matchAll(/action-message__heading-item[^>]*>([^<]*)</gi)].map((m) => decode(m[1]));
+    const datum = items.find((x) => /^\d{2}\/\d{2}\/\d{4}$/.test(x));
+    const tijd = items.find((x) => /^\d{1,2}:\d{2}$/.test(x));
+    const plaats = items.find((x) => x !== datum && x !== tijd) || null;
+    const soort = /start/i.test(label) ? "start" : /afloop|einde|gesloten/i.test(label) ? "afloop" : "update";
+    const at = datum ? amsterdamTime(datum, tijd || "00:00") : null;
+    out.push({ soort, label, plaats: plaats ? plaats.toLowerCase().replace(/(^|[\s-])(\p{L})/gu, (_, a, b) => a + b.toUpperCase()) : null, at: at ? new Date(at).toISOString() : null, tekst });
+  }
+  const rang = { start: 0, update: 1, afloop: 2 };
+  // Burgernet lists newest first; sort by time, and by kind when times are missing or equal.
+  return out.reverse().sort((a, b) => (a.at && b.at && a.at !== b.at ? Date.parse(a.at) - Date.parse(b.at) : rang[a.soort] - rang[b.soort]));
+}
+
 /** One action page of burgernet.nl (/burgernet/<id>) in the shape of fromBurgernet. */
 export function fromBurgernetSite(id, html, now = Date.now()) {
   const h = String(html || "");
@@ -161,12 +182,15 @@ export function fromBurgernetSite(id, html, now = Date.now()) {
   const clean = report.replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
   const firstSentence = clean.split(/(?<=[.:!?])\s/)[0] || clean;
   const afloop = message("Afloopbericht");
+  const berichten = burgernetBerichten(h);
   return {
     id: `burgernet:${id}`, bron: "burgernet",
     titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/is, "").slice(0, 140),
     tekst: afloop && ended ? `${report}\n\n${afloop}` : report, tekst_en: null,
     // Start and closing message apart, so the apps and Homey can show the closing message on its own.
     startbericht: report, afloop: afloop || null,
+    // Every message on its own with place and time (start, updates, closing), oldest first: a timeline.
+    berichten: berichten.length ? berichten : null,
     plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
     start_at: amsterdamTime(sd, st) ?? now, end_at: ended ? (amsterdamTime(ed2, et) ?? now) : null,
     status: ended ? "beeindigd" : "actief",
@@ -372,7 +396,7 @@ export function toAPI(row, { withArea = true } = {}) {
     })() : {}),
     ...(row.bron === "burgernet" ? (() => {
       const b = parse(row.knmi_data) || {};
-      return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null };
+      return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null, berichten: Array.isArray(b.berichten) && b.berichten.length ? b.berichten : null };
     })() : {}),
   };
 }
@@ -454,9 +478,9 @@ async function upsert(env, w, now) {
       .bind(w.id, JSON.stringify(extra)).run();
   }
   // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
-  if (w.bron === "burgernet" && w.afloop) {
+  if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {
     await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
-      .bind(w.id, JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop })).run();
+      .bind(w.id, JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null })).run();
   }
   return prev;
 }

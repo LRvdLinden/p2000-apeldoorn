@@ -114,6 +114,17 @@ data class Melding(
 fun String.capPlaats(): String = split(" ").joinToString(" ") { w -> w.replaceFirstChar { it.uppercase() } }
 fun String.plaatsKey(): String = lowercase().replace("-", " ").trim()
 
+/** One message of a Burgernet action: "start", "update" or "afloop". */
+@Serializable
+data class BurgernetBericht(val soort: String = "update", val plaats: String? = null, val at: String? = null, val tekst: String = "") {
+    val atInstant: java.time.Instant? get() = at?.let { parseInstant(it) }
+    val kop: String get() = when (soort) {
+        "start" -> tr("Startbericht", "Start message")
+        "afloop" -> tr("Afloopbericht", "Closing message")
+        else -> tr("Update", "Update")
+    }
+}
+
 @Serializable
 data class Waarschuwing(
     val id: String,
@@ -124,6 +135,8 @@ data class Waarschuwing(
     /** Burgernet: call-out and closing message apart. */
     val startbericht: String? = null,
     val afloop: String? = null,
+    /** Burgernet: every message with place and time (start, updates, closing), oldest first. */
+    val berichten: List<BurgernetBericht>? = null,
     val plaats: String? = null,
     val niveau: String? = null,
     val soort: String? = null,

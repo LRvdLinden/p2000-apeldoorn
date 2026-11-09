@@ -125,10 +125,7 @@ struct WaarschuwingDetailView: View {
                 .padding(.bottom, -6)
                 mainCard(w)
                 if w.heeftKnmiTekst { knmiCard(w) }
-                else if let afloop = w.afloop, !afloop.isEmpty {
-                    berichtCard(w, w.startbericht ?? w.tekst ?? "")
-                    afloopCard(w, afloop)
-                }
+                else if !w.tijdlijn.isEmpty { tijdlijnCard(w) }
                 else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
                 if let m = meteo { meteoCard(m, live: w.bron == .knmi) }
                 // A weather code covers a whole region: no alerts nearby.
@@ -363,18 +360,44 @@ struct WaarschuwingDetailView: View {
         .wCard()
     }
 
-    /// Burgernet closing message ("Afloopbericht"), apart from the call-out.
-    private func afloopCard(_ w: Waarschuwing, _ afloop: String) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Label(L("Afloopbericht"), systemImage: "checkmark.circle.fill")
-                .font(AppFont.heading(18)).foregroundStyle(.green)
-            Text(afloop)
-                .font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
-            if let e = w.einde {
-                Text(Lf("Gesloten om %@", e.formatted(date: .abbreviated, time: .shortened))).font(AppFont.body(13)).foregroundStyle(.secondary)
+    /// Burgernet: start message, updates and closing message as a timeline, newest on top.
+    private func tijdlijnCard(_ w: Waarschuwing) -> some View {
+        let lijst = w.tijdlijn
+        return VStack(alignment: .leading, spacing: 14) {
+            Text(L("Berichten van Burgernet")).font(AppFont.heading(18))
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(Array(lijst.enumerated()), id: \.element.id) { i, b in
+                    HStack(alignment: .top, spacing: 12) {
+                        VStack(spacing: 0) {
+                            Circle().fill(Self.tijdlijnKleur(b.soort)).frame(width: 14, height: 14)
+                                .overlay(Circle().stroke(Self.tijdlijnKleur(b.soort).opacity(0.25), lineWidth: 6))
+                                .padding(.top, 3)
+                            if i < lijst.count - 1 { Rectangle().fill(Color.secondary.opacity(0.25)).frame(width: 2).frame(maxHeight: .infinity) }
+                        }
+                        .frame(width: 20)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(b.kop).font(AppFont.body(15, .semibold))
+                                .foregroundStyle(b.soort == .afloop ? Color.green : Color.primary)
+                            let meta = [b.plaats, b.at.map { $0.formatted(.dateTime.day().month(.abbreviated)) }, b.at.map { $0.formatted(date: .omitted, time: .shortened) }].compactMap { $0 }
+                            if !meta.isEmpty { Text(meta.joined(separator: " · ")).font(AppFont.body(12)).foregroundStyle(.secondary) }
+                            Text(b.tekst).font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
+                        }
+                        .padding(.bottom, i < lijst.count - 1 ? 18 : 0)
+                    }
+                    .accessibilityElement(children: .combine)
+                }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .wCard()
+    }
+
+    static func tijdlijnKleur(_ s: BurgernetBericht.Soort) -> Color {
+        switch s {
+        case .start: return Color(hex: 0x0067B1)
+        case .update: return Color(hex: 0xF59E0B)
+        case .afloop: return Color(hex: 0x16A34A)
+        }
     }
 
     /// KNMI warning that has been lifted: code green now (or another warning that applies now).

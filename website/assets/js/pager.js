@@ -364,6 +364,22 @@ $("knmiBar").addEventListener("click", (e) => {
 // ------------------------------------------------------------------ detail
 
 let detailMap = null;
+/** Burgernet: the start message, updates and the closing message as a timeline, newest on top (as on burgernet.nl). */
+function tijdlijnHTML(w) {
+  const lijst = w.berichten?.length ? w.berichten : [
+    { soort: "start", label: "Startbericht", plaats: w.plaats, at: w.start, tekst: w.startbericht || w.tekst },
+    ...(w.afloop ? [{ soort: "afloop", label: "Afloopbericht", plaats: w.plaats, at: w.einde, tekst: w.afloop }] : []),
+  ];
+  const kop = { start: "Startbericht", update: "Update", afloop: "Afloopbericht" };
+  const items = [...lijst].reverse().map((b) => {
+    const d = b.at ? new Date(b.at) : null;
+    const meta = [b.plaats, d ? d.toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "Europe/Amsterdam" }) : null, d ? fmtTime(d) : null].filter(Boolean).map(esc).join(" · ");
+    return `<li class="tl-${esc(b.soort)}"><span class="tl-dot"></span><div><h3>${esc(kop[b.soort] || b.label || "Bericht")}</h3>
+      ${meta ? `<small>${meta}</small>` : ""}${String(b.tekst || "").split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</div></li>`;
+  }).join("");
+  return `<section class="card story tijdlijn"><h2>Berichten van Burgernet</h2><ol>${items}</ol></section>`;
+}
+
 /** "Route naar incident": the same choices as in the apps — Google Maps, Apple Kaarten or copy the address. */
 function routePopup(m) {
   document.querySelector(".route-pop")?.remove();
@@ -684,8 +700,7 @@ async function selectWarning(id, { push = true } = {}) {
     </section>
     ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
-    : w.afloop ? `<section class="card story"><h2>Oproep</h2>${String(w.startbericht || w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
-      <section class="card story afloop"><h2>✅ Afloopbericht</h2>${String(w.afloop).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}${w.einde ? `<p class="hint">Gesloten ${esc(fmtTime(new Date(w.einde)))}</p>` : ""}</section>`
+    : w.bron === "burgernet" && (w.berichten?.length || w.afloop) ? tijdlijnHTML(w)
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}

@@ -36,3 +36,16 @@ test("Nederlandse tijd met zomer- en wintertijd", () => {
   assert.equal(new Date(amsterdamTime("06/11/2026", "13:15")).toISOString(), "2026-11-06T12:15:00.000Z");
   assert.equal(new Date(amsterdamTime("06/07/2026", "13:15")).toISOString(), "2026-07-06T11:15:00.000Z");
 });
+
+test("burgernetBerichten: start, update and closing message as a timeline, oldest first", async () => {
+  const { burgernetBerichten } = await import("../src/alerts.js");
+  const blok = (label, tijd, tekst) => `<h5 class="action-detail-block__title">${label}</h5><div class="c-action-message"><div class="action-message__body">
+    <span class="action-message__heading"><span class="action-message__heading-item">APELDOORN</span><span class="action-message__heading-item">09/11/2026</span>
+    <span class="action-message__heading-item">${tijd}</span></span><h3 class="action-message__title">${tekst}<span class="action-message__title-icon"><svg></svg></span></h3></div></div>`;
+  const b = burgernetBerichten(blok("Afloopbericht", "10:41", "Blijf uitkijken.") + blok("Update", "09:30", "Rode pet.") + blok("Startbericht", "09:06", "Twee mannen."));
+  assert.deepEqual(b.map((x) => [x.soort, x.plaats, x.at, x.tekst]), [
+    ["start", "Apeldoorn", "2026-11-09T08:06:00.000Z", "Twee mannen."],
+    ["update", "Apeldoorn", "2026-11-09T08:30:00.000Z", "Rode pet."],
+    ["afloop", "Apeldoorn", "2026-11-09T09:41:00.000Z", "Blijf uitkijken."],
+  ]);
+});

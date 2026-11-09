@@ -1582,6 +1582,23 @@
         }
       }
     },
+    "Berichten van Burgernet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Burgernet messages"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichten van Burgernet"
+          }
+        }
+      }
+    },
     "Berichten, WhatsApp, Mail en meer": {
       "extractionState": "manual",
       "localizations": {
@@ -3958,23 +3975,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschatte tijden, zonder voertuigposities."
-          }
-        }
-      }
-    },
-    "Gesloten om %@": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Closed at %@"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Gesloten om %@"
           }
         }
       }
@@ -8480,6 +8480,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Start"
+          }
+        }
+      }
+    },
+    "Startbericht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Start message"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Startbericht"
           }
         }
       }

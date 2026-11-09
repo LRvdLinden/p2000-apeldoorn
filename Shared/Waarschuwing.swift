@@ -17,6 +17,8 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     /// Burgernet: the call-out and the closing message apart (afloop is set once the call-out is closed).
     var startbericht: String? = nil
     var afloop: String? = nil
+    /// Burgernet: every message with place and time (start, updates, closing), oldest first.
+    var berichten: [BurgernetBericht]? = nil
     let plaats: String?
     /// KNMI: "yellow", "orange" or "red".
     let niveau: String?
@@ -56,7 +58,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let uitgifte: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken, startbericht, afloop
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken, startbericht, afloop, berichten
         case knmiKop = "kop"
         case tekstEn = "tekst_en"
     }
@@ -70,6 +72,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         tekstEn = try? c.decodeIfPresent(String.self, forKey: .tekstEn)
         startbericht = (try? c.decodeIfPresent(String.self, forKey: .startbericht)).flatMap { $0 }
         afloop = (try? c.decodeIfPresent(String.self, forKey: .afloop)).flatMap { $0 }
+        berichten = (try? c.decodeIfPresent([BurgernetBericht].self, forKey: .berichten)).flatMap { $0 }
         plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
         niveau = try? c.decodeIfPresent(String.self, forKey: .niveau)
         soort = try? c.decodeIfPresent(String.self, forKey: .soort)
@@ -239,6 +242,45 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
 }
 
 /// GET /v1/waarschuwingen/:id: the warning plus P2000 alerts in its area around its time.
+/// One message of a Burgernet action: the start message, an update or the closing message.
+struct BurgernetBericht: Decodable, Hashable, Sendable, Identifiable {
+    enum Soort: String, Decodable, Sendable { case start, update, afloop }
+    let soort: Soort
+    let plaats: String?
+    let at: Date?
+    let tekst: String
+    var id: String { "\(soort.rawValue)-\(at?.timeIntervalSince1970 ?? 0)-\(tekst.prefix(20))" }
+
+    enum CodingKeys: String, CodingKey { case soort, plaats, at, tekst }
+    init(soort: Soort, plaats: String?, at: Date?, tekst: String) { self.soort = soort; self.plaats = plaats; self.at = at; self.tekst = tekst }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        soort = (try? c.decode(Soort.self, forKey: .soort)) ?? .update
+        plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
+        at = (try? c.decodeIfPresent(String.self, forKey: .at)).flatMap { $0 }.flatMap(Fmt.parseISO)
+        tekst = (try? c.decode(String.self, forKey: .tekst)) ?? ""
+    }
+
+    var kop: String {
+        switch soort {
+        case .start: return L("Startbericht")
+        case .update: return L("Update")
+        case .afloop: return L("Afloopbericht")
+        }
+    }
+}
+
+extension Waarschuwing {
+    /// Burgernet timeline, newest on top (as on burgernet.nl). Empty for other sources.
+    var tijdlijn: [BurgernetBericht] {
+        guard bron == .burgernet else { return [] }
+        if let b = berichten, !b.isEmpty { return b.reversed() }
+        guard let afloop, !afloop.isEmpty else { return [] }
+        return [BurgernetBericht(soort: .afloop, plaats: plaats, at: einde, tekst: afloop),
+                BurgernetBericht(soort: .start, plaats: plaats, at: start, tekst: startbericht ?? tekst ?? "")]
+    }
+}
+
 struct WaarschuwingDetail: Decodable, Sendable {
     let waarschuwing: Waarschuwing
     let meldingen: [Melding]
