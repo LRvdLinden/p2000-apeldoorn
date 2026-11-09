@@ -1,9 +1,0 @@
-name: Probe
-on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
-jobs:
-  p:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          curl -s https://www.burgernet.nl/robots.txt | grep -iE "^(user-agent|disallow|allow|crawl)" 
-          echo "== active"; curl -s -A "A-Alerts/1.0 (+https://a-alerts.nl)" https://www.burgernet.nl/active | head -c 400

@@ -4,7 +4,7 @@ set -u
 cd "$(dirname "$0")"
 UA="A-Alerts/1.0 (+https://p2000-apeldoorn.nl)"
 curl -sS -m 30 -A "$UA" -H "Accept: application/json" "https://api.public-warning.app/api/v1/providers/nl-alert/alerts" -o nlalert.json; echo "nl-alert $?"
-curl -sS -m 30 -A "$UA" -H "Accept: application/json" "https://api.112meldkamer.nl/v1/burgernet" -o burgernet.json; echo "burgernet $?"
+curl -sS -m 30 -A "$UA" -H "Accept: application/json" "https://www.burgernet.nl/active" -o burgernet.json; echo "burgernet $?"
 curl -sS -m 30 -A "$UA" -H "Accept: application/json" "https://www.knmi.nl/api/v1/weather-warnings.json" -o knmi.json; echo "knmi $?"
 curl -sS -m 30 -A "$UA" -H "Accept: application/json" "https://www.knmi.nl/api/v1/weather-warnings/version" -o knmi-version.json; echo "knmi-version $?"
 curl -sS -m 30 -A "$UA" "https://api.airplanes.live/v2/callsign/LIFELN3" -o airplaneslive-lifeln3.json; echo "airplanes.live $?"

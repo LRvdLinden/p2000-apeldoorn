@@ -6,7 +6,8 @@ import { KIND_API, KIND_BRONNEN, groepeer, kindWarning } from "./kind.js";
 
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
-  burgernet: "https://api.112meldkamer.nl/v1/burgernet",
+  // Burgernet's own list of running actions (what burgernet.nl/actueel shows), with date and time of the start message.
+  burgernet: "https://www.burgernet.nl/active",
   // Burgernet's own site: the list of recent actions per municipality, and one page per action.
   burgernetSite: "https://www.burgernet.nl",
   knmi: "https://www.knmi.nl/api/v1/weather-warnings",
@@ -115,7 +116,7 @@ export function fromBurgernet(a, now = Date.now()) {
     titel: burgernetTitel(report), tekst: report, tekst_en: null,
     plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
     start_at: start, end_at: null, status: a.isClosed === true ? "beeindigd" : "actief",
-    gebied: null, lat: plaats.lat, lon: plaats.lon, link: link || null,
+    gebied: null, lat: plaats.lat, lon: plaats.lon, link: idMatch ? `https://www.burgernet.nl/burgernet/${idMatch[1]}` : (link || null),
   };
 }
 
@@ -524,37 +525,30 @@ async function fetchText(url, budget) {
 }
 
 /**
- * Burgernet from its own site: the recent actions of Apeldoorn and Voorst (for Teuge), with one action page each.
- * An action page is only read again while the action runs; finished actions are skipped once their timeline is stored.
+ * Burgernet action pages (/burgernet/<id>): start, updates and closing message with place and time, the exact start and end,
+ * and the map position. Read for the running actions in our area, for actions that just left the list (closing message),
+ * and once more for finished actions whose timeline was not stored yet. At most 4 pages per run.
  */
-async function burgernetFromSite(env, budget, now, feedIds = []) {
-  // The ids from the 112meldkamer feed come first: burgernet.nl loads its municipality list with JavaScript now,
-  // so the HTML of that page can be empty. The action pages themselves are complete (start, updates, closing).
-  const ids = [...feedIds];
-  let lijstOk = false;
-  for (const gemeente of ["APELDOORN", "VOORST"]) {
-    try {
-      const html = await fetchText(`${SOURCES.burgernetSite}/gemeente/Oost-Nederland/${gemeente}`, budget);
-      ids.push(...burgernetSiteIds(html));
-      lijstOk = true;
-    } catch (e) { console.warn("[burgernet] gemeente", gemeente, e.message || e); }
+async function burgernetPaginas(env, budget, now, actieveIds) {
+  const { results: open } = await env.DB.prepare(
+    `SELECT w.id, w.status, wk.data FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id
+     WHERE w.bron = 'burgernet' AND (w.status = 'actief' OR w.updated_at > ?)`).bind(now - 2 * 86_400_000).all();
+  const ids = [...actieveIds];
+  for (const r of open) {
+    const id = r.id.replace(/^burgernet:/, "");
+    if (!/^\d{4,}$/.test(id) || ids.includes(id)) continue;
+    // Gone from the list but still running here: read it once for the closing message and the real end time.
+    if (r.status === "actief") ids.push(id);
+    else if (!String(r.data || "").includes('"berichten":[')) ids.push(id);
   }
-  if (!lijstOk && !feedIds.length) throw new Error("geen lijst");
   const out = [];
-  let reads = 0;
-  for (const id of [...new Set(ids)]) {
-    const prev = await env.DB.prepare("SELECT w.status, wk.data FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE w.id = ?")
-      .bind(`burgernet:${id}`).first();
-    // Finished actions are read once more when their messages (timeline) were not stored yet, then never again.
-    if (prev?.status === "beeindigd" && String(prev.data || "").includes('"berichten":[')) continue;
-    if (reads >= 4) break;
-    reads++;
+  for (const id of ids.slice(0, 4)) {
     try {
       const w = fromBurgernetSite(id, await fetchText(`${SOURCES.burgernetSite}/burgernet/${id}`, budget), now);
       if (w) out.push(w);
     } catch (e) { console.warn("[burgernet]", id, e.message || e); }
   }
-  return { ids: new Set(ids.map((i) => `burgernet:${i}`)), list: out };
+  return out;
 }
 
 async function fetchJSON(url, budget) {
@@ -604,35 +598,40 @@ export async function ingestWarnings(env, budget, kv) {
     status.nlalert = `ok ${list.length}`;
   } catch (e) { status.nlalert = `fout: ${e.message}`; }
 
-  // Burgernet: burgernet.nl first (reliable, with start, end and position), the 112meldkamer feed as extra source.
+  // Burgernet, only from burgernet.nl: the list of running actions (/active), then the action page of each one in our area.
   {
     const merged = new Map();
-    const listed = new Set();
+    let lijst = null;
     const fouten = [];
-    let siteOk = false, feedOk = false;
     try {
-      const d = await fetchJSON(SOURCES.burgernet, budget);
-      for (const w of (Array.isArray(d) ? d : []).map((a) => fromBurgernet(a, now)).filter(Boolean)) {
-        // No time in the feed: keep the start we already have (first seen), so it does not move every run.
+      const d = await fetchJSON(`${SOURCES.burgernet}?t=${Math.floor(now / 30_000)}`, budget);
+      if (!Array.isArray(d)) throw new Error("geen lijst");
+      lijst = d.map((a) => fromBurgernet(a, now)).filter(Boolean);
+      for (const w of lijst) {
+        // Without a time (should not happen): keep the start we already have, so it does not move every run.
         if (w.startOnbekend) {
           const oud = await env.DB.prepare("SELECT start_at FROM waarschuwingen WHERE id = ?").bind(w.id).first();
           if (oud?.start_at) w.start_at = oud.start_at;
         }
-        merged.set(w.id, w); listed.add(w.id);
+        merged.set(w.id, w);
       }
-      feedOk = true;
-    } catch (e) { fouten.push(`112meldkamer ${e.message}`); }
+    } catch (e) { fouten.push(`lijst ${e.message}`); }
     try {
-      const feedIds = [...listed].filter((i) => merged.get(i)?.status !== "beeindigd").map((i) => i.replace(/^burgernet:/, "")).filter((i) => /^\d{4,}$/.test(i));
-      const site = await burgernetFromSite(env, budget, now, feedIds);
-      site.ids.forEach((i) => listed.add(i));
-      for (const w of site.list) merged.set(w.id, w);
-      siteOk = true;
-    } catch (e) { fouten.push(`burgernet.nl ${e.message}`); }
-    if (siteOk || feedOk) {
-      await handleBurgernet([...merged.values()], listed);
-      status.burgernet = `ok ${[...merged.values()].filter((w) => w.status === "actief").length}${fouten.length ? ` (${fouten.join(", ")})` : ""}`;
-    } else status.burgernet = `fout: ${fouten.join(", ")}`;
+      const actief = (lijst || []).map((w) => w.id.replace(/^burgernet:/, "")).filter((i) => /^\d{4,}$/.test(i));
+      for (const w of await burgernetPaginas(env, budget, now, actief)) {
+        // The list decides what is running: an action that is on it stays running, one that left it has ended.
+        if (lijst && !merged.has(w.id) && w.status === "actief") { w.status = "beeindigd"; w.end_at = w.end_at ?? now; }
+        merged.set(w.id, w);
+      }
+    } catch (e) { fouten.push(`pagina's ${e.message}`); }
+    if (lijst) {
+      await handleBurgernet([...merged.values()], new Set(lijst.map((w) => w.id)));
+      status.burgernet = `ok ${lijst.length}${fouten.length ? ` (${fouten.join(", ")})` : ""}`;
+    } else {
+      // Without the list nothing is ended on absence; pages that were read are still stored.
+      if (merged.size) await handle("burgernet", [...merged.values()]);
+      status.burgernet = `fout: ${fouten.join(", ")}`;
+    }
   }
 
   // AMBER Alert and Vermist Kind Alert (Burgernet's open API). Every new message is a push: start, update and closing message.

@@ -48,6 +48,16 @@ test("Burgernet: no time in the feed means no made-up 13:00, and 'Opgelet!' is n
   assert.equal(new Date(t.start_at).toISOString(), "2026-11-09T19:11:00.000Z");
 });
 
+test("Burgernet /active: relative link becomes the burgernet.nl page, start from date and time", () => {
+  const w = fromBurgernet({ location: "APELDOORN", date: "09\/11\/2026".replace(/\\/g, ""), time: "20:11", link: "/burgernet/3977418",
+    report: "Opgelet! Op dit moment zijn nepagenten actief in/rondom Apeldoorn.\r\nTips? Bel nu 112" });
+  assert.equal(w.id, "burgernet:3977418");
+  assert.equal(w.link, "https://www.burgernet.nl/burgernet/3977418");
+  assert.equal(w.startOnbekend, false);
+  assert.equal(new Date(w.start_at).toISOString(), "2026-11-09T19:11:00.000Z");
+  assert.equal(fromBurgernet({ location: "GOUDA", date: "09/11/2026", time: "20:03", link: "/burgernet/3977417", report: "Vermist" }), null);
+});
+
 test("KNMI: keeps periods that cover the area, with the highest level", () => {
   const gelderland = { type: "Polygon", coordinates: [[[5.5, 51.8], [6.5, 51.8], [6.5, 52.5], [5.5, 52.5], [5.5, 51.8]]] };
   const zeeland = { type: "Polygon", coordinates: [[[3.4, 51.2], [4.2, 51.2], [4.2, 51.7], [3.4, 51.7], [3.4, 51.2]]] };
