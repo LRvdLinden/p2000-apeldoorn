@@ -485,30 +485,37 @@ export async function linkedMeldingen(env, w, toAPIMelding, SELECT) {
   }));
 }
 
+/**
+ * Stores a warning, but only writes when something changed: every source is read every minute, and D1 counts every
+ * written row (free plan: 100,000 a day). updated_at only moves on a real change, so the news sync follows real changes too.
+ */
 async function upsert(env, w, now) {
-  const prev = await env.DB.prepare("SELECT status, niveau, notified, first_seen FROM waarschuwingen WHERE id = ?").bind(w.id).first();
+  const prev = await env.DB.prepare(`SELECT w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status, w.gebied, w.lat, w.lon, w.link,
+      w.notified, w.first_seen, wk.data AS extra FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE w.id = ?`).bind(w.id).first();
+  let extra = null;
+  if (w.bron === "knmi") {
+    extra = JSON.stringify({ verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte,
+      tijdvakken: w.tijdvakken || null });
+  } else if (KIND_BRONNEN.includes(w.bron) && w.extra) extra = JSON.stringify(w.extra);
+  // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
+  else if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {
+    extra = JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null });
+  }
+  const velden = [w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status, json(w.gebied), w.lat, w.lon, w.link];
+  const oud = prev && [prev.titel, prev.tekst, prev.tekst_en, prev.plaats, prev.niveau, prev.soort, prev.start_at, prev.end_at, prev.status, prev.gebied, prev.lat, prev.lon, prev.link];
+  const gelijk = (a, b) => (a ?? null) === (b ?? null) || (typeof a === "number" && typeof b === "number" && Math.abs(a - b) < 1e-9);
+  const rijGelijk = oud && velden.every((v, i) => gelijk(v, oud[i]));
+  const extraGelijk = extra == null || extra === prev?.extra;
+  if (rijGelijk && extraGelijk) return prev;
   await env.DB.prepare(`
     INSERT INTO waarschuwingen (id, bron, titel, tekst, tekst_en, plaats, niveau, soort, start_at, end_at, status, gebied, lat, lon, link, first_seen, updated_at, notified)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ON CONFLICT(id) DO UPDATE SET titel = excluded.titel, tekst = excluded.tekst, tekst_en = excluded.tekst_en, plaats = excluded.plaats,
       niveau = excluded.niveau, soort = excluded.soort, start_at = excluded.start_at, end_at = excluded.end_at, status = excluded.status,
       gebied = excluded.gebied, lat = excluded.lat, lon = excluded.lon, link = excluded.link, updated_at = excluded.updated_at`)
-    .bind(w.id, w.bron, w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status,
-      json(w.gebied), w.lat, w.lon, w.link, prev?.first_seen ?? now, now, prev?.notified ?? null).run();
-  if (w.bron === "knmi") {
-    const extra = { verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte,
-      tijdvakken: w.tijdvakken || null };
-    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
-      .bind(w.id, JSON.stringify(extra)).run();
-  }
-  if (KIND_BRONNEN.includes(w.bron) && w.extra) {
-    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
-      .bind(w.id, JSON.stringify(w.extra)).run();
-  }
-  // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
-  if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {
-    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
-      .bind(w.id, JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null })).run();
+    .bind(w.id, w.bron, ...velden, prev?.first_seen ?? now, now, prev?.notified ?? null).run();
+  if (!extraGelijk) {
+    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`).bind(w.id, extra).run();
   }
   return prev;
 }

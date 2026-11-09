@@ -122,15 +122,19 @@ export function politieItem(n) {
 
 const parse = (s, d = null) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
+/** Stores a news item, only when something changed (the feeds are read every few minutes; D1 counts every written row). */
 async function upsertNieuws(env, it, now = Date.now()) {
-  const prev = await env.DB.prepare("SELECT id, data, status, notified FROM nieuws WHERE id = ?").bind(it.id).first();
+  const prev = await env.DB.prepare("SELECT id, titel, intro, plaats, lat, lon, url, categorie, status, niveau, at, data, notified FROM nieuws WHERE id = ?").bind(it.id).first();
+  const data = JSON.stringify(it.data || {});
+  const nieuw = [it.titel, it.intro ?? null, it.plaats ?? null, it.lat ?? null, it.lon ?? null, it.url ?? null, it.categorie ?? null, it.status ?? null, it.niveau ?? null, it.at, data];
+  if (prev && nieuw.every((v, i) => (v ?? null) === ([prev.titel, prev.intro, prev.plaats, prev.lat, prev.lon, prev.url, prev.categorie, prev.status, prev.niveau, prev.at, prev.data][i] ?? null))) return prev;
   await env.DB.prepare(`INSERT INTO nieuws (id, soort, bron, ref, titel, intro, plaats, lat, lon, url, categorie, status, niveau, at, updated_at, data, hidden, notified, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL, ?)
     ON CONFLICT(id) DO UPDATE SET titel = excluded.titel, intro = excluded.intro, plaats = excluded.plaats, lat = excluded.lat, lon = excluded.lon,
       url = excluded.url, categorie = excluded.categorie, status = excluded.status, niveau = excluded.niveau, at = excluded.at,
       updated_at = excluded.updated_at, data = excluded.data`)
     .bind(it.id, it.soort, it.bron, it.ref ?? null, it.titel, it.intro ?? null, it.plaats ?? null, it.lat ?? null, it.lon ?? null, it.url ?? null,
-      it.categorie ?? null, it.status ?? null, it.niveau ?? null, it.at, now, JSON.stringify(it.data || {}), now).run();
+      it.categorie ?? null, it.status ?? null, it.niveau ?? null, it.at, now, data, now).run();
   return prev;
 }
 

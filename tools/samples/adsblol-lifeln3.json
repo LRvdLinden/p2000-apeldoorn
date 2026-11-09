@@ -1,8 +1,9 @@
 {"ac":[
+{"hex":"486a31","type":"adsb_icao","flight":"LIFELN3 ","alt_baro":725,"alt_geom":1150,"gs":122.3,"track":203.63,"baro_rate":-448,"squawk":"6223","emergency":"none","category":"A7","lat":51.890848,"lon":5.845337,"nic":8,"rc":186,"seen_pos":0.377,"version":2,"nic_baro":1,"nac_p":10,"nac_v":1,"sil":3,"sil_type":"perhour","gva":2,"sda":2,"alert":0,"spi":0,"mlat":[],"tisb":[],"messages":1663,"seen":0.0,"rssi":-12.7}
 ]
 ,"msg": "No error"
-,"now": 1794254011002
-,"total": 0
-,"ctime": 1794254011002
+,"now": 1793956626001
+,"total": 1
+,"ctime": 1793956626001
 ,"ptime": 0
 }
