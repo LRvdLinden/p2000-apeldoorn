@@ -5,6 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          sleep 150
-          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.id=="burgernet:3977418")][] | {status,start,titel,startbericht:(.startbericht|.[0:60]),berichten}'
-          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/nieuws?limit=10" | jq -c '.[] | select(.bron=="burgernet") | {id,titel,start,aantal}'
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.id=="burgernet:3977418")][] | {status,start,titel,bijgewerkt,berichten}'
+          curl -s "$A/v1/status" | jq -c '.. | objects | select(.id? and (.id|tostring|test("burgernet")))' | head -c 800; echo
+          curl -s "$A/v1/status" | jq -c '.versie? // .version? // empty'
