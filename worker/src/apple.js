@@ -28,6 +28,11 @@ async function importKey(p8) {
   return key;
 }
 
+/** Raw ES256 signature (r||s, base64url) of a string, e.g. for signed Apple Maps snapshot URLs. */
+export async function signRaw(p8, data) {
+  return b64url(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, await importKey(p8), enc.encode(data)));
+}
+
 /** ES256 JWT. WebCrypto already returns the raw r||s signature that JWT needs. */
 export async function es256(header, claims, p8) {
   const data = `${b64url(JSON.stringify(header))}.${b64url(JSON.stringify(claims))}`;

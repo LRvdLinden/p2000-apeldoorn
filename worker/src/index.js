@@ -39,6 +39,7 @@ import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents
 import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
+import { kaartImage } from "./kaart.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
@@ -251,6 +252,8 @@ async function handle(req, env, ctx) {
   // Rain radar (KNMI): one image of the Netherlands, or map tiles.
   if (method === "GET" && path === "/v1/radar") return reply(200, radarInfo(env, url.origin), { "cache-control": "public, max-age=60" });
   if (method === "GET" && path === "/v1/radar.png") return radarImage(env, ctx);
+  // Square map with a marker, for the image tags in Homey.
+  if (method === "GET" && path === "/v1/kaart.png") return kaartImage(env, ctx, url);
   m = path.match(/^\/v1\/radar\/(\d{1,2})\/(\d{1,5})\/(\d{1,5})\.png$/);
   if (method === "GET" && m) return radarTile(env, ctx, Number(m[1]), Number(m[2]), Number(m[3]));
 

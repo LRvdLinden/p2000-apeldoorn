@@ -1,0 +1,15 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+jobs:
+  kaart:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          sleep 60
+          for q in "c=52.18992,5.96554&z=16&m=brandweer" "c=52.10,5.92&z=8.6" "c=40,-70&z=16"; do
+            curl -s -o k.png -w "$q -> %{http_code} %{content_type} %{size_download}\n" "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/kaart.png?$q"
+            file k.png
+          done
