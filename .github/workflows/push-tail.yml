@@ -1,0 +1,25 @@
+name: Homey-controle (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: worker } }
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npm ci >/dev/null
+      - name: Homey-status (geen sleutels)
+        run: |
+          ID=$(npx wrangler d1 list --json 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>console.log(JSON.parse(s).find(d=>d.name==="p2000-apeldoorn").uuid))')
+          sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
+          q() { npx wrangler d1 execute p2000-apeldoorn --remote --json --command "$1" 2>/dev/null | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{for(const r of JSON.parse(s)[0].results)console.log(JSON.stringify(r))})'; }
+          echo "--- homey"; q "SELECT key, value, datetime(at/1000,'unixepoch','+1 hour') AS bijgewerkt FROM kv WHERE key IN ('homey_last','homey_cursor')"
+          echo "--- meldingen laatste 12 uur per uur (opgeslagen)"; q "SELECT strftime('%d %H:00', created_at/1000,'unixepoch','+1 hour') AS uur, COUNT(*) AS n FROM meldingen WHERE created_at > (strftime('%s','now')-43200)*1000 GROUP BY 1 ORDER BY 1"
+          echo "--- cron"; q "SELECT key, value FROM kv WHERE key IN ('cron_run','feed_ok')"
