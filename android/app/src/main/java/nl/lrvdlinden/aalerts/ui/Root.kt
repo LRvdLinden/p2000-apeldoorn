@@ -36,7 +36,7 @@ import java.net.URLEncoder
 fun enc(s: String): String = URLEncoder.encode(s, "UTF-8")
 fun dec(s: String): String = URLDecoder.decode(s, "UTF-8")
 
-enum class Tab { PAGER, KAART, STATISTIEKEN, INSTELLINGEN }
+enum class Tab { PAGER, KAART, NIEUWS, STATISTIEKEN, INSTELLINGEN }
 
 /** Shared navigation for all screens. */
 class Nav(val nav: NavHostController) {
@@ -44,6 +44,7 @@ class Nav(val nav: NavHostController) {
     var kaartFocus by mutableStateOf<String?>(null)
     fun melding(guid: String) = nav.navigate("melding/${enc(guid)}")
     fun waarschuwing(id: String) = nav.navigate("waarschuwing/${enc(id)}")
+    fun nieuws(id: String) { tab = Tab.NIEUWS; nav.navigate("nieuws/${enc(id)}") }
     fun open(route: String) = nav.navigate(route)
     fun back() { nav.popBackStack() }
     fun toonOpKaart(guid: String) { kaartFocus = guid; tab = Tab.KAART; nav.popBackStack("main", false) }
@@ -58,7 +59,7 @@ fun AAlertsRoot(activity: MainActivity) {
         val nav = remember { Nav(navController) }
         var onboarding by rememberSaveable { mutableStateOf(!Settings.onboardingDone) }
         LaunchedEffect(activity.startTab) {
-            when (activity.startTab) { "kaart" -> nav.tab = Tab.KAART; "statistieken" -> nav.tab = Tab.STATISTIEKEN; "instellingen" -> nav.tab = Tab.INSTELLINGEN; "pager" -> nav.tab = Tab.PAGER }
+            when (activity.startTab) { "kaart" -> nav.tab = Tab.KAART; "statistieken" -> nav.tab = Tab.STATISTIEKEN; "instellingen" -> nav.tab = Tab.INSTELLINGEN; "pager" -> nav.tab = Tab.PAGER; "nieuws" -> nav.tab = Tab.NIEUWS }
             if (activity.startTab == "waarschuwingen") nav.open("waarschuwingen")
         }
 
@@ -74,6 +75,7 @@ fun AAlertsRoot(activity: MainActivity) {
             when (dest) {
                 is Bestemming.Melding -> if (dest.kaart) nav.toonOpKaart(dest.guid) else nav.melding(dest.guid)
                 is Bestemming.Waarschuwing -> nav.waarschuwing(dest.id)
+                is Bestemming.Nieuws -> nav.nieuws(dest.id)
             }
             activity.bestemming = null
         }
@@ -89,6 +91,7 @@ fun AAlertsRoot(activity: MainActivity) {
                     composable("melding/{guid}") { MeldingDetail(dec(it.arguments?.getString("guid") ?: ""), nav) }
                     composable("waarschuwing/{id}") { WaarschuwingDetail(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("waarschuwingen") { WaarschuwingenScreen(nav) }
+                    composable("nieuws/{id}") { NieuwsDetail(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("bewaard") { BewaardScreen(nav) }
                     composable("capcodes") { VolgCapcodesScreen(nav) }
                     composable("helizones") { HeliZonesScreen(nav) }
@@ -116,6 +119,7 @@ private fun MainTabs(nav: Nav) {
                 val items = listOf(
                     Triple(Tab.PAGER, tr("Pager", "Pager"), Icons.AutoMirrored.Filled.ViewList),
                     Triple(Tab.KAART, tr("Kaart", "Map"), Icons.Outlined.Map),
+                    Triple(Tab.NIEUWS, tr("Nieuws", "News"), Icons.Outlined.Newspaper),
                     Triple(Tab.STATISTIEKEN, tr("Statistieken", "Statistics"), Icons.Outlined.BarChart),
                     Triple(Tab.INSTELLINGEN, tr("Instellingen", "Settings"), Icons.Outlined.Settings),
                 )
@@ -131,6 +135,7 @@ private fun MainTabs(nav: Nav) {
             when (nav.tab) {
                 Tab.PAGER -> PagerScreen(nav)
                 Tab.KAART -> MapScreen(nav)
+                Tab.NIEUWS -> NieuwsScreen(nav)
                 Tab.STATISTIEKEN -> StatsScreen(nav)
                 Tab.INSTELLINGEN -> SettingsScreen(nav)
             }

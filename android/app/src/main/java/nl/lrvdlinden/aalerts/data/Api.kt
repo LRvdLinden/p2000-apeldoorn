@@ -74,6 +74,11 @@ object Api {
     suspend fun waarschuwing(id: String): Waarschuwing? = runCatching { AppJson.decodeFromString<Waarschuwing>(getText("${base}v1/waarschuwingen/${enc(id)}")) }.getOrNull()
     suspend fun waarschuwingWeather(id: String): AlertWeather? = runCatching { AppJson.decodeFromString<AlertWeather>(getText("${base}v1/waarschuwingen/${enc(id)}/weather")) }.getOrNull()
 
+    /** Tab Nieuws. */
+    suspend fun nieuws(soort: String? = null, limit: Int = 60): List<NieuwsItem> =
+        nieuwsLijst(getText("${base}v1/nieuws?limit=$limit" + (soort?.let { "&soort=$it" } ?: "")))
+    suspend fun nieuwsItem(id: String): NieuwsItem? = runCatching { AppJson.decodeFromString<NieuwsItem>(getText("${base}v1/nieuws/${enc(id)}")) }.getOrNull()
+
     suspend fun heliSpoor(id: String, bereik: SpoorBereik): List<HeliSpoorPunt> = runCatching { AppJson.decodeFromString<HeliSpoor>(getText("${base}v1/helikopters/${enc(id)}/spoor?scope=${bereik.key}")).punten }.getOrDefault(emptyList())
     suspend fun heliVluchten(id: String): List<HeliVlucht> = runCatching { AppJson.decodeFromString<HeliVluchten>(getText("${base}v1/helikopters/${enc(id)}/vluchten")).vluchten }.getOrDefault(emptyList())
     suspend fun status(): AppStatus? = runCatching { AppJson.decodeFromString<AppStatus>(getText("${base}v1/status")) }.getOrNull()

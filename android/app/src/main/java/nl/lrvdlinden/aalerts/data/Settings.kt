@@ -117,6 +117,9 @@ object Settings {
     /** AMBER Alert and Vermist Kind Alert: one switch each (not per profile), on by default. */
     var pushAmber by bool("pushAmber", true, push = true)
     var pushVermistKind by bool("pushVermistKind", true, push = true)
+    /** Tab Nieuws: push when A-Alerts adds a message to a liveblog (on), and for new police news (off). */
+    var pushNieuwsLiveblog by bool("pushNieuwsLiveblog", true, push = true)
+    var pushNieuwsPolitie by bool("pushNieuwsPolitie", false, push = true)
     var pushKnmiOpgeheven by bool("pushKnmiOpgeheven", true, push = true)
     var quietFrom by int("quietFrom", 23 * 60, push = true)
     var quietTo by int("quietTo", 7 * 60, push = true)
@@ -296,6 +299,8 @@ object Settings {
                 "knmiOpgeheven" to pushKnmiOpgeheven,
                 "amber" to pushAmber,
                 "vermistkind" to pushVermistKind,
+                "nieuwsLiveblog" to pushNieuwsLiveblog,
+                "nieuwsPolitie" to pushNieuwsPolitie,
             ),
             "capcodes" to gevolgd.keys.sorted(),
             "heli" to mutableMapOf<String, Any?>(

@@ -317,6 +317,7 @@ fun Onboarding(onDone: () -> Unit) {
                     Schakelaar("Burgernet", tr("Vermissingen en zoekacties", "Missing persons and searches"), p.burgernet) { save(p.copy(burgernet = it)) }
                     Schakelaar("AMBER Alert", tr("Kind vermist en in levensgevaar, heel Nederland", "Child missing and in danger, all of the Netherlands"), Settings.pushAmber) { Settings.pushAmber = it }
                     Schakelaar(tr("Vermist Kind Alert", "Missing Child Alert"), tr("Vermist kind in het werkgebied (alle plaatsen en buurtschappen)", "Missing child in the working area (all places and hamlets)"), Settings.pushVermistKind) { Settings.pushVermistKind = it }
+                    Schakelaar(tr("Liveblogs", "Live blogs"), tr("Aanvullingen van A-Alerts op een liveblog (tab Nieuws)", "Updates from A-Alerts in a live blog (News tab)"), Settings.pushNieuwsLiveblog) { Settings.pushNieuwsLiveblog = it }
                     Text(tr("KNMI-weercodes", "KNMI weather codes"), color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         listOf("yellow", "orange", "red").forEach { c -> Chip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }

@@ -41,6 +41,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" android:host="a-alerts.nl" android:pathPrefix="/melding/" />
                 <data android:pathPrefix="/waarschuwing/" />
+                <data android:pathPrefix="/nieuws/" />
             </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />

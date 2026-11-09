@@ -88,6 +88,11 @@ fun SettingsScreen(nav: Nav) {
                 }
             }
 
+            if (Push.available) SectionCard(tr("Nieuws", "News"), Icons.Outlined.Newspaper) {
+                SwitchRow(tr("Liveblogs", "Live blogs"), tr("Een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt", "A notification when A-Alerts adds a message to a live blog of an alert you follow"), Settings.pushNieuwsLiveblog) { Settings.pushNieuwsLiveblog = it }
+                SwitchRow(tr("Politienieuws", "Police news"), tr("Nieuwe berichten van de politie over je plaatsen", "New police messages about your places"), Settings.pushNieuwsPolitie) { Settings.pushNieuwsPolitie = it }
+            }
+
             SectionCard(tr("Meldingsprofielen", "Notification profiles"), Icons.Outlined.Tune) {
                 Text(tr("Tot ${MeldingProfiel.MAX} profielen, elk met eigen plaatsen, disciplines, waarschuwingen en tijden.", "Up to ${MeldingProfiel.MAX} profiles, each with its own places, services, warnings and times."), color = Muted, fontSize = 12.sp)
                 Settings.profielen.forEach { p ->

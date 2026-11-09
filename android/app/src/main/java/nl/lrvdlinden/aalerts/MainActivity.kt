@@ -24,6 +24,7 @@ import nl.lrvdlinden.aalerts.widget.WidgetUpdater
 sealed interface Bestemming {
     data class Melding(val guid: String, val kaart: Boolean = false) : Bestemming
     data class Waarschuwing(val id: String) : Bestemming
+    data class Nieuws(val id: String) : Bestemming
 }
 
 class MainActivity : FragmentActivity() {
@@ -67,11 +68,14 @@ class MainActivity : FragmentActivity() {
         intent.getStringExtra("tab")?.let { startTab = it }
         intent.getStringExtra(EXTRA_GUID)?.let { bestemming = Bestemming.Melding(it, intent.getBooleanExtra(EXTRA_KAART, false)) }
         intent.getStringExtra(EXTRA_WAARSCHUWING)?.let { bestemming = Bestemming.Waarschuwing(it) }
+        intent.getStringExtra(EXTRA_NIEUWS)?.let { bestemming = Bestemming.Nieuws(it) }
         intent.data?.let { uri ->
             val segs = uri.pathSegments
             when {
                 // a-alerts.nl/melding/<guid> and /melding/<dienst>/<guid> (the guid is always the last part)
                 uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "melding" -> bestemming = Bestemming.Melding(segs.last())
+                uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "nieuws" -> bestemming = Bestemming.Nieuws(segs.last())
+                uri.scheme == "aalerts" && uri.host == "nieuws" && segs.isNotEmpty() -> bestemming = Bestemming.Nieuws(segs.last())
                 uri.host == "a-alerts.nl" && segs.size >= 2 && segs[0] == "waarschuwing" -> bestemming = Bestemming.Waarschuwing(segs.drop(1).joinToString("/"))
                 // a-alerts.nl/pager/?melding=… and ?waarschuwing=…
                 uri.host == "a-alerts.nl" && uri.getQueryParameter("melding") != null -> bestemming = Bestemming.Melding(uri.getQueryParameter("melding")!!)
@@ -80,7 +84,7 @@ class MainActivity : FragmentActivity() {
                 uri.scheme == "aalerts" && uri.host == "waarschuwing" && segs.isNotEmpty() -> bestemming = Bestemming.Waarschuwing(segs.joinToString("/"))
             }
         }
-        intent.removeExtra(EXTRA_GUID); intent.removeExtra(EXTRA_WAARSCHUWING)
+        intent.removeExtra(EXTRA_GUID); intent.removeExtra(EXTRA_WAARSCHUWING); intent.removeExtra(EXTRA_NIEUWS)
     }
 
     val canLock: Boolean get() = BiometricManager.from(this).canAuthenticate(
@@ -100,6 +104,7 @@ class MainActivity : FragmentActivity() {
     companion object {
         const val EXTRA_GUID = "guid"
         const val EXTRA_WAARSCHUWING = "waarschuwing"
+        const val EXTRA_NIEUWS = "nieuws"
         const val EXTRA_KAART = "kaart"
     }
 }

@@ -25,6 +25,7 @@ object Notifier {
     const val CH_ALGEMEEN = "algemeen"
     const val CH_LIFELINER = "lifeliner"
     const val CH_KIND = "kind"
+    const val CH_NIEUWS = "nieuws"
 
     fun createChannels(ctx: Context) {
         if (Build.VERSION.SDK_INT < 26) return
@@ -48,6 +49,7 @@ object Notifier {
             ch(CH_NLALERT, "NL-Alert", tr("NL-Alerts in de gemeente Apeldoorn", "NL-Alerts in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_KIND, tr("AMBER Alert en Vermist Kind Alert", "AMBER Alert and Missing Child Alert"), tr("Oproepen van de politie bij een vermist kind", "Police calls for a missing child"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_WAARSCHUWINGEN, tr("Burgernet en KNMI", "Burgernet and KNMI"), tr("Burgernet-acties en KNMI-weercodes", "Burgernet calls and KNMI weather codes"), NotificationManager.IMPORTANCE_DEFAULT, "warn"),
+            ch(CH_NIEUWS, tr("Nieuws en liveblogs", "News and live blogs"), tr("Aanvullingen op liveblogs en politienieuws", "Live blog updates and police news"), NotificationManager.IMPORTANCE_DEFAULT, "warn"),
             ch(CH_ALGEMEEN, tr("Algemeen", "General"), tr("Berichten van A-Alerts en testmeldingen", "Messages from A-Alerts and test notifications"), NotificationManager.IMPORTANCE_DEFAULT, null),
         ))
     }
@@ -65,12 +67,14 @@ object Notifier {
         val body = data["body"].orEmpty()
         val guid = data["guid"]
         val waarschuwing = data["waarschuwing"]
+        val nieuws = data["nieuws"]
         val bron = data["bron"]
         val heli = data["heli"]
-        val soort = if (heli != null) "traumaheli" else data["dienst"] ?: bron ?: data["thread"]
+        val soort = if (heli != null) "traumaheli" else data["dienst"] ?: bron ?: data["thread"]?.takeUnless { it.startsWith("nieuws") }
         val urgent = data["urgent"] == "1"
         val channel = when {
             heli != null -> CH_LIFELINER
+            nieuws != null -> CH_NIEUWS
             bron == "nlalert" -> CH_NLALERT
             bron == "amber" || bron == "vermistkind" -> CH_KIND
             waarschuwing != null -> CH_WAARSCHUWINGEN
@@ -82,8 +86,9 @@ object Notifier {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
             guid?.let { putExtra(MainActivity.EXTRA_GUID, it) }
             waarschuwing?.let { putExtra(MainActivity.EXTRA_WAARSCHUWING, it) }
+            nieuws?.let { putExtra(MainActivity.EXTRA_NIEUWS, it) }
         }
-        val id = ((heli ?: "") + (guid ?: waarschuwing ?: title)).hashCode()
+        val id = ((heli ?: "") + (guid ?: waarschuwing ?: nieuws ?: title) + (if (nieuws != null) body else "")).hashCode()
         val pi = PendingIntent.getActivity(ctx, id, open, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val b = NotificationCompat.Builder(ctx, channel)
             .setSmallIcon(R.drawable.ic_notification)
