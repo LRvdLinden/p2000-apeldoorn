@@ -254,7 +254,7 @@ fun BurgernetTijdlijn(x: Waarschuwing) {
                 }
                 Column(Modifier.weight(1f).padding(bottom = if (i < lijst.size - 1) 16.dp else 0.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                     Text(b.kop, fontWeight = FontWeight.SemiBold, fontSize = 15.sp, color = if (b.soort == "afloop") kleur else MaterialTheme.colorScheme.onSurface)
-                    val meta = listOfNotNull(b.plaats, b.atInstant?.let { Fmt.day(it) }, b.atInstant?.let { Fmt.time(it) })
+                    val meta = listOfNotNull(b.plaats, b.atInstant?.let { java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy").format(it.atZone(java.time.ZoneId.of("Europe/Amsterdam"))) }, b.atInstant?.let { Fmt.time(it) })
                     if (meta.isNotEmpty()) Text(meta.joinToString(" · "), color = Muted, fontSize = 12.sp)
                     Text(b.tekst, fontSize = 15.sp)
                 }

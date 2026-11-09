@@ -378,7 +378,7 @@ struct WaarschuwingDetailView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(b.kop).font(AppFont.body(15, .semibold))
                                 .foregroundStyle(b.soort == .afloop ? Color.green : Color.primary)
-                            let meta = [b.plaats, b.at.map { $0.formatted(.dateTime.day().month(.abbreviated)) }, b.at.map { $0.formatted(date: .omitted, time: .shortened) }].compactMap { $0 }
+                            let meta = [b.plaats, b.at.map { Self.burgernetDatum($0) }, b.at.map { $0.formatted(date: .omitted, time: .shortened) }].compactMap { $0 }
                             if !meta.isEmpty { Text(meta.joined(separator: " · ")).font(AppFont.body(12)).foregroundStyle(.secondary) }
                             Text(b.tekst).font(AppFont.body(15)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                         }
@@ -390,6 +390,14 @@ struct WaarschuwingDetailView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .wCard()
+    }
+
+    /// Like burgernet.nl: 09/11/2026.
+    static func burgernetDatum(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.dateFormat = "dd/MM/yyyy"
+        f.timeZone = TimeZone(identifier: "Europe/Amsterdam")
+        return f.string(from: d)
     }
 
     static func tijdlijnKleur(_ s: BurgernetBericht.Soort) -> Color {

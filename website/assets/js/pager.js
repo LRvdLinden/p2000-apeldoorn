@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=55";
+} from "./core.js?v=56";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=55";
+  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=56";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -373,7 +373,9 @@ function tijdlijnHTML(w) {
   const kop = { start: "Startbericht", update: "Update", afloop: "Afloopbericht" };
   const items = [...lijst].reverse().map((b) => {
     const d = b.at ? new Date(b.at) : null;
-    const meta = [b.plaats, d ? d.toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "Europe/Amsterdam" }) : null, d ? fmtTime(d) : null].filter(Boolean).map(esc).join(" · ");
+    // Like burgernet.nl: place, date (09/11/2026) and time.
+    const dag = d ? d.toLocaleDateString("nl-NL", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "Europe/Amsterdam" }).replace(/-/g, "/") : null;
+    const meta = [b.plaats, dag, d ? fmtTime(d) : null].filter(Boolean).map(esc).join(" · ");
     return `<li class="tl-${esc(b.soort)}"><span class="tl-dot"></span><div><h3>${esc(kop[b.soort] || b.label || "Bericht")}</h3>
       ${meta ? `<small>${meta}</small>` : ""}${String(b.tekst || "").split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</div></li>`;
   }).join("");
