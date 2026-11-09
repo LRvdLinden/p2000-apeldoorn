@@ -3,25 +3,41 @@ on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] }
 jobs:
   p:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - run: npm i -s playwright@1.49.1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1; echo ok
       - run: |
-          cat > p.js <<'J'
-          const { chromium } = require('playwright');
-          (async () => {
-            const b = await chromium.launch(); const p = await b.newPage({ userAgent: 'Mozilla/5.0 (Macintosh) Chrome/130 Safari/537.36' });
-            p.on('response', async r => { const u = r.url(); const t = r.request().resourceType();
-              if (['xhr','fetch'].includes(t) || /api|json/i.test(u)) { let body=''; try { body = (await r.text()).slice(0, 700); } catch {}
-                console.log('##', r.status(), r.request().method(), u, '\n', body.replace(/\s+/g,' ')); } });
-            for (const u of ['https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN','https://www.burgernet.nl/actueel','https://www.burgernet.nl/burgernet/3977418']) {
-              console.log('==== PAGE', u); try { await p.goto(u, { waitUntil: 'networkidle', timeout: 45000 }); } catch(e) { console.log('ERR', e.message); }
-              await p.waitForTimeout(3000);
-              const links = await p.$$eval('a[href*="/burgernet/"]', as => as.map(a => a.getAttribute('href') + ' | ' + a.innerText.replace(/\s+/g,' ').slice(0,90)).slice(0, 8));
-              console.log('LINKS', JSON.stringify(links, null, 1));
-            }
-            await b.close();
-          })();
-          J
-          node p.js
-          echo "==== api.js"; curl -s -A "Mozilla/5.0" https://www.burgernet.nl/themes/burgernet_theme/assets/js/main.js | grep -o -E '"/[a-z/_-]*(api|action|actie|json)[a-z/_{}-]*"|https?://[a-z.]*burgernet[a-z./_-]*' | sort -u | head -30
-          curl -s -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN | grep -o -E '<script[^>]*src="[^"]*"|data-[a-z-]*(url|endpoint|api)[a-z-]*="[^"]*"' | head -20
+          cat > v.py <<'P'
+          import json, time, urllib.request
+          def get(u, ua):
+              t=time.time()
+              try:
+                  r=urllib.request.urlopen(urllib.request.Request(u, headers={"user-agent":ua,"accept":"application/json"}), timeout=20)
+                  b=r.read(); return json.loads(b), round(time.time()-t,2), r.status, len(b)
+              except Exception as e: return None, round(time.time()-t,2), str(e)[:60], 0
+          UA="A-Alerts/1.0 (+https://a-alerts.nl)"
+          seen={"bn":{}, "mk":{}}
+          for i in range(26):
+              bn, tb, sb, nb = get("https://www.burgernet.nl/active", UA)
+              mk, tm, sm, nm = get("https://api.112meldkamer.nl/v1/burgernet", UA)
+              now=time.strftime("%H:%M:%S")
+              for k,d in (("bn",bn),("mk",mk)):
+                  for a in (d or []):
+                      key=a["link"].split("/")[-1]
+                      if key not in seen[k]: seen[k][key]=(now,a.get("location"),a.get("date"),a.get("time"),a.get("isClosed","-"))
+              print(now, "burgernet", sb, tb, "s", len(bn or []), "items |", "112mk", sm, tm, "s", len(mk or []), "items", flush=True)
+              if i==0:
+                  print("BN velden:", sorted({k for a in (bn or []) for k in a}))
+                  print("MK velden:", sorted({k for a in (mk or []) for k in a}))
+                  print("BN zonder tijd:", sum(1 for a in (bn or []) if not a.get("time")), "MK zonder tijd:", sum(1 for a in (mk or []) if not a.get("time")))
+                  print("MK isClosed true:", sum(1 for a in (mk or []) if a.get("isClosed") is True))
+              time.sleep(30)
+          b=set(seen["bn"]); m=set(seen["mk"])
+          print("alleen burgernet:", [seen["bn"][x] for x in sorted(b-m)][:15])
+          print("alleen 112mk:", [seen["mk"][x] for x in sorted(m-b)][:15])
+          late=[(x, seen["bn"][x][0], seen["mk"][x][0]) for x in sorted(b&m) if seen["bn"][x][0]!=seen["mk"][x][0]]
+          print("verschil eerst gezien (id, burgernet, 112mk):", late)
+          print("beide:", len(b&m))
+          P
+          python3 v.py
+          echo "== headers"; curl -sI -A "A-Alerts/1.0" https://www.burgernet.nl/active | grep -iE "^(HTTP|cache|age|cf-|server|x-)" 
+          echo "== robots"; curl -s https://www.burgernet.nl/robots.txt | head -30
