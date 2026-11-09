@@ -5,7 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          sleep 100; A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          ID=$(curl -s "$A/v1/nieuws?soort=weer&limit=1" | jq -r '.[0].id')
-          curl -s "$A/v1/nieuws/$ID" | jq -c '.weer | {kop,gebieden:(.gebieden|length), niveaus:[.gebieden[].niveau]}'
-          curl -s "$A/v1/nieuws/$ID" | wc -c
+          curl -s https://www.knmi.nl/api/v1/weather-warnings.json | jq -c '.warning_events[] | {id, periods:[.periods[] | {s:.starts_at, parts:[.parts[] | {level, area:.area_description, g:(.geometry.type), n:((.geometry.coordinates|tostring|length))}]}]}' | head -c 3000; echo
+          curl -s https://www.knmi.nl/api/v1/weather-warnings.json | jq -c '[.warning_events[].periods[].parts[].geometry | keys] | unique'
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.bron=="knmi")][] | {id,status,bijgewerkt}'
+          curl -s "$A/v1/status" | jq -c '.. | objects | select(.id?=="knmi") | {staat,detail}'
