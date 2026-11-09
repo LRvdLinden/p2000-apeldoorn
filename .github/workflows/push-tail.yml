@@ -9,7 +9,7 @@ jobs:
     steps:
       - run: |
           set +e
-          sleep 150
+          sleep 5
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
           curl -s $A/health | python3 -c "import json,sys;d=json.load(sys.stdin);print('politie',d.get('nieuws'));print('112',json.dumps(d.get('nieuws112')))"
           curl -s "$A/v1/nieuws?soort=regionaal&limit=30" | python3 -c "
