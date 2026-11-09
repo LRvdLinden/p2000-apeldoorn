@@ -1,0 +1,27 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: npm i -s playwright@1.49.1 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1; echo ok
+      - run: |
+          cat > p.js <<'J'
+          const { chromium } = require('playwright');
+          (async () => {
+            const b = await chromium.launch(); const p = await b.newPage({ userAgent: 'Mozilla/5.0 (Macintosh) Chrome/130 Safari/537.36' });
+            p.on('response', async r => { const u = r.url(); const t = r.request().resourceType();
+              if (['xhr','fetch'].includes(t) || /api|json/i.test(u)) { let body=''; try { body = (await r.text()).slice(0, 700); } catch {}
+                console.log('##', r.status(), r.request().method(), u, '\n', body.replace(/\s+/g,' ')); } });
+            for (const u of ['https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN','https://www.burgernet.nl/actueel','https://www.burgernet.nl/burgernet/3977418']) {
+              console.log('==== PAGE', u); try { await p.goto(u, { waitUntil: 'networkidle', timeout: 45000 }); } catch(e) { console.log('ERR', e.message); }
+              await p.waitForTimeout(3000);
+              const links = await p.$$eval('a[href*="/burgernet/"]', as => as.map(a => a.getAttribute('href') + ' | ' + a.innerText.replace(/\s+/g,' ').slice(0,90)).slice(0, 8));
+              console.log('LINKS', JSON.stringify(links, null, 1));
+            }
+            await b.close();
+          })();
+          J
+          node p.js
+          echo "==== api.js"; curl -s -A "Mozilla/5.0" https://www.burgernet.nl/themes/burgernet_theme/assets/js/main.js | grep -o -E '"/[a-z/_-]*(api|action|actie|json)[a-z/_{}-]*"|https?://[a-z.]*burgernet[a-z./_-]*' | sort -u | head -30
+          curl -s -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN | grep -o -E '<script[^>]*src="[^"]*"|data-[a-z-]*(url|endpoint|api)[a-z-]*="[^"]*"' | head -20
