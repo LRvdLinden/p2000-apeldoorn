@@ -37,10 +37,13 @@ jobs:
           }
           for naam, c in cases.items():
               lat, lon = c['c']; f, w, h, off = c['img']
-              ann = [{"point": f"{lat},{lon}", "markerStyle": "img", "imgIdx": 0, "offset": off}]
+              # Apple centres an image annotation on its point: move the point up by half the image so the tip is on the spot.
+              wx, wy = world(lat, lon, c['z']); wy -= h / 2
+              s_ = 256 * 2 ** c['z']; plon = wx / s_ * 360 - 180; plat = math.degrees(math.atan(math.sinh(math.pi * (1 - 2 * wy / s_))))
+              ann = [] if c.get('gebied') else [{"point": f"{plat:.6f},{plon:.6f}", "markerStyle": "img", "imgIdx": 0}]
               imgs = [{"url": A + f, "width": w, "height": h}]
               q = [('center', f'{lat},{lon}'), ('z', str(c['z'])), ('size', '600x600'), ('scale', '2'), ('colorScheme', 'light'), ('lang', 'nl-NL'),
-                   ('annotations', json.dumps(ann, separators=(',', ':'))), ('imgs', json.dumps(imgs, separators=(',', ':'))),
+                   ] + ([('annotations', json.dumps(ann, separators=(',', ':'))), ('imgs', json.dumps(imgs, separators=(',', ':')))] if ann else []) + [
                    ('teamId', os.environ['TID']), ('keyId', os.environ['KID'])]
               path = '/api/v1/snapshot?' + urllib.parse.urlencode(q, quote_via=urllib.parse.quote)
               r, s = decode_dss_signature(key.sign(path.encode(), ec.ECDSA(hashes.SHA256())))
@@ -54,4 +57,4 @@ jobs:
           PY
       - run: |
           git config user.name "github-actions" && git config user.email "actions@github.com"
-          git checkout --orphan voorbeeld-kaart3 && git rm -rq --cached . && git add -f out/*.png && git commit -qm "voorbeeld" && git push -fq origin voorbeeld-kaart3
+          git checkout --orphan voorbeeld-kaart4 && git rm -rq --cached . && git add -f out/*.png && git commit -qm "voorbeeld" && git push -fq origin voorbeeld-kaart4
