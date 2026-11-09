@@ -703,8 +703,11 @@ export async function ingestWarnings(env, budget, kv) {
     // Only download the full set when KNMI's revision changed.
     const v = await fetchJSON(`${SOURCES.knmi}/version`, budget);
     const rev = String(v?.revision || "");
-    const last = await kv.get("knmi_revision");
-    if (!rev || rev !== last?.value || Date.now() - Number(last?.at || 0) > 30 * 60_000) {
+    // Stored as "<revision>@<time of the last full read>" (kv only writes a changed value). "v3": once again after the
+    // weather articles got the map of the whole Netherlands, so the areas of the current warnings are stored.
+    const last = String((await kv.get("knmi_revision"))?.value || "");
+    const [lastRev, lastAt] = last.split("@");
+    if (!rev || `v3:${rev}` !== lastRev || Date.now() - Number(lastAt || 0) > 30 * 60_000) {
       const d = await fetchJSON(`${SOURCES.knmi}.json`, budget);
       // Headline, description and details only stand on KNMI's warnings page; without it the feed texts still work.
       let pagina = new Map();
@@ -720,7 +723,7 @@ export async function ingestWarnings(env, budget, kv) {
         if (ids.has(r.id)) continue;
         await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', end_at = ?, updated_at = ? WHERE id = ?").bind(Math.max(r.start_at, now), now, r.id).run();
       }
-      await kv.set("knmi_revision", rev);
+      await kv.set("knmi_revision", `v3:${rev}@${Date.now()}`);
       status.knmi = `ok ${list.length}`;
     } else status.knmi = "ongewijzigd";
     // Pushes around a KNMI code: one hour before it starts (when it was issued well before), and when it is lifted.
