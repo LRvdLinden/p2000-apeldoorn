@@ -1,5 +1,6 @@
 // A-Alerts in het beheer: waarschuwingen (verbergen, handmatig beëindigen), status van de bronnen,
 // helikopters in de lucht, statistiek van de notificatieprofielen, en een beheer-push bij een storing van een bron.
+import { kvWrite } from "./kv.js";
 import { toAPI } from "./alerts.js";
 import { helikopters } from "./heli.js";
 
@@ -7,7 +8,7 @@ const DAY = 86_400_000;
 const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 const rows = async (env, sql, ...args) => (await env.DB.prepare(sql).bind(...args).all()).results;
 const kvGet = (env, key) => env.DB.prepare("SELECT value, at FROM kv WHERE key = ?").bind(key).first();
-const kvSet = (env, key, value) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, value, Date.now()).run();
+const kvSet = (env, key, value) => kvWrite(env, key, value);
 
 // Sources that are read (status); "kind" = Burgernet's API for AMBER Alert and Vermist Kind Alert.
 export const BRONNEN = ["nlalert", "burgernet", "knmi", "kind"];

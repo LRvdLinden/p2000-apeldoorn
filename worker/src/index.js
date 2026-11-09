@@ -43,6 +43,7 @@ import { kaartImage } from "./kaart.js";
 import { listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
   syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
+import { kvWrite } from "./kv.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
 /** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
@@ -76,7 +77,7 @@ async function kvGet(env, key) {
   return env.DB.prepare("SELECT value, at FROM kv WHERE key = ?").bind(key).first();
 }
 async function kvSet(env, key, value) {
-  await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, value, Date.now()).run();
+  await kvWrite(env, key, value);
 }
 
 async function handle(req, env, ctx) {

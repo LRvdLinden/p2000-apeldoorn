@@ -7,11 +7,12 @@
 // gives the 90-day bars. When a component stays off normal for a few minutes the beheer gets a push, and again
 // when it works again.
 
+import { kvWrite } from "./kv.js";
 const MIN = 60_000;
 const DAY = 86_400_000;
 const rows = async (env, sql, ...args) => (await env.DB.prepare(sql).bind(...args).all()).results;
 const kvGet = async (env, key) => (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(key).first())?.value ?? null;
-const kvSet = (env, key, value) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, String(value), Date.now()).run();
+const kvSet = (env, key, value) => kvWrite(env, key, value);
 const kvDel = (env, key) => env.DB.prepare("DELETE FROM kv WHERE key = ?").bind(key).run();
 const parse = (s, d = null) => { try { return s ? JSON.parse(s) : d; } catch { return d; } };
 
@@ -239,12 +240,29 @@ export const verwijderIncident = (env, id) => env.DB.prepare("DELETE FROM status
 export async function statusTick(env, pushAdmins, now = Date.now()) {
   const s = await huidigeStaat(env, now);
   const dag = dagVan(now);
-  await env.DB.batch(ONDERDELEN.filter((o) => !s[o.id]?.onbekend).map((o) => {
+  // The minutes per state are counted in one kv row and added to status_dag every 10 minutes (and at midnight):
+  // one written row a minute instead of one per component.
+  let buf = parse(await kvGet(env, "status_buf"), null);
+  const flush = async (b) => {
+    const ids = Object.keys(b.n || {});
+    if (!ids.length) return;
+    await env.DB.batch(ids.map((id) => {
+      const c = b.n[id];
+      return env.DB.prepare(`INSERT INTO status_dag (onderdeel, dag, ok, warn, down, maint) VALUES (?, ?, ?, ?, ?, ?)
+        ON CONFLICT(onderdeel, dag) DO UPDATE SET ok = ok + excluded.ok, warn = warn + excluded.warn, down = down + excluded.down, maint = maint + excluded.maint`)
+        .bind(id, b.dag, c.ok || 0, c.warn || 0, c.down || 0, c.maint || 0);
+    }));
+  };
+  if (buf && buf.dag !== dag) { await flush(buf); buf = null; }
+  if (!buf) buf = { dag, since: now, n: {} };
+  for (const o of ONDERDELEN) {
+    if (s[o.id]?.onbekend) continue;
     const st = s[o.id].staat;
-    return env.DB.prepare(`INSERT INTO status_dag (onderdeel, dag, ok, warn, down, maint) VALUES (?, ?, ?, ?, ?, ?)
-      ON CONFLICT(onderdeel, dag) DO UPDATE SET ok = ok + excluded.ok, warn = warn + excluded.warn, down = down + excluded.down, maint = maint + excluded.maint`)
-      .bind(o.id, dag, st === "ok" ? 1 : 0, st === "warn" ? 1 : 0, st === "down" ? 1 : 0, st === "maint" ? 1 : 0);
-  }));
+    const c = (buf.n[o.id] ||= {});
+    c[st] = (c[st] || 0) + 1;
+  }
+  if (now - buf.since >= 10 * MIN) { await flush(buf); buf = { dag, since: now, n: {} }; }
+  await kvSet(env, "status_buf", JSON.stringify(buf));
 
   // Beheer push: a component that stays off normal for 3 minutes, and again when it is fine.
   const meldingen = [];

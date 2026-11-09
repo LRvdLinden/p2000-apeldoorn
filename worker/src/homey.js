@@ -3,6 +3,7 @@
 // Secret HOMEY_WEBHOOK_ID = the webhook id from the Homey developer tools. Without it nothing is sent.
 // The Homey app works out the events itself (new, ended, opened, closed) and also reads the API at start-up,
 // so a missed webhook never loses an alert.
+import { kvWrite } from "./kv.js";
 import { SELECT, toAPI } from "./db.js";
 import { warningsSince } from "./alerts.js";
 
@@ -12,7 +13,7 @@ export const homeyConfigured = (env) => Boolean(env.HOMEY_WEBHOOK_ID);
 async function kvGet(env, key) {
   return (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(key).first())?.value ?? null;
 }
-const kvSet = (env, key, value) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, String(value), Date.now()).run();
+const kvSet = (env, key, value) => kvWrite(env, key, value);
 
 /** What changed since the last send: alerts stored after the cursor and warnings updated after it. */
 export async function homeyChanges(env, since) {

@@ -9,7 +9,7 @@ function fakeEnv() {
     bind: (...a) => stmt(sql, a),
     first: async () => (sql.startsWith("SELECT value, at FROM kv") && kv.has(args[0]) ? { value: kv.get(args[0]).value, at: kv.get(args[0]).at } : null),
     run: async () => {
-      if (sql.startsWith("INSERT OR REPLACE INTO kv")) kv.set(args[0], { value: args[1], at: args[2] });
+      if (/^INSERT (OR REPLACE )?INTO kv/.test(sql)) kv.set(args[0], { value: args[1] == null ? null : String(args[1]), at: args[2] });
       if (sql.startsWith("DELETE FROM kv")) kv.delete(args[0]);
     },
   });

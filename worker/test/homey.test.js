@@ -8,7 +8,7 @@ function fakeDB(state) {
       const stmt = { args: [] };
       stmt.bind = (...a) => { stmt.args = a; return stmt; };
       stmt.first = async () => (/FROM kv/.test(sql) ? (state.kv.has(stmt.args[0]) ? { value: state.kv.get(stmt.args[0]) } : null) : null);
-      stmt.run = async () => { if (/INSERT OR REPLACE INTO kv/.test(sql)) state.kv.set(stmt.args[0], stmt.args[1]); };
+      stmt.run = async () => { if (/INSERT (OR REPLACE )?INTO kv/.test(sql)) state.kv.set(stmt.args[0], stmt.args[1]); };
       stmt.all = async () => (/FROM meldingen/.test(sql) ? { results: state.meldingen } : { results: state.waarschuwingen });
       return stmt;
     },
