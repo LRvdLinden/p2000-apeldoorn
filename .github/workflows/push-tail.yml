@@ -6,10 +6,13 @@ jobs:
     steps:
       - run: |
           set +e
-          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          echo "== item"; curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.id=="burgernet:3977418")]'
-          echo "== status"; curl -s "$A/v1/status" | head -c 1500; echo
-          echo "== feed"; curl -s -A "Mozilla/5.0" "https://api.112meldkamer.nl/v1/burgernet" | head -c 1500; echo
-          echo "== gemeente"; curl -s -o /tmp/g.html -w "%{http_code}\n" -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN; grep -o 'href="/burgernet/[0-9]*"' /tmp/g.html | head -5
-          echo "== actie"; curl -s -o /tmp/a.html -w "%{http_code}\n" -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/3977418; grep -o -E 'action-detail-block__title[^>]*>[^<]*|action-message__heading-item[^>]*>[^<]*|(Start actie|Einde actie|Locatie|Status van deze actie)</p>\s*<p[^>]*>[^<]*' /tmp/a.html | head -20
-          grep -o '<h3[^>]*>[^<]*' /tmp/a.html | head -5
+          curl -s -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN > g.html
+          curl -s -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/3977418 > a.html
+          echo "== gemeente links"; grep -o -E '(href|data-[a-z-]*)="[^"]*(burgernet|actie|action)[^"]*"' g.html | sort | uniq -c | head -30
+          grep -o -E '3977418|397[0-9]{4}' g.html | head; grep -o -E 'api[^"'"'"' ]{0,120}' g.html | sort -u | head -15
+          echo "== actie"; python3 - <<'P'
+          import re;h=open('a.html').read()
+          i=h.find('Startbericht');print(h[i-1500:i+2500])
+          for k in ['Start actie','Einde actie','Locatie','Status van deze actie','data-center','<h1']:
+              j=h.find(k);print('##',k,j,repr(h[j-50:j+250]) if j>=0 else '')
+          P
