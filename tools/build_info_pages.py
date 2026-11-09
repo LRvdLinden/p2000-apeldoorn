@@ -101,7 +101,7 @@ def page(slug, data_name, title, h1, desc):
 <meta property="og:title" content="{html.escape(h1)} – A-Alerts">
 <meta property="og:description" content="{html.escape(desc)}">
 <meta property="og:url" content="{url}">
-<meta property="og:image" content="{SITE}/assets/img/og-image.jpg">
+<meta property="og:image" content="{SITE}/og/a-alerts.jpg">
 <meta property="og:image:type" content="image/jpeg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -109,7 +109,7 @@ def page(slug, data_name, title, h1, desc):
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{html.escape(h1)} – A-Alerts">
 <meta name="twitter:description" content="{html.escape(desc)}">
-<meta name="twitter:image" content="{SITE}/assets/img/og-image.jpg">
+<meta name="twitter:image" content="{SITE}/og/a-alerts.jpg">
 <meta name="twitter:image:alt" content="A-Alerts: live meldingen in de gemeente Apeldoorn">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/assets/img/aalerts-icon-32.png">
