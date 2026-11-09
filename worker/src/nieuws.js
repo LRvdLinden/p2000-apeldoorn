@@ -101,10 +101,11 @@ export function politieItem(n) {
     alineas.push({ titel: a.titel ? decodeEntities(String(a.titel)).trim() || null : null, tekst: delen.join("\n\n") });
   }
   const intro = htmlNaarAlineas(n.introductie || "").join("\n\n");
-  const alles = [n.titel, intro, ...alineas.map((a) => `${a.titel || ""} ${a.tekst}`)].join("\n");
+  // Only what the message is about: its area, title and intro (a place named once deep in the text does not count).
+  const alles = [n.gebied || "", n.titel, intro].join("\n");
   const locs = (Array.isArray(n.locaties) ? n.locaties : []).map((l) => ({ lat: Number(l.latitude), lon: Number(l.longitude) })).filter((l) => Number.isFinite(l.lat) && Number.isFinite(l.lon));
   const inGebied = locs.some((l) => inWerkgebied(l.lat, l.lon, 2));
-  const plaatsen = plaatsenIn(alles, { regio: inGebied || REGIO.test(String(n.gebied || "")) });
+  const plaatsen = plaatsenIn(alles, { regio: inGebied });
   if (!plaatsen.length && !inGebied) return null;
   const at = politieTijd(n.publicatiedatum) || Date.now();
   const loc = locs.find((l) => inWerkgebied(l.lat, l.lon, 2)) || null;
@@ -204,8 +205,10 @@ export async function syncWaarschuwingen(env, kv, now = Date.now()) {
       const l = liveblogVan(w);
       const nid = await nieuwsId("l", w.id);
       const klaar = w.status === "beeindigd";
+      // "at" of a liveblog is the time of its newest official message (sorting), the start is kept in data.
+      const laatste = Math.max(Date.parse(w.start) || 0, ...l.berichten.map((b) => Date.parse(b.at) || 0));
       await upsertNieuws(env, { id: nid, soort: "liveblog", bron: w.bron, ref: w.id, titel: l.titel, intro: l.intro, plaats: w.plaats, lat: w.lat, lon: w.lon,
-        url: w.link, categorie: null, status: klaar ? "afgerond" : "actief", niveau: null, at: Date.parse(w.start), data: { berichten: l.berichten } }, now);
+        url: w.link, categorie: null, status: klaar ? "afgerond" : "actief", niveau: null, at: laatste || now, data: { berichten: l.berichten, start: w.start } }, now);
       // A missing child: after the end no photo and no description any more, also not in what the beheer added.
       if (klaar && KIND.includes(w.bron)) await wisKindAanvullingen(env, nid);
     }
@@ -243,7 +246,9 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
 function samenvatting(row, origin, stock, extra = {}) {
   return {
     id: row.id, soort: row.soort, bron: row.bron, titel: row.titel, intro: row.intro || null, plaats: row.plaats || null,
-    at: new Date(row.at).toISOString(), bijgewerkt: new Date(Math.max(row.updated_at || 0, row.laatste_update || 0, row.at)).toISOString(),
+    // at: publication (police, weather) or newest message (liveblog); bijgewerkt: also counts the beheer messages.
+    at: new Date(row.at).toISOString(), bijgewerkt: new Date(Math.max(row.laatste_update || 0, row.at)).toISOString(),
+    start: row.soort === "liveblog" ? (row.start || new Date(row.at).toISOString()) : null,
     status: row.status || null, niveau: row.niveau || null, categorie: row.categorie || null,
     afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}`, bron_url: row.url || null,
     waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null,
@@ -259,7 +264,7 @@ export async function listNieuws(env, origin, { soort, limit, before, beheer = f
   const lim = Math.min(Math.max(Number(limit) || 40, 1), 100);
   const where = [beheer ? "1=1" : "n.hidden = 0"], args = [];
   if (NIEUWS_SOORTEN.includes(soort)) { where.push("n.soort = ?"); args.push(soort); }
-  const sortKey = "MAX(n.at, COALESCE((SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id), 0), CASE WHEN n.soort = 'liveblog' THEN n.updated_at ELSE 0 END)";
+  const sortKey = "MAX(n.at, COALESCE((SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id), 0))";
   if (before) { where.push(`${sortKey} < ?`); args.push(Number(new Date(before)) || Number(before)); }
   const { results } = await env.DB.prepare(`${LIST_SQL} WHERE ${where.join(" AND ")} ORDER BY ${sortKey} DESC, n.created_at DESC LIMIT ?`).bind(...args, lim).all();
   const stock = await stockFotos(env);
@@ -267,8 +272,7 @@ export async function listNieuws(env, origin, { soort, limit, before, beheer = f
     const d = parse(r.data, {});
     const aantal = r.soort === "liveblog" ? (d.berichten?.length || 0) + (r.n_updates || 0) : r.n_updates || 0;
     // Sort time of a liveblog: its newest message (official or from the beheer).
-    const laatste = r.soort === "liveblog" ? Math.max(r.at, ...((d.berichten || []).map((b) => Date.parse(b.at) || 0)), r.laatste_update || 0) : r.laatste_update || 0;
-    return samenvatting({ ...r, aantal, laatste_update: laatste }, origin, stock, { beheer });
+    return samenvatting({ ...r, aantal, start: d.start || null }, origin, stock, { beheer });
   });
 }
 
@@ -284,7 +288,7 @@ export async function getNieuws(env, origin, id, { beheer = false } = {}) {
   const laatste = Math.max(row.at, ...tijdlijn.map((t) => Date.parse(t.at) || 0));
   const stock = await stockFotos(env);
   return {
-    ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste }, origin, stock, { beheer }),
+    ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste, start: d.start || null }, origin, stock, { beheer }),
     alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn,
     bron_naam: row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
   };

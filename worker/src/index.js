@@ -590,6 +590,14 @@ async function pushNieuws(env, id, kind, updateId = 0) {
 /** Tab Nieuws: police news every 10 minutes, weather articles and liveblogs follow the warnings. */
 async function nieuwsRun(env, budget) {
   const kv = { get: (k) => kvGet(env, k), set: (k, v) => kvSet(env, k, v) };
+  // One time: read everything again with the stricter place filter (title, intro and area only).
+  if (!(await kvGet(env, "nieuws_v2"))) {
+    await env.DB.batch([
+      env.DB.prepare("DELETE FROM nieuws WHERE soort = 'politie' AND foto IS NULL AND hidden = 0 AND id NOT IN (SELECT nieuws_id FROM nieuws_updates)"),
+      env.DB.prepare("DELETE FROM kv WHERE key IN ('nieuws_politie_at', 'nieuws_sync')"),
+    ]);
+    await kvSet(env, "nieuws_v2", "1");
+  }
   try { await syncWaarschuwingen(env, kv); } catch (e) { console.error("[nieuws-sync]", e.message || e); }
   try {
     for (const id of await syncPolitie(env, budget, kv)) {
