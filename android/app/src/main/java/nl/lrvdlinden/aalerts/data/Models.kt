@@ -100,7 +100,8 @@ data class Melding(
     /** A large incident (same rule as the server and iOS): GRIP, scaling up, a (very) large or medium fire, or 10+ units. */
     val isGrootIncident: Boolean get() {
         if ((grip?.toIntOrNull() ?: 0) > 0) return true
-        if (!opschaling.isNullOrBlank() && opschaling != "0") return true
+        // opschaling = size of the fire ("klein", "middel", "groot", "zeer groot"): only middel and up count.
+        if (Regex("middel|groot|grip", RegexOption.IGNORE_CASE).containsMatchIn(opschaling ?: "")) return true
         val tekst = listOfNotNull(title, fullMelding, categorie).joinToString(" ")
         if (GROOT_RE.containsMatchIn(tekst)) return true
         return eenheden.size >= 10

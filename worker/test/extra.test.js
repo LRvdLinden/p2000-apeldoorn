@@ -18,6 +18,8 @@ test("groot incident: GRIP, grote brand, veel eenheden", () => {
   assert.equal(isGrootIncident({ title: "Ambu", grip: "1" }), true);
   assert.equal(isGrootIncident({ title: "Ambu", eenheden: Array(10).fill({}) }), true);
   assert.equal(isGrootIncident({ title: "Ongeval wegvervoer letsel" }), false);
+  assert.equal(isGrootIncident({ title: "BR woning (schoorsteen)", opschaling: "klein" }), false);
+  assert.equal(isGrootIncident({ title: "BR industrie", opschaling: "middel" }), true);
   const g = grootPrefsFrom({ aan: true, plaatsen: [] });
   assert.equal(grootWanted(dev("a"), { groot: g }, { title: "Grote brand", stad: "Apeldoorn" }), true);
   assert.equal(grootWanted(dev("a"), { groot: { aan: false } }, { title: "Grote brand" }), false);

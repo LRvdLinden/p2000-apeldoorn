@@ -57,7 +57,8 @@ extension Melding {
     /// A large incident (same rule as the server): GRIP, scaling up, a (very) large or medium fire, or 10+ units.
     var isGrootIncident: Bool {
         if let g = grip, let n = Int(g), n > 0 { return true }
-        if let o = opschaling, !o.isEmpty, o != "0" { return true }
+        // opschaling = size of the fire ("klein", "middel", "groot", "zeer groot"): only middel and up count.
+        if let o = opschaling, o.range(of: "middel|groot|grip", options: [.regularExpression, .caseInsensitive]) != nil { return true }
         let tekst = [title, fullMelding ?? "", categorie ?? ""].joined(separator: " ")
         let pattern = #"\bGRIP\s*[1-5]\b|zeer\s+grote\s+brand|\bgrote\s+brand\b|middel\s*brand|\bopschaling\b|\bramp\b|\bCoPI\b|grootschalig|\bMMA\b|multi\s*trauma"#
         if tekst.range(of: pattern, options: [.regularExpression, .caseInsensitive]) != nil { return true }

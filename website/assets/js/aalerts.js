@@ -208,7 +208,7 @@ export const snelheidTekst = (h) => h.snelheid_kt == null ? "–" : weergave().l
 /** A large incident (same rule as the apps and the server). */
 const GROOT = /\bGRIP\s*[1-5]\b|zeer\s+grote\s+brand|\bgrote\s+brand\b|middel\s*brand|\bopschaling\b|\bramp\b|\bCoPI\b|grootschalig|\bMMA\b|multi\s*trauma/i;
 export function isGrootIncident(m) {
-  if (Number(m.grip) > 0 || (m.opschaling && m.opschaling !== "0")) return true;
+  if (Number(m.grip) > 0 || /middel|groot|grip/i.test(m.opschaling || "")) return true; // "klein" is a small fire
   if (GROOT.test([m.title, m.full_melding, m.categorie].filter(Boolean).join(" "))) return true;
   return Array.isArray(m.eenheden) && m.eenheden.length >= 10;
 }
