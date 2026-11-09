@@ -1,0 +1,60 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "== 112nieuws feeds"
+          for p in apeldoorn beekbergen beemte-broekland beemte broekland hoenderloo hoog-soeren klarenbeek loenen uddel ugchelen wenum-wiesel wenum wiesel teuge assel engeland gerritsflesch groenendaal de-haere hoog-buurlo hooilanden de-jonas de-krim lieren meerveld nieuw-milligen oosterhuizen radio-kootwijk woeste-hoeve; do
+            f=$(curl -sL -A "A-Alerts/2.0 (+https://a-alerts.nl)" -w "\n%{http_code}" "https://112nieuws.net/tag/$p/feed/")
+            code=$(echo "$f" | tail -1); n=$(echo "$f" | grep -c "<item>"); last=$(echo "$f" | grep -o "<pubDate>[^<]*" | head -1 | sed 's/<pubDate>//')
+            echo "$p $code items=$n laatste=$last"
+          done
+          echo "== voorbeeld item"
+          curl -sL -A "A-Alerts/2.0 (+https://a-alerts.nl)" "https://112nieuws.net/tag/apeldoorn/feed/" | python3 -c "
+          import sys,re
+          x=sys.stdin.read(); it=x.split('<item>')[1].split('</item>')[0]
+          print(it[:2500])"
+          mkdir out && cd out
+          npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > zoek.mjs <<'JS'
+          import { chromium } from "playwright";
+          import fs from "node:fs";
+          const b = await chromium.launch({ headless: true, args: ["--disable-blink-features=AutomationControlled"] });
+          const ctx = await b.newContext({ locale: "nl-NL", userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36", viewport: { width: 1366, height: 900 } });
+          const p = await ctx.newPage();
+          const out = [];
+          for (const q of process.argv.slice(2)) {
+            try {
+              await p.goto(`https://pixabay.com/nl/photos/search/${encodeURIComponent(q)}/`, { waitUntil: "domcontentloaded", timeout: 45000 });
+              for (let i = 0; i < 12 && (await p.title()).startsWith("Even"); i++) await p.waitForTimeout(1500);
+              await p.waitForTimeout(1500);
+              for (let i = 0; i < 4; i++) { await p.mouse.wheel(0, 2500); await p.waitForTimeout(700); }
+              const items = await p.$$eval('a[href*="/photos/"]', (as) => as.map((a) => { const img = a.querySelector("img"); return img ? { href: a.href, src: img.currentSrc || img.src || img.getAttribute("data-lazy-src"), alt: img.alt } : null; }).filter(Boolean));
+              const seen = new Set();
+              for (const it of items) { if (!it.src || !it.src.includes("cdn.pixabay.com/photo") || seen.has(it.href)) continue; seen.add(it.href); out.push({ q, ...it }); }
+              console.log(q, seen.size);
+            } catch (e) { console.log(q, "fout", e.message.slice(0, 80)); }
+          }
+          let n = 0;
+          for (const it of out) {
+            const id = it.href.replace(/\/$/, "").split("-").pop();
+            if (fs.existsSync(`${id}.jpg`)) continue;
+            const r = await p.request.get(it.src, { headers: { referer: "https://pixabay.com/" } });
+            if (r.ok()) { fs.writeFileSync(`${id}.jpg`, await r.body()); n++; }
+          }
+          fs.writeFileSync("lijst.json", JSON.stringify(out, null, 1));
+          console.log("thumbs", n);
+          await b.close();
+          JS
+          node zoek.mjs "politie nederland" "nederlandse politie" "politieauto" "politie amsterdam" "dutch police" "politie motor" "ambulance nederland" "brandweer nederland" "brandweerauto" "zwaailicht" "ongeluk auto" "verkeersongeval" "brand huis" "112"
+          rm -rf node_modules package*.json zoek.mjs; ls | wc -l
+          git config --global user.email "actions@github.com"; git config --global user.name "probe"
+          git init -q && git checkout -q -b pixabay-zoek && git add . && git commit -qm "Pixabay zoekresultaten" \
+            && git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pixabay-zoek && echo gepusht
