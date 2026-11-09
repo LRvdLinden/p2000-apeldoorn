@@ -26,7 +26,9 @@ final class InAppAlarm {
     }
 
     /// New alerts from the live list (polling).
-    func handle(_ list: [Melding], settings: AppSettings = .shared) {
+    func handle(_ list: [Melding], settings: AppSettings? = nil) {
+        // Resolved here (on the main actor) instead of as a default argument, which Swift 6 does not allow.
+        let settings = settings ?? .shared
         let wanted = list.filter { m in
             settings.matchesList(m)
                 && (!onlyUrgent || m.isUrgent)
