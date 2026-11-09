@@ -44,9 +44,9 @@
 .today div::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, #fff); }
 .today dt { font-size: .7rem; text-transform: uppercase; letter-spacing: .06em; color: rgba(255,255,255,.75); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .today dd { margin: 0; font-family: var(--display); font-weight: 900; font-size: 1.9rem; line-height: 1.1; font-variant-numeric: tabular-nums; }
-.today .t-total { background: #fff; color: #111; }
+.today .t-total { background: #fff; color: #111; grid-column: 1 / -1; }
 .today .t-total dt { color: #c50a1d; }
-@media (max-width: 520px) { .today { grid-template-columns: repeat(4, minmax(0, 1fr)); } .today .t-total { grid-column: span 4; } .today dd { font-size: 1.5rem; } }
+@media (max-width: 520px) { .today { grid-template-columns: repeat(4, minmax(0, 1fr)); } .today div { padding: 10px 8px 8px 10px; } .today dt { white-space: normal; font-size: .62rem; letter-spacing: .03em; line-height: 1.2; min-height: 2.4em; overflow-wrap: anywhere; } .today dd { font-size: 1.5rem; } }
 
 .hero-device { position: relative; display: grid; justify-items: center; perspective: 1400px; }
 .phone { width: 300px; aspect-ratio: 440/956; background: #1b1b1d; border-radius: 52px; padding: 10px; position: relative;
