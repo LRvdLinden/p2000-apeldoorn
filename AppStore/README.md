@@ -1,4 +1,4 @@
-# A-Alerts 2.0.0 – App Store-materiaal
+# A-Alerts 2.0.1 – App Store-materiaal
 
 Alles voor App Store Connect, voor iPhone, iPad, Mac, Apple Watch en Apple TV.
 
@@ -8,16 +8,16 @@ Alles voor App Store Connect, voor iPhone, iPad, Mac, Apple Watch en Apple TV.
 - **App Review-notities:** Engels (`metadata/review_information/notes.txt`), Nederlandse kopie ter referentie (`notes-nl.txt`, niet uploaden).
 
 ## Herkomst van de schermen
-Echte schermen uit de app (build 47), gemaakt in de simulator en op een Mac met live data (workflows `screenshots.yml` en `mac-shots.yml`, branches `screenshots` en `screenshots-mac`). Afbeeldingen alleen in het Nederlands (nl-NL), op verzoek van Léon; de Engelse winkelpagina toont dan automatisch de Nederlandse beelden. Per apparaat: iPhone 8 (6,3" en 6,1"; met het welkomscherm en een KNMI-weercode), iPad 7, Mac 4, Apple Watch 3, Apple TV 3. Opnames van 8 november. Een helikopter met route ontbreekt: bij de opnames vloog er geen heli; `screenshots.yml` neemt hem vanzelf mee (`-AAlertsHeli`) als hij draait terwijl er een Lifeliner of Zulu vliegt. Mac: venster van de echte Mac-app (runner-scherm 1024×768, daarom één Mac-screenshot). Apple Watch en Apple TV: alleen het scherm, zonder kader (Apple-richtlijn).
+Echte schermen uit de app (build 68), gemaakt in de simulator met live data (workflow `screenshots.yml`, branch `screenshots`, 9 november). Afbeeldingen alleen in het Nederlands (nl-NL), op verzoek van Léon; de Engelse winkelpagina toont dan de Nederlandse beelden. Nieuw in 2.0.1: tabblad Nieuws, liveblog en artikel (112 Nieuws). iPhone en iPad 10, Apple Watch 4 (met Nieuws), Apple TV 3, Mac 4 (ongewijzigd uit 2.0.0; de Mac- en TV-opname van het tabblad Nieuws lukte in de CI niet). Apple Watch en Apple TV: alleen het scherm, zonder kader.
 
 ## Inhoud
 | Map | Maten | Aantal per taal |
 |---|---|---|
-| `screenshots/<taal>/iphone-6.3` | 1206×2622 | 8 |
-| `screenshots/<taal>/iphone-6.1` | 1179×2556 | 8 |
-| `screenshots/<taal>/ipad-13` | 2064×2752 | 7 |
-| `screenshots/<taal>/mac` | 2880×1800 | 1 |
-| `screenshots/<taal>/watch` | 410×502 | 1 |
+| `screenshots/<taal>/iphone-6.3` | 1206×2622 | 10 |
+| `screenshots/<taal>/iphone-6.1` | 1179×2556 | 10 |
+| `screenshots/<taal>/ipad-13` | 2064×2752 | 10 |
+| `screenshots/<taal>/mac` | 2880×1800 | 4 |
+| `screenshots/<taal>/watch` | 410×502 | 4 |
 | `screenshots/<taal>/appletv` | 1920×1080 | 3 |
 | `marketing/<taal>` | header 5244×2950 + 3840×1646, search 5244×2950 + 3840×2560 + 1920×1280 | 5 |
 | `metadata/` | fastlane-deliver-indeling: naam, ondertitel, promotietekst, beschrijving, trefwoorden, release notes, URL's, privacy, review-info | – |
@@ -26,7 +26,7 @@ Echte schermen uit de app (build 47), gemaakt in de simulator en op een Mac met 
 Alle PNG's zijn RGB zonder alfakanaal, in de exacte maten van Apple.
 
 ## Uploadchecklist
-1. App Store Connect › A-Alerts › 2.0.0: screenshots per toestel en taal uit `screenshots/`.
+1. App Store Connect › A-Alerts › 2.0.1: screenshots per toestel en taal uit `screenshots/`.
 2. Teksten per taal uit `metadata/nl-NL` en `metadata/en-US`.
 3. App-informatie: categorie Nieuws + Navigatie, privacy-URL https://a-alerts.nl/privacy/.
 4. App Privacy: tabel uit `app-info.md`.

@@ -27,7 +27,7 @@ if (phone && matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-redu
 }
 
 // Feature scrolly: swap the phone screen with the active step.
-const glows = { pager: "rgba(220,38,38,.45)", map: "rgba(37,99,235,.45)", detail: "rgba(244,196,0,.4)", meteo: "rgba(14,165,233,.45)", notif: "rgba(227,6,19,.45)", home: "rgba(147,51,234,.45)" };
+const glows = { pager: "rgba(220,38,38,.45)", map: "rgba(37,99,235,.45)", nieuws: "rgba(0,103,177,.45)", detail: "rgba(244,196,0,.4)", meteo: "rgba(14,165,233,.45)", notif: "rgba(227,6,19,.45)", home: "rgba(147,51,234,.45)" };
 const steps = document.querySelectorAll(".step");
 const screens = document.querySelectorAll("#featureGlass img");
 const device = document.querySelector(".scrolly-device");
