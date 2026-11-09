@@ -37,6 +37,17 @@ test("Burgernet: only Apeldoorn (and Teuge via Voorst), place from the text", ()
   assert.equal(c.plaats, "Teuge");
 });
 
+test("Burgernet: no time in the feed means no made-up 13:00, and 'Opgelet!' is not the whole title", () => {
+  const now = Date.parse("2026-11-09T19:13:00Z");
+  const w = fromBurgernet({ location: "APELDOORN", date: "09/11/2026", time: "", link: "https://burgernet.nl/burgernet/3977418",
+    report: "Opgelet! Op dit moment zijn nepagenten actief in/rondom Apeldoorn Zij vragen om uw geld. Tips? Bel nu 112" }, now);
+  assert.equal(w.start_at, now);
+  assert.equal(w.startOnbekend, true);
+  assert.match(w.titel, /^Opgelet! Op dit moment zijn nepagenten actief/);
+  const t = fromBurgernet({ location: "APELDOORN", date: "09/11/2026", time: "20:11", link: "x/burgernet/1", report: "Gezocht: man. Tips? Bel nu 112" }, now);
+  assert.equal(new Date(t.start_at).toISOString(), "2026-11-09T19:11:00.000Z");
+});
+
 test("KNMI: keeps periods that cover the area, with the highest level", () => {
   const gelderland = { type: "Polygon", coordinates: [[[5.5, 51.8], [6.5, 51.8], [6.5, 52.5], [5.5, 52.5], [5.5, 51.8]]] };
   const zeeland = { type: "Polygon", coordinates: [[[3.4, 51.2], [4.2, 51.2], [4.2, 51.7], [3.4, 51.7], [3.4, 51.2]]] };

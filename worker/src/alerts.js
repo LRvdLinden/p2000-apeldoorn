@@ -87,6 +87,15 @@ function burgernetPlaats(report, location) {
   return null;
 }
 
+/** Title of a Burgernet call: the first sentence, or the first two when the first is only a word like "Opgelet!". */
+export function burgernetTitel(report) {
+  const clean = String(report || "").replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
+  const zinnen = clean.split(/(?<=[.:!?])\s/);
+  let t = zinnen[0] || clean;
+  if (t.length < 25 && zinnen[1]) t = `${t} ${zinnen[1]}`;
+  return t.replace(/\s*(Tips\?|Bel nu 112)[\s\S]*$/i, "").trim().slice(0, 140);
+}
+
 export function fromBurgernet(a, now = Date.now()) {
   const location = String(a?.location || "").trim();
   const key = plaatsKey(location);
@@ -98,15 +107,12 @@ export function fromBurgernet(a, now = Date.now()) {
   const idMatch = link.match(/\/burgernet\/([^/?#]+)/);
   const id = idMatch ? idMatch[1] : `${key}-${a.date}-${String(a.report || "").slice(0, 40)}`;
   const report = String(a.report || "").replace(/\r/g, "").trim();
-  const clean = report.replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
-  const firstSentence = clean.split(/(?<=[.:!?])\s/)[0] || clean;
-  const [d, mth, y] = String(a.date || "").split("/").map(Number);
-  let start = y ? Date.UTC(y, mth - 1, d, 12) : now;
+  // The feed often has a date without a time: then the moment it was first seen, never a made-up 13:00.
   const t = String(a.time || "").match(/(\d{1,2}):(\d{2})/);
-  if (y && t) start = amsterdamTime(a.date, `${t[1]}:${t[2]}`) ?? start;
+  const start = t ? (amsterdamTime(a.date, `${t[1]}:${t[2]}`) ?? now) : now;
   return {
-    id: `burgernet:${id}`, bron: "burgernet",
-    titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/i, "").slice(0, 140), tekst: report, tekst_en: null,
+    id: `burgernet:${id}`, bron: "burgernet", startOnbekend: !t,
+    titel: burgernetTitel(report), tekst: report, tekst_en: null,
     plaats: plaats.naam, niveau: null, soort: (BURGERNET_SOORT.find(([re]) => re.test(report)) || [null, "Zoekactie"])[1],
     start_at: start, end_at: null, status: a.isClosed === true ? "beeindigd" : "actief",
     gebied: null, lat: plaats.lat, lon: plaats.lon, link: link || null,
@@ -180,13 +186,11 @@ export function fromBurgernetSite(id, html, now = Date.now()) {
   let lat = center ? Number(center[1]) : plaats.lat, lon = center ? Number(center[2]) : plaats.lon;
   // Burgernet centres on the town when it has no address; outside the area means a wrong guess.
   if (!Number.isFinite(lat) || !Number.isFinite(lon) || distanceKm({ lat, lon }, plaats) > 25) { lat = plaats.lat; lon = plaats.lon; }
-  const clean = report.replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
-  const firstSentence = clean.split(/(?<=[.:!?])\s/)[0] || clean;
   const afloop = message("Afloopbericht");
   const berichten = burgernetBerichten(h);
   return {
     id: `burgernet:${id}`, bron: "burgernet",
-    titel: firstSentence.replace(/\s*(Tips\?|Bel nu 112).*$/is, "").slice(0, 140),
+    titel: burgernetTitel(report),
     tekst: afloop && ended ? `${report}\n\n${afloop}` : report, tekst_en: null,
     // Start and closing message apart, so the apps and Homey can show the closing message on its own.
     startbericht: report, afloop: afloop || null,
@@ -523,12 +527,19 @@ async function fetchText(url, budget) {
  * Burgernet from its own site: the recent actions of Apeldoorn and Voorst (for Teuge), with one action page each.
  * An action page is only read again while the action runs; finished actions are skipped once their timeline is stored.
  */
-async function burgernetFromSite(env, budget, now) {
-  const ids = [];
+async function burgernetFromSite(env, budget, now, feedIds = []) {
+  // The ids from the 112meldkamer feed come first: burgernet.nl loads its municipality list with JavaScript now,
+  // so the HTML of that page can be empty. The action pages themselves are complete (start, updates, closing).
+  const ids = [...feedIds];
+  let lijstOk = false;
   for (const gemeente of ["APELDOORN", "VOORST"]) {
-    const html = await fetchText(`${SOURCES.burgernetSite}/gemeente/Oost-Nederland/${gemeente}`, budget);
-    ids.push(...burgernetSiteIds(html));
+    try {
+      const html = await fetchText(`${SOURCES.burgernetSite}/gemeente/Oost-Nederland/${gemeente}`, budget);
+      ids.push(...burgernetSiteIds(html));
+      lijstOk = true;
+    } catch (e) { console.warn("[burgernet] gemeente", gemeente, e.message || e); }
   }
+  if (!lijstOk && !feedIds.length) throw new Error("geen lijst");
   const out = [];
   let reads = 0;
   for (const id of [...new Set(ids)]) {
@@ -601,11 +612,19 @@ export async function ingestWarnings(env, budget, kv) {
     let siteOk = false, feedOk = false;
     try {
       const d = await fetchJSON(SOURCES.burgernet, budget);
-      for (const w of (Array.isArray(d) ? d : []).map((a) => fromBurgernet(a, now)).filter(Boolean)) { merged.set(w.id, w); listed.add(w.id); }
+      for (const w of (Array.isArray(d) ? d : []).map((a) => fromBurgernet(a, now)).filter(Boolean)) {
+        // No time in the feed: keep the start we already have (first seen), so it does not move every run.
+        if (w.startOnbekend) {
+          const oud = await env.DB.prepare("SELECT start_at FROM waarschuwingen WHERE id = ?").bind(w.id).first();
+          if (oud?.start_at) w.start_at = oud.start_at;
+        }
+        merged.set(w.id, w); listed.add(w.id);
+      }
       feedOk = true;
     } catch (e) { fouten.push(`112meldkamer ${e.message}`); }
     try {
-      const site = await burgernetFromSite(env, budget, now);
+      const feedIds = [...listed].filter((i) => merged.get(i)?.status !== "beeindigd").map((i) => i.replace(/^burgernet:/, "")).filter((i) => /^\d{4,}$/.test(i));
+      const site = await burgernetFromSite(env, budget, now, feedIds);
       site.ids.forEach((i) => listed.add(i));
       for (const w of site.list) merged.set(w.id, w);
       siteOk = true;
