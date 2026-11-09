@@ -1,0 +1,49 @@
+name: Nieuws-deelpagina's (a-alerts.nl)
+
+# Every 15 minutes: a static share page per news item (a-alerts.nl/nieuws/<id>/) with the title, intro and image of that
+# article in the link preview, plus sitemap-nieuws.xml. Only plain HTML; uploaded via FTPS (same secrets as the website).
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "4,19,34,49 * * * *"
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/nieuws-deel.yml', 'tools/nieuws_deel.py', 'website/nieuws/index.html']
+
+concurrency:
+  group: website-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deel:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+      FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+      FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+      FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+      FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Pagina's maken
+        run: python3 tools/nieuws_deel.py website out
+      - name: Uploaden via FTPS
+        run: |
+          set -euo pipefail
+          [ -n "${FTP_SERVER:-}" ] && [ -n "${FTP_PASSWORD:-}" ] || { echo "::warning::FTP-secrets ontbreken"; exit 0; }
+          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          source tools/ftps.sh
+          ftps_connect
+          T="$FTPS_TARGET"
+          # --ignore-time: only pages whose content (size) changed are uploaded again. Never --delete.
+          ftps_run "mirror -R --ignore-time --parallel=4 ./out/ \"$T\"" >/dev/null 2>&1 || { echo "::error::Uploaden mislukt."; exit 1; }
+          echo "::notice::$(ls out/nieuws | wc -l) deelpagina's bijgewerkt."
+      - name: Controleren
+        run: |
+          id=$(ls out/nieuws | head -1)
+          curl -sL --max-time 20 "https://a-alerts.nl/nieuws/$id/" | grep -o 'og:image" content="[^"]*' | head -1 || true
+          curl -s -o /dev/null -w "sitemap-nieuws %{http_code}\n" https://a-alerts.nl/sitemap-nieuws.xml

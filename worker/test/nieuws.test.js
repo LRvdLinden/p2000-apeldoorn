@@ -82,7 +82,7 @@ test("sync: police (first run silent, later new ones pushed), warnings, beheer m
   const lijst = await listNieuws(env, "https://api.test", { soort: "politie" });
   assert.equal(lijst.length, 2, "Deventer is not ours");
   assert.equal(lijst[0].afbeelding, "https://a-alerts.nl/assets/img/nieuws/politie-getuigen.webp?v=2");
-  assert.match(lijst[0].link, /^https:\/\/a-alerts\.nl\/nieuws\/p-[0-9a-f]{12}$/);
+  assert.match(lijst[0].link, /^https:\/\/a-alerts\.nl\/nieuws\/p-[0-9a-f]{12}\/$/);
 
   // A missing child alert with its official messages.
   const wid = "vermistkind:42";

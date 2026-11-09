@@ -3,3 +3,4 @@ Allow: /
 Disallow: /assets/demo.json
 
 Sitemap: https://a-alerts.nl/sitemap.xml
+Sitemap: https://a-alerts.nl/sitemap-nieuws.xml

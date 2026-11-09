@@ -350,7 +350,7 @@ function samenvatting(row, origin, stock, extra = {}) {
     at: new Date(row.at).toISOString(), bijgewerkt: new Date(Math.max(row.laatste_update || 0, row.at)).toISOString(),
     start: row.soort === "liveblog" ? (row.start || new Date(row.at).toISOString()) : null,
     status: row.status || null, niveau: row.niveau || null, categorie: row.categorie || null,
-    afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}`, bron_url: row.url || null,
+    afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}/`, bron_url: row.url || null,
     waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null,
     ...(row.hidden !== undefined && extra.beheer ? { hidden: Boolean(row.hidden) } : {}),
   };
