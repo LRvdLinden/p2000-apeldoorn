@@ -498,7 +498,7 @@ async function fetchText(url, budget) {
 
 /**
  * Burgernet from its own site: the recent actions of Apeldoorn and Voorst (for Teuge), with one action page each.
- * An action page is only read again while the action runs; finished actions in the database are skipped.
+ * An action page is only read again while the action runs; finished actions are skipped once their timeline is stored.
  */
 async function burgernetFromSite(env, budget, now) {
   const ids = [];
@@ -509,8 +509,10 @@ async function burgernetFromSite(env, budget, now) {
   const out = [];
   let reads = 0;
   for (const id of [...new Set(ids)]) {
-    const prev = await env.DB.prepare("SELECT status FROM waarschuwingen WHERE id = ?").bind(`burgernet:${id}`).first();
-    if (prev?.status === "beeindigd") continue;
+    const prev = await env.DB.prepare("SELECT w.status, wk.data FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE w.id = ?")
+      .bind(`burgernet:${id}`).first();
+    // Finished actions are read once more when their messages (timeline) were not stored yet, then never again.
+    if (prev?.status === "beeindigd" && String(prev.data || "").includes('"berichten":[')) continue;
     if (reads >= 4) break;
     reads++;
     try {
