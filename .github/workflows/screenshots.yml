@@ -51,6 +51,7 @@ jobs:
           curl -sS "$API/v1/meldingen?limit=80" -o m.json
           curl -sS "$API/v1/waarschuwingen?days=14" -o w.json
           curl -sS "$API/v1/helikopters" -o h.json
+          curl -sS "$API/v1/nieuws?limit=40" -o n.json
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import json
           m=json.load(open("m.json")); w=json.load(open("w.json"))
@@ -64,6 +65,10 @@ jobs:
           hs=json.load(open("h.json")).get("helikopters", [])
           hs=sorted(hs, key=lambda h: (h.get("op_grond", True), h.get("soort") != "trauma"))
           print("heli="+(hs[0]["id"] if hs else ""))
+          ns=json.load(open("n.json"))
+          pick=lambda s: next((x["id"] for x in ns if x["soort"]==s), "")
+          print("nieuws="+(pick("regionaal") or pick("politie")))
+          print("liveblog="+pick("liveblog"))
           PY
       - name: Screenshots
         run: |
@@ -72,7 +77,7 @@ jobs:
           WAPP=$(find buildw/Build/Products -name "P2000 Apeldoorn Watch.app" -maxdepth 3 | head -1)
           TVAPP=$(find buildtv/Build/Products -name "*.app" -maxdepth 3 | head -1)
           MACAPP=$(find buildmac/Build/Products -name "P2000 Apeldoorn.app" -maxdepth 3 | head -1)
-          GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"; HELI="${{ steps.data.outputs.heli }}"; KNMI="${{ steps.data.outputs.knmi }}"
+          NIEUWS="${{ steps.data.outputs.nieuws }}"; LIVE="${{ steps.data.outputs.liveblog }}"; GUID="${{ steps.data.outputs.guid }}"; WID="${{ steps.data.outputs.wid }}"; HELI="${{ steps.data.outputs.heli }}"; KNMI="${{ steps.data.outputs.knmi }}"
           for LANG in nl en; do
             [ $LANG = nl ] && LOC=nl_NL || LOC=en_US
             L="-AppleLanguages ($LANG) -AppleLocale $LOC -AAlertsScreenshots"
@@ -89,6 +94,9 @@ jobs:
               snap() { xcrun simctl launch --terminate-running-process "$D" "$BUNDLE" $L $2; sleep $3; xcrun simctl io "$D" screenshot "shots/$LANG/$P-$1.png"; }
               snap pager "" 16; snap pager "" 12
               snap kaart "-AAlertsTab kaart" 16
+              snap nieuws "-AAlertsTab nieuws" 16
+              [ -n "$NIEUWS" ] && snap artikel "-AAlertsNieuws $NIEUWS" 16
+              [ -n "$LIVE" ] && snap liveblog "-AAlertsNieuws $LIVE" 16
               snap statistieken "-AAlertsTab statistieken" 12
               snap instellingen "-AAlertsTab instellingen" 10
               snap melding "-AAlertsMelding $GUID" 18
@@ -122,6 +130,8 @@ jobs:
             xcrun simctl io "$W" screenshot "shots/$LANG/watch-melding.png"
             xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC -AAlertsTab statistieken; sleep 15
             xcrun simctl io "$W" screenshot "shots/$LANG/watch-statistieken.png"
+            xcrun simctl launch --terminate-running-process "$W" "$BUNDLE.watchkitapp" -AppleLanguages "($LANG)" -AppleLocale $LOC -AAlertsTab nieuws; sleep 15
+            xcrun simctl io "$W" screenshot "shots/$LANG/watch-nieuws.png"
             xcrun simctl shutdown "$W" || true
             # Apple TV
             T="${{ steps.dev.outputs.tv }}"
@@ -129,7 +139,7 @@ jobs:
               xcrun simctl boot "$T"; xcrun simctl bootstatus "$T" -b
               xcrun simctl install "$T" "$TVAPP"
               TVB=$(/usr/libexec/PlistBuddy -c "Print CFBundleIdentifier" "$TVAPP/Info.plist")
-              for tab in meldkamer waarschuwingen statistieken; do
+              for tab in meldkamer waarschuwingen nieuws statistieken; do
                 xcrun simctl launch --terminate-running-process "$T" "$TVB" $L -AAlertsTab $tab; sleep 18
                 xcrun simctl io "$T" screenshot "shots/$LANG/tv-$tab.png"
               done
@@ -149,6 +159,10 @@ jobs:
               open -n "$MACAPP" --args $L -AAlertsMelding "$GUID"
               sleep 16
               screencapture -x -R0,0,1440,900 "shots/$LANG/mac-melding.png" || true
+              pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
+              open -n "$MACAPP" --args $L -AAlertsTab nieuws
+              sleep 16
+              screencapture -x -R0,0,1440,900 "shots/$LANG/mac-nieuws.png" || true
               pkill -f "P2000 Apeldoorn.app/Contents/MacOS" || true
               open -n "$MACAPP" --args $L -AAlertsTab statistieken
               sleep 14

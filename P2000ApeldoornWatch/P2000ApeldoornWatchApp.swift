@@ -58,6 +58,7 @@ struct WatchRootView: View {
             let args = ProcessInfo.processInfo.arguments
             func value(_ key: String) -> String? { args.firstIndex(of: key).flatMap { args.indices.contains($0 + 1) ? args[$0 + 1] : nil } }
             if value("-AAlertsTab") == "statistieken" { showSplash = false; pagina = 1 }
+            if value("-AAlertsTab") == "nieuws" { showSplash = false; pagina = 2 }
             if let guid = value("-AAlertsMelding") { showSplash = false; opened = await store.melding(guid: guid) }
             #endif
         }
