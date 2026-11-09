@@ -75,7 +75,9 @@ jobs:
           "$BT/aapt2" dump badging out/A-Alerts.apk | head -3
           SIZE=$(stat -c%s out/A-Alerts.apk)
           SHA=$(sha256sum out/A-Alerts.apk | cut -d' ' -f1)
-          printf '{"version":"2.0.0","build":%s,"url":"https://a-alerts.nl/downloads/A-Alerts.apk","size":%s,"sha256":"%s","minAndroid":"7.0","notes":null}\n' "$ANDROID_BUILD" "$SIZE" "$SHA" > out/android.json
+          # Version from the APK itself (versionName in app/build.gradle.kts), never hard-coded.
+          VER=$("$BT/aapt2" dump badging out/A-Alerts.apk | sed -n "s/.*versionName='\([^']*\)'.*/\1/p" | head -1)
+          printf '{"version":"%s","build":%s,"build":%s,"url":"https://a-alerts.nl/downloads/A-Alerts.apk","size":%s,"sha256":"%s","minAndroid":"7.0","notes":null}\n' "${VER:-2.0.1}" "$ANDROID_BUILD" "$SIZE" "$SHA" > out/android.json
           cat out/android.json
           echo "### A-Alerts APK build $ANDROID_BUILD (getekend: ${{ steps.ks.outputs.signed }}) – $((SIZE/1024/1024)) MB" >> "$GITHUB_STEP_SUMMARY"
 
