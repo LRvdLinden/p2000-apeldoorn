@@ -1,0 +1,31 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+permissions:
+  contents: write
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir out && cd out
+          UA="Mozilla/5.0 (Macintosh; Intel Mac OS X 14_0) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+          for p in auto-politie-auto-politie-weg-6398127 politie-plaats-delict-blauw-licht-1141039 handboeien-ketenen-schuldig-zin-3655293 \
+            ongeluk-ontsnapping-van-de-bestuurder-1497298 politie-auto-politie-blauw-licht-2672366 handboeien-uniform-politie-6371299 \
+            helikopter-politie-politiehelikopter-273457 helikopter-blauw-vliegend-hemel-4742196 politie-plaats-delict-moord-3284258 \
+            handboeien-zwart-crimineel-2202224 politie-mist-kust-grijs-politie-651504 patrouillewagen-straat-6900312 \
+            politie-arresteren-handboeien-2122376 politieagente-politie-politieauto-986047 politie-auto-politie-auto-5655238 \
+            technologie-politie-2500010 aardappelen-moord-politie-1458569 helikopter-politie-missie-9864353; do
+            id=${p##*-}
+            html=$(curl -sL -A "$UA" -H "Accept-Language: nl" "https://pixabay.com/nl/photos/$p/")
+            img=$(echo "$html" | grep -o 'https://cdn.pixabay.com/photo/[^"]*_1280\.[a-z]*' | head -1)
+            [ -z "$img" ] && img=$(echo "$html" | grep -o 'og:image" content="[^"]*' | head -1 | sed 's/.*content="//')
+            echo "$id -> ${img:-NIETS} ($(echo "$html" | wc -c) bytes html)"
+            [ -n "$img" ] && curl -sL -A "$UA" -e "https://pixabay.com/" "$img" -o "$id.jpg" && file "$id.jpg"
+          done
+          ls -la
+          git config --global user.email "actions@github.com"; git config --global user.name "probe"
+          git init -q && git checkout -q -b pixabay-stock && git add . && git commit -qm "Pixabay kandidaten" \
+            && git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" pixabay-stock && echo gepusht
