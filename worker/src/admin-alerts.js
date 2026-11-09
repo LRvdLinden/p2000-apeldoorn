@@ -9,8 +9,10 @@ const rows = async (env, sql, ...args) => (await env.DB.prepare(sql).bind(...arg
 const kvGet = (env, key) => env.DB.prepare("SELECT value, at FROM kv WHERE key = ?").bind(key).first();
 const kvSet = (env, key, value) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(key, value, Date.now()).run();
 
-export const BRONNEN = ["nlalert", "burgernet", "knmi"];
-const NAMEN = { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: "KNMI" };
+// Sources that are read (status); "kind" = Burgernet's API for AMBER Alert and Vermist Kind Alert.
+export const BRONNEN = ["nlalert", "burgernet", "knmi", "kind"];
+const NAMEN = { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: "KNMI", kind: "AMBER Alert / Vermist Kind", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert" };
+const SOORTEN = ["nlalert", "burgernet", "knmi", "amber", "vermistkind"];
 /** A source counts as down after 30 minutes without a successful read. */
 export const BRON_STORING_MS = 30 * 60_000;
 
@@ -87,7 +89,7 @@ export async function alertsOverview(env) {
 
   const ws = (await rows(env, `SELECT w.bron, w.status, w.niveau, w.start_at, w.end_at, COALESCE(wo.hidden, 0) AS ov_hidden, wo.ended_at AS ov_ended
     FROM waarschuwingen w ${OVERRIDE_JOIN} WHERE COALESCE(w.end_at, w.start_at) >= ? OR w.status != 'beeindigd'`, now - 7 * DAY)).map(applyOverride);
-  const perBron = Object.fromEntries(BRONNEN.map((b) => [b, { actief: 0, week: 0 }]));
+  const perBron = Object.fromEntries(SOORTEN.map((b) => [b, { actief: 0, week: 0 }]));
   let verborgen = 0;
   for (const w of ws) {
     if (w.ov_hidden) { verborgen++; continue; }
@@ -100,10 +102,12 @@ export async function alertsOverview(env) {
   const prefs = await rows(env, "SELECT p.data FROM device_prefs p JOIN devices d ON d.token = p.token WHERE d.enabled = 1");
   const verdeling = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
   const plaatsen = new Map();
-  const wil = { nlalert: 0, burgernet: 0, knmi: { yellow: 0, orange: 0, red: 0 } };
+  const wil = { nlalert: 0, burgernet: 0, amber: 0, vermistkind: 0, knmi: { yellow: 0, orange: 0, red: 0 } };
   let metProfielen = 0, profielenTotaal = 0, metTijden = 0, uit = 0;
   for (const r of prefs) {
     const p = parse(r.data);
+    if (p?.amber) wil.amber++;
+    if (p?.vermistkind) wil.vermistkind++;
     const list = Array.isArray(p?.profielen) ? p.profielen : null;
     if (!list?.length) continue;
     metProfielen++;

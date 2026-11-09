@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=56";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=57";
 
 const TZ = "Europe/Amsterdam";
 
@@ -10,7 +10,12 @@ export const BRONNEN = {
   nlalert: { label: "NL-Alert", color: "#FFC800", on: "#000", icon: "icon_nlalert", text: "#B45309" },
   burgernet: { label: "Burgernet", color: "#0067B1", on: "#fff", icon: "icon_burgernet", text: "#0067B1" },
   knmi: { label: "KNMI", color: "#3E9FDB", on: "#fff", icon: "icon_knmi", text: "#2563eb" },
+  // Missing children, from the police (through Burgernet): national AMBER Alert and regional Vermist Kind Alert.
+  amber: { label: "AMBER Alert", color: "#EC6E24", on: "#fff", icon: "icon_amber", text: "#C2410C" },
+  vermistkind: { label: "Vermist Kind Alert", color: "#1B265E", on: "#F4E005", icon: "icon_vermistkind", text: "#1B265E" },
 };
+/** Warnings about a missing child (AMBER Alert, Vermist Kind Alert). */
+export const isKind = (w) => w?.bron === "amber" || w?.bron === "vermistkind";
 export const CODES = { yellow: ["Code geel", "#F7C600", "#000"], orange: ["Code oranje", "#F28C28", "#fff"], red: ["Code rood", "#E3001B", "#fff"], green: ["Code groen", "#2E9E44", "#fff"] };
 /** KNMI: the code that applies now; a lifted (ended) warning is code green. */
 export const codeNu = (w) => (w.bron === "knmi" && w.status === "beeindigd" ? "green" : w.niveau);
@@ -35,7 +40,7 @@ export const routeLinks = (m, adres) => {
 
 export async function fetchWaarschuwingen(days = 7) {
   try {
-    const r = await fetch(`${API}/v1/waarschuwingen?days=${days}`, { signal: AbortSignal.timeout(10_000) });
+    const r = await fetch(`${API}/v1/waarschuwingen?days=${days}&kind=1`, { signal: AbortSignal.timeout(10_000) });
     return r.ok ? await r.json() : [];
   } catch { return []; }
 }
@@ -62,6 +67,7 @@ export function wOpKleur(w) {
 export function wKop(w) {
   if (w.bron === "knmi") return [(CODES[w.niveau] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
   if (w.bron === "burgernet") return ["Burgernet", w.soort].filter(Boolean).join(" · ");
+  if (w.bron === "amber" || w.bron === "vermistkind") return BRONNEN[w.bron].label;
   return "NL-Alert";
 }
 export const wStatus = (w) => (isOpgeheven(w) ? "Opgeheven · code groen" : w.status === "beeindigd" ? "Beëindigd" : w.status === "verwacht" ? "Verwacht" : "Actief");

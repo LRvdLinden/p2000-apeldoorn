@@ -240,6 +240,7 @@ function androidCard(a) {
 
 const BRON = {
   nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: [icon("knmi", "KNMI"), "KNMI", "#3E9FDB"],
+  amber: ["🧒", "AMBER Alert", "#EC6E24"], vermistkind: ["🧒", "Vermist Kind Alert", "#1B265E"], kind: ["🧒", "AMBER Alert / Vermist Kind (Burgernet)", "#EC6E24"],
   helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
 };
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood" };
@@ -258,7 +259,7 @@ function aAlertsCards(a, status) {
       ${a.inDeLucht.length ? a.inDeLucht.map((h) => `<div class="row"><span>🚁</span><span class="grow"><b>${esc(h.naam)}</b></span><small>${h.hoogte_m === 0 ? "op de grond" : h.hoogte_m != null ? `${h.hoogte_m} m` : ""}${h.snelheid_kmh != null ? ` · ${h.snelheid_kmh} km/u` : ""}</small></div>`).join("") : `<p class="muted">Er is nu geen Lifeliner of Zulu in de lucht.</p>`}
     </div>
     <div class="card"><h2>Waarschuwingen · 7 dagen</h2>
-      ${["nlalert", "burgernet", "knmi"].map((k) => `<div class="row"><span>${BRON[k][0]}</span><span class="grow">${BRON[k][1]}</span><b>${wb[k]?.week || 0}</b><small>${wb[k]?.actief || 0} actief</small></div>`).join("")}
+      ${["nlalert", "burgernet", "knmi", "amber", "vermistkind"].map((k) => `<div class="row"><span>${BRON[k][0]}</span><span class="grow">${BRON[k][1]}</span><b>${wb[k]?.week || 0}</b><small>${wb[k]?.actief || 0} actief</small></div>`).join("")}
       ${a.waarschuwingen.verborgen ? `<p class="muted" style="font-size:.8rem">${a.waarschuwingen.verborgen} verborgen</p>` : ""}
     </div>
     <div class="card"><h2>Notificatieprofielen</h2>
@@ -268,6 +269,7 @@ function aAlertsCards(a, status) {
         <div class="row"><span class="grow">Nog zonder profielen (oudere versie)</span><b>${p.zonderProfielen}</b></div>
         <div class="row"><span class="grow">Met eigen tijden</span><b>${p.metTijden}</b></div>
         <div class="row"><span class="grow">Wil NL-Alert / Burgernet</span><b>${p.waarschuwingen.nlalert} / ${p.waarschuwingen.burgernet}</b></div>
+        <div class="row"><span class="grow">Wil AMBER Alert / Vermist Kind</span><b>${p.waarschuwingen.amber ?? 0} / ${p.waarschuwingen.vermistkind ?? 0}</b></div>
         <div class="row"><span class="grow">Wil KNMI geel / oranje / rood</span><b>${p.waarschuwingen.knmi.yellow} / ${p.waarschuwingen.knmi.orange} / ${p.waarschuwingen.knmi.red}</b></div>
         ${p.topPlaatsen.length ? `<p class="muted" style="font-size:.8rem;margin:8px 0 2px">Populairste plaatsen</p>${p.topPlaatsen.slice(0, 6).map((x) => `<div class="row"><span class="grow">${esc(x.plaats)}</span><small>${x.n}</small></div>`).join("")}` : ""}
         <p class="muted" style="font-size:.75rem;margin:6px 0 0">Gemiddeld ${p.gemiddeld} profiel per toestel · ${p.pushToestellen} toestellen met push</p>
@@ -279,11 +281,11 @@ let wBron = "", wStatus = "", wQuery = "";
 async function waarschuwingen(el) {
   const qs = new URLSearchParams({ days: "30", ...(wBron ? { bron: wBron } : {}), ...(wStatus ? { status: wStatus } : {}), ...(wQuery ? { q: wQuery } : {}) });
   const list = await api("GET", `/v1/beheer/waarschuwingen?${qs}`);
-  const kop = (w) => w.bron === "knmi" ? `${CODE[w.niveau] || "KNMI"} · ${w.soort || ""}` : w.bron === "burgernet" ? `Burgernet · ${w.plaats || "Apeldoorn"}` : "NL-Alert";
+  const kop = (w) => w.bron === "knmi" ? `${CODE[w.niveau] || "KNMI"} · ${w.soort || ""}` : w.bron === "burgernet" ? `Burgernet · ${w.plaats || "Apeldoorn"}` : w.bron === "amber" ? "AMBER Alert" : w.bron === "vermistkind" ? `Vermist Kind Alert · ${w.plaats || ""}` : "NL-Alert";
   el.innerHTML = `
     <div class="toolbar">
       <input type="search" id="wq" placeholder="Zoek in titel, tekst of plaats" value="${esc(wQuery)}">
-      <select id="wb"><option value="">Alle bronnen</option>${["nlalert", "burgernet", "knmi"].map((b) => `<option value="${b}" ${wBron === b ? "selected" : ""}>${BRON[b][1]}</option>`).join("")}</select>
+      <select id="wb"><option value="">Alle bronnen</option>${["nlalert", "burgernet", "knmi", "amber", "vermistkind"].map((b) => `<option value="${b}" ${wBron === b ? "selected" : ""}>${BRON[b][1]}</option>`).join("")}</select>
       <select id="ws"><option value="">Alle statussen</option>${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${wStatus === k ? "selected" : ""}>${v}</option>`).join("")}</select>
     </div>
     <div class="list">${list.length ? list.map((w) => `

@@ -68,6 +68,7 @@ struct MapScreen: View {
             switch w.bron {
             case .nlalert: guard settings.laag(.nlalert) else { return false }
             case .burgernet: guard settings.laag(.burgernet) else { return false }
+            case .amber, .vermistkind: guard settings.laag(.kind), w.coordinate != nil else { return false }
             case .knmi: guard settings.laag(.knmi), !w.isBeeindigd else { return false }
             }
             guard !w.isBeeindigd || (w.einde ?? w.start) >= cutoff else { return false }
@@ -423,6 +424,16 @@ struct MapScreen: View {
                     } content: {
                         Image("icon_nlalert").resizable().scaledToFit().frame(width: 16, height: 16)
                         Text("\(nl)")
+                    }
+                    // AMBER Alert / Vermist Kind Alert: only when there is one (a missing child).
+                    let kind = aantal(.amber) + aantal(.vermistkind)
+                    if kind > 0 {
+                        chip(on: settings.laag(.kind), color: Color(hex: 0xEC6E24), label: "\(L("Vermist kind")): \(kind)") {
+                            settings.setLaag(.kind, !settings.laag(.kind))
+                        } content: {
+                            Image(aantal(.amber) > 0 ? "icon_amber" : "icon_vermistkind").resizable().scaledToFit().frame(width: 16, height: 16)
+                            Text("\(kind)")
+                        }
                     }
                     ForEach(heliSoorten, id: \.soort) { g in
                         chip(on: settings.laag(.helikopters), color: g.color, label: "\(g.naam): \(g.items.count)") {

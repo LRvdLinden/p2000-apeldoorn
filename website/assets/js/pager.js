@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=56";
+} from "./core.js?v=57";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=56";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=57";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -32,7 +32,7 @@ const state = {
   hideRead: prefs.get("p2000.hideRead", false),
   mapHours: 24,
   mapDiensten: new Set(SELECTABLE),
-  mapBronnen: new Set(["nlalert", "burgernet"]),
+  mapBronnen: new Set(["nlalert", "burgernet", "amber", "vermistkind"]),
   // A-Alerts
   warnings: [],
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
@@ -244,7 +244,7 @@ function warnRowHTML(w) {
 /** Warnings shown in the timeline: NL-Alert and Burgernet of the last 24 hours (or still active). */
 function timelineWarnings() {
   if (state.diensten.size || state.prio || state.radiusKm) return [];
-  if (state.bron && state.bron !== "nlalert" && state.bron !== "burgernet") return [];
+  if (state.bron && !["nlalert", "burgernet", "amber", "vermistkind"].includes(state.bron)) return [];
   const q = state.search.toLowerCase();
   return state.warnings.filter((w) => w.bron !== "knmi" && (!state.bron || w.bron === state.bron)
     && (isActief(w) || Date.now() - wStart(w).getTime() < WINDOW_MS)
@@ -283,8 +283,12 @@ function knmiHTML(w) {
 }
 
 function renderKnmi() {
+  const kind = state.warnings.filter((w) => isKind(w) && isActief(w));
   const items = state.warnings.filter((w) => w.bron === "knmi" && isActief(w));
-  $("knmiBar").innerHTML = items.map((w) => `
+  $("knmiBar").innerHTML = kind.map((w) => `
+    <a class="knmi kind-bar" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
+      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}${w.bron === "vermistkind" && w.plaats ? ` · ${esc(w.plaats)}` : ""}</b><small>${esc(w.titel)}</small><small>${esc(regels(w.tekst)[0] || "")}</small></span><i>›</i>
+    </a>`).join("") + items.map((w) => `
     <a class="knmi" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
       <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small>${w.kop || w.verwachting ? `<small>${esc(regels(w.kop || w.verwachting)[0])}</small>` : ""}</span><i>›</i>
     </a>`).join("");
@@ -364,7 +368,7 @@ $("knmiBar").addEventListener("click", (e) => {
 // ------------------------------------------------------------------ detail
 
 let detailMap = null;
-/** Burgernet: the start message, updates and the closing message as a timeline, newest on top (as on burgernet.nl). */
+/** Burgernet, AMBER Alert and Vermist Kind Alert: start message, updates and closing message as a timeline, newest on top. */
 function tijdlijnHTML(w) {
   const lijst = w.berichten?.length ? w.berichten : [
     { soort: "start", label: "Startbericht", plaats: w.plaats, at: w.start, tekst: w.startbericht || w.tekst },
@@ -379,7 +383,23 @@ function tijdlijnHTML(w) {
     return `<li class="tl-${esc(b.soort)}"><span class="tl-dot"></span><div><h3>${esc(kop[b.soort] || b.label || "Bericht")}</h3>
       ${meta ? `<small>${meta}</small>` : ""}${String(b.tekst || "").split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</div></li>`;
   }).join("");
-  return `<section class="card story tijdlijn"><h2>Berichten van Burgernet</h2><ol>${items}</ol></section>`;
+  const titel = isKind(w)
+    ? `${w.bron === "amber" ? `<img class="tl-logo" src="${asset("assets/img/logo_amber.png")}" alt="AMBER Alert">` : `<span class="tl-vk">Vermist Kind Alert</span>`}Berichten van de politie`
+    : "Berichten van Burgernet";
+  return `<section class="card story tijdlijn tijdlijn-${esc(w.bron)}"><h2>${titel}</h2><ol>${items}</ol>
+    ${isKind(w) ? `<p class="hint">Bron: Politie, via Burgernet.</p>` : ""}</section>`;
+}
+
+/** AMBER Alert / Vermist Kind Alert: photo of the child (only while it runs) and what to do. */
+function kindHTML(w) {
+  if (!isKind(w)) return "";
+  const actief = isActief(w);
+  const tip = w.bron === "amber" ? "Zie je dit kind? Bel direct 112." : "Heb je een tip? Bel 0800-6070. Bij direct gevaar: 112.";
+  return `<section class="card kind-card kind-${esc(w.bron)}">
+    ${actief && w.foto ? `<img class="kind-foto" src="${esc(w.foto)}" alt="Foto van het vermiste kind" loading="lazy" referrerpolicy="no-referrer">` : ""}
+    <div><b>${actief ? esc(tip) : "Deze oproep is beëindigd."}</b>
+      ${actief ? `<a class="kind-bel" href="tel:${w.bron === "amber" ? "112" : "08006070"}">${w.bron === "amber" ? "Bel 112" : "Bel 0800-6070"}</a>` : ""}</div>
+  </section>`;
 }
 
 /** "Route naar incident": the same choices as in the apps — Google Maps, Apple Kaarten or copy the address. */
@@ -697,12 +717,13 @@ async function selectWarning(id, { push = true } = {}) {
       <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${w.bron === "knmi" ? wKleur(w) : b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1>
         <button class="share" id="wShareBtn" aria-label="Delen">${ICO.share}</button></div>
       <div class="info"><span class="ico" style="background:${isActief(w) ? "#DC2626" : "#6b7280"}">${ICO.warn}</span><div><b>${esc(wStatus(w))}</b><small>${esc(wTijd(w))}</small></div></div>
-      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : "Plaats van de oproep"}</small></div></div>
-      ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} Bekijk bij ${esc(b.label)}</a>` : ""}
+      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : w.bron === "amber" ? "Landelijke oproep" : w.bron === "vermistkind" ? `Zoekgebied${w.straal_km ? ` van ${esc(w.straal_km)} km` : ""}` : "Plaats van de oproep"}</small></div></div>
+      ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} ${isKind(w) ? "Meer informatie bij de politie" : `Bekijk bij ${esc(b.label)}`}</a>` : ""}
     </section>
     ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
+    ${kindHTML(w)}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
-    : w.bron === "burgernet" && (w.berichten?.length || w.afloop) ? tijdlijnHTML(w)
+    : (w.bron === "burgernet" || isKind(w)) && (w.berichten?.length || w.afloop) ? tijdlijnHTML(w)
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
@@ -736,7 +757,9 @@ async function selectWarning(id, { push = true } = {}) {
   if (!mk || state.selected !== `w:${w.id}`) return;
   if (detailMap) { try { detailMap.destroy(); } catch {} }
   const div = document.createElement("div"); div.className = "mk"; $("dMap").prepend(div);
-  detailMap = new mk.Map(div, { center: new mk.Coordinate(w.lat ?? 52.2112, w.lon ?? 5.9699), cameraDistance: 9000, showsMapTypeControl: false,
+  // AMBER Alert: all of the Netherlands.
+  const landelijk = w.bron === "amber" && w.lat == null;
+  detailMap = new mk.Map(div, { center: new mk.Coordinate(w.lat ?? (landelijk ? 52.2 : 52.2112), w.lon ?? (landelijk ? 5.3 : 5.9699)), cameraDistance: landelijk ? 420000 : 9000, showsMapTypeControl: false,
     colorScheme: kaartKleur(mk) });
   const overlays = warnOverlays(mk, w);
   if (overlays.length) { detailMap.addOverlays(overlays); try { detailMap.showItems(overlays, { padding: new mk.Padding(30, 30, 30, 30) }); } catch {} }
@@ -859,6 +882,7 @@ function renderMapChips() {
     const n = recent.filter((m) => m.dienst === d).length;
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("") + bronChip("burgernet", "Burgernet", "#0067B1") + bronChip("nlalert", "NL-Alert", "#E3001B")
+    + bronChip("amber", "AMBER Alert", "#EC6E24") + bronChip("vermistkind", "Vermist Kind Alert", "#1B265E")
     + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu");
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length

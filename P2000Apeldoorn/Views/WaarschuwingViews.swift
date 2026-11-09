@@ -85,12 +85,16 @@ struct KnmiBanner: View {
             ForEach(items) { w in
                 Button { open(w) } label: {
                     HStack(spacing: 12) {
-                        Image(systemName: w.systemImage)
-                            .font(.title3.weight(.semibold))
-                            .frame(width: 30)
+                        if w.isKind {
+                            WaarschuwingIcon(waarschuwing: w, size: 30)
+                        } else {
+                            Image(systemName: w.systemImage)
+                                .font(.title3.weight(.semibold))
+                                .frame(width: 30)
+                        }
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: w.kop).font(AppFont.body(15, .bold, relativeTo: .subheadline))
-                            Text(validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
+                            Text(w.isKind ? [w.titel, w.plaats].compactMap { $0 }.joined(separator: " · ") : validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
                             if let regel = (w.knmiKop ?? w.verwachting)?.split(separator: "\n").first {
                                 Text(String(regel)).font(AppFont.body(12, .regular, relativeTo: .caption)).lineLimit(1).opacity(0.9)
                             }
@@ -103,7 +107,7 @@ struct KnmiBanner: View {
                     .background(w.color, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint(L("Open de weerwaarschuwing"))
+                .accessibilityHint(w.isKind ? L("Open de oproep") : L("Open de weerwaarschuwing"))
             }
         }
     }
@@ -292,7 +296,7 @@ struct KnmiCodesView: View {
 struct WaarschuwingFilterSection: View {
     @Environment(AppSettings.self) private var settings
     private let keys: [(String, String)] = [
-        ("nlalert", "NL-Alert"), ("burgernet", "Burgernet"),
+        ("nlalert", "NL-Alert"), ("burgernet", "Burgernet"), ("amber", "AMBER Alert"), ("vermistkind", L("Vermist Kind Alert")),
         ("knmi:yellow", L("KNMI code geel")), ("knmi:orange", L("KNMI code oranje")), ("knmi:red", L("KNMI code rood")),
     ]
 

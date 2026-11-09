@@ -124,12 +124,13 @@ struct WaarschuwingDetailView: View {
                 .padding(.horizontal, 4)
                 .padding(.bottom, -6)
                 mainCard(w)
+                if w.isKind { kindCard(w) }
                 if w.heeftKnmiTekst { knmiCard(w) }
                 else if !w.tijdlijn.isEmpty { tijdlijnCard(w) }
                 else if let tekst = w.tekst, !tekst.isEmpty { berichtCard(w, tekst) }
                 if let m = meteo { meteoCard(m, live: w.bron == .knmi) }
-                // A weather code covers a whole region: no alerts nearby.
-                if w.bron != .knmi { meldingenCard(w) }
+                // A weather code covers a whole region: no alerts nearby. A missing child: no P2000 link.
+                if w.bron != .knmi && !w.isKind { meldingenCard(w) }
                 dataCard(w)
                 Text(w.bron == .nlalert
                      ? L("A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112.")
@@ -153,6 +154,10 @@ struct WaarschuwingDetailView: View {
 
     private func startPosition(_ w: Waarschuwing) -> MapCameraPosition {
         let coords = w.rings.flatMap { $0 }
+        // AMBER Alert: all of the Netherlands.
+        if w.bron == .amber, w.coordinate == nil {
+            return .region(MKCoordinateRegion(center: CLLocationCoordinate2D(latitude: 52.2, longitude: 5.3), latitudinalMeters: 330_000, longitudinalMeters: 300_000))
+        }
         guard coords.count > 2 else {
             return .region(MKCoordinateRegion(center: coordinate(w), latitudinalMeters: 3000, longitudinalMeters: 3000))
         }
@@ -329,7 +334,7 @@ struct WaarschuwingDetailView: View {
             }
             if let link = w.link, let url = URL(string: link) {
                 Link(destination: url) {
-                    Label(Lf("Bekijk bij %@", MeldingDetailView.bronNaam(w.bron)), systemImage: "safari.fill")
+                    Label(w.isKind ? L("Meer informatie bij de politie") : Lf("Bekijk bij %@", MeldingDetailView.bronNaam(w.bron)), systemImage: "safari.fill")
                         .font(AppFont.body(15, .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -364,7 +369,14 @@ struct WaarschuwingDetailView: View {
     private func tijdlijnCard(_ w: Waarschuwing) -> some View {
         let lijst = w.tijdlijn
         return VStack(alignment: .leading, spacing: 14) {
-            Text(L("Berichten van Burgernet")).font(AppFont.heading(18))
+            HStack(spacing: 10) {
+                if w.bron == .amber { Image("logo_amber").resizable().scaledToFit().frame(height: 26) }
+                if w.bron == .vermistkind {
+                    Text(L("VERMIST KIND ALERT")).font(AppFont.body(11, .heavy)).foregroundStyle(Color(hex: 0x1B265E))
+                        .padding(.horizontal, 8).padding(.vertical, 4).background(Color(hex: 0xF4E005), in: Capsule())
+                }
+                Text(w.isKind ? L("Berichten van de politie") : L("Berichten van Burgernet")).font(AppFont.heading(18))
+            }
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(lijst.enumerated()), id: \.element.id) { i, b in
                     HStack(alignment: .top, spacing: 12) {
@@ -398,6 +410,36 @@ struct WaarschuwingDetailView: View {
         f.dateFormat = "dd/MM/yyyy"
         f.timeZone = TimeZone(identifier: "Europe/Amsterdam")
         return f.string(from: d)
+    }
+
+    /// AMBER Alert / Vermist Kind Alert: photo (only while it runs), what to do and a call button.
+    private func kindCard(_ w: Waarschuwing) -> some View {
+        let amber = w.bron == .amber
+        let nummer = amber ? "112" : "08006070"
+        return HStack(alignment: .top, spacing: 14) {
+            if w.isActief, let s = w.foto, let url = URL(string: s) {
+                AsyncImage(url: url) { img in img.resizable().scaledToFill() } placeholder: { Color.secondary.opacity(0.12) }
+                    .frame(width: 92, height: 116).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                    .accessibilityLabel(L("Foto van het vermiste kind"))
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                Text(w.isActief ? (amber ? L("Zie je dit kind? Bel direct 112.") : L("Heb je een tip? Bel 0800-6070. Bij direct gevaar: 112."))
+                     : L("Deze oproep is beëindigd. Foto en signalement staan er daarom niet meer bij."))
+                    .font(AppFont.body(15, .semibold)).fixedSize(horizontal: false, vertical: true)
+                if w.isActief, let url = URL(string: "tel:\(nummer)") {
+                    Link(destination: url) {
+                        Label(amber ? L("Bel 112") : L("Bel 0800-6070"), systemImage: "phone.fill")
+                            .font(AppFont.body(15, .bold)).foregroundStyle(.white)
+                            .padding(.horizontal, 16).padding(.vertical, 9).background(Color.red, in: Capsule())
+                    }
+                }
+                Text(L("Bron: Politie, via Burgernet.")).font(AppFont.body(12)).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .wCard()
+        .overlay(alignment: .leading) { Rectangle().fill(w.color).frame(width: 4).padding(.vertical, 8) }
     }
 
     static func tijdlijnKleur(_ s: BurgernetBericht.Soort) -> Color {
@@ -687,6 +729,8 @@ extension MeldingDetailView {
         case .nlalert: return "NL-Alert"
         case .burgernet: return "Burgernet"
         case .knmi: return "KNMI"
+        case .amber: return "AMBER Alert"
+        case .vermistkind: return L("Vermist Kind Alert")
         }
     }
 

@@ -84,6 +84,8 @@ export function meldingWanted(device, prefs, m, date = new Date()) {
 
 /** NL-Alert, Burgernet or KNMI: at least one active profile wants this kind for one of its places. */
 export function warningWanted(device, prefs, w, date = new Date()) {
+  // AMBER Alert and Vermist Kind Alert are one switch per device, not per profile.
+  if (w.bron === "amber" || w.bron === "vermistkind") return wantsPush(device, prefs, w);
   const profielen = prefs?.profielen;
   if (!Array.isArray(profielen) || !profielen.length) return wantsPush(device, prefs, w);
   return profielen.some((p) => geldt(p, date)

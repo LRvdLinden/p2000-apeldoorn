@@ -137,6 +137,9 @@ data class Waarschuwing(
     val afloop: String? = null,
     /** Burgernet: every message with place and time (start, updates, closing), oldest first. */
     val berichten: List<BurgernetBericht>? = null,
+    /** AMBER Alert / Vermist Kind Alert: photo of the child (only while it runs) and the search radius. */
+    val foto: String? = null,
+    @SerialName("straal_km") val straalKm: Double? = null,
     val plaats: String? = null,
     val niveau: String? = null,
     val soort: String? = null,
@@ -166,12 +169,16 @@ data class Waarschuwing(
     val eindeAt: Instant? get() = parseInstant(einde)
     val isActief get() = status == "actief"
     val isBeeindigd get() = status == "beeindigd"
+    /** AMBER Alert (national) or Vermist Kind Alert (regional): a missing child, from the police via Burgernet. */
+    val isKind get() = bron == "amber" || bron == "vermistkind"
     val filterKey get() = if (bron == "knmi") "knmi:${niveau ?: "yellow"}" else bron
     val hasCoordinate get() = lat != null && lon != null
 
     val label: String get() = when (bron) {
         "nlalert" -> "NL-Alert"
         "burgernet" -> "Burgernet"
+        "amber" -> "AMBER Alert"
+        "vermistkind" -> tr("Vermist Kind Alert", "Missing Child Alert")
         else -> codeLabel(niveau)
     }
     /** KNMI: the code that applies now; a lifted (ended) warning is code green. */
@@ -180,7 +187,7 @@ data class Waarschuwing(
     /** Link to this warning on a-alerts.nl (for sharing). */
     val shareUrl: String get() = "https://a-alerts.nl/waarschuwing/" + java.net.URLEncoder.encode(id, "UTF-8")
     val kop: String get() = when (bron) {
-        "nlalert" -> label
+        "nlalert", "amber", "vermistkind" -> label
         else -> listOfNotNull(label, soort?.takeIf { it.isNotBlank() }).joinToString(" · ")
     }
     val statusLabel: String get() = if (isOpgeheven) tr("Opgeheven · code groen", "Lifted · code green") else when (status) {
@@ -191,19 +198,29 @@ data class Waarschuwing(
     val color: Color get() = when (bron) {
         "nlalert" -> Color(0xFFFFC800)
         "burgernet" -> Color(0xFF0067B1)
+        "amber" -> Color(0xFFEC6E24)
+        "vermistkind" -> Color(0xFF1B265E)
         else -> codeColor(niveau)
     }
     val onColor: Color get() = when (bron) {
         "nlalert" -> Color.Black
-        "burgernet" -> Color.White
+        "burgernet", "amber" -> Color.White
+        "vermistkind" -> Color(0xFFF4E005)
         else -> if (niveau == "yellow" || niveau == null) Color.Black else Color.White
     }
     val icon: Int get() = when (bron) {
         "nlalert" -> R.drawable.icon_nlalert
         "burgernet" -> R.drawable.icon_burgernet
+        "amber" -> R.drawable.icon_amber
+        "vermistkind" -> R.drawable.icon_vermistkind
         else -> R.drawable.icon_knmi
     }
-    val marker: Int get() = if (bron == "burgernet") R.drawable.marker_burgernet else R.drawable.marker_nlalert
+    val marker: Int get() = when (bron) {
+        "burgernet" -> R.drawable.marker_burgernet
+        "amber" -> R.drawable.marker_amber
+        "vermistkind" -> R.drawable.marker_vermistkind
+        else -> R.drawable.marker_nlalert
+    }
     /** Dutch text, or the English one when the app runs in English and there is one. */
     val tekstLokaal: String? get() = if (!isDutch && !tekstEn.isNullOrBlank()) tekstEn else tekst
 
@@ -211,6 +228,7 @@ data class Waarschuwing(
 
     fun covers(plaatsNaam: String): Boolean {
         if (bron == "burgernet") return (plaats ?: "Apeldoorn").plaatsKey() == plaatsNaam.plaatsKey()
+        if (bron == "amber") return true
         val g = gebied ?: return true
         val p = Werkgebied.plaats(plaatsNaam) ?: return true
         return g.any { Geo.ringContains(it, p.lat, p.lon) } || g.any { Geo.distanceToRingKm(it, p.lat, p.lon) <= 2 }
@@ -221,6 +239,7 @@ data class Waarschuwing(
         val from = startAt.minusSeconds(2 * 3600)
         val to = (eindeAt ?: startAt.plusSeconds(6 * 3600)).plusSeconds(3600)
         if (m.datum.isBefore(from) || m.datum.isAfter(to)) return false
+        if (isKind) return false
         if (bron == "burgernet") return m.soort == Dienst.POLITIE && (plaats ?: "Apeldoorn") in Werkgebied.plaatsenVoor(m)
         val la = m.lat ?: return false
         val lo = m.lon ?: return false

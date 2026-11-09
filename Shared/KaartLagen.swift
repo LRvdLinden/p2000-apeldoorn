@@ -2,7 +2,7 @@ import SwiftUI
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, knmi, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
+    case p2000, nlalert, burgernet, kind, knmi, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
 
     var id: String { rawValue }
 
@@ -14,6 +14,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .p2000: return L("P2000-meldingen")
         case .nlalert: return "NL-Alert"
         case .burgernet: return "Burgernet"
+        case .kind: return L("AMBER Alert en Vermist Kind Alert")
         case .knmi: return L("KNMI-waarschuwingsgebieden")
         case .werkgebied: return L("Grens werkgebied")
         case .kazernes: return L("Kazernes en posten")
@@ -28,6 +29,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .p2000: return "light.beacon.max.fill"
         case .nlalert: return "exclamationmark.triangle.fill"
         case .burgernet: return "megaphone.fill"
+        case .kind: return "figure.child"
         case .knmi: return "cloud.sun.rain.fill"
         case .werkgebied: return "skew"
         case .kazernes: return "building.2.fill"

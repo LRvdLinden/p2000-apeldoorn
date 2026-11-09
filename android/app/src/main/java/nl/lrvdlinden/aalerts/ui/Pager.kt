@@ -158,7 +158,7 @@ fun FilterSheet(onDismiss: () -> Unit) {
             }
             SectionCard(tr("Waarschuwingen", "Warnings")) {
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    listOf("nlalert" to "NL-Alert", "burgernet" to "Burgernet", "knmi:yellow" to Waarschuwing.codeLabel("yellow"), "knmi:orange" to Waarschuwing.codeLabel("orange"), "knmi:red" to Waarschuwing.codeLabel("red"))
+                    listOf("nlalert" to "NL-Alert", "burgernet" to "Burgernet", "amber" to "AMBER Alert", "vermistkind" to tr("Vermist Kind Alert", "Missing Child Alert"), "knmi:yellow" to Waarschuwing.codeLabel("yellow"), "knmi:orange" to Waarschuwing.codeLabel("orange"), "knmi:red" to Waarschuwing.codeLabel("red"))
                         .forEach { (k, l) -> SelectChip(l, k in Settings.waarschuwingFilter) { Settings.waarschuwingFilter = Settings.waarschuwingFilter.toggle(k) } }
                 }
             }

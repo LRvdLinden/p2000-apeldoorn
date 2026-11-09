@@ -28,6 +28,9 @@ final class AppSettings {
     var pushNLAlert: Bool = true { didSet { save(.pushNLAlert, pushNLAlert); notificationsChanged() } }
     /// Push for Burgernet calls (optional, off by default).
     var pushBurgernet: Bool = false { didSet { save(.pushBurgernet, pushBurgernet); notificationsChanged() } }
+    /// AMBER Alert (national) and Vermist Kind Alert (regional): a missing child. On by default; one switch each, not per profile.
+    var pushAmber: Bool = true { didSet { save(.pushAmber, pushAmber); notificationsChanged() } }
+    var pushVermistKind: Bool = true { didSet { save(.pushVermistKind, pushVermistKind); notificationsChanged() } }
     /// KNMI codes that give a push: "yellow", "orange", "red".
     var pushKnmi: Set<String> = ["orange", "red"] { didSet { save(.pushKnmi, Array(pushKnmi).sorted()); notificationsChanged() } }
     /// KNMI: a push one hour before a code starts (when it was announced well before).
@@ -116,7 +119,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen
+        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, pushAmber, pushVermistKind
         case heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
@@ -250,14 +253,20 @@ final class AppSettings {
         if let v = set(.waarschuwingFilter) { waarschuwingFilter = v }
         if let v = source(Key.pushNLAlert.storageKey) as? Bool { pushNLAlert = v }
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
+        if let v = source(Key.pushAmber.storageKey) as? Bool { pushAmber = v }
+        if let v = source(Key.pushVermistKind.storageKey) as? Bool { pushVermistKind = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
         if let v = source(Key.volgCapcodes.storageKey) as? [String: String] { volgCapcodes = v }
         if let v = source(Key.pushKnmiVooraf.storageKey) as? Bool { pushKnmiVooraf = v }
         if let v = source(Key.pushKnmiOpgeheven.storageKey) as? Bool { pushKnmiOpgeheven = v }
         if let v = set(.kaartLagen) {
             // New layer "ziekenhuizen" (build 37): on once for everyone who already chose layers.
-            kaartLagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
+            var lagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
+            // New layer "kind" (2.0.1, AMBER Alert and Vermist Kind Alert): on once for everyone.
+            if !UserDefaults.standard.bool(forKey: "laag.kind.v1") { lagen.insert("kind") }
+            kaartLagen = lagen
             UserDefaults.standard.set(true, forKey: "laag.ziekenhuizen.v1")
+            UserDefaults.standard.set(true, forKey: "laag.kind.v1")
         }
         if let s = source(Key.heliZones.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([HeliZone].self, from: data) { heliZones = Array(list.prefix(HeliZone.maximum)) }
@@ -309,7 +318,7 @@ final class AppSettings {
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
         radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
-        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]
+        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
         heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
@@ -377,6 +386,7 @@ final class AppSettings {
         if !waarschuwingFilter.isEmpty, !waarschuwingFilter.contains(w.filterKey), !waarschuwingFilter.contains(w.bron.rawValue) { return false }
         if !plaatsen.isEmpty, !plaatsen.contains(where: { w.covers(plaats: $0) }) { return false }
         if radiusEnabled, let c = radiusCenter {
+            if w.bron == .amber { return true } // all of the Netherlands
             if w.bron == .burgernet || w.gebied == nil {
                 guard let lat = w.lat, let lon = w.lon, Self.distanceKm(c.lat, c.lon, lat, lon) <= radiusKm + 2 else { return false }
             } else if !w.contains(lat: c.lat, lon: c.lon),

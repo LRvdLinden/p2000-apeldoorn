@@ -44,7 +44,9 @@ object Store {
     fun waarschuwing(id: String) = (waarschuwingen + alleWaarschuwingen).firstOrNull { it.id == id }
 
     /** Active KNMI codes for the bar above the list. */
-    val knmiActief: List<Waarschuwing> get() = waarschuwingen.filter { it.bron == "knmi" && !it.isBeeindigd }
+    /** Bar at the top of the pager: a missing child (AMBER Alert, Vermist Kind Alert) first, then the KNMI codes. */
+    val knmiActief: List<Waarschuwing> get() = waarschuwingen.filter { it.isKind && it.isActief }.sortedByDescending { it.startAt } +
+        waarschuwingen.filter { it.bron == "knmi" && !it.isBeeindigd }
 
     fun stats(day: LocalDate): DayStats = DayStats(day, meldingen)
 }

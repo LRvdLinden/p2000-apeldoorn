@@ -2,6 +2,7 @@
 // Read once per cron run, filtered on the working area, stored in D1 (table waarschuwingen) and pushed to devices
 // that opted in (table device_prefs). Pure parsing lives here too, so the tests can run it without I/O.
 import { polygonOverlaps, inWerkgebied, inRing, distanceKm, PLAATSEN_ALL, plaatsKey, matchesPlaatsen } from "./werkgebied.js";
+import { KIND_API, KIND_BRONNEN, groepeer, kindWarning } from "./kind.js";
 
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
@@ -310,6 +311,8 @@ export function prefsFrom(s) {
   if (!s || typeof s !== "object") return null;
   const knmi = Array.isArray(s.knmi) ? s.knmi.map(normLevel).filter((l) => l !== "green") : [];
   return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)],
+    // AMBER Alert and Vermist Kind Alert (app 2.0.1+): only when the app sends them, so older apps never get a kind they cannot show.
+    amber: s.amber === true, vermistkind: s.vermistkind === true,
     // KNMI extras (default on): a push one hour before the code starts, and one when it is lifted (code green).
     knmiVooraf: s.knmiVooraf !== false, knmiOpgeheven: s.knmiOpgeheven !== false };
 }
@@ -330,6 +333,9 @@ export function wantsPush(device, prefs, w) {
   if (w.bron === "nlalert" && !prefs.nlalert) return false;
   if (w.bron === "burgernet" && !prefs.burgernet) return false;
   if (w.bron === "knmi" && !prefs.knmi.includes(w.niveau)) return false;
+  // AMBER Alert: all of the Netherlands. Vermist Kind Alert: only kept when its search area reaches the working area.
+  if (w.bron === "amber") return Boolean(prefs.amber);
+  if (w.bron === "vermistkind") return Boolean(prefs.vermistkind);
   // "Mijn buurt": only warnings that reach the radius around the device (same rule as the list in the app).
   if (device.radius_km > 0 && device.lat != null && device.lon != null && !withinRadius(device, w)) return false;
   const chosen = device.plaatsen || [];
@@ -342,9 +348,9 @@ export function wantsPush(device, prefs, w) {
 }
 
 const LABELS = {
-  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" }, update: "Update", upgrade: "Opgeschaald naar",
+  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert", kindUpdate: "Update", kindEinde: "Beëindigd", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" }, update: "Update", upgrade: "Opgeschaald naar",
     vooraf: (code, tijd) => `Om ${tijd} gaat ${code.toLowerCase()} in`, opgeheven: (soort) => `De waarschuwing${soort ? ` voor ${soort.toLowerCase()}` : ""} is opgeheven. Er geldt nu code groen.` },
-  en: { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red", green: "Code green" }, update: "Update", upgrade: "Raised to",
+  en: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Missing Child Alert", kindUpdate: "Update", kindEinde: "Ended", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red", green: "Code green" }, update: "Update", upgrade: "Raised to",
     vooraf: (code, tijd) => `${code} starts at ${tijd}`, opgeheven: (soort) => `The warning${soort ? ` for ${soort.toLowerCase()}` : ""} has been lifted. Code green applies now.` },
 };
 
@@ -358,7 +364,12 @@ export function payloadForWarning(w, lang = "nl", { upgrade = false, kind = upgr
   let body = w.bron === "knmi" ? (w.tekst || w.plaats || "") : w.bron === "nlalert" ? w.tekst : `${w.titel}`;
   if (w.bron === "knmi" && kind === "v") head = `${L.vooraf(code, tijd(w.start))} · ${w.soort || ""}`.replace(/ · $/, "");
   if (w.bron === "knmi" && kind === "g") { head = `${L.knmi.green} · ${w.soort || ""}`.replace(/ · $/, ""); body = L.opgeheven(w.soort); }
-  const urgent = kind !== "g" && (w.bron === "nlalert" || w.niveau === "red");
+  if (KIND_BRONNEN.includes(w.bron)) {
+    // kind: "n" new, "u" new message (update), "a" closing message
+    head = `${L[w.bron]}${kind === "u" ? ` · ${L.kindUpdate}` : kind === "a" ? ` · ${L.kindEinde}` : ""}${w.bron === "vermistkind" && w.plaats ? ` · ${w.plaats}` : ""}`;
+    body = kind === "a" ? w.tekst : [w.titel, w.tekst].filter(Boolean).join(" – ");
+  }
+  const urgent = KIND_BRONNEN.includes(w.bron) ? kind !== "a" : kind !== "g" && (w.bron === "nlalert" || w.niveau === "red");
   return {
     aps: {
       alert: { title: head, body: String(body || w.titel || "").slice(0, 400) },
@@ -394,6 +405,11 @@ export function toAPI(row, { withArea = true } = {}) {
       return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null,
         tijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length > 1 ? k.tijdvakken : null };
     })() : {}),
+    ...(KIND_BRONNEN.includes(row.bron) ? (() => {
+      const k = parse(row.knmi_data) || {};
+      return { berichten: Array.isArray(k.berichten) && k.berichten.length ? k.berichten : null, foto: k.foto || null, foto_klein: k.foto_klein || null,
+        straal_km: k.cirkel?.km ?? null };
+    })() : {}),
     ...(row.bron === "burgernet" ? (() => {
       const b = parse(row.knmi_data) || {};
       return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null, berichten: Array.isArray(b.berichten) && b.berichten.length ? b.berichten : null };
@@ -406,12 +422,13 @@ const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended, wk.data AS knmi_data
   LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE COALESCE(wo.hidden, 0) = 0`;
 const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { ...row, status: "beeindigd", end_at: Math.min(row.end_at || row.ov_ended, row.ov_ended) } : row);
 
-export async function listWarnings(env, days = 7) {
+/** kind = true: also AMBER Alert and Vermist Kind Alert (apps from 2.0.1, website, Homey); older apps cannot decode them. */
+export async function listWarnings(env, days = 7, { kind = false } = {}) {
   const since = Date.now() - Math.min(Number(days) || 7, 14) * DAY;
   const { results } = await env.DB.prepare(
     `${PUBLIC_SELECT} AND (COALESCE(w.end_at, w.start_at) >= ? OR w.status != 'beeindigd') ORDER BY w.start_at DESC LIMIT 200`,
   ).bind(since).all();
-  return results.map((r) => toAPI(withOverride(r)));
+  return results.filter((r) => kind || !KIND_BRONNEN.includes(r.bron)).map((r) => toAPI(withOverride(r)));
 }
 
 /** Warnings changed after a moment (for the Homey app): new ones, status changes and hand-ended ones. */
@@ -476,6 +493,10 @@ async function upsert(env, w, now) {
       tijdvakken: w.tijdvakken || null };
     await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
       .bind(w.id, JSON.stringify(extra)).run();
+  }
+  if (KIND_BRONNEN.includes(w.bron) && w.extra) {
+    await env.DB.prepare(`INSERT INTO waarschuwing_knmi (id, data) VALUES (?, ?) ON CONFLICT(id) DO UPDATE SET data = excluded.data`)
+      .bind(w.id, JSON.stringify(w.extra)).run();
   }
   // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
   if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {
@@ -592,6 +613,44 @@ export async function ingestWarnings(env, budget, kv) {
       status.burgernet = `ok ${[...merged.values()].filter((w) => w.status === "actief").length}${fouten.length ? ` (${fouten.join(", ")})` : ""}`;
     } else status.burgernet = `fout: ${fouten.join(", ")}`;
   }
+
+  // AMBER Alert and Vermist Kind Alert (Burgernet's open API). Every new message is a push: start, update and closing message.
+  try {
+    const list = await fetchJSON(KIND_API, budget);
+    const groepen = groepeer(list);
+    const listed = new Set(groepen.keys());
+    let actief = 0;
+    for (const [id, berichten] of groepen) {
+      const row = await env.DB.prepare("SELECT w.*, wk.data AS extra FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE w.id = ?").bind(id).first();
+      const w = kindWarning(berichten, row ? { row, extra: parse(row.extra) || {} } : null, now);
+      if (!w) continue;
+      const { _nieuwBericht, _soortNieuw, ...opslag } = w;
+      await upsert(env, opslag, now);
+      if (w.status === "actief") actief++;
+      if (firstRun) { await markNotified(env, w.id, "1"); continue; }
+      if (!row?.notified) {
+        // First time seen: a push when it is still running (an alert that already ended needs no push).
+        if (w.status === "actief") toPush.push({ id: w.id, kind: "n" });
+        await markNotified(env, w.id, "1");
+      } else if (_nieuwBericht && row.status !== "beeindigd") {
+        toPush.push({ id: w.id, kind: _soortNieuw.includes("afloop") ? "a" : "u" });
+      }
+    }
+    // Gone from the list while still running: ended (without a closing message), photo and description removed.
+    const { results: open } = await env.DB.prepare(`SELECT w.*, wk.data AS extra FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id
+      WHERE w.bron IN ('amber', 'vermistkind') AND w.status = 'actief'`).all();
+    for (const r of open) {
+      if (listed.has(r.id)) continue;
+      const w = kindWarning([{ id: r.id, bron: r.bron, messageId: `einde-${now}`, soort: "afloop", at: now, titel: "", tekst: "", kop: "", gebied: r.plaats, cirkel: null, link: r.link }],
+        { row: r, extra: parse(r.extra) || {} }, now);
+      if (w) {
+        const { _nieuwBericht, _soortNieuw, ...opslag } = w;
+        await upsert(env, opslag, now);
+        if (r.notified && !firstRun) toPush.push({ id: w.id, kind: "a" });
+      }
+    }
+    status.kind = `ok ${actief}`;
+  } catch (e) { status.kind = `fout: ${e.message}`; }
 
   try {
     // Only download the full set when KNMI's revision changed.

@@ -41,7 +41,7 @@ ErrorDocument 404 /404.html
   # die meteen doorstuurt naar de live pager. Met de app geïnstalleerd opent de link in de app (universal links / app links).
   RewriteRule ^melding/(brandweer|ambulance|politie|traumaheli)/[A-Za-z0-9_-]+/?$ /deel/$1.html [L]
   RewriteRule ^melding/[a-z]+/[A-Za-z0-9_-]+/?$ /deel/melding.html [L]
-  RewriteRule ^waarschuwing/(burgernet|nlalert|knmi):.+$ /deel/$1.html [L]
+  RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind):.+$ /deel/$1.html [L]
 
   # Oudere deellinks: /melding/<guid> en /waarschuwing/<id> → live pager
   RewriteRule ^melding/([A-Za-z0-9_-]+)/?$ /pager/?melding=$1 [R=302,L,QSA]

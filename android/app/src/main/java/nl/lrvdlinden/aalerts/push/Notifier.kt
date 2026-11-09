@@ -24,6 +24,7 @@ object Notifier {
     const val CH_NLALERT = "nlalert"
     const val CH_ALGEMEEN = "algemeen"
     const val CH_LIFELINER = "lifeliner"
+    const val CH_KIND = "kind"
 
     fun createChannels(ctx: Context) {
         if (Build.VERSION.SDK_INT < 26) return
@@ -45,15 +46,17 @@ object Notifier {
             ch(CH_URGENT, tr("Spoedmeldingen (A0, A1, P1)", "Urgent alerts (A0, A1, P1)"), tr("Meldingen met de hoogste prioriteit", "Alerts with the highest priority"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_LIFELINER, tr("Lifeliner opgestegen", "Lifeliner took off"), tr("Een Lifeliner stijgt op voor een melding in de gemeente Apeldoorn", "A Lifeliner takes off for an alert in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_NLALERT, "NL-Alert", tr("NL-Alerts in de gemeente Apeldoorn", "NL-Alerts in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "warn"),
+            ch(CH_KIND, tr("AMBER Alert en Vermist Kind Alert", "AMBER Alert and Missing Child Alert"), tr("Oproepen van de politie bij een vermist kind", "Police calls for a missing child"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_WAARSCHUWINGEN, tr("Burgernet en KNMI", "Burgernet and KNMI"), tr("Burgernet-acties en KNMI-weercodes", "Burgernet calls and KNMI weather codes"), NotificationManager.IMPORTANCE_DEFAULT, "warn"),
             ch(CH_ALGEMEEN, tr("Algemeen", "General"), tr("Berichten van A-Alerts en testmeldingen", "Messages from A-Alerts and test notifications"), NotificationManager.IMPORTANCE_DEFAULT, null),
         ))
     }
 
     private val DIENST_KLEUR = mapOf("brandweer" to 0xFFE30613, "ambulance" to 0xFFF4C400, "politie" to 0xFF15428B, "traumaheli" to 0xFF9333EA,
-        "nlalert" to 0xFFFFC800, "burgernet" to 0xFF0067B1, "knmi" to 0xFF3E9FDB)
+        "nlalert" to 0xFFFFC800, "burgernet" to 0xFF0067B1, "knmi" to 0xFF3E9FDB, "amber" to 0xFFEC6E24, "vermistkind" to 0xFF1B265E)
     private val ICON = mapOf("brandweer" to R.drawable.icon_brandweer, "ambulance" to R.drawable.icon_ambulance, "politie" to R.drawable.icon_politie,
-        "traumaheli" to R.drawable.icon_traumaheli, "nlalert" to R.drawable.icon_nlalert, "burgernet" to R.drawable.icon_burgernet, "knmi" to R.drawable.icon_knmi)
+        "traumaheli" to R.drawable.icon_traumaheli, "nlalert" to R.drawable.icon_nlalert, "burgernet" to R.drawable.icon_burgernet, "knmi" to R.drawable.icon_knmi,
+        "amber" to R.drawable.icon_amber, "vermistkind" to R.drawable.icon_vermistkind)
 
     /** A push from the server (data message, see worker/src/fcm.js). */
     fun show(ctx: Context, data: Map<String, String>) {
@@ -69,6 +72,7 @@ object Notifier {
         val channel = when {
             heli != null -> CH_LIFELINER
             bron == "nlalert" -> CH_NLALERT
+            bron == "amber" || bron == "vermistkind" -> CH_KIND
             waarschuwing != null -> CH_WAARSCHUWINGEN
             guid != null && urgent -> CH_URGENT
             guid != null -> CH_MELDINGEN
@@ -89,7 +93,7 @@ object Notifier {
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setAutoCancel(true)
             .setContentIntent(pi)
-            .setPriority(if (urgent || bron == "nlalert") NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
+            .setPriority(if (urgent || bron == "nlalert" || bron == "amber") NotificationCompat.PRIORITY_MAX else NotificationCompat.PRIORITY_HIGH)
             .setCategory(if (bron == "nlalert") NotificationCompat.CATEGORY_ALARM else NotificationCompat.CATEGORY_EVENT)
             .setGroup(if (waarschuwing != null) "warn" else "p2000")
             .setWhen(System.currentTimeMillis())

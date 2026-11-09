@@ -104,7 +104,7 @@ private fun WaarschuwingStats(nav: Nav) {
     val list = Store.alleWaarschuwingen.ifEmpty { Store.waarschuwingen }
     SectionCard(tr("Waarschuwingen (14 dagen)", "Warnings (14 days)"), Icons.Outlined.WarningAmber) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-            listOf("nlalert", "burgernet", "knmi").forEach { b ->
+            (listOf("nlalert", "burgernet", "knmi") + listOf("amber", "vermistkind").filter { b -> list.any { it.bron == b } }).forEach { b ->
                 val n = list.count { it.bron == b }
                 val actief = list.count { it.bron == b && it.isActief }
                 Column(Modifier.weight(1f).clip(RoundedCornerShape(12.dp)).background(MaterialTheme.colorScheme.surfaceVariant).padding(10.dp)) {

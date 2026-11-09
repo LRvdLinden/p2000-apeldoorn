@@ -33,7 +33,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "2.0.0"
+        versionName = "2.0.1"
         buildConfigField("String", "API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
         buildConfigField("String", "WEBSITE", "\"https://a-alerts.nl\"")
         buildConfigField("boolean", "HAS_FIREBASE", hasFirebase.toString())

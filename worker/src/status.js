@@ -30,6 +30,7 @@ export const GROEPEN = [
     { id: "nlalert", naam: "NL-Alert", naam_en: "NL-Alert" },
     { id: "burgernet", naam: "Burgernet", naam_en: "Burgernet" },
     { id: "knmi", naam: "KNMI-waarschuwingen", naam_en: "KNMI warnings" },
+    { id: "kind", naam: "AMBER Alert en Vermist Kind Alert", naam_en: "AMBER Alert and Missing Child Alert" },
   ] },
   { id: "push", naam: "Pushmeldingen", naam_en: "Push notifications", onderdelen: [
     { id: "push_apple", naam: "iPhone, iPad, Mac en Watch", naam_en: "iPhone, iPad, Mac and Watch" },
@@ -120,14 +121,14 @@ async function pushStaat(env, platform, now) {
 
 /** Current state of every component (and the beheer-only signals). */
 export async function huidigeStaat(env, now = Date.now()) {
-  const keys = ["feed_ok", "feed_error", "bron_ok:nlalert", "bron_ok:burgernet", "bron_ok:knmi", "bron_fout:nlalert", "bron_fout:burgernet", "bron_fout:knmi",
+  const keys = ["feed_ok", "feed_error", "bron_ok:nlalert", "bron_ok:burgernet", "bron_ok:knmi", "bron_ok:kind", "bron_fout:nlalert", "bron_fout:burgernet", "bron_fout:knmi", "bron_fout:kind",
     "status_heli_ok", "status_heli_fout", "status_weer_ok", "status_weer_fout", "status_web_ok", "status_web_fout", "cron_run"];
   const { results } = await env.DB.prepare(`SELECT key, value FROM kv WHERE key IN (${keys.map(() => "?").join(",")})`).bind(...keys).all();
   const kv = Object.fromEntries(results.map((r) => [r.key, r.value]));
   const n = (k) => Number(kv[k]) || 0;
   const s = {};
   s.p2000 = opLeeftijd(n("feed_ok"), kv.feed_error, now, 3 * MIN, 10 * MIN);
-  for (const b of ["nlalert", "burgernet", "knmi"]) s[b] = opLeeftijd(n(`bron_ok:${b}`), kv[`bron_fout:${b}`], now, 10 * MIN, 30 * MIN);
+  for (const b of ["nlalert", "burgernet", "knmi", "kind"]) s[b] = opLeeftijd(n(`bron_ok:${b}`), kv[`bron_fout:${b}`], now, 10 * MIN, 30 * MIN);
   s.heli = opLeeftijd(n("status_heli_ok"), null, now, 5 * MIN, 15 * MIN);
   if (s.heli.staat === "ok" && !s.heli.onbekend) { s.heli.detail = s.heli.detail.replace("Laatste ophaalronde", "Laatste positie"); s.heli.detail_en = s.heli.detail_en.replace("Last read", "Last position"); }
   s.push_apple = await pushStaat(env, "apple", now);

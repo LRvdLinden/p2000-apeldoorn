@@ -169,11 +169,12 @@ fun KnmiBar(list: List<Waarschuwing>, onClick: (Waarschuwing) -> Unit) {
                 Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(w.color).clickable { onClick(w) }.padding(horizontal = 12.dp, vertical = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Image(painterResource(nl.lrvdlinden.aalerts.R.drawable.icon_knmi), null, Modifier.size(22.dp))
+                Image(painterResource(w.icon), null, Modifier.size(22.dp))
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(w.kop, color = w.onColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text("${w.statusLabel} · ${wTijd(w)}" + (w.eindeAt?.let { tr(" tot ", " until ") + Fmt.dayTime(it) } ?: ""), color = w.onColor.copy(alpha = 0.85f), fontSize = 12.sp)
+                    Text(if (w.isKind) listOfNotNull(w.titel.takeIf { it.isNotBlank() }, w.plaats).joinToString(" · ")
+                        else "${w.statusLabel} · ${wTijd(w)}" + (w.eindeAt?.let { tr(" tot ", " until ") + Fmt.dayTime(it) } ?: ""), color = w.onColor.copy(alpha = 0.85f), fontSize = 12.sp)
                 }
                 Icon(Icons.Filled.ChevronRight, null, tint = w.onColor)
             }

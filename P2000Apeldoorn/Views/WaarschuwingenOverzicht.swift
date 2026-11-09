@@ -7,16 +7,21 @@ extension AppSettings {
         case .nlalert: return profielen.contains { $0.actief && $0.nlalert }
         case .burgernet: return profielen.contains { $0.actief && $0.burgernet }
         case .knmi: return profielen.contains { $0.actief && !$0.knmi.isEmpty }
+        case .amber: return pushAmber
+        case .vermistkind: return pushVermistKind
         }
     }
 
     func zetPush(_ bron: Waarschuwing.Bron, _ aan: Bool) {
+        if bron == .amber { pushAmber = aan; return }
+        if bron == .vermistkind { pushVermistKind = aan; return }
         var list = profielen
         for i in list.indices {
             switch bron {
             case .nlalert: list[i].nlalert = aan
             case .burgernet: list[i].burgernet = aan
             case .knmi: list[i].knmi = aan ? (list[i].knmi.isEmpty ? ["orange", "red"] : list[i].knmi) : []
+            case .amber, .vermistkind: break
             }
         }
         profielen = list
@@ -52,6 +57,12 @@ struct WaarschuwingenOverzichtView: View {
                 }
                 Toggle(isOn: Binding(get: { settings.pushAan(.burgernet) }, set: { settings.zetPush(.burgernet, $0) })) {
                     rij(.burgernet, "Burgernet", L("Oproepen van de politie om mee te kijken, bijvoorbeeld bij een vermissing."))
+                }
+                Toggle(isOn: Binding(get: { settings.pushAan(.amber) }, set: { settings.zetPush(.amber, $0) })) {
+                    rij(.amber, "AMBER Alert", L("Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn."))
+                }
+                Toggle(isOn: Binding(get: { settings.pushAan(.vermistkind) }, set: { settings.zetPush(.vermistkind, $0) })) {
+                    rij(.vermistkind, L("Vermist Kind Alert"), L("Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt."))
                 }
                 NavigationLink {
                     KnmiDrempelView()
@@ -143,7 +154,7 @@ struct BronIcoon: View {
     let bron: Waarschuwing.Bron
     var size: CGFloat = 30
     var body: some View {
-        Image(bron == .nlalert ? "icon_nlalert" : bron == .burgernet ? "icon_burgernet" : "icon_knmi")
+        Image("icon_\(bron.rawValue)")
             .resizable().scaledToFit().frame(width: size, height: size)
     }
 }

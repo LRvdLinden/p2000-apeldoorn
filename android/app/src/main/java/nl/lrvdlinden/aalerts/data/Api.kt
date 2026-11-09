@@ -69,7 +69,8 @@ object Api {
     suspend fun routes(guid: String): RoutesAntwoord? = runCatching { AppJson.decodeFromString<RoutesAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/routes")) }.getOrNull()
     suspend fun weather(guid: String): AlertWeather? = runCatching { AppJson.decodeFromString<AlertWeather>(getText("${base}v1/meldingen/${enc(guid)}/weather")) }.getOrNull()
 
-    suspend fun waarschuwingen(days: Int = 7): List<Waarschuwing> = AppJson.decodeFromString(getText("${base}v1/waarschuwingen?days=$days"))
+    /** kind=1: also AMBER Alert and Vermist Kind Alert (2.0.1). */
+    suspend fun waarschuwingen(days: Int = 7): List<Waarschuwing> = AppJson.decodeFromString(getText("${base}v1/waarschuwingen?days=$days&kind=1"))
     suspend fun waarschuwing(id: String): Waarschuwing? = runCatching { AppJson.decodeFromString<Waarschuwing>(getText("${base}v1/waarschuwingen/${enc(id)}")) }.getOrNull()
     suspend fun waarschuwingWeather(id: String): AlertWeather? = runCatching { AppJson.decodeFromString<AlertWeather>(getText("${base}v1/waarschuwingen/${enc(id)}/weather")) }.getOrNull()
 

@@ -86,6 +86,9 @@ fun ProfielScreen(id: String, nav: Nav) {
             SectionCard(tr("Waarschuwingen", "Warnings"), Icons.Outlined.WarningAmber) {
                 SwitchRow("NL-Alert", tr("Alarmberichten van de overheid", "Government alert messages"), p.nlalert) { save(p.copy(nlalert = it)) }
                 SwitchRow("Burgernet", tr("Vermissingen en zoekacties", "Missing persons and searches"), p.burgernet) { save(p.copy(burgernet = it)) }
+                // Missing children: one switch per device (same on iOS).
+                SwitchRow("AMBER Alert", tr("Landelijke oproep als een kind vermist is en in levensgevaar kan zijn", "National call when a child is missing and may be in danger"), Settings.pushAmber) { Settings.pushAmber = it }
+                SwitchRow(tr("Vermist Kind Alert", "Missing Child Alert"), tr("Regionale oproep, als het zoekgebied Apeldoorn raakt", "Regional call, when the search area reaches Apeldoorn"), Settings.pushVermistKind) { Settings.pushVermistKind = it }
                 Text(tr("KNMI-weercodes", "KNMI weather codes"), fontSize = 15.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("yellow", "orange", "red").forEach { c -> SelectChip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }
@@ -309,9 +312,11 @@ fun Onboarding(onDone: () -> Unit) {
                     Keuze(tr("Alleen spoed", "Urgent only"), tr("A1 en P1: met zwaailicht en sirene", "A1 and P1: with lights and siren"), p.prioriteiten == setOf("A1", "P1")) { save(p.copy(prioriteiten = setOf("A1", "P1"))) }
                     Keuze(tr("Spoed en snel", "Urgent and fast"), tr("A1, A2, P1 en P2", "A1, A2, P1 and P2"), p.prioriteiten == setOf("A1", "A2", "P1", "P2")) { save(p.copy(prioriteiten = setOf("A1", "A2", "P1", "P2"))) }
                 }
-                3 -> Stap(tr("Ook waarschuwingen?", "Warnings too?"), tr("NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.", "NL-Alert and Burgernet are in the pager between the alerts; a KNMI weather code is a bar at the top while it applies. Choose what you want to be notified about.")) {
+                3 -> Stap(tr("Ook waarschuwingen?", "Warnings too?"), tr("NL-Alert, Burgernet, AMBER Alert en Vermist Kind Alert staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.", "NL-Alert, Burgernet, AMBER Alert and Missing Child Alert are in the pager between the alerts; a KNMI weather code is a bar at the top while it applies. Choose what you want to be notified about.")) {
                     Schakelaar("NL-Alert", tr("Alarmberichten van de overheid", "Government alert messages"), p.nlalert) { save(p.copy(nlalert = it)) }
                     Schakelaar("Burgernet", tr("Vermissingen en zoekacties", "Missing persons and searches"), p.burgernet) { save(p.copy(burgernet = it)) }
+                    Schakelaar("AMBER Alert", tr("Kind vermist en in levensgevaar, heel Nederland", "Child missing and in danger, all of the Netherlands"), Settings.pushAmber) { Settings.pushAmber = it }
+                    Schakelaar(tr("Vermist Kind Alert", "Missing Child Alert"), tr("Vermist kind in de regio Apeldoorn", "Missing child in the Apeldoorn region"), Settings.pushVermistKind) { Settings.pushVermistKind = it }
                     Text(tr("KNMI-weercodes", "KNMI weather codes"), color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                         listOf("yellow", "orange", "red").forEach { c -> Chip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }
@@ -327,7 +332,7 @@ fun Onboarding(onDone: () -> Unit) {
                 }
                 else -> Stap(tr("Je profiel staat klaar", "Your profile is ready"), tr("Zet pushmeldingen aan om ze te ontvangen. Alles pas je later aan in Instellingen › Meldingen. Bel bij nood altijd 112.", "Turn on notifications to receive them. You can change everything later in Settings › Notifications. In an emergency always call 112.")) {
                     val waar = when { Settings.radiusEnabled -> tr("Binnen ${Settings.radiusKm.toInt()} km van je locatie", "Within ${Settings.radiusKm.toInt()} km of your location"); p.plaatsen.isNotEmpty() -> p.plaatsen.sorted().joinToString(", "); else -> tr("De hele gemeente Apeldoorn", "The whole municipality of Apeldoorn") }
-                    val wsch = listOfNotNull("NL-Alert".takeIf { p.nlalert }, "Burgernet".takeIf { p.burgernet },
+                    val wsch = listOfNotNull("NL-Alert".takeIf { p.nlalert }, "Burgernet".takeIf { p.burgernet }, "AMBER Alert".takeIf { Settings.pushAmber },
                         p.knmi.takeIf { it.isNotEmpty() }?.let { k -> "KNMI " + listOf("yellow", "orange", "red").filter { it in k }.joinToString(", ") { Waarschuwing.codeLabel(it).substringAfter(" ") } })
                     Column(Modifier.fillMaxWidth().clip(RoundedCornerShape(18.dp)).background(Color.White.copy(alpha = 0.12f)).padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf(waar, p.samenvatting.substringBefore(" · "), if (p.prioriteiten.isEmpty()) tr("Alle meldingen", "All alerts") else p.prioriteiten.sorted().joinToString(", "),

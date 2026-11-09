@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
@@ -78,14 +79,16 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 val h = (maxWidth * 0.9f).coerceIn(300.dp, 440.dp)
                 val rings = x.gebied ?: emptyList()
                 val fit = rings.flatten().map { it[1] to it[0] }
-                val la = x.lat ?: fit.map { it.first }.average().takeIf { !it.isNaN() } ?: 52.2112
-                val lo = x.lon ?: fit.map { it.second }.average().takeIf { !it.isNaN() } ?: 5.9699
+                // AMBER Alert: all of the Netherlands.
+                val landelijk = x.bron == "amber" && !x.hasCoordinate
+                val la = x.lat ?: fit.map { it.first }.average().takeIf { !it.isNaN() } ?: if (landelijk) 52.2 else 52.2112
+                val lo = x.lon ?: fit.map { it.second }.average().takeIf { !it.isNaN() } ?: if (landelijk) 5.3 else 5.9699
                 AMap(
                     Modifier.fillMaxWidth().height(h).alpha(if (ended) 0.85f else 1f),
                     points = if (x.bron != "knmi" && x.hasCoordinate) listOf(MapPoint(x.id, x.lat!!, x.lon!!, x.marker, 40, dim = ended)) else emptyList(),
                     areas = listOf(MapArea(x.id, rings, (if (ended && !x.isOpgeheven) Color.Gray else x.color).toArgb().toLong(), 0.2)) +
                         listOf(MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.0, width = 1.5)),
-                    camera = MapCamera(la, lo, if (x.bron == "burgernet") 13.5 else 11.0, fit = if (fit.size > 2) fit else emptyList(), key = x.id),
+                    camera = MapCamera(la, lo, if (landelijk) 6.4 else if (x.bron == "burgernet") 13.5 else 11.0, fit = if (fit.size > 2) fit else emptyList(), key = x.id),
                     interactive = false,
                 )
             }
@@ -118,6 +121,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         else Text(tr("Er geldt nu geen weerwaarschuwing van het KNMI voor de gemeente Apeldoorn.", "No KNMI weather warning applies to the municipality of Apeldoorn now."), fontSize = 14.sp)
                     }
                 }
+                if (x.isKind) KindKaart(x)
                 if (x.heeftKnmiTekst) {
                     // As on knmi.nl, in Dutch only.
                     if (x.knmiKop != null || x.omschrijving != null) SectionCard {
@@ -146,7 +150,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         x.details?.let { Text(tr("Meer informatie", "More information"), fontWeight = FontWeight.SemiBold); Text(it, fontSize = 15.sp) }
                         x.plaats?.let { Text(tr("Geldt voor: ", "Applies to: ") + it, color = Muted, fontSize = 13.sp) }
                     }
-                } else if (x.bron == "burgernet" && (!x.berichten.isNullOrEmpty() || !x.afloop.isNullOrBlank())) {
+                } else if ((x.bron == "burgernet" || x.isKind) && (!x.berichten.isNullOrEmpty() || !x.afloop.isNullOrBlank())) {
                     BurgernetTijdlijn(x)
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
@@ -175,7 +179,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 }
                 x.link?.let { link ->
                     OutlinedButton(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link))) } }, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(8.dp)); Text(tr("Meer bij ", "More at ") + bronNaam(x.bron))
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(8.dp)); Text(if (x.isKind) tr("Meer informatie bij de politie", "More information from the police") else tr("Meer bij ", "More at ") + bronNaam(x.bron))
                     }
                 }
                 Spacer(Modifier.height(24.dp))
@@ -195,7 +199,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
     }
 }
 
-fun bronNaam(bron: String) = when (bron) { "nlalert" -> "NL-Alert"; "burgernet" -> "Burgernet"; else -> "KNMI" }
+fun bronNaam(bron: String) = when (bron) { "nlalert" -> "NL-Alert"; "burgernet" -> "Burgernet"; "amber" -> "AMBER Alert"; "vermistkind" -> tr("Vermist Kind Alert", "Missing Child Alert"); else -> "KNMI" }
 
 fun codeUitleg(niveau: String?) = when (niveau) {
     "red" -> tr("Code rood: extreem weer met grote kans op enorme schade, letsel of verkeersontwrichting. Kom in actie en volg de adviezen van de overheid.",
@@ -219,7 +223,7 @@ fun WaarschuwingenScreen(nav: Nav) {
                 item {
                     LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { SelectChip(tr("Alles", "All"), bron == null) { bron = null } }
-                        items(listOf("nlalert", "burgernet", "knmi")) { b -> SelectChip(bronNaam(b), bron == b) { bron = if (bron == b) null else b } }
+                        items(listOf("nlalert", "burgernet", "amber", "vermistkind", "knmi")) { b -> SelectChip(bronNaam(b), bron == b) { bron = if (bron == b) null else b } }
                     }
                     Text(tr("Laatste 14 dagen in de gemeente Apeldoorn", "Last 14 days in the municipality of Apeldoorn"), color = Muted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
                 }
@@ -242,7 +246,10 @@ fun BurgernetTijdlijn(x: Waarschuwing) {
         BurgernetBericht("start", x.plaats, x.start, x.startbericht ?: x.tekstLokaal ?: ""),
         x.afloop?.let { BurgernetBericht("afloop", x.plaats, x.einde, it) },
     )).reversed()
-    SectionCard(tr("Berichten van Burgernet", "Burgernet messages"), Icons.Outlined.Campaign) {
+    SectionCard(if (x.isKind) tr("Berichten van de politie", "Police messages") else tr("Berichten van Burgernet", "Burgernet messages"), Icons.Outlined.Campaign) {
+        if (x.bron == "amber") androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(nl.lrvdlinden.aalerts.R.drawable.logo_amber), "AMBER Alert", Modifier.height(30.dp))
+        if (x.bron == "vermistkind") Text(tr("VERMIST KIND ALERT", "MISSING CHILD ALERT"), fontWeight = FontWeight.Black, fontSize = 11.sp, color = Color(0xFF1B265E),
+            modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFF4E005)).padding(horizontal = 10.dp, vertical = 4.dp))
         lijst.forEachIndexed { i, b ->
             val kleur = when (b.soort) { "start" -> Color(0xFF0067B1); "afloop" -> Color(0xFF16A34A); else -> Color(0xFFF59E0B) }
             Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -258,6 +265,41 @@ fun BurgernetTijdlijn(x: Waarschuwing) {
                     if (meta.isNotEmpty()) Text(meta.joinToString(" · "), color = Muted, fontSize = 12.sp)
                     Text(b.tekst, fontSize = 15.sp)
                 }
+            }
+        }
+    }
+}
+
+
+/** AMBER Alert / Vermist Kind Alert: photo of the child (only while it runs), what to do and a call button (same as iOS). */
+@Composable
+fun KindKaart(x: Waarschuwing) {
+    val ctx = LocalContext.current
+    val amber = x.bron == "amber"
+    val foto by produceState<androidx.compose.ui.graphics.ImageBitmap?>(null, x.foto, x.isActief) {
+        value = if (!x.isActief || x.foto.isNullOrBlank()) null else kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+            runCatching {
+                (java.net.URL(x.foto).openConnection() as java.net.HttpURLConnection).run {
+                    connectTimeout = 10_000; readTimeout = 10_000
+                    inputStream.use { android.graphics.BitmapFactory.decodeStream(it) }?.asImageBitmap()
+                }
+            }.getOrNull()
+        }
+    }
+    SectionCard {
+        Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+            foto?.let { androidx.compose.foundation.Image(it, tr("Foto van het vermiste kind", "Photo of the missing child"),
+                Modifier.size(92.dp, 116.dp).clip(RoundedCornerShape(12.dp)), contentScale = androidx.compose.ui.layout.ContentScale.Crop) }
+            Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                Text(if (x.isActief) (if (amber) tr("Zie je dit kind? Bel direct 112.", "Do you see this child? Call 112 right away.")
+                    else tr("Heb je een tip? Bel 0800-6070. Bij direct gevaar: 112.", "Got a tip? Call 0800-6070. In immediate danger: 112."))
+                    else tr("Deze oproep is beëindigd. Foto en signalement staan er daarom niet meer bij.", "This call has ended, so the photo and description are no longer shown."),
+                    fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                if (x.isActief) Button(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_DIAL, Uri.parse(if (amber) "tel:112" else "tel:08006070"))) } },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFDC2626))) {
+                    Icon(Icons.Outlined.Phone, null); Spacer(Modifier.width(8.dp)); Text(if (amber) tr("Bel 112", "Call 112") else tr("Bel 0800-6070", "Call 0800-6070"))
+                }
+                Text(tr("Bron: Politie, via Burgernet.", "Source: Police, through Burgernet."), color = Muted, fontSize = 12.sp)
             }
         }
     }

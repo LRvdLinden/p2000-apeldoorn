@@ -137,7 +137,7 @@ async function handle(req, env, ctx) {
 
   // A-Alerts: NL-Alert, Burgernet and KNMI for the working area.
   if (method === "GET" && path === "/v1/waarschuwingen") {
-    return reply(200, await listWarnings(env, url.searchParams.get("days")), { "cache-control": "public, max-age=30" });
+    return reply(200, await listWarnings(env, url.searchParams.get("days"), { kind: url.searchParams.get("kind") === "1" }), { "cache-control": "public, max-age=30" });
   }
   // Weather at the place and time of a warning (same WeatherKit data as for an alert).
   m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})\/weather$/);
@@ -456,7 +456,8 @@ async function drain(env, budget) {
     if (!item || !budget.take()) { if (!item) await done.run(); return; }
     const r = item.warning
       ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { kind: item.kind }),
-        { urgent: item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"), collapseId: item.warning.id.slice(0, 64) })
+        { urgent: ["amber", "vermistkind"].includes(item.warning.bron) ? item.kind !== "a" : item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"),
+          collapseId: item.warning.id.slice(0, 64) })
       : item.melding
       ? await sendPush(env, row, meldingPayload(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
       : await sendPush(env, row, broadcastPayload(item.broadcast, row.language), item.broadcast.heli ? { collapseId: row.guid.slice(-64) } : {});

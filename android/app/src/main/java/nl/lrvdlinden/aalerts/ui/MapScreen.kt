@@ -216,7 +216,9 @@ fun MapScreen(nav: Nav) {
                         Spacer(Modifier.width(4.dp)); Text("${alleMeldingen.count { it.soort == d }}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
-                val bronnen = listOf(Triple("burgernet", "Burgernet", Color(0xFF0067B1)), Triple("nlalert", "NL-Alert", Color(0xFFE3001B)))
+                val bronnen = listOf(Triple("burgernet", "Burgernet", Color(0xFF0067B1)), Triple("nlalert", "NL-Alert", Color(0xFFE3001B)),
+                    Triple("amber", "AMBER Alert", Color(0xFFEC6E24)), Triple("vermistkind", tr("Vermist Kind Alert", "Missing Child Alert"), Color(0xFF1B265E)))
+                    .filter { it.first == "burgernet" || it.first == "nlalert" || aantalBron(it.first) > 0 }
                 items(bronnen, key = { it.first }) { (b, naam, kleur) ->
                     val n = aantalBron(b)
                     val on = b !in verborgen && KaartLaag.WAARSCHUWINGEN.key in lagen
@@ -224,7 +226,7 @@ fun MapScreen(nav: Nav) {
                         if (KaartLaag.WAARSCHUWINGEN.key !in lagen) { Settings.kaartLagen = Settings.kaartLagen + KaartLaag.WAARSCHUWINGEN.key; verborgen = verborgen - b }
                         else verborgen = if (on) verborgen + b else verborgen - b
                     }) {
-                        Image(painterResource(if (b == "burgernet") R.drawable.icon_burgernet else R.drawable.icon_nlalert), null, Modifier.size(16.dp))
+                        Image(painterResource(when (b) { "burgernet" -> R.drawable.icon_burgernet; "amber" -> R.drawable.icon_amber; "vermistkind" -> R.drawable.icon_vermistkind; else -> R.drawable.icon_nlalert }), null, Modifier.size(16.dp))
                         Spacer(Modifier.width(4.dp)); Text("$n", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }

@@ -114,6 +114,9 @@ object Settings {
     var toonAfstand by bool("toonAfstand", false)
     /** KNMI: a push one hour before a code starts, and one when it is lifted (code green). For all profiles. */
     var pushKnmiVooraf by bool("pushKnmiVooraf", true, push = true)
+    /** AMBER Alert and Vermist Kind Alert: one switch each (not per profile), on by default. */
+    var pushAmber by bool("pushAmber", true, push = true)
+    var pushVermistKind by bool("pushVermistKind", true, push = true)
     var pushKnmiOpgeheven by bool("pushKnmiOpgeheven", true, push = true)
     var quietFrom by int("quietFrom", 23 * 60, push = true)
     var quietTo by int("quietTo", 7 * 60, push = true)
@@ -266,6 +269,7 @@ object Settings {
         if (plaatsen.isNotEmpty() && plaatsen.none { w.covers(it) }) return false
         val c = radiusCenter
         if (radiusEnabled && c != null) {
+            if (w.bron == "amber") return true // all of the Netherlands
             if (w.bron == "burgernet" || w.gebied == null) {
                 val la = w.lat ?: return false; val lo = w.lon ?: return false
                 if (Geo.distanceKm(c.first, c.second, la, lo) > radiusKm + 2) return false
@@ -290,6 +294,8 @@ object Settings {
                 "knmi" to p.filter { it.actief }.flatMap { it.knmi }.toSet().sorted(),
                 "knmiVooraf" to pushKnmiVooraf,
                 "knmiOpgeheven" to pushKnmiOpgeheven,
+                "amber" to pushAmber,
+                "vermistkind" to pushVermistKind,
             ),
             "capcodes" to gevolgd.keys.sorted(),
             "heli" to mutableMapOf<String, Any?>(

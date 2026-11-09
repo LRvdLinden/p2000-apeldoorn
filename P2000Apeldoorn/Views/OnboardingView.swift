@@ -152,10 +152,12 @@ struct OnboardingView: View {
 
     private var waarschuwingen: some View {
         stap(icon: "exclamationmark.triangle.fill", title: L("Ook waarschuwingen?"),
-             text: L("NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.")) {
+             text: L("NL-Alert, Burgernet, AMBER Alert en Vermist Kind Alert staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.")) {
             VStack(spacing: 10) {
                 schakelaar(L("NL-Alert"), sub: L("Alarmberichten van de overheid"), aan: Binding(get: { settings.pushNLAlert }, set: { settings.pushNLAlert = $0 })) { BronIcoon(bron: .nlalert, size: 28) }
                 schakelaar(L("Burgernet"), sub: L("Vermissingen en zoekacties"), aan: Binding(get: { settings.pushBurgernet }, set: { settings.pushBurgernet = $0 })) { BronIcoon(bron: .burgernet, size: 28) }
+                schakelaar("AMBER Alert", sub: L("Kind vermist en in levensgevaar, heel Nederland"), aan: Binding(get: { settings.pushAmber }, set: { settings.pushAmber = $0 })) { BronIcoon(bron: .amber, size: 28) }
+                schakelaar(L("Vermist Kind Alert"), sub: L("Vermist kind in de regio Apeldoorn"), aan: Binding(get: { settings.pushVermistKind }, set: { settings.pushVermistKind = $0 })) { BronIcoon(bron: .vermistkind, size: 28) }
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 10) {
                         BronIcoon(bron: .knmi, size: 28)

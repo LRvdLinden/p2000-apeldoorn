@@ -4,12 +4,12 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=56";
+} from "./core.js?v=57";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur,
-} from "./aalerts.js?v=56";
+} from "./aalerts.js?v=57";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -270,6 +270,8 @@ function renderChips() {
     `<span class="chip"><img src="${icon({ dienst: d })}" alt="${DIENSTEN[d].label}">${items.filter((m) => m.dienst === d).length}</span>`).join("")
     + `<span class="chip"><img src="${asset("assets/img/icon_burgernet.png")}" alt="Burgernet">${n("burgernet")}</span>`
     + `<span class="chip"><img src="${asset("assets/img/icon_nlalert.png")}" alt="NL-Alert">${n("nlalert")}</span>`
+    + (n("amber") ? `<span class="chip"><img src="${asset("assets/img/icon_amber.png")}" alt="AMBER Alert">${n("amber")}</span>` : "")
+    + (n("vermistkind") ? `<span class="chip"><img src="${asset("assets/img/icon_vermistkind.png")}" alt="Vermist Kind Alert">${n("vermistkind")}</span>` : "")
     + heli("trauma", "Lifeliner") + heli("politie", "Zulu");
 }
 
@@ -318,7 +320,9 @@ function renderKnmi() {
   const kaart = $("mapKnmi");
   if (kaart) kaart.innerHTML = state.lagen.has("knmi") ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
     `<a class="mk-code" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><b>${esc(wKop(w))}</b>${w.einde ? `<small>tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}</small>` : ""}</a>`).join("") : "";
-  $("knmi").innerHTML = state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
+  $("knmi").innerHTML = state.warnings.filter((w) => (w.bron === "amber" || w.bron === "vermistkind") && isActief(w)).map((w) =>
+    `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}${w.plaats && w.bron === "vermistkind" ? ` · ${esc(w.plaats)}` : ""}</b><small>${esc(w.titel)}</small></span></a>`).join("")
+    + state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
     `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}` : ""}</small>${w.kop || w.advies || w.verwachting ? `<small>${esc(String(w.kop || w.advies || w.verwachting).split("\n")[0])}</small>` : ""}</span></a>`).join("");
 }
 
@@ -375,7 +379,8 @@ $("alarm").addEventListener("click", () => { clearTimeout(alarmTimer); nextAlarm
 
 /** Alarm screen for a new NL-Alert or Burgernet call, and when one ends (like the app's push). */
 function warnAlarm(w, box) {
-  const ms = w.bron === "nlalert" && !isBeeindigd(w) ? 14_000 : 9_000;
+  const groot = (w.bron === "nlalert" || w.bron === "amber" || w.bron === "vermistkind") && !isBeeindigd(w);
+  const ms = groot ? 14_000 : 9_000;
   box.style.setProperty("--c", wKleur(w));
   box.innerHTML = `<div class="alarm-inner">
     <img src="${wIcon(w)}" alt="">
@@ -384,7 +389,7 @@ function warnAlarm(w, box) {
     <div class="alarm-where">${esc(w.plaats || "Gemeente Apeldoorn")} · ${esc(wTijd(w))}</div>
     <div class="alarm-bar" style="--t:${ms}ms"><i></i></div></div>`;
   box.hidden = false;
-  beep(w.bron === "nlalert" && !isBeeindigd(w));
+  beep(groot);
   clearTimeout(alarmTimer);
   alarmTimer = setTimeout(() => {
     if (map && w.lat != null) map.setRegionAnimated(region({ lat: w.lat, lon: w.lon, dLat: 0.05, dLon: 0.08 }), true);

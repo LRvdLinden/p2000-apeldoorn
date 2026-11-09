@@ -732,6 +732,23 @@
         }
       }
     },
+    "AMBER Alert en Vermist Kind Alert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AMBER Alert and Missing Child Alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "AMBER Alert en Vermist Kind Alert"
+          }
+        }
+      }
+    },
     "Aan": {
       "extractionState": "manual",
       "localizations": {
@@ -1531,6 +1548,40 @@
         }
       }
     },
+    "Bel 0800-6070": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Call 0800-6070"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bel 0800-6070"
+          }
+        }
+      }
+    },
+    "Bel 112": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Call 112"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bel 112"
+          }
+        }
+      }
+    },
     "Bel bij nood altijd 112.": {
       "extractionState": "manual",
       "localizations": {
@@ -1595,6 +1646,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Berichten van Burgernet"
+          }
+        }
+      }
+    },
+    "Berichten van de politie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police messages"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichten van de politie"
           }
         }
       }
@@ -1850,6 +1918,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron: %@. Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
+    "Bron: Politie, via Burgernet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: Police, through Burgernet."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: Politie, via Burgernet."
           }
         }
       }
@@ -2721,6 +2806,23 @@
         }
       }
     },
+    "Deze oproep is beëindigd. Foto en signalement staan er daarom niet meer bij.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This call has ended, so the photo and description are no longer shown."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze oproep is beëindigd. Foto en signalement staan er daarom niet meer bij."
+          }
+        }
+      }
+    },
     "Deze plek": {
       "extractionState": "manual",
       "localizations": {
@@ -3312,6 +3414,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filters uit de app gebruiken"
+          }
+        }
+      }
+    },
+    "Foto van het vermiste kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Photo of the missing child"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Foto van het vermiste kind"
           }
         }
       }
@@ -4179,6 +4298,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Handig als je een dagje weg bent of een helikopterbasis in je zone hebt. De stille modus geldt ook voor zonemeldingen."
+          }
+        }
+      }
+    },
+    "Heb je een tip? Bel 0800-6070. Bij direct gevaar: 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Got a tip? Call 0800-6070. In immediate danger: 112."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Heb je een tip? Bel 0800-6070. Bij direct gevaar: 112."
           }
         }
       }
@@ -5254,6 +5390,23 @@
         }
       }
     },
+    "Kind vermist en in levensgevaar, heel Nederland": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Child missing and in danger, all of the Netherlands"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kind vermist en in levensgevaar, heel Nederland"
+          }
+        }
+      }
+    },
     "Klaar": {
       "extractionState": "manual",
       "localizations": {
@@ -5577,6 +5730,23 @@
         }
       }
     },
+    "Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "National police call when a child is missing and may be in danger."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn."
+          }
+        }
+      }
+    },
     "Landen in je zone": {
       "extractionState": "manual",
       "localizations": {
@@ -5828,6 +5998,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meer informatie"
+          }
+        }
+      }
+    },
+    "Meer informatie bij de politie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More information from the police"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meer informatie bij de politie"
           }
         }
       }
@@ -6257,23 +6444,6 @@
         }
       }
     },
-    "NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NL-Alert and Burgernet are in the pager between the alerts; a KNMI weather code is a bar at the top while it applies. Choose what you want to be notified about."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "NL-Alert en Burgernet staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt."
-          }
-        }
-      }
-    },
     "NL-Alert en Burgernet staan tussen de meldingen; KNMI-waarschuwingen staan als balk bovenaan.": {
       "extractionState": "manual",
       "localizations": {
@@ -6321,6 +6491,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "NL-Alert, Burgernet en KNMI-weerwaarschuwingen voor de plaatsen van dit profiel."
+          }
+        }
+      }
+    },
+    "NL-Alert, Burgernet, AMBER Alert en Vermist Kind Alert staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet, AMBER Alert and Missing Child Alert appear in the pager between the alerts; a KNMI weather code shows as a bar at the top while it applies. Choose what you want a notification for."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "NL-Alert, Burgernet, AMBER Alert en Vermist Kind Alert staan in de pager tussen de meldingen; een KNMI-weercode staat als balk bovenaan zolang hij geldt. Kies waarvoor je een pushmelding wilt."
           }
         }
       }
@@ -7974,6 +8161,23 @@
         }
       }
     },
+    "Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regional police call for a missing child, when the search area reaches Apeldoorn."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt."
+          }
+        }
+      }
+    },
     "Risico's en advies": {
       "extractionState": "manual",
       "localizations": {
@@ -9368,6 +9572,23 @@
         }
       }
     },
+    "VERMIST KIND ALERT": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "MISSING CHILD ALERT"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VERMIST KIND ALERT"
+          }
+        }
+      }
+    },
     "Van": {
       "extractionState": "manual",
       "localizations": {
@@ -9755,6 +9976,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vermissingen en zoekacties"
+          }
+        }
+      }
+    },
+    "Vermist Kind Alert": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing Child Alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vermist Kind Alert"
+          }
+        }
+      }
+    },
+    "Vermist kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing child"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vermist kind"
+          }
+        }
+      }
+    },
+    "Vermist kind in de regio Apeldoorn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing child in the Apeldoorn region"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vermist kind in de regio Apeldoorn"
           }
         }
       }
@@ -10741,6 +11013,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zichtbaar"
+          }
+        }
+      }
+    },
+    "Zie je dit kind? Bel direct 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Do you see this child? Call 112 right away."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zie je dit kind? Bel direct 112."
           }
         }
       }

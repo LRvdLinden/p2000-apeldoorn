@@ -207,6 +207,9 @@ enum PushManager {
                 "knmi": Array(s.pushKnmi).sorted(),
                 "knmiVooraf": s.pushKnmiVooraf,
                 "knmiOpgeheven": s.pushKnmiOpgeheven,
+                // 2.0.1: missing children (the server only sends these to apps that pass them).
+                "amber": s.pushAmber,
+                "vermistkind": s.pushVermistKind,
             ] as [String: Any],
             // Followed capcodes: push also outside places, radius and profiles.
             "capcodes": Array(s.volgCapcodes.keys).sorted(),

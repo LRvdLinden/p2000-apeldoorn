@@ -1,5 +1,5 @@
-import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=56";
-import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=56";
+import { fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wIcon, wStatus, BRONNEN } from "./aalerts.js?v=57";
+import { trackVisit, fetchMeldingen, today, dienstOf, asset, date, fmtTime, esc, ago, reveal, countUp, demoMode, config, plaatsText } from "./core.js?v=57";
 
 reveal();
 trackVisit();
@@ -176,6 +176,8 @@ async function renderAAlerts() {
   set("tBurgernet", n("burgernet"));
   set("wBurgernet", n("burgernet"));
   set("wKnmi", w.filter((x) => x.bron === "knmi" && x.status === "actief").length);
+  set("wAmber", w.filter((x) => x.bron === "amber" && x.status === "actief").length);
+  set("wVermistkind", w.filter((x) => x.bron === "vermistkind" && x.status === "actief").length);
   set("hTrauma", h.filter((x) => x.soort === "trauma" && !x.op_grond).length);
   set("hPolitie", h.filter((x) => x.soort === "politie" && !x.op_grond).length);
 }
