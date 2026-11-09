@@ -10,10 +10,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
+          set +e
           echo "== 112nieuws feeds"
           for p in apeldoorn beekbergen beemte-broekland beemte broekland hoenderloo hoog-soeren klarenbeek loenen uddel ugchelen wenum-wiesel wenum wiesel teuge assel engeland gerritsflesch groenendaal de-haere hoog-buurlo hooilanden de-jonas de-krim lieren meerveld nieuw-milligen oosterhuizen radio-kootwijk woeste-hoeve; do
             f=$(curl -sL -A "A-Alerts/2.0 (+https://a-alerts.nl)" -w "\n%{http_code}" "https://112nieuws.net/tag/$p/feed/")
-            code=$(echo "$f" | tail -1); n=$(echo "$f" | grep -c "<item>"); last=$(echo "$f" | grep -o "<pubDate>[^<]*" | head -1 | sed 's/<pubDate>//')
+            code=$(echo "$f" | tail -1); n=$(echo "$f" | grep -c "<item>" || true); last=$(echo "$f" | grep -o "<pubDate>[^<]*" | head -1 | sed 's/<pubDate>//')
             echo "$p $code items=$n laatste=$last"
           done
           echo "== voorbeeld item"
