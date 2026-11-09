@@ -1,0 +1,16 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set +e
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          echo "== waarschuwingen burgernet"; curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.bron=="burgernet")] | .[:5][] | {id,status,start_at,titel,plaats,startbericht,berichten:(.berichten|length)}' 
+          echo "== health"; curl -s "$A/v1/health" | jq -c '.' | head -c 1500; echo
+          echo "== feed"; curl -s -A "Mozilla/5.0" "https://api.112meldkamer.nl/v1/burgernet" | jq -c ".[:4][] | {location,date,time,isClosed,link,report:(.report|.[0:80])}"
+          echo "== burgernet.nl apeldoorn"; H=$(curl -s -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN); echo "$H" | grep -o 'href="/burgernet/[0-9]*"' | head -8
+          ID=$(echo "$H" | grep -o 'href="/burgernet/[0-9]*"' | head -1 | grep -o '[0-9]*')
+          echo "== actie $ID"; P=$(curl -s -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/$ID); echo "$P" | grep -o -E 'action-detail-block__title[^>]*>[^<]*|action-message__heading-item[^>]*>[^<]*|(Start actie|Einde actie|Locatie|Status van deze actie)</p>\s*<p[^>]*>[^<]*' | head -20
+          echo "$P" | wc -c
