@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   apk:
@@ -94,3 +95,9 @@ jobs:
           git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
           git add -A && git commit -qm "A-Alerts APK build $ANDROID_BUILD from ${GITHUB_SHA::7}"
           git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" android-build
+
+      # Every new APK goes straight to a-alerts.nl/downloads/ and a-alerts.nl/android/ (version, build, size).
+      - name: Website bijwerken met de nieuwe APK
+        if: github.ref == 'refs/heads/a-alerts'
+        env: { GH_TOKEN: "${{ github.token }}" }
+        run: gh workflow run website-deploy.yml --ref a-alerts -R "${{ github.repository }}"

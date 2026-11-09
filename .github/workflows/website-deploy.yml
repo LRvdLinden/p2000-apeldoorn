@@ -28,7 +28,7 @@ jobs:
         run: |
           mkdir -p website/data && cp worker/content/*.json website/data/
           git fetch --depth 1 origin android-build && git show origin/android-build:A-Alerts.apk > website/downloads/A-Alerts.apk \
-            && git show origin/android-build:android.json > /tmp/android.json && echo "APK: $(stat -c %s website/downloads/A-Alerts.apk) bytes" \
+            && git show origin/android-build:android.json > website/downloads/android.json && python3 tools/android_pagina.py && echo "APK: $(stat -c %s website/downloads/A-Alerts.apk) bytes" \
             || echo "::warning::Geen APK in android-build"
           rm -f website/.deploy
       - name: Controleren
