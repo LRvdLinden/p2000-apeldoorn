@@ -1,1 +1,1 @@
-brandweer,ambulance,politie,lifeliner,nl-alert,burgernet,knmi,112,meldingen,pager,teuge,traumaheli
+brandweer,ambulance,politie,lifeliner,nl-alert,burgernet,knmi,112,nieuws,amber alert,vermist,teuge

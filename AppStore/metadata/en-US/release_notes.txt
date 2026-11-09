@@ -1,16 +1,9 @@
-P2000 Apeldoorn is now A-Alerts, with a new icon. Your settings and saved alerts stay.
-• NL-Alert and Burgernet in the pager, KNMI warnings as a bar at the top, and all warnings of the last two weeks
-• Map with filters per service, Burgernet and NL-Alert, and layers for stations, hospitals and air bases
-• Lifeliners and police helicopters live, with route, likely destination and flight playback
-• A notification when a Lifeliner takes off for an alert in Apeldoorn
-• New alert page: stations with estimated arrival, the Lifeliner live, incident timeline, route and sharing
-• Up to five notification profiles with their own times; your current settings are in the profile Standaard
-• Notifications with a small map and buttons for Save and Apple Maps
-• Status of every component in Settings
-• Area extended to 26 towns and hamlets, including Teuge
-• Apple TV: control room with warnings, map layers, helicopters with route and stations
-• New welcome screen: set up your own notification profile in a few steps
-• Follow a capcode with a star, also outside your places and radius
-• Hide viewed alerts; an alert without a notification tells you why
-• KNMI as on knmi.nl, with live weather, course per code, a notification in advance and when lifted (code green)
-• Help and FAQ in the app
+New: the News tab, plus AMBER Alert and Missing Child Alert.
+• News tab: police news about Apeldoorn and its villages (source politie.nl), 112 Nieuws per place, an article for every KNMI weather warning and a live blog for every Burgernet call
+• Live blogs with a timeline, newest message on top, updated with extra information, photos and links
+• AMBER Alert and Missing Child Alert: their own notification, a bar at the top, photo and description while the call runs, and a button to call right away
+• Burgernet as a timeline: start message, updates and closing message with place and time
+• New switches in Settings › Notifications › News: Live blogs, Police news and 112 Nieuws
+• Shared links open straight in the app; articles are shared with their own image
+• Route to an incident with Apple Maps or Google Maps, or copy the address
+• News also on Apple TV, Apple Watch and a-alerts.nl/nieuws

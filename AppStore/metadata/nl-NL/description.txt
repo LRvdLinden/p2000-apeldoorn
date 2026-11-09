@@ -1,4 +1,4 @@
-A-Alerts (voorheen P2000 Apeldoorn) laat live zien wat er gebeurt in de gemeente Apeldoorn en Teuge: meldingen van brandweer, ambulance, politie en traumahelikopter, samen met NL-Alert, Burgernet en KNMI-weerwaarschuwingen.
+A-Alerts (voorheen P2000 Apeldoorn) laat live zien wat er gebeurt in de gemeente Apeldoorn en Teuge: meldingen van brandweer, ambulance, politie en traumahelikopter, samen met NL-Alert, Burgernet, AMBER Alert, Vermist Kind Alert, KNMI-weerwaarschuwingen en het laatste nieuws.
 
 LIVE PAGER
 • Alle P2000-meldingen van 26 plaatsen en buurtschappen, per dag gegroepeerd
@@ -6,6 +6,17 @@ LIVE PAGER
 • KNMI-waarschuwing (code geel, oranje of rood) als balk bovenaan zolang hij geldt
 • Alle waarschuwingen van de laatste twee weken terug te lezen
 • Verberg meldingen die je al hebt gezien: ben je overal bij, dan zie je ‘Je bent helemaal bij’
+
+NIEUWS
+• Politieberichten over Apeldoorn, de dorpen en buurtschappen (bron politie.nl)
+• 112 Nieuws per plaats, met een link naar het volledige artikel
+• Een artikel bij elke KNMI-weerwaarschuwing
+• Liveblogs bij Burgernet, AMBER Alert en Vermist Kind Alert: een tijdlijn met het nieuwste bericht bovenaan
+
+AMBER ALERT EN VERMIST KIND ALERT
+• De oproepen van de politie bij een vermist kind, met foto en signalement zolang de oproep loopt
+• Eigen pushmelding, een balk bovenaan en een knop om direct 112 of 0800-6070 te bellen
+• Na afloop verdwijnen foto en beschrijving automatisch
 
 KAART MET LAGEN EN FILTERS
 • Filter met één tik op brandweer, ambulance, politie, traumaheli, Burgernet en NL-Alert

@@ -1,4 +1,4 @@
-A-Alerts (formerly P2000 Apeldoorn) shows live what happens in the municipality of Apeldoorn and Teuge in the Netherlands: alerts from the fire brigade, ambulance, police and trauma helicopter, together with NL-Alert, Burgernet and KNMI weather warnings.
+A-Alerts (formerly P2000 Apeldoorn) shows live what happens in the municipality of Apeldoorn and Teuge in the Netherlands: alerts from the fire brigade, ambulance, police and trauma helicopter, together with NL-Alert, Burgernet, AMBER Alert, Missing Child Alert, KNMI weather warnings and the latest news.
 
 LIVE PAGER
 • Every P2000 alert for 26 towns and hamlets, grouped by day
@@ -6,6 +6,17 @@ LIVE PAGER
 • A KNMI warning (code yellow, orange or red) as a bar at the top while it applies
 • All warnings of the last two weeks
 • Hide alerts you have already seen: when you are up to date you see "You're all caught up"
+
+NEWS
+• Police news about Apeldoorn and its villages (source politie.nl)
+• 112 Nieuws per place, with a link to the full article
+• An article for every KNMI weather warning
+• Live blogs for Burgernet, AMBER Alert and Missing Child Alert: a timeline with the newest message on top
+
+AMBER ALERT AND MISSING CHILD ALERT
+• Police calls for a missing child, with photo and description while the call runs
+• Their own notification, a bar at the top and a button to call 112 or 0800-6070 right away
+• When the call ends, the photo and description disappear automatically
 
 MAP WITH LAYERS AND FILTERS
 • Filter with one tap on fire, ambulance, police, trauma helicopter, Burgernet and NL-Alert

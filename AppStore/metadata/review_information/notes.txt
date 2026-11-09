@@ -10,13 +10,14 @@ HOW TO TEST
 4. Tap a helicopter: route (this flight / 30 min / 2 h), likely destination, recent flights and playback (play button).
 5. Statistics: today versus yesterday.
 6. In an alert, tap the star next to a capcode to follow that unit (Settings > Followed capcodes). The eye button in the pager hides viewed alerts. Settings > Help and FAQ. Settings > Notifications > Profiles; "Send a test notification" sends a push right away. Settings > Status shows the state of every component.
-7. Apple Watch, Mac and Apple TV show the same data; Apple TV has a control-room view.
+7. News tab (between Map and Statistics): police news, 112 Nieuws (title and intro, "Read more on 112nieuws.net" opens their site), weather articles and live blogs. Tap an item to read it; live blogs show a timeline. Filter chips at the top.
+8. Apple Watch, Mac and Apple TV show the same data; Apple TV has a control-room view and a News tab.
 
 REGION / DATA NOTES
 Content is limited to one Dutch municipality. Alerts arrive several times per hour; warnings are rare, so lists can be empty. Helicopters only appear while they are tracked; outside a flight the route can be empty. This is expected, not an error.
 
 DATA SOURCES
-P2000 (public pager network), NL-Alert, Burgernet, KNMI warnings, helicopter positions from open ADS-B data (adsb.lol, ODbL), stations/hospitals from OpenStreetMap (ODbL), weather from WeatherKit (Apple Weather mark and legal link shown). No affiliation with the emergency services or government is claimed; the in-app disclaimer says so.
+P2000 (public pager network), NL-Alert, Burgernet (incl. AMBER Alert and Missing Child Alert, public police calls), police news from the open politie.nl API (text with source credit, no police images), 112 Nieuws headlines and intros with written permission of 112 Nieuws Nederland (no photos from them), news images are royalty-free Pixabay photos, KNMI warnings, helicopter positions from open ADS-B data (adsb.lol, ODbL), stations/hospitals from OpenStreetMap (ODbL), weather from WeatherKit (Apple Weather mark and legal link shown). No affiliation with the emergency services or government is claimed; the in-app disclaimer says so.
 
 PERMISSIONS
 Notifications: to send alerts (welcome screen or Settings). Location (when in use): only for "My area" and distances; the app works fully without it.
@@ -27,5 +28,5 @@ No in-app purchases, subscriptions, ads or tracking.
 OTHER
 Review prompt at most once a week at a calm moment (requestReview). Settings has a "More apps by the developer" card.
 
-WHAT'S NEW IN 2.0.0
-New name and icon; NL-Alert/Burgernet/KNMI; map filters and layers; live helicopters with route, destination and playback; Lifeliner take-off notification; notification profiles; status screen; Apple TV control room; welcome flow with profile setup; followed capcodes; KNMI details with live weather and code green.
+WHAT'S NEW IN 2.0.1
+News tab (police news, 112 Nieuws, weather articles, live blogs); AMBER Alert and Missing Child Alert as separate warnings with their own notification switch (on by default); Burgernet timeline; share links that open in the app; route via Apple Maps or Google Maps. AMBER Alerts are rare: when none is active, the reviewer will not see one, which is expected.

@@ -1,16 +1,9 @@
-P2000 Apeldoorn heet nu A-Alerts, met een nieuw icoon. Je instellingen en bewaarde meldingen blijven staan.
-• NL-Alert en Burgernet in de pager, KNMI-waarschuwingen als balk bovenaan, en alle waarschuwingen van twee weken terug te lezen
-• Kaart met filters per dienst, Burgernet en NL-Alert, en lagen voor kazernes, ziekenhuizen en vliegbases
-• Lifeliners en politiehelikopters live, met routespoor, waarschijnlijke bestemming en vluchten terugspelen
-• Pushmelding wanneer een Lifeliner opstijgt voor een melding in Apeldoorn
-• Nieuwe meldingpagina: kazernes met geschatte aankomst, de Lifeliner live, verloop van de inzet, route en delen
-• Tot vijf meldingsprofielen met eigen tijden; je huidige instellingen staan in profiel Standaard
-• Pushmeldingen met een kaartje en knoppen voor Bewaar en Apple Kaarten
-• Status van alle onderdelen in Instellingen
-• Werkgebied uitgebreid naar 26 plaatsen en buurtschappen, waaronder Teuge
-• Apple TV: meldkamer met waarschuwingen, kaartlagen, helikopters met route en kazernes
-• Nieuw welkomscherm: stel in een paar stappen je eigen meldingsprofiel in
-• Volg een capcode met een ster, ook buiten je plaatsen en straal
-• Verberg bekeken meldingen; bij een melding zonder pushmelding zie je waarom
-• KNMI zoals op knmi.nl, met live weer, verloop per code, een melding vooraf en bij opheffen (code groen)
-• Hulp en veelgestelde vragen in de app
+Nieuw: het tabblad Nieuws, en AMBER Alert en Vermist Kind Alert.
+• Tabblad Nieuws: politieberichten over Apeldoorn, de dorpen en buurtschappen (bron politie.nl), 112 Nieuws per plaats, een artikel bij elke KNMI-weerwaarschuwing en een liveblog bij elke Burgernet-melding
+• Liveblogs met een tijdlijn, nieuwste bericht bovenaan, aangevuld met extra informatie, foto's en links
+• AMBER Alert en Vermist Kind Alert: eigen pushmelding, balk bovenaan, foto en signalement zolang de oproep loopt, en een knop om direct te bellen
+• Burgernet als tijdlijn: startbericht, updates en afloopbericht met plaats en tijd
+• Nieuwe pushschakelaars bij Instellingen › Pushmeldingen › Nieuws: Liveblogs, Politienieuws en 112 Nieuws
+• Gedeelde links openen direct in de app; artikelen delen met hun eigen afbeelding
+• Route naar een incident via Apple Kaarten of Google Maps, of kopieer het adres
+• Nieuws ook op Apple TV, Apple Watch en a-alerts.nl/nieuws

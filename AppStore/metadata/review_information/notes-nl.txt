@@ -28,5 +28,8 @@ Geen aankopen, abonnementen, advertenties of tracking.
 OVERIG
 Beoordelingsvraag hooguit één keer per week op een rustig moment. In Instellingen een kaart "Meer apps van de ontwikkelaar".
 
-NIEUW IN 2.0.0
-Nieuwe naam en icoon; NL-Alert/Burgernet/KNMI; kaartfilters en lagen; live helikopters met route, bestemming en terugspelen; pushmelding bij opstijgen Lifeliner; meldingsprofielen; statusscherm; Apple TV-meldkamer; welkomscherm met profiel; capcodes volgen; KNMI-details met live weer en code groen.
+NIEUW IN 2.0.1
+Tabblad Nieuws (politienieuws, 112 Nieuws, weerartikelen, liveblogs); AMBER Alert en Vermist Kind Alert als eigen waarschuwingen met eigen pushschakelaar (standaard aan); Burgernet als tijdlijn; deellinks openen in de app; route via Apple Kaarten of Google Maps. AMBER Alerts zijn zeldzaam: is er geen actief, dan ziet de reviewer er geen; dat is normaal.
+
+TESTEN NIEUWS
+Tabblad Nieuws (tussen Kaart en Statistieken): politienieuws, 112 Nieuws (titel en intro met link naar 112nieuws.net), weerartikelen en liveblogs. Tik op een bericht; liveblogs tonen een tijdlijn.
