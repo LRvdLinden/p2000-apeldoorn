@@ -7260,6 +7260,23 @@
         }
       }
     },
+    "Open de oproep": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the call"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open de oproep"
+          }
+        }
+      }
+    },
     "Open de weerwaarschuwing": {
       "extractionState": "manual",
       "localizations": {
@@ -8161,19 +8178,19 @@
         }
       }
     },
-    "Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt.": {
+    "Regionale oproep van de politie bij een vermist kind, als het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge).": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Regional police call for a missing child, when the search area reaches Apeldoorn."
+            "value": "Regional police call for a missing child, when the search area lies in the working area (Apeldoorn, all its villages and hamlets, and Teuge)."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt."
+            "value": "Regionale oproep van de politie bij een vermist kind, als het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge)."
           }
         }
       }
@@ -10014,19 +10031,19 @@
         }
       }
     },
-    "Vermist kind in de regio Apeldoorn": {
+    "Vermist kind in het werkgebied (alle plaatsen en buurtschappen)": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Missing child in the Apeldoorn region"
+            "value": "Missing child in the working area (all places and hamlets)"
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Vermist kind in de regio Apeldoorn"
+            "value": "Vermist kind in het werkgebied (alle plaatsen en buurtschappen)"
           }
         }
       }
