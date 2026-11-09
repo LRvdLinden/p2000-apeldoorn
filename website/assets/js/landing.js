@@ -174,6 +174,8 @@ async function renderAAlerts() {
   set("wNlalert", n("nlalert"));
   set("tNlalert", n("nlalert"));
   set("tBurgernet", n("burgernet"));
+  set("tAmber", n("amber"));
+  set("tVermistkind", n("vermistkind"));
   set("wBurgernet", n("burgernet"));
   set("wKnmi", w.filter((x) => x.bron === "knmi" && x.status === "actief").length);
   set("wAmber", w.filter((x) => x.bron === "amber" && x.status === "actief").length);
