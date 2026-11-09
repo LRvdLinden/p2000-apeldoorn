@@ -162,12 +162,6 @@ struct HeliMarker: View {
                 .scaleEffect(x: volgtKoers && heli.vliegtWest ? -1 : 1, y: 1)
                 .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
                 .padding(4)
-                .background {
-                    if selected {
-                        Capsule().fill(heli.color.opacity(0.25))
-                            .overlay(Capsule().strokeBorder(heli.color, lineWidth: 2))
-                    }
-                }
             Text(heli.naam)
                 .font(AppFont.body(10, .bold, relativeTo: .caption2))
                 .padding(.horizontal, 6).padding(.vertical, 2)
