@@ -129,7 +129,7 @@ fun NieuwsScreen(nav: Nav) {
                 }
             }
             item {
-                Text(tr("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts.", "Police news: source politie.nl. Images with police news are by A-Alerts."),
+                Text(tr("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's van Pixabay.", "Police news: source politie.nl. Images with police news are stock photos from Pixabay."),
                     color = Muted, fontSize = 11.sp, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
             }
         }
@@ -256,7 +256,7 @@ fun NieuwsDetail(id: String, nav: Nav) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(when (d.soort) {
-                        "politie" -> tr("Bron: politie.nl. De afbeelding is van A-Alerts.", "Source: politie.nl. The image is by A-Alerts.")
+                        "politie" -> tr("Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.", "Source: politie.nl. The image is a stock photo from Pixabay.")
                         "weer" -> tr("Bron: KNMI.", "Source: KNMI.")
                         else -> if (d.bron == "burgernet") tr("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                             else tr("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Police, via Burgernet. Messages labelled A-Alerts were added by A-Alerts.")

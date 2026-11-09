@@ -33,7 +33,7 @@ struct NieuwsView: View {
                             .buttonStyle(.plain)
                         }
                     }
-                    Text(L("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts."))
+                    Text(L("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's van Pixabay."))
                         .font(AppFont.body(11)).foregroundStyle(.secondary).frame(maxWidth: .infinity).multilineTextAlignment(.center).padding(.top, 6)
                 }
                 .padding()
@@ -333,7 +333,7 @@ struct NieuwsDetailView: View {
     @ViewBuilder private func bron(_ d: NieuwsDetail) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             if d.item.soort == .politie {
-                Text(L("Bron: politie.nl. De afbeelding is van A-Alerts.")).font(AppFont.body(12)).foregroundStyle(.secondary)
+                Text(L("Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.")).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else if d.item.soort == .weer {
                 Text(L("Bron: KNMI.")).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else {

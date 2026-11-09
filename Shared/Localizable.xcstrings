@@ -2143,19 +2143,19 @@
         }
       }
     },
-    "Bron: politie.nl. De afbeelding is van A-Alerts.": {
+    "Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Source: politie.nl. The image is by A-Alerts."
+            "value": "Source: politie.nl. The image is a stock photo from Pixabay."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Bron: politie.nl. De afbeelding is van A-Alerts."
+            "value": "Bron: politie.nl. De afbeelding is een stockfoto van Pixabay."
           }
         }
       }
@@ -8127,19 +8127,19 @@
         }
       }
     },
-    "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts.": {
+    "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's van Pixabay.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Police news: source politie.nl. Images with police news are by A-Alerts."
+            "value": "Police news: source politie.nl. Images with police news are stock photos from Pixabay."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts."
+            "value": "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's van Pixabay."
           }
         }
       }
