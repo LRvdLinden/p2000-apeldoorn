@@ -3,12 +3,12 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=54";
+} from "./core.js?v=55";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=54";
+  CODES, isOpgeheven, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=55";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -222,7 +222,7 @@ function rowHTML(m, isNew) {
       <div class="where">${PIN}${esc(plaatsText(m))}${dist}</div>
       <div class="pt">${esc(prioText(m))}</div>
     </div>
-    <div class="meta">${isGrootIncident(m) ? `<span class="live groot" title="Groot incident">🔥</span>` : ""}${m.views ? `<span>👁 ${m.views}x</span>` : ""}${isRecent(m) ? `<span class="live">LIVE</span>` : ""}</div>
+    <div class="meta">${isGrootIncident(m) ? `<span class="live groot" title="Groot incident">🔥</span>` : ""}${m.views ? `<span>👁 ${m.views}x</span>` : ""}</div>
   </a>`;
 }
 

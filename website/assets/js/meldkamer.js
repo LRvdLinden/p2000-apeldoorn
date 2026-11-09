@@ -4,12 +4,12 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=54";
+} from "./core.js?v=55";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur,
-} from "./aalerts.js?v=54";
+} from "./aalerts.js?v=55";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -282,7 +282,7 @@ function renderLatest() {
   const pr = prioText(m);
   $("latest").innerHTML = `<a class="latest-card" href="${pagerLink(m)}" style="--c:${dienstOf(m).text}">
     <img src="${icon(m)}" alt="">
-    <div><div class="meta">${isRecent(m) ? '<span class="live">LIVE</span>' : ""}<span>${esc(ago(date(m)))} · ${fmtTime(date(m))}</span></div>
+    <div><div class="meta"><span>${esc(ago(date(m)))} · ${fmtTime(date(m))}</span></div>
       <h2>${esc(m.title)}</h2><div class="where">${esc(plaatsText(m))}</div>${pr ? `<div class="pr">${esc(pr)}</div>` : ""}</div></a>`;
 }
 
@@ -331,7 +331,7 @@ function renderList(fresh = new Set()) {
     const pr = prioText(m);
     return `<a class="row${fresh.has(m.guid) ? " is-new" : ""}${m.guid === state.focus ? " is-focus" : ""}" href="${pagerLink(m)}" data-guid="${esc(m.guid)}" style="--c:${dienstOf(m).text}">
       <img src="${icon(m)}" alt="">
-      <div><div class="meta">${isRecent(m) ? '<span class="live">LIVE</span>' : ""}<span>${esc(ago(date(m)))} · ${fmtTime(date(m))}</span></div>
+      <div><div class="meta"><span>${esc(ago(date(m)))} · ${fmtTime(date(m))}</span></div>
         <b>${esc(m.title)}</b><div class="where">${esc(plaatsText(m))}</div>${pr ? `<div class="pr">${esc(pr)}</div>` : ""}</div></a>`;
   }).join("") : `<p style="color:var(--muted);text-align:center;padding:2em 0">Geen meldingen in de laatste 24 uur</p>`;
 }
