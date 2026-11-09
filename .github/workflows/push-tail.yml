@@ -6,21 +6,11 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: worker
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
-      - uses: actions/checkout@v4
       - run: |
           set +e
-          npm ci >/dev/null 2>&1
-          npx wrangler deployments status 2>&1 | tail -12
-          V=$(npx wrangler deployments status 2>&1 | grep -oE '[0-9a-f]{8}-[0-9a-f-]{27}' | head -1); echo "versie $V"
-          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/p2000-apeldoorn-api/content/v2?version=$V" -o content.bin -w "content %{http_code}\n"
-          ls -la content.bin; grep -a -c "nieuws112" content.bin; grep -a -c "sync112" content.bin
-          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts" | python3 -c "import json,sys;d=json.load(sys.stdin);[print(s['id'],s.get('modified_on')) for s in d.get('result',[])]"
-          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/health?t=$RANDOM" | tail -c 300; echo
-          grep -n "nieuws112" src/index.js
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('keys',list(d)[-4:]);print('112',json.dumps(d.get('nieuws112'))[:900])"
+          curl -s "$A/v1/nieuws?soort=regionaal&limit=30&t=$RANDOM" | python3 -c "
+          import json,sys;d=json.load(sys.stdin);print(len(d))
+          for x in d: print(x['at'][:16],x.get('plaats'),x.get('categorie'),x['afbeelding'].split('/')[-1],'|',x['titel'][:60],'|',(x.get('intro') or '')[:50])"
