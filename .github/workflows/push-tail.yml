@@ -9,14 +9,14 @@ jobs:
     steps:
       - run: |
           set +e
-          sleep 420
+          sleep 600
           H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
           DB=$(curl -s -H "$H" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database" | jq -r '.result[] | select(.name|test("p2000")) | .uuid' | head -1)
           echo "db gevonden: $([ -n "$DB" ] && echo ja || echo nee)"
           q() { jq -n --arg q "$1" '{query:$q}' | curl -s -H "$H" -H "content-type: application/json" -d @- https://api.cloudflare.com/client/v4/graphql; }
           echo "== per kwartier (UTC)"
           q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1AnalyticsAdaptiveGroups(limit:200, filter:{date_geq:\"2026-11-09\", databaseId:\"$DB\"}, orderBy:[datetimeHour_ASC]) { sum { rowsWritten rowsRead writeQueries } dimensions { datetimeHour } } } } }" | jq -c '.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups[]? | [.dimensions.datetimeHour, .sum.rowsWritten, .sum.writeQueries]' ; 
-          q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1AnalyticsAdaptiveGroups(limit:200, filter:{datetimeMinute_geq:\"2026-11-09T20:00:00Z\", databaseId:\"$DB\"}, orderBy:[datetimeMinute_ASC]) { sum { rowsWritten } dimensions { datetimeMinute } } } } }" | jq -c '[.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups[]? | [.dimensions.datetimeMinute[11:16], .sum.rowsWritten]]' ; 
+          q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1AnalyticsAdaptiveGroups(limit:200, filter:{datetimeMinute_geq:\"2026-11-09T20:15:00Z\", databaseId:\"$DB\"}, orderBy:[datetimeMinute_ASC]) { sum { rowsWritten } dimensions { datetimeMinute } } } } }" | jq -c '[.data.viewer.accounts[0].d1AnalyticsAdaptiveGroups[]? | [.dimensions.datetimeMinute[11:16], .sum.rowsWritten]]' ; 
           echo "== top queries vandaag"
-          q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1QueriesAdaptiveGroups(limit:15, filter:{date_geq:\"2026-11-09\", databaseId:\"$DB\"}, orderBy:[sum_rowsWritten_DESC]) { sum { rowsWritten } count dimensions { query } } } } }" | jq -c '.data.viewer.accounts[0].d1QueriesAdaptiveGroups[]? | [.sum.rowsWritten, .count, (.dimensions.query|.[0:110])]'
+          q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1QueriesAdaptiveGroups(limit:15, filter:{datetime_geq:\"'$(date -u -d "-8 min" +%Y-%m-%dT%H:%M:%SZ)'\", databaseId:\"$DB\"}, orderBy:[sum_rowsWritten_DESC]) { sum { rowsWritten } count dimensions { query } } } } }" | jq -c '.data.viewer.accounts[0].d1QueriesAdaptiveGroups[]? | [.sum.rowsWritten, .count, (.dimensions.query|.[0:110])]'
           q "{ viewer { accounts(filter:{accountTag:\"$CLOUDFLARE_ACCOUNT_ID\"}) { d1QueriesAdaptiveGroups(limit:1, filter:{date_geq:\"2026-11-09\", databaseId:\"$DB\"}) { count } } } }" | jq -c '.errors? // empty' | head -c 400
