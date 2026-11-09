@@ -12,6 +12,8 @@ export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog", "regionaal"];
 const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind"];
 const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
+// New version of the images (browsers keep them 30 days): raise when an image is replaced under the same name.
+const IMG_V = "?v=2";
 const SITE = "https://a-alerts.nl/nieuws/";
 const DAY = 86_400_000;
 const CENTRUM = { lat: 52.2112, lon: 5.9699 };
@@ -250,7 +252,7 @@ const FOTOS_112 = {
 export function foto112(row) {
   const lijst = FOTOS_112[row.categorie] || FOTOS_112.algemeen;
   const h = parseInt(String(row.id).slice(2, 10), 16) || 0;
-  return `${IMG}${lijst[h % lijst.length]}.webp`;
+  return `${IMG}${lijst[h % lijst.length]}.webp${IMG_V}`;
 }
 
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" };
@@ -332,7 +334,7 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
   if (row.soort === "politie") {
     const cat = STOCK_CATEGORIEEN.includes(row.categorie) ? row.categorie : "algemeen";
     const eigen = stock.get(cat) || stock.get("algemeen");
-    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}politie-${cat}.webp`;
+    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}politie-${cat}.webp${IMG_V}`;
   }
   if (row.soort === "weer") return `${IMG}knmi.webp`;
   if (row.soort === "regionaal") return foto112(row);
@@ -487,7 +489,7 @@ export async function verwijderUpdate(env, id, uid) {
 /** Stock images per subject for police articles: { categorie: dataURL | null }. */
 export async function stockLijst(env, origin) {
   const s = await stockFotos(env);
-  return STOCK_CATEGORIEEN.map((c) => ({ categorie: c, eigen: s.has(c), afbeelding: s.has(c) ? `${origin}/v1/nieuws/foto/${s.get(c)}` : `${IMG}politie-${c}.webp` }));
+  return STOCK_CATEGORIEEN.map((c) => ({ categorie: c, eigen: s.has(c), afbeelding: s.has(c) ? `${origin}/v1/nieuws/foto/${s.get(c)}` : `${IMG}politie-${c}.webp${IMG_V}` }));
 }
 export async function zetStock(env, body) {
   for (const c of STOCK_CATEGORIEEN) {
