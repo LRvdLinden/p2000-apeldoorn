@@ -58,18 +58,21 @@ struct TVNieuwsView: View {
 struct TVNieuwsKaart: View {
     let item: NieuwsItem
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            NieuwsAfbeeldingTV(item: item).frame(height: 320).frame(maxWidth: .infinity).clipped()
-            LinearGradient(colors: [.clear, .black.opacity(0.88)], startPoint: .center, endPoint: .bottom)
-            VStack(alignment: .leading, spacing: 10) {
-                Text(item.label.uppercased()).font(AppFont.body(18, .bold)).foregroundStyle(.black)
-                    .padding(.horizontal, 12).padding(.vertical, 5).background(.white, in: Capsule())
-                Text(item.titel).font(AppFont.heading(30)).foregroundStyle(.white).lineLimit(2)
-                Text(TVNieuwsMeta.tekst(item)).font(AppFont.body(18)).foregroundStyle(.white.opacity(0.85))
+        Color.clear
+            .frame(maxWidth: .infinity).frame(height: 320)
+            .overlay { NieuwsAfbeeldingTV(item: item) }
+            .overlay { LinearGradient(colors: [.clear, .black.opacity(0.88)], startPoint: .center, endPoint: .bottom) }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 10) {
+                    Text(item.label.uppercased()).font(AppFont.body(18, .bold)).foregroundStyle(.black)
+                        .padding(.horizontal, 12).padding(.vertical, 5).background(.white, in: Capsule())
+                    Text(item.titel).font(AppFont.heading(30)).foregroundStyle(.white).lineLimit(2)
+                    Text(TVNieuwsMeta.tekst(item)).font(AppFont.body(18)).foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(24)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(24)
-        }
-        .frame(height: 320)
+            .clipped()
     }
 }
 
@@ -112,7 +115,7 @@ struct TVNieuwsDetail: View {
             if let d = detail {
                 HStack(alignment: .top, spacing: 60) {
                     VStack(alignment: .leading, spacing: 24) {
-                        NieuwsAfbeeldingTV(item: d.item).frame(width: 640, height: 360).clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
+                        Color.clear.frame(width: 640, height: 360).overlay { NieuwsAfbeeldingTV(item: d.item) }.clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))
                         Text(d.item.label.uppercased()).font(AppFont.body(20, .bold)).foregroundStyle(d.item.kleur)
                         Text(d.item.titel).font(AppFont.heading(40)).fixedSize(horizontal: false, vertical: true)
                         Text(TVNieuwsMeta.tekst(d.item)).font(AppFont.body(22)).foregroundStyle(.secondary)

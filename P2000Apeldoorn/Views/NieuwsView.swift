@@ -121,18 +121,20 @@ struct NieuwsHeroCard: View {
     let item: NieuwsItem
     var hoogte: CGFloat = 230
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
-            NieuwsAfbeelding(item: item)
-                .frame(height: hoogte).frame(maxWidth: .infinity).clipped()
-            LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom)
-            VStack(alignment: .leading, spacing: 6) {
-                NieuwsLabel(item: item)
-                Text(item.titel).font(AppFont.heading(20)).foregroundStyle(.white).lineLimit(3).multilineTextAlignment(.leading)
-                Text(NieuwsMeta.tekst(item)).font(AppFont.body(12)).foregroundStyle(.white.opacity(0.85))
+        // The photo is an overlay of a fixed-size frame: a wide photo (scaledToFill) can then never make the card wider than the screen.
+        Color.clear
+            .frame(maxWidth: .infinity).frame(height: hoogte)
+            .overlay { NieuwsAfbeelding(item: item) }
+            .overlay { LinearGradient(colors: [.clear, .black.opacity(0.85)], startPoint: .center, endPoint: .bottom) }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 6) {
+                    NieuwsLabel(item: item)
+                    Text(item.titel).font(AppFont.heading(20)).foregroundStyle(.white).lineLimit(3).multilineTextAlignment(.leading)
+                    Text(NieuwsMeta.tekst(item)).font(AppFont.body(12)).foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(16)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(16)
-        }
-        .frame(height: hoogte)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .contentShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .accessibilityElement(children: .combine)
@@ -143,8 +145,9 @@ struct NieuwsRij: View {
     let item: NieuwsItem
     var body: some View {
         HStack(spacing: 12) {
-            NieuwsAfbeelding(item: item)
-                .frame(width: 104, height: 80).clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            Color.clear.frame(width: 104, height: 80)
+                .overlay { NieuwsAfbeelding(item: item) }
+                .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.label).font(AppFont.body(11, .bold)).foregroundStyle(item.kleur).lineLimit(1)
                 Text(item.titel).font(AppFont.body(15, .semibold)).lineLimit(3).multilineTextAlignment(.leading).foregroundStyle(.primary)
@@ -250,17 +253,19 @@ struct NieuwsDetailView: View {
     }
 
     private func kop(_ item: NieuwsItem) -> some View {
-        ZStack(alignment: .bottomLeading) {
-            NieuwsAfbeelding(item: item).frame(height: 260).frame(maxWidth: .infinity).clipped()
-            LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.85)], startPoint: .top, endPoint: .bottom)
-            VStack(alignment: .leading, spacing: 8) {
-                NieuwsLabel(item: item)
-                Text(item.titel).font(AppFont.heading(24)).foregroundStyle(.white).fixedSize(horizontal: false, vertical: true)
-                Text(kopMeta(item)).font(AppFont.body(13)).foregroundStyle(.white.opacity(0.85))
+        Color.clear
+            .frame(maxWidth: .infinity).frame(height: 260)
+            .overlay { NieuwsAfbeelding(item: item) }
+            .overlay { LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.85)], startPoint: .top, endPoint: .bottom) }
+            .overlay(alignment: .bottomLeading) {
+                VStack(alignment: .leading, spacing: 8) {
+                    NieuwsLabel(item: item)
+                    Text(item.titel).font(AppFont.heading(24)).foregroundStyle(.white).lineLimit(4).minimumScaleFactor(0.8)
+                    Text(kopMeta(item)).font(AppFont.body(13)).foregroundStyle(.white.opacity(0.85))
+                }
+                .padding(18)
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .padding(18)
-        }
-        .frame(height: 260)
         .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
         .padding(.horizontal)
         .padding(.top, 8)
