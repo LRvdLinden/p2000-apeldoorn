@@ -524,10 +524,13 @@ struct NotificationSettingsView: View {
                     Toggle(isOn: $settings.pushNieuwsPolitie) {
                         SettingsRow(icon: "newspaper.fill", color: .blue, title: L("Politienieuws"))
                     }
+                    Toggle(isOn: $settings.pushNieuwsRegio) {
+                        SettingsRow(icon: "light.beacon.max.fill", color: .red, title: "112 Nieuws")
+                    }
                 } header: {
                     Text(L("Nieuws"))
                 } footer: {
-                    Text(L("Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen."))
+                    Text(L("Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen. 112 Nieuws: nieuwe artikelen van 112nieuws.net over je plaatsen."))
                 }
 
                 Section {

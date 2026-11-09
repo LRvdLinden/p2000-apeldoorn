@@ -41,7 +41,7 @@ import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { kaartImage } from "./kaart.js";
 import { listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
-  syncWaarschuwingen, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
+  syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
@@ -100,6 +100,7 @@ async function handle(req, env, ctx) {
       devices: await deviceCount(env),
       waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
       nieuws: JSON.parse((await kvGet(env, "nieuws_politie_status"))?.value || "null"),
+      nieuws112: JSON.parse((await kvGet(env, "n112_status"))?.value || "null"),
     });
   }
 
@@ -173,7 +174,7 @@ async function handle(req, env, ctx) {
   }
   m = path.match(/^\/v1\/nieuws\/foto\/([0-9a-f]{32})$/);
   if (method === "GET" && m) return fotoResponse(env, m[1]);
-  m = path.match(/^\/v1\/nieuws\/([pwl]-[0-9a-f]{12})$/);
+  m = path.match(/^\/v1\/nieuws\/([pwlr]-[0-9a-f]{12})$/);
   if (method === "GET" && m) {
     const item = await getNieuws(env, url.origin, m[1]);
     return item ? reply(200, item, { "cache-control": "public, max-age=20" }) : reply(404, { error: "Not found" });
@@ -329,13 +330,13 @@ async function handleBeheer(req, env, url, path, method) {
     if (method === "GET") return reply(200, await stockLijst(env, url.origin));
     if (method === "PUT" || method === "POST") { await zetStock(env, await readJSON(req, 3_000_000)); return reply(200, await stockLijst(env, url.origin)); }
   }
-  let n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})$/);
+  let n = path.match(/^\/v1\/beheer\/nieuws\/([pwlr]-[0-9a-f]{12})$/);
   if (n && method === "GET") { const item = await getNieuws(env, url.origin, n[1], { beheer: true }); return item ? reply(200, item) : reply(404, { error: "Niet gevonden" }); }
   if (n && (method === "PATCH" || method === "PUT")) {
     const ok = await wijzigNieuws(env, n[1], await readJSON(req, 3_000_000));
     return ok ? reply(200, await getNieuws(env, url.origin, n[1], { beheer: true })) : reply(404, { error: "Niet gevonden" });
   }
-  n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})\/updates$/);
+  n = path.match(/^\/v1\/beheer\/nieuws\/([pwlr]-[0-9a-f]{12})\/updates$/);
   if (n && method === "POST") {
     const body = await readJSON(req, 3_000_000);
     const r = await voegToe(env, n[1], body);
@@ -344,7 +345,7 @@ async function handleBeheer(req, env, url, path, method) {
     if (body.push !== false) ontvangers = await pushNieuws(env, n[1], "a", r.id);
     return reply(200, { ...(await getNieuws(env, url.origin, n[1], { beheer: true })), ontvangers });
   }
-  n = path.match(/^\/v1\/beheer\/nieuws\/([pwl]-[0-9a-f]{12})\/updates\/(\d+)$/);
+  n = path.match(/^\/v1\/beheer\/nieuws\/([pwlr]-[0-9a-f]{12})\/updates\/(\d+)$/);
   if (n && (method === "PATCH" || method === "PUT")) {
     const ok = await wijzigUpdate(env, n[1], Number(n[2]), await readJSON(req, 3_000_000));
     return ok ? reply(200, await getNieuws(env, url.origin, n[1], { beheer: true })) : reply(404, { error: "Niet gevonden" });
@@ -581,7 +582,7 @@ async function pushNieuws(env, id, kind, updateId = 0) {
   if (!row) return 0;
   const data = JSON.parse(row.data || "{}");
   const item = { ...row, plaatsen: data.plaatsen || null };
-  const warning = row.soort === "politie" ? null : await getWarning(env, row.ref);
+  const warning = row.soort === "politie" || row.soort === "regionaal" ? null : await getWarning(env, row.ref);
   const tokens = nieuwsOntvangers(await activeDevices(env), await devicePrefs(env), item, warningWanted, warning);
   if (tokens.length) await queue(env, `n:${kind}:${id}:${updateId}`, tokens);
   return tokens.length;
@@ -608,6 +609,13 @@ async function nieuwsRun(env, budget) {
     await kvSet(env, "nieuws_politie_status", JSON.stringify({ ok: false, at: Date.now(), fout: String(e.message || e) }));
     console.error("[nieuws-politie]", e.message || e);
   }
+  // 112 Nieuws: title and intro per place, with permission (never their photos).
+  try {
+    for (const id of await sync112(env, budget, kv)) {
+      await env.DB.prepare("UPDATE nieuws SET notified = '1' WHERE id = ?").bind(id).run();
+      await pushNieuws(env, id, "p");
+    }
+  } catch (e) { console.error("[nieuws-112]", e.message || e); }
 }
 
 /** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */

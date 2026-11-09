@@ -5,7 +5,7 @@ import SwiftUI
 /// Burgernet, AMBER Alert and Vermist Kind Alert (with messages the beheer adds).
 /// Police texts come from politie.nl (source named); their photos are never shown: the server gives an A-Alerts image.
 struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
-    enum Soort: String, Decodable, Sendable, CaseIterable { case politie, weer, liveblog }
+    enum Soort: String, Decodable, Sendable, CaseIterable { case politie, weer, liveblog, regionaal }
 
     let id: String
     let soort: Soort
@@ -69,6 +69,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case .liveblog: return "\(L("Liveblog")) · \(bronNaam)"
         case .politie: return "\(L("Politie"))\(plaats.map { " · \($0)" } ?? "")"
         case .weer: return "\(L("Weer")) · \(Waarschuwing.codeLabel(niveau))"
+        case .regionaal: return "112 Nieuws\(plaats.map { " · \($0)" } ?? "")"
         }
     }
 
@@ -78,6 +79,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "amber": return "AMBER Alert"
         case "vermistkind": return L("Vermist Kind")
         case "knmi": return "KNMI"
+        case "112nieuws": return "112 Nieuws"
         default: return L("Politie")
         }
     }
@@ -86,6 +88,13 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     var icoon: String? {
         switch bron {
         case "burgernet", "amber", "vermistkind", "knmi": return "icon_\(bron)"
+        case "112nieuws":
+            switch categorie {
+            case "brand": return "icon_brandweer"
+            case "traumaheli": return "icon_traumaheli"
+            case "politie": return "icon_politie"
+            default: return "icon_ambulance"
+            }
         default: return "icon_politie"
         }
     }
@@ -96,6 +105,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "amber": return Color(hex: 0xEC6E24)
         case "vermistkind": return Color(hex: 0x1B265E)
         case "knmi": return Waarschuwing.codeColor(niveau ?? "yellow")
+        case "112nieuws": return Color(hex: 0xDC2626)
         default: return Color(hex: 0x1E3A8C)
         }
     }

@@ -8,7 +8,7 @@ import { PLAATSEN_ALL, distanceKm, inWerkgebied } from "./werkgebied.js";
 import { getWarning } from "./alerts.js";
 
 export const POLITIE_API = "https://api.politie.nl/v4/nieuws";
-export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog"];
+export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog", "regionaal"];
 const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind"];
 const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
@@ -158,6 +158,101 @@ export async function syncPolitie(env, budget, kv, now = Date.now()) {
   return nieuw;
 }
 
+// ------------------------------------------------------------------ 112 Nieuws (112nieuws.net)
+// With permission of 112 Nieuws Nederland: title and a short intro with a clear link to their article.
+// Their photos may NOT be used: every article gets a royalty-free photo (Pixabay) of A-Alerts.
+// One RSS feed per place: https://112nieuws.net/tag/<plaats>/feed/
+
+export const FEED_112 = "https://112nieuws.net/tag/";
+export const SLUGS_112 = PLAATSEN_ALL.map((p) => ({ naam: p.naam, slug: p.naam.toLowerCase().replace(/\s+/g, "-") }));
+// Names that also exist elsewhere in the Netherlands: only articles tagged Gelderland or Apeldoorn.
+const ZWAK_112 = new Set(["Loenen", "Lieren", "Engeland", "De Krim", "Groenendaal", "Meerveld", "Hooilanden", "De Jonas", "Oosterhuizen", "Assel", "De Haere", "Woeste Hoeve", "Gerritsflesch"]);
+
+const cdata = (s) => String(s || "").replace(/^\s*<!\[CDATA\[([\s\S]*?)\]\]>\s*$/, "$1");
+const tag = (xml, t) => { const m = new RegExp(`<${t}[^>]*>([\\s\\S]*?)</${t}>`, "i").exec(xml); return m ? cdata(m[1]).trim() : ""; };
+
+/** Short intro: the first sentences of the description, at most ~260 characters. */
+export function korteIntro(html, max = 260) {
+  const t = htmlNaarAlineas(html).join(" ").replace(/\s+/g, " ").replace(/\[…\]|\[\.\.\.\]|The post .*$/i, "").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const punt = Math.max(cut.lastIndexOf(". "), cut.lastIndexOf("! "), cut.lastIndexOf("? "));
+  return punt > 80 ? cut.slice(0, punt + 1) : cut.replace(/\s+\S*$/, "") + "…";
+}
+
+/** RSS of one place → items (only title, link, time, categories and a short intro; never the media). */
+export function parse112(xml, plaats) {
+  const out = [];
+  for (const deel of String(xml || "").split(/<item>/i).slice(1)) {
+    const it = deel.split(/<\/item>/i)[0];
+    const titel = decodeEntities(tag(it, "title"));
+    const link = tag(it, "link");
+    if (!titel || !/^https:\/\/112nieuws\.net\//.test(link)) continue;
+    const cats = [...it.matchAll(/<category>([\s\S]*?)<\/category>/gi)].map((m) => decodeEntities(cdata(m[1]).trim()));
+    if (ZWAK_112.has(plaats) && !cats.some((c) => /^(gelderland|apeldoorn)$/i.test(c))) continue;
+    const at = Date.parse(tag(it, "pubDate")) || Date.now();
+    out.push({ bronId: tag(it, "guid") || link, titel, link, at, cats, plaats, intro: korteIntro(tag(it, "description")) });
+  }
+  return out;
+}
+
+export function categorie112(cats) {
+  const c = cats.map((x) => x.toLowerCase());
+  if (c.some((x) => /brand|brandweer|explosie|rook/.test(x))) return "brand";
+  if (c.some((x) => /traumaheli|lifeliner|helikopter/.test(x))) return "traumaheli";
+  if (c.some((x) => /ongeval|aanrijding|verkeer|eenzijdig/.test(x))) return "verkeer";
+  if (c.some((x) => /ambulance|reanimatie|medisch|letsel/.test(x))) return "ambulance";
+  if (c.some((x) => /politie|steekpartij|schiet|overval|inbraak|aanhouding|vermis/.test(x))) return "politie";
+  return "algemeen";
+}
+
+/** Apeldoorn every 5 minutes, the other places one by one (one per run). Returns new ids to push. */
+export async function sync112(env, budget, kv, now = Date.now()) {
+  const doelen = [];
+  const lastA = Number((await kv.get("n112_apeldoorn_at"))?.value || 0);
+  if (now - lastA >= 5 * 60_000) { doelen.push(SLUGS_112[0]); await kv.set("n112_apeldoorn_at", String(now)); }
+  const rest = SLUGS_112.slice(1);
+  const i = Number((await kv.get("n112_i"))?.value || 0) % rest.length;
+  doelen.push(rest[i]);
+  await kv.set("n112_i", String(i + 1));
+  const nieuw = [];
+  const status = JSON.parse((await kv.get("n112_status"))?.value || "{}");
+  for (const d of doelen) {
+    if (!budget.take()) break;
+    const eerste = !status[d.slug];
+    try {
+      const res = await fetch(`${FEED_112}${d.slug}/feed/`, { headers: { accept: "application/rss+xml, application/xml", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
+      if (!res.ok) { status[d.slug] = { at: now, fout: `HTTP ${res.status}` }; continue; }
+      const items = parse112(await res.text(), d.naam);
+      for (const x of items) {
+        const id = await nieuwsId("r", x.bronId);
+        const bestaand = await env.DB.prepare("SELECT id, plaats FROM nieuws WHERE id = ?").bind(id).first();
+        // The same article can be in more feeds: keep the first place, unless that was Apeldoorn and a village is more precise.
+        const plaats = bestaand && !(bestaand.plaats === "Apeldoorn" && d.naam !== "Apeldoorn") ? bestaand.plaats : d.naam;
+        await upsertNieuws(env, { id, soort: "regionaal", bron: "112nieuws", ref: x.bronId, titel: x.titel, intro: x.intro, plaats, url: x.link,
+          categorie: categorie112(x.cats), status: null, at: x.at, data: { categorieen: x.cats.slice(0, 12), plaatsen: [plaats] } }, now);
+        if (!bestaand && !eerste && now - x.at < 3 * 3_600_000) nieuw.push(id);
+        if (!bestaand && eerste) await env.DB.prepare("UPDATE nieuws SET notified = '1' WHERE id = ?").bind(id).run();
+      }
+      status[d.slug] = { at: now, n: items.length };
+    } catch (e) { status[d.slug] = { at: now, fout: String(e.message || e).slice(0, 80) }; }
+  }
+  await kv.set("n112_status", JSON.stringify(status));
+  return [...new Set(nieuw)];
+}
+
+/** Royalty-free photos (Pixabay) per subject; the variant follows from the id so an article always keeps its photo. */
+const FOTOS_112 = {
+  brand: ["112-brand-1", "112-brand-2", "112-brand-3"], ambulance: ["112-ambulance-1", "112-ambulance-2", "112-ambulance-3"],
+  traumaheli: ["112-traumaheli-1"], verkeer: ["112-ambulance-2", "politie-verkeer"], politie: ["politie-algemeen", "politie-drugs", "politie-getuigen"],
+  algemeen: ["112-ambulance-1", "112-brand-1", "politie-algemeen"],
+};
+export function foto112(row) {
+  const lijst = FOTOS_112[row.categorie] || FOTOS_112.algemeen;
+  const h = parseInt(String(row.id).slice(2, 10), 16) || 0;
+  return `${IMG}${lijst[h % lijst.length]}.webp`;
+}
+
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" };
 const tijdNL = (iso) => new Date(iso).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" });
 
@@ -240,6 +335,7 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
     return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}politie-${cat}.webp`;
   }
   if (row.soort === "weer") return `${IMG}knmi.webp`;
+  if (row.soort === "regionaal") return foto112(row);
   return `${IMG}${row.bron}.webp`;
 }
 
@@ -290,7 +386,7 @@ export async function getNieuws(env, origin, id, { beheer = false } = {}) {
   return {
     ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste, start: d.start || null }, origin, stock, { beheer }),
     alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn,
-    bron_naam: row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
+    bron_naam: row.soort === "regionaal" ? "112 Nieuws" : row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
   };
 }
 
@@ -408,14 +504,15 @@ export async function zetStock(env, body) {
 // ------------------------------------------------------------------ push
 
 const L = {
-  nl: { live: { burgernet: "Liveblog · Burgernet", amber: "Liveblog · AMBER Alert", vermistkind: "Liveblog · Vermist Kind" }, politie: "Politienieuws", weer: "Weer" },
-  en: { live: { burgernet: "Live blog · Burgernet", amber: "Live blog · AMBER Alert", vermistkind: "Live blog · Missing Child" }, politie: "Police news", weer: "Weather" },
+  nl: { live: { burgernet: "Liveblog · Burgernet", amber: "Liveblog · AMBER Alert", vermistkind: "Liveblog · Vermist Kind" }, politie: "Politienieuws", weer: "Weer", regio: "112 Nieuws" },
+  en: { live: { burgernet: "Live blog · Burgernet", amber: "Live blog · AMBER Alert", vermistkind: "Live blog · Missing Child" }, politie: "Police news", weer: "Weather", regio: "112 Nieuws" },
 };
 
 /** kind "p": new police article, "a": message added by the beheer. */
 export function payloadVoorNieuws(item, lang = "nl", kind = "p", update = null) {
   const t = L[(lang || "nl").startsWith("nl") ? "nl" : "en"];
-  const head = item.soort === "liveblog" ? t.live[item.bron] || "Liveblog" : item.soort === "weer" ? `${t.weer} · ${item.titel}` : `${t.politie}${item.plaats ? ` · ${item.plaats}` : ""}`;
+  const head = item.soort === "liveblog" ? t.live[item.bron] || "Liveblog" : item.soort === "weer" ? `${t.weer} · ${item.titel}`
+    : `${item.soort === "regionaal" ? t.regio : t.politie}${item.plaats ? ` · ${item.plaats}` : ""}`;
   const body = kind === "a" && update ? [update.titel, update.tekst].filter(Boolean).join(" – ") || item.titel : item.titel;
   return {
     aps: { alert: { title: head.slice(0, 120), body: String(body || "").slice(0, 400), ...(kind === "a" && item.soort !== "liveblog" ? { subtitle: item.titel.slice(0, 120) } : {}) },
@@ -426,7 +523,7 @@ export function payloadVoorNieuws(item, lang = "nl", kind = "p", update = null) 
 
 /** Prefs (from settings.waarschuwingen): only apps with the tab send these; liveblogs default on in the app. */
 export function nieuwsPrefs(p) {
-  return { liveblog: p?.nieuwsLiveblog === true, politie: p?.nieuwsPolitie === true };
+  return { liveblog: p?.nieuwsLiveblog === true, politie: p?.nieuwsPolitie === true, regio: p?.nieuwsRegio === true };
 }
 
 /** Which devices get a push for a new police article or a beheer message on an item. */
@@ -435,8 +532,8 @@ export function nieuwsOntvangers(devices, prefs, item, warningWanted, warning) {
     if (!d.enabled) return false;
     const p = prefs.get(d.token);
     const n = nieuwsPrefs(p);
-    if (item.soort === "politie") {
-      if (!n.politie) return false;
+    if (item.soort === "politie" || item.soort === "regionaal") {
+      if (item.soort === "politie" ? !n.politie : !n.regio) return false;
       const chosen = d.plaatsen || [];
       return !chosen.length || chosen.some((c) => (item.plaatsen || [item.plaats]).some((x) => String(x).toLowerCase() === String(c).toLowerCase()));
     }

@@ -140,3 +140,20 @@ test("push: payload and who gets it", () => {
   assert.deepEqual(nieuwsOntvangers(devices, prefs, pol, () => true, null), ["a"], "c only follows Uddel");
   assert.equal(payloadVoorNieuws(pol, "en").aps.alert.title, "Police news · Ugchelen");
 });
+
+test("112 Nieuws: title, short intro and link only; Loenen only when in Gelderland", async () => {
+  const { parse112, categorie112, korteIntro, foto112 } = await import("../src/nieuws.js");
+  const item = (titel, cats, beschrijving = "<p>In de nacht van zondag op maandag is er bij een tattooshop aan de Hoofdstraat in Apeldoorn een explosie geweest. De brandweer kwam ter plaatse. De politie doet onderzoek en zoekt getuigen die iets hebben gezien of camerabeelden hebben.</p>") =>
+    `<item><title>${titel}</title><link>https://112nieuws.net/2026/11/09/x/</link><pubDate>Mon, 09 Nov 2026 07:18:47 +0000</pubDate>${cats.map((c) => `<category><![CDATA[${c}]]></category>`).join("")}<guid isPermaLink="false">https://112nieuws.net/?p=${titel.length}</guid><description><![CDATA[${beschrijving}]]></description><media:content url="https://112nieuws.net/wp-content/uploads/foto.jpg" medium="image"/></item>`;
+  const xml = `<rss><channel>${item("Explosie bij tattooshop", ["Gelderland", "Apeldoorn", "Brand", "Politie"])}</channel></rss>`;
+  const [x] = parse112(xml, "Apeldoorn");
+  assert.equal(x.titel, "Explosie bij tattooshop");
+  assert.equal(x.link, "https://112nieuws.net/2026/11/09/x/");
+  assert.ok(x.intro.length <= 261 && x.intro.startsWith("In de nacht"));
+  assert.ok(!JSON.stringify(x).includes("foto.jpg"), "never their photo");
+  assert.equal(categorie112(x.cats), "brand");
+  assert.equal(parse112(`<rss>${item("Ongeval in Loenen", ["Utrecht", "Loenen aan de Vecht"])}</rss>`, "Loenen").length, 0);
+  assert.equal(parse112(`<rss>${item("Ongeval in Loenen", ["Gelderland", "Loenen"])}</rss>`, "Loenen").length, 1);
+  assert.equal(korteIntro("<p>Kort.</p>"), "Kort.");
+  assert.match(foto112({ id: "r-0123456789ab", categorie: "brand" }), /\/nieuws\/112-brand-\d\.webp$/);
+});

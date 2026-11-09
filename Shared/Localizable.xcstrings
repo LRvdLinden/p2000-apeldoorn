@@ -2041,6 +2041,40 @@
         }
       }
     },
+    "Bron: 112 Nieuws (112nieuws.net).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: 112 Nieuws (112nieuws.net)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: 112 Nieuws (112nieuws.net)."
+          }
+        }
+      }
+    },
+    "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: 112 Nieuws Nederland (112nieuws.net), with permission. The photo is a stock photo from Pixabay."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay."
+          }
+        }
+      }
+    },
     "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
       "extractionState": "manual",
       "localizations": {
@@ -6053,6 +6087,23 @@
         }
       }
     },
+    "Lees verder op 112nieuws.net": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read more on 112nieuws.net"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lees verder op 112nieuws.net"
+          }
+        }
+      }
+    },
     "Let op:": {
       "extractionState": "manual",
       "localizations": {
@@ -6172,19 +6223,19 @@
         }
       }
     },
-    "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen.": {
+    "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen. 112 Nieuws: nieuwe artikelen van 112nieuws.net over je plaatsen.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Live blogs: a notification when A-Alerts adds a message to a live blog of an alert you follow. Police news: new police messages about your places."
+            "value": "Live blogs: a notification when A-Alerts adds a message to a live blog of an alert you follow. Police news: new police messages about your places. 112 Nieuws: new articles from 112nieuws.net about your places."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen."
+            "value": "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen. 112 Nieuws: nieuwe artikelen van 112nieuws.net over je plaatsen."
           }
         }
       }

@@ -34,6 +34,8 @@ final class AppSettings {
     /// Tab Nieuws: push when A-Alerts adds a message to a liveblog (on), and for new police news (off).
     var pushNieuwsLiveblog: Bool = true { didSet { save(.pushNieuwsLiveblog, pushNieuwsLiveblog); notificationsChanged() } }
     var pushNieuwsPolitie: Bool = false { didSet { save(.pushNieuwsPolitie, pushNieuwsPolitie); notificationsChanged() } }
+    /// 112 Nieuws (112nieuws.net) about your places (off).
+    var pushNieuwsRegio: Bool = false { didSet { save(.pushNieuwsRegio, pushNieuwsRegio); notificationsChanged() } }
     /// KNMI codes that give a push: "yellow", "orange", "red".
     var pushKnmi: Set<String> = ["orange", "red"] { didSet { save(.pushKnmi, Array(pushKnmi).sorted()); notificationsChanged() } }
     /// KNMI: a push one hour before a code starts (when it was announced well before).
@@ -122,7 +124,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie
+        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
         case heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
@@ -260,6 +262,7 @@ final class AppSettings {
         if let v = source(Key.pushVermistKind.storageKey) as? Bool { pushVermistKind = v }
         if let v = source(Key.pushNieuwsLiveblog.storageKey) as? Bool { pushNieuwsLiveblog = v }
         if let v = source(Key.pushNieuwsPolitie.storageKey) as? Bool { pushNieuwsPolitie = v }
+        if let v = source(Key.pushNieuwsRegio.storageKey) as? Bool { pushNieuwsRegio = v }
         if let v = set(.pushKnmi) { pushKnmi = v }
         if let v = source(Key.volgCapcodes.storageKey) as? [String: String] { volgCapcodes = v }
         if let v = source(Key.pushKnmiVooraf.storageKey) as? Bool { pushKnmiVooraf = v }
@@ -323,7 +326,7 @@ final class AppSettings {
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
         radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
-        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true; pushNieuwsLiveblog = true; pushNieuwsPolitie = false
+        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true; pushNieuwsLiveblog = true; pushNieuwsPolitie = false; pushNieuwsRegio = false
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
         heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0

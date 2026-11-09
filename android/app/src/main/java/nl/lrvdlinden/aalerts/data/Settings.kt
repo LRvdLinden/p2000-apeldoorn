@@ -120,6 +120,7 @@ object Settings {
     /** Tab Nieuws: push when A-Alerts adds a message to a liveblog (on), and for new police news (off). */
     var pushNieuwsLiveblog by bool("pushNieuwsLiveblog", true, push = true)
     var pushNieuwsPolitie by bool("pushNieuwsPolitie", false, push = true)
+    var pushNieuwsRegio by bool("pushNieuwsRegio", false, push = true)
     var pushKnmiOpgeheven by bool("pushKnmiOpgeheven", true, push = true)
     var quietFrom by int("quietFrom", 23 * 60, push = true)
     var quietTo by int("quietTo", 7 * 60, push = true)
@@ -301,6 +302,7 @@ object Settings {
                 "vermistkind" to pushVermistKind,
                 "nieuwsLiveblog" to pushNieuwsLiveblog,
                 "nieuwsPolitie" to pushNieuwsPolitie,
+                "nieuwsRegio" to pushNieuwsRegio,
             ),
             "capcodes" to gevolgd.keys.sorted(),
             "heli" to mutableMapOf<String, Any?>(

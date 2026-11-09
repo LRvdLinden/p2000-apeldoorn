@@ -48,7 +48,7 @@ enum DeelLink: Equatable {
         guard url.scheme == "https", let host = url.host, host.hasSuffix("a-alerts.nl") else { return nil }
         let delen = url.pathComponents.filter { $0 != "/" }
         let query = URLComponents(url: url, resolvingAgainstBaseURL: false)?.queryItems ?? []
-        if delen.first == "nieuws", delen.count >= 2, let id = delen.last, id.range(of: #"^[pwl]-[0-9a-f]{12}$"#, options: .regularExpression) != nil {
+        if delen.first == "nieuws", delen.count >= 2, let id = delen.last, id.range(of: #"^[pwlr]-[0-9a-f]{12}$"#, options: .regularExpression) != nil {
             self = .nieuws(id); return
         }
         if let n = query.first(where: { $0.name == "nieuws" })?.value, !n.isEmpty, delen.first == "nieuws" { self = .nieuws(n); return }

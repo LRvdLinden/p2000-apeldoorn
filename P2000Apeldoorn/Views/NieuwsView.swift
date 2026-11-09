@@ -69,6 +69,7 @@ struct NieuwsView: View {
                 chip(L("Alles"), nil)
                 chip(L("Liveblogs"), .liveblog)
                 chip(L("Politie"), .politie)
+                chip("112 Nieuws", .regionaal)
                 chip(L("Weer"), .weer)
             }
         }
@@ -166,7 +167,7 @@ enum NieuwsMeta {
             return delen.joined(separator: " · ")
         case .weer:
             return [NieuwsItem.wanneer(item.at), item.isAfgerond ? L("opgeheven") : nil].compactMap { $0 }.joined(separator: " · ")
-        case .politie:
+        case .politie, .regionaal:
             return NieuwsItem.wanneer(item.at)
         }
     }
@@ -193,7 +194,14 @@ struct NieuwsDetailView: View {
                                 Text(a.tekst).font(AppFont.body(16)).lineSpacing(5).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                             }
                         }
-                        if let w = d.item.waarschuwing, d.item.soort != .politie {
+                        if d.item.soort == .regionaal, let url = d.item.bronUrl {
+                            Link(destination: url) {
+                                Label(L("Lees verder op 112nieuws.net"), systemImage: "arrow.up.right.square.fill")
+                                    .font(AppFont.body(16, .bold)).frame(maxWidth: .infinity)
+                                    .padding(.vertical, 13).foregroundStyle(.white).background(Theme.red, in: RoundedRectangle(cornerRadius: 14, style: .continuous))
+                            }
+                        }
+                        if let w = d.item.waarschuwing, d.item.soort != .politie, d.item.soort != .regionaal {
                             NavigationLink { WaarschuwingDetailView(id: w) } label: {
                                 Label(d.item.soort == .weer ? L("Bekijk de weerwaarschuwing") : L("Bekijk de melding"), systemImage: "exclamationmark.triangle.fill")
                                     .font(AppFont.body(15, .semibold)).frame(maxWidth: .infinity)
@@ -265,7 +273,7 @@ struct NieuwsDetailView: View {
         case .liveblog:
             let start = (item.start ?? item.at).formatted(.dateTime.day().month(.abbreviated).hour().minute())
             return [Lf("Gestart %@", start), item.isAfgerond ? L("afgerond") : L("loopt nog")].joined(separator: " · ")
-        case .weer, .politie:
+        case .weer, .politie, .regionaal:
             return [f, item.plaats].compactMap { $0 }.joined(separator: " · ")
         }
     }
@@ -332,7 +340,9 @@ struct NieuwsDetailView: View {
 
     @ViewBuilder private func bron(_ d: NieuwsDetail) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            if d.item.soort == .politie {
+            if d.item.soort == .regionaal {
+                Text(L("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay.")).font(AppFont.body(12)).foregroundStyle(.secondary)
+            } else if d.item.soort == .politie {
                 Text(L("Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.")).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else if d.item.soort == .weer {
                 Text(L("Bron: KNMI.")).font(AppFont.body(12)).foregroundStyle(.secondary)
@@ -341,7 +351,7 @@ struct NieuwsDetailView: View {
                      : L("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts."))
                     .font(AppFont.body(12)).foregroundStyle(.secondary)
             }
-            if let url = d.item.bronUrl {
+            if let url = d.item.bronUrl, d.item.soort != .regionaal {
                 Link(destination: url) {
                     Label(d.item.soort == .politie ? L("Lees op politie.nl") : L("Bekijk de bron"), systemImage: "arrow.up.right.square")
                         .font(AppFont.body(15, .semibold))

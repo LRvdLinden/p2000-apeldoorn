@@ -47,11 +47,13 @@ data class NieuwsItem(
         "amber" -> "AMBER Alert"
         "vermistkind" -> tr("Vermist Kind", "Missing Child")
         "knmi" -> "KNMI"
+        "112nieuws" -> "112 Nieuws"
         else -> tr("Politie", "Police")
     }
     val label: String get() = when (soort) {
         "liveblog" -> tr("Liveblog", "Live blog") + " · " + bronNaam
         "weer" -> tr("Weer", "Weather") + " · " + Waarschuwing.codeLabel(niveau)
+        "regionaal" -> "112 Nieuws" + (plaats?.let { " · $it" } ?: "")
         else -> tr("Politie", "Police") + (plaats?.let { " · $it" } ?: "")
     }
     val kleur: Color get() = when (bron) {
@@ -59,6 +61,7 @@ data class NieuwsItem(
         "amber" -> Color(0xFFEC6E24)
         "vermistkind" -> Color(0xFF1B265E)
         "knmi" -> Waarschuwing.codeColor(niveau)
+        "112nieuws" -> Color(0xFFDC2626)
         else -> Color(0xFF1E3A8C)
     }
     val icon: Int get() = when (bron) {
@@ -66,6 +69,7 @@ data class NieuwsItem(
         "amber" -> R.drawable.icon_amber
         "vermistkind" -> R.drawable.icon_vermistkind
         "knmi" -> R.drawable.icon_knmi
+        "112nieuws" -> when (categorie) { "brand" -> R.drawable.icon_brandweer; "traumaheli" -> R.drawable.icon_traumaheli; "politie" -> R.drawable.icon_politie; else -> R.drawable.icon_ambulance }
         else -> R.drawable.icon_politie
     }
 }

@@ -114,7 +114,7 @@ fun NieuwsScreen(nav: Nav) {
             item { Text(tr("Nieuws", "News"), fontSize = 30.sp, fontWeight = FontWeight.Bold) }
             item {
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(listOf(null to tr("Alles", "All"), "liveblog" to tr("Liveblogs", "Live blogs"), "politie" to tr("Politie", "Police"), "weer" to tr("Weer", "Weather"))) { (k, t) ->
+                    items(listOf(null to tr("Alles", "All"), "liveblog" to tr("Liveblogs", "Live blogs"), "politie" to tr("Politie", "Police"), "regionaal" to "112 Nieuws", "weer" to tr("Weer", "Weather"))) { (k, t) ->
                         FilterChip(selected = filter == k, onClick = { filter = k }, label = { Text(t) },
                             colors = FilterChipDefaults.filterChipColors(selectedContainerColor = RED, selectedLabelColor = Color.White))
                     }
@@ -213,7 +213,13 @@ fun NieuwsDetail(id: String, nav: Nav) {
                     Text(a.tekst, fontSize = 16.sp, lineHeight = 23.sp)
                 }
             }
-            if (d.waarschuwing != null && d.soort != "politie") item {
+            if (d.soort == "regionaal" && d.bronUrl != null) item {
+                Button(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(d.bronUrl))) } }, colors = ButtonDefaults.buttonColors(containerColor = RED), modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(8.dp))
+                    Text(tr("Lees verder op 112nieuws.net", "Read more on 112nieuws.net"), color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
+            if (d.waarschuwing != null && d.soort != "politie" && d.soort != "regionaal") item {
                 Button(onClick = { nav.waarschuwing(d.waarschuwing) }, colors = ButtonDefaults.buttonColors(containerColor = d.kleur), modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Outlined.WarningAmber, null); Spacer(Modifier.width(8.dp))
                     Text(if (d.soort == "weer") tr("Bekijk de weerwaarschuwing", "View the weather warning") else tr("Bekijk de melding", "View the alert"), color = Color.White)
@@ -258,10 +264,11 @@ fun NieuwsDetail(id: String, nav: Nav) {
                     Text(when (d.soort) {
                         "politie" -> tr("Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.", "Source: politie.nl. The image is a stock photo from Pixabay.")
                         "weer" -> tr("Bron: KNMI.", "Source: KNMI.")
+                        "regionaal" -> tr("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay.", "Source: 112 Nieuws Nederland (112nieuws.net), with permission. The photo is a stock photo from Pixabay.")
                         else -> if (d.bron == "burgernet") tr("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                             else tr("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Police, via Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                     }, color = Muted, fontSize = 12.sp)
-                    d.bronUrl?.let { u ->
+                    d.bronUrl?.takeIf { d.soort != "regionaal" }?.let { u ->
                         TextButton(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(u))) } }, contentPadding = PaddingValues(0.dp)) {
                             Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(6.dp))
                             Text(if (d.soort == "politie") tr("Lees op politie.nl", "Read on politie.nl") else tr("Bekijk de bron", "View the source"))

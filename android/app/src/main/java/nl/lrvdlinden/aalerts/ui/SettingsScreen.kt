@@ -91,6 +91,7 @@ fun SettingsScreen(nav: Nav) {
             if (Push.available) SectionCard(tr("Nieuws", "News"), Icons.Outlined.Newspaper) {
                 SwitchRow(tr("Liveblogs", "Live blogs"), tr("Een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt", "A notification when A-Alerts adds a message to a live blog of an alert you follow"), Settings.pushNieuwsLiveblog) { Settings.pushNieuwsLiveblog = it }
                 SwitchRow(tr("Politienieuws", "Police news"), tr("Nieuwe berichten van de politie over je plaatsen", "New police messages about your places"), Settings.pushNieuwsPolitie) { Settings.pushNieuwsPolitie = it }
+                SwitchRow("112 Nieuws", tr("Nieuwe artikelen van 112nieuws.net over je plaatsen", "New articles from 112nieuws.net about your places"), Settings.pushNieuwsRegio) { Settings.pushNieuwsRegio = it }
             }
 
             SectionCard(tr("Meldingsprofielen", "Notification profiles"), Icons.Outlined.Tune) {

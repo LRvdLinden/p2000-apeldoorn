@@ -213,6 +213,7 @@ enum PushManager {
                 // Tab Nieuws (build 67): liveblog messages from A-Alerts and new police news.
                 "nieuwsLiveblog": s.pushNieuwsLiveblog,
                 "nieuwsPolitie": s.pushNieuwsPolitie,
+                "nieuwsRegio": s.pushNieuwsRegio,
             ] as [String: Any],
             // Followed capcodes: push also outside places, radius and profiles.
             "capcodes": Array(s.volgCapcodes.keys).sorted(),

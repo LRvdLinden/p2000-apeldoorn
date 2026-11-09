@@ -330,8 +330,8 @@ function editWaarschuwing(w) {
 
 // ------------------------------------------------------------------ nieuws (tab Nieuws in the apps and on a-alerts.nl)
 
-const N_SOORT = { liveblog: "Liveblog", politie: "Politie", weer: "Weer" };
-const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie" };
+const N_SOORT = { liveblog: "Liveblog", politie: "Politie", regionaal: "112 Nieuws", weer: "Weer" };
+const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
 const N_CAT = { algemeen: "Algemeen", verkeer: "Verkeer", inbraak: "Inbraak", getuigen: "Getuigen gezocht", drugs: "Drugs", brand: "Brand", vermist: "Vermist" };
 let nSoort = "";
 
@@ -406,7 +406,7 @@ async function nieuwsItem(id) {
       <label>Tekst<textarea name="tekst" rows="4" maxlength="4000"></textarea></label>
       <label>Link (https://, optioneel)<input name="url" type="url" placeholder="https://"></label>
       ${kindKlaar ? "" : `<label>Foto (optioneel)<input type="file" name="foto" accept="image/*"></label>`}
-      <label class="check"><input type="checkbox" name="push" checked> Pushmelding sturen (${x.soort === "politie" ? "naar wie Politienieuws aan heeft" : "naar wie Liveblogs aan heeft en deze bron volgt"})</label>
+      <label class="check"><input type="checkbox" name="push" checked> Pushmelding sturen (${x.soort === "regionaal" ? "naar wie 112 Nieuws aan heeft" : x.soort === "politie" ? "naar wie Politienieuws aan heeft" : "naar wie Liveblogs aan heeft en deze bron volgt"})</label>
       <div class="actions"><button type="submit" class="btn primary">Toevoegen</button></div>
     </form>
     <h3 style="margin-top:18px">Tijdlijn (nieuwste boven)</h3>

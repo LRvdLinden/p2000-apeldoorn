@@ -52,7 +52,7 @@ struct WatchNieuwsDetail: View {
                         }
                         .padding(.vertical, 4)
                     }
-                    Text(d.item.soort == .politie ? L("Bron: politie.nl.") : d.item.soort == .weer ? L("Bron: KNMI.") : "")
+                    Text(d.item.soort == .regionaal ? L("Bron: 112 Nieuws (112nieuws.net).") : d.item.soort == .politie ? L("Bron: politie.nl.") : d.item.soort == .weer ? L("Bron: KNMI.") : "")
                         .font(.caption2).foregroundStyle(.secondary)
                 }
             } else {
