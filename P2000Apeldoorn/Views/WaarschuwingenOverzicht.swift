@@ -62,7 +62,7 @@ struct WaarschuwingenOverzichtView: View {
                     rij(.amber, "AMBER Alert", L("Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn."))
                 }
                 Toggle(isOn: Binding(get: { settings.pushAan(.vermistkind) }, set: { settings.zetPush(.vermistkind, $0) })) {
-                    rij(.vermistkind, L("Vermist Kind Alert"), L("Regionale oproep van de politie bij een vermist kind, als het zoekgebied Apeldoorn raakt."))
+                    rij(.vermistkind, L("Vermist Kind Alert"), L("Regionale oproep van de politie bij een vermist kind, als het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge)."))
                 }
                 NavigationLink {
                     KnmiDrempelView()
