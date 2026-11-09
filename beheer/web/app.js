@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], nieuws: ["Nieuws", nieuws], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -325,6 +325,151 @@ function editWaarschuwing(w) {
       toast("Opgeslagen");
       run();
     } catch (err) { toast(err.message); }
+  });
+}
+
+// ------------------------------------------------------------------ nieuws (tab Nieuws in the apps and on a-alerts.nl)
+
+const N_SOORT = { liveblog: "Liveblog", politie: "Politie", weer: "Weer" };
+const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie" };
+const N_CAT = { algemeen: "Algemeen", verkeer: "Verkeer", inbraak: "Inbraak", getuigen: "Getuigen gezocht", drugs: "Drugs", brand: "Brand", vermist: "Vermist" };
+let nSoort = "";
+
+/** Photo from a file input → JPEG data URL of at most 1600 px (the server takes up to 1.8 MB). */
+function fotoNaarData(file) {
+  return new Promise((resolve, reject) => {
+    if (!file) return resolve(null);
+    const img = new Image();
+    img.onload = () => {
+      const s = Math.min(1, 1600 / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * s); c.height = Math.round(img.height * s);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      let q = 0.85, data = c.toDataURL("image/jpeg", q);
+      while (data.length > 2_300_000 && q > 0.4) { q -= 0.1; data = c.toDataURL("image/jpeg", q); }
+      resolve(data);
+    };
+    img.onerror = () => reject(new Error("Kan deze foto niet lezen"));
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function nieuws(el) {
+  const list = await api("GET", `/v1/beheer/nieuws?limit=100${nSoort ? `&soort=${nSoort}` : ""}`);
+  el.innerHTML = `
+    <div class="toolbar">
+      <select id="ns"><option value="">Alles</option>${Object.entries(N_SOORT).map(([k, v]) => `<option value="${k}" ${nSoort === k ? "selected" : ""}>${v}</option>`).join("")}</select>
+      <button class="btn" id="nStock">Standaardafbeeldingen politie</button>
+    </div>
+    <div class="list">${list.length ? list.map((x) => `
+      <div class="item${x.hidden ? " hidden" : ""}" data-id="${esc(x.id)}">
+        <img src="${esc(x.afbeelding)}" alt="" width="96" height="60" style="border-radius:10px;object-fit:cover;flex:none">
+        <div class="grow" style="flex:1;min-width:0">
+          <small>${dt(x.at)} · ${N_SOORT[x.soort]}${x.soort !== "politie" ? ` · ${N_BRON[x.bron] || esc(x.bron)}` : x.plaats ? ` · ${esc(x.plaats)}` : ""}</small>
+          <div class="t">${esc(x.titel)}</div>
+          <div>${x.soort === "liveblog" ? `<span class="tag${x.status === "afgerond" ? "" : " blue"}">${x.status === "afgerond" ? "Afgerond" : "Loopt"}</span>` : ""}${x.aantal ? `<span class="tag">${x.aantal} berichten</span>` : ""}${x.hidden ? `<span class="tag orange">Verborgen</span>` : ""}</div>
+        </div>
+      </div>`).join("") : `<p class="muted" style="padding:16px">Nog geen nieuws.</p>`}</div>
+    <p class="muted" style="font-size:.8rem">Politieberichten komen van politie.nl (tekst met bronvermelding, nooit hun foto's). Liveblogs volgen Burgernet, AMBER Alert en Vermist Kind Alert; met “Bericht toevoegen” vul je ze aan met tekst, foto en link. Na afloop van een kind-alert worden foto's en teksten van het kind automatisch weggehaald.</p>`;
+  $("ns").addEventListener("change", (e) => { nSoort = e.target.value; run(); });
+  $("nStock").addEventListener("click", stockBeheer);
+  el.querySelectorAll(".item").forEach((row) => row.addEventListener("click", () => nieuwsItem(row.dataset.id)));
+}
+
+async function nieuwsItem(id) {
+  const x = await api("GET", `/v1/beheer/nieuws/${id}`);
+  const kindKlaar = ["amber", "vermistkind"].includes(x.bron) && x.status === "afgerond";
+  const tl = (x.tijdlijn || []).map((b) => `
+    <div class="item" style="cursor:default">
+      <div class="grow" style="flex:1;min-width:0">
+        <small>${dt(b.at)} · ${b.door === "a-alerts" ? "<b style='color:var(--red)'>A-Alerts</b>" : esc(N_BRON[b.door] || b.door)}</small>
+        ${b.titel ? `<div class="t">${esc(b.titel)}</div>` : ""}
+        <div style="white-space:pre-wrap">${esc(b.tekst)}</div>
+        ${b.foto ? `<img src="${esc(b.foto)}" alt="" style="max-width:220px;border-radius:10px;margin-top:6px">` : ""}
+        ${b.url ? `<div><a href="${esc(b.url)}" target="_blank" rel="noopener">${esc(b.url)}</a></div>` : ""}
+      </div>
+      ${b.door === "a-alerts" && b.id ? `<div style="display:flex;flex-direction:column;gap:6px"><button class="btn" data-edit="${b.id}">Wijzig</button><button class="btn danger" data-del="${b.id}">Verwijder</button></div>` : ""}
+    </div>`).join("");
+  openModal(`
+    <h2>${esc(x.titel)}</h2>
+    <p class="muted">${N_SOORT[x.soort]} · ${esc(N_BRON[x.bron] || x.bron)} · ${dt(x.at)}${x.plaats ? ` · ${esc(x.plaats)}` : ""} · <a href="${esc(x.link)}" target="_blank" rel="noopener">Bekijk op a-alerts.nl ↗</a></p>
+    <img src="${esc(x.afbeelding)}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px">
+    <div class="form" style="margin-top:12px">
+      <label class="check"><input type="checkbox" id="nHide" ${x.hidden ? "checked" : ""}> Verbergen in de apps en op de website</label>
+      ${kindKlaar ? `<p class="muted" style="font-size:.8rem">Deze kind-alert is afgelopen: er kan geen foto meer bij.</p>` : `<label>Eigen afbeelding (vervangt de standaardafbeelding)<input type="file" id="nFoto" accept="image/*"></label>`}
+      <div class="actions"><button class="btn" id="nFotoWeg">Eigen afbeelding weghalen</button><button class="btn primary" id="nBewaar">Bewaar</button></div>
+    </div>
+    <h3 style="margin-top:18px">Bericht toevoegen aan de tijdlijn</h3>
+    <form class="form" id="nAdd">
+      <label>Kop (optioneel)<input name="titel" maxlength="160"></label>
+      <label>Tekst<textarea name="tekst" rows="4" maxlength="4000"></textarea></label>
+      <label>Link (https://, optioneel)<input name="url" type="url" placeholder="https://"></label>
+      ${kindKlaar ? "" : `<label>Foto (optioneel)<input type="file" name="foto" accept="image/*"></label>`}
+      <label class="check"><input type="checkbox" name="push" checked> Pushmelding sturen (${x.soort === "politie" ? "naar wie Politienieuws aan heeft" : "naar wie Liveblogs aan heeft en deze bron volgt"})</label>
+      <div class="actions"><button type="submit" class="btn primary">Toevoegen</button></div>
+    </form>
+    <h3 style="margin-top:18px">Tijdlijn (nieuwste boven)</h3>
+    <div class="list">${tl || `<p class="muted" style="padding:12px">Nog geen berichten.</p>`}</div>
+    <div class="actions"><button class="btn" id="nClose">Sluiten</button></div>`);
+  $("nClose").onclick = () => { closeModal(); run(); };
+  $("nBewaar").onclick = async () => {
+    try {
+      const body = { hidden: $("nHide").checked };
+      const f = $("nFoto")?.files?.[0];
+      if (f) body.foto = await fotoNaarData(f);
+      await api("PATCH", `/v1/beheer/nieuws/${id}`, body);
+      toast("Bewaard"); nieuwsItem(id);
+    } catch (err) { toast(err.message); }
+  };
+  $("nFotoWeg").onclick = async () => { try { await api("PATCH", `/v1/beheer/nieuws/${id}`, { foto: null }); toast("Afbeelding weggehaald"); nieuwsItem(id); } catch (err) { toast(err.message); } };
+  $("nAdd").onsubmit = async (e) => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const btn = e.target.querySelector("button[type=submit]");
+    btn.disabled = true;
+    try {
+      const body = { titel: f.get("titel"), tekst: f.get("tekst"), url: f.get("url"), push: f.get("push") === "on" };
+      const file = e.target.querySelector("input[name=foto]")?.files?.[0];
+      if (file) body.foto = await fotoNaarData(file);
+      const r = await api("POST", `/v1/beheer/nieuws/${id}/updates`, body);
+      toast(body.push ? `Toegevoegd · push naar ${r.ontvangers} toestel(len)` : "Toegevoegd");
+      nieuwsItem(id);
+    } catch (err) { toast(err.message); btn.disabled = false; }
+  };
+  document.querySelectorAll("[data-del]").forEach((b) => b.onclick = async () => {
+    if (!confirm("Dit bericht verwijderen?")) return;
+    try { await api("DELETE", `/v1/beheer/nieuws/${id}/updates/${b.dataset.del}`); toast("Verwijderd"); nieuwsItem(id); } catch (err) { toast(err.message); }
+  });
+  document.querySelectorAll("[data-edit]").forEach((b) => b.onclick = async () => {
+    const u = x.tijdlijn.find((t) => String(t.id) === b.dataset.edit);
+    const tekst = prompt("Tekst", u?.tekst || "");
+    if (tekst === null) return;
+    const url = prompt("Link (leeg = geen)", u?.url || "");
+    if (url === null) return;
+    try { await api("PATCH", `/v1/beheer/nieuws/${id}/updates/${b.dataset.edit}`, { tekst, url }); toast("Gewijzigd"); nieuwsItem(id); } catch (err) { toast(err.message); }
+  });
+}
+
+async function stockBeheer() {
+  const lijst = await api("GET", "/v1/beheer/nieuws/stock");
+  openModal(`
+    <h2>Standaardafbeeldingen politieberichten</h2>
+    <p class="muted" style="font-size:.85rem">Elk politiebericht krijgt de afbeelding van zijn onderwerp. Foto's van politie.nl mogen niet gebruikt worden; kies hier eigen foto's of stockfoto's met een vrije licentie.</p>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(200px,1fr))">${lijst.map((s) => `
+      <div class="card">
+        <img src="${esc(s.afbeelding)}" alt="" style="width:100%;aspect-ratio:16/9;object-fit:cover;border-radius:10px">
+        <b>${N_CAT[s.categorie] || esc(s.categorie)}</b>${s.eigen ? ` <span class="tag blue">Eigen</span>` : ""}
+        <input type="file" accept="image/*" data-cat="${s.categorie}" style="margin-top:6px;max-width:100%">
+        ${s.eigen ? `<button class="btn" data-reset="${s.categorie}" style="margin-top:6px">Terug naar standaard</button>` : ""}
+      </div>`).join("")}</div>
+    <div class="actions"><button class="btn" id="sClose">Sluiten</button></div>`);
+  $("sClose").onclick = closeModal;
+  document.querySelectorAll("input[data-cat]").forEach((inp) => inp.onchange = async () => {
+    try { await api("PUT", "/v1/beheer/nieuws/stock", { [inp.dataset.cat]: await fotoNaarData(inp.files[0]) }); toast("Afbeelding bewaard"); stockBeheer(); } catch (err) { toast(err.message); }
+  });
+  document.querySelectorAll("[data-reset]").forEach((b) => b.onclick = async () => {
+    try { await api("PUT", "/v1/beheer/nieuws/stock", { [b.dataset.reset]: null }); toast("Standaard hersteld"); stockBeheer(); } catch (err) { toast(err.message); }
   });
 }
 
