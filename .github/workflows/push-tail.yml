@@ -1,0 +1,20 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set +e
+          sleep 150
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s $A/health | python3 -c "import json,sys;d=json.load(sys.stdin);print('politie',d.get('nieuws'));print('112',json.dumps(d.get('nieuws112')))"
+          curl -s "$A/v1/nieuws?soort=regionaal&limit=30" | python3 -c "
+          import json,sys;d=json.load(sys.stdin);print(len(d))
+          for x in d: print(x['at'][:16],x.get('plaats'),x.get('categorie'),x['afbeelding'].split('/')[-1],'|',x['titel'][:70],'|',(x.get('intro') or '')[:60])"
+          ID=$(curl -s "$A/v1/nieuws?soort=regionaal&limit=1" | python3 -c "import json,sys;d=json.load(sys.stdin);print(d[0]['id'] if d else '')"); [ -n "$ID" ] && curl -s "$A/v1/nieuws/$ID" | head -c 900; echo
+          for f in politie-algemeen 112-brand-1 112-ambulance-2 112-traumaheli-1; do curl -s -o /dev/null -w "$f %{http_code}\n" "https://a-alerts.nl/assets/img/nieuws/$f.webp?v=2"; done
+          curl -s -o /dev/null -w "nieuws-pagina %{http_code}\n" https://a-alerts.nl/nieuws/
