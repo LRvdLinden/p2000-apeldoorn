@@ -146,14 +146,17 @@ struct NieuwsDetail: Decodable, Sendable {
     let alineas: [Alinea]
     let tijdlijn: [Bericht]
     let bronNaam: String?
+    /// Weather articles: the content in the layout of knmi.nl (map, headline, code, advice).
+    let weer: WeerArtikel?
 
-    enum CodingKeys: String, CodingKey { case alineas, tijdlijn, bronNaam = "bron_naam" }
+    enum CodingKeys: String, CodingKey { case alineas, tijdlijn, bronNaam = "bron_naam", weer }
     init(from d: Decoder) throws {
         item = try NieuwsItem(from: d)
         let c = try d.container(keyedBy: CodingKeys.self)
         alineas = (try? c.decodeIfPresent([Alinea].self, forKey: .alineas)) ?? []
         tijdlijn = (try? c.decodeIfPresent([Bericht].self, forKey: .tijdlijn)) ?? []
         bronNaam = try c.decodeIfPresent(String.self, forKey: .bronNaam)
+        weer = try? c.decodeIfPresent(WeerArtikel.self, forKey: .weer)
     }
 }
 

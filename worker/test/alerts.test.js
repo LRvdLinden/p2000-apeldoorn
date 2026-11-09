@@ -69,6 +69,7 @@ test("KNMI: keeps periods that cover the area, with the highest level", () => {
   assert.equal(list[0].niveau, "yellow");
   assert.equal(list[0].plaats, "Gelderland");
   assert.equal(list[0].status, "actief");
+  assert.deepEqual(list[0].landelijk.map((a) => a.niveau).sort(), ["orange", "yellow"], "all of the Netherlands for the map");
   assert.deepEqual(fromKnmi({ warning_events: [] }), []);
 });
 

@@ -12,6 +12,10 @@ De app van [a-alerts.nl](https://a-alerts.nl) voor **iPhone, iPad, Mac, Apple Wa
 | Talen | Nederlands (bron), Engels |
 | Team | EU3UY476T6 |
 
+## Nieuws
+
+Tabblad Nieuws (iPhone, iPad, Mac, Apple Watch, Apple TV, Android en a-alerts.nl/nieuws): politieberichten (bron politie.nl), 112 Nieuws (titel en intro, met toestemming), liveblogs bij Burgernet, AMBER Alert en Vermist Kind Alert, en een weerartikel bij elke KNMI-waarschuwing. Een weerartikel is opgebouwd zoals de waarschuwing op knmi.nl: kaart van heel Nederland met de gebieden in hun code en het tijdvenster ("maandag 23:30 tot dinsdag 12:00"), de kop van het KNMI, de code, de uitleg, de uitgiftetijd, Risico's en advies en de details.
+
 ## Functies
 
 - **Animated splash**: het schild valt in beeld, pager-pulsen golven uit en daarna gaat de app open.

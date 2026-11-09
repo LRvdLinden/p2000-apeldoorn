@@ -193,7 +193,13 @@ fun NieuwsDetail(id: String, nav: Nav) {
             return@Scaffold
         }
         LazyColumn(Modifier.padding(pad).fillMaxSize(), contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-            item {
+            val weer = d.weer
+            if (weer != null) {
+                // Weather: like the warning on knmi.nl.
+                item { WeerKaart(weer) }
+                item { WeerTekst(weer) }
+                item { Text(Fmt.day(d.atInstant) + " " + Fmt.time(d.atInstant), color = Muted, fontSize = 13.sp) }
+            } else item {
                 Box(Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(22.dp))) {
                     NetImage(d.afbeelding, d.kleur, Modifier.matchParentSize())
                     Box(Modifier.matchParentSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.1f), 1f to Color.Black.copy(alpha = 0.85f))))
@@ -206,8 +212,8 @@ fun NieuwsDetail(id: String, nav: Nav) {
                     }
                 }
             }
-            if (!d.intro.isNullOrBlank() && d.soort != "liveblog") item { Text(d.intro, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, lineHeight = 24.sp) }
-            items(d.alineas.orEmpty()) { a ->
+            if (weer == null && !d.intro.isNullOrBlank() && d.soort != "liveblog") item { Text(d.intro, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, lineHeight = 24.sp) }
+            items(if (weer == null) d.alineas.orEmpty() else emptyList()) { a ->
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     if (!a.titel.isNullOrBlank()) Text(a.titel, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     Text(a.tekst, fontSize = 16.sp, lineHeight = 23.sp)

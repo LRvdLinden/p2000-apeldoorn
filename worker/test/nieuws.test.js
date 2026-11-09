@@ -53,8 +53,20 @@ test("police item: only about our places, never with the politie.nl image", () =
 
 test("weather article and liveblog content", () => {
   const a = weerArtikel({ niveau: "orange", soort: "Zware windstoten", status: "actief", start: "2026-11-09T12:00:00Z", einde: "2026-11-09T18:00:00Z", verwachting: "Windstoten tot 100 km/u.", advies: "Blijf binnen." });
-  assert.equal(a.titel, "Code oranje voor zware windstoten in Gelderland");
-  assert.deepEqual(a.alineas.map((x) => x.titel), ["Wanneer", "Wat wordt er verwacht", "Advies van het KNMI"]);
+  assert.equal(a.titel, "Code oranje voor zware windstoten");
+  assert.deepEqual(a.alineas.map((x) => x.titel), ["Wanneer", null, "Risico's en advies"]);
+  assert.equal(a.weer.tijdvak, "maandag 13:00 tot 19:00");
+  assert.deepEqual(a.weer.adviezen, ["Blijf binnen."]);
+  assert.equal(a.weer.icoon, "wind");
+  const k = weerArtikel({ niveau: "yellow", soort: "Mist", status: "actief", start: "2026-11-09T22:30:00Z", einde: "2026-11-10T11:00:00Z", kop: "Plaatselijk dichte mist",
+    omschrijving: "Mist met een zicht van minder dan 200 m.", verwachting: "Houd rekening met vertragingen. Er is kans op gevaarlijke situaties.", advies: "Rijd langzamer.",
+    landelijk: [{ niveau: "yellow", gebied: [[[5, 52], [6, 52], [6, 51], [5, 52]]] }, { niveau: "yellow", gebied: [[[6, 53], [7, 53], [7, 52], [6, 53]]] }] });
+  assert.equal(k.titel, "Plaatselijk dichte mist");
+  assert.equal(k.weer.tijdvak, "maandag 23:30 tot dinsdag 12:00");
+  assert.equal(k.weer.vanafTot, "Vanaf 23:30 tot dinsdag 12:00");
+  assert.equal(k.weer.datumKop, "Maandag 9 november");
+  assert.deepEqual(k.weer.adviezen, ["Houd rekening met vertragingen.", "Er is kans op gevaarlijke situaties.", "Rijd langzamer."]);
+  assert.equal(k.weer.gebieden.length, 2);
   assert.match(weerArtikel({ niveau: "orange", soort: "Gladheid", status: "beeindigd", start: "2026-11-09T12:00:00Z" }).titel, /^Opgeheven/);
   const l = liveblogVan({ bron: "burgernet", titel: "Gezocht", tekst: "Man", start: "2026-11-09T20:00:00Z", berichten: [{ soort: "start", at: "2026-11-09T20:00:00Z", tekst: "Man op scooter" }] });
   assert.equal(l.berichten.length, 1);
@@ -98,7 +110,7 @@ test("sync: police (first run silent, later new ones pushed), warnings, beheer m
   assert.equal(live.tijdlijn.length, 1);
   assert.equal(live.afbeelding, "https://a-alerts.nl/assets/img/nieuws/vermistkind.webp");
   const weer = (await listNieuws(env, "https://api.test", { soort: "weer" }))[0];
-  assert.equal(weer.titel, "Code geel voor windstoten in Gelderland");
+  assert.equal(weer.titel, "Code geel voor windstoten");
 
   // Beheer adds a message with a photo and a link; the newest is on top.
   const r = await voegToe(env, lid, { tekst: "Extra info", url: "https://www.politie.nl/x", foto: PNG });

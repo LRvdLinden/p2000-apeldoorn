@@ -26,6 +26,9 @@ export function parseNlAlertRing(text) {
 }
 
 /** Keep at most n points per ring (enough for an overlay; the full shape is only needed for the overlap test). */
+/** Coordinates to 3 decimals (about 100 m): plenty for a map of the Netherlands, a third of the size. */
+const rondAf = (rings) => rings.map((r) => r.map(([x, y]) => [Math.round(x * 1000) / 1000, Math.round(y * 1000) / 1000]));
+
 export function simplify(rings, n = 160) {
   return rings.map((ring) => {
     if (ring.length <= n) return ring;
@@ -300,13 +303,29 @@ export function fromKnmi(data, now = Date.now(), pagina = new Map()) {
     }
     joined.push(w);
   }
+  // All of the Netherlands per warning (like the map on knmi.nl): every province or area with its highest code.
+  const landelijk = new Map();
+  for (const [ei, ev] of (data?.warning_events || []).entries()) {
+    const per = new Map();
+    for (const period of ev.periods || []) {
+      for (const p of period.parts || []) {
+        const level = normLevel(p.level);
+        const rings = geomRings(p.geometry);
+        if (level === "green" || !rings.length) continue;
+        const key = txt(p.area_description) || JSON.stringify(rings[0][0]);
+        const prev = per.get(key);
+        if (!prev || levelRank(level) > levelRank(prev.niveau)) per.set(key, { niveau: level, gebied: rondAf(simplify(rings, 120)) });
+      }
+    }
+    landelijk.set(ev.id ?? ei, [...per.values()]);
+  }
   // Time slots of the whole warning for the working area, per code ("geel 06–09 · oranje 09–10"), on every record of it.
   const slots = new Map();
   for (const w of joined) {
     if (!slots.has(w._ev)) slots.set(w._ev, []);
     slots.get(w._ev).push({ niveau: w.niveau, start: new Date(w.start_at).toISOString(), einde: new Date(w.end_at).toISOString() });
   }
-  return joined.map(({ _ev, ...w }) => ({ ...w, tijdvakken: slots.get(_ev) }));
+  return joined.map(({ _ev, ...w }) => ({ ...w, tijdvakken: slots.get(_ev), landelijk: landelijk.get(_ev)?.length ? landelijk.get(_ev) : null }));
 }
 
 // ------------------------------------------------------------------ device preferences
@@ -399,7 +418,7 @@ export function payloadForWarning(w, lang = "nl", { upgrade = false, kind = upgr
 const json = (v) => (v == null ? null : JSON.stringify(v));
 const parse = (s) => { try { return s ? JSON.parse(s) : null; } catch { return null; } };
 
-export function toAPI(row, { withArea = true } = {}) {
+export function toAPI(row, { withArea = true, metLandelijk = false } = {}) {
   if (!row) return null;
   return {
     id: row.id, bron: row.bron, titel: row.bron === "knmi" ? knmiNaam(row.titel) : row.titel, tekst: row.tekst, tekst_en: row.tekst_en, plaats: row.plaats,
@@ -410,7 +429,8 @@ export function toAPI(row, { withArea = true } = {}) {
     ...(row.bron === "knmi" ? (() => {
       const k = parse(row.knmi_data) || {};
       return { verwachting: k.verwachting ?? null, advies: k.advies ?? null, kop: k.kop ?? null, omschrijving: k.omschrijving ?? null, details: k.details ?? null, uitgifte: k.uitgifte ?? null,
-        tijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length > 1 ? k.tijdvakken : null };
+        tijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length > 1 ? k.tijdvakken : null,
+        alleTijdvakken: Array.isArray(k.tijdvakken) && k.tijdvakken.length ? k.tijdvakken : null, ...(metLandelijk ? { landelijk: Array.isArray(k.landelijk) ? k.landelijk : null } : {}) };
     })() : {}),
     ...(KIND_BRONNEN.includes(row.bron) ? (() => {
       const k = parse(row.knmi_data) || {};
@@ -447,7 +467,7 @@ export async function warningsSince(env, since) {
 }
 
 export async function getWarning(env, id) {
-  return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first())) || knmiOpgeheven(id);
+  return toAPI(withOverride(await env.DB.prepare(`${PUBLIC_SELECT} AND w.id = ?`).bind(id).first()), { metLandelijk: true }) || knmiOpgeheven(id);
 }
 
 /**
@@ -495,7 +515,7 @@ async function upsert(env, w, now) {
   let extra = null;
   if (w.bron === "knmi") {
     extra = JSON.stringify({ verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte,
-      tijdvakken: w.tijdvakken || null });
+      tijdvakken: w.tijdvakken || null, landelijk: w.landelijk || null });
   } else if (KIND_BRONNEN.includes(w.bron) && w.extra) extra = JSON.stringify(w.extra);
   // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
   else if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {

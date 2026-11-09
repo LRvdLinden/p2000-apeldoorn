@@ -57,3 +57,26 @@ body { padding: 0 16px 60px; background: var(--bg); }
 .nw-voet a { color: var(--red); font-weight: 600; }
 .nw-delen { margin-left: auto; font: inherit; font-weight: 600; border: 0; background: var(--surface); color: var(--text); padding: 8px 14px; border-radius: 999px; box-shadow: var(--shadow); cursor: pointer; }
 .nw-acties { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+
+/* Weather article, like the warning on knmi.nl */
+.nw-weer-kaart { position: relative; margin: 0 0 18px; height: 460px; border-radius: 18px; overflow: hidden; background: #cfe3ef; }
+.nw-weer-kaart .kaart { position: absolute; inset: 0; }
+.nw-weer-kaart .kaart svg { width: 100%; height: 100%; }
+.nw-weer-kaart .datum { position: absolute; top: 14px; left: 14px; display: flex; flex-direction: column; padding: 6px 10px; border-radius: 10px; background: rgba(255,255,255,.78); color: #163E6E; }
+.nw-weer-kaart .datum strong { font-size: 1.35rem; }
+.nw-weer-kaart .icoon { position: absolute; top: 92px; left: 14px; width: 62px; height: 62px; padding: 7px; border-radius: 12px; background: #1D1D1F; box-sizing: border-box; }
+.nw-weer-kaart .icoon span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 9px; font-size: 1.5rem; font-weight: 700; }
+.nw-weer-kaart .chip { position: absolute; left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 8px 18px; border-radius: 6px; border-left: 4px solid; background: #23272F; color: #fff; white-space: nowrap; }
+.nw-weer-kaart .chip small { font-size: .85rem; }
+.nw-weer-titel { font-size: clamp(1.6rem, 4vw, 2.2rem); margin: 0 0 12px; }
+.nw-code span { display: inline-block; padding: 6px 12px; border-radius: 6px; font-weight: 600; }
+.nw-code em { color: var(--muted); font-style: normal; font-weight: 600; margin-left: 8px; }
+.nw-vakken { list-style: none; padding: 0; } .nw-vakken li { display: flex; align-items: center; gap: 8px; margin: 4px 0; }
+.nw-vakken li span { width: 10px; height: 10px; border-radius: 50%; }
+.nw-uitgifte { color: var(--muted); font-size: .9rem; }
+.nw-advies { margin: 22px 0; padding: 18px 22px; border-left: 4px solid #4FB3E8; background: rgba(127,127,127,.12); }
+.nw-advies h2 { color: #4FB3E8; margin-top: 0; }
+.nw-advies ul { list-style: none; padding: 0; margin: 0; } .nw-advies li { position: relative; padding-left: 22px; margin: 10px 0; }
+.nw-advies li::before { content: "›"; position: absolute; left: 4px; color: #4FB3E8; font-weight: 700; }
+.nw-details summary { cursor: pointer; color: #4FB3E8; font-weight: 700; font-size: 1.2rem; padding: 8px 0; }
+@media (max-width: 600px) { .nw-weer-kaart { height: 380px; } .nw-weer-kaart .datum strong { font-size: 1.1rem; } }

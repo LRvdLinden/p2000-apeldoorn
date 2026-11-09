@@ -7770,6 +7770,23 @@
         }
       }
     },
+    "Opgeheven": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lifted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeheven"
+          }
+        }
+      }
+    },
     "Opgeheven · code groen": {
       "extractionState": "manual",
       "localizations": {

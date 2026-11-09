@@ -34,7 +34,23 @@ struct WatchNieuwsDetail: View {
 
     var body: some View {
         ScrollView {
-            if let d = detail {
+            if let weer = detail?.weer {
+                // Weather: like knmi.nl, compact.
+                VStack(alignment: .leading, spacing: 8) {
+                    WeerKaart(weer: weer, hoogte: 150, interactief: false)
+                    Text(weer.kop).font(.headline)
+                    Text(weer.opgeheven ? L("Code groen") : weer.code).font(.caption.bold()).foregroundStyle(weer.opKleur)
+                        .padding(.horizontal, 8).padding(.vertical, 3).background(weer.kleur, in: RoundedRectangle(cornerRadius: 5))
+                    if let t = weer.tijdvak { Text(t).font(.footnote.bold()) }
+                    if let o = weer.omschrijving, !o.isEmpty { Text(o).font(.footnote) }
+                    if !weer.adviezen.isEmpty {
+                        Text(L("Risico's en advies")).font(.footnote.bold()).foregroundStyle(Color(hex: 0x4FB3E8))
+                        ForEach(weer.adviezen, id: \.self) { a in Text("› \(a)").font(.footnote) }
+                    }
+                    if let u = weer.uitgifte { Text(Lf("Uitgifte: %@", u)).font(.caption2).foregroundStyle(.secondary) }
+                    Text(L("Bron: KNMI.")).font(.caption2).foregroundStyle(.secondary)
+                }
+            } else if let d = detail {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(d.item.label).font(.caption2.bold()).foregroundStyle(.secondary)
                     Text(d.item.titel).font(.headline)

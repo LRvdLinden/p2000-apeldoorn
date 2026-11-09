@@ -112,7 +112,18 @@ struct TVNieuwsDetail: View {
 
     var body: some View {
         ScrollView {
-            if let d = detail {
+            if let weer = detail?.weer {
+                // Weather: like the warning on knmi.nl, the map left and the text right.
+                HStack(alignment: .top, spacing: 60) {
+                    WeerKaart(weer: weer, hoogte: 760, interactief: false).frame(width: 760)
+                    VStack(alignment: .leading, spacing: 22) {
+                        blok { WeerTekst(weer: weer, schaal: 1.45) }
+                        Text(L("Bron: KNMI.")).font(AppFont.body(18)).foregroundStyle(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                }
+                .padding(.horizontal, 80).padding(.vertical, 40)
+            } else if let d = detail {
                 HStack(alignment: .top, spacing: 60) {
                     VStack(alignment: .leading, spacing: 24) {
                         Color.clear.frame(width: 640, height: 360).overlay { NieuwsAfbeeldingTV(item: d.item) }.clipShape(RoundedRectangle(cornerRadius: 24, style: .continuous))

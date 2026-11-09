@@ -186,12 +186,21 @@ struct NieuwsDetailView: View {
         ScrollView {
             if let d = detail {
                 VStack(alignment: .leading, spacing: 18) {
-                    kop(d.item)
+                    if let weer = d.weer {
+                        // Weather: like the warning on knmi.nl.
+                        WeerKaart(weer: weer).padding(.horizontal).padding(.top, 8)
+                    } else {
+                        kop(d.item)
+                    }
                     VStack(alignment: .leading, spacing: 16) {
-                        if let intro = d.item.intro, !intro.isEmpty, d.item.soort != .liveblog {
+                        if let weer = d.weer {
+                            WeerTekst(weer: weer)
+                            Text(kopMeta(d.item)).font(AppFont.body(13)).foregroundStyle(.secondary)
+                        }
+                        if d.weer == nil, let intro = d.item.intro, !intro.isEmpty, d.item.soort != .liveblog {
                             Text(intro).font(AppFont.body(17, .semibold)).lineSpacing(4).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                         }
-                        ForEach(d.alineas, id: \.self) { a in
+                        ForEach(d.weer == nil ? d.alineas : [], id: \.self) { a in
                             VStack(alignment: .leading, spacing: 6) {
                                 if let t = a.titel, !t.isEmpty { Text(t).font(AppFont.heading(18)) }
                                 Text(a.tekst).font(AppFont.body(16)).lineSpacing(5).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)

@@ -265,20 +265,70 @@ const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood", gre
 const tijdNL = (iso) => new Date(iso).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" });
 
 /** KNMI warning (API shape) → weather article. */
+const TZ = "Europe/Amsterdam";
+const deel = (iso, opts) => new Date(iso).toLocaleString("nl-NL", { timeZone: TZ, ...opts });
+const dagKey = (iso) => deel(iso, { year: "numeric", month: "2-digit", day: "2-digit" });
+const uurMin = (iso) => deel(iso, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+const weekdag = (iso) => deel(iso, { weekday: "long" });
+/** "maandag 23:30 tot dinsdag 12:00", "dinsdag 06:00 tot 11:00" (same day), "vanaf maandag 23:30" (no end). Like knmi.nl. */
+export function tijdvakTekst(start, einde) {
+  if (!start) return "";
+  const van = `${weekdag(start)} ${uurMin(start)}`;
+  if (!einde) return `vanaf ${van}`;
+  return `${van} tot ${dagKey(einde) === dagKey(start) ? "" : `${weekdag(einde)} `}${uurMin(einde)}`;
+}
+const hoofd = (s) => (s ? s[0].toUpperCase() + s.slice(1) : s);
+const KNMI_ICOON = [[/mist/i, "fog"], [/wind/i, "wind"], [/onweer|tornado|hagel/i, "thunderstorm"], [/regen/i, "rain"], [/sneeuw/i, "snow"],
+  [/glad|ijzel|vorst/i, "ice"], [/hitte/i, "heat"], [/kou/i, "cold"], [/kust/i, "waterspout"]];
+
+/** KNMI "Risico's en advies": the impact and instruction texts, one point per sentence. */
+export function adviezen(...teksten) {
+  const uit = [];
+  for (const t of teksten) {
+    for (const regel of String(t || "").split(/\n+/)) {
+      for (const zin of regel.split(/(?<=[.!?])\s+(?=[A-Z0-9])/)) {
+        const z = zin.replace(/^[-•›>\s]+/, "").trim();
+        if (z && !uit.includes(z)) uit.push(z);
+      }
+    }
+  }
+  return uit;
+}
+
+/**
+ * Weather article, built like the warning on knmi.nl: map of the Netherlands with the areas in their code and the
+ * time window, the KNMI headline, the code, the description, the issue time, "Risico's en advies" and the details.
+ * The same content as paragraphs (alineas) for app versions that do not know "weer" yet.
+ */
 export function weerArtikel(w) {
   const code = CODE[w.niveau] || "Weerwaarschuwing";
   const soort = w.soort || "het weer";
   const opgeheven = w.status === "beeindigd" || w.niveau === "green";
-  const titel = opgeheven ? `Opgeheven: ${code.toLowerCase()} voor ${soort.toLowerCase()} in Gelderland` : `${code} voor ${soort.toLowerCase()} in Gelderland`;
-  const vakken = Array.isArray(w.tijdvakken) && w.tijdvakken.length ? w.tijdvakken : [{ niveau: w.niveau, start: w.start, einde: w.einde }];
+  const vakken = Array.isArray(w.alleTijdvakken) && w.alleTijdvakken.length ? w.alleTijdvakken
+    : Array.isArray(w.tijdvakken) && w.tijdvakken.length ? w.tijdvakken : [{ niveau: w.niveau, start: w.start, einde: w.einde }];
+  const begin = vakken.reduce((m, v) => (!m || Date.parse(v.start) < Date.parse(m) ? v.start : m), null) || w.start;
+  const eind = vakken.reduce((m, v) => (v.einde && (!m || Date.parse(v.einde) > Date.parse(m)) ? v.einde : m), null) || w.einde;
+  const tijdvak = tijdvakTekst(begin, eind);
+  const kop = w.kop || `${code} voor ${soort.toLowerCase()}`;
+  const titel = opgeheven ? `Opgeheven: ${kop.charAt(0).toLowerCase()}${kop.slice(1)}` : kop;
+  const omschrijving = w.omschrijving || w.verwachting || w.tekst || "";
+  const advies = adviezen(w.omschrijving ? w.verwachting : null, w.advies);
+  const weer = {
+    kop, code, niveau: w.niveau, soort, icoon: (KNMI_ICOON.find(([re]) => re.test(soort)) || [null, "warning"])[1],
+    omschrijving, uitgifte: w.uitgifte || null, details: w.details || null, adviezen: advies, opgeheven,
+    tijdvak, datumKop: begin ? hoofd(deel(begin, { weekday: "long", day: "numeric", month: "long" })) : null,
+    vanafTot: begin ? hoofd(`vanaf ${uurMin(begin)}${eind ? ` tot ${dagKey(eind) === dagKey(begin) ? "" : `${weekdag(eind)} `}${uurMin(eind)}` : ""}`) : null,
+    tijdvakken: vakken.length > 1 ? vakken.map((v) => ({ niveau: v.niveau, code: CODE[v.niveau] || code, tekst: tijdvakTekst(v.start, v.einde) })) : null,
+    gebieden: Array.isArray(w.landelijk) && w.landelijk.length ? w.landelijk : w.gebied ? [{ niveau: w.niveau, gebied: w.gebied }] : [],
+  };
   const alineas = [];
   if (opgeheven) alineas.push({ titel: null, tekst: "Het KNMI heeft deze waarschuwing opgeheven. Er geldt nu code groen." });
-  alineas.push({ titel: "Wanneer", tekst: vakken.map((v) => `${CODE[v.niveau] || code}: ${tijdNL(v.start)}${v.einde ? ` tot ${tijdNL(v.einde)}` : ""}`).join("\n") });
-  if (w.verwachting) alineas.push({ titel: "Wat wordt er verwacht", tekst: String(w.verwachting) });
-  else if (w.tekst) alineas.push({ titel: "Wat wordt er verwacht", tekst: String(w.tekst) });
+  alineas.push({ titel: "Wanneer", tekst: weer.tijdvakken ? weer.tijdvakken.map((v) => `${v.code}: ${v.tekst}`).join("\n") : `${code}: ${tijdvak}` });
+  if (omschrijving) alineas.push({ titel: null, tekst: omschrijving });
+  if (advies.length) alineas.push({ titel: "Risico's en advies", tekst: advies.map((a) => `› ${a}`).join("\n") });
   if (w.details) alineas.push({ titel: "Details", tekst: String(w.details) });
-  if (w.advies) alineas.push({ titel: "Advies van het KNMI", tekst: String(w.advies) });
-  return { titel, intro: w.omschrijving || w.kop || w.tekst || "", alineas, opgeheven };
+  if (w.uitgifte) alineas.push({ titel: null, tekst: `Uitgifte: ${w.uitgifte}` });
+  return { titel, intro: omschrijving, alineas, opgeheven, weer };
 }
 
 /** Burgernet / AMBER / Vermist Kind (API shape) → liveblog with the official timeline. */
@@ -291,10 +341,13 @@ export function liveblogVan(w) {
 }
 
 /** Weather articles and liveblogs follow the warnings: every changed warning updates its item. */
-export async function syncWaarschuwingen(env, kv, now = Date.now()) {
+export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer = false } = {}) {
   const last = Number((await kv.get("nieuws_sync"))?.value || 0);
   const since = last ? last - 2 * 60_000 : now - 14 * DAY;
-  const { results } = await env.DB.prepare(`SELECT w.id FROM waarschuwingen w LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id
+  // alleWeer: once after a change in how weather articles are built, so the existing ones get the new layout too.
+  const { results } = alleWeer
+    ? await env.DB.prepare("SELECT ref AS id FROM nieuws WHERE soort = 'weer' AND ref IS NOT NULL").all()
+    : await env.DB.prepare(`SELECT w.id FROM waarschuwingen w LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id
     WHERE w.bron IN ('knmi','burgernet','amber','vermistkind') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
     ORDER BY w.updated_at LIMIT 60`).bind(since, since, since).all();
   for (const { id } of results) {
@@ -303,7 +356,7 @@ export async function syncWaarschuwingen(env, kv, now = Date.now()) {
     if (w.bron === "knmi") {
       const a = weerArtikel(w);
       await upsertNieuws(env, { id: await nieuwsId("w", w.id), soort: "weer", bron: "knmi", ref: w.id, titel: a.titel, intro: a.intro, plaats: "Gelderland",
-        url: w.link, categorie: null, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas } }, now);
+        url: w.link, categorie: null, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas, weer: a.weer } }, now);
     } else if (LIVE_BRONNEN.includes(w.bron)) {
       const l = liveblogVan(w);
       const nid = await nieuwsId("l", w.id);
@@ -316,7 +369,7 @@ export async function syncWaarschuwingen(env, kv, now = Date.now()) {
       if (klaar && KIND.includes(w.bron)) await wisKindAanvullingen(env, nid);
     }
   }
-  await kv.set("nieuws_sync", String(now));
+  if (!alleWeer) await kv.set("nieuws_sync", String(now));
 }
 
 export async function wisKindAanvullingen(env, nid) {
@@ -393,7 +446,7 @@ export async function getNieuws(env, origin, id, { beheer = false } = {}) {
   const stock = await stockFotos(env);
   return {
     ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste, start: d.start || null }, origin, stock, { beheer }),
-    alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn,
+    alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn, weer: d.weer || null,
     bron_naam: row.soort === "regionaal" ? "112 Nieuws" : row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
   };
 }

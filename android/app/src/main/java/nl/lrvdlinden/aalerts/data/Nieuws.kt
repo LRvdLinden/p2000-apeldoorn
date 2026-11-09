@@ -37,6 +37,8 @@ data class NieuwsItem(
     val aantal: Int? = null,
     val alineas: List<NieuwsAlinea>? = null,
     val tijdlijn: List<NieuwsBericht>? = null,
+    /** Weather articles: the content in the layout of knmi.nl (map, headline, code, advice). */
+    val weer: WeerArtikel? = null,
 ) {
     val atInstant: Instant get() = parseInstant(at) ?: Instant.now()
     val laatste: Instant get() = maxOf(parseInstant(bijgewerkt) ?: atInstant, atInstant)
@@ -116,3 +118,33 @@ object NieuwsStore {
 /** One item that fails to decode is skipped, never the whole list. */
 internal fun nieuwsLijst(json: String): List<NieuwsItem> =
     (AppJson.parseToJsonElement(json) as? JsonArray).orEmpty().mapNotNull { runCatching { AppJson.decodeFromJsonElement<NieuwsItem>(it) }.getOrNull() }
+
+
+/** Weather article like the warning on knmi.nl (GET /v1/nieuws/:id → "weer"). */
+@Serializable
+data class WeerArtikel(
+    val kop: String = "",
+    val code: String = "",
+    val niveau: String? = null,
+    val soort: String? = null,
+    val omschrijving: String? = null,
+    val uitgifte: String? = null,
+    val details: String? = null,
+    val adviezen: List<String> = emptyList(),
+    val opgeheven: Boolean = false,
+    val tijdvak: String? = null,
+    val datumKop: String? = null,
+    val vanafTot: String? = null,
+    val tijdvakken: List<WeerVak>? = null,
+    val gebieden: List<WeerGebied> = emptyList(),
+) {
+    val kleur: Color get() = Waarschuwing.codeColor(if (opgeheven) "green" else niveau)
+    /** Dark text on yellow, white on the other codes. */
+    val opKleur: Color get() = if (!opgeheven && (niveau == null || niveau == "yellow")) Color(0xFF1D1D1F) else Color.White
+}
+
+@Serializable
+data class WeerVak(val niveau: String? = null, val code: String = "", val tekst: String = "")
+
+@Serializable
+data class WeerGebied(val niveau: String? = null, val gebied: List<List<List<Double>>>? = null)
