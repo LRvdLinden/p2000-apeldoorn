@@ -9,8 +9,9 @@ jobs:
     steps:
       - run: |
           B=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          curl -s "$B/v1/meldingen?limit=300" > meldingen.json
-          curl -s "$B/v1/waarschuwingen?days=30" > waarschuwingen.json
-          ls -la *.json
-      - uses: actions/upload-artifact@v4
-        with: { name: voorbeelden, path: "*.json", retention-days: 1 }
+          curl -s "$B/v1/meldingen?limit=300" > m.json
+          curl -s "$B/v1/waarschuwingen?days=30" > w.json
+          for d in brandweer ambulance politie lifeliner traumaheli; do jq -c --arg d "$d" '[.[]|select(.dienst==$d)][0] // empty' m.json | sed "s/^/MELDING $d /"; done
+          jq -c '[.[]|select((.eenheden|map(.naam // "")|join(" "))|test("(?i)lifeliner"))][0] // empty' m.json | sed "s/^/MELDING lifelinerunit /"
+          jq -c '[.[]|select(.grip!=null or .opschaling!=null)][0] // empty' m.json | sed "s/^/MELDING grip /"
+          for b in nlalert burgernet knmi; do jq -c --arg b "$b" '[.[]|select(.bron==$b)][0:2][]' w.json | sed "s/^/WAARSCHUWING $b /"; done
