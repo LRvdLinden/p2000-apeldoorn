@@ -7,10 +7,9 @@ jobs:
       - run: |
           set +e
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          echo "== waarschuwingen burgernet"; curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.bron=="burgernet")] | .[:5][] | {id,status,start_at,titel,plaats,startbericht,berichten:(.berichten|length)}' 
-          echo "== health"; curl -s "$A/v1/health" | jq -c '.' | head -c 1500; echo
-          echo "== feed"; curl -s -A "Mozilla/5.0" "https://api.112meldkamer.nl/v1/burgernet" | jq -c ".[:4][] | {location,date,time,isClosed,link,report:(.report|.[0:80])}"
-          echo "== burgernet.nl apeldoorn"; H=$(curl -s -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN); echo "$H" | grep -o 'href="/burgernet/[0-9]*"' | head -8
-          ID=$(echo "$H" | grep -o 'href="/burgernet/[0-9]*"' | head -1 | grep -o '[0-9]*')
-          echo "== actie $ID"; P=$(curl -s -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/$ID); echo "$P" | grep -o -E 'action-detail-block__title[^>]*>[^<]*|action-message__heading-item[^>]*>[^<]*|(Start actie|Einde actie|Locatie|Status van deze actie)</p>\s*<p[^>]*>[^<]*' | head -20
-          echo "$P" | wc -c
+          echo "== item"; curl -s "$A/v1/waarschuwingen" | jq -c '[.[]? // .items[]? | select(.id=="burgernet:3977418")]'
+          echo "== status"; curl -s "$A/v1/status" | head -c 1500; echo
+          echo "== feed"; curl -s -A "Mozilla/5.0" "https://api.112meldkamer.nl/v1/burgernet" | head -c 1500; echo
+          echo "== gemeente"; curl -s -o /tmp/g.html -w "%{http_code}\n" -A "Mozilla/5.0" https://www.burgernet.nl/gemeente/Oost-Nederland/APELDOORN; grep -o 'href="/burgernet/[0-9]*"' /tmp/g.html | head -5
+          echo "== actie"; curl -s -o /tmp/a.html -w "%{http_code}\n" -A "Mozilla/5.0" https://www.burgernet.nl/burgernet/3977418; grep -o -E 'action-detail-block__title[^>]*>[^<]*|action-message__heading-item[^>]*>[^<]*|(Start actie|Einde actie|Locatie|Status van deze actie)</p>\s*<p[^>]*>[^<]*' /tmp/a.html | head -20
+          grep -o '<h3[^>]*>[^<]*' /tmp/a.html | head -5
