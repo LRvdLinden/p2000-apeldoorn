@@ -108,6 +108,12 @@ jobs:
           npx wrangler secret bulk secrets.json
           rm secrets.json
 
+      # "secret bulk" makes a new version from an older one when the Cloudflare API had a hiccup (504): the old code then
+      # stays live. Deploy the code once more; secrets stay on the Worker.
+      - name: Code opnieuw deployen (na de secrets)
+        if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
+        run: npx wrangler deploy 2>&1 | tail -3
+
       - name: Adres van de API
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
         run: |
