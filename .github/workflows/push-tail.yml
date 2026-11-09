@@ -1,0 +1,18 @@
+name: probe
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/push-tail.yml']
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          set +e
+          sleep 200
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('112',json.dumps(d.get('nieuws112')))"
+          curl -s "$A/v1/nieuws?soort=regionaal&limit=30&t=$RANDOM" | python3 -c "
+          import json,sys;d=json.load(sys.stdin);print(len(d))
+          for x in d: print(x['at'][:16],x.get('plaats'),x.get('categorie'),x['afbeelding'].split('/')[-1],'|',x['titel'][:60],'|',(x.get('intro') or '')[:50])"
+          curl -s "$A/v1/nieuws?soort=politie&limit=2&t=$RANDOM" | python3 -c "import json,sys;[print(x['afbeelding']) for x in json.load(sys.stdin)]"
