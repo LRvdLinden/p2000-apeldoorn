@@ -205,6 +205,23 @@
         }
       }
     },
+    "%lld berichten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld messages"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld berichten"
+          }
+        }
+      }
+    },
     "%lld d": {
       "extractionState": "manual",
       "localizations": {
@@ -796,6 +813,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Aantal"
+          }
+        }
+      }
+    },
+    "Aanvullingen van A-Alerts op een liveblog (tab Nieuws)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updates from A-Alerts in a live blog (News tab)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aanvullingen van A-Alerts op een liveblog (tab Nieuws)"
           }
         }
       }
@@ -1531,6 +1565,40 @@
         }
       }
     },
+    "Bekijk de bron": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View the source"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk de bron"
+          }
+        }
+      }
+    },
+    "Bekijk de melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View the alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk de melding"
+          }
+        }
+      }
+    },
     "Bekijk de officiële bron": {
       "extractionState": "manual",
       "localizations": {
@@ -1544,6 +1612,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bekijk de officiële bron"
+          }
+        }
+      }
+    },
+    "Bekijk de weerwaarschuwing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View the weather warning"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk de weerwaarschuwing"
           }
         }
       }
@@ -1629,6 +1714,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bericht"
+          }
+        }
+      }
+    },
+    "Bericht niet gevonden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Item not found"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bericht niet gevonden"
+          }
+        }
+      }
+    },
+    "Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages labelled A-Alerts were added by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
           }
         }
       }
@@ -1922,6 +2041,40 @@
         }
       }
     },
+    "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
+          }
+        }
+      }
+    },
+    "Bron: KNMI.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: KNMI."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: KNMI."
+          }
+        }
+      }
+    },
     "Bron: Politie, via Burgernet.": {
       "extractionState": "manual",
       "localizations": {
@@ -1939,6 +2092,23 @@
         }
       }
     },
+    "Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: Police, via Burgernet. Messages labelled A-Alerts were added by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
+          }
+        }
+      }
+    },
     "Bron: p2000.page": {
       "extractionState": "manual",
       "localizations": {
@@ -1952,6 +2122,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron: p2000.page"
+          }
+        }
+      }
+    },
+    "Bron: politie.nl.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: politie.nl."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: politie.nl."
+          }
+        }
+      }
+    },
+    "Bron: politie.nl. De afbeelding is van A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: politie.nl. The image is by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: politie.nl. De afbeelding is van A-Alerts."
           }
         }
       }
@@ -3265,6 +3469,23 @@
         }
       }
     },
+    "Er is nu geen nieuws in deze categorie.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "There is no news in this category right now."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Er is nu geen nieuws in deze categorie."
+          }
+        }
+      }
+    },
     "Er is nu geen trauma- of politiehelikopter in de lucht.": {
       "extractionState": "manual",
       "localizations": {
@@ -3669,6 +3890,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen in de laatste 24 uur"
+          }
+        }
+      }
+    },
+    "Geen nieuws": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No news"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen nieuws"
           }
         }
       }
@@ -4094,6 +4332,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geschatte tijden, zonder voertuigposities."
+          }
+        }
+      }
+    },
+    "Gestart %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Started %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gestart %@"
           }
         }
       }
@@ -5730,6 +5985,23 @@
         }
       }
     },
+    "Laden…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Loading…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laden…"
+          }
+        }
+      }
+    },
     "Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn.": {
       "extractionState": "manual",
       "localizations": {
@@ -5760,6 +6032,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Landen in je zone"
+          }
+        }
+      }
+    },
+    "Lees op politie.nl": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Read on politie.nl"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lees op politie.nl"
           }
         }
       }
@@ -5845,6 +6134,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Live"
+          }
+        }
+      }
+    },
+    "Liveblog": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live blog"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liveblog"
+          }
+        }
+      }
+    },
+    "Liveblogs": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live blogs"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liveblogs"
+          }
+        }
+      }
+    },
+    "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Live blogs: a notification when A-Alerts adds a message to a live blog of an alert you follow. Police news: new police messages about your places."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen."
           }
         }
       }
@@ -6746,6 +7086,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nieuwe zone"
+          }
+        }
+      }
+    },
+    "Nieuws": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "News"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuws"
+          }
+        }
+      }
+    },
+    "Nieuws laden mislukt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Could not load the news"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nieuws laden mislukt"
           }
         }
       }
@@ -7753,6 +8127,23 @@
         }
       }
     },
+    "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police news: source politie.nl. Images with police news are by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn van A-Alerts."
+          }
+        }
+      }
+    },
     "Politiebureau": {
       "extractionState": "manual",
       "localizations": {
@@ -7817,6 +8208,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging."
+          }
+        }
+      }
+    },
+    "Politienieuws": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police news"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politienieuws"
           }
         }
       }
@@ -9113,6 +9521,23 @@
         }
       }
     },
+    "Tijdlijn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Timeline"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tijdlijn"
+          }
+        }
+      }
+    },
     "Tik om te kopiëren": {
       "extractionState": "manual",
       "localizations": {
@@ -9997,6 +10422,23 @@
         }
       }
     },
+    "Vermist Kind": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Missing Child"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vermist Kind"
+          }
+        }
+      }
+    },
     "Vermist Kind Alert": {
       "extractionState": "manual",
       "localizations": {
@@ -10622,6 +11064,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Wat klopt er niet?"
+          }
+        }
+      }
+    },
+    "Weer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weer"
           }
         }
       }
@@ -11306,6 +11765,23 @@
         }
       }
     },
+    "afgerond": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ended"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "afgerond"
+          }
+        }
+      }
+    },
     "alle plaatsen": {
       "extractionState": "manual",
       "localizations": {
@@ -11459,6 +11935,23 @@
         }
       }
     },
+    "gisteren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "yesterday"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "gisteren"
+          }
+        }
+      }
+    },
     "gisteren %lld": {
       "extractionState": "manual",
       "localizations": {
@@ -11472,6 +11965,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "gisteren %lld"
+          }
+        }
+      }
+    },
+    "laatste": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "latest"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "laatste"
+          }
+        }
+      }
+    },
+    "loopt nog": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ongoing"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "loopt nog"
           }
         }
       }
@@ -11578,6 +12105,23 @@
         }
       }
     },
+    "nieuwste boven": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "newest on top"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "nieuwste boven"
+          }
+        }
+      }
+    },
     "nog %lld min · ± %@": {
       "extractionState": "manual",
       "localizations": {
@@ -11625,6 +12169,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "onbekend"
+          }
+        }
+      }
+    },
+    "opgeheven": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "lifted"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "opgeheven"
           }
         }
       }
@@ -11799,6 +12360,23 @@
         }
       }
     },
+    "vandaag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "today"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "vandaag"
+          }
+        }
+      }
+    },
     "vertrek over %lld min": {
       "extractionState": "manual",
       "localizations": {
@@ -11914,6 +12492,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "zo"
+          }
+        }
+      }
+    },
+    "zojuist": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "just now"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "zojuist"
           }
         }
       }

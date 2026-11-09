@@ -67,6 +67,7 @@ struct TVRootView: View {
             TabView(selection: $tab) {
                 MeldkamerView().tabItem { Label(L("Meldkamer"), systemImage: "light.beacon.max") }.tag(0)
                 TVWaarschuwingenView().tabItem { Label(L("Waarschuwingen"), systemImage: "exclamationmark.triangle") }.tag(3)
+                TVNieuwsView().tabItem { Label(L("Nieuws"), systemImage: "newspaper") }.tag(4)
                 TVStatsView().tabItem { Label(L("Statistieken"), systemImage: "chart.bar.xaxis") }.tag(1)
                 TVSettingsView().tabItem { Label(L("Instellingen"), systemImage: "gearshape") }.tag(2)
             }
@@ -89,7 +90,7 @@ struct TVRootView: View {
             guard args.contains("-AAlertsScreenshots") else { return }
             tv.alarmScreen = false
             if let i = args.firstIndex(of: "-AAlertsTab"), i + 1 < args.count {
-                tab = ["meldkamer": 0, "waarschuwingen": 3, "statistieken": 1, "instellingen": 2][args[i + 1]] ?? 0
+                tab = ["meldkamer": 0, "waarschuwingen": 3, "nieuws": 4, "statistieken": 1, "instellingen": 2][args[i + 1]] ?? 0
             }
         }
         #endif

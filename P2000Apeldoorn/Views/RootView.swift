@@ -128,6 +128,7 @@ struct RootView: View {
                 try? await Task.sleep(for: .seconds(4))
                 if let guid = value("-AAlertsMelding") { router.open(guid: guid) }
                 if let id = value("-AAlertsWaarschuwing") { router.openWaarschuwing(id: id) }
+                if let id = value("-AAlertsNieuws") { router.openNieuws(id: id) }
                 if let id = value("-AAlertsHeli") { router.volg(heli: id) }
             }
         }
@@ -137,7 +138,10 @@ struct RootView: View {
                 switch doel {
                 case .melding(let guid): router.open(guid: guid)
                 case .waarschuwing(let id): router.openWaarschuwing(id: id)
+                case .nieuws(let id): router.openNieuws(id: id)
                 }
+            } else if url.host == "nieuws", url.lastPathComponent.count > 3 {
+                router.openNieuws(id: url.lastPathComponent)
             } else if url.host == "waarschuwing", url.lastPathComponent.count > 3 {
                 router.openWaarschuwing(id: url.lastPathComponent)
             } else if let guid = AppGroup.guid(from: url) {
@@ -177,6 +181,9 @@ struct MainTabs: View {
             }
             Tab(L("Kaart"), systemImage: "map", value: Router.Destination.kaart) {
                 MapScreen()
+            }
+            Tab(L("Nieuws"), systemImage: "newspaper", value: Router.Destination.nieuws) {
+                NieuwsView()
             }
             Tab(L("Statistieken"), systemImage: "chart.bar.xaxis", value: Router.Destination.statistieken) {
                 StatsView()

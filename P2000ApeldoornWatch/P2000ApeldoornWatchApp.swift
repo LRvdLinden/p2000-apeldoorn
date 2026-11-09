@@ -32,6 +32,7 @@ struct WatchRootView: View {
             NavigationStack {
                 TabView(selection: $pagina) {
                     WatchListView().tag(0)
+                    WatchNieuwsView().tag(2)
                     WatchStatsView().tag(1)
                 }
                 .tabViewStyle(.verticalPage)

@@ -210,6 +210,9 @@ enum PushManager {
                 // 2.0.1: missing children (the server only sends these to apps that pass them).
                 "amber": s.pushAmber,
                 "vermistkind": s.pushVermistKind,
+                // Tab Nieuws (build 67): liveblog messages from A-Alerts and new police news.
+                "nieuwsLiveblog": s.pushNieuwsLiveblog,
+                "nieuwsPolitie": s.pushNieuwsPolitie,
             ] as [String: Any],
             // Followed capcodes: push also outside places, radius and profiles.
             "capcodes": Array(s.volgCapcodes.keys).sorted(),
@@ -266,6 +269,17 @@ enum PushManager {
     /// Set by the app; called with the warning id when an NL-Alert, Burgernet or KNMI notification is tapped.
     static var openWaarschuwing: ((String) -> Void)?
 
+    /// Set by the app; called with the news id when a liveblog or police news notification is tapped.
+    static var openNieuws: ((String) -> Void)?
+
+    nonisolated static func nieuwsID(from data: [AnyHashable: Any]) -> String? {
+        (data["nieuws"] as? String).flatMap { $0.isEmpty ? nil : $0 }
+    }
+
+    @MainActor static func route(nieuws id: String) {
+        if let open = openNieuws { open(id) } else { Router.shared.openNieuws(id: id) }
+    }
+
     nonisolated static func waarschuwingID(from data: [AnyHashable: Any]) -> String? {
         (data["waarschuwing"] as? String).flatMap { $0.isEmpty ? nil : $0 }
     }
@@ -305,6 +319,7 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
         // Only plain values cross to the main queue.
         let guid = PushManager.guid(from: info)
         let waarschuwing = PushManager.waarschuwingID(from: info)
+        let nieuws = PushManager.nieuwsID(from: info)
         let lat = PushManager.number(info["lat"]), lon = PushManager.number(info["lon"])
         DispatchQueue.main.async {
             MainActor.assumeIsolated {
@@ -316,7 +331,8 @@ final class NotificationDelegate: NSObject, UNUserNotificationCenterDelegate {
                     else if let waarschuwing { PushManager.route(waarschuwing: waarschuwing) }
                     else if let guid { PushManager.route(melding: guid) }
                 default:
-                    if let waarschuwing { PushManager.route(waarschuwing: waarschuwing) }
+                    if let nieuws { PushManager.route(nieuws: nieuws) }
+                    else if let waarschuwing { PushManager.route(waarschuwing: waarschuwing) }
                     else if let guid { PushManager.route(melding: guid) }
                 }
             }

@@ -516,6 +516,20 @@ struct NotificationSettingsView: View {
                 ProfielenSection()
                 GrootIncidentSection()
 
+                // Tab Nieuws: liveblog messages from A-Alerts (on) and new police news (off).
+                Section {
+                    Toggle(isOn: $settings.pushNieuwsLiveblog) {
+                        SettingsRow(icon: "dot.radiowaves.left.and.right", color: .red, title: L("Liveblogs"))
+                    }
+                    Toggle(isOn: $settings.pushNieuwsPolitie) {
+                        SettingsRow(icon: "newspaper.fill", color: .blue, title: L("Politienieuws"))
+                    }
+                } header: {
+                    Text(L("Nieuws"))
+                } footer: {
+                    Text(L("Liveblogs: een pushmelding als A-Alerts een bericht toevoegt aan een liveblog van een melding die je volgt. Politienieuws: nieuwe berichten van de politie over je plaatsen."))
+                }
+
                 Section {
                     NavigationLink {
                         RadiusSettingsView()

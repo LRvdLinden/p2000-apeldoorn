@@ -77,7 +77,7 @@ final class Router {
     static let shared = Router()
 
     enum Destination: String, Hashable, CaseIterable {
-        case pager, kaart, statistieken, instellingen
+        case pager, kaart, nieuws, statistieken, instellingen
     }
 
     var tab: Destination = .pager
@@ -92,6 +92,16 @@ final class Router {
         presented = nil
         volgHeli = id
         tab = .kaart
+    }
+
+    /// News item to open in the tab Nieuws (push, share link).
+    var nieuwsOpen: String?
+
+    func openNieuws(id: String) {
+        presented = nil
+        presentedWaarschuwing = nil
+        tab = .nieuws
+        nieuwsOpen = id
     }
 
     func openWaarschuwing(id: String) {
@@ -116,6 +126,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
         MainActor.assumeIsolated {
             PushManager.openMelding = { Router.shared.open(guid: $0) }
             PushManager.openWaarschuwing = { Router.shared.openWaarschuwing(id: $0) }
+            PushManager.openNieuws = { Router.shared.openNieuws(id: $0) }
             PushManager.start()
             ReviewManager.registerLaunch()
         }
@@ -138,6 +149,7 @@ final class MacAppDelegate: NSObject, NSApplicationDelegate {
         MainActor.assumeIsolated {
             PushManager.openMelding = { Router.shared.open(guid: $0) }
             PushManager.openWaarschuwing = { Router.shared.openWaarschuwing(id: $0) }
+            PushManager.openNieuws = { Router.shared.openNieuws(id: $0) }
             PushManager.start()
             ReviewManager.registerLaunch()
         }

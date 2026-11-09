@@ -158,6 +158,10 @@ struct OnboardingView: View {
                 schakelaar(L("Burgernet"), sub: L("Vermissingen en zoekacties"), aan: Binding(get: { settings.pushBurgernet }, set: { settings.pushBurgernet = $0 })) { BronIcoon(bron: .burgernet, size: 28) }
                 schakelaar("AMBER Alert", sub: L("Kind vermist en in levensgevaar, heel Nederland"), aan: Binding(get: { settings.pushAmber }, set: { settings.pushAmber = $0 })) { BronIcoon(bron: .amber, size: 28) }
                 schakelaar(L("Vermist Kind Alert"), sub: L("Vermist kind in het werkgebied (alle plaatsen en buurtschappen)"), aan: Binding(get: { settings.pushVermistKind }, set: { settings.pushVermistKind = $0 })) { BronIcoon(bron: .vermistkind, size: 28) }
+                schakelaar(L("Liveblogs"), sub: L("Aanvullingen van A-Alerts op een liveblog (tab Nieuws)"), aan: Binding(get: { settings.pushNieuwsLiveblog }, set: { settings.pushNieuwsLiveblog = $0 })) {
+                    Image(systemName: "dot.radiowaves.left.and.right").font(.system(size: 15, weight: .bold)).foregroundStyle(.white)
+                        .frame(width: 28, height: 28).background(Color.red, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                }
                 VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 10) {
                         BronIcoon(bron: .knmi, size: 28)
