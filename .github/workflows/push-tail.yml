@@ -6,23 +6,17 @@ on:
 jobs:
   probe:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: worker
-    env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
       - run: |
           set +e
-          npm ci >/dev/null 2>&1
-          V=$(npx wrangler deployments status 2>&1 | grep -oE '[0-9a-f]{8}-[0-9a-f-]{27}' | head -1); echo "versie $V"
-          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/p2000-apeldoorn-api/content/v2?version=$V" -o content.bin
-          grep -a -o '.\{120\}nieuws112.\{60\}' content.bin | head -3
-          grep -a -c 'path === "/health"' content.bin
           A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          curl -s -H "Cloudflare-Workers-Version-Overrides: p2000-apeldoorn-api=\"$V\"" "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('override keys',list(d)[-4:])"
-          curl -s -D - "$A/health?t=$RANDOM" -o /dev/null | head -20
-          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/p2000-apeldoorn-api/settings" | python3 -c "import json,sys;d=json.load(sys.stdin).get('result',{});print({k:d.get(k) for k in ['placement','compatibility_date','usage_model','tail_consumers','logpush']})"
-          curl -s -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/p2000-apeldoorn-api/subdomain" | head -c 300; echo
+          for i in $(seq 1 30); do
+            s=$(curl -s "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('NIEUW' if 'nieuws112' in d else 'OUD')")
+            echo "$(date +%H:%M) $s"; [ "$s" = NIEUW ] && break; sleep 60
+          done
+          sleep 150
+          curl -s "$A/health?t=$RANDOM" | python3 -c "import json,sys;d=json.load(sys.stdin);print('112',json.dumps(d.get('nieuws112'))[:600])"
+          curl -s "$A/v1/nieuws?soort=regionaal&limit=30&t=$RANDOM" | python3 -c "
+          import json,sys;d=json.load(sys.stdin);print(len(d))
+          for x in d: print(x['at'][:16],x.get('plaats'),x.get('categorie'),x['afbeelding'].split('/')[-1],'|',x['titel'][:60],'|',(x.get('intro') or '')[:50])"
