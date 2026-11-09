@@ -63,7 +63,7 @@
 </style>
 <script src="/config.js?v=57"></script>
 <script src="/assets/js/consent.js?v=57" defer></script>
-<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://a-alerts.nl/android/","url":"https://a-alerts.nl/android/","name":"A-Alerts voor Android","inLanguage":"nl-NL","isPartOf":{"@id":"https://a-alerts.nl/#website"}},{"@type":"MobileApplication","name":"A-Alerts","operatingSystem":"Android 7.0 of nieuwer","applicationCategory":"NewsApplication","downloadUrl":"https://a-alerts.nl/downloads/A-Alerts.apk","softwareVersion":"2.0.0","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"publisher":{"@id":"https://a-alerts.nl/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"A-Alerts","item":"https://a-alerts.nl/"},{"@type":"ListItem","position":2,"name":"Android","item":"https://a-alerts.nl/android/"}]}]}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebPage","@id":"https://a-alerts.nl/android/","url":"https://a-alerts.nl/android/","name":"A-Alerts voor Android","inLanguage":"nl-NL","isPartOf":{"@id":"https://a-alerts.nl/#website"}},{"@type":"MobileApplication","name":"A-Alerts","operatingSystem":"Android 7.0 of nieuwer","applicationCategory":"NewsApplication","downloadUrl":"https://a-alerts.nl/downloads/A-Alerts.apk","softwareVersion":"2.0.1","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"publisher":{"@id":"https://a-alerts.nl/#org"}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"A-Alerts","item":"https://a-alerts.nl/"},{"@type":"ListItem","position":2,"name":"Android","item":"https://a-alerts.nl/android/"}]}]}</script>
 </head>
 <body>
 <header>
@@ -76,10 +76,10 @@
       <img src="/assets/img/aalerts-icon-180.png" alt="" width="72" height="72">
       <div>
         <h1>A-Alerts voor Android <span class="beta">BETA</span></h1>
-        <div class="meta">Versie <span id="ver">2.0.0</span> · Android 7.0 of nieuwer<span id="size"></span></div>
+        <div class="meta">Versie <span id="ver">2.0.1</span> · Android 7.0 of nieuwer<span id="size"></span></div>
       </div>
     </div>
-    <p>Live meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn, met NL-Alert, Burgernet, AMBER Alert, Vermist Kind Alert, KNMI, de kaart met live helikopters en pushmeldingen. De Android-app staat (nog) niet in de Play Store: je installeert hem hier als APK-bestand. Lees eerst de stappen hieronder.</p>
+    <p>Live meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn, met NL-Alert, Burgernet, AMBER Alert, Vermist Kind Alert, KNMI, het tabblad Nieuws (liveblogs, politieberichten, 112 Nieuws en weer), de kaart met live helikopters en pushmeldingen. De Android-app staat (nog) niet in de Play Store: je installeert hem hier als APK-bestand. Lees eerst de stappen hieronder.</p>
   </section>
 
   <section class="card">
@@ -132,7 +132,7 @@
   }
   // Count the download (anonymous, without cookies) – shown in the beheer.
   document.getElementById("apk").addEventListener("click", () => {
-    const body = JSON.stringify({ app: "android", version: info ? `${info.version} (${info.build})` : "2.0.0" });
+    const body = JSON.stringify({ app: "android", version: info ? `${info.version} (${info.build})` : "2.0.1" });
     try { navigator.sendBeacon(`${API}/v1/downloads`, new Blob([body], { type: "text/plain" })) || fetch(`${API}/v1/downloads`, { method: "POST", body, keepalive: true }); } catch {}
   });
 </script>
