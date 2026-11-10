@@ -1,0 +1,28 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+permissions: { contents: write }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir s && cd s && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > t.js <<'X'
+          const { chromium } = require('playwright');
+          (async () => { const b = await chromium.launch(); const errs = [];
+            const run = async (n, url, w, dark, consent) => {
+              const c = await b.newContext({ viewport: { width: w, height: 1000 }, colorScheme: dark ? 'dark' : 'light', deviceScaleFactor: 2 });
+              if (consent) await c.addInitScript(() => localStorage.setItem('p2000_consent', JSON.stringify({ choice: 'all', at: Date.now() })));
+              const p = await c.newPage(); p.on('pageerror', (e) => errs.push(n + ': ' + e.message)); p.on('console', (m) => { if (m.type() === 'error') errs.push(n + ' console: ' + m.text().slice(0, 200)); });
+              await p.goto(url, { waitUntil: 'networkidle' }).catch(() => {}); await p.waitForTimeout(9000);
+              await p.screenshot({ path: n + '.png', fullPage: true }); await c.close(); };
+            await run('nieuws-licht', 'https://a-alerts.nl/nieuws/', 1280, false, true);
+            await run('nieuws-donker', 'https://a-alerts.nl/nieuws/', 1280, true, true);
+            await run('nieuws-mobiel', 'https://a-alerts.nl/nieuws/', 390, false, true);
+            await run('widget-donker', 'https://a-alerts.nl/widget/?w=kaart,verkeer&thema=auto&site=test-voorbeeld.nl', 380, true, true);
+            await run('widget-zonder-toestemming', 'https://a-alerts.nl/widget/?w=kaart,verkeer&thema=licht&site=test-voorbeeld.nl', 380, false, false);
+            require('fs').writeFileSync('fouten.txt', errs.join('\n')); await b.close(); })();
+          X
+          node t.js; cat fouten.txt; rm -rf node_modules package*.json t.js
+          git init -q -b ndw-samples && git add . && git -c user.name=probe -c user.email=p@p commit -qm shots
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ndw-samples
