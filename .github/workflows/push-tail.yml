@@ -1,0 +1,14 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          curl -s https://opendata.ndw.nu/ | sed 's/<[^>]*>/ /g' | grep -iE "\.gz|\.xml|\.json|\.zip" | tr -s ' ' | head -80
+          mkdir s; cd s
+          for f in srti.xml.gz actuele_statusberichten.xml.gz incidents.xml.gz wegwerkzaamheden.xml.gz; do curl -s -o $f https://opendata.ndw.nu/$f; echo "$f $(stat -c%s $f) $(zcat $f 2>/dev/null | wc -c)"; done
+          zcat srti.xml.gz | head -c 4000; echo; echo =====
+          zcat actuele_statusberichten.xml.gz | head -c 5000; echo
+      - uses: actions/upload-artifact@v4
+        with: { name: s, path: s }
