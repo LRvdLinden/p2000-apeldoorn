@@ -1,0 +1,9 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          sleep 70
+          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/status" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const d=JSON.parse(s);for(const g of d.groepen||d.groups||[]){for(const o of g.onderdelen||[])console.log("status",g.id,o.id,o.staat,o.detail||"")}})'
