@@ -13,7 +13,7 @@ const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind"];
 const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
 // New version of the images (browsers keep them 30 days): raise when an image is replaced under the same name.
-const IMG_V = "?v=2";
+const IMG_V = "?v=3";
 const SITE = "https://a-alerts.nl/nieuws/";
 const DAY = 86_400_000;
 const CENTRUM = { lat: 52.2112, lon: 5.9699 };
@@ -361,7 +361,7 @@ export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer =
     if (w.bron === "knmi") {
       const a = weerArtikel(w);
       await upsertNieuws(env, { id: await nieuwsId("w", w.id), soort: "weer", bron: "knmi", ref: w.id, titel: a.titel, intro: a.intro, plaats: "Gelderland",
-        url: w.link, categorie: null, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas, weer: a.weer } }, now);
+        url: w.link, categorie: a.weer.icoon, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas, weer: a.weer } }, now);
     } else if (LIVE_BRONNEN.includes(w.bron)) {
       const l = liveblogVan(w);
       const nid = await nieuwsId("l", w.id);
@@ -400,10 +400,15 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
     const eigen = stock.get(cat) || stock.get("algemeen");
     return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}${POLITIE_FOTOS[cat] ? kiesOpId(POLITIE_FOTOS[cat], row.id) : `politie-${cat}`}.webp${IMG_V}`;
   }
-  if (row.soort === "weer") return `${IMG}knmi.webp`;
+  // Weather: the banner of the code and the kind of weather (knmi-<code>-<icon>.webp), green once lifted.
+  if (row.soort === "weer") {
+    const code = row.status === "afgerond" || row.niveau === "green" ? "green" : ["yellow", "orange", "red"].includes(row.niveau) ? row.niveau : "yellow";
+    return `${IMG}knmi-${code}-${WEER_ICONEN.includes(row.categorie) ? row.categorie : "warning"}.webp${IMG_V}`;
+  }
   if (row.soort === "regionaal") return foto112(row);
-  return `${IMG}${row.bron}.webp`;
+  return `${IMG}${row.bron}.webp${IMG_V}`;
 }
+const WEER_ICONEN = ["fog", "wind", "thunderstorm", "rain", "snow", "ice", "heat", "cold", "waterspout", "warning"];
 
 function samenvatting(row, origin, stock, extra = {}) {
   return {

@@ -601,8 +601,8 @@ async function nieuwsRun(env, budget) {
     await kvSet(env, "nieuws_v2", "1");
   }
   // One time: existing weather articles in the new layout (like knmi.nl).
-  if (!(await kvGet(env, "nieuws_weer_v3"))) {
-    try { await syncWaarschuwingen(env, kv, Date.now(), { alleWeer: true }); await kvSet(env, "nieuws_weer_v3", "1"); }
+  if (!(await kvGet(env, "nieuws_weer_v4"))) {
+    try { await syncWaarschuwingen(env, kv, Date.now(), { alleWeer: true }); await kvSet(env, "nieuws_weer_v4", "1"); }
     catch (e) { console.error("[nieuws-weer-v3]", e.message || e); }
   }
   try { await syncWaarschuwingen(env, kv); } catch (e) { console.error("[nieuws-sync]", e.message || e); }
