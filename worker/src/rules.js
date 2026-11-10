@@ -178,12 +178,15 @@ const capitalize = (s) => String(s || "").split(" ").map((w) => w.charAt(0).toUp
 
 export function payloadFor(m, lang = "nl") {
   const L = LABELS[lang] || LABELS.nl;
-  const plaats = [m.locatie, capitalize(m.stad)].filter(Boolean).join(", ") || "Apeldoorn";
-  const prioLine = m.prioriteit ? `${L.prio} ${m.prioriteit}${m.categorie ? ` - ${m.categorie}` : ""}` : (m.categorie || "");
   const urgent = isUrgent(m);
+  // Short and like a pager: "Ambulance • A2" and the P2000 message itself with the time ("A2 Ambu 06122 - Apeldoorn Rit 346089 (07:27:14)").
+  const prio = String(m.prioriteit || "").toUpperCase();
+  const tekst = String(m.full_melding || "").trim() || [prio, m.title].filter(Boolean).join(" ");
+  const tijd = m.datum ? new Date(typeof m.datum === "number" ? m.datum : Date.parse(m.datum))
+    .toLocaleTimeString("nl-NL", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" }) : "";
   return {
     aps: {
-      alert: { title: `${L[m.dienst] || L.onbekend} · ${plaats}`, body: [m.title, prioLine].filter(Boolean).join("\n") },
+      alert: { title: [L[m.dienst] || L.onbekend, prio].filter(Boolean).join(" • "), body: tijd && !/Invalid/.test(tijd) ? `${tekst} (${tijd})` : tekst },
       sound: "default",
       "thread-id": m.dienst,
       "interruption-level": urgent ? "time-sensitive" : "active",

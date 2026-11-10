@@ -57,8 +57,8 @@ test("matching incl. radius and quiet hours", () => {
 
 test("payload", () => {
   const p = payloadFor(fromFeed(feed), "nl");
-  assert.equal(p.aps.alert.title, "Ambulance · Apeldoorn");
-  assert.match(p.aps.alert.body, /Prioriteit A1 - Ambulance spoedurgentie/);
+  assert.equal(p.aps.alert.title, "Ambulance • A1");
+  assert.match(p.aps.alert.body, /^A1 .+ \(\d\d:\d\d:\d\d\)$/);
   assert.equal(p.aps["interruption-level"], "time-sensitive");
   assert.equal(p.guid, feed.uid);
 });
