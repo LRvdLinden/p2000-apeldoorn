@@ -528,6 +528,23 @@
         }
       }
     },
+    "+%lld min": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld min"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "+%lld min"
+          }
+        }
+      }
+    },
     "1 uur": {
       "extractionState": "manual",
       "localizations": {
@@ -953,6 +970,40 @@
         }
       }
     },
+    "Afgesloten voor evenement": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed for an event"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgesloten voor evenement"
+          }
+        }
+      }
+    },
+    "Afgesloten voor werkzaamheden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed for roadworks"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgesloten voor werkzaamheden"
+          }
+        }
+      }
+    },
     "Afloopbericht": {
       "extractionState": "manual",
       "localizations": {
@@ -966,6 +1017,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afloopbericht"
+          }
+        }
+      }
+    },
+    "Afsluiting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closure"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afsluiting"
           }
         }
       }
@@ -2020,6 +2088,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron"
+          }
+        }
+      }
+    },
+    "Bron: %@ via NDW": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: %@ via NDW"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: %@ via NDW"
           }
         }
       }
@@ -3656,6 +3741,23 @@
         }
       }
     },
+    "File": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traffic jam"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "File"
+          }
+        }
+      }
+    },
     "Filter op": {
       "extractionState": "manual",
       "localizations": {
@@ -3703,6 +3805,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Filters uit de app gebruiken"
+          }
+        }
+      }
+    },
+    "Flitser": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed camera"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flitser"
+          }
+        }
+      }
+    },
+    "Flitsers (vast)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Speed cameras (fixed)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Flitsers (vast)"
           }
         }
       }
@@ -6070,6 +6206,23 @@
         }
       }
     },
+    "Lading of vloeistof op de weg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Load or spillage on the road"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lading of vloeistof op de weg"
+          }
+        }
+      }
+    },
     "Landelijke oproep van de politie als een kind vermist is en in levensgevaar kan zijn.": {
       "extractionState": "manual",
       "localizations": {
@@ -6100,6 +6253,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Landen in je zone"
+          }
+        }
+      }
+    },
+    "Langzaam rijdend verkeer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Slow traffic"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Langzaam rijdend verkeer"
           }
         }
       }
@@ -6406,6 +6576,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Made & Powered by"
+          }
+        }
+      }
+    },
+    "Max. %lld km/u": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max. %lld km/h"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Max. %lld km/u"
           }
         }
       }
@@ -7430,6 +7617,23 @@
         }
       }
     },
+    "Obstakel op de weg": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obstacle on the road"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Obstakel op de weg"
+          }
+        }
+      }
+    },
     "Offline": {
       "extractionState": "manual",
       "localizations": {
@@ -7579,6 +7783,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Onderweg naar de melding in %@"
+          }
+        }
+      }
+    },
+    "Ongeval": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeval"
+          }
+        }
+      }
+    },
+    "Ongeval, rijstrook dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accident, lane closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeval, rijstrook dicht"
+          }
+        }
+      }
+    },
+    "Ongeval, weg afgesloten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Accident, road closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ongeval, weg afgesloten"
           }
         }
       }
@@ -8059,6 +8314,23 @@
         }
       }
     },
+    "Pech of obstakel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Breakdown or obstacle"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pech of obstakel"
+          }
+        }
+      }
+    },
     "Per discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -8123,6 +8395,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Periode"
+          }
+        }
+      }
+    },
+    "Pijlwagen bij werk of incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Arrow vehicle at works or incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pijlwagen bij werk of incident"
           }
         }
       }
@@ -8705,6 +8994,57 @@
         }
       }
     },
+    "Rijstroken verlegd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lanes moved"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rijstroken verlegd"
+          }
+        }
+      }
+    },
+    "Rijstrook dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lane closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rijstrook dicht"
+          }
+        }
+      }
+    },
+    "Rijstrook dicht voor werkzaamheden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lane closed for roadworks"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rijstrook dicht voor werkzaamheden"
+          }
+        }
+      }
+    },
     "Risico's en advies": {
       "extractionState": "manual",
       "localizations": {
@@ -9062,6 +9402,23 @@
         }
       }
     },
+    "Sinds %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Since %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sinds %@"
+          }
+        }
+      }
+    },
     "Sluit": {
       "extractionState": "manual",
       "localizations": {
@@ -9330,6 +9687,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stille uren"
+          }
+        }
+      }
+    },
+    "Stilstaand verkeer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stationary traffic"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stilstaand verkeer"
+          }
+        }
+      }
+    },
+    "Stilstaand voertuig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stationary vehicle"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Stilstaand voertuig"
           }
         }
       }
@@ -9895,6 +10286,23 @@
         }
       }
     },
+    "Tot %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Until %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tot %@"
+          }
+        }
+      }
+    },
     "Tot morgen 07:00": {
       "extractionState": "manual",
       "localizations": {
@@ -9908,6 +10316,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tot morgen 07:00"
+          }
+        }
+      }
+    },
+    "Trajectcontrole": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Average speed check"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trajectcontrole"
           }
         }
       }
@@ -10354,6 +10779,23 @@
         }
       }
     },
+    "Vaste flitser uit OpenStreetMap. Mobiele controles staan in geen enkele open bron.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fixed speed camera from OpenStreetMap. Mobile checks are not in any open source."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vaste flitser uit OpenStreetMap. Mobiele controles staan in geen enkele open bron."
+          }
+        }
+      }
+    },
     "Veeg een melding naar rechts of open hem en tik op het bladwijzer-icoon.": {
       "extractionState": "manual",
       "localizations": {
@@ -10452,6 +10894,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Vergrendeld – ontgrendel met %@"
+          }
+        }
+      }
+    },
+    "Verkeer (NDW)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traffic (NDW)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkeer (NDW)"
           }
         }
       }
@@ -10643,6 +11102,23 @@
         }
       }
     },
+    "Versmalde rijstroken": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Narrowed lanes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Versmalde rijstroken"
+          }
+        }
+      }
+    },
     "Verstoord": {
       "extractionState": "manual",
       "localizations": {
@@ -10809,6 +11285,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voertuig"
+          }
+        }
+      }
+    },
+    "Voertuig met pech": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Broken-down vehicle"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voertuig met pech"
+          }
+        }
+      }
+    },
+    "Voertuig met pech, rijstrook dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Broken-down vehicle, lane closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voertuig met pech, rijstrook dicht"
           }
         }
       }
@@ -11221,6 +11731,23 @@
         }
       }
     },
+    "Weg afgesloten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Road closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weg afgesloten"
+          }
+        }
+      }
+    },
     "Welke helikopters": {
       "extractionState": "manual",
       "localizations": {
@@ -11285,6 +11812,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Werkt"
+          }
+        }
+      }
+    },
+    "Werkzaamheden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Roadworks"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werkzaamheden"
           }
         }
       }

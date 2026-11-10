@@ -16,6 +16,10 @@ De app van [a-alerts.nl](https://a-alerts.nl) voor **iPhone, iPad, Mac, Apple Wa
 
 Tabblad Nieuws (iPhone, iPad, Mac, Apple Watch, Apple TV, Android en a-alerts.nl/nieuws): politieberichten (bron politie.nl), 112 Nieuws (titel en intro, met toestemming), liveblogs bij Burgernet, AMBER Alert en Vermist Kind Alert, een artikel bij elke Burgernet-oproep, AMBER Alert, Vermist Kind Alert en NL-Alert, en een weerartikel bij elke KNMI-waarschuwing. In beheer zet je per artikel de schakelaar Liveblog aan (standaard uit): dan staat er "Liveblog" bij, LIVEBLOG op de afbeelding en valt het onder het filter Liveblogs. Een weerartikel is opgebouwd zoals de waarschuwing op knmi.nl: kaart van heel Nederland met de gebieden in hun code en het tijdvenster ("maandag 23:30 tot dinsdag 12:00"), de kop van het KNMI, de code, de uitleg, de uitgiftetijd, Risico's en advies en de details.
 
+## Verkeer
+
+Kaartlaag **Verkeer** (iPhone, iPad, Mac, Apple TV, Android, a-alerts.nl pager en meldkamer): afsluitingen en werkzaamheden, ongevallen en pech, en files met vertraging in de regio Apeldoorn, uit de open data van de NDW (`actueel_beeld.xml.gz`: Rijkswaterstaat, provincie en gemeenten), met straatnamen via de PDOK Locatieserver. Laag **Flitsers**: vaste flitsers en trajectcontroles uit OpenStreetMap (mobiele controles staan in geen enkele open bron). Het NDW-bestand is te groot voor de Worker (CPU-limiet), daarom leest de aparte service [a-alerts_file_verkeer_info](https://github.com/LRvdLinden/a-alerts_file_verkeer_info) op Koyeb (gratis) het bestand en vraagt de Worker elke minuut het kleine resultaat op (`GET /v1/verkeer`). Secrets van de Worker: `VERKEER_URL` en `VERKEER_TOKEN`; zonder die secrets is de laag leeg.
+
 ## Functies
 
 - **Animated splash**: het schild valt in beeld, pager-pulsen golven uit en daarna gaat de app open.
@@ -56,6 +60,7 @@ Er is geen server om te beheren: de API draait als **Cloudflare Worker** (`worke
   - `GET /v1/meldingen` en `GET /v1/meldingen/:guid`, `POST /v1/meldingen/:guid/view`
   - `GET /v1/meldingen/:guid/weather` (WeatherKit) en `GET /v1/mapkit-token`
   - `GET /v1/content/privacy|terms|disclaimer` en `GET /v1/changelog`
+  - `GET /v1/verkeer`: verkeer (NDW) en vaste flitsers (OSM) in de regio, van de verkeersservice op Koyeb
   - `POST /v1/devices`, `DELETE /v1/devices/:token`, `POST /v1/devices/:token/test`
   - `POST /v1/broadcast` met `Authorization: Bearer ADMIN_TOKEN`
 - Pushmeldingen gaan rechtstreeks naar APNs en houden rekening met plaatsen, disciplines, prioriteiten, stille modus, kritieke meldingen en de radius. Het gratis plan staat 50 uitgaande verzoeken per cron-run toe; meer pushes dan dat gaan via een wachtrij (`outbox`) mee met de volgende minuut. Met Workers Paid ($5 per maand) is die limiet veel hoger.

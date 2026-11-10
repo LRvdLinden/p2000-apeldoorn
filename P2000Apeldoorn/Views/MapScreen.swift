@@ -39,6 +39,9 @@ struct MapScreen: View {
     @State private var selectedLocatie: Locatie?
     @Environment(\.colorScheme) private var colorScheme
     @State private var radar = RadarStore.shared
+    @State private var verkeer = VerkeerStore.shared
+    @State private var selectedVerkeer: VerkeerItem?
+    @State private var selectedFlitser: Flitser?
     /// Bumped on every camera move while the rain radar is on, so its image follows the map.
     @State private var cameraTeller = 0
     /// Long press on the map: make a helicopter zone or plan a route there.
@@ -102,6 +105,7 @@ struct MapScreen: View {
                 werkgebiedLaag
                 gebiedenLaag(ws)
                 kazernesLaag
+                verkeerLaag
                 ziekenhuizenLaag
                 meldingenLaag(groups)
                 waarschuwingMarkers(ws)
@@ -154,6 +158,29 @@ struct MapScreen: View {
                         nieuweZone = nil
                     }
                 }
+            }
+            // Traffic and speed cameras: every minute while one of the two layers is on.
+            .task(id: settings.laag(.verkeer) || settings.laag(.flitsers)) {
+                while settings.laag(.verkeer) || settings.laag(.flitsers), !Task.isCancelled {
+                    await verkeer.vernieuw()
+                    try? await Task.sleep(for: .seconds(60))
+                }
+            }
+            .sheet(item: $selectedVerkeer) { item in
+                ScrollView { VerkeerDetail(item: item) }
+                    .presentationDetents([.height(320), .large])
+            }
+            .sheet(item: $selectedFlitser) { f in
+                VStack(alignment: .leading, spacing: 10) {
+                    HStack(spacing: 12) {
+                        FlitserIcon(flitser: f, size: 40)
+                        Text(f.isTraject ? L("Trajectcontrole") : L("Flitser")).font(AppFont.heading(20))
+                    }
+                    if let m = f.max { Text(Lf("Max. %lld km/u", m)).font(AppFont.body(16, .semibold)) }
+                    Text(L("Vaste flitser uit OpenStreetMap. Mobiele controles staan in geen enkele open bron.")).font(AppFont.body(13)).foregroundStyle(.secondary)
+                }
+                .padding(20).frame(maxWidth: .infinity, alignment: .leading)
+                .presentationDetents([.height(200)])
             }
             .task(id: settings.laag(.buienradar)) {
                 while settings.laag(.buienradar), !Task.isCancelled {
@@ -308,6 +335,36 @@ struct MapScreen: View {
             MapCircle(center: CLLocationCoordinate2D(latitude: c.lat, longitude: c.lon), radius: settings.radiusKm * 1000)
                 .foregroundStyle(Theme.red.opacity(0.08))
                 .stroke(Theme.red, style: StrokeStyle(lineWidth: 2, dash: [8, 6]))
+        }
+    }
+
+    /// Traffic from the NDW: the route of closures, roadworks and jams as a line, every item as an icon; fixed speed cameras.
+    @MapContentBuilder private var verkeerLaag: some MapContent {
+        if settings.laag(.verkeer) {
+            ForEach(verkeer.items.filter { $0.route.count >= 2 }) { v in
+                MapPolyline(coordinates: v.route)
+                    .stroke(v.soort.kleur, style: StrokeStyle(lineWidth: v.soort == .file ? 6 : 4, lineCap: .round, lineJoin: .round,
+                                                               dash: v.soort == .afsluiting ? [6, 5] : []))
+            }
+            ForEach(verkeer.items) { v in
+                Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: .center) {
+                    VerkeerIcon(soort: v.soort, size: selectedVerkeer?.id == v.id ? 32 : 24)
+                        .onTapGesture { selectedVerkeer = v }
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityLabel([v.soort.label, v.titelLokaal, v.waar].compactMap { $0 }.joined(separator: ", "))
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+        if settings.laag(.flitsers) {
+            ForEach(verkeer.flitsers) { f in
+                Annotation(f.isTraject ? L("Trajectcontrole") : L("Flitser"), coordinate: f.coordinate, anchor: .center) {
+                    FlitserIcon(flitser: f, size: 20)
+                        .onTapGesture { selectedFlitser = f }
+                        .accessibilityAddTraits(.isButton)
+                }
+                .annotationTitles(.hidden)
+            }
         }
     }
 

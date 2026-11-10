@@ -425,6 +425,54 @@ export async function werkgebiedLijnen(mk, kleur = "#DC2626") {
     { style: new mk.Style({ strokeColor: kleur, strokeOpacity: 0.8, lineWidth: 2.5, lineDash: [10, 6] }) }));
 }
 
+// ------------------------------------------------------------------ traffic (NDW) and fixed speed cameras (OSM)
+
+const VERKEER_KLEUR = { ongeval: "#E3001B", afsluiting: "#C4001A", file: "#B0002E", pech: "#F08C00", werk: "#F5B400" };
+export const VERKEER_SOORT = { ongeval: "Ongeval", afsluiting: "Afsluiting", file: "File", pech: "Pech of obstakel", werk: "Werkzaamheden" };
+let verkeerCache = null;
+/** GET /v1/verkeer, at most once a minute. */
+export async function fetchVerkeer() {
+  if (verkeerCache && Date.now() - verkeerCache.at < 60_000) return verkeerCache.data;
+  const data = await fetch(`${API}/v1/verkeer`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json()).catch(() => null);
+  if (data) verkeerCache = { at: Date.now(), data };
+  return data || verkeerCache?.data || { items: [], flitsers: [] };
+}
+export const verkeerKleur = (v) => VERKEER_KLEUR[v.soort] || VERKEER_KLEUR.werk;
+export const verkeerIcon = (soort) => asset(`assets/img/verkeer_${soort}.png`);
+/** "2,4 km · +4 min" */
+export const verkeerFile = (v) => [v.lengte_km ? `${String(v.lengte_km).replace(".", ",")} km` : "", v.vertraging_min ? `+${v.vertraging_min} min` : ""].filter(Boolean).join(" · ");
+export function verkeerOverlay(mk, v) {
+  if (!Array.isArray(v.lijn) || v.lijn.length < 2) return null;
+  return new mk.PolylineOverlay(v.lijn.map(([lon, lat]) => new mk.Coordinate(lat, lon)), {
+    style: new mk.Style({ strokeColor: verkeerKleur(v), strokeOpacity: 0.9, lineWidth: v.soort === "file" ? 6 : 4, lineCap: "round", lineJoin: "round",
+      ...(v.soort === "afsluiting" ? { lineDash: [6, 5] } : {}) }),
+  });
+}
+function iconAnnotation(mk, lat, lon, src, title, size, onSelect, item) {
+  const a = new mk.Annotation(new mk.Coordinate(lat, lon), () => {
+    const el = document.createElement("div");
+    el.innerHTML = `<img src="${src}" alt="" style="width:${size}px;height:${size}px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">`;
+    el.title = title;
+    return el;
+  }, { calloutEnabled: false, title });
+  if (onSelect) a.addEventListener("select", () => onSelect(item));
+  return a;
+}
+export const verkeerAnnotation = (mk, v, onSelect) =>
+  iconAnnotation(mk, v.lat, v.lon, verkeerIcon(v.soort), [v.titel, v.weg, v.plaats].filter(Boolean).join(" · "), 24, onSelect, v);
+export const flitserAnnotation = (mk, f, onSelect) =>
+  iconAnnotation(mk, f.lat, f.lon, verkeerIcon("flitser"), f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser", 20, onSelect, f);
+/** Panel text of a traffic item (HTML). */
+export function verkeerHTML(v) {
+  const tijd = (t) => new Date(t).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: TZ });
+  const f = verkeerFile(v);
+  return `<p><img src="${verkeerIcon(v.soort)}" alt="" style="width:20px;height:20px;vertical-align:-4px"> <b style="color:${verkeerKleur(v)}">${esc(VERKEER_SOORT[v.soort] || "")}</b></p>
+    ${v.weg || v.plaats ? `<p>${esc([v.weg, v.plaats].filter(Boolean).join(", "))}</p>` : ""}
+    ${f ? `<p><b style="color:${verkeerKleur(v)}">${esc(f)}</b></p>` : ""}
+    ${v.opmerking ? `<p>${esc(v.opmerking)}</p>` : ""}
+    <p class="hint" style="margin:8px 0 0">${[v.start ? `Sinds ${tijd(v.start)}` : "", v.einde ? `tot ${tijd(v.einde)}` : "", v.bron ? `bron: ${esc(v.bron)} via NDW` : "bron: NDW"].filter(Boolean).join(" · ")}</p>`;
+}
+
 // ------------------------------------------------------------------ hospitals, bases, prediction, playback
 
 let locatiesCache = null;

@@ -8,7 +8,8 @@ import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=57";
+  fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=58";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -37,7 +38,7 @@ const state = {
   warnings: [],
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
   helis: [],
-  lagen: new Set(prefs.get("p2000.lagen", ["waarschuwingen", "knmi", "helikopters"])),
+  lagen: new Set(prefs.get("p2000.lagen", ["waarschuwingen", "knmi", "verkeer", "helikopters"])),
   view: "meldingen",
   history: null,
 };
@@ -860,6 +861,8 @@ const LAGEN = [
   ["helikopters", "Heli's", "icon_traumaheli", "#9333EA"],
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
+  ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B"],
+  ["flitsers", "Flitsers", "verkeer_flitser", "#1D1D1F"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626"],
   ["buienradar", "Buien", "icon_knmi", "#2563EB"],
 ];
@@ -887,7 +890,7 @@ function renderMapChips() {
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -992,6 +995,15 @@ async function renderMap() {
   }
   if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613")));
   if (state.lagen.has("ziekenhuizen")) (await fetchLocaties()).forEach((l) => extra.push(locatieAnnotation(mk, l, openLocatie)));
+  if (state.lagen.has("verkeer") || state.lagen.has("flitsers")) {
+    const vk = await fetchVerkeer();
+    if (state.lagen.has("verkeer")) (vk.items || []).forEach((v) => {
+      const ov = verkeerOverlay(mk, v);
+      if (ov) bigMap.addOverlay(ov);
+      extra.push(verkeerAnnotation(mk, v, openVerkeer));
+    });
+    if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
+  }
   heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
@@ -1087,6 +1099,18 @@ function openWeergave() {
 }
 
 /** Hospital or base tapped: what it is and which helicopter is probably heading there. */
+function openVerkeer(v) {
+  const box = $("clusterPanel");
+  box.innerHTML = `<header><b>${esc(v.titel)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>${verkeerHTML(v)}`;
+  box.hidden = false;
+}
+function openFlitser(f) {
+  const box = $("clusterPanel");
+  box.innerHTML = `<header><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser"}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    ${f.max ? `<p><b>Max. ${f.max} km/u</b></p>` : ""}
+    <p class="hint" style="margin:8px 0 0">Vaste flitser uit OpenStreetMap (© OpenStreetMap-bijdragers). Mobiele controles staan in geen enkele open bron.</p>`;
+  box.hidden = false;
+}
 function openLocatie(l) {
   const box = $("clusterPanel");
   const op = state.helis.filter((h) => h.voorspelling?.id === l.id);

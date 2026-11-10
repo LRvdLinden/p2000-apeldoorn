@@ -2,12 +2,12 @@ import SwiftUI
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, kind, knmi, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
+    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
 
     var id: String { rawValue }
 
-    /// On by default: everything except the stations (they make the map busy).
-    static let standaard: Set<String> = Set(allCases.filter { $0 != .kazernes && $0 != .buienradar }.map(\.rawValue))
+    /// On by default: everything except the stations, the rain radar and the speed cameras (they make the map busy).
+    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers].contains($0) }.map(\.rawValue))
 
     var titel: String {
         switch self {
@@ -16,6 +16,8 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .burgernet: return "Burgernet"
         case .kind: return L("AMBER Alert en Vermist Kind Alert")
         case .knmi: return L("KNMI-waarschuwingsgebieden")
+        case .verkeer: return L("Verkeer (NDW)")
+        case .flitsers: return L("Flitsers (vast)")
         case .werkgebied: return L("Grens werkgebied")
         case .kazernes: return L("Kazernes en posten")
         case .ziekenhuizen: return L("Ziekenhuizen en vliegbases")
@@ -31,6 +33,8 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .burgernet: return "megaphone.fill"
         case .kind: return "figure.child"
         case .knmi: return "cloud.sun.rain.fill"
+        case .verkeer: return "car.side.fill"
+        case .flitsers: return "camera.fill"
         case .werkgebied: return "skew"
         case .kazernes: return "building.2.fill"
         case .ziekenhuizen: return "cross.case.fill"

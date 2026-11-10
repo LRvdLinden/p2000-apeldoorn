@@ -272,7 +272,10 @@ final class AppSettings {
             var lagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
             // New layer "kind" (2.0.1, AMBER Alert and Vermist Kind Alert): on once for everyone.
             if !UserDefaults.standard.bool(forKey: "laag.kind.v1") { lagen.insert("kind") }
+            // New layer "verkeer" (NDW: closures, roadworks, accidents, breakdowns, jams): on once for everyone.
+            if !UserDefaults.standard.bool(forKey: "laag.verkeer.v1") { lagen.insert("verkeer") }
             kaartLagen = lagen
+            UserDefaults.standard.set(true, forKey: "laag.verkeer.v1")
             UserDefaults.standard.set(true, forKey: "laag.ziekenhuizen.v1")
             UserDefaults.standard.set(true, forKey: "laag.kind.v1")
         }

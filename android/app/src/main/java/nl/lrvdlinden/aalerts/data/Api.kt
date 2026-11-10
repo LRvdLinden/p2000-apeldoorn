@@ -82,6 +82,7 @@ object Api {
     suspend fun heliSpoor(id: String, bereik: SpoorBereik): List<HeliSpoorPunt> = runCatching { AppJson.decodeFromString<HeliSpoor>(getText("${base}v1/helikopters/${enc(id)}/spoor?scope=${bereik.key}")).punten }.getOrDefault(emptyList())
     suspend fun heliVluchten(id: String): List<HeliVlucht> = runCatching { AppJson.decodeFromString<HeliVluchten>(getText("${base}v1/helikopters/${enc(id)}/vluchten")).vluchten }.getOrDefault(emptyList())
     suspend fun status(): AppStatus? = runCatching { AppJson.decodeFromString<AppStatus>(getText("${base}v1/status")) }.getOrNull()
+    suspend fun verkeer(): VerkeerResponse? = runCatching { AppJson.decodeFromString<VerkeerResponse>(getText("${base}v1/verkeer")) }.getOrNull()
     suspend fun locaties(): List<Locatie> = runCatching { AppJson.decodeFromString<Locaties>(getText("${base}v1/locaties")).let { it.bases + it.ziekenhuizen } }.getOrDefault(emptyList())
     suspend fun helikopters(): List<Helikopter> = runCatching { AppJson.decodeFromString<HeliResponse>(getText("${base}v1/helikopters")).helikopters }.getOrDefault(emptyList())
 

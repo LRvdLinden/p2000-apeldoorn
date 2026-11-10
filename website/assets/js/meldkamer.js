@@ -8,8 +8,8 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
-  kaartKleur, volgKaartKleur,
-} from "./aalerts.js?v=57";
+  kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
+} from "./aalerts.js?v=58";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -25,7 +25,7 @@ const state = {
   lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"])),
 };
 // Map layers, like the Apple TV control room and the live pager.
-const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -118,6 +118,7 @@ async function renderExtra(kit) {
   if (extraOv.length) map.removeOverlays(extraOv);
   const L = state.lagen;
   const actief = state.warnings.filter(isActief);
+  const vk = L.has("verkeer") || L.has("flitsers") ? await fetchVerkeer() : { items: [], flitsers: [] };
   const dag = state.warnings.filter((w) => w.bron !== "knmi" && (isActief(w) || Date.now() - new Date(w.einde || w.start).getTime() < WINDOW_MS));
   const ov = [
     ...(L.has("knmi") ? actief.filter((w) => w.bron === "knmi").flatMap((w) => warnOverlays(kit, w)) : []),
@@ -125,11 +126,14 @@ async function renderExtra(kit) {
     ...(L.has("werkgebied") ? await werkgebiedLijnen(kit) : []),
     ...(L.has("helikopters") ? state.helis.map((h) => spoorOverlay(kit, state.sporen.get(h.id) || [], h)).filter(Boolean) : []),
     ...(L.has("helikopters") ? state.helis.map((h) => voorspellingOverlay(kit, h)).filter(Boolean) : []),
+    ...(L.has("verkeer") ? (vk.items || []).map((v) => verkeerOverlay(kit, v)).filter(Boolean) : []),
   ];
   const ann = [
     ...(L.has("waarschuwingen") ? dag.filter((w) => w.lat != null).map((w) => warnAnnotation(kit, w)) : []),
     ...(L.has("kazernes") ? (await kazernes()).map((k) => kazerneAnnotation(kit, k, DIENSTEN[k.soort]?.color || "#E30613")) : []),
     ...(L.has("ziekenhuizen") ? (await fetchLocaties()).map((l) => locatieAnnotation(kit, l)) : []),
+    ...(L.has("verkeer") ? (vk.items || []).map((v) => verkeerAnnotation(kit, v)) : []),
+    ...(L.has("flitsers") ? (vk.flitsers || []).map((f) => flitserAnnotation(kit, f)) : []),
   ];
   // Focused alert: alarmed stations (dashed line) and its Lifeliner/Zulu (dashed line to the scene).
   const f = inWindow().find((m) => m.guid === state.focus);

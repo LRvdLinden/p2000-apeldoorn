@@ -64,6 +64,11 @@ object Settings {
         prefs = ctx.getSharedPreferences("settings", Context.MODE_PRIVATE)
         for (p in all) p.load()
         if (profielen.isEmpty()) profielen = listOf(MeldingProfiel(naam = tr("Standaard", "Default")))
+        // New map layer "verkeer" (NDW: closures, roadworks, accidents, breakdowns, jams): on once for everyone (as on iOS).
+        if (!prefs.getBoolean("laag.verkeer.v1", false)) {
+            kaartLagen = kaartLagen + "verkeer"
+            prefs.edit().putBoolean("laag.verkeer.v1", true).apply()
+        }
     }
 
     var onPushSettingsChanged: (() -> Unit)? = null
@@ -101,7 +106,7 @@ object Settings {
 
     // Appearance
     var appearance by str("appearance", "systeem")
-    var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"))
+    var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "verkeer", "helikopters", "werkgebied", "ziekenhuizen"))
     var kaartPeriode by int("kaartPeriode", 24)
 
     // Notifications

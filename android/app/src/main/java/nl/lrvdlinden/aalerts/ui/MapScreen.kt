@@ -43,12 +43,13 @@ import nl.lrvdlinden.aalerts.tr
 
 /** Map layers (same as the app, the website and Apple TV). */
 enum class KaartLaag(val key: String) {
-    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
+    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
         HELIKOPTERS -> tr("Helikopters (live)", "Helicopters (live)"); KAZERNES -> tr("Kazernes en posten", "Stations")
         ZIEKENHUIZEN -> tr("Ziekenhuizen en vliegbases", "Hospitals and air bases"); WERKGEBIED -> tr("Gemeentegrens", "Municipal border")
         BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
+        VERKEER -> tr("Verkeer (NDW)", "Traffic (NDW)"); FLITSERS -> tr("Flitsers (vast)", "Speed cameras (fixed)")
     }
 }
 
@@ -65,6 +66,11 @@ fun MapScreen(nav: Nav) {
     // Tapping a Lifeliner/Zulu chip with more than one: show all of them.
     var heliFit by remember { mutableStateOf<MapCamera?>(null) }
 
+    // Traffic and speed cameras: every minute while one of the two layers is on.
+    val verkeerAan = KaartLaag.VERKEER.key in lagen || KaartLaag.FLITSERS.key in lagen
+    LaunchedEffect(verkeerAan) {
+        while (verkeerAan) { Store.refreshVerkeer(); delay(60_000) }
+    }
     // Always loaded: the Lifeliner and Zulu chips show even when the helicopter layer is off.
     LaunchedEffect(Unit) {
         while (true) { Store.refreshHelikopters(); delay(10_000) }
@@ -150,6 +156,16 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, if (selected == "k:${k.id}") 30 else 24, anchorBottom = false, kazerne = k.dienst.color.toArgb().toLong()) } }
     if (KaartLaag.MELDINGEN.key in lagen) meldingen.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
     val lines = mutableListOf<MapLine>()
+    // Traffic from the NDW: the route as a line (closure dashed), every item as an icon; fixed speed cameras.
+    val vk = Store.verkeer
+    if (KaartLaag.VERKEER.key in lagen) vk?.items?.forEach { v ->
+        val r = v.route
+        if (r.size >= 2) lines += MapLine("vl:${v.id}", r, v.kleur.toArgb().toLong(), dashed = v.soort == "afsluiting", width = if (v.soort == "file") 6.0 else 4.0)
+        points += MapPoint("v:${v.id}", v.lat, v.lon, v.icon, if (selected == "v:${v.id}") 32 else 24, anchorBottom = false)
+    }
+    if (KaartLaag.FLITSERS.key in lagen) vk?.flitsers?.forEach { f ->
+        points += MapPoint("f:${f.id}", f.lat, f.lon, R.drawable.verkeer_flitser, if (selected == "f:${f.id}") 28 else 20, anchorBottom = false)
+    }
     if (KaartLaag.ZIEKENHUIZEN.key in lagen) Store.locaties.forEach { l ->
         points += MapPoint("l:${l.id}", l.lat, l.lon, l.icon, if (selected == "l:${l.id}") 30 else 22, anchorBottom = false)
     }
@@ -253,6 +269,39 @@ fun MapScreen(nav: Nav) {
                         afspelen = Afspelen(afspeel, speelt, snelheid, afspeelMoment, kanAfspelen = selSpoor.size >= 2,
                             onSpeel = { if (afspeel == null || afspeel!! >= 1f) afspeel = 0f; speelt = true }, onPauze = { speelt = false },
                             onZoek = { speelt = false; afspeel = it }, onSnelheid = { snelheid = it }, onStop = { speelt = false; afspeel = null })) { selected = null }
+                }
+                sel.startsWith("v:") -> Store.verkeer?.items?.firstOrNull { it.id == sel.removePrefix("v:") }?.let { v ->
+                    PreviewCard(onClose = { selected = null }) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(painterResource(v.icon), null, Modifier.size(36.dp))
+                                Spacer(Modifier.width(10.dp))
+                                Column {
+                                    Text(v.soortLabel.uppercase(), color = v.kleur, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                    Text(v.titelLokaal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                }
+                            }
+                            v.waar?.let { Text(it, fontSize = 15.sp) }
+                            v.fileTekst?.let { Text(it, color = v.kleur, fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
+                            v.opmerking?.takeIf { it.isNotBlank() }?.let { Text(it, fontSize = 15.sp) }
+                            val tijden = listOfNotNull(v.startAt?.let { tr("Sinds ", "Since ") + Fmt.dayTime(it) }, v.eindeAt?.let { tr("Tot ", "Until ") + Fmt.dayTime(it) })
+                            if (tijden.isNotEmpty()) Text(tijden.joinToString(" · "), color = Muted, fontSize = 13.sp)
+                            v.bron?.let { Text(tr("Bron: $it via NDW", "Source: $it via NDW"), color = Muted, fontSize = 13.sp) }
+                        }
+                    }
+                }
+                sel.startsWith("f:") -> Store.verkeer?.flitsers?.firstOrNull { it.id == sel.removePrefix("f:") }?.let { f ->
+                    PreviewCard(onClose = { selected = null }) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Image(painterResource(R.drawable.verkeer_flitser), null, Modifier.size(36.dp))
+                                Spacer(Modifier.width(10.dp))
+                                Text(if (f.isTraject) tr("Trajectcontrole", "Average speed check") else tr("Flitser", "Speed camera"), fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                            }
+                            f.max?.let { Text(tr("Max. $it km/u", "Max. $it km/h"), fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
+                            Text(tr("Vaste flitser uit OpenStreetMap. Mobiele controles staan in geen enkele open bron.", "Fixed speed camera from OpenStreetMap. Mobile checks are not in any open source."), color = Muted, fontSize = 13.sp)
+                        }
+                    }
                 }
                 sel.startsWith("l:") -> Store.locaties.firstOrNull { it.id == sel.removePrefix("l:") }?.let { l ->
                     PreviewCard(onClose = { selected = null }) {

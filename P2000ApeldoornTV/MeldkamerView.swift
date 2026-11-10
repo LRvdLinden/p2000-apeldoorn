@@ -81,6 +81,22 @@ struct MeldkamerView: View {
                             .annotationTitles(.hidden)
                     }
                 }
+                // Traffic from the NDW (closures, roadworks, accidents, breakdowns, jams).
+                if settings.laag(.verkeer) {
+                    ForEach(VerkeerStore.shared.items.filter { $0.route.count >= 2 }) { v in
+                        MapPolyline(coordinates: v.route).stroke(v.soort.kleur, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: v.soort == .afsluiting ? [8, 6] : []))
+                    }
+                    ForEach(VerkeerStore.shared.items) { v in
+                        Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: .center) { VerkeerIcon(soort: v.soort, size: 30) }
+                            .annotationTitles(.hidden)
+                    }
+                }
+                if settings.laag(.flitsers) {
+                    ForEach(VerkeerStore.shared.flitsers) { f in
+                        Annotation("", coordinate: f.coordinate, anchor: .center) { FlitserIcon(flitser: f, size: 26) }
+                            .annotationTitles(.hidden)
+                    }
+                }
                 // Hospitals and helicopter bases.
                 if settings.laag(.ziekenhuizen) {
                     ForEach(LocatieStore.shared.items) { l in
@@ -137,6 +153,12 @@ struct MeldkamerView: View {
             }
             .onAppear { HeliStore.shared.start() }
             .task { await LocatieStore.shared.load() }
+            .task(id: settings.laag(.verkeer) || settings.laag(.flitsers)) {
+                while settings.laag(.verkeer) || settings.laag(.flitsers), !Task.isCancelled {
+                    await VerkeerStore.shared.vernieuw()
+                    try? await Task.sleep(for: .seconds(60))
+                }
+            }
             .onDisappear { HeliStore.shared.stop() }
             .task {
                 while !Task.isCancelled {
