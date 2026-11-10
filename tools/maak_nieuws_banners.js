@@ -104,4 +104,17 @@ async function render(BANNERS, OUT, hoogte = 675, varianten = true) {
   await br.close();
 }
 module.exports = { render, page, stripes, knmi, IMG };
-if (require.main === module) render(BANNERS, OUT);
+// Ended (wide, for news articles): <bron>-afgerond for Burgernet, AMBER Alert, Vermist Kind and NL-Alert.
+const AFGEROND = {
+  burgernet: { big: 'Afgerond', sub: 'De Burgernet-actie is beëindigd', label: 'AFGEROND' },
+  amber: { big: 'Afgerond', sub: 'De AMBER Alert is beëindigd', label: 'AFGEROND' },
+  vermistkind: { big: 'Afgerond', sub: 'De Vermist Kind Alert is beëindigd', label: 'AFGEROND' },
+  nlalert: { big: 'Ingetrokken', sub: 'Het NL-Alert geldt niet meer', label: 'INGETROKKEN' },
+};
+module.exports.AFGEROND = AFGEROND;
+if (require.main === module) {
+  if (process.argv.includes('--afgerond')) {
+    render(BANNERS.filter((b) => AFGEROND[b.name]).map((b) => ({ ...b, name: `${b.name}-afgerond`, afgerond: true, afgerondLabel: AFGEROND[b.name].label,
+      big: AFGEROND[b.name].big, sub: AFGEROND[b.name].sub, bigSize: 110 })), OUT, 675, false);
+  } else render(BANNERS, OUT);
+}
