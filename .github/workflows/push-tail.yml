@@ -1,9 +1,0 @@
-name: Probe
-on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
-jobs:
-  p:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          curl -s "https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=Loolaan%20Apeldoorn&fq=type:weg&rows=3&fl=weergavenaam,centroide_ll" | head -c 600; echo
-          curl -s -o /tmp/k.png -w "%{http_code} %{size_download}\n" "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/kaart.png?c=52.22311,5.95432&z=15.5&m=burgernet"
