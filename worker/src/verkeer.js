@@ -17,17 +17,32 @@ async function lees(env) {
 export async function verkeerRun(env, budget) {
   if (!verkeerConfigured(env)) return { ok: false, reden: "niet ingesteld" };
   if (budget && !budget.take()) return { ok: false, reden: "budget" };
+  const now = Date.now();
+  try {
+    const r = await ophalen(env, now);
+    // The service answers, but its NDW data is old: the NDW (or the service's read) is failing.
+    if (r.ndwOud) await kvWrite(env, "bron_fout:verkeer", `NDW-gegevens zijn ${Math.round(r.ndwOud / 60_000)} min oud`, now);
+    else await kvWrite(env, "bron_ok:verkeer", String(now), now);
+    return r;
+  } catch (e) {
+    await kvWrite(env, "bron_fout:verkeer", String(e.message || e), now);
+    throw e;
+  }
+}
+
+async function ophalen(env, now) {
   const oud = await lees(env);
   const res = await fetch(`${String(env.VERKEER_URL).replace(/\/+$/, "")}/verkeer`, {
     headers: { authorization: `Bearer ${env.VERKEER_TOKEN}`, ...(oud?.etag ? { "if-none-match": oud.etag } : {}) },
     signal: AbortSignal.timeout(15_000),
   });
-  if (res.status === 304) return { ok: true, nieuw: false };
+  const ndwOud = (d) => { const t = Date.parse(d?.opgehaald || 0) || 0; return t && now - t > 10 * 60_000 ? now - t : 0; };
+  if (res.status === 304) return { ok: true, nieuw: false, ndwOud: ndwOud(oud?.data) };
   if (!res.ok) throw new Error(`verkeer HTTP ${res.status}`);
   const data = await res.json();
   if (!Array.isArray(data?.items)) throw new Error("verkeer: geen lijst");
   await kvWrite(env, KEY, JSON.stringify({ etag: res.headers.get("etag"), at: Date.now(), data }));
-  return { ok: true, nieuw: true, items: data.items.length };
+  return { ok: true, nieuw: true, items: data.items.length, ndwOud: ndwOud(data) };
 }
 
 /** GET /v1/verkeer: the traffic layer for the apps, the website and Homey. */

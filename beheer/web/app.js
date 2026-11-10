@@ -242,6 +242,7 @@ const BRON = {
   nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: [icon("knmi", "KNMI"), "KNMI", "#3E9FDB"],
   amber: ["🧒", "AMBER Alert", "#EC6E24"], vermistkind: ["🧒", "Vermist Kind Alert", "#1B265E"], kind: ["🧒", "AMBER Alert / Vermist Kind (Burgernet)", "#EC6E24"],
   helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
+  verkeer: ["🚧", "Verkeer (NDW, Koyeb)", "#F08C00"],
 };
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood" };
 const STATUS = { actief: "Actief", verwacht: "Verwacht", beeindigd: "Beëindigd" };

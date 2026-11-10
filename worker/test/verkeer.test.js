@@ -19,10 +19,11 @@ test("verkeerRun stores the list, sends the ETag next time, verkeer serves it", 
     if (init.headers["if-none-match"] === '"a"') return { status: 304, ok: false };
     return { status: 200, ok: true, headers: { get: () => '"a"' }, json: async () => ({ bijgewerkt: now, opgehaald: now, items: [{ id: "1", soort: "ongeval" }], flitsers: [{ id: "osm:1" }] }) };
   };
-  assert.deepEqual(await verkeerRun(e, null), { ok: true, nieuw: true, items: 1 });
+  assert.deepEqual(await verkeerRun(e, null), { ok: true, nieuw: true, items: 1, ndwOud: 0 });
+  assert.ok(e.kv.has("bron_ok:verkeer"));
   assert.equal(calls[0][0], "https://x.koyeb.app/verkeer");
   assert.equal(calls[0][1].authorization, "Bearer t");
-  assert.deepEqual(await verkeerRun(e, null), { ok: true, nieuw: false });
+  assert.deepEqual(await verkeerRun(e, null), { ok: true, nieuw: false, ndwOud: 0 });
   const v = await verkeer(e);
   assert.equal(v.items.length, 1);
   assert.equal(v.flitsers.length, 1);

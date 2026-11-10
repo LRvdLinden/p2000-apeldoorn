@@ -11,8 +11,8 @@ const kvGet = (env, key) => env.DB.prepare("SELECT value, at FROM kv WHERE key =
 const kvSet = (env, key, value) => kvWrite(env, key, value);
 
 // Sources that are read (status); "kind" = Burgernet's API for AMBER Alert and Vermist Kind Alert.
-export const BRONNEN = ["nlalert", "burgernet", "knmi", "kind"];
-const NAMEN = { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: "KNMI", kind: "AMBER Alert / Vermist Kind", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert" };
+export const BRONNEN = ["nlalert", "burgernet", "knmi", "kind", "verkeer"];
+const NAMEN = { nlalert: "NL-Alert", burgernet: "Burgernet", knmi: "KNMI", kind: "AMBER Alert / Vermist Kind", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert", verkeer: "Verkeer (NDW, Koyeb)" };
 const SOORTEN = ["nlalert", "burgernet", "knmi", "amber", "vermistkind"];
 /** A source counts as down after 30 minutes without a successful read. */
 export const BRON_STORING_MS = 30 * 60_000;
