@@ -1,0 +1,11 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    env:
+      WID: ${{ secrets.HOMEY_WEBHOOK_ID }}
+    steps:
+      - run: |
+          B='{"channel":"aalerts","sent_at":"probe","meldingen":[],"waarschuwingen":[]}'
+          curl -s -o r.txt -w "STATUS %{http_code} " -X POST -H "content-type: application/json" --data "$B" "https://webhooks.athom.com/webhook/$WID"; head -c 300 r.txt; echo
