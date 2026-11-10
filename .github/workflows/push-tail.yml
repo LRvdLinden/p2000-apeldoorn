@@ -1,0 +1,10 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          for f in actueel_beeld veiligheidsgerelateerde_informatie_srti; do curl -s https://opendata.ndw.nu/$f.xml.gz | gunzip > $f.xml; node tools/ndw_proto.mjs $f.xml; node tools/ndw_proto.mjs $f.xml | head -1; done
+          echo "== OSM flitsers"; curl -s -X POST https://overpass-api.de/api/interpreter --data 'data=[out:json][timeout:25];node["highway"="speed_camera"](51.95,5.55,52.45,6.40);out;' | jq -c '[.elements[] | {lat,lon,tags:(.tags|{maxspeed,direction,ref})}] | length, .[:3]'
