@@ -48,10 +48,10 @@ async function ophalen(env, now) {
 /** GET /v1/verkeer: the traffic layer for the apps, the website and Homey. */
 export async function verkeer(env) {
   const v = await lees(env);
-  if (!v?.data) return { beschikbaar: verkeerConfigured(env), bijgewerkt: null, items: [], flitsers: [] };
-  const { bijgewerkt, opgehaald, items, flitsers } = v.data;
+  if (!v?.data) return { beschikbaar: verkeerConfigured(env), bijgewerkt: null, items: [], gepland: [], flitsers: [] };
+  const { bijgewerkt, opgehaald, items, flitsers, gepland } = v.data;
   // Older than 15 minutes: the service is down; then no items (an old accident on the map is worse than none).
   const oud = Date.now() - (Date.parse(opgehaald || 0) || v.at || 0) > 15 * 60_000;
-  return { beschikbaar: true, bijgewerkt, verouderd: oud, items: oud ? [] : items, flitsers: flitsers || [],
+  return { beschikbaar: true, bijgewerkt, verouderd: oud, items: oud ? [] : items, gepland: gepland || [], flitsers: flitsers || [],
     bron: "NDW open data (Rijkswaterstaat, provincies en gemeenten); flitsers © OpenStreetMap-bijdragers" };
 }

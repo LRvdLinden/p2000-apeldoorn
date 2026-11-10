@@ -511,6 +511,23 @@
         }
       }
     },
+    "%lld van %lld rijstroken open": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$lld of %2$lld lanes open"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld van %lld rijstroken open"
+          }
+        }
+      }
+    },
     "(verouderd)": {
       "extractionState": "manual",
       "localizations": {
@@ -1017,6 +1034,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afloopbericht"
+          }
+        }
+      }
+    },
+    "Afrit dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exit closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afrit dicht"
           }
         }
       }
@@ -8093,6 +8127,23 @@
         }
       }
     },
+    "Oprit dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Entry closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Oprit dicht"
+          }
+        }
+      }
+    },
     "Oproepen van de politie om mee te kijken, bijvoorbeeld bij een vermissing.": {
       "extractionState": "manual",
       "localizations": {
@@ -10847,6 +10898,23 @@
         }
       }
     },
+    "Verbindingsweg dicht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Link road closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verbindingsweg dicht"
+          }
+        }
+      }
+    },
     "Verborgen": {
       "extractionState": "manual",
       "localizations": {
@@ -12615,6 +12683,23 @@
         }
       }
     },
+    "hinder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "some delay"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hinder"
+          }
+        }
+      }
+    },
     "laatste": {
       "extractionState": "manual",
       "localizations": {
@@ -12662,6 +12747,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "ma"
+          }
+        }
+      }
+    },
+    "max. %lld km/u": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "max. %lld km/h"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "max. %lld km/u"
           }
         }
       }
@@ -12798,6 +12900,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "nu"
+          }
+        }
+      }
+    },
+    "omleiding ingesteld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "detour in place"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "omleiding ingesteld"
           }
         }
       }
@@ -13023,6 +13142,23 @@
         }
       }
     },
+    "veel hinder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "major delay"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "veel hinder"
+          }
+        }
+      }
+    },
     "vertrek over %lld min": {
       "extractionState": "manual",
       "localizations": {
@@ -13070,6 +13206,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "weekend"
+          }
+        }
+      }
+    },
+    "weinig hinder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "little delay"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "weinig hinder"
           }
         }
       }

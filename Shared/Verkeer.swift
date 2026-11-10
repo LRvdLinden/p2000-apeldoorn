@@ -23,10 +23,23 @@ struct VerkeerItem: Decodable, Identifiable, Hashable, Sendable {
     let lengteKm: Double?
     let weg: String?
     let plaats: String?
+    /// "A1 richting Amersfoort" (or the street), "tussen afrit 22 Twello en afrit 18 Kootwijk".
+    let kop: String?
+    let traject: String?
+    let oorzaak: String?
+    let toelichting: [String]
+    let rijstrokenOpen: Int?
+    let rijstrokenTotaal: Int?
+    let maxSnelheid: Int?
+    let hinder: Int?
+    let omleiding: Bool
+    let infoURL: URL?
+    let tijdvakken: [[String]]
 
+    struct Rijstroken: Decodable { let open: Int?; let totaal: Int? }
     enum CodingKeys: String, CodingKey {
-        case id, soort, titel, opmerking, bron, start, einde, lat, lon, lijn, weg, plaats
-        case vertragingMin = "vertraging_min", lengteKm = "lengte_km"
+        case id, soort, titel, opmerking, bron, start, einde, lat, lon, lijn, weg, plaats, kop, traject, oorzaak, toelichting, rijstroken, hinder, omleiding, tijdvakken
+        case vertragingMin = "vertraging_min", lengteKm = "lengte_km", maxSnelheid = "max_snelheid", infoURL = "info_url"
     }
     init(from d: Decoder) throws {
         let c = try d.container(keyedBy: CodingKeys.self)
@@ -44,7 +57,44 @@ struct VerkeerItem: Decodable, Identifiable, Hashable, Sendable {
         lengteKm = try? c.decodeIfPresent(Double.self, forKey: .lengteKm)
         weg = try? c.decodeIfPresent(String.self, forKey: .weg)
         plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
+        kop = try? c.decodeIfPresent(String.self, forKey: .kop)
+        traject = try? c.decodeIfPresent(String.self, forKey: .traject)
+        oorzaak = try? c.decodeIfPresent(String.self, forKey: .oorzaak)
+        toelichting = (try? c.decodeIfPresent([String].self, forKey: .toelichting)) ?? []
+        let r = try? c.decodeIfPresent(Rijstroken.self, forKey: .rijstroken)
+        rijstrokenOpen = r?.open; rijstrokenTotaal = r?.totaal
+        maxSnelheid = try? c.decodeIfPresent(Int.self, forKey: .maxSnelheid)
+        hinder = try? c.decodeIfPresent(Int.self, forKey: .hinder)
+        omleiding = (try? c.decodeIfPresent(Bool.self, forKey: .omleiding)) ?? false
+        infoURL = (try? c.decodeIfPresent(String.self, forKey: .infoURL)).flatMap { URL(string: $0) }
+        tijdvakken = (try? c.decodeIfPresent([[String]].self, forKey: .tijdvakken)) ?? []
     }
+
+    /// Road and direction, or the street, or the kind.
+    var kopTekst: String { kop ?? weg ?? titelLokaal }
+    /// "Rijstrook dicht voor werkzaamheden · tussen … en …"
+    var watTekst: String? {
+        let w = [kop != nil || weg != nil ? titelLokaal : nil, traject, plaats].compactMap { $0?.isEmpty == false ? $0 : nil }
+        return w.isEmpty ? nil : w.joined(separator: " · ")
+    }
+    /// "1 van 2 rijstroken open · max. 70 km/u · omleiding ingesteld"
+    var detailTekst: String? {
+        var d: [String] = []
+        if let f = fileTekst { d.append(f) }
+        if let o = rijstrokenOpen, let t = rijstrokenTotaal, o < t { d.append(Lf("%lld van %lld rijstroken open", o, t)) }
+        if let m = maxSnelheid { d.append(Lf("max. %lld km/u", m)) }
+        if omleiding && soort == .afsluiting { d.append(L("omleiding ingesteld")) }
+        return d.isEmpty ? nil : d.joined(separator: " · ")
+    }
+    var hinderTekst: String? { switch hinder { case 1: L("weinig hinder"); case 2: L("hinder"); case 3: L("veel hinder"); default: nil } }
+    /// "do 12 nov 20:00–05:00"
+    var tijdvakTeksten: [String] {
+        tijdvakken.compactMap { p in
+            guard p.count == 2, let a = Self.datum(p[0]), let e = Self.datum(p[1]) else { return nil }
+            return "\(a.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated))) \(a.formatted(date: .omitted, time: .shortened))–\(e.formatted(date: .omitted, time: .shortened))"
+        }
+    }
+    private static func datum(_ s: String) -> Date? { ISO8601DateFormatter.verkeer.date(from: s) ?? ISO8601DateFormatter().date(from: s) }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
     /// The route as coordinates (the server sends [lon, lat]).
@@ -56,13 +106,8 @@ struct VerkeerItem: Decodable, Identifiable, Hashable, Sendable {
                          "Voertuig met pech", "Stilstaand voertuig", "Lading of vloeistof op de weg", "Obstakel op de weg",
                          "Stilstaand verkeer", "File", "Langzaam rijdend verkeer", "Werkzaamheden", "Afgesloten voor evenement",
                          "Afgesloten voor werkzaamheden", "Weg afgesloten", "Voertuig met pech, rijstrook dicht", "Rijstrook dicht",
-                         "Rijstrook dicht voor werkzaamheden", "Versmalde rijstroken", "Rijstroken verlegd"]
+                         "Rijstrook dicht voor werkzaamheden", "Versmalde rijstroken", "Rijstroken verlegd", "Afrit dicht", "Oprit dicht", "Verbindingsweg dicht"]
     var titelLokaal: String { L(titel) }
-    /// "Anklaarseweg, Apeldoorn"
-    var waar: String? {
-        let w = [weg, plaats].compactMap { $0?.isEmpty == false ? $0 : nil }
-        return w.isEmpty ? nil : w.joined(separator: ", ")
-    }
     var startDatum: Date? { start.flatMap { ISO8601DateFormatter.verkeer.date(from: $0) ?? ISO8601DateFormatter().date(from: $0) } }
     var eindDatum: Date? { einde.flatMap { ISO8601DateFormatter.verkeer.date(from: $0) ?? ISO8601DateFormatter().date(from: $0) } }
     /// "2,4 km · +4 min"
@@ -177,7 +222,7 @@ struct FlitserIcon: View {
     }
 }
 
-/// Details of a traffic item (sheet on the map).
+/// Details of a traffic item (sheet on the map): road and direction, stretch, lanes, speed, cause, comments, time slots.
 struct VerkeerDetail: View {
     let item: VerkeerItem
     var body: some View {
@@ -186,18 +231,25 @@ struct VerkeerDetail: View {
                 VerkeerIcon(soort: item.soort, size: 40)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(item.soort.label.uppercased()).font(AppFont.body(11, .bold)).foregroundStyle(item.soort.kleur)
-                    Text(item.titelLokaal).font(AppFont.heading(20)).fixedSize(horizontal: false, vertical: true)
+                    Text(item.kopTekst).font(AppFont.heading(20)).fixedSize(horizontal: false, vertical: true)
                 }
             }
-            if let w = item.waar { Label(w, systemImage: "road.lanes").font(AppFont.body(16)) }
-            if let f = item.fileTekst { Label(f, systemImage: "clock").font(AppFont.body(16, .semibold)).foregroundStyle(item.soort.kleur) }
-            if let o = item.opmerking, !o.isEmpty { Text(o).font(AppFont.body(16)).fixedSize(horizontal: false, vertical: true) }
+            if let w = item.watTekst { Text(w).font(AppFont.body(16)).fixedSize(horizontal: false, vertical: true) }
+            if let d = item.detailTekst { Text(d).font(AppFont.body(16, .semibold)).foregroundStyle(item.soort.kleur).fixedSize(horizontal: false, vertical: true) }
+            ForEach([item.oorzaak].compactMap { $0 } + item.toelichting, id: \.self) { t in
+                Text(t).font(AppFont.body(15)).fixedSize(horizontal: false, vertical: true)
+            }
+            if !item.tijdvakTeksten.isEmpty {
+                Label(item.tijdvakTeksten.joined(separator: " · "), systemImage: "calendar.badge.clock").font(AppFont.body(14))
+            }
             VStack(alignment: .leading, spacing: 4) {
                 if let s = item.startDatum { Text(Lf("Sinds %@", s.formatted(.dateTime.day().month(.abbreviated).hour().minute()))) }
                 if let e = item.eindDatum { Text(Lf("Tot %@", e.formatted(.dateTime.day().month(.abbreviated).hour().minute()))) }
+                if let h = item.hinderTekst { Text(h) }
                 if let b = item.bron { Text(Lf("Bron: %@ via NDW", b)) }
             }
             .font(AppFont.body(13)).foregroundStyle(.secondary)
+            if let u = item.infoURL { Link(L("Meer informatie"), destination: u).font(AppFont.body(14, .semibold)) }
         }
         .padding(20)
         .frame(maxWidth: .infinity, alignment: .leading)

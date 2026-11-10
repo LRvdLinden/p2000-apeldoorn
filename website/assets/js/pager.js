@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=59";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=60";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -1101,7 +1101,7 @@ function openWeergave() {
 /** Hospital or base tapped: what it is and which helicopter is probably heading there. */
 function openVerkeer(v) {
   const box = $("clusterPanel");
-  box.innerHTML = `<header><b>${esc(v.titel)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>${verkeerHTML(v)}`;
+  box.innerHTML = `<header><b>${esc(v.kop || v.titel)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>${verkeerHTML(v)}`;
   box.hidden = false;
 }
 function openFlitser(f) {

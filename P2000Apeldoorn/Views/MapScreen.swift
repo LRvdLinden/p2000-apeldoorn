@@ -347,11 +347,11 @@ struct MapScreen: View {
                                                                dash: v.soort == .afsluiting ? [6, 5] : []))
             }
             ForEach(verkeer.items) { v in
-                Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: v.soort.isMarker ? .bottom : .center) {
+                Annotation(v.kopTekst, coordinate: v.coordinate, anchor: v.soort.isMarker ? .bottom : .center) {
                     VerkeerIcon(soort: v.soort, size: selectedVerkeer?.id == v.id ? 32 : 26)
                         .onTapGesture { selectedVerkeer = v }
                         .accessibilityAddTraits(.isButton)
-                        .accessibilityLabel([v.soort.label, v.titelLokaal, v.waar].compactMap { $0 }.joined(separator: ", "))
+                        .accessibilityLabel([v.soort.label, v.kopTekst, v.watTekst, v.detailTekst].compactMap { $0 }.joined(separator: ", "))
                 }
                 .annotationTitles(.hidden)
             }

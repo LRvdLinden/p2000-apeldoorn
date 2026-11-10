@@ -279,13 +279,14 @@ fun MapScreen(nav: Nav) {
                                 Spacer(Modifier.width(10.dp))
                                 Column {
                                     Text(v.soortLabel.uppercase(), color = v.kleur, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                    Text(v.titelLokaal, fontSize = 17.sp, fontWeight = FontWeight.Bold)
+                                    Text(v.kopTekst, fontSize = 17.sp, fontWeight = FontWeight.Bold)
                                 }
                             }
-                            v.waar?.let { Text(it, fontSize = 15.sp) }
-                            v.fileTekst?.let { Text(it, color = v.kleur, fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
-                            v.opmerking?.takeIf { it.isNotBlank() }?.let { Text(it, fontSize = 15.sp) }
-                            val tijden = listOfNotNull(v.startAt?.let { tr("Sinds ", "Since ") + Fmt.dayTime(it) }, v.eindeAt?.let { tr("Tot ", "Until ") + Fmt.dayTime(it) })
+                            v.watTekst?.let { Text(it, fontSize = 15.sp) }
+                            v.detailTekst?.let { Text(it, color = v.kleur, fontSize = 15.sp, fontWeight = FontWeight.SemiBold) }
+                            (listOfNotNull(v.oorzaak) + v.toelichting).forEach { Text(it, fontSize = 14.sp) }
+                            if (v.tijdvakTeksten.isNotEmpty()) Text(v.tijdvakTeksten.joinToString(" · "), fontSize = 14.sp)
+                            val tijden = listOfNotNull(v.startAt?.let { tr("Sinds ", "Since ") + Fmt.dayTime(it) }, v.eindeAt?.let { tr("Tot ", "Until ") + Fmt.dayTime(it) }, v.hinderTekst)
                             if (tijden.isNotEmpty()) Text(tijden.joinToString(" · "), color = Muted, fontSize = 13.sp)
                             v.bron?.let { Text(tr("Bron: $it via NDW", "Source: $it via NDW"), color = Muted, fontSize = 13.sp) }
                         }

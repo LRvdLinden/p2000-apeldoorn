@@ -435,7 +435,7 @@ export async function fetchVerkeer() {
   if (verkeerCache && Date.now() - verkeerCache.at < 60_000) return verkeerCache.data;
   const data = await fetch(`${API}/v1/verkeer`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json()).catch(() => null);
   if (data) verkeerCache = { at: Date.now(), data };
-  return data || verkeerCache?.data || { items: [], flitsers: [] };
+  return data || verkeerCache?.data || { items: [], gepland: [], flitsers: [] };
 }
 export const verkeerKleur = (v) => VERKEER_KLEUR[v.soort] || VERKEER_KLEUR.werk;
 // ?v=2: the site caches images 30 days; raise when the icons change.
@@ -463,18 +463,42 @@ function iconAnnotation(mk, lat, lon, src, title, size, onSelect, item, pin = fa
   return a;
 }
 export const verkeerAnnotation = (mk, v, onSelect) =>
-  iconAnnotation(mk, v.lat, v.lon, verkeerIcon(v.soort), [v.titel, v.weg, v.plaats].filter(Boolean).join(" · "), 26, onSelect, v, v.soort === "ongeval" || v.soort === "pech");
+  iconAnnotation(mk, v.lat, v.lon, verkeerIcon(v.soort), [v.kop, v.titel, v.traject].filter(Boolean).join(" · "), 26, onSelect, v, v.soort === "ongeval" || v.soort === "pech");
 export const flitserAnnotation = (mk, f, onSelect) =>
   iconAnnotation(mk, f.lat, f.lon, verkeerIcon("flitser"), f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser", 24, onSelect, f, true);
+const vTijd = (t, opts) => new Date(t).toLocaleString("nl-NL", { timeZone: TZ, ...opts });
+const vUur = (t) => vTijd(t, { hour: "2-digit", minute: "2-digit" });
+const vDag = (t) => vTijd(t, { weekday: "short", day: "numeric", month: "short" });
+/** "do 12 nov 19:00–04:00" (a time slot). */
+export const verkeerTijdvak = ([a, e]) => `${vDag(a)} ${vUur(a)}–${vUur(e)}`;
+const HINDER = { 1: "weinig hinder", 2: "hinder", 3: "veel hinder" };
+/**
+ * The lines of a traffic item, like the traffic sites:
+ *  kop: "A1 richting Amersfoort" (or the street), wat: "Rijstrook dicht voor werkzaamheden · tussen … en …",
+ *  details: ["1 van 2 rijstroken open", "max. 70 km/u", "3,3 km · +7 min"], extra: cause, comments, time slots, end.
+ */
+export function verkeerRegels(v) {
+  const kop = v.kop || v.weg || v.titel;
+  const wat = [v.kop || v.weg ? v.titel : null, v.traject, !v.kop && v.plaats ? v.plaats : v.kop && v.plaats && !/^[AN]\d/.test(v.kop) ? v.plaats : null].filter(Boolean).join(" · ");
+  const details = [
+    verkeerFile(v),
+    v.rijstroken?.totaal && v.rijstroken.open < v.rijstroken.totaal ? `${v.rijstroken.open} van ${v.rijstroken.totaal} rijstroken open` : "",
+    v.max_snelheid ? `max. ${v.max_snelheid} km/u` : "",
+    v.omleiding && v.soort === "afsluiting" ? "omleiding ingesteld" : "",
+  ].filter(Boolean);
+  const eind = v.einde ? `tot ${vDag(v.einde)} ${vUur(v.einde)}` : "";
+  return { kop, wat, details, eind, oorzaak: v.oorzaak || "", toelichting: v.toelichting || [], tijdvakken: v.tijdvakken || [], hinder: HINDER[v.hinder] || "" };
+}
 /** Panel text of a traffic item (HTML). */
 export function verkeerHTML(v) {
-  const tijd = (t) => new Date(t).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: TZ });
-  const f = verkeerFile(v);
+  const r = verkeerRegels(v);
   return `<p><img src="${verkeerIcon(v.soort)}" alt="" style="width:20px;height:auto;vertical-align:-4px"> <b style="color:${verkeerKleur(v)}">${esc(VERKEER_SOORT[v.soort] || "")}</b></p>
-    ${v.weg || v.plaats ? `<p>${esc([v.weg, v.plaats].filter(Boolean).join(", "))}</p>` : ""}
-    ${f ? `<p><b style="color:${verkeerKleur(v)}">${esc(f)}</b></p>` : ""}
-    ${v.opmerking ? `<p>${esc(v.opmerking)}</p>` : ""}
-    <p class="hint" style="margin:8px 0 0">${[v.start ? `Sinds ${tijd(v.start)}` : "", v.einde ? `tot ${tijd(v.einde)}` : "", v.bron ? `bron: ${esc(v.bron)} via NDW` : "bron: NDW"].filter(Boolean).join(" · ")}</p>`;
+    ${r.wat ? `<p>${esc(r.wat)}</p>` : ""}
+    ${r.details.length ? `<p><b style="color:${verkeerKleur(v)}">${esc(r.details.join(" · "))}</b></p>` : ""}
+    ${r.oorzaak ? `<p>${esc(r.oorzaak)}</p>` : ""}${r.toelichting.map((t) => `<p>${esc(t)}</p>`).join("")}
+    ${r.tijdvakken.length ? `<p>${esc(r.tijdvakken.map(verkeerTijdvak).join(" · "))}</p>` : ""}
+    <p class="hint" style="margin:8px 0 0">${[v.start ? `Sinds ${vDag(v.start)} ${vUur(v.start)}` : "", r.eind, r.hinder, v.bron ? `bron: ${esc(v.bron)} via NDW` : "bron: NDW"].filter(Boolean).join(" · ")}
+    ${v.info_url ? ` · <a href="${esc(v.info_url)}" target="_blank" rel="noopener">meer info</a>` : ""}</p>`;
 }
 
 // ------------------------------------------------------------------ hospitals, bases, prediction, playback

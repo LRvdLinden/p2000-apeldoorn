@@ -40,3 +40,12 @@ button.aw-rij:hover { background: var(--bg); }
 .aw-voet a { color: var(--red); font-weight: 600; text-decoration: none; white-space: nowrap; }
 .aw-blok { background: var(--surface); border-radius: 22px; box-shadow: var(--shadow); padding: 24px; text-align: center; font-size: 14px; }
 .aw-blok a { color: var(--red); font-weight: 700; }
+.aw-rij > div { min-width: 0; }
+.aw-rij small { display: block; }
+.aw-rij .aw-det { font-weight: 600; }
+.aw-rij .aw-meer { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.aw-rij .aw-wanneer { color: var(--text); font-weight: 500; }
+.aw-rij.open { background: var(--bg); align-items: flex-start; }
+.aw-open { display: grid; gap: 3px; margin-top: 4px; }
+.aw-open .aw-bron { font-size: 11px; }
+.aw-open a { color: var(--red); font-weight: 600; font-size: 12px; text-decoration: none; }

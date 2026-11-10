@@ -19,7 +19,27 @@ data class VerkeerItem(
     @SerialName("vertraging_min") val vertragingMin: Int? = null,
     @SerialName("lengte_km") val lengteKm: Double? = null,
     val weg: String? = null, val plaats: String? = null,
+    /** "A1 richting Amersfoort" (or the street) and "tussen afrit 22 Twello en afrit 18 Kootwijk". */
+    val kop: String? = null, val traject: String? = null, val oorzaak: String? = null, val toelichting: List<String> = emptyList(),
+    val rijstroken: Rijstroken? = null, @SerialName("max_snelheid") val maxSnelheid: Int? = null, val hinder: Int? = null,
+    val omleiding: Boolean = false, @SerialName("info_url") val infoUrl: String? = null, val tijdvakken: List<List<String>> = emptyList(),
 ) {
+    @Serializable data class Rijstroken(val open: Int? = null, val totaal: Int? = null)
+    val kopTekst: String get() = kop ?: weg ?: titelLokaal
+    val watTekst: String? get() = listOfNotNull(if (kop != null || weg != null) titelLokaal else null, traject, plaats?.takeIf { it.isNotBlank() }).joinToString(" · ").ifBlank { null }
+    val detailTekst: String? get() = listOfNotNull(
+        fileTekst,
+        rijstroken?.let { r -> if (r.open != null && r.totaal != null && r.open < r.totaal) tr("${r.open} van ${r.totaal} rijstroken open", "${r.open} of ${r.totaal} lanes open") else null },
+        maxSnelheid?.let { tr("max. $it km/u", "max. $it km/h") },
+        if (omleiding && soort == "afsluiting") tr("omleiding ingesteld", "detour in place") else null,
+    ).joinToString(" · ").ifBlank { null }
+    val hinderTekst: String? get() = when (hinder) { 1 -> tr("weinig hinder", "little delay"); 2 -> tr("hinder", "some delay"); 3 -> tr("veel hinder", "major delay"); else -> null }
+    val tijdvakTeksten: List<String> get() = tijdvakken.mapNotNull { p ->
+        if (p.size != 2) return@mapNotNull null
+        val a = runCatching { Instant.parse(p[0]) }.getOrNull() ?: return@mapNotNull null
+        val e = runCatching { Instant.parse(p[1]) }.getOrNull() ?: return@mapNotNull null
+        "${nl.lrvdlinden.aalerts.Fmt.day(a)} ${nl.lrvdlinden.aalerts.Fmt.time(a)}–${nl.lrvdlinden.aalerts.Fmt.time(e)}"
+    }
     val route: List<Pair<Double, Double>> get() = lijn.orEmpty().filter { it.size == 2 }.map { it[1] to it[0] }
     val kleur: Color get() = when (soort) {
         "ongeval" -> Color(0xFFE3001B); "afsluiting" -> Color(0xFFC4001A); "file" -> Color(0xFFB0002E); "pech" -> Color(0xFFF08C00); else -> Color(0xFFF5B400)
@@ -53,6 +73,7 @@ data class VerkeerItem(
             "Afgesloten voor werkzaamheden" to "Closed for roadworks", "Weg afgesloten" to "Road closed",
             "Voertuig met pech, rijstrook dicht" to "Broken-down vehicle, lane closed", "Rijstrook dicht" to "Lane closed",
             "Rijstrook dicht voor werkzaamheden" to "Lane closed for roadworks", "Versmalde rijstroken" to "Narrowed lanes", "Rijstroken verlegd" to "Lanes moved",
+            "Afrit dicht" to "Exit closed", "Oprit dicht" to "Entry closed", "Verbindingsweg dicht" to "Link road closed",
         )
     }
 }
