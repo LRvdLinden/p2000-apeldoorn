@@ -38,7 +38,8 @@ export function maakWidgets(el, opts = {}) {
   const kaartLink = (id) => `${SITE}/pager/?verkeer=${encodeURIComponent(id)}#kaart`;
   const naam = (t) => (ext ? `A-Alerts · ${t}` : t);
   const kop = (t, id, sub = "Apeldoorn e.o.") => `<div class="aw-kop"><img src="${asset("assets/img/aalerts-icon-32.png")}" alt="A-Alerts">${esc(naam(t))}<small id="${id}">${sub}</small></div>`;
-  const voet = (tekst, link, label) => `<div class="aw-voet"><span>${tekst}</span><a href="${link}"${doel}>${label} ›</a></div>`;
+  // Footer: the a-alerts.nl pill (like on the news pictures), a link to the page on a-alerts.nl.
+  const voet = (link) => `<div class="aw-voet"><a class="aw-site" href="${link}"${doel}><img src="${asset("assets/img/aalerts-icon-32.png")}" alt="">a-alerts.nl</a></div>`;
   el.classList.add("aw");
   el.innerHTML = [
     widgets.includes("kaart") ? `<section class="aw-w" aria-label="${esc(naam("Live kaart"))}">${kop("Live kaart", "awKaartTijd")}
@@ -46,13 +47,13 @@ export function maakWidgets(el, opts = {}) {
         <div class="aw-laden" hidden><p>De kaart komt van Apple Kaarten. Daarbij ziet Apple je IP-adres.</p><button type="button">Kaart laden</button></div>
         <div class="aw-info" hidden></div></div>
       <div class="aw-chips" role="group" aria-label="Kaartlagen"></div>
-      ${ext ? voet("Bron: A-Alerts · NDW · KNMI · Apple Kaarten", "https://a-alerts.nl/pager/#kaart", "a-alerts.nl") : ""}</section>` : "",
+      ${voet(`${SITE}/pager/#kaart`)}</section>` : "",
     widgets.includes("verkeer") ? `<section class="aw-w" aria-label="${esc(naam("Verkeer nu"))}">${kop(ext ? "Verkeer" : "Verkeer nu", "awVerkeerTijd")}
       <div class="aw-sum" role="group" aria-label="Samenvatting"></div><div class="aw-seg" role="tablist"></div><div class="aw-lijst"><p class="aw-leeg">Verkeer laden…</p></div>
-      ${voet(ext ? "Bron: A-Alerts · NDW · © OpenStreetMap" : "Bron: NDW (Rijkswaterstaat, provincie, gemeenten); flitsers © OpenStreetMap", `${SITE}/pager/#kaart`, ext ? "a-alerts.nl" : "Open de kaart")}</section>` : "",
+      ${voet(`${SITE}/pager/#kaart`)}</section>` : "",
     widgets.includes("weer") ? `<section class="aw-w aw-weer" aria-label="${esc(naam(ext ? "Weer" : "Weerwaarschuwing"))}">${kop(ext ? "Weer" : "Weerwaarschuwing", "awWeerTijd", "KNMI")}
       <div class="aw-wfig"></div><div class="aw-wbody"><p class="aw-leeg">Weer laden…</p></div>
-      ${voet(ext ? "Bron: A-Alerts · KNMI" : "Bron: KNMI", `${SITE}/nieuws/`, ext ? "a-alerts.nl" : "Alle weerberichten")}</section>` : "",
+      ${voet(`${SITE}/nieuws/`)}</section>` : "",
   ].join("");
 
   const state = { lagen: new Set(prefs.get("aw.lagen", STANDAARD)), tab: "nu", filter: null, groepen: new Map(), open: null, verkeer: { items: [], gepland: [], flitsers: [] } };
@@ -112,7 +113,7 @@ export function maakWidgets(el, opts = {}) {
     if (state.tab === "flitsers") {
       html = flitsers.map((f) => `<div class="aw-rij"><img src="${rondIcoon("flitser")}" alt=""><div><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Vaste flitser"}</b><small>${esc(f.plaats || f.weg || "Regio Apeldoorn")}</small>${f.max ? `<small class="aw-det" style="color:#2F80ED">max. ${f.max} km/u</small>` : ""}<a class="aw-link" href="${kaartLink(f.id)}"${doel}>Op de kaart ›</a></div></div>`).join("")
         || '<p class="aw-leeg">Geen vaste flitsers bekend in de regio.</p>';
-      html += '<p class="aw-leeg klein">Vaste flitsers en trajectcontroles uit OpenStreetMap. Mobiele controles staan hier niet in.</p>';
+      html += '<p class="aw-leeg klein">Vaste flitsers en trajectcontroles: © OpenStreetMap-bijdragers. Mobiele controles staan hier niet in.</p>';
     } else if (state.tab === "gepland") {
       html = groepen(gepland, true) || '<p class="aw-leeg">Geen werkzaamheden of afsluitingen gepland in de komende 7 dagen.</p>';
     } else {

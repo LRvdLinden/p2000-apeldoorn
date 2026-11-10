@@ -112,3 +112,8 @@ button.aw-rij:hover { background: var(--bg); }
 .aw-groen > span { width: 30px; height: 30px; border-radius: 9px; display: grid; place-content: center; background: #2E9E44; color: #fff; flex: none; font-weight: 700; }
 .aw-groen b { display: block; } .aw-groen small { color: var(--muted); font-size: 12px; }
 .aw-rij .aw-link, .aw-info a { color: var(--red); font-weight: 600; font-size: 12px; text-decoration: none; display: block; margin-top: 3px; }
+/* Footer: the a-alerts.nl pill. */
+.aw-voet { justify-content: flex-end; padding: 10px 14px 12px; }
+.aw-voet .aw-site { display: inline-flex; align-items: center; gap: 7px; padding: 4px 12px 4px 4px; border-radius: 999px; background: rgba(18,23,38,.88); color: #fff; font-weight: 700; font-size: 12.5px; text-decoration: none; }
+.aw-voet .aw-site img { width: 22px; height: 22px; border-radius: 6px; }
+.aw-voet .aw-site:hover { background: #121726; }
