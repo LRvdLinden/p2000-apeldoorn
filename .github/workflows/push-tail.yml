@@ -4,8 +4,5 @@ jobs:
   p:
     runs-on: ubuntu-latest
     steps:
-      - env: { U: "${{ secrets.VERKEER_URL }}" }
-        run: |
-          sleep 75
-          echo "koyeb health: $(curl -s -m 30 "$U/health")"
-          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/verkeer" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const d=JSON.parse(s);console.log("api: beschikbaar",d.beschikbaar,"verouderd",d.verouderd,"bijgewerkt",d.bijgewerkt,"items",d.items.length,"flitsers",d.flitsers.length);for(const i of d.items)console.log(" ",i.soort,"|",i.titel,"|",i.weg||"-",i.plaats||"-")})'
+      - env: { U: "${{ secrets.VERKEER_URL }}", T: "${{ secrets.VERKEER_TOKEN }}", U2: "${{ vars.VERKEER_URL }}" }
+        run: echo "url-lengte ${#U} token-lengte ${#T} variabele-url-lengte ${#U2}"
