@@ -407,6 +407,8 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
   }
   if (row.soort === "regionaal") return foto112(row);
   // Burgernet, AMBER Alert, Vermist Kind, NL-Alert: with "LIVEBLOG" on the banner when the beheer switched it on.
+  // Ended: the "afgerond" banner (also when it was a liveblog).
+  if (row.status === "afgerond" && LIVE_BRONNEN.includes(row.bron)) return `${IMG}${row.bron}-afgerond.webp${IMG_V}`;
   return `${IMG}${row.bron}${row.is_liveblog ? "-live" : ""}.webp${IMG_V}`;
 }
 const WEER_ICONEN = ["fog", "wind", "thunderstorm", "rain", "snow", "ice", "heat", "cold", "waterspout", "warning"];
