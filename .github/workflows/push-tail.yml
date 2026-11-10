@@ -7,10 +7,10 @@ jobs:
       WID: ${{ secrets.HOMEY_WEBHOOK_ID }}
     steps:
       - run: |
-          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
-          M=$(curl -s "$A/v1/meldingen/f0a96819-31b1-e52a-1f7e-d6fbd718bf39")
-          echo "melding bytes: $(echo "$M" | wc -c)"; echo "$M" | jq -c 'to_entries | map({k:.key, n:(.value|tostring|length)}) | sort_by(-.n) | .[:8]'
-          for body in '{"channel":"aalerts","sent_at":"x","meldingen":[],"waarschuwingen":[]}' "$(jq -nc --argjson m "$(echo "$M" | jq -c '.melding // .')" '{channel:"aalerts",sent_at:"x",meldingen:[$m],waarschuwingen:[]}')"; do
-            echo "== POST $(echo "$body" | wc -c) bytes"
-            curl -s -o r.txt -w "%{http_code}\n" -X POST -H "content-type: application/json" --data "$body" "https://webhooks.athom.com/webhook/$WID"; head -c 300 r.txt; echo
-          done
+          B='{"channel":"aalerts","sent_at":"probe","meldingen":[],"waarschuwingen":[]}'
+          t() { echo "== $1"; curl -s -o r.txt -w "%{http_code} " "${@:2}"; head -c 200 r.txt; echo; }
+          t "query"  -X POST -H "content-type: application/json" --data "$B" "https://webhooks.athom.com/webhook/$WID?channel=aalerts"
+          t "header" -X POST -H "content-type: application/json" -H "channel: aalerts" --data "$B" "https://webhooks.athom.com/webhook/$WID"
+          t "nested body" -X POST -H "content-type: application/json" --data '{"body":{"channel":"aalerts"},"channel":"aalerts"}' "https://webhooks.athom.com/webhook/$WID"
+          t "form" -X POST --data "channel=aalerts" "https://webhooks.athom.com/webhook/$WID"
+          t "GET query" "https://webhooks.athom.com/webhook/$WID?channel=aalerts"
