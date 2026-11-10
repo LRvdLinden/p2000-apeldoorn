@@ -128,14 +128,14 @@ async function toonArtikel(id) {
 // ------------------------------------------------------------------ weather article (like knmi.nl)
 
 const CODE_KLEUR = { yellow: "#F7C600", orange: "#F28C28", red: "#E3001B", green: "#2E9E44" };
-const ICOON = [[/onweer|hagel|tornado/i, "⚡"], [/wind|storm/i, "💨"], [/sneeuw/i, "❄"], [/glad|ijzel|vorst|kou/i, "❄"], [/mist/i, "≡"], [/regen/i, "☔"], [/hitte/i, "☀"]];
+const WEER_ICOON = [[/onweer|hagel|tornado/i, "⚡"], [/wind|storm/i, "💨"], [/sneeuw/i, "❄"], [/glad|ijzel|vorst|kou/i, "❄"], [/mist/i, "≡"], [/regen/i, "☔"], [/hitte/i, "☀"]];
 const codeKleur = (w, n) => CODE_KLEUR[w.opgeheven ? "green" : n] || CODE_KLEUR.yellow;
 const opKleur = (w) => (!w.opgeheven && (!w.niveau || w.niveau === "yellow") ? "#1D1D1F" : "#fff");
 const NL = { n: 53.62, s: 50.7, w: 3.3, e: 7.25 };
 
 function weerKaartHTML(w) {
   const [dag, rest] = (w.tijdvak || "").split(/ (.+)/);
-  const icoon = (ICOON.find(([re]) => re.test(w.soort || "")) || [null, "!"])[1];
+  const icoon = (WEER_ICOON.find(([re]) => re.test(w.soort || "")) || [null, "!"])[1];
   return `<figure class="nw-weer-kaart" role="img" aria-label="${esc([w.code, w.soort, w.tijdvak].filter(Boolean).join(", "))}">
     <div class="kaart">${weerSVG(w)}</div>
     ${w.datumKop ? `<div class="datum"><strong>${esc(w.datumKop)}</strong>${w.vanafTot ? `<span>${esc(w.vanafTot)}</span>` : ""}</div>` : ""}
