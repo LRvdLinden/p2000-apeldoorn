@@ -6,8 +6,10 @@ jobs:
     steps:
       - run: |
           set +e
-          curl -s https://opendata.ndw.nu/ | grep -o 'href="[^"]*"[^<]*</a>[^<]*' | sed 's/<\/a>//' | head -80
-          echo "== srti"; curl -s https://opendata.ndw.nu/srti.xml.gz | gunzip | head -c 1500; echo
-          echo "== incidents"; curl -s https://opendata.ndw.nu/incidents.xml.gz | gunzip | grep -o "<[a-zA-Z:]*situationRecord [^>]*>" | sed 's/ id=.*//' | sort | uniq -c | head
-          echo "== srti types"; curl -s https://opendata.ndw.nu/srti.xml.gz | gunzip | grep -o 'xsi:type="[^"]*"' | sort | uniq -c | head -20
-          echo "== statusberichten types"; curl -s https://opendata.ndw.nu/actuele_statusberichten.xml.gz | gunzip | grep -o 'xsi:type="[^"]*"' | sort | uniq -c | head -20
+          for f in actueel_beeld veiligheidsgerelateerde_informatie_srti tijdelijke_verkeersmaatregelen_afsluitingen trafficspeed; do
+            curl -s -o $f.gz https://opendata.ndw.nu/$f.xml.gz; echo "== $f gz=$(stat -c%s $f.gz) xml=$(gunzip -c $f.gz | wc -c)"
+            gunzip -c $f.gz | grep -o 'xsi:type="[^"]*"' | sort | uniq -c | sort -rn | head -14
+          done
+          echo "== voorbeeld file (AbnormalTraffic) uit actueel_beeld"
+          gunzip -c actueel_beeld.gz | tr -d '\n' | grep -o '<[a-z:]*situationRecord[^>]*xsi:type="[a-z:]*AbnormalTraffic".\{0,2500\}' | head -1 | head -c 2500; echo
+          echo "== headers"; curl -sI https://opendata.ndw.nu/actueel_beeld.xml.gz | grep -iE "last-modified|cache|content-length"
