@@ -5,6 +5,4 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/nieuws?limit=40" | jq -r '.[] | select(.soort=="regionaal") | "\(.afbeelding) \(.foto_bron)"' | head -15
-          for u in $(curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/nieuws?limit=40" | jq -r '.[] | select(.foto_bron!=null) | .afbeelding' | sort -u); do echo "$u -> $(curl -s -o /dev/null -w '%{http_code} %{content_type} %{size_download}' "$u")"; done
-          curl -s -o /dev/null -w 'site js-brand: %{http_code} %{content_type}\n' https://a-alerts.nl/assets/img/nieuws/js-brand-1.webp
+          for f in js-brand-1 112-brand-1; do echo "== $f"; curl -sI -A "A-Alerts/73 CFNetwork/3826 Darwin/25.0.0" -H "Accept: image/webp,image/avif,image/jxl,image/heic,image/*,*/*;q=0.8" "https://a-alerts.nl/assets/img/nieuws/$f.webp?v=3" | grep -iE "^(HTTP|content-type|content-length|cache-control|cf-cache|age|last-modified|server|x-)" ; done
