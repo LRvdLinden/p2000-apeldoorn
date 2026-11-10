@@ -51,10 +51,15 @@ async function laadLijst() {
 }
 function toonLijst() {
   const lijst = items.filter((x) => !filter || (filter === "liveblog" ? isLiveblog(x) : x.soort === filter));
-  $("#items").innerHTML = lijst.length ? lijst.map((x) => `
-    <a class="nw-kaart" href="/nieuws/${esc(x.id)}" data-id="${esc(x.id)}" style="background-image:url('${esc(x.afbeelding || "")}')">
-      <span class="t">${labelHTML(x)}<h2>${esc(x.titel)}</h2><small>${esc(meta(x))}</small></span>
-    </a>`).join("") : `<p class="nw-leeg">Er is nu geen nieuws in deze categorie.</p>`;
+  if (!lijst.length) { $("#items").innerHTML = `<p class="nw-leeg">Er is nu geen nieuws in deze categorie.</p>`; return; }
+  // Like a regional news site: one big story, two below it, then a list with a 16:9 image left of the title.
+  const href = (x) => `href="/nieuws/${esc(x.id)}" data-id="${esc(x.id)}"`;
+  const beeld = (x) => `<span class="nw-beeld" style="background-image:url('${esc(x.afbeelding || "")}')"></span>`;
+  const [eerste, ...rest] = lijst;
+  const groot = `<a class="nw-groot" ${href(eerste)}>${beeld(eerste)}<span class="t">${labelHTML(eerste)}<h2>${esc(eerste.titel)}</h2><small>${esc(meta(eerste))}</small></span></a>`;
+  const twee = rest.slice(0, 2).map((x) => `<a class="nw-blok" ${href(x)}>${beeld(x)}<span class="t">${labelHTML(x)}<h2>${esc(x.titel)}</h2><small>${esc(meta(x))}</small></span></a>`).join("");
+  const rij = rest.slice(2).map((x) => `<a class="nw-rij" ${href(x)}>${beeld(x)}<span class="t">${labelHTML(x)}<h2>${esc(x.titel)}</h2><small>${esc(meta(x))}</small></span></a>`).join("");
+  $("#items").innerHTML = groot + (twee ? `<div class="nw-twee">${twee}</div>` : "") + (rij ? `<div class="nw-rijen">${rij}</div>` : "");
 }
 document.querySelectorAll(".nw-chips button").forEach((b) => b.addEventListener("click", () => {
   filter = b.dataset.f;

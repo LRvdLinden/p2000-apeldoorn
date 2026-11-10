@@ -153,7 +153,7 @@ fun NieuwsHero(x: NieuwsItem, onClick: () -> Unit) {
 fun NieuwsRij(x: NieuwsItem, onClick: () -> Unit) {
     Surface(shape = RoundedCornerShape(18.dp), color = MaterialTheme.colorScheme.surface, modifier = Modifier.fillMaxWidth().clickable(onClick = onClick)) {
         Row(Modifier.padding(10.dp), verticalAlignment = Alignment.CenterVertically) {
-            NetImage(x.afbeelding, x.kleur, Modifier.size(104.dp, 80.dp).clip(RoundedCornerShape(12.dp)))
+            NetImage(x.afbeelding, x.kleur, Modifier.size(128.dp, 72.dp).clip(RoundedCornerShape(12.dp)))
             Spacer(Modifier.width(12.dp))
             Column(verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(x.label, color = if (x.bron == "vermistkind") MaterialTheme.colorScheme.primary else x.kleur, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)

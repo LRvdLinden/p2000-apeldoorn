@@ -145,7 +145,7 @@ struct NieuwsRij: View {
     let item: NieuwsItem
     var body: some View {
         HStack(spacing: 12) {
-            Color.clear.frame(width: 104, height: 80)
+            Color.clear.frame(width: 128, height: 72) // 16:9, like every news image (1200x675): never cropped
                 .overlay { NieuwsAfbeelding(item: item) }
                 .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
             VStack(alignment: .leading, spacing: 4) {

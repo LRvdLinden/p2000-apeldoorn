@@ -3,6 +3,7 @@
 // that opted in (table device_prefs). Pure parsing lives here too, so the tests can run it without I/O.
 import { polygonOverlaps, inWerkgebied, inRing, distanceKm, PLAATSEN_ALL, plaatsKey, matchesPlaatsen } from "./werkgebied.js";
 import { KIND_API, KIND_BRONNEN, groepeer, kindWarning } from "./kind.js";
+import { kvWrite } from "./kv.js";
 
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
@@ -98,6 +99,53 @@ export function burgernetTitel(report) {
   let t = zinnen[0] || clean;
   if (t.length < 25 && zinnen[1]) t = `${t} ${zinnen[1]}`;
   return t.replace(/\s*(Tips\?|Bel nu 112)[\s\S]*$/i, "").trim().slice(0, 140);
+}
+
+/**
+ * The street in a Burgernet message ("omgeving Loolaan", "op de Deventerstraat"), or null. Burgernet has no address field:
+ * only a street named in the text counts, so a map with a marker is only made when the spot is really known.
+ */
+const STRAAT_RE = /(?<![\p{L}])((?:(?:Van|De|Den|Het|Ter|Ten)\s)*[A-Z][\p{L}'.-]+(?:straat|weg|laan|plein|singel|dreef|kade|dijk|allee|hof|pad|steeg|gracht|markt|ring|baan|park|veld|erf))(?![\p{L}])|(?<![\p{L}])((?:Laan|Weg|Plein)\s(?:van|der|de|den|het|\s)*[A-Z][\p{L}'-]+)/gu;
+const GEEN_STRAAT = /^(Burgerweg|Snelweg|Rijksweg|Onderweg|Uitweg|Omweg|Zijweg)$/;
+export function burgernetStraat(report) {
+  for (const m of String(report || "").matchAll(STRAAT_RE)) {
+    const s = (m[1] || m[2] || "").trim();
+    if (s.length >= 5 && !GEEN_STRAAT.test(s)) return s;
+  }
+  return null;
+}
+
+/** Spot of a street in a town with the PDOK Locatieserver (open data of the government); cached in kv. */
+async function straatPunt(env, budget, straat, plaats) {
+  const key = `bn_straat:${straat.toLowerCase()}|${plaats.naam.toLowerCase()}`;
+  const oud = (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(key).first())?.value;
+  if (oud) return oud === "-" ? null : oud.split(",").map(Number);
+  if (!budget.take()) return null;
+  let punt = null;
+  try {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(`${straat} ${plaats.naam}`)}&fq=type:weg&rows=3&fl=weergavenaam,centroide_ll`;
+    const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const docs = (await res.json())?.response?.docs || [];
+    for (const d of docs) {
+      const m = String(d.centroide_ll || "").match(/POINT\((-?[\d.]+) (-?[\d.]+)\)/);
+      if (!m) continue;
+      const lat = Number(m[2]), lon = Number(m[1]);
+      // Only a street near the place of the action (Burgernet only sends Apeldoorn and Voorst).
+      if (distanceKm(lat, lon, plaats.lat, plaats.lon) <= 15) { punt = [Math.round(lat * 1e5) / 1e5, Math.round(lon * 1e5) / 1e5]; break; }
+    }
+  } catch (e) { console.warn("[burgernet straat]", straat, e.message || e); return null; }
+  await kvWrite(env, key, punt ? punt.join(",") : "-");
+  return punt;
+}
+
+/** A Burgernet action with a street in its message: the street and its spot (for the map with a marker in Homey). */
+export async function burgernetLocatie(env, budget, w) {
+  const straat = burgernetStraat(w.startbericht || w.tekst);
+  if (!straat) return w;
+  const plaats = PLAATSEN_ALL.find((p) => p.naam === w.plaats) || PLAATSEN_ALL.find((p) => p.naam === "Apeldoorn");
+  const punt = await straatPunt(env, budget, straat, plaats);
+  return punt ? { ...w, straat, lat: punt[0], lon: punt[1] } : w;
 }
 
 export function fromBurgernet(a, now = Date.now()) {
@@ -439,7 +487,7 @@ export function toAPI(row, { withArea = true, metLandelijk = false } = {}) {
     })() : {}),
     ...(row.bron === "burgernet" ? (() => {
       const b = parse(row.knmi_data) || {};
-      return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null, berichten: Array.isArray(b.berichten) && b.berichten.length ? b.berichten : null };
+      return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null, berichten: Array.isArray(b.berichten) && b.berichten.length ? b.berichten : null, straat: b.straat ?? null };
     })() : {}),
   };
 }
@@ -518,8 +566,8 @@ async function upsert(env, w, now) {
       tijdvakken: w.tijdvakken || null, landelijk: w.landelijk || null });
   } else if (KIND_BRONNEN.includes(w.bron) && w.extra) extra = JSON.stringify(w.extra);
   // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
-  else if (w.bron === "burgernet" && (w.afloop || w.berichten?.length)) {
-    extra = JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null });
+  else if (w.bron === "burgernet" && (w.afloop || w.berichten?.length || w.straat)) {
+    extra = JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null, ...(w.straat ? { straat: w.straat } : {}) });
   }
   const velden = [w.titel, w.tekst, w.tekst_en, w.plaats, w.niveau, w.soort, w.start_at, w.end_at, w.status, json(w.gebied), w.lat, w.lon, w.link];
   const oud = prev && [prev.titel, prev.tekst, prev.tekst_en, prev.plaats, prev.niveau, prev.soort, prev.start_at, prev.end_at, prev.status, prev.gebied, prev.lat, prev.lon, prev.link];
@@ -651,6 +699,10 @@ export async function ingestWarnings(env, budget, kv) {
         merged.set(w.id, w);
       }
     } catch (e) { fouten.push(`pagina's ${e.message}`); }
+    // A street in the message: its spot from PDOK (cached), so Homey can draw a map with a marker.
+    for (const [id, w] of merged) {
+      try { merged.set(id, await burgernetLocatie(env, budget, w)); } catch (e) { fouten.push(`straat ${e.message}`); }
+    }
     if (lijst) {
       await handleBurgernet([...merged.values()], new Set(lijst.map((w) => w.id)));
       status.burgernet = `ok ${lijst.length}${fouten.length ? ` (${fouten.join(", ")})` : ""}`;

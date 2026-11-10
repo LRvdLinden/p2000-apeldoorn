@@ -12,15 +12,30 @@ body { padding: 0 16px 60px; background: var(--bg); }
 .nw-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
 .nw-chips button { font: inherit; font-weight: 600; font-size: .92rem; border: 0; border-radius: 999px; padding: 8px 16px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); cursor: pointer; }
 .nw-chips button[aria-pressed="true"] { background: var(--red); color: #fff; }
-.nw-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 16px; }
-.nw-kaart { position: relative; display: block; border-radius: 22px; overflow: hidden; aspect-ratio: 16 / 10; background: #222 center/cover no-repeat; color: #fff; text-decoration: none; box-shadow: var(--shadow); }
-.nw-kaart::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 15%, rgba(0,0,0,.55) 55%, rgba(0,0,0,.92)); }
-.nw-kaart .t { position: absolute; left: 16px; right: 16px; bottom: 14px; z-index: 1; }
-.nw-kaart h2 { font-size: 1.15rem; line-height: 1.25; margin: 8px 0 4px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
-.nw-kaart small { opacity: .88; font-size: .8rem; }
-.nw-kaart:hover, .nw-kaart:focus-visible { transform: translateY(-2px); transition: transform .15s; }
-.nw-grid .nw-kaart:first-child { grid-column: 1 / -1; aspect-ratio: auto; min-height: 320px; }
-.nw-grid .nw-kaart:first-child h2 { font-size: clamp(1.4rem, 3vw, 2rem); }
+/* Overview like a regional news site: one big story, two below it, then a list. Every image is 16:9 (1200x675), never cropped. */
+.nw-grid { display: flex; flex-direction: column; gap: 16px; }
+.nw-beeld { display: block; aspect-ratio: 16 / 9; background: #222 center/cover no-repeat; }
+.nw-groot, .nw-blok, .nw-rij { display: block; text-decoration: none; color: var(--text); background: var(--surface); border-radius: 22px; overflow: hidden; box-shadow: var(--shadow); transition: transform .15s; }
+.nw-groot:hover, .nw-blok:hover, .nw-rij:hover, .nw-groot:focus-visible, .nw-blok:focus-visible, .nw-rij:focus-visible { transform: translateY(-2px); }
+.nw-groot .t, .nw-blok .t { display: block; padding: 14px 18px 18px; }
+.nw-groot h2, .nw-blok h2, .nw-rij h2 { margin: 8px 0 4px; line-height: 1.25; display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; }
+.nw-groot h2 { font-size: clamp(1.4rem, 3vw, 2rem); -webkit-line-clamp: 3; }
+.nw-blok h2 { font-size: 1.15rem; -webkit-line-clamp: 3; }
+.nw-rij h2 { font-size: 1.05rem; -webkit-line-clamp: 3; }
+.nw-groot small, .nw-blok small, .nw-rij small { color: var(--muted); font-size: .8rem; }
+.nw-twee { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.nw-rijen { display: flex; flex-direction: column; gap: 12px; }
+.nw-rij { display: flex; align-items: center; gap: 16px; padding: 10px; border-radius: 18px; }
+.nw-rij .nw-beeld { flex: 0 0 clamp(128px, 28%, 240px); border-radius: 12px; }
+.nw-rij .t { min-width: 0; }
+.nw-label { border: 1px solid var(--line, rgba(0,0,0,.08)); }
+@media (max-width: 600px) {
+  .nw-twee { gap: 10px; }
+  .nw-blok .t { padding: 10px 12px 14px; }
+  .nw-blok h2 { font-size: .98rem; }
+  .nw-blok .nw-label { font-size: .6rem; padding: 3px 8px; }
+  .nw-rij h2 { font-size: .95rem; }
+}
 .nw-label { display: inline-flex; align-items: center; gap: 6px; background: #fff; color: #111; border-radius: 999px; padding: 4px 10px; font-size: .7rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase; }
 .nw-label img { width: 15px; height: 15px; }
 .nw-label .live { width: 7px; height: 7px; border-radius: 50%; background: #e3001b; }
@@ -80,3 +95,9 @@ body { padding: 0 16px 60px; background: var(--bg); }
 .nw-advies li::before { content: "›"; position: absolute; left: 4px; color: var(--red); font-weight: 700; }
 .nw-details summary { cursor: pointer; color: var(--red); font-weight: 700; font-size: 1.2rem; padding: 8px 0; }
 @media (max-width: 600px) { .nw-weer-kaart { height: 380px; } .nw-weer-kaart .datum strong { font-size: 1.1rem; } }
+/* Wide screens: the big story with the image left and the text right, so it does not fill the whole screen. */
+@media (min-width: 900px) {
+  .nw-groot { display: grid; grid-template-columns: 62% 1fr; align-items: center; }
+  .nw-groot .t { padding: 24px 28px; }
+  .nw-groot h2 { -webkit-line-clamp: 5; }
+}
