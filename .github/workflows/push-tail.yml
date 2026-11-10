@@ -1,0 +1,16 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    env:
+      WID: ${{ secrets.HOMEY_WEBHOOK_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - run: |
+          B='{"channel":"aalerts","sent_at":"probe","meldingen":[],"waarschuwingen":[]}'
+          echo "TEST $(curl -s -o r.txt -w '%{http_code}' -X POST -H 'content-type: application/json' --data "$B" "https://webhooks.athom.com/webhook/$WID") $(head -c 200 r.txt)"
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          DB=$(curl -s -H "$H" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database" | jq -r '.result[] | select(.name|test("p2000")) | .uuid' | head -1)
+          jq -n --arg s "SELECT key, value, datetime(at/1000,'unixepoch') AS at FROM kv WHERE key IN ('homey_last','homey_cursor')" '{sql:$s}' | curl -s -H "$H" -H "content-type: application/json" -d @- "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database/$DB/query" | jq -c '.result[0].results[]' | sed 's/^/KV /'
