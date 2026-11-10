@@ -17,11 +17,13 @@ const kvSet = (env, key, value) => kvWrite(env, key, value);
 
 /** What changed since the last send: alerts stored after the cursor and warnings updated after it. */
 export async function homeyChanges(env, since) {
-  const [m, w] = await Promise.all([
+  const [m, w, n] = await Promise.all([
     env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.created_at > ? ORDER BY m.datum ASC LIMIT 40`).bind(since).all(),
     warningsSince(env, since),
+    // New news articles: only their ids; the Homey app then reads GET /v1/nieuws (image, title, kind).
+    env.DB.prepare("SELECT id FROM nieuws WHERE hidden = 0 AND created_at > ? ORDER BY created_at ASC LIMIT 20").bind(since).all(),
   ]);
-  return { meldingen: m.results.map(toAPI), waarschuwingen: w };
+  return { meldingen: m.results.map(toAPI), waarschuwingen: w, nieuws: n.results.map((r) => r.id) };
 }
 
 export async function notifyHomey(env, budget) {
@@ -31,7 +33,7 @@ export async function notifyHomey(env, budget) {
   if (!raw) { await kvSet(env, CURSOR, now); return { sent: false, reason: "cursor set" }; }
   const since = Math.max(Number(raw) || now, now - 30 * 60_000); // never resend more than 30 minutes
   const changes = await homeyChanges(env, since);
-  if (!changes.meldingen.length && !changes.waarschuwingen.length) { await kvSet(env, CURSOR, now); return { sent: false, reason: "nothing new" }; }
+  if (!changes.meldingen.length && !changes.waarschuwingen.length && !changes.nieuws.length) { await kvSet(env, CURSOR, now); return { sent: false, reason: "nothing new" }; }
   if (budget && !budget.take()) return { sent: false, reason: "budget" };
   const res = await fetch(`https://webhooks.athom.com/webhook/${env.HOMEY_WEBHOOK_ID}`, {
     method: "POST",
@@ -42,6 +44,6 @@ export async function notifyHomey(env, budget) {
   // On failure the cursor stays, so the next run sends the same changes again.
   if (res.ok) await kvSet(env, CURSOR, now);
   else console.error("[homey]", res.status, res.statusText);
-  await kvSet(env, "homey_last", JSON.stringify({ at: now, ok: res.ok, status: res.status, meldingen: changes.meldingen.length, waarschuwingen: changes.waarschuwingen.length }));
+  await kvSet(env, "homey_last", JSON.stringify({ at: now, ok: res.ok, status: res.status, meldingen: changes.meldingen.length, waarschuwingen: changes.waarschuwingen.length, nieuws: changes.nieuws.length }));
   return { sent: res.ok, status: res.status, ...changes };
 }
