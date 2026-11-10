@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A-Alerts widget: live kaart en verkeer Apeldoorn</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="/assets/css/base.css?v=58">
+<link rel="stylesheet" href="/assets/css/widget.css?v=1">
+<script src="/config.js?v=58"></script>
+<style>html, body { background: transparent; margin: 0; } body { padding: 2px; } #w { max-width: 520px; margin: 0 auto; }</style>
+</head>
+<body>
+<div id="w"></div>
+<script type="module">
+// A-Alerts widget for other websites: /widget/?w=kaart,verkeer&thema=auto|licht|donker[&site=<host>]
+// Reports the site it is shown on (domain only); a blocked site gets a link to a-alerts.nl instead.
+import { API } from "/assets/js/core.js?v=58";
+import { maakWidgets } from "/assets/js/widget.js?v=1";
+const q = new URLSearchParams(location.search);
+const widgets = (q.get("w") || "kaart,verkeer").split(",");
+const thema = ["licht", "donker"].includes(q.get("thema")) ? q.get("thema") : "auto";
+if (thema !== "auto") document.documentElement.dataset.theme = thema === "donker" ? "dark" : "light";
+let site = q.get("site") || "";
+try { if (!site && document.referrer) site = new URL(document.referrer).hostname; } catch {}
+const el = document.getElementById("w");
+// Height for embed.js (the script version adjusts the iframe to the content).
+const hoogte = () => parent !== window && parent.postMessage({ aAlertsWidget: true, id: q.get("id") || "", hoogte: document.documentElement.scrollHeight }, "*");
+new ResizeObserver(hoogte).observe(document.body);
+let blok = false;
+try {
+  const r = await fetch(`${API}/v1/widget/ping?site=${encodeURIComponent(site)}&w=${encodeURIComponent(widgets.join(","))}`, { signal: AbortSignal.timeout(6000) });
+  blok = (await r.json()).blok === true;
+} catch {}
+if (blok) el.innerHTML = '<div class="aw-blok">Het live verkeer en de kaart van Apeldoorn e.o. vind je op <a href="https://a-alerts.nl/nieuws/" target="_blank" rel="noopener">a-alerts.nl</a>.</div>';
+else maakWidgets(el, { widgets, thema, extern: true, onResize: hoogte });
+</script>
+</body>
+</html>

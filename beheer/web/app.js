@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], nieuws: ["Nieuws", nieuws], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], nieuws: ["Nieuws", nieuws], widgets: ["Widgets", widgets], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -639,6 +639,41 @@ function incidentUpdate(id, klaar) {
 // "Klopt deze melding niet?": reports from users (apps and website), kept 90 days.
 const REDEN = { locatie: "De plek klopt niet", dienst: "Verkeerde hulpdienst", prioriteit: "Verkeerde prioriteit", dubbel: "Dubbele melding", test: "Test- of proefalarm", anders: "Iets anders" };
 let foutFilter = "open";
+// Widgets (live map, "Verkeer nu") for other websites: the code to copy, and on which sites they are embedded.
+let wKeus = { w: "kaart,verkeer", thema: "auto" };
+const WIDGET_HOOGTE = { "kaart,verkeer": 1180, kaart: 560, verkeer: 640 };
+function widgetCode(soort) {
+  const { w, thema } = wKeus;
+  if (soort === "iframe") return `<iframe src="https://a-alerts.nl/widget/?w=${w}&thema=${thema}"\n  title="A-Alerts: live kaart en verkeer Apeldoorn" width="360" height="${WIDGET_HOOGTE[w]}"\n  style="border:0;max-width:100%" loading="lazy"></iframe>`;
+  return `<div data-a-alerts-widget="${w}" data-thema="${thema}"></div>\n<script src="https://a-alerts.nl/widget/embed.js" async></script>`;
+}
+async function widgets(el) {
+  const d = await api("GET", "/v1/beheer/widgets");
+  const knop = (k, v, l) => `<button class="btn${wKeus[k] === v ? " primary" : ""}" data-wk="${k}" data-wv="${v}">${l}</button>`;
+  const blok = (soort, titel) => `<p style="margin:12px 0 6px;font-weight:600">${titel}</p><pre class="code" id="wc-${soort}">${esc(widgetCode(soort))}</pre>
+    <button class="btn primary" data-wcopy="${soort}">Kopieer ${soort === "iframe" ? "iframe" : "script"}</button>`;
+  el.innerHTML = `<div class="card"><h3 style="margin-top:0">Code om te delen</h3>
+      <div class="toolbar" style="flex-wrap:wrap;gap:6px">${knop("w", "kaart,verkeer", "Kaart + verkeer")}${knop("w", "kaart", "Alleen kaart")}${knop("w", "verkeer", "Alleen verkeer")}
+        <span style="width:12px"></span>${knop("thema", "auto", "Thema: automatisch")}${knop("thema", "licht", "Licht")}${knop("thema", "donker", "Donker")}</div>
+      ${blok("iframe", "Iframe (vaste hoogte)")}${blok("script", "Script (past de hoogte vanzelf aan)")}
+      <p class="muted" style="font-size:.8rem;margin-top:12px">In de widget staat altijd "A-Alerts" in de kop en een link naar a-alerts.nl. <a href="https://a-alerts.nl/widget/?w=${wKeus.w}&thema=${wKeus.thema}" target="_blank" rel="noopener">Voorbeeld ↗</a></p></div>
+    <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Ingesloten op</h3>
+      ${d.sites.length ? `<table class="tabel"><tr><th>Website</th><th>Widget</th><th>Eerst gezien</th><th>Laatst gezien</th><th>Weergaven 7 dagen</th><th>Status</th><th></th></tr>
+        ${d.sites.map((s) => `<tr><td><a href="https://${esc(s.site)}" target="_blank" rel="noopener"><b>${esc(s.site)}</b></a></td><td>${esc(s.widgets.replace(",", " + "))}</td>
+          <td>${dt(s.eerst)}</td><td>${dt(s.laatst)}</td><td>${s.views7.toLocaleString("nl-NL")}</td>
+          <td>${s.blok ? '<span class="tag red">geblokkeerd</span>' : s.actief ? '<span class="tag green">actief</span>' : '<span class="muted">geen bezoek >3 dagen</span>'}</td>
+          <td><button class="btn${s.blok ? "" : " danger"}" data-wblok="${esc(s.site)}" data-aan="${s.blok ? 0 : 1}">${s.blok ? "Deblokkeer" : "Blokkeer"}</button></td></tr>`).join("")}</table>`
+        : '<p class="muted">Nog op geen enkele andere website ingesloten.</p>'}
+      <p class="muted" style="font-size:.8rem;margin-top:10px">De widget meldt alleen de domeinnaam van de site waarop hij staat, geen gegevens van bezoekers. Een geblokkeerde site toont alleen een link naar a-alerts.nl.</p></div>`;
+  el.querySelectorAll("[data-wk]").forEach((b) => (b.onclick = () => { wKeus = { ...wKeus, [b.dataset.wk]: b.dataset.wv }; run(); }));
+  el.querySelectorAll("[data-wcopy]").forEach((b) => (b.onclick = async () => { await navigator.clipboard.writeText(widgetCode(b.dataset.wcopy)); toast("Gekopieerd"); }));
+  el.querySelectorAll("[data-wblok]").forEach((b) => (b.onclick = async () => {
+    const aan = b.dataset.aan === "1";
+    if (aan && !confirm(`${b.dataset.wblok} blokkeren? De site toont dan alleen een link naar a-alerts.nl.`)) return;
+    await api("POST", "/v1/beheer/widgets/blok", { site: b.dataset.wblok, blok: aan }); toast(aan ? "Geblokkeerd" : "Gedeblokkeerd"); run();
+  }));
+}
+
 async function fouten(el) {
   const d = await api("GET", `/v1/beheer/feedback${foutFilter ? `?status=${foutFilter}` : ""}`);
   const knop = (k, l) => `<button class="btn${foutFilter === k ? " primary" : ""}" data-ff="${k}">${l}</button>`;

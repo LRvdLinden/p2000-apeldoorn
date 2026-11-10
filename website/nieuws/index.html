@@ -28,7 +28,8 @@
 <link rel="apple-touch-icon" href="/assets/img/aalerts-icon-180.png">
 <link rel="manifest" href="/site.webmanifest">
 <link rel="stylesheet" href="/assets/css/base.css?v=58">
-<link rel="stylesheet" href="/assets/css/nieuws.css?v=66">
+<link rel="stylesheet" href="/assets/css/nieuws.css?v=67">
+<link rel="stylesheet" href="/assets/css/widget.css?v=1">
 <script src="/config.js?v=58"></script>
 <script src="/assets/js/consent.js?v=58" defer></script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@graph": [{"@type": "CollectionPage", "@id": "https://a-alerts.nl/nieuws/", "url": "https://a-alerts.nl/nieuws/", "name": "Nieuws", "inLanguage": "nl-NL", "isPartOf": {"@id": "https://a-alerts.nl/#website"}}, {"@type": "BreadcrumbList", "itemListElement": [{"@type": "ListItem", "position": 1, "name": "A-Alerts", "item": "https://a-alerts.nl/"}, {"@type": "ListItem", "position": 2, "name": "Nieuws", "item": "https://a-alerts.nl/nieuws/"}]}]}</script>
@@ -49,12 +50,15 @@
       <button type="button" data-f="regionaal" aria-pressed="false">112 Nieuws</button>
       <button type="button" data-f="weer" aria-pressed="false">Weer</button>
     </div>
-    <div id="items" class="nw-grid" aria-live="polite"><p class="nw-leeg">Nieuws laden…</p></div>
+    <div class="nw-kol">
+      <div id="items" class="nw-grid" aria-live="polite"><p class="nw-leeg">Nieuws laden…</p></div>
+      <aside id="widgets" class="nw-zij" aria-label="Live kaart en verkeer"></aside>
+    </div>
     <p class="nw-bron">Politieberichten: bron politie.nl. 112 Nieuws: titel en intro van 112nieuws.net, met toestemming. Foto's bij deze berichten zijn stockfoto's.</p>
   </section>
   <article id="artikel" hidden></article>
 </main>
 <footer class="nw-foot">A-Alerts · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a></footer>
-<script type="module" src="/assets/js/nieuws.js?v=66"></script>
+<script type="module" src="/assets/js/nieuws.js?v=67"></script>
 </body>
 </html>

@@ -20,6 +20,8 @@ Tabblad Nieuws (iPhone, iPad, Mac, Apple Watch, Apple TV, Android en a-alerts.nl
 
 Kaartlaag **Verkeer** (iPhone, iPad, Mac, Apple TV, Android, a-alerts.nl pager en meldkamer): afsluitingen en werkzaamheden, ongevallen en pech, en files met vertraging in de regio Apeldoorn, uit de open data van de NDW (`actueel_beeld.xml.gz`: Rijkswaterstaat, provincie en gemeenten), met straatnamen via de PDOK Locatieserver. Laag **Flitsers**: vaste flitsers en trajectcontroles uit OpenStreetMap (mobiele controles staan in geen enkele open bron). Het NDW-bestand is te groot voor de Worker (CPU-limiet), daarom leest de aparte service [a-alerts_file_verkeer_info](https://github.com/LRvdLinden/a-alerts_file_verkeer_info) op Koyeb (gratis) het bestand en vraagt de Worker elke minuut het kleine resultaat op (`GET /v1/verkeer`). Secrets van de Worker: `VERKEER_URL` en `VERKEER_TOKEN`; zonder die secrets is de laag leeg.
 
+**Widgets (alleen website):** op a-alerts.nl/nieuws staan rechts (op de telefoon onder het nieuws) de widgets **Live kaart** (vierkant: gemeentegrens in de kleur van de KNMI-code, verkeer, P2000 van de laatste 3 uur, helikopters in het gebied, ziekenhuizen, buien, optioneel flitsers; licht/donker automatisch) en **Verkeer nu** (files, afsluitingen, werkzaamheden, ongevallen, pech, flitsers). Andere websites plaatsen ze met een iframe (`a-alerts.nl/widget/?w=kaart,verkeer&thema=auto`) of met `a-alerts.nl/widget/embed.js`; de naam A-Alerts staat in elke kop en onderaan. De widget meldt de domeinnaam (`GET /v1/widget/ping`); in beheer (Widgets) staat de code om te kopiëren, de lijst van sites met weergaven, en blokkeren.
+
 ## Functies
 
 - **Animated splash**: het schild valt in beeld, pager-pulsen golven uit en daarna gaat de app open.

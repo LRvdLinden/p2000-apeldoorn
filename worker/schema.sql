@@ -193,3 +193,7 @@ CREATE TABLE IF NOT EXISTS nieuws_liveblog (id TEXT PRIMARY KEY, at INTEGER NOT 
 -- Stock photo chosen per police / 112 Nieuws article (never the same photo as the article before it).
 CREATE TABLE IF NOT EXISTS nieuws_stockfoto (id TEXT PRIMARY KEY, foto TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS nieuws_fotos (id TEXT PRIMARY KEY, mime TEXT NOT NULL, data BLOB NOT NULL, at INTEGER NOT NULL);
+-- Widgets (live map, "Verkeer nu") embedded on other websites: domain, views per day, blocked sites.
+CREATE TABLE IF NOT EXISTS widget_sites (site TEXT PRIMARY KEY, widgets TEXT, eerst INTEGER NOT NULL, laatst INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS widget_views (site TEXT NOT NULL, dag TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (site, dag));
+CREATE TABLE IF NOT EXISTS widget_blok (site TEXT PRIMARY KEY, at INTEGER NOT NULL);

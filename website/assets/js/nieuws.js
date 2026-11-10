@@ -1,5 +1,6 @@
 // A-Alerts: Nieuws. The list (/nieuws/) and one article or liveblog (/nieuws/<id>, also ?id=<id>).
 import { API, esc, loadMapKit } from "./core.js?v=58";
+import { maakWidgets } from "./widget.js?v=1";
 
 const TZ = "Europe/Amsterdam";
 const $ = (s) => document.querySelector(s);
@@ -202,3 +203,7 @@ function route() {
 addEventListener("popstate", route);
 route();
 setInterval(() => { if (!$("#lijst").hidden) laadLijst(); }, 120_000);
+
+// Side column: Live kaart and Verkeer nu (on a phone below the news).
+const widgetsEl = document.getElementById("widgets");
+if (widgetsEl) maakWidgets(widgetsEl, { widgets: ["kaart", "verkeer"], thema: "auto" });

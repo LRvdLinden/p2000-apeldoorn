@@ -117,3 +117,10 @@ textarea.code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; fon
 /* A-Alerts pager icons */
 .dicon { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; flex: none; }
 .ico .dicon { width: 26px; height: 26px; }
+/* Widgets: code to copy and the list of sites. */
+pre.code { background: #111; color: #e6e6e6; border-radius: 12px; padding: 12px 14px; font: .82rem/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; white-space: pre-wrap; word-break: break-all; margin: 0 0 8px; }
+table.tabel { width: 100%; border-collapse: collapse; font-size: .9rem; }
+table.tabel th, table.tabel td { text-align: left; padding: 8px 6px; border-top: 1px solid var(--line, rgba(0,0,0,.08)); }
+table.tabel th { color: var(--muted, #6b7280); font-weight: 600; font-size: .78rem; border-top: 0; }
+@media (max-width: 700px) { table.tabel th:nth-child(3), table.tabel td:nth-child(3) { display: none; } }
+.tag.green { background: rgba(22,163,74,.15); color: #16A34A; }

@@ -1,12 +1,12 @@
 /* A-Alerts: Nieuws (/nieuws/ and /nieuws/<id>) */
 body { padding: 0 16px 60px; background: var(--bg); }
-.nw-head { max-width: 1100px; margin: 0 auto; padding: 20px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.nw-head { max-width: 1180px; margin: 0 auto; padding: 20px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
 .nw-brand { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; color: var(--text); }
 .nw-brand img { border-radius: 9px; }
 .nw-head nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .9rem; }
 .nw-head nav a { font-weight: 500; color: var(--muted); text-decoration: none; }
 .nw-head nav a[aria-current] { color: var(--red); font-weight: 700; }
-.nw { max-width: 1100px; margin: 0 auto; }
+.nw { max-width: 1180px; margin: 0 auto; }
 .nw h1 { font-family: var(--display); font-weight: 900; font-size: clamp(2rem, 5vw, 3rem); line-height: 1; margin: .2em 0 .25em; }
 .nw-intro { color: var(--muted); max-width: 720px; margin: 0 0 18px; }
 .nw-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
@@ -103,3 +103,8 @@ body { padding: 0 16px 60px; background: var(--bg); }
   .nw-groot .t { padding: 24px 28px; }
   .nw-groot h2 { -webkit-line-clamp: 5; }
 }
+
+/* News on the left, the widgets (Live kaart, Verkeer nu) on the right from the first article down; on a phone below the news. */
+.nw-kol { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 24px; align-items: start; }
+.nw-zij { position: sticky; top: 16px; }
+@media (max-width: 960px) { .nw-kol { grid-template-columns: minmax(0, 1fr); } .nw-zij { position: static; } }

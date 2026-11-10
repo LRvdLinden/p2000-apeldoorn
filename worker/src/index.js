@@ -3,6 +3,7 @@
 //  - Cron (every minute): reads the p2000.page feed 3× per run, stores Apeldoorn alerts in D1 and sends pushes.
 //  - HTTP: the same REST API the app, the widgets and the website use.
 import { verkeer, verkeerRun } from "./verkeer.js";
+import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
 import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError } from "./rules.js";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
@@ -269,6 +270,7 @@ async function handle(req, env, ctx) {
   }
 
   // Rain radar (KNMI): one image of the Netherlands, or map tiles.
+  if (method === "GET" && path === "/v1/widget/ping") return reply(200, await widgetPing(env, url.searchParams), { "cache-control": "no-store" });
   if (method === "GET" && path === "/v1/verkeer") return reply(200, await verkeer(env), { "cache-control": "public, max-age=60" });
   if (method === "GET" && path === "/v1/radar") return reply(200, radarInfo(env, url.origin), { "cache-control": "public, max-age=60" });
   if (method === "GET" && path === "/v1/radar.png") return radarImage(env, ctx);
@@ -314,6 +316,11 @@ async function handleBeheer(req, env, url, path, method) {
   if (method === "GET" && path === "/v1/beheer/overview") {
     const [base, aAlerts, android] = await Promise.all([overview(env, await statusInfo(env)), alertsOverview(env), downloadStats(env)]);
     return reply(200, { ...base, aAlerts, android });
+  }
+  // Widgets on other websites: where they are embedded, and blocking a site.
+  if (method === "GET" && path === "/v1/beheer/widgets") return reply(200, { sites: await widgetSites(env) });
+  if ((method === "POST" || method === "PUT") && path === "/v1/beheer/widgets/blok") {
+    return (await widgetBlok(env, await readJSON(req))) ? reply(200, { sites: await widgetSites(env) }) : reply(400, { error: "Ongeldige site" });
   }
   if (method === "GET" && path === "/v1/beheer/downloads") return reply(200, await downloadStats(env));
   // A-Alerts: NL-Alert, Burgernet and KNMI in the beheer.
@@ -711,6 +718,7 @@ async function cron(env, event) {
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }
+    await widgetHousekeeping(env).catch(() => {});
   }
 }
 
