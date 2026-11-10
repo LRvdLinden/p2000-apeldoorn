@@ -32,16 +32,16 @@ function page(b) {
   @font-face{font-family:P;font-weight:500;src:url(${FONT}Poppins-Medium.woff2)}
   @font-face{font-family:P;font-weight:700;src:url(${FONT}Poppins-Bold.woff2)}
   @font-face{font-family:O;font-weight:900;src:url(${FONT}overpass-latin-900-normal.woff2)}
-  *{margin:0;box-sizing:border-box} body{width:1200px;height:675px;overflow:hidden;font-family:P}
-  .b{position:relative;width:1200px;height:675px;overflow:hidden;background:${b.bg}}
-  .band{position:absolute;right:-120px;top:-60px;width:520px;height:900px;transform:rotate(14deg);background:${b.stripes};opacity:${b.stripeOpacity ?? 1}}
+  *{margin:0;box-sizing:border-box} body{width:1200px;height:${b.h || 675}px;overflow:hidden;font-family:P}
+  .b{position:relative;width:1200px;height:${b.h || 675}px;overflow:hidden;background:${b.bg}}
+  .band{position:absolute;right:${b.vierkant ? -360 : -120}px;top:-60px;width:520px;height:${b.vierkant ? 1500 : 900}px;transform:rotate(14deg);background:${b.stripes};opacity:${b.stripeOpacity ?? 1}}
   .tile{position:absolute;left:${b.tx ?? 820}px;top:${b.ty ?? 150}px;width:280px;height:280px;border-radius:64px;background:${b.tileBg};display:grid;place-items:center;box-shadow:0 30px 60px rgba(0,0,0,.35)}
   .pill{position:absolute;left:56px;top:52px;display:flex;align-items:center;gap:14px;padding:12px 24px 12px 14px;border-radius:999px;background:rgba(255,255,255,.95);color:#121726;font-weight:700;font-size:30px;letter-spacing:.5px}
   .pill img{height:46px} .pill .dot{width:46px;height:46px;border-radius:12px;display:grid;place-items:center}
   .live{position:absolute;left:56px;top:128px;padding:8px 18px;border-radius:999px;background:#E3001B;color:#fff;font-weight:700;font-size:24px;letter-spacing:2px;display:flex;align-items:center;gap:10px}
   .live i{width:12px;height:12px;border-radius:50%;background:#fff;display:block}
-  .big{position:absolute;left:56px;top:${b.bigTop ?? 200}px;font-family:O;font-weight:900;font-size:${b.bigSize ?? 120}px;line-height:.95;color:${b.bigColor};letter-spacing:-1px;white-space:nowrap}
-  .sub{position:absolute;left:60px;top:${(b.bigTop ?? 200) + (b.subOffset ?? 128)}px;font-weight:500;font-size:34px;color:${b.subColor}}
+  .big{position:absolute;left:${b.vierkant ? 40 : 56}px;${b.vierkant ? 'right:330px;text-align:center;' : ''}top:${b.bigTop ?? 200}px;font-family:O;font-weight:900;font-size:${b.bigSize ?? 120}px;line-height:.95;color:${b.bigColor};letter-spacing:-1px;white-space:nowrap}
+  .sub{position:absolute;left:${b.vierkant ? 40 : 60}px;${b.vierkant ? 'right:330px;text-align:center;white-space:normal;' : ''}top:${(b.bigTop ?? 200) + (b.subOffset ?? 128)}px;font-weight:500;font-size:34px;color:${b.subColor}}
   .shade{position:absolute;left:0;right:0;bottom:0;height:300px;background:linear-gradient(transparent, rgba(0,0,0,.45))}
   .site{position:absolute;right:44px;bottom:36px;display:flex;align-items:center;gap:10px;padding:8px 18px 8px 8px;border-radius:999px;background:rgba(18,23,38,.85);color:#fff;font-weight:700;font-size:24px}
   .site img{height:36px;border-radius:9px}
@@ -91,13 +91,15 @@ BANNERS.push(
     pillIcon: `<img src="${IMG}icon_vermistkind.png" style="border-radius:12px">`, pill: 'Vermist Kind Alert', big: 'Help zoeken', bigColor: '#F4D400', sub: 'Regionale oproep van de politie', subColor: '#fff', bigTop: 220, subOffset: 120 },
 );
 
-(async () => {
-  const br = await chromium.launch(); const p = await br.newPage({ viewport: { width: 1200, height: 675 } });
+async function render(BANNERS, OUT, hoogte = 675, varianten = true) {
+  const br = await chromium.launch(); const p = await br.newPage({ viewport: { width: 1200, height: hoogte } });
   // Every banner twice: plain, and with "LIVEBLOG" (name-live) for items the beheer marked as liveblog.
-  for (const b of BANNERS.flatMap((x) => [{ ...x, live: false }, { ...x, live: true, name: `${x.name}-live` }])) {
+  for (const b of varianten ? BANNERS.flatMap((x) => [{ ...x, live: false }, { ...x, live: true, name: `${x.name}-live` }]) : BANNERS) {
     fs.writeFileSync(`${OUT}/${b.name}.html`, page(b));
     await p.goto(`file://${OUT}/${b.name}.html`, { waitUntil: 'load' }); await p.evaluate(() => document.fonts.ready);
     await p.screenshot({ path: `${OUT}/${b.name}.png` }); fs.unlinkSync(`${OUT}/${b.name}.html`);
   }
   await br.close();
-})();
+}
+module.exports = { render, page, stripes, knmi, IMG };
+if (require.main === module) render(BANNERS, OUT);
