@@ -28,7 +28,7 @@ import nl.lrvdlinden.aalerts.tr
 // issue time, "Risico's en advies" and the details.
 
 private val NEDERLAND = MapCamera(52.15, 5.29, 6.6, fit = listOf(53.62 to 3.30, 50.70 to 7.25), key = "nl")
-private val KNMI_BLAUW = Color(0xFF4FB3E8)
+private val KNMI_BLAUW = Red // the A-Alerts red (was the KNMI blue)
 private val KNMI_NAVY = Color(0xFF163E6E)
 
 private fun argb(c: Color) = c.toArgb().toLong() and 0xFFFFFFFFL

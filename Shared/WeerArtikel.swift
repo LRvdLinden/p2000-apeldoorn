@@ -164,12 +164,12 @@ struct WeerTekst: View {
             }
             if !weer.adviezen.isEmpty {
                 HStack(spacing: 0) {
-                    Rectangle().fill(Color(hex: 0x4FB3E8)).frame(width: 4)
+                    Rectangle().fill(Theme.red).frame(width: 4)
                     VStack(alignment: .leading, spacing: 12 * schaal) {
-                        Text(L("Risico's en advies")).font(AppFont.heading(21 * schaal)).foregroundStyle(Color(hex: 0x4FB3E8))
+                        Text(L("Risico's en advies")).font(AppFont.heading(21 * schaal)).foregroundStyle(Theme.red)
                         ForEach(weer.adviezen, id: \.self) { a in
                             HStack(alignment: .firstTextBaseline, spacing: 10) {
-                                Image(systemName: "chevron.right").font(.system(size: 13 * schaal, weight: .bold)).foregroundStyle(Color(hex: 0x4FB3E8))
+                                Image(systemName: "chevron.right").font(.system(size: 13 * schaal, weight: .bold)).foregroundStyle(Theme.red)
                                 Text(a).font(AppFont.body(17 * schaal)).lineSpacing(3).fixedSize(horizontal: false, vertical: true)
                             }
                         }
@@ -200,9 +200,9 @@ private struct WeerDetails: View {
             Text(tekst).font(AppFont.body(16 * schaal)).lineSpacing(3).fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: .infinity, alignment: .leading).padding(.top, 8)
         } label: {
-            Text(L("Details")).font(AppFont.heading(21 * schaal)).foregroundStyle(Color(hex: 0x4FB3E8))
+            Text(L("Details")).font(AppFont.heading(21 * schaal)).foregroundStyle(Theme.red)
         }
-        .tint(Color(hex: 0x4FB3E8))
+        .tint(Theme.red)
         #endif
     }
 }

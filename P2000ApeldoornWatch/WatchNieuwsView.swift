@@ -44,7 +44,7 @@ struct WatchNieuwsDetail: View {
                     if let t = weer.tijdvak { Text(t).font(.footnote.bold()) }
                     if let o = weer.omschrijving, !o.isEmpty { Text(o).font(.footnote) }
                     if !weer.adviezen.isEmpty {
-                        Text(L("Risico's en advies")).font(.footnote.bold()).foregroundStyle(Color(hex: 0x4FB3E8))
+                        Text(L("Risico's en advies")).font(.footnote.bold()).foregroundStyle(Theme.red)
                         ForEach(weer.adviezen, id: \.self) { a in Text("› \(a)").font(.footnote) }
                     }
                     if let u = weer.uitgifte { Text(Lf("Uitgifte: %@", u)).font(.caption2).foregroundStyle(.secondary) }
