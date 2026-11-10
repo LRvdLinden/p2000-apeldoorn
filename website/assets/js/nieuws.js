@@ -115,7 +115,7 @@ async function toonArtikel(id) {
   const w = x.weer;
   el.innerHTML = `
     <div class="nw-acties"><a class="nw-terug" href="/nieuws/">‹ Alle nieuws</a><button class="nw-delen" type="button">Delen</button></div>
-    ${w ? weerKaartHTML(w) : `<header class="nw-kop" style="background-image:url('${esc(x.afbeelding || "")}')"><div class="t">${labelHTML(x)}<h1>${esc(x.titel)}</h1><small>${esc(kopMeta)}</small></div></header>`}
+    ${w ? weerKaartHTML(w) : `<header class="nw-kop">${x.afbeelding ? `<img src="${esc(x.afbeelding)}" alt="" width="1200" height="675">` : ""}<div class="t">${labelHTML(x)}<h1>${esc(x.titel)}</h1><small>${esc(kopMeta)}</small></div></header>`}
     <div class="nw-tekst">
       ${w ? weerTekstHTML(w, kopMeta) : `${x.intro && x.soort !== "liveblog" ? `<p class="intro">${esc(x.intro)}</p>` : ""}
       ${alineas}`}
