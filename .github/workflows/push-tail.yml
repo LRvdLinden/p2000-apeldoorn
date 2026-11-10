@@ -1,17 +1,11 @@
 name: Probe
 on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
-permissions: { contents: write }
 jobs:
   p:
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          mkdir s && cd s
-          curl -s -o vild.zip https://opendata.ndw.nu/VILD6.14.A.zip && unzip -o -q vild.zip -d vild && find vild -type f | head -30 && du -sh vild
-          curl -s -o plan.xml.gz https://opendata.ndw.nu/planningsfeed_wegwerkzaamheden_en_evenementen.xml.gz
-          curl -s -o actueel.xml.gz https://opendata.ndw.nu/actueel_beeld.xml.gz
-          ls -la
-          # keep small: the VILD files as they are (dbf/csv) if under 30 MB in total, otherwise only the list
-          rm -f vild.zip
-          git init -q -b ndw-samples && git add . && git -c user.name=probe -c user.email=p@p commit -qm samples
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ndw-samples
+      - env: { U: "${{ secrets.VERKEER_URL }}" }
+        run: |
+          echo "koyeb: $(curl -s -m 60 "$U/health")"
+          sleep 70
+          curl -s "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/verkeer" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const d=JSON.parse(s);console.log("API items",d.items.length,"gepland",(d.gepland||[]).length,"flitsers",d.flitsers.length);for(const i of d.items)console.log("  ",i.soort,"|",i.kop||"-","|",i.titel,"|",i.traject||"-","|",i.oorzaak||"-")})'
