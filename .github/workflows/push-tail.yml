@@ -1,0 +1,17 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+permissions: { contents: write }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir s; cd s; A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          curl -s -o kaart.png "$A/v1/kaart.png?c=52.185,5.955&z=10.1"
+          curl -s -o verkeer.json "$A/v1/verkeer"
+          curl -s -o meldingen.json "$A/v1/meldingen?limit=30"
+          curl -s -o waarschuwingen.json "$A/v1/waarschuwingen?days=3&kind=1"
+          curl -s -o nieuws.json "$A/v1/nieuws?limit=12"
+          ls -la
+          git init -q -b ndw-samples && git add . && git -c user.name=probe -c user.email=p@p commit -qm samples
+          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ndw-samples
