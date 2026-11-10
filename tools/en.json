@@ -791,5 +791,7 @@
  "zojuist": "just now",
  "± %@": "± %@",
  "± %lld min rijden": "± %lld min drive",
- "Opgeheven": "Lifted"
+ "Opgeheven": "Lifted",
+ "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. Foto: %@.": "Source: 112 Nieuws Nederland (112nieuws.net), with permission. Photo: %@.",
+ "Bron: politie.nl. Foto: %@.": "Source: politie.nl. Photo: %@."
 }

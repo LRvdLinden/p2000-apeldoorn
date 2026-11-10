@@ -249,21 +249,50 @@ export async function sync112(env, budget, kv, now = Date.now()) {
   return [...new Set(nieuw)];
 }
 
-/** Stock photos per subject (Pixabay and stock photos supplied by A-Alerts); the variant follows from the id, so an article keeps its photo. */
+/**
+ * Stock photos per subject. Photos of JS Fotografie (js-*, used with permission, credited) come first and are used
+ * as often as possible; the others are Pixabay and photos supplied by A-Alerts. Each article gets the first photo of its
+ * subject that is not the photo of the article before it, so two articles in a row never share a photo.
+ */
 const FOTOS_112 = {
-  brand: ["112-brand-1", "112-brand-2", "112-brand-3", "112-brand-4"],
-  ambulance: ["112-ambulance-1", "112-ambulance-2", "112-ambulance-3", "112-ambulance-4", "112-ambulance-5"],
-  traumaheli: ["112-traumaheli-1"], verkeer: ["112-ambulance-2", "politie-verkeer", "politie-motor-2", "112-ambulance-5"],
-  politie: ["politie-algemeen", "politie-drugs", "politie-getuigen", "politie-auto", "politie-motor-1"],
-  algemeen: ["112-ambulance-1", "112-brand-1", "politie-algemeen", "112-ambulance-4", "politie-auto"],
+  brand: ["js-brand-1", "112-brand-4", "112-brand-1", "112-brand-2", "112-brand-3"],
+  ambulance: ["js-ambulance-1", "js-ambulance-2", "112-ambulance-4", "112-ambulance-1", "112-ambulance-2", "112-ambulance-3", "112-ambulance-5"],
+  traumaheli: ["js-traumaheli-1", "js-traumaheli-2", "112-traumaheli-1"],
+  verkeer: ["js-ambulance-2", "politie-motor-2", "112-ambulance-5", "politie-verkeer", "112-ambulance-2"],
+  politie: ["politie-auto", "politie-motor-1", "politie-algemeen", "politie-getuigen", "politie-drugs"],
+  algemeen: ["js-ambulance-1", "js-brand-1", "js-traumaheli-2", "politie-auto", "112-ambulance-4", "112-brand-4"],
 };
-/** Police news: more than one photo for the general and traffic subjects (same choice by id). */
-const POLITIE_FOTOS = { algemeen: ["politie-algemeen", "politie-auto", "politie-motor-1"], verkeer: ["politie-verkeer", "politie-motor-2"] };
+const POLITIE_FOTOS = {
+  algemeen: ["politie-algemeen", "politie-auto", "politie-motor-1"], verkeer: ["politie-verkeer", "politie-motor-2", "js-ambulance-2"],
+  brand: ["politie-brand", "js-brand-1", "112-brand-4"], inbraak: ["politie-inbraak", "politie-auto"], getuigen: ["politie-getuigen", "politie-motor-1"],
+  drugs: ["politie-drugs", "politie-auto"], vermist: ["politie-vermist", "politie-algemeen"],
+};
 const kiesOpId = (lijst, id) => lijst[(parseInt(String(id).slice(2, 10), 16) || 0) % lijst.length];
+const fotoLijst = (soort, categorie) => (soort === "politie" ? POLITIE_FOTOS[categorie] || POLITIE_FOTOS.algemeen : FOTOS_112[categorie] || FOTOS_112.algemeen);
+/** Credit for photos that need one. */
+export const fotoBron = (foto) => (String(foto || "").startsWith("js-") ? "JS Fotografie" : null);
+
+/** Gives every police and 112 Nieuws article without a photo yet its photo, oldest first (also the existing ones, once). */
+export async function kiesStockFotos(env, now = Date.now()) {
+  const { results } = await env.DB.prepare(`SELECT n.id, n.soort, n.categorie, n.at FROM nieuws n LEFT JOIN nieuws_stockfoto s ON s.id = n.id
+    WHERE n.soort IN ('politie', 'regionaal') AND s.id IS NULL ORDER BY n.at ASC LIMIT 150`).all();
+  if (!results.length) return 0;
+  let vorige = (await env.DB.prepare(`SELECT s.foto FROM nieuws_stockfoto s JOIN nieuws n ON n.id = s.id WHERE n.at <= ? ORDER BY n.at DESC LIMIT 1`)
+    .bind(results[0].at).first())?.foto || null;
+  const stmts = [];
+  for (const r of results) {
+    const lijst = fotoLijst(r.soort, r.categorie);
+    const foto = lijst.find((f) => f !== vorige) || lijst[0];
+    stmts.push(env.DB.prepare("INSERT OR IGNORE INTO nieuws_stockfoto (id, foto, at) VALUES (?, ?, ?)").bind(r.id, foto, now));
+    vorige = foto;
+  }
+  await env.DB.batch(stmts);
+  return stmts.length;
+}
+
 export function foto112(row) {
-  const lijst = FOTOS_112[row.categorie] || FOTOS_112.algemeen;
-  const h = parseInt(String(row.id).slice(2, 10), 16) || 0;
-  return `${IMG}${lijst[h % lijst.length]}.webp${IMG_V}`;
+  const f = row.stock_foto || kiesOpId(FOTOS_112[row.categorie] || FOTOS_112.algemeen, row.id);
+  return `${IMG}${f}.webp${IMG_V}`;
 }
 
 const CODE = { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" };
@@ -398,7 +427,7 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
   if (row.soort === "politie") {
     const cat = STOCK_CATEGORIEEN.includes(row.categorie) ? row.categorie : "algemeen";
     const eigen = stock.get(cat) || stock.get("algemeen");
-    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}${POLITIE_FOTOS[cat] ? kiesOpId(POLITIE_FOTOS[cat], row.id) : `politie-${cat}`}.webp${IMG_V}`;
+    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}${row.stock_foto || kiesOpId(POLITIE_FOTOS[cat] || POLITIE_FOTOS.algemeen, row.id)}.webp${IMG_V}`;
   }
   // Weather: the banner of the code and the kind of weather (knmi-<code>-<icon>.webp), green once lifted.
   if (row.soort === "weer") {
@@ -422,12 +451,14 @@ function samenvatting(row, origin, stock, extra = {}) {
     status: row.status || null, niveau: row.niveau || null, categorie: row.categorie || null,
     afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}/`, bron_url: row.url || null,
     waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null, liveblog: Boolean(row.is_liveblog),
+    foto_bron: !row.foto && (row.soort === "politie" || row.soort === "regionaal") ? fotoBron(row.stock_foto) : null,
     ...(row.hidden !== undefined && extra.beheer ? { hidden: Boolean(row.hidden) } : {}),
   };
 }
 
 const LIST_SQL = `SELECT n.*, (SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS laatste_update,
   EXISTS (SELECT 1 FROM nieuws_liveblog lb WHERE lb.id = n.id) AS is_liveblog,
+  (SELECT foto FROM nieuws_stockfoto sf WHERE sf.id = n.id) AS stock_foto,
   (SELECT COUNT(*) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS n_updates FROM nieuws n`;
 
 /** Newest first: liveblogs by their last message, the rest by publication. */
@@ -637,6 +668,7 @@ export async function nieuwsHousekeeping(env) {
       env.DB.prepare("DELETE FROM nieuws_fotos WHERE id IN (SELECT foto FROM nieuws WHERE id = ? AND foto IS NOT NULL)").bind(id),
       env.DB.prepare("DELETE FROM nieuws_updates WHERE nieuws_id = ?").bind(id),
       env.DB.prepare("DELETE FROM nieuws_liveblog WHERE id = ?").bind(id),
+      env.DB.prepare("DELETE FROM nieuws_stockfoto WHERE id = ?").bind(id),
       env.DB.prepare("DELETE FROM nieuws WHERE id = ?").bind(id),
     ]);
   }

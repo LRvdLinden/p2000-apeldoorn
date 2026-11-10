@@ -130,7 +130,7 @@ struct TVNieuwsDetail: View {
                         Text(d.item.label.uppercased()).font(AppFont.body(20, .bold)).foregroundStyle(d.item.kleur)
                         Text(d.item.titel).font(AppFont.heading(40)).fixedSize(horizontal: false, vertical: true)
                         Text(TVNieuwsMeta.tekst(d.item)).font(AppFont.body(22)).foregroundStyle(.secondary)
-                        Text(d.item.soort == .regionaal ? L("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto.") : d.item.soort == .politie ? L("Bron: politie.nl. De afbeelding is een stockfoto.") : d.item.soort == .weer ? L("Bron: KNMI.") : L("Berichten met het label A-Alerts zijn aangevuld door A-Alerts."))
+                        Text(d.item.bronRegel ?? (d.item.soort == .weer ? L("Bron: KNMI.") : L("Berichten met het label A-Alerts zijn aangevuld door A-Alerts.")))
                             .font(AppFont.body(18)).foregroundStyle(.secondary)
                     }
                     .frame(width: 640)

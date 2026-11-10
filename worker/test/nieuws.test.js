@@ -5,7 +5,7 @@ import { readFileSync } from "node:fs";
 import { DatabaseSync } from "node:sqlite";
 import {
   politieItem, plaatsenIn, categorieVan, htmlNaarAlineas, politieTijd, weerArtikel, liveblogVan, nieuwsId, syncPolitie, syncWaarschuwingen,
-  listNieuws, getNieuws, voegToe, wijzigUpdate, verwijderUpdate, wijzigNieuws, payloadVoorNieuws, nieuwsOntvangers, leesFoto, VERWIJDERD,
+  listNieuws, getNieuws, voegToe, kiesStockFotos, wijzigUpdate, verwijderUpdate, wijzigNieuws, payloadVoorNieuws, nieuwsOntvangers, leesFoto, VERWIJDERD,
 } from "../src/nieuws.js";
 
 function d1() {
@@ -168,4 +168,24 @@ test("112 Nieuws: title, short intro and link only; Loenen only when in Gelderla
   assert.equal(parse112(`<rss>${item("Ongeval in Loenen", ["Gelderland", "Loenen"])}</rss>`, "Loenen").length, 1);
   assert.equal(korteIntro("<p>Kort.</p>"), "Kort.");
   assert.match(foto112({ id: "r-0123456789ab", categorie: "brand" }), /\/nieuws\/112-brand-\d\.webp\?v=3$/);
+});
+
+test("stock photos: JS Fotografie first, never the same photo twice in a row, credit in the API", async () => {
+  const env = { DB: d1() };
+  const t0 = Date.parse("2026-11-10T08:00:00Z");
+  const zet = (id, cat, i) => env.DB.prepare(`INSERT INTO nieuws (id, soort, bron, titel, categorie, at, updated_at, created_at, data, hidden)
+    VALUES (?, 'regionaal', '112nieuws', ?, ?, ?, ?, ?, '{}', 0)`).bind(id, `Artikel ${i}`, cat, t0 + i * 60_000, t0, t0).run();
+  const cats = ["ambulance", "ambulance", "ambulance", "brand", "brand", "traumaheli", "traumaheli"];
+  for (const [i, c] of cats.entries()) await zet(`r-00000000000${i}`, c, i);
+  assert.equal(await kiesStockFotos(env, t0), 7);
+  const { results } = await env.DB.prepare("SELECT s.foto FROM nieuws_stockfoto s JOIN nieuws n ON n.id = s.id ORDER BY n.at").all();
+  const fotos = results.map((r) => r.foto);
+  assert.deepEqual(fotos, ["js-ambulance-1", "js-ambulance-2", "js-ambulance-1", "js-brand-1", "112-brand-4", "js-traumaheli-1", "js-traumaheli-2"]);
+  for (let i = 1; i < fotos.length; i++) assert.notEqual(fotos[i], fotos[i - 1]);
+  assert.equal(await kiesStockFotos(env, t0), 0, "chosen once, then kept");
+  const lijst = await listNieuws(env, "https://api", { limit: 10 });
+  const brand = lijst.find((x) => x.id === "r-000000000003");
+  assert.match(brand.afbeelding, /js-brand-1\.webp/);
+  assert.equal(brand.foto_bron, "JS Fotografie");
+  assert.equal(lijst.find((x) => x.id === "r-000000000004").foto_bron, null);
 });

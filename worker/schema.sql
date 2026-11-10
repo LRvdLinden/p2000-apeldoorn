@@ -190,4 +190,6 @@ CREATE TABLE IF NOT EXISTS nieuws_updates (
 CREATE INDEX IF NOT EXISTS nieuws_updates_n ON nieuws_updates (nieuws_id);
 -- Items the beheer marked as liveblog (label and banner); default none.
 CREATE TABLE IF NOT EXISTS nieuws_liveblog (id TEXT PRIMARY KEY, at INTEGER NOT NULL);
+-- Stock photo chosen per police / 112 Nieuws article (never the same photo as the article before it).
+CREATE TABLE IF NOT EXISTS nieuws_stockfoto (id TEXT PRIMARY KEY, foto TEXT NOT NULL, at INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS nieuws_fotos (id TEXT PRIMARY KEY, mime TEXT NOT NULL, data BLOB NOT NULL, at INTEGER NOT NULL);

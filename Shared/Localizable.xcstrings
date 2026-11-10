@@ -2075,6 +2075,23 @@
         }
       }
     },
+    "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. Foto: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: 112 Nieuws Nederland (112nieuws.net), with permission. Photo: %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. Foto: %@."
+          }
+        }
+      }
+    },
     "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
       "extractionState": "manual",
       "localizations": {
@@ -2190,6 +2207,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron: politie.nl. De afbeelding is een stockfoto."
+          }
+        }
+      }
+    },
+    "Bron: politie.nl. Foto: %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: politie.nl. Photo: %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: politie.nl. Foto: %@."
           }
         }
       }

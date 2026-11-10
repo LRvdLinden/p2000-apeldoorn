@@ -26,9 +26,12 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     let aantal: Int?
     /// Set in the beheer: shown as a liveblog (label and banner). Older servers: every Burgernet/AMBER/Vermist Kind item.
     let isLiveblog: Bool
+    /// Photographer of the stock photo when it needs a credit ("JS Fotografie").
+    let fotoBron: String?
 
     enum CodingKeys: String, CodingKey {
         case id, soort, bron, titel, intro, plaats, at, bijgewerkt, start, status, niveau, categorie, afbeelding, link, waarschuwing, aantal, liveblog
+        case fotoBron = "foto_bron"
         case bronUrl = "bron_url"
     }
 
@@ -52,6 +55,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         waarschuwing = try c.decodeIfPresent(String.self, forKey: .waarschuwing)
         aantal = try c.decodeIfPresent(Int.self, forKey: .aantal)
         isLiveblog = (try? c.decodeIfPresent(Bool.self, forKey: .liveblog)) ?? (soort == .liveblog)
+        fotoBron = (try? c.decodeIfPresent(String.self, forKey: .fotoBron)) ?? nil
     }
 
     /// Filter chips: "Liveblogs" follows the beheer switch, the others the kind of item.
@@ -81,6 +85,15 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case .politie: return "\(L("Politie"))\(plaats.map { " · \($0)" } ?? "")"
         case .weer: return "\(L("Weer")) · \(Waarschuwing.codeLabel(niveau))"
         case .regionaal: return "112 Nieuws\(plaats.map { " · \($0)" } ?? "")"
+        }
+    }
+
+    /// Source line under police and 112 Nieuws articles, with the photo credit when there is one.
+    var bronRegel: String? {
+        switch soort {
+        case .regionaal: return fotoBron.map { Lf("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. Foto: %@.", $0) } ?? L("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto.")
+        case .politie: return fotoBron.map { Lf("Bron: politie.nl. Foto: %@.", $0) } ?? L("Bron: politie.nl. De afbeelding is een stockfoto.")
+        default: return nil
         }
     }
 

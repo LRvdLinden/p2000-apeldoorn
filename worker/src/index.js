@@ -40,7 +40,7 @@ import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, 
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
 import { kaartImage } from "./kaart.js";
-import { listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
+import { kiesStockFotos, listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
   syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 import { kvWrite } from "./kv.js";
@@ -606,6 +606,7 @@ async function nieuwsRun(env, budget) {
     catch (e) { console.error("[nieuws-weer-v3]", e.message || e); }
   }
   try { await syncWaarschuwingen(env, kv); } catch (e) { console.error("[nieuws-sync]", e.message || e); }
+  try { await kiesStockFotos(env); } catch (e) { console.error("[nieuws-foto]", e.message || e); }
   try {
     for (const id of await syncPolitie(env, budget, kv)) {
       await env.DB.prepare("UPDATE nieuws SET notified = '1' WHERE id = ?").bind(id).run();

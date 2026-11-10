@@ -354,10 +354,8 @@ struct NieuwsDetailView: View {
 
     @ViewBuilder private func bron(_ d: NieuwsDetail) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            if d.item.soort == .regionaal {
-                Text(L("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto.")).font(AppFont.body(12)).foregroundStyle(.secondary)
-            } else if d.item.soort == .politie {
-                Text(L("Bron: politie.nl. De afbeelding is een stockfoto.")).font(AppFont.body(12)).foregroundStyle(.secondary)
+            if let regel = d.item.bronRegel {
+                Text(regel).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else if d.item.soort == .weer {
                 Text(L("Bron: KNMI.")).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else {

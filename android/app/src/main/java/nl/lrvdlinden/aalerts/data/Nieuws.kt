@@ -41,6 +41,8 @@ data class NieuwsItem(
     val weer: WeerArtikel? = null,
     /** Set in the beheer: shown as a liveblog (label and banner). Older servers: every Burgernet/AMBER/Vermist Kind item. */
     val liveblog: Boolean? = null,
+    /** Photographer of the stock photo when it needs a credit ("JS Fotografie"). */
+    @SerialName("foto_bron") val fotoBron: String? = null,
 ) {
     val isLiveblog: Boolean get() = liveblog ?: (soort == "liveblog")
     /** Filter chips: "Liveblogs" follows the beheer switch, the others the kind of item. */
