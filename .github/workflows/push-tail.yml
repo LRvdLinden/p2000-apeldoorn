@@ -1,0 +1,23 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          mkdir s && cd s && npm init -y >/dev/null && npm i playwright@1.48.2 >/dev/null 2>&1 && npx playwright install --with-deps chromium >/dev/null 2>&1
+          cat > t.js <<'X'
+          const { chromium } = require('playwright');
+          (async () => { const b = await chromium.launch();
+            for (const consent of [null, 'necessary', 'all']) {
+              const c = await b.newContext();
+              if (consent) await c.addInitScript((v) => localStorage.setItem('p2000_consent', JSON.stringify({ choice: v, at: new Date().toISOString(), v: 1 })), consent);
+              const p = await c.newPage(); const gtm = [];
+              p.on('request', (r) => { if (/googletagmanager|google-analytics/.test(r.url())) gtm.push(r.url().slice(0, 80)); });
+              await p.goto('https://a-alerts.nl/nieuws/', { waitUntil: 'networkidle' }).catch(() => {}); await p.waitForTimeout(3000);
+              if (!consent) { await p.click('#p2000-consent .y').catch(() => {}); await p.waitForTimeout(3000); }
+              console.log('keuze', consent || 'geen → Accepteren geklikt', '| google-verzoeken:', gtm.length, gtm.slice(0, 3).join(' , '));
+              await c.close(); }
+            await b.close(); })();
+          X
+          node t.js
