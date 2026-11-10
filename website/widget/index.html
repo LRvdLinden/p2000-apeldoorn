@@ -6,7 +6,7 @@
 <title>A-Alerts widget: live kaart en verkeer Apeldoorn</title>
 <meta name="robots" content="noindex">
 <link rel="stylesheet" href="/assets/css/base.css?v=58">
-<link rel="stylesheet" href="/assets/css/widget.css?v=2">
+<link rel="stylesheet" href="/assets/css/widget.css?v=3">
 <script src="/config.js?v=58"></script>
 <style>html, body { background: transparent; margin: 0; } body { padding: 2px; } #w { max-width: 520px; margin: 0 auto; }</style>
 </head>
@@ -16,7 +16,7 @@
 // A-Alerts widget for other websites: /widget/?w=kaart,verkeer&thema=auto|licht|donker[&site=<host>]
 // Reports the site it is shown on (domain only); a blocked site gets a link to a-alerts.nl instead.
 import { API } from "/assets/js/core.js?v=58";
-import { maakWidgets } from "/assets/js/widget.js?v=3";
+import { maakWidgets } from "/assets/js/widget.js?v=4";
 const q = new URLSearchParams(location.search);
 const widgets = (q.get("w") || "kaart,verkeer").split(",");
 const thema = ["licht", "donker"].includes(q.get("thema")) ? q.get("thema") : "auto";

@@ -21,8 +21,6 @@ const LAGEN = [
 ];
 const STANDAARD = ["p2000", "verkeer", "heli", "ziekenhuis", "buien"];
 const VOLGORDE = ["ongeval", "file", "afsluiting", "werk", "pech"];
-const TABS = [["alles", "Alles"], ["ongeval", "Ongevallen"], ["file", "Files"], ["afsluiting", "Afsluitingen"], ["werk", "Werkzaamheden"], ["pech", "Pech"], ["gepland", "Gepland"], ["flitsers", "Flitsers"]];
-const PIN = new Set(["ongeval", "pech"]);
 const dag = (t) => new Date(t).toLocaleDateString("nl-NL", { day: "numeric", month: "short", timeZone: "Europe/Amsterdam" });
 
 /**
@@ -45,58 +43,92 @@ export function maakWidgets(el, opts = {}) {
       <div class="aw-chips" role="group" aria-label="Kaartlagen"></div>
       ${ext ? voet("Bron: A-Alerts · NDW · KNMI · Apple Kaarten", "https://a-alerts.nl/pager/", "a-alerts.nl") : ""}</section>` : "",
     widgets.includes("verkeer") ? `<section class="aw-w" aria-label="${esc(naam("Verkeer nu"))}">${kop(ext ? "Verkeer" : "Verkeer nu", "awVerkeerTijd")}
-      <div class="aw-tabs" role="tablist"></div><div class="aw-lijst"><p class="aw-leeg">Verkeer laden…</p></div>
+      <div class="aw-sum" role="group" aria-label="Samenvatting"></div><div class="aw-seg" role="tablist"></div><div class="aw-lijst"><p class="aw-leeg">Verkeer laden…</p></div>
       ${voet(ext ? "Bron: A-Alerts · NDW · © OpenStreetMap" : "Bron: NDW (Rijkswaterstaat, provincie, gemeenten); flitsers © OpenStreetMap", ext ? "https://a-alerts.nl/nieuws/" : "/pager/", ext ? "a-alerts.nl" : "Open de kaart")}</section>` : "",
   ].join("");
 
-  const state = { lagen: new Set(prefs.get("aw.lagen", STANDAARD)), tab: "alles", open: null, verkeer: { items: [], gepland: [], flitsers: [] } };
+  const state = { lagen: new Set(prefs.get("aw.lagen", STANDAARD)), tab: "nu", filter: null, groepen: new Map(), open: null, verkeer: { items: [], gepland: [], flitsers: [] } };
   const meld = () => opts.onResize?.();
 
   // ---------------------------------------------------------------- Verkeer nu
-  const tabsEl = el.querySelector(".aw-tabs"), lijstEl = el.querySelector(".aw-lijst");
-  /** One row: road and direction, what and where, lanes / speed / jam, and (open) cause, comments, time slots, end. */
+  // Structured like a traffic site: a summary per type, Nu / Gepland / Flitsers, then groups per road (A and N roads
+  // with a road shield) and per place (local roads). Every report shows the direction (Apeldoorn → Amersfoort), the
+  // stretch, what is going on in colour, and when it ends; a tap opens the cause, lanes, time slots and source.
+  // In the list every icon is a circle (the map uses pins for accidents, breakdowns and speed cameras).
+  const rondIcoon = (s) => (s === "ongeval" || s === "pech" || s === "flitser" ? asset(`assets/img/verkeer_${s}_rond.png?v=1`) : verkeerIcon(s));
+  const sumEl = el.querySelector(".aw-sum"), segEl = el.querySelector(".aw-seg"), lijstEl = el.querySelector(".aw-lijst");
+  const TEGELS = [["file", "files"], ["werk", "werk"], ["afsluiting", "dicht"], ["ongeval", "ongeval"], ["flitser", "flitsers"]];
+  const ROUTE = { A1: "Amsterdam – Hengelo", A50: "Arnhem – Zwolle", N344: "Apeldoorn – Teuge", N345: "Apeldoorn – Zutphen", N304: "Apeldoorn – Hoenderloo", N786: "Apeldoorn – Beekbergen" };
+  const groepSleutel = (v) => (v.weg && /^[AN]\d/.test(v.weg) ? v.weg : `L:${v.plaats || "Regio Apeldoorn"}`);
+  const plekVan = (v) => (v.weg ? v.traject || "" : [v.kop && v.kop !== v.plaats ? v.kop : "", v.traject].filter(Boolean).join(" · "));
+  const richtingVan = (v) => (v.weg && v.vanaf && v.richting ? `${esc(v.vanaf)}<i>→</i>${esc(v.richting)}` : esc(v.weg ? v.kop || v.weg : v.titel));
+  const watVan = (v, r) => [v.soort === "file" ? "" : v.weg ? v.titel : "", ...r.details].filter(Boolean).join(" · ") || (v.weg ? v.titel : "");
   function rij(v, gepland = false) {
-    const r = verkeerRegels(v);
-    const wanneer = gepland ? (r.tijdvakken[0] ? verkeerTijdvak(r.tijdvakken[0]) : v.start ? verkeerTijdvak([v.start, v.einde || v.start]) : "") : r.eind;
+    const r = verkeerRegels(v), open = state.open === v.id, plek = plekVan(v), wat = watVan(v, r);
+    const wanneer = gepland ? (r.tijdvakken.slice(0, 2).map(verkeerTijdvak).join(" · ") || (v.start ? verkeerTijdvak([v.start, v.einde || v.start]) : "")) : r.eind;
     const meer = [r.oorzaak, ...r.toelichting].filter(Boolean);
-    const open = state.open === v.id;
-    return `<button type="button" class="aw-rij${open ? " open" : ""}" data-v="${esc(v.id)}" aria-expanded="${open}"><img class="${PIN.has(v.soort) ? "pin" : ""}" src="${verkeerIcon(v.soort)}" alt="${esc(VERKEER_SOORT[v.soort] || "")}">
-      <div><b>${esc(r.kop)}</b>${r.wat ? `<small>${esc(r.wat)}</small>` : ""}
-        ${r.details.length ? `<small class="aw-det" style="color:${verkeerKleur(v)}">${esc(r.details.join(" · "))}</small>` : ""}
-        ${gepland && wanneer ? `<small class="aw-wanneer">${esc(wanneer)}</small>` : ""}
-        ${!open && meer[0] ? `<small class="aw-meer">${esc(meer[0])}</small>` : ""}
+    r.hinder = ["", "weinig hinder", "matige hinder", "veel hinder"][v.hinder] || "";
+    return `<button type="button" class="aw-rij${open ? " open" : ""}" data-v="${esc(v.id)}" aria-expanded="${open}"><img src="${rondIcoon(v.soort)}" alt="${esc(VERKEER_SOORT[v.soort] || "")}">
+      <div><b class="aw-dir">${richtingVan(v)}</b>${plek ? `<small>${esc(plek)}</small>` : ""}
+        ${wat ? `<small class="aw-det" style="color:${verkeerKleur(v)}">${esc(wat)}</small>` : ""}
+        ${wanneer || r.hinder ? `<small class="aw-wanneer">${wanneer ? `${gepland ? "🗓 " : ""}${esc(wanneer)}` : ""}${r.hinder ? `<span class="aw-pil">${esc(r.hinder)}</span>` : ""}</small>` : ""}
         ${open ? `<span class="aw-open">${meer.map((t) => `<small>${esc(t)}</small>`).join("")}
-          ${r.tijdvakken.length ? `<small>${esc(r.tijdvakken.map(verkeerTijdvak).join(" · "))}</small>` : ""}
-          <small class="aw-bron">${esc([!gepland && wanneer, r.hinder, v.bron ? `bron: ${v.bron} via NDW` : ""].filter(Boolean).join(" · "))}</small>
-          ${v.info_url ? `<a href="${esc(v.info_url)}" target="_blank" rel="noopener">Meer informatie ›</a>` : ""}</span>` : !gepland && wanneer ? `<small class="aw-wanneer">${esc(wanneer)}</small>` : ""}
+          ${r.tijdvakken.length > 2 ? `<small>${esc(r.tijdvakken.map(verkeerTijdvak).join(" · "))}</small>` : ""}
+          <small class="aw-bron">${esc(v.bron ? `Bron: ${v.bron} via NDW` : "Bron: NDW")}</small>
+          ${v.info_url ? `<a href="${esc(v.info_url)}" target="_blank" rel="noopener">Meer informatie ›</a>` : ""}</span>` : ""}
       </div></button>`;
+  }
+  function groepen(lijst, gepland) {
+    const m = new Map();
+    for (const v of lijst) { const k = groepSleutel(v); (m.get(k) || m.set(k, []).get(k)).push(v); }
+    const sleutels = [...m.keys()].sort((a, b) => (a.startsWith("L:") - b.startsWith("L:")) || (a[0] === "N") - (b[0] === "N") || a.localeCompare(b, "nl", { numeric: true }));
+    return sleutels.map((k) => {
+      const vs = m.get(k).sort((a, b) => VOLGORDE.indexOf(a.soort) - VOLGORDE.indexOf(b.soort));
+      const lokaal = k.startsWith("L:");
+      const open = state.groepen.has(k) ? state.groepen.get(k) : !lokaal || sleutels.every((x) => x.startsWith("L:"));
+      const schild = lokaal ? `<span class="aw-schild L">📍</span><span>${esc(k.slice(2))}</span>` : `<span class="aw-schild ${k[0]}">${esc(k)}</span><span>${esc(ROUTE[k] || "")}</span>`;
+      return `<div class="aw-groep${open ? " open" : ""}"><button type="button" class="aw-gkop" data-g="${esc(k)}" aria-expanded="${open}">${schild}<small>${vs.length} melding${vs.length === 1 ? "" : "en"}</small><i>›</i></button>
+        ${open ? vs.map((v) => rij(v, gepland)).join("") : ""}</div>`;
+    }).join("");
   }
   function lijst() {
     if (!lijstEl) return;
     const { items = [], gepland = [], flitsers = [] } = state.verkeer;
-    const tel = (s) => (s === "alles" ? items.length : s === "flitsers" ? flitsers.length : s === "gepland" ? gepland.length : items.filter((v) => v.soort === s).length);
-    tabsEl.innerHTML = TABS.map(([k, t]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.tab === k}">${t} <b>${tel(k)}</b></button>`).join("");
-    let rijen;
+    const km = items.filter((v) => v.soort === "file").reduce((a, v) => a + (v.lengte_km || 0), 0);
+    const tel = { file: items.filter((v) => v.soort === "file").length, werk: items.filter((v) => v.soort === "werk").length, afsluiting: items.filter((v) => v.soort === "afsluiting").length,
+      ongeval: items.filter((v) => v.soort === "ongeval" || v.soort === "pech").length, flitser: flitsers.length };
+    sumEl.innerHTML = TEGELS.map(([k, t]) => `<button type="button" data-f="${k}" aria-pressed="${state.filter === k || (k === "flitser" && state.tab === "flitsers")}"><img src="${rondIcoon(k)}" alt=""><b>${tel[k]}</b><span>${k === "file" && km ? `${km.toFixed(1).replace(".", ",")} km` : t}</span></button>`).join("");
+    segEl.innerHTML = [["nu", `Nu (${items.length})`], ["gepland", `Gepland (${gepland.length})`], ["flitsers", "Flitsers"]].map(([k, t]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.tab === k}">${t}</button>`).join("");
+    let html;
     if (state.tab === "flitsers") {
-      rijen = flitsers.map((f) => `<div class="aw-rij"><img class="pin" src="${verkeerIcon("flitser")}" alt=""><div><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser"}${f.max ? ` · max. ${f.max} km/u` : ""}</b><small>Vaste flitser (OpenStreetMap)</small></div></div>`);
-      if (!rijen.length) rijen = ['<p class="aw-leeg">Geen vaste flitsers bekend in de regio.</p>'];
+      html = flitsers.map((f) => `<div class="aw-rij"><img src="${rondIcoon("flitser")}" alt=""><div><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Vaste flitser"}</b><small>${esc(f.plaats || f.weg || "Regio Apeldoorn")}</small>${f.max ? `<small class="aw-det" style="color:#2F80ED">max. ${f.max} km/u</small>` : ""}</div></div>`).join("")
+        || '<p class="aw-leeg">Geen vaste flitsers bekend in de regio.</p>';
+      html += '<p class="aw-leeg klein">Vaste flitsers en trajectcontroles uit OpenStreetMap. Mobiele controles staan hier niet in.</p>';
     } else if (state.tab === "gepland") {
-      rijen = gepland.map((v) => rij(v, true));
-      if (!rijen.length) rijen = ['<p class="aw-leeg">Geen werkzaamheden of afsluitingen gepland in de komende 7 dagen.</p>'];
+      html = groepen(gepland, true) || '<p class="aw-leeg">Geen werkzaamheden of afsluitingen gepland in de komende 7 dagen.</p>';
     } else {
-      const lijst = items.filter((v) => state.tab === "alles" || v.soort === state.tab).sort((a, b) => VOLGORDE.indexOf(a.soort) - VOLGORDE.indexOf(b.soort));
-      rijen = lijst.map((v) => rij(v));
-      if ((state.tab === "alles" || state.tab === "file") && !items.some((v) => v.soort === "file")) {
-        rijen.unshift(`<div class="aw-rij leeg"><img src="${verkeerIcon("file")}" alt=""><div><b>Geen files</b><small>Op de A1 en A50 rond Apeldoorn rijdt het verkeer door</small></div></div>`);
-      }
-      if (!rijen.length) rijen = [`<p class="aw-leeg">Nu niets bekend: ${esc((TABS.find(([k]) => k === state.tab) || [, ""])[1].toLowerCase())}.</p>`];
+      const f = state.filter;
+      const lijst = items.filter((v) => !f || v.soort === f || (f === "ongeval" && v.soort === "pech"));
+      html = groepen(lijst, false);
+      if ((!f || f === "file") && !tel.file) html = `<div class="aw-rij leeg"><img src="${rondIcoon("file")}" alt=""><div><b>Geen files</b><small>Op de A1 en A50 rond Apeldoorn rijdt het verkeer door</small></div></div>` + html;
+      if (!html) html = `<p class="aw-leeg">Nu niets bekend.</p>`;
     }
-    lijstEl.innerHTML = rijen.join("");
+    lijstEl.innerHTML = html;
     meld();
   }
-  tabsEl?.addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) { state.tab = b.dataset.tab; state.open = null; lijst(); } });
+  sumEl?.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-f]");
+    if (!b) return;
+    const k = b.dataset.f;
+    if (k === "flitser") { state.tab = state.tab === "flitsers" ? "nu" : "flitsers"; state.filter = null; }
+    else { state.tab = "nu"; state.filter = state.filter === k ? null : k; }
+    state.open = null; lijst();
+  });
+  segEl?.addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) { state.tab = b.dataset.tab; state.filter = null; state.open = null; lijst(); } });
   lijstEl?.addEventListener("click", (e) => {
     if (e.target.closest("a")) return;
+    const g = e.target.closest("[data-g]");
+    if (g) { state.groepen.set(g.dataset.g, g.getAttribute("aria-expanded") !== "true"); lijst(); return; }
     const b = e.target.closest("[data-v]");
     if (!b) return;
     const v = [...state.verkeer.items, ...(state.verkeer.gepland || [])].find((x) => x.id === b.dataset.v);

@@ -49,3 +49,29 @@ button.aw-rij:hover { background: var(--bg); }
 .aw-open { display: grid; gap: 3px; margin-top: 4px; }
 .aw-open .aw-bron { font-size: 11px; }
 .aw-open a { color: var(--red); font-weight: 600; font-size: 12px; text-decoration: none; }
+
+/* Verkeer nu: summary tiles, Nu / Gepland / Flitsers, groups per road (shield) and per place. */
+.aw-sum { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; padding: 0 12px 10px; }
+.aw-sum button { font: inherit; color: inherit; border: 1.5px solid transparent; background: var(--bg); border-radius: 12px; padding: 7px 2px 6px; cursor: pointer; text-align: center; }
+.aw-sum button[aria-pressed="true"] { border-color: var(--red); }
+.aw-sum img { width: 22px; height: 22px; object-fit: contain; display: block; margin: 0 auto 2px; }
+.aw-sum b { display: block; font-size: 15px; line-height: 1.1; }
+.aw-sum span { display: block; font-size: 10px; color: var(--muted); white-space: nowrap; }
+.aw-seg { display: flex; margin: 0 12px 10px; background: var(--bg); border-radius: 10px; padding: 3px; }
+.aw-seg button { flex: 1; font: inherit; font-size: 12px; font-weight: 600; border: 0; background: none; color: var(--muted); padding: 5px 4px; border-radius: 8px; cursor: pointer; white-space: nowrap; }
+.aw-seg button[aria-selected="true"] { background: var(--surface); color: var(--text); box-shadow: 0 1px 2px rgba(0,0,0,.14); }
+.aw-groep { border-top: 1px solid var(--line); }
+.aw-gkop { display: flex; align-items: center; gap: 10px; width: 100%; font: inherit; font-size: 14px; font-weight: 600; color: inherit; background: none; border: 0; padding: 10px 16px; cursor: pointer; text-align: left; }
+.aw-gkop small { margin-left: auto; font-size: 12px; font-weight: 500; color: var(--muted); white-space: nowrap; }
+.aw-gkop i { font-style: normal; color: var(--muted); transition: transform .2s; }
+.aw-groep.open .aw-gkop i { transform: rotate(90deg); }
+.aw-schild { font-size: 12.5px; font-weight: 700; border-radius: 5px; padding: 2px 7px; min-width: 24px; text-align: center; flex: none; }
+.aw-schild.A { background: #E3001B; color: #fff; }
+.aw-schild.N { background: #F7C600; color: #111; }
+.aw-schild.L { background: var(--bg); font-size: 11px; }
+.aw-groep .aw-rij { border-top: 1px dashed var(--line); align-items: flex-start; }
+.aw-rij .aw-dir i { font-style: normal; color: var(--muted); margin: 0 4px; }
+.aw-pil { display: inline-block; font-size: 10.5px; font-weight: 600; padding: 0 6px; border-radius: 5px; background: var(--bg); color: var(--muted); margin-left: 6px; }
+.aw-rij .aw-wanneer { color: var(--muted); font-weight: 400; margin-top: 2px; }
+.aw-leeg.klein { font-size: 11px; padding-top: 4px; }
+.aw-rij.open .aw-pil { background: var(--surface); }

@@ -641,22 +641,21 @@ const REDEN = { locatie: "De plek klopt niet", dienst: "Verkeerde hulpdienst", p
 let foutFilter = "open";
 // Widgets (live map, "Verkeer nu") for other websites: the code to copy, and on which sites they are embedded.
 let wKeus = { w: "kaart,verkeer", thema: "auto" };
-const WIDGET_HOOGTE = { "kaart,verkeer": 1180, kaart: 560, verkeer: 640 };
-function widgetCode(soort) {
+// Only the script version is offered: it comes from a-alerts.nl, sizes itself and cannot be changed by the site.
+function widgetCode() {
   const { w, thema } = wKeus;
-  if (soort === "iframe") return `<iframe src="https://a-alerts.nl/widget/?w=${w}&thema=${thema}"\n  title="A-Alerts: live kaart en verkeer Apeldoorn" width="360" height="${WIDGET_HOOGTE[w]}"\n  style="border:0;max-width:100%" loading="lazy"></iframe>`;
   return `<div data-a-alerts-widget="${w}" data-thema="${thema}"></div>\n<script src="https://a-alerts.nl/widget/embed.js" async></script>`;
 }
 async function widgets(el) {
   const d = await api("GET", "/v1/beheer/widgets");
   const knop = (k, v, l) => `<button class="btn${wKeus[k] === v ? " primary" : ""}" data-wk="${k}" data-wv="${v}">${l}</button>`;
   const blok = (soort, titel) => `<p style="margin:12px 0 6px;font-weight:600">${titel}</p><pre class="code" id="wc-${soort}">${esc(widgetCode(soort))}</pre>
-    <button class="btn primary" data-wcopy="${soort}">Kopieer ${soort === "iframe" ? "iframe" : "script"}</button>`;
+    <button class="btn primary" data-wcopy="${soort}">Kopieer script</button>`;
   el.innerHTML = `<div class="card"><h3 style="margin-top:0">Code om te delen</h3>
       <div class="toolbar" style="flex-wrap:wrap;gap:6px">${knop("w", "kaart,verkeer", "Kaart + verkeer")}${knop("w", "kaart", "Alleen kaart")}${knop("w", "verkeer", "Alleen verkeer")}
         <span style="width:12px"></span>${knop("thema", "auto", "Thema: automatisch")}${knop("thema", "licht", "Licht")}${knop("thema", "donker", "Donker")}</div>
-      ${blok("iframe", "Iframe (vaste hoogte)")}${blok("script", "Script (past de hoogte vanzelf aan)")}
-      <p class="muted" style="font-size:.8rem;margin-top:12px">In de widget staat altijd "A-Alerts" in de kop en een link naar a-alerts.nl. <a href="https://a-alerts.nl/widget/?w=${wKeus.w}&thema=${wKeus.thema}" target="_blank" rel="noopener">Voorbeeld ↗</a></p></div>
+      ${blok("script", "Script")}
+      <p class="muted" style="font-size:.8rem;margin-top:12px">We bieden alleen de script-code aan: de widget komt van a-alerts.nl, past zijn hoogte vanzelf aan en kan door de website niet worden aangepast. In de widget staat altijd "A-Alerts" in de kop en een link naar a-alerts.nl. <a href="https://a-alerts.nl/widget/?w=${wKeus.w}&thema=${wKeus.thema}" target="_blank" rel="noopener">Voorbeeld ↗</a></p></div>
     <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Ingesloten op</h3>
       ${d.sites.length ? `<table class="tabel"><tr><th>Website</th><th>Widget</th><th>Eerst gezien</th><th>Laatst gezien</th><th>Weergaven 7 dagen</th><th>Status</th><th></th></tr>
         ${d.sites.map((s) => `<tr><td><a href="https://${esc(s.site)}" target="_blank" rel="noopener"><b>${esc(s.site)}</b></a></td><td>${esc(s.widgets.replace(",", " + "))}</td>
