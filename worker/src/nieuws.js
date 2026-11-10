@@ -9,7 +9,7 @@ import { getWarning } from "./alerts.js";
 
 export const POLITIE_API = "https://api.politie.nl/v4/nieuws";
 export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog", "regionaal"];
-const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind"];
+const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind", "nlalert"];
 const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
 // New version of the images (browsers keep them 30 days): raise when an image is replaced under the same name.
@@ -353,7 +353,7 @@ export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer =
   const { results } = alleWeer
     ? await env.DB.prepare("SELECT ref AS id FROM nieuws WHERE soort = 'weer' AND ref IS NOT NULL").all()
     : await env.DB.prepare(`SELECT w.id FROM waarschuwingen w LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id
-    WHERE w.bron IN ('knmi','burgernet','amber','vermistkind') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
+    WHERE w.bron IN ('knmi','burgernet','amber','vermistkind','nlalert') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
     ORDER BY w.updated_at LIMIT 60`).bind(since, since, since).all();
   for (const { id } of results) {
     const w = await getWarning(env, id);
@@ -403,10 +403,11 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
   // Weather: the banner of the code and the kind of weather (knmi-<code>-<icon>.webp), green once lifted.
   if (row.soort === "weer") {
     const code = row.status === "afgerond" || row.niveau === "green" ? "green" : ["yellow", "orange", "red"].includes(row.niveau) ? row.niveau : "yellow";
-    return `${IMG}knmi-${code}-${WEER_ICONEN.includes(row.categorie) ? row.categorie : "warning"}.webp${IMG_V}`;
+    return `${IMG}knmi-${code}-${WEER_ICONEN.includes(row.categorie) ? row.categorie : "warning"}${row.is_liveblog ? "-live" : ""}.webp${IMG_V}`;
   }
   if (row.soort === "regionaal") return foto112(row);
-  return `${IMG}${row.bron}.webp${IMG_V}`;
+  // Burgernet, AMBER Alert, Vermist Kind, NL-Alert: with "LIVEBLOG" on the banner when the beheer switched it on.
+  return `${IMG}${row.bron}${row.is_liveblog ? "-live" : ""}.webp${IMG_V}`;
 }
 const WEER_ICONEN = ["fog", "wind", "thunderstorm", "rain", "snow", "ice", "heat", "cold", "waterspout", "warning"];
 
@@ -418,19 +419,22 @@ function samenvatting(row, origin, stock, extra = {}) {
     start: row.soort === "liveblog" ? (row.start || new Date(row.at).toISOString()) : null,
     status: row.status || null, niveau: row.niveau || null, categorie: row.categorie || null,
     afbeelding: afbeeldingVoor(row, origin, stock), link: `${SITE}${row.id}/`, bron_url: row.url || null,
-    waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null,
+    waarschuwing: row.soort === "politie" ? null : row.ref, aantal: row.aantal ?? null, liveblog: Boolean(row.is_liveblog),
     ...(row.hidden !== undefined && extra.beheer ? { hidden: Boolean(row.hidden) } : {}),
   };
 }
 
 const LIST_SQL = `SELECT n.*, (SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS laatste_update,
+  EXISTS (SELECT 1 FROM nieuws_liveblog lb WHERE lb.id = n.id) AS is_liveblog,
   (SELECT COUNT(*) FROM nieuws_updates u WHERE u.nieuws_id = n.id) AS n_updates FROM nieuws n`;
 
 /** Newest first: liveblogs by their last message, the rest by publication. */
 export async function listNieuws(env, origin, { soort, limit, before, beheer = false } = {}) {
   const lim = Math.min(Math.max(Number(limit) || 40, 1), 100);
   const where = [beheer ? "1=1" : "n.hidden = 0"], args = [];
-  if (NIEUWS_SOORTEN.includes(soort)) { where.push("n.soort = ?"); args.push(soort); }
+  // "liveblog" follows the beheer switch; the other kinds the kind of item.
+  if (soort === "liveblog" && !beheer) where.push("EXISTS (SELECT 1 FROM nieuws_liveblog lb WHERE lb.id = n.id)");
+  else if (NIEUWS_SOORTEN.includes(soort)) { where.push("n.soort = ?"); args.push(soort); }
   const sortKey = "MAX(n.at, COALESCE((SELECT MAX(at) FROM nieuws_updates u WHERE u.nieuws_id = n.id), 0))";
   if (before) { where.push(`${sortKey} < ?`); args.push(Number(new Date(before)) || Number(before)); }
   const { results } = await env.DB.prepare(`${LIST_SQL} WHERE ${where.join(" AND ")} ORDER BY ${sortKey} DESC, n.created_at DESC LIMIT ?`).bind(...args, lim).all();
@@ -496,6 +500,14 @@ export async function wijzigNieuws(env, id, body) {
   const row = await env.DB.prepare("SELECT * FROM nieuws WHERE id = ?").bind(id).first();
   if (!row) return null;
   if ("hidden" in body) await env.DB.prepare("UPDATE nieuws SET hidden = ? WHERE id = ?").bind(body.hidden ? 1 : 0, id).run();
+  // Liveblog yes/no (label and banner in apps and website); updated_at moves so the share page follows.
+  if ("liveblog" in body) {
+    await env.DB.batch([
+      body.liveblog ? env.DB.prepare("INSERT OR IGNORE INTO nieuws_liveblog (id, at) VALUES (?, ?)").bind(id, Date.now())
+        : env.DB.prepare("DELETE FROM nieuws_liveblog WHERE id = ?").bind(id),
+      env.DB.prepare("UPDATE nieuws SET updated_at = ? WHERE id = ?").bind(Date.now(), id),
+    ]);
+  }
   if ("foto" in body) {
     if (body.foto && isKindAfgerond(row)) throw Object.assign(new Error("Na afloop van een kind-alert kan er geen foto meer bij"), { status: 400 });
     const foto = body.foto ? await bewaarFoto(env, body.foto) : null;
@@ -622,6 +634,7 @@ export async function nieuwsHousekeeping(env) {
       env.DB.prepare("DELETE FROM nieuws_fotos WHERE id IN (SELECT foto FROM nieuws_updates WHERE nieuws_id = ? AND foto IS NOT NULL)").bind(id),
       env.DB.prepare("DELETE FROM nieuws_fotos WHERE id IN (SELECT foto FROM nieuws WHERE id = ? AND foto IS NOT NULL)").bind(id),
       env.DB.prepare("DELETE FROM nieuws_updates WHERE nieuws_id = ?").bind(id),
+      env.DB.prepare("DELETE FROM nieuws_liveblog WHERE id = ?").bind(id),
       env.DB.prepare("DELETE FROM nieuws WHERE id = ?").bind(id),
     ]);
   }

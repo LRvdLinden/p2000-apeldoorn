@@ -24,9 +24,11 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     let bronUrl: URL?
     let waarschuwing: String?
     let aantal: Int?
+    /// Set in the beheer: shown as a liveblog (label and banner). Older servers: every Burgernet/AMBER/Vermist Kind item.
+    let isLiveblog: Bool
 
     enum CodingKeys: String, CodingKey {
-        case id, soort, bron, titel, intro, plaats, at, bijgewerkt, start, status, niveau, categorie, afbeelding, link, waarschuwing, aantal
+        case id, soort, bron, titel, intro, plaats, at, bijgewerkt, start, status, niveau, categorie, afbeelding, link, waarschuwing, aantal, liveblog
         case bronUrl = "bron_url"
     }
 
@@ -49,6 +51,13 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         bronUrl = (try c.decodeIfPresent(String.self, forKey: .bronUrl)).flatMap(URL.init(string:))
         waarschuwing = try c.decodeIfPresent(String.self, forKey: .waarschuwing)
         aantal = try c.decodeIfPresent(Int.self, forKey: .aantal)
+        isLiveblog = (try? c.decodeIfPresent(Bool.self, forKey: .liveblog)) ?? (soort == .liveblog)
+    }
+
+    /// Filter chips: "Liveblogs" follows the beheer switch, the others the kind of item.
+    func hoortBij(_ filter: Soort?) -> Bool {
+        guard let filter else { return true }
+        return filter == .liveblog ? isLiveblog : soort == filter
     }
 
     static func datum(_ s: String) -> Date? {
@@ -64,9 +73,11 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     var laatste: Date { max(bijgewerkt ?? at, at) }
 
     /// Label on the photo: "Liveblog · Burgernet", "Politie · Ugchelen", "Weer · Code oranje".
-    var label: String {
+    var label: String { isLiveblog ? "\(L("Liveblog")) · \(basisLabel)" : basisLabel }
+
+    private var basisLabel: String {
         switch soort {
-        case .liveblog: return "\(L("Liveblog")) · \(bronNaam)"
+        case .liveblog: return bronNaam
         case .politie: return "\(L("Politie"))\(plaats.map { " · \($0)" } ?? "")"
         case .weer: return "\(L("Weer")) · \(Waarschuwing.codeLabel(niveau))"
         case .regionaal: return "112 Nieuws\(plaats.map { " · \($0)" } ?? "")"
@@ -78,6 +89,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "burgernet": return "Burgernet"
         case "amber": return "AMBER Alert"
         case "vermistkind": return L("Vermist Kind")
+        case "nlalert": return "NL-Alert"
         case "knmi": return "KNMI"
         case "112nieuws": return "112 Nieuws"
         default: return L("Politie")
@@ -87,7 +99,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     /// Small icon next to the label (same images as the warnings).
     var icoon: String? {
         switch bron {
-        case "burgernet", "amber", "vermistkind", "knmi": return "icon_\(bron)"
+        case "burgernet", "amber", "vermistkind", "knmi", "nlalert": return "icon_\(bron)"
         case "112nieuws":
             switch categorie {
             case "brand": return "icon_brandweer"
@@ -104,6 +116,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "burgernet": return Color(hex: 0x0067B1)
         case "amber": return Color(hex: 0xEC6E24)
         case "vermistkind": return Color(hex: 0x1B265E)
+        case "nlalert": return Color(hex: 0x1D1D1F)
         case "knmi": return Waarschuwing.codeColor(niveau ?? "yellow")
         case "112nieuws": return Color(hex: 0xDC2626)
         default: return Color(hex: 0x1E3A8C)

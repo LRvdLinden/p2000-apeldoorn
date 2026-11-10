@@ -8,7 +8,7 @@ struct NieuwsView: View {
     @State private var pad: [String] = []
     @Environment(\.horizontalSizeClass) private var sizeClass
 
-    private var zichtbaar: [NieuwsItem] { store.items.filter { filter == nil || $0.soort == filter } }
+    private var zichtbaar: [NieuwsItem] { store.items.filter { $0.hoortBij(filter) } }
 
     var body: some View {
         NavigationStack(path: $pad) {

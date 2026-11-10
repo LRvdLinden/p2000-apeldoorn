@@ -3,13 +3,16 @@ import { API, esc, loadMapKit } from "./core.js?v=58";
 
 const TZ = "Europe/Amsterdam";
 const $ = (s) => document.querySelector(s);
-const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", politie: "#1E3A8C", "112nieuws": "#DC2626" };
+const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", nlalert: "#1D1D1F", politie: "#1E3A8C", "112nieuws": "#DC2626" };
 const CODE = { yellow: ["Code geel", "#F7C600"], orange: ["Code oranje", "#F28C28"], red: ["Code rood", "#E3001B"], green: ["Code groen", "#2E9E44"] };
-const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
+const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
 const ICOON = (b, cat) => b === "112nieuws" ? `/assets/img/icon_${{ brand: "brandweer", traumaheli: "traumaheli", politie: "politie" }[cat] || "ambulance"}.png`
-  : `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi"].includes(b) ? b : "politie"}.png`;
+  : `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi", "nlalert"].includes(b) ? b : "politie"}.png`;
 const kleur = (x) => (x.bron === "knmi" ? (CODE[x.niveau] || CODE.yellow)[1] : KLEUR[x.bron] || KLEUR.politie);
-const label = (x) => x.soort === "regionaal" ? `112 Nieuws${x.plaats ? ` · ${x.plaats}` : ""}` : x.soort === "liveblog" ? `Liveblog · ${BRON[x.bron]}` : x.soort === "weer" ? `Weer · ${(CODE[x.niveau] || CODE.yellow)[0]}` : `Politie${x.plaats ? ` · ${x.plaats}` : ""}`;
+/** Liveblog (set in the beheer; older servers: every Burgernet/AMBER/Vermist Kind item). */
+const isLiveblog = (x) => (typeof x.liveblog === "boolean" ? x.liveblog : x.soort === "liveblog");
+const label = (x) => (isLiveblog(x) ? "Liveblog · " : "") + basisLabel(x);
+const basisLabel = (x) => x.soort === "regionaal" ? `112 Nieuws${x.plaats ? ` · ${x.plaats}` : ""}` : x.soort === "liveblog" ? BRON[x.bron] || "Melding" : x.soort === "weer" ? `Weer · ${(CODE[x.niveau] || CODE.yellow)[0]}` : `Politie${x.plaats ? ` · ${x.plaats}` : ""}`;
 const isLive = (x) => x.soort === "liveblog" && x.status !== "afgerond";
 
 function wanneer(iso) {
@@ -47,7 +50,7 @@ async function laadLijst() {
   }
 }
 function toonLijst() {
-  const lijst = items.filter((x) => !filter || x.soort === filter);
+  const lijst = items.filter((x) => !filter || (filter === "liveblog" ? isLiveblog(x) : x.soort === filter));
   $("#items").innerHTML = lijst.length ? lijst.map((x) => `
     <a class="nw-kaart" href="/nieuws/${esc(x.id)}" data-id="${esc(x.id)}" style="background-image:url('${esc(x.afbeelding || "")}')">
       <span class="t">${labelHTML(x)}<h2>${esc(x.titel)}</h2><small>${esc(meta(x))}</small></span>

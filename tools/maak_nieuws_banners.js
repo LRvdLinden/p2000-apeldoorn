@@ -78,22 +78,23 @@ for (const niveau of ['yellow', 'orange', 'red', 'green']) for (const g of Objec
 }
 BANNERS.push(
   { name: 'burgernet', bg: 'linear-gradient(135deg,#0B3C6E,#1265A8)', stripes: stripes('#F28C00', 'transparent', 30), stripeOpacity: .9,
-    tile: `<img src="${IMG}icon_burgernet.png" style="width:200px">`, tileBg: '#fff', live: true,
+    tile: `<img src="${IMG}icon_burgernet.png" style="width:200px">`, tileBg: '#fff', 
     pillIcon: `<img src="${IMG}icon_burgernet.png">`, pill: 'Burgernet', big: 'Kijk mee', bigColor: '#fff', sub: 'Oproep van de politie · Apeldoorn e.o.', subColor: 'rgba(255,255,255,.9)', bigTop: 220, subOffset: 120 },
   { name: 'amber', bg: 'linear-gradient(135deg,#E8590C,#FF8A1F)', stripes: stripes('rgba(255,255,255,.9)', 'transparent', 30), stripeOpacity: .55,
-    tile: `<img src="${IMG}logo_amber.png" style="width:220px">`, tileBg: '#fff', live: true,
+    tile: `<img src="${IMG}logo_amber.png" style="width:220px">`, tileBg: '#fff', 
     pillIcon: `<img src="${IMG}icon_amber.png" style="border-radius:12px">`, pill: 'AMBER Alert', big: 'Kind vermist', bigColor: '#fff', bigSize: 104, sub: 'Mogelijk in levensgevaar · heel Nederland', subColor: '#fff', bigTop: 220, subOffset: 120 },
   { name: 'nlalert', bg: 'linear-gradient(135deg,#111522,#262c3f)', stripes: stripes('#fff', 'transparent', 26), stripeOpacity: .9,
     tile: `<img src="${IMG}logo_nlalert.png" style="width:230px">`, tileBg: '#fff', ringColor: '#FFD200',
     pillIcon: `<img src="${IMG}icon_nlalert.png" style="border-radius:12px">`, pill: 'NL-Alert', big: 'Let op', bigColor: '#FFD200', sub: 'Lees het bericht en volg de instructies', subColor: '#fff', bigTop: 220, subOffset: 120 },
   { name: 'vermistkind', bg: 'linear-gradient(135deg,#13204B,#22336F)', stripes: stripes('#F4D400', 'transparent', 30), stripeOpacity: .95,
-    tile: `<img src="${IMG}icon_vermistkind.png" style="width:280px;border-radius:64px">`, tileBg: '#1B2457', ringColor: '#F4D400', live: true,
+    tile: `<img src="${IMG}icon_vermistkind.png" style="width:280px;border-radius:64px">`, tileBg: '#1B2457', ringColor: '#F4D400', 
     pillIcon: `<img src="${IMG}icon_vermistkind.png" style="border-radius:12px">`, pill: 'Vermist Kind Alert', big: 'Help zoeken', bigColor: '#F4D400', sub: 'Regionale oproep van de politie', subColor: '#fff', bigTop: 220, subOffset: 120 },
 );
 
 (async () => {
   const br = await chromium.launch(); const p = await br.newPage({ viewport: { width: 1200, height: 675 } });
-  for (const b of BANNERS) {
+  // Every banner twice: plain, and with "LIVEBLOG" (name-live) for items the beheer marked as liveblog.
+  for (const b of BANNERS.flatMap((x) => [{ ...x, live: false }, { ...x, live: true, name: `${x.name}-live` }])) {
     fs.writeFileSync(`${OUT}/${b.name}.html`, page(b));
     await p.goto(`file://${OUT}/${b.name}.html`, { waitUntil: 'load' }); await p.evaluate(() => document.fonts.ready);
     await p.screenshot({ path: `${OUT}/${b.name}.png` }); fs.unlinkSync(`${OUT}/${b.name}.html`);

@@ -5,7 +5,7 @@ struct TVNieuwsView: View {
     @State private var store = NieuwsStore.shared
     @State private var filter: NieuwsItem.Soort?
 
-    private var zichtbaar: [NieuwsItem] { store.items.filter { filter == nil || $0.soort == filter } }
+    private var zichtbaar: [NieuwsItem] { store.items.filter { $0.hoortBij(filter) } }
     private let kolommen = [GridItem(.adaptive(minimum: 540), spacing: 48)]
 
     var body: some View {

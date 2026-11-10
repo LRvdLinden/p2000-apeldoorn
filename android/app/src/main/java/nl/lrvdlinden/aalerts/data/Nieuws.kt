@@ -39,7 +39,12 @@ data class NieuwsItem(
     val tijdlijn: List<NieuwsBericht>? = null,
     /** Weather articles: the content in the layout of knmi.nl (map, headline, code, advice). */
     val weer: WeerArtikel? = null,
+    /** Set in the beheer: shown as a liveblog (label and banner). Older servers: every Burgernet/AMBER/Vermist Kind item. */
+    val liveblog: Boolean? = null,
 ) {
+    val isLiveblog: Boolean get() = liveblog ?: (soort == "liveblog")
+    /** Filter chips: "Liveblogs" follows the beheer switch, the others the kind of item. */
+    fun hoortBij(filter: String?): Boolean = filter == null || (if (filter == "liveblog") isLiveblog else soort == filter)
     val atInstant: Instant get() = parseInstant(at) ?: Instant.now()
     val laatste: Instant get() = maxOf(parseInstant(bijgewerkt) ?: atInstant, atInstant)
     val isAfgerond get() = status == "afgerond"
@@ -48,12 +53,14 @@ data class NieuwsItem(
         "burgernet" -> "Burgernet"
         "amber" -> "AMBER Alert"
         "vermistkind" -> tr("Vermist Kind", "Missing Child")
+        "nlalert" -> "NL-Alert"
         "knmi" -> "KNMI"
         "112nieuws" -> "112 Nieuws"
         else -> tr("Politie", "Police")
     }
-    val label: String get() = when (soort) {
-        "liveblog" -> tr("Liveblog", "Live blog") + " · " + bronNaam
+    val label: String get() = if (isLiveblog) tr("Liveblog", "Live blog") + " · " + basisLabel else basisLabel
+    private val basisLabel: String get() = when (soort) {
+        "liveblog" -> bronNaam
         "weer" -> tr("Weer", "Weather") + " · " + Waarschuwing.codeLabel(niveau)
         "regionaal" -> "112 Nieuws" + (plaats?.let { " · $it" } ?: "")
         else -> tr("Politie", "Police") + (plaats?.let { " · $it" } ?: "")
@@ -62,6 +69,7 @@ data class NieuwsItem(
         "burgernet" -> Color(0xFF0067B1)
         "amber" -> Color(0xFFEC6E24)
         "vermistkind" -> Color(0xFF1B265E)
+        "nlalert" -> Color(0xFF1D1D1F)
         "knmi" -> Waarschuwing.codeColor(niveau)
         "112nieuws" -> Color(0xFFDC2626)
         else -> Color(0xFF1E3A8C)
@@ -70,6 +78,7 @@ data class NieuwsItem(
         "burgernet" -> R.drawable.icon_burgernet
         "amber" -> R.drawable.icon_amber
         "vermistkind" -> R.drawable.icon_vermistkind
+        "nlalert" -> R.drawable.icon_nlalert
         "knmi" -> R.drawable.icon_knmi
         "112nieuws" -> when (categorie) { "brand" -> R.drawable.icon_brandweer; "traumaheli" -> R.drawable.icon_traumaheli; "politie" -> R.drawable.icon_politie; else -> R.drawable.icon_ambulance }
         else -> R.drawable.icon_politie

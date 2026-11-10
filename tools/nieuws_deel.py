@@ -36,8 +36,10 @@ def og_image(url):
 
 
 def label(x):
+    live = x.get("liveblog", x["soort"] == "liveblog")
     if x["soort"] == "liveblog":
-        return {"burgernet": "Liveblog Burgernet", "amber": "Liveblog AMBER Alert", "vermistkind": "Liveblog Vermist Kind Alert"}.get(x["bron"], "Liveblog")
+        naam = {"burgernet": "Burgernet", "amber": "AMBER Alert", "vermistkind": "Vermist Kind Alert", "nlalert": "NL-Alert"}.get(x["bron"], "Melding")
+        return f"Liveblog {naam}" if live else naam
     if x["soort"] == "regionaal":
         return "112 Nieuws" + (f" · {x['plaats']}" if x.get("plaats") else "")
     if x["soort"] == "weer":
@@ -75,7 +77,7 @@ def page(template, x):
     t = re.sub(r'(<meta name="twitter:title" content=")[^"]*', lambda m: m.group(1) + e(titel), t)
     t = re.sub(r'(<meta name="twitter:description" content=")[^"]*', lambda m: m.group(1) + e(desc), t)
     t = re.sub(r'(<meta name="twitter:image" content=")[^"]*', lambda m: m.group(1) + e(img), t)
-    ld = {"@context": "https://schema.org", "@type": "NewsArticle" if x["soort"] != "liveblog" else "LiveBlogPosting",
+    ld = {"@context": "https://schema.org", "@type": "LiveBlogPosting" if x.get("liveblog", x["soort"] == "liveblog") else "NewsArticle",
           "headline": titel, "description": desc, "image": [img], "datePublished": x.get("start") or x["at"], "dateModified": x.get("bijgewerkt") or x["at"],
           "url": url, "inLanguage": "nl-NL", "publisher": {"@type": "Organization", "name": "A-Alerts", "url": SITE},
           "isPartOf": {"@id": f"{SITE}/nieuws/"}}

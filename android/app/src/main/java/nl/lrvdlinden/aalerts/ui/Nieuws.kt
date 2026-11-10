@@ -108,7 +108,7 @@ fun NieuwsScreen(nav: Nav) {
         NieuwsStore.load()
         while (true) { delay(120_000); NieuwsStore.load(force = true) }
     }
-    val lijst = NieuwsStore.items.filter { filter == null || it.soort == filter }
+    val lijst = NieuwsStore.items.filter { it.hoortBij(filter) }
     PullToRefreshBox(isRefreshing = refreshing, onRefresh = { scope.launch { refreshing = true; NieuwsStore.load(force = true); refreshing = false } }) {
         LazyColumn(contentPadding = PaddingValues(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxSize()) {
             item { Text(tr("Nieuws", "News"), fontSize = 30.sp, fontWeight = FontWeight.Bold) }

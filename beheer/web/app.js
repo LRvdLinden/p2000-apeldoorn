@@ -330,8 +330,8 @@ function editWaarschuwing(w) {
 
 // ------------------------------------------------------------------ nieuws (tab Nieuws in the apps and on a-alerts.nl)
 
-const N_SOORT = { liveblog: "Liveblog", politie: "Politie", regionaal: "112 Nieuws", weer: "Weer" };
-const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
+const N_SOORT = { liveblog: "Meldingen (Burgernet, AMBER, NL-Alert, Vermist Kind)", politie: "Politie", regionaal: "112 Nieuws", weer: "Weer" };
+const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
 const N_CAT = { algemeen: "Algemeen", verkeer: "Verkeer", inbraak: "Inbraak", getuigen: "Getuigen gezocht", drugs: "Drugs", brand: "Brand", vermist: "Vermist" };
 let nSoort = "";
 
@@ -368,7 +368,7 @@ async function nieuws(el) {
         <div class="grow" style="flex:1;min-width:0">
           <small>${dt(x.at)} · ${N_SOORT[x.soort]}${x.soort !== "politie" ? ` · ${N_BRON[x.bron] || esc(x.bron)}` : x.plaats ? ` · ${esc(x.plaats)}` : ""}</small>
           <div class="t">${esc(x.titel)}</div>
-          <div>${x.soort === "liveblog" ? `<span class="tag${x.status === "afgerond" ? "" : " blue"}">${x.status === "afgerond" ? "Afgerond" : "Loopt"}</span>` : ""}${x.aantal ? `<span class="tag">${x.aantal} berichten</span>` : ""}${x.hidden ? `<span class="tag orange">Verborgen</span>` : ""}</div>
+          <div>${x.soort === "liveblog" ? `<span class="tag${x.status === "afgerond" ? "" : " blue"}">${x.status === "afgerond" ? "Afgerond" : "Loopt"}</span>` : ""}${x.liveblog ? `<span class="tag red">Liveblog</span>` : ""}${x.aantal ? `<span class="tag">${x.aantal} berichten</span>` : ""}${x.hidden ? `<span class="tag orange">Verborgen</span>` : ""}</div>
         </div>
       </div>`).join("") : `<p class="muted" style="padding:16px">Nog geen nieuws.</p>`}</div>
     <p class="muted" style="font-size:.8rem">Politieberichten komen van politie.nl (tekst met bronvermelding, nooit hun foto's). Liveblogs volgen Burgernet, AMBER Alert en Vermist Kind Alert; met “Bericht toevoegen” vul je ze aan met tekst, foto en link. Na afloop van een kind-alert worden foto's en teksten van het kind automatisch weggehaald.</p>`;
@@ -397,6 +397,7 @@ async function nieuwsItem(id) {
     <img src="${esc(x.afbeelding)}" alt="" style="width:100%;max-height:220px;object-fit:cover;border-radius:14px">
     <div class="form" style="margin-top:12px">
       <label class="check"><input type="checkbox" id="nHide" ${x.hidden ? "checked" : ""}> Verbergen in de apps en op de website</label>
+      ${x.soort === "weer" || x.soort === "liveblog" ? `<label class="check"><input type="checkbox" id="nLive" ${x.liveblog ? "checked" : ""}> Liveblog (label "Liveblog" en "LIVEBLOG" op de afbeelding, in het filter Liveblogs)</label>` : ""}
       ${kindKlaar ? `<p class="muted" style="font-size:.8rem">Deze kind-alert is afgelopen: er kan geen foto meer bij.</p>` : `<label>Eigen afbeelding (vervangt de standaardafbeelding)<input type="file" id="nFoto" accept="image/*"></label>`}
       <div class="actions"><button class="btn" id="nFotoWeg">Eigen afbeelding weghalen</button><button class="btn primary" id="nBewaar">Bewaar</button></div>
     </div>
@@ -416,6 +417,7 @@ async function nieuwsItem(id) {
   $("nBewaar").onclick = async () => {
     try {
       const body = { hidden: $("nHide").checked };
+      if ($("nLive")) body.liveblog = $("nLive").checked;
       const f = $("nFoto")?.files?.[0];
       if (f) body.foto = await fotoNaarData(f);
       await api("PATCH", `/v1/beheer/nieuws/${id}`, body);

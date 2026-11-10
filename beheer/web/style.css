@@ -95,6 +95,7 @@ svg.chart .grid { stroke: var(--line); }
 .tag { display: inline-block; font-size: .7rem; font-weight: 700; padding: 1px 6px; border-radius: 6px; background: rgba(220,38,38,.12); color: var(--red); margin-right: 4px; }
 .tag.blue { background: rgba(59,130,246,.15); color: var(--blue); }
 .tag.orange { background: rgba(245,158,11,.15); color: var(--orange); }
+.tag.red { background: rgba(220,38,38,.15); color: #DC2626; }
 
 /* forms */
 .form { display: grid; gap: 12px; max-width: 720px; }
