@@ -375,7 +375,7 @@ export function liveblogVan(w) {
   return { titel: w.titel || "", intro: w.tekst || "", berichten };
 }
 
-/** Weather articles and liveblogs follow the warnings: every changed warning updates its item. */
+/** Weather articles and liveblogs follow the warnings: every changed warning updates its item (a new weather code: a new article). */
 export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer = false } = {}) {
   const last = Number((await kv.get("nieuws_sync"))?.value || 0);
   const since = last ? last - 2 * 60_000 : now - 14 * DAY;
@@ -390,8 +390,18 @@ export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer =
     if (!w) continue;
     if (w.bron === "knmi") {
       const a = weerArtikel(w);
-      await upsertNieuws(env, { id: await nieuwsId("w", w.id), soort: "weer", bron: "knmi", ref: w.id, titel: a.titel, intro: a.intro, plaats: "Gelderland",
-        url: w.link, categorie: a.weer.icoon, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at: Date.parse(w.eerst_gezien) || Date.parse(w.start), data: { alineas: a.alineas, weer: a.weer } }, now);
+      // One article per code: as long as the code stays the same the article follows the warning; a new code
+      // (higher, lower, or lifted = code groen) gets a new article and the earlier one stays as it was.
+      const code = a.opgeheven ? "green" : w.niveau || "yellow";
+      const { results: eerder } = await env.DB.prepare("SELECT id, niveau, status, at FROM nieuws WHERE soort = 'weer' AND ref = ? ORDER BY created_at DESC, at DESC").bind(w.id).all();
+      const laatste = eerder[0];
+      const codeVan = (r) => (r.status === "afgerond" ? "green" : r.niveau || "yellow");
+      let id, at;
+      if (!laatste) { id = await nieuwsId("w", w.id); at = Date.parse(w.eerst_gezien) || Date.parse(w.start); }
+      else if (codeVan(laatste) === code) { id = laatste.id; at = laatste.at; }
+      else { id = await nieuwsId("w", `${w.id}#${code}#${eerder.length}`); at = now; }
+      await upsertNieuws(env, { id, soort: "weer", bron: "knmi", ref: w.id, titel: a.titel, intro: a.intro, plaats: "Gelderland",
+        url: w.link, categorie: a.weer.icoon, status: a.opgeheven ? "afgerond" : "actief", niveau: w.niveau, at, data: { alineas: a.alineas, weer: a.weer } }, now);
     } else if (LIVE_BRONNEN.includes(w.bron)) {
       const l = liveblogVan(w);
       const nid = await nieuwsId("l", w.id);

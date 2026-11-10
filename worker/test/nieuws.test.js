@@ -111,6 +111,23 @@ test("sync: police (first run silent, later new ones pushed), warnings, beheer m
   assert.equal(live.afbeelding, "https://a-alerts.nl/assets/img/nieuws/vermistkind.webp?v=4");
   const weer = (await listNieuws(env, "https://api.test", { soort: "weer" }))[0];
   assert.equal(weer.titel, "Code geel voor windstoten");
+  // Same code: the article follows. Another code (also code groen when lifted): a new article, the earlier one stays.
+  await env.DB.prepare("UPDATE waarschuwingen SET tekst = 'Zeer harde wind', updated_at = ? WHERE id = 'knmi:wind:1'").bind(now + 2000).run();
+  await syncWaarschuwingen(env, kv, now + 3000);
+  assert.equal((await listNieuws(env, "https://api.test", { soort: "weer" })).length, 1);
+  await env.DB.prepare("UPDATE waarschuwingen SET niveau = 'orange', updated_at = ? WHERE id = 'knmi:wind:1'").bind(now + 4000).run();
+  await syncWaarschuwingen(env, kv, now + 5000);
+  let weerLijst = await listNieuws(env, "https://api.test", { soort: "weer" });
+  assert.equal(weerLijst.length, 2);
+  assert.equal(weerLijst[0].titel, "Code oranje voor windstoten");
+  assert.equal(weerLijst[1].titel, "Code geel voor windstoten", "the code geel article is not edited");
+  assert.notEqual(weerLijst[0].id, weerLijst[1].id);
+  await env.DB.prepare("UPDATE waarschuwingen SET status = 'beeindigd', updated_at = ? WHERE id = 'knmi:wind:1'").bind(now + 6000).run();
+  await syncWaarschuwingen(env, kv, now + 7000);
+  weerLijst = await listNieuws(env, "https://api.test", { soort: "weer" });
+  assert.equal(weerLijst.length, 3);
+  assert.match(weerLijst[0].titel, /^Opgeheven/);
+  assert.equal(weerLijst[1].titel, "Code oranje voor windstoten");
 
   // Beheer adds a message with a photo and a link; the newest is on top.
   const r = await voegToe(env, lid, { tekst: "Extra info", url: "https://www.politie.nl/x", foto: PNG });
