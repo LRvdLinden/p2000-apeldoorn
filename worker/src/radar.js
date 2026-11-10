@@ -37,7 +37,7 @@ async function cachedPng(env, ctx, key, url) {
   if (hit) return hit;
   let res = await fetch(WMS + url, { headers: { Authorization: env.KNMI_WMS_KEY }, signal: AbortSignal.timeout(12_000) });
   if (res.status === 401 || res.status === 403) res = await fetch(WMS_ANON + url, { signal: AbortSignal.timeout(12_000) });
-  if (!res.ok) return new Response(JSON.stringify({ error: `KNMI ${res.status}` }), { status: 502, headers: { "content-type": "application/json" } });
+  if (!res.ok) return new Response(JSON.stringify({ error: `KNMI ${res.status}` }), { status: 502, headers: { "content-type": "application/json", "access-control-allow-origin": "*" } });
   const out = new Response(await res.arrayBuffer(), {
     headers: { "content-type": "image/png", "cache-control": "public, max-age=300", "access-control-allow-origin": "*" },
   });

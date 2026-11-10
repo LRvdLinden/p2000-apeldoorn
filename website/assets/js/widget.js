@@ -121,7 +121,7 @@ export function maakWidgets(el, opts = {}) {
     kaart.mk = mk;
     const donker = () => (opts.thema === "donker" ? true : opts.thema === "licht" ? false : matchMedia("(prefers-color-scheme: dark)").matches);
     kaart.map = new mk.Map(kaartEl, {
-      region: new mk.CoordinateRegion(new mk.Coordinate(52.19, 5.955), new mk.CoordinateSpan(0.27, 0.44)),
+      region: new mk.CoordinateRegion(new mk.Coordinate(52.19, 5.955), new mk.CoordinateSpan(0.23, 0.37)),
       colorScheme: donker() ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light,
       showsMapTypeControl: false, showsCompass: mk.FeatureVisibility.Hidden, showsScale: mk.FeatureVisibility.Hidden,
       isRotationEnabled: false, showsZoomControl: true, showsPointsOfInterest: false,
