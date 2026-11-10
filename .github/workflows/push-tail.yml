@@ -1,0 +1,16 @@
+name: Probe
+on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - run: |
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          DB=$(curl -s -H "$H" "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database" | jq -r '.result[] | select(.name|test("p2000")) | .uuid' | head -1)
+          q() { jq -n --arg s "$1" '{sql:$s}' | curl -s -H "$H" -H "content-type: application/json" -d @- "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/d1/database/$DB/query" | jq -c '.result[0].results[]?'; }
+          q "SELECT key, value, datetime(at/1000,'unixepoch') AS at FROM kv WHERE key IN ('homey_last','homey_cursor','cron_run','feed_ok')"
+          q "SELECT guid, datum, datetime(created_at/1000,'unixepoch') AS opgeslagen FROM meldingen ORDER BY created_at DESC LIMIT 8"
+          q "SELECT guid, datetime(MIN(created_at)/1000,'unixepoch') AS push_queue, COUNT(*) n FROM outbox GROUP BY guid ORDER BY MIN(created_at) DESC LIMIT 5"
