@@ -1104,6 +1104,23 @@ function openVerkeer(v) {
   box.innerHTML = `<header><b>${esc(v.kop || v.titel)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>${verkeerHTML(v)}`;
   box.hidden = false;
 }
+/** ?verkeer=<id> (link from the widgets): the map with the traffic report or speed camera opened. */
+async function openVerkeerLink(id) {
+  const vk = await fetchVerkeer();
+  const v = [...(vk.items || []), ...(vk.gepland || [])].find((x) => x.id === id);
+  const f = v ? null : (vk.flitsers || []).find((x) => x.id === id);
+  const laag = f ? "flitsers" : "verkeer";
+  if (!state.lagen.has(laag)) { state.lagen.add(laag); prefs.set("p2000.lagen", [...state.lagen]); }
+  setTab("kaart");
+  const mk = await bigMapReady;
+  const x = v || f;
+  if (!x) return;
+  if (mk && bigMap && x.lat != null) {
+    bigMap.setCenterAnimated(new mk.Coordinate(x.lat, x.lon));
+    if (bigMap.cameraDistance > 20000) bigMap.cameraDistance = 9000;
+  }
+  v ? openVerkeer(v) : openFlitser(f);
+}
 function openFlitser(f) {
   const box = $("clusterPanel");
   box.innerHTML = `<header><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser"}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
@@ -1369,6 +1386,7 @@ setTab((location.hash || "#pager").slice(1), false);
 await refresh();
 setInterval(() => { if (!document.hidden) refresh(); }, 15_000);
 setInterval(() => { if (!document.hidden) renderList(); }, 60_000); // "x min geleden"
-const initial = params.get("melding"), initialW = params.get("waarschuwing");
-if (initialW) selectWarning(initialW, { push: false });
+const initial = params.get("melding"), initialW = params.get("waarschuwing"), initialV = params.get("verkeer");
+if (initialV) openVerkeerLink(initialV);
+else if (initialW) selectWarning(initialW, { push: false });
 else if (initial) select(initial, { push: false });

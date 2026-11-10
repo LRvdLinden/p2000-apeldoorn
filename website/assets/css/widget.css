@@ -75,3 +75,40 @@ button.aw-rij:hover { background: var(--bg); }
 .aw-rij .aw-wanneer { color: var(--muted); font-weight: 400; margin-top: 2px; }
 .aw-leeg.klein { font-size: 11px; padding-top: 4px; }
 .aw-rij.open .aw-pil { background: var(--surface); }
+/* Weer: the picture of the news article (smaller) and the text with "Meer informatie". */
+.aw .nw-weer-kaart { position: relative; margin: 0 12px; height: 205px; border-radius: 14px; overflow: hidden; background: #cfe3ef; }
+.aw .nw-weer-kaart .kaart { position: absolute; inset: 0; }
+.aw .nw-weer-kaart .kaart svg { width: 100%; height: 100%; }
+.aw .nw-weer-kaart .datum { position: absolute; top: 8px; left: 8px; z-index: 2; display: flex; flex-direction: column; padding: 4px 8px; border-radius: 8px; background: rgba(255,255,255,.82); color: #163E6E; font-size: 10.5px; line-height: 1.3; }
+.aw .nw-weer-kaart .datum strong { font-size: 13px; }
+.aw .nw-weer-kaart .icoon { position: absolute; top: 58px; left: 8px; z-index: 2; width: 38px; height: 38px; padding: 4px; border-radius: 9px; background: #1D1D1F; box-sizing: border-box; }
+.aw .nw-weer-kaart .icoon span { display: grid; place-items: center; width: 100%; height: 100%; border-radius: 6px; font-size: 16px; font-weight: 700; }
+.aw .nw-weer-kaart .chip { position: absolute; left: 50%; bottom: 8px; z-index: 2; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; padding: 4px 12px; border-radius: 5px; border-left: 3px solid; background: #23272F; color: #fff; white-space: nowrap; font-size: 11.5px; line-height: 1.3; }
+.aw .nw-weer-kaart .chip small { font-size: 10px; }
+.aw-wtekst { padding: 12px 16px 12px; }
+.aw-wtekst h4 { margin: 0 0 6px; font-size: 17px; font-weight: 700; line-height: 1.25; }
+.aw-wcode { display: inline-block; font-weight: 600; font-size: 12px; border-radius: 7px; padding: 3px 9px; }
+.aw-wtekst p { font-size: 12.5px; font-weight: 600; margin: 8px 0 0; line-height: 1.45; }
+.aw-wmeer { display: flex; align-items: center; gap: 6px; font: inherit; color: var(--red); font-weight: 700; font-size: 13px; background: none; border: 0; padding: 0; margin-top: 10px; cursor: pointer; }
+.aw-wmeer i { font-style: normal; transition: transform .2s; }
+.aw-wmeer[aria-expanded="true"] i { transform: rotate(90deg); }
+.aw-wopen { margin-top: 6px; }
+.aw-wuit { display: block; font-size: 11px; color: var(--muted); margin-top: 4px; }
+.aw-wvakken { list-style: none; padding: 0; margin: 6px 0 0; font-size: 12px; }
+.aw-wvakken li { display: flex; align-items: center; gap: 6px; margin: 2px 0; }
+.aw-wvakken span, .aw-wrij span { width: 10px; height: 10px; border-radius: 3px; flex: none; }
+.aw-wadv { background: var(--bg); border-left: 3px solid var(--red); border-radius: 0 10px 10px 0; padding: 9px 12px; margin-top: 10px; font-size: 12px; }
+.aw-wadv b, .aw-wdet b { color: var(--red); font-size: 13px; display: block; margin-bottom: 3px; }
+.aw-wadv ul { margin: 0; padding: 0; list-style: none; }
+.aw-wadv li { position: relative; padding-left: 12px; margin: 3px 0; line-height: 1.4; }
+.aw-wadv li::before { content: "›"; position: absolute; left: 0; color: var(--red); font-weight: 700; }
+.aw-wdet { font-size: 12px; margin-top: 10px; }
+.aw-wdet p { margin: 0; font-weight: 400; white-space: pre-line; }
+.aw-wknop { display: inline-block; font-weight: 700; font-size: 12.5px; border-radius: 10px; padding: 8px 14px; margin-top: 12px; text-decoration: none; }
+.aw-wrij { display: flex; align-items: center; gap: 10px; width: 100%; font: inherit; font-size: 13px; color: inherit; background: none; border: 0; border-top: 1px solid var(--line); padding: 10px 16px; cursor: pointer; text-align: left; }
+.aw-wrij b { font-weight: 500; }
+.aw-wrij small { margin-left: auto; color: var(--muted); font-size: 11.5px; white-space: nowrap; }
+.aw-groen { display: flex; gap: 10px; align-items: center; padding: 4px 16px 14px; font-size: 13px; }
+.aw-groen > span { width: 30px; height: 30px; border-radius: 9px; display: grid; place-content: center; background: #2E9E44; color: #fff; flex: none; font-weight: 700; }
+.aw-groen b { display: block; } .aw-groen small { color: var(--muted); font-size: 12px; }
+.aw-rij .aw-link, .aw-info a { color: var(--red); font-weight: 600; font-size: 12px; text-decoration: none; display: block; margin-top: 3px; }

@@ -14,7 +14,7 @@ export function siteVan(s) {
   return /^[a-z0-9.-]{3,120}$/.test(h) && h.includes(".") ? h : null;
 }
 
-const WIDGETS = ["kaart", "verkeer"];
+const WIDGETS = ["kaart", "verkeer", "weer"];
 const widgetsVan = (w) => [...new Set(String(w || "").split(",").map((x) => x.trim()).filter((x) => WIDGETS.includes(x)))].join(",") || "kaart,verkeer";
 
 /** GET /v1/widget/ping?site=…&w=…: counts the view (other sites only) and says whether the site is blocked. */

@@ -639,26 +639,25 @@ function incidentUpdate(id, klaar) {
 // "Klopt deze melding niet?": reports from users (apps and website), kept 90 days.
 const REDEN = { locatie: "De plek klopt niet", dienst: "Verkeerde hulpdienst", prioriteit: "Verkeerde prioriteit", dubbel: "Dubbele melding", test: "Test- of proefalarm", anders: "Iets anders" };
 let foutFilter = "open";
-// Widgets (live map, "Verkeer nu") for other websites: the code to copy, and on which sites they are embedded.
-let wKeus = { w: "kaart,verkeer", thema: "auto" };
-// Only the script version is offered: it comes from a-alerts.nl, sizes itself and cannot be changed by the site.
-function widgetCode() {
-  const { w, thema } = wKeus;
-  return `<div data-a-alerts-widget="${w}" data-thema="${thema}"></div>\n<script src="https://a-alerts.nl/widget/embed.js" async></script>`;
+// Widgets (live map, "Verkeer nu", weather warning) for other websites: the code to copy, and on which sites they are embedded.
+let wKeus = { thema: "auto" };
+// One script per widget: it puts the widget where it stands, comes from a-alerts.nl, sizes itself and cannot be changed by the site.
+const WIDGET_SOORTEN = [["kaart", "Live kaart"], ["verkeer", "Verkeer nu"], ["weer", "Weerwaarschuwing"]];
+function widgetCode(w) {
+  return `<script src="https://a-alerts.nl/widget/${w}.js" data-thema="${wKeus.thema}" async></script>`;
 }
 async function widgets(el) {
   const d = await api("GET", "/v1/beheer/widgets");
   const knop = (k, v, l) => `<button class="btn${wKeus[k] === v ? " primary" : ""}" data-wk="${k}" data-wv="${v}">${l}</button>`;
-  const blok = (soort, titel) => `<p style="margin:12px 0 6px;font-weight:600">${titel}</p><pre class="code" id="wc-${soort}">${esc(widgetCode(soort))}</pre>
-    <button class="btn primary" data-wcopy="${soort}">Kopieer script</button>`;
+  const blok = (w, titel) => `<p style="margin:14px 0 6px;font-weight:600">${titel} <a class="muted" style="font-weight:400;font-size:.8rem" href="https://a-alerts.nl/widget/?w=${w}&thema=${wKeus.thema}" target="_blank" rel="noopener">voorbeeld ↗</a></p><pre class="code">${esc(widgetCode(w))}</pre>
+    <button class="btn primary" data-wcopy="${w}">Kopieer script</button>`;
   el.innerHTML = `<div class="card"><h3 style="margin-top:0">Code om te delen</h3>
-      <div class="toolbar" style="flex-wrap:wrap;gap:6px">${knop("w", "kaart,verkeer", "Kaart + verkeer")}${knop("w", "kaart", "Alleen kaart")}${knop("w", "verkeer", "Alleen verkeer")}
-        <span style="width:12px"></span>${knop("thema", "auto", "Thema: automatisch")}${knop("thema", "licht", "Licht")}${knop("thema", "donker", "Donker")}</div>
-      ${blok("script", "Script")}
-      <p class="muted" style="font-size:.8rem;margin-top:12px">We bieden alleen de script-code aan: de widget komt van a-alerts.nl, past zijn hoogte vanzelf aan en kan door de website niet worden aangepast. In de widget staat altijd "A-Alerts" in de kop en een link naar a-alerts.nl. <a href="https://a-alerts.nl/widget/?w=${wKeus.w}&thema=${wKeus.thema}" target="_blank" rel="noopener">Voorbeeld ↗</a></p></div>
+      <div class="toolbar" style="flex-wrap:wrap;gap:6px">${knop("thema", "auto", "Thema: automatisch")}${knop("thema", "licht", "Licht")}${knop("thema", "donker", "Donker")}</div>
+      ${WIDGET_SOORTEN.map(([w, t]) => blok(w, t)).join("")}
+      <p class="muted" style="font-size:.8rem;margin-top:12px">Elke widget heeft een eigen script: de widget verschijnt op de plek van het script, komt van a-alerts.nl, past zijn hoogte vanzelf aan en kan door de website niet worden aangepast. In de widget staat altijd "A-Alerts" in de kop en elke link gaat naar a-alerts.nl. Handleiding: <a href="https://a-alerts.nl/widget/A-Alerts-widgets.pdf" target="_blank" rel="noopener">PDF ↗</a></p></div>
     <div class="card" style="margin-top:16px"><h3 style="margin-top:0">Ingesloten op</h3>
       ${d.sites.length ? `<table class="tabel"><tr><th>Website</th><th>Widget</th><th>Eerst gezien</th><th>Laatst gezien</th><th>Weergaven 7 dagen</th><th>Status</th><th></th></tr>
-        ${d.sites.map((s) => `<tr><td><a href="https://${esc(s.site)}" target="_blank" rel="noopener"><b>${esc(s.site)}</b></a></td><td>${esc(s.widgets.replace(",", " + "))}</td>
+        ${d.sites.map((s) => `<tr><td><a href="https://${esc(s.site)}" target="_blank" rel="noopener"><b>${esc(s.site)}</b></a></td><td>${esc(s.widgets.replaceAll(",", " + "))}</td>
           <td>${dt(s.eerst)}</td><td>${dt(s.laatst)}</td><td>${s.views7.toLocaleString("nl-NL")}</td>
           <td>${s.blok ? '<span class="tag red">geblokkeerd</span>' : s.actief ? '<span class="tag green">actief</span>' : '<span class="muted">geen bezoek >3 dagen</span>'}</td>
           <td><button class="btn${s.blok ? "" : " danger"}" data-wblok="${esc(s.site)}" data-aan="${s.blok ? 0 : 1}">${s.blok ? "Deblokkeer" : "Blokkeer"}</button></td></tr>`).join("")}</table>`

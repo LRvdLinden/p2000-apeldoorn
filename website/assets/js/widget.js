@@ -1,7 +1,9 @@
-// A-Alerts widgets: "Live kaart" (square map of Apeldoorn e.o.) and "Verkeer nu" (traffic list).
+// A-Alerts widgets: "Live kaart" (square map of Apeldoorn e.o.), "Verkeer nu" (traffic list) and "Weer" (the KNMI warning
+// for Apeldoorn e.o. with the picture of the news article). Every link leads to the information on a-alerts.nl.
 // Used in the side column of a-alerts.nl/nieuws and on other websites through /widget/ (iframe, or embed.js).
 // The map: municipal border in the colour of the active KNMI code, traffic (NDW), P2000 alerts of the last 3 hours,
 // helicopters inside the area, hospitals, rain radar and (optional) fixed speed cameras. Light/dark follows the device.
+import { weerKaartHTML, tekenWeerKaart, codeKleur, opKleur, CODE_KLEUR } from "./weerkaart.js?v=1";
 import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, prefs } from "./core.js?v=58";
 import {
   fetchWaarschuwingen, fetchHelikopters, heliLaag, fetchLocaties, locatieAnnotation, radarLaag, CODES, mShareUrl,
@@ -28,11 +30,14 @@ const dag = (t) => new Date(t).toLocaleDateString("nl-NL", { day: "numeric", mon
  * title, links open a-alerts.nl in a new tab), thema: "auto" | "licht" | "donker", onResize: fn }.
  */
 export function maakWidgets(el, opts = {}) {
-  const widgets = (opts.widgets?.length ? opts.widgets : ["kaart", "verkeer"]).filter((w) => w === "kaart" || w === "verkeer");
+  const widgets = (opts.widgets?.length ? opts.widgets : ["kaart", "verkeer"]).filter((w) => ["kaart", "verkeer", "weer"].includes(w));
   const ext = Boolean(opts.extern);
   const doel = ext ? ' target="_blank" rel="noopener"' : "";
+  // Links to the information on a-alerts.nl (absolute on other websites).
+  const SITE = ext ? "https://a-alerts.nl" : "";
+  const kaartLink = (id) => `${SITE}/pager/?verkeer=${encodeURIComponent(id)}#kaart`;
   const naam = (t) => (ext ? `A-Alerts · ${t}` : t);
-  const kop = (t, id) => `<div class="aw-kop"><img src="${asset("assets/img/aalerts-icon-32.png")}" alt="A-Alerts">${esc(naam(t))}<small id="${id}">Apeldoorn e.o.</small></div>`;
+  const kop = (t, id, sub = "Apeldoorn e.o.") => `<div class="aw-kop"><img src="${asset("assets/img/aalerts-icon-32.png")}" alt="A-Alerts">${esc(naam(t))}<small id="${id}">${sub}</small></div>`;
   const voet = (tekst, link, label) => `<div class="aw-voet"><span>${tekst}</span><a href="${link}"${doel}>${label} ›</a></div>`;
   el.classList.add("aw");
   el.innerHTML = [
@@ -41,10 +46,13 @@ export function maakWidgets(el, opts = {}) {
         <div class="aw-laden" hidden><p>De kaart komt van Apple Kaarten. Daarbij ziet Apple je IP-adres.</p><button type="button">Kaart laden</button></div>
         <div class="aw-info" hidden></div></div>
       <div class="aw-chips" role="group" aria-label="Kaartlagen"></div>
-      ${ext ? voet("Bron: A-Alerts · NDW · KNMI · Apple Kaarten", "https://a-alerts.nl/pager/", "a-alerts.nl") : ""}</section>` : "",
+      ${ext ? voet("Bron: A-Alerts · NDW · KNMI · Apple Kaarten", "https://a-alerts.nl/pager/#kaart", "a-alerts.nl") : ""}</section>` : "",
     widgets.includes("verkeer") ? `<section class="aw-w" aria-label="${esc(naam("Verkeer nu"))}">${kop(ext ? "Verkeer" : "Verkeer nu", "awVerkeerTijd")}
       <div class="aw-sum" role="group" aria-label="Samenvatting"></div><div class="aw-seg" role="tablist"></div><div class="aw-lijst"><p class="aw-leeg">Verkeer laden…</p></div>
-      ${voet(ext ? "Bron: A-Alerts · NDW · © OpenStreetMap" : "Bron: NDW (Rijkswaterstaat, provincie, gemeenten); flitsers © OpenStreetMap", ext ? "https://a-alerts.nl/nieuws/" : "/pager/", ext ? "a-alerts.nl" : "Open de kaart")}</section>` : "",
+      ${voet(ext ? "Bron: A-Alerts · NDW · © OpenStreetMap" : "Bron: NDW (Rijkswaterstaat, provincie, gemeenten); flitsers © OpenStreetMap", `${SITE}/pager/#kaart`, ext ? "a-alerts.nl" : "Open de kaart")}</section>` : "",
+    widgets.includes("weer") ? `<section class="aw-w aw-weer" aria-label="${esc(naam(ext ? "Weer" : "Weerwaarschuwing"))}">${kop(ext ? "Weer" : "Weerwaarschuwing", "awWeerTijd", "KNMI")}
+      <div class="aw-wfig"></div><div class="aw-wbody"><p class="aw-leeg">Weer laden…</p></div>
+      ${voet(ext ? "Bron: A-Alerts · KNMI" : "Bron: KNMI", `${SITE}/nieuws/`, ext ? "a-alerts.nl" : "Alle weerberichten")}</section>` : "",
   ].join("");
 
   const state = { lagen: new Set(prefs.get("aw.lagen", STANDAARD)), tab: "nu", filter: null, groepen: new Map(), open: null, verkeer: { items: [], gepland: [], flitsers: [] } };
@@ -75,7 +83,7 @@ export function maakWidgets(el, opts = {}) {
         ${open ? `<span class="aw-open">${meer.map((t) => `<small>${esc(t)}</small>`).join("")}
           ${r.tijdvakken.length > 2 ? `<small>${esc(r.tijdvakken.map(verkeerTijdvak).join(" · "))}</small>` : ""}
           <small class="aw-bron">${esc(v.bron ? `Bron: ${v.bron} via NDW` : "Bron: NDW")}</small>
-          ${v.info_url ? `<a href="${esc(v.info_url)}" target="_blank" rel="noopener">Meer informatie ›</a>` : ""}</span>` : ""}
+          <a href="${kaartLink(v.id)}"${doel}>Bekijk op ${ext ? "a-alerts.nl" : "de kaart"} ›</a></span>` : ""}
       </div></button>`;
   }
   function groepen(lijst, gepland) {
@@ -101,7 +109,7 @@ export function maakWidgets(el, opts = {}) {
     segEl.innerHTML = [["nu", `Nu (${items.length})`], ["gepland", `Gepland (${gepland.length})`], ["flitsers", "Flitsers"]].map(([k, t]) => `<button type="button" role="tab" data-tab="${k}" aria-selected="${state.tab === k}">${t}</button>`).join("");
     let html;
     if (state.tab === "flitsers") {
-      html = flitsers.map((f) => `<div class="aw-rij"><img src="${rondIcoon("flitser")}" alt=""><div><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Vaste flitser"}</b><small>${esc(f.plaats || f.weg || "Regio Apeldoorn")}</small>${f.max ? `<small class="aw-det" style="color:#2F80ED">max. ${f.max} km/u</small>` : ""}</div></div>`).join("")
+      html = flitsers.map((f) => `<div class="aw-rij"><img src="${rondIcoon("flitser")}" alt=""><div><b>${f.soort === "trajectcontrole" ? "Trajectcontrole" : "Vaste flitser"}</b><small>${esc(f.plaats || f.weg || "Regio Apeldoorn")}</small>${f.max ? `<small class="aw-det" style="color:#2F80ED">max. ${f.max} km/u</small>` : ""}<a class="aw-link" href="${kaartLink(f.id)}"${doel}>Op de kaart ›</a></div></div>`).join("")
         || '<p class="aw-leeg">Geen vaste flitsers bekend in de regio.</p>';
       html += '<p class="aw-leeg klein">Vaste flitsers en trajectcontroles uit OpenStreetMap. Mobiele controles staan hier niet in.</p>';
     } else if (state.tab === "gepland") {
@@ -137,6 +145,71 @@ export function maakWidgets(el, opts = {}) {
     if (v && kaart.map && state.open) kaart.map.setCenterAnimated(new kaart.mk.Coordinate(v.lat, v.lon));
   });
 
+  // ---------------------------------------------------------------- Weer
+  // The KNMI warning(s) for Apeldoorn e.o. that apply now, each with the picture and text of its news article on
+  // a-alerts.nl; the most severe one is shown, the others as a line below it. "Meer informatie" opens the issue time,
+  // the risks and advice, the details and a link to the article.
+  const wFig = el.querySelector(".aw-wfig"), wBody = el.querySelector(".aw-wbody");
+  const NIV = { red: 3, orange: 2, yellow: 1 };
+  const hoofd = (t) => String(t || "").charAt(0).toUpperCase() + String(t || "").slice(1);
+  const weer = { lijst: [], keus: 0, open: false, getekend: null };
+  const weerLink = (a) => (a.id ? `${SITE}/nieuws/${a.id}` : `${SITE}/pager/?waarschuwing=${encodeURIComponent(a.waarschuwing)}`);
+  async function laadWeer() {
+    if (!wBody) return;
+    const [ws, nieuws] = await Promise.all([fetchWaarschuwingen(1),
+      fetch(`${API}/v1/nieuws?soort=weer&limit=30`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json()).catch(() => [])]);
+    const nu = Date.now();
+    const actief = ws.filter((w) => w.bron === "knmi" && w.status !== "beeindigd" && w.niveau && w.niveau !== "green" && (!w.einde || Date.parse(w.einde) > nu));
+    const arts = [], gezien = new Set();
+    for (const w of actief) {
+      const n = (Array.isArray(nieuws) ? nieuws : []).find((x) => x.waarschuwing === w.id);
+      if (n && gezien.has(n.id)) continue;
+      if (n) gezien.add(n.id);
+      const a = n ? await fetch(`${API}/v1/nieuws/${n.id}`, { signal: AbortSignal.timeout(10_000) }).then((r) => (r.ok ? r.json() : null)).catch(() => null) : null;
+      if (a?.weer) { if (!a.weer.opgeheven) arts.push({ id: a.id, waarschuwing: w.id, weer: a.weer }); continue; }
+      // No article (yet): the warning itself.
+      const code = (CODES[w.niveau] || CODES.yellow)[0];
+      arts.push({ id: null, waarschuwing: w.id, weer: { kop: w.kop || `${code} voor ${String(w.soort || "het weer").toLowerCase()}`, code, niveau: w.niveau, soort: w.soort || "",
+        omschrijving: w.omschrijving || w.tekst || "", adviezen: [], gebieden: w.gebied ? [{ niveau: w.niveau, gebied: w.gebied }] : [] } });
+    }
+    arts.sort((a, b) => (NIV[b.weer.niveau] || 0) - (NIV[a.weer.niveau] || 0));
+    const oud = weer.lijst[weer.keus]?.waarschuwing;
+    weer.lijst = arts;
+    weer.keus = Math.max(0, arts.findIndex((a) => a.waarschuwing === oud));
+    const t = el.querySelector("#awWeerTijd");
+    if (t) t.textContent = `KNMI · ${fmtTime(new Date())}`;
+    toonWeer();
+  }
+  function toonWeer() {
+    if (!wBody) return;
+    if (!weer.lijst.length) {
+      wFig.innerHTML = ""; weer.getekend = null;
+      wBody.innerHTML = `<div class="aw-groen"><span>✓</span><div><b>Code groen</b><small>Er is nu geen KNMI-weerwaarschuwing voor Apeldoorn e.o.</small></div></div>`;
+      meld(); return;
+    }
+    const a = weer.lijst[weer.keus], w = a.weer, kl = codeKleur(w, w.niveau), op = opKleur(w);
+    if (weer.getekend !== a.waarschuwing) {
+      wFig.innerHTML = weerKaartHTML(w);
+      weer.getekend = a.waarschuwing;
+      tekenWeerKaart(wFig.querySelector(".nw-weer-kaart"), w).then(meld);
+    }
+    const vakken = (w.tijdvakken || []).length > 1 ? `<ul class="aw-wvakken">${w.tijdvakken.map((v) => `<li><span style="background:${CODE_KLEUR[v.niveau] || CODE_KLEUR.yellow}"></span>${esc(v.code)}: ${esc(v.tekst)}</li>`).join("")}</ul>` : "";
+    wBody.innerHTML = `<div class="aw-wtekst"><h4>${esc(w.kop)}</h4><span class="aw-wcode" style="background:${kl};color:${op}">${esc(w.code)}</span>
+        ${w.omschrijving ? `<p>${esc(w.omschrijving)}</p>` : ""}
+        <button type="button" class="aw-wmeer" aria-expanded="${weer.open}"><i>›</i>${weer.open ? "Minder informatie" : "Meer informatie"}</button>
+        ${weer.open ? `<div class="aw-wopen">${vakken}${w.uitgifte ? `<small class="aw-wuit">Uitgifte: ${esc(w.uitgifte)}</small>` : ""}
+          ${(w.adviezen || []).length ? `<div class="aw-wadv"><b>Risico's en advies</b><ul>${w.adviezen.map((x) => `<li>${esc(x)}</li>`).join("")}</ul></div>` : ""}
+          ${w.details ? `<div class="aw-wdet"><b>Details</b><p>${esc(w.details)}</p></div>` : ""}
+          <a class="aw-wknop" href="${weerLink(a)}"${doel} style="background:${kl};color:${op}">Bekijk de weerwaarschuwing ›</a></div>` : ""}</div>
+      ${weer.lijst.map((x, i) => (i === weer.keus ? "" : `<button type="button" class="aw-wrij" data-wi="${i}"><span style="background:${codeKleur(x.weer, x.weer.niveau)}"></span><b>${esc(x.weer.code)} · ${esc(hoofd(x.weer.soort || x.weer.kop))}</b><small>${esc(x.weer.tijdvak || "")} ›</small></button>`)).join("")}`;
+    meld();
+  }
+  wBody?.addEventListener("click", (e) => {
+    if (e.target.closest(".aw-wmeer")) { weer.open = !weer.open; toonWeer(); return; }
+    const r = e.target.closest("[data-wi]");
+    if (r) { weer.keus = Number(r.dataset.wi); weer.open = false; toonWeer(); }
+  });
+
   // ---------------------------------------------------------------- Live kaart
   const kaart = { mk: null, map: null, helis: null, radar: null, anns: [], ovs: [] };
   const kaartEl = el.querySelector(".aw-map");
@@ -146,7 +219,8 @@ export function maakWidgets(el, opts = {}) {
   const verkeerTekst = (v) => {
     const r = verkeerRegels(v);
     return `<b>${esc(r.kop)}</b>${r.wat ? `<span>${esc(r.wat)}</span>` : ""}${r.details.length ? `<span style="color:${verkeerKleur(v)};font-weight:600">${esc(r.details.join(" · "))}</span>` : ""}
-      ${[r.oorzaak, ...r.toelichting].filter(Boolean).slice(0, 2).map((t) => `<span>${esc(t)}</span>`).join("")}${r.eind ? `<span>${esc(r.eind)}</span>` : ""}`;
+      ${[r.oorzaak, ...r.toelichting].filter(Boolean).slice(0, 2).map((t) => `<span>${esc(t)}</span>`).join("")}${r.eind ? `<span>${esc(r.eind)}</span>` : ""}
+      <a href="${kaartLink(v.id)}"${doel}>Meer op a-alerts.nl ›</a>`;
   };
 
   function chips() {
@@ -182,7 +256,7 @@ export function maakWidgets(el, opts = {}) {
       isRotationEnabled: false, showsZoomControl: true, showsPointsOfInterest: false,
     });
     if (!opts.thema || opts.thema === "auto") matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { kaart.map.colorScheme = donker() ? mk.Map.ColorSchemes.Dark : mk.Map.ColorSchemes.Light; });
-    kaart.helis = heliLaag(mk, kaart.map, { onSelect: (id) => { const h = kaart.helis.current(id); if (h) toonInfo(`<b>${esc(h.naam || id)}</b><span>${h.op_grond ? "Op de grond" : "In de lucht"}${h.voorspelling?.naam ? ` · waarschijnlijk naar ${esc(h.voorspelling.naam)}` : ""}</span>`); } });
+    kaart.helis = heliLaag(mk, kaart.map, { onSelect: (id) => { const h = kaart.helis.current(id); if (h) toonInfo(`<b>${esc(h.naam || id)}</b><span>${h.op_grond ? "Op de grond" : "In de lucht"}${h.voorspelling?.naam ? ` · waarschijnlijk naar ${esc(h.voorspelling.naam)}` : ""}</span><a href="${SITE}/pager/#kaart"${doel}>Volg op a-alerts.nl ›</a>`); } });
     await teken();
   }
   el.querySelector(".aw-laden button")?.addEventListener("click", () => {
@@ -220,7 +294,7 @@ export function maakWidgets(el, opts = {}) {
         kaart.anns.push(verkeerAnnotation(mk, v, (x) => toonInfo(verkeerTekst(x))));
       }
     }
-    if (state.lagen.has("flitsers")) for (const f of state.verkeer.flitsers) kaart.anns.push(flitserAnnotation(mk, f, (x) => toonInfo(`<b>${x.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser"}</b><span>${x.max ? `Max. ${x.max} km/u · ` : ""}vaste flitser (OpenStreetMap)</span>`)));
+    if (state.lagen.has("flitsers")) for (const f of state.verkeer.flitsers) kaart.anns.push(flitserAnnotation(mk, f, (x) => toonInfo(`<b>${x.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser"}</b><span>${x.max ? `Max. ${x.max} km/u · ` : ""}vaste flitser (OpenStreetMap)</span><a href="${kaartLink(x.id)}"${doel}>Meer op a-alerts.nl ›</a>`)));
     if (state.lagen.has("ziekenhuis")) for (const l of data.locaties) if (inGebied(l.lat, l.lon)) kaart.anns.push(locatieAnnotation(mk, l, (x) => toonInfo(`<b>${esc(x.naam)}</b>`)));
     if (state.lagen.has("p2000")) {
       const grens3u = Date.now() - 3 * 3600_000, gezien = new Set();
@@ -259,6 +333,8 @@ export function maakWidgets(el, opts = {}) {
     data = { ...data, meldingen: Array.isArray(meldingen) ? meldingen : [], warnings, locaties };
   }
   chips();
+  laadWeer();
+  setInterval(() => { if (!document.hidden) laadWeer(); }, 300_000);
   (async () => {
     await laadVerkeer();
     if (kaartEl) { await laadKaartData(); data.helis = await fetchHelikopters(); await startKaart(); }
