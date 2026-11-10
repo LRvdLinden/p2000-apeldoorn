@@ -5,6 +5,7 @@ import android.net.Uri
 import android.util.LruCache
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -90,7 +91,7 @@ fun nieuwsMeta(x: NieuwsItem): String = when (x.soort) {
 
 @Composable
 fun NieuwsLabel(x: NieuwsItem) {
-    Row(Modifier.background(Color.White, RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+    Row(Modifier.background(Color.White, RoundedCornerShape(50)).border(1.dp, Color.Black.copy(alpha = 0.08f), RoundedCornerShape(50)).padding(horizontal = 9.dp, vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
         Image(painterResource(x.icon), null, Modifier.size(16.dp))
         Spacer(Modifier.width(6.dp))
         Text(x.label.uppercase(), color = Color.Black, fontSize = 11.sp, fontWeight = FontWeight.Bold, maxLines = 1)
@@ -200,16 +201,15 @@ fun NieuwsDetail(id: String, nav: Nav) {
                 item { WeerTekst(weer) }
                 item { Text(Fmt.day(d.atInstant) + " " + Fmt.time(d.atInstant), color = Muted, fontSize = 13.sp) }
             } else item {
-                Box(Modifier.fillMaxWidth().height(250.dp).clip(RoundedCornerShape(22.dp))) {
-                    NetImage(d.afbeelding, d.kleur, Modifier.matchParentSize())
-                    Box(Modifier.matchParentSize().background(Brush.verticalGradient(0f to Color.Black.copy(alpha = 0.1f), 1f to Color.Black.copy(alpha = 0.85f))))
-                    Column(Modifier.align(Alignment.BottomStart).padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                        NieuwsLabel(d)
-                        Text(d.titel, color = Color.White, fontSize = 22.sp, fontWeight = FontWeight.Bold, lineHeight = 27.sp)
-                        Text(if (d.soort == "liveblog") listOf(tr("Gestart ", "Started ") + Fmt.dayTime(parseInstant(d.start) ?: d.atInstant), if (d.isAfgerond) tr("afgerond", "ended") else tr("loopt nog", "ongoing")).joinToString(" · ")
-                            else listOfNotNull(Fmt.day(d.atInstant) + " " + Fmt.time(d.atInstant), d.plaats).joinToString(" · "),
-                            color = Color.White.copy(alpha = 0.85f), fontSize = 13.sp)
-                    }
+                // The image in full (16:9, never cropped), the label, title and time below it (same as iOS and the website).
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    NetImage(d.afbeelding, d.kleur, Modifier.fillMaxWidth().aspectRatio(16f / 9f).clip(RoundedCornerShape(22.dp)))
+                    Spacer(Modifier.height(4.dp))
+                    NieuwsLabel(d)
+                    Text(d.titel, fontSize = 22.sp, fontWeight = FontWeight.Bold, lineHeight = 27.sp)
+                    Text(if (d.soort == "liveblog") listOf(tr("Gestart ", "Started ") + Fmt.dayTime(parseInstant(d.start) ?: d.atInstant), if (d.isAfgerond) tr("afgerond", "ended") else tr("loopt nog", "ongoing")).joinToString(" · ")
+                        else listOfNotNull(Fmt.day(d.atInstant) + " " + Fmt.time(d.atInstant), d.plaats).joinToString(" · "),
+                        color = Muted, fontSize = 13.sp)
                 }
             }
             if (weer == null && !d.intro.isNullOrBlank() && d.soort != "liveblog") item { Text(d.intro, fontSize = 17.sp, fontWeight = FontWeight.SemiBold, lineHeight = 24.sp) }

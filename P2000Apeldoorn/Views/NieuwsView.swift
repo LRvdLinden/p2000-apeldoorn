@@ -102,6 +102,7 @@ struct NieuwsLabel: View {
         .foregroundStyle(Color.black)
         .padding(.horizontal, 9).padding(.vertical, 5)
         .background(.white, in: Capsule())
+        .overlay(Capsule().stroke(Color.black.opacity(0.08), lineWidth: 1))
     }
 }
 
@@ -261,21 +262,21 @@ struct NieuwsDetailView: View {
         catch { if detail == nil { fout = error.localizedDescription } }
     }
 
+    /// The image in full (16:9, never cropped) with the label, title and time below it, like the website.
     private func kop(_ item: NieuwsItem) -> some View {
-        Color.clear
-            .frame(maxWidth: .infinity).frame(height: 260)
-            .overlay { NieuwsAfbeelding(item: item) }
-            .overlay { LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.85)], startPoint: .top, endPoint: .bottom) }
-            .overlay(alignment: .bottomLeading) {
-                VStack(alignment: .leading, spacing: 8) {
-                    NieuwsLabel(item: item)
-                    Text(item.titel).font(AppFont.heading(24)).foregroundStyle(.white).lineLimit(4).minimumScaleFactor(0.8)
-                    Text(kopMeta(item)).font(AppFont.body(13)).foregroundStyle(.white.opacity(0.85))
-                }
-                .padding(18)
-                .frame(maxWidth: .infinity, alignment: .leading)
+        VStack(alignment: .leading, spacing: 12) {
+            Color.clear
+                .aspectRatio(16 / 9, contentMode: .fit)
+                .overlay { NieuwsAfbeelding(item: item) }
+                .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            VStack(alignment: .leading, spacing: 8) {
+                NieuwsLabel(item: item)
+                Text(item.titel).font(AppFont.heading(24)).fixedSize(horizontal: false, vertical: true)
+                Text(kopMeta(item)).font(AppFont.body(13)).foregroundStyle(.secondary)
             }
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+            .padding(.horizontal, 4)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal)
         .padding(.top, 8)
         .accessibilityElement(children: .combine)
