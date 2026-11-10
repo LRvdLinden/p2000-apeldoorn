@@ -1,0 +1,873 @@
+Overzicht wijzigingen 6.14.A tov 6.13.A 
+========================================
+
+Datum: 2026-09-10
+=================
+
+Verwijderd uit huidige database:
+--------------------------------
+
+| Locatienummer |
+| ------------- |
+| 1500          |
+| 1512          |
+| 1537          |
+| 1538          |
+| 1539          |
+| 1551          |
+| 1552          |
+| 1558          |
+| 1559          |
+| 4430          |
+| 6225          |
+| 9789          |
+| 9790          |
+| 9931          |
+| 9933          |
+| 10618         |
+| 10883         |
+| 12940         |
+| 12941         |
+| 13239         |
+| 13803         |
+| 13881         |
+| 14129         |
+| 14130         |
+| 14290         |
+| 15299         |
+| 15300         |
+| 15301         |
+| 15302         |
+| 16140         |
+| 16141         |
+| 16351         |
+| 18000         |
+| 19520         |
+| 19521         |
+| 21103         |
+| 21221         |
+| 21644         |
+| 21868         |
+| 22271         |
+| 22342         |
+| 22472         |
+| 22473         |
+| 22481         |
+| 22482         |
+| 22486         |
+| 22641         |
+| 26345         |
+| 29322         |
+| 30011         |
+| 30038         |
+| 30043         |
+| 30054         |
+| 30055         |
+| 30056         |
+| 30057         |
+| 30060         |
+| 30061         |
+| 30062         |
+| 30063         |
+| 30137         |
+| 30138         |
+| 30140         |
+| 30267         |
+| 30268         |
+| 30269         |
+| 30270         |
+| 30301         |
+| 30302         |
+| 30305         |
+| 30306         |
+| 30307         |
+| 30308         |
+| 30309         |
+| 30325         |
+
+Nieuw in huidige database:
+--------------------------
+
+| Locatienummer |
+| ------------- |
+| 3418          |
+| 3419          |
+| 3711          |
+| 3712          |
+| 4481          |
+| 4482          |
+| 4731          |
+| 4732          |
+| 9846          |
+| 9943          |
+| 9944          |
+| 10271         |
+| 13986         |
+| 13987         |
+| 16484         |
+| 18993         |
+| 18994         |
+| 21247         |
+| 21250         |
+| 22005         |
+| 22678         |
+| 22765         |
+| 22766         |
+| 22767         |
+| 22768         |
+| 22769         |
+| 22770         |
+| 22771         |
+| 22772         |
+| 22773         |
+| 22774         |
+| 22775         |
+| 22776         |
+| 22777         |
+| 22778         |
+| 22779         |
+| 22780         |
+| 22781         |
+| 22782         |
+| 22783         |
+| 22784         |
+| 22785         |
+| 22786         |
+| 22787         |
+| 22788         |
+| 22789         |
+| 22790         |
+| 22791         |
+| 22792         |
+| 22793         |
+| 22794         |
+| 22795         |
+| 22796         |
+| 22797         |
+| 22798         |
+| 22799         |
+| 22800         |
+| 22801         |
+| 22802         |
+| 22803         |
+| 22804         |
+| 22805         |
+| 22806         |
+| 22807         |
+| 22808         |
+| 22809         |
+| 22810         |
+| 22811         |
+| 22812         |
+| 22813         |
+| 22814         |
+| 22815         |
+| 22816         |
+| 22817         |
+| 22818         |
+| 22819         |
+| 22820         |
+| 22821         |
+| 22822         |
+| 22823         |
+| 22824         |
+| 22825         |
+| 22826         |
+| 22827         |
+| 22828         |
+| 22829         |
+| 22830         |
+| 28886         |
+| 28887         |
+| 29643         |
+| 32183         |
+| 32184         |
+| 32185         |
+| 32186         |
+| 32187         |
+| 32188         |
+| 32189         |
+
+Wijzigingen in huidige database:
+--------------------------------
+
+| Locatienummer | Veldnaam                       | Huidige waarde                        | Oude waarde                            |
+| ------------- | ------------------------------ | ------------------------------------- | -------------------------------------- |
+| 0             | Naam 1                         | 6.14.A                                | 6.13.A                                 |
+| 0             | Naam 2                         | 10-09-2026                            | 25-08-2025                             |
+| 3403          | Locatienummer lijn             | 3418                                  | 3415                                   |
+| 3403          | Locatienummer keten negatief   | 3419                                  | 3417                                   |
+| 3413          | Locatienummer keten negatief   | 3418                                  | 3415                                   |
+| 3415          | Locatienummer keten positief   | null                                  | 3413                                   |
+| 3415          | Naam 2                         | Joure                                 | Groningen                              |
+| 3417          | Locatienummer keten positief   | null                                  | 3403                                   |
+| 3417          | Naam 2                         | Joure                                 | Heerenveen                             |
+| 3810          | Naam 2                         | Aalsmeer                              | Amstelveen                             |
+| 6008          | Naam 2                         | Wehe den Hoorn                        | Warfhuizen                             |
+| 7183          | Naam 1                         | Amsterdam-Nieuwendam                  | Durgerdam                              |
+| 7185          | Naam 1                         | Amsterdam-IJburg                      | Zeeburg                                |
+| 7587          | Naam 1                         | Hazeldonk                             | Industriegebied Breda 6000-7000        |
+| 7587          | Locatienummer kruisverwijzing  | null                                  | 7686                                   |
+| 7605          | Naam 1                         | Lage Zwaluwe                          | Zevenbergschen Hoek                    |
+| 7630          | Naam 1                         | Rotterdam-Terbregge                   | Rotterdam-Prins Alexander              |
+| 7643          | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 7686          | Naam 1                         | Transportzone Meer                    | Industriegebied Breda 6000-7000        |
+| 7686          | Locatienummer kruisverwijzing  | null                                  | 7587                                   |
+| 8316          | Beginhectometer positief       | 316                                   | 315                                    |
+| 8318          | Beginhectometer positief       | 352                                   | 353                                    |
+| 8318          | Eindhectometer negatief        | 352                                   | 353                                    |
+| 8320          | Eindhectometer positief        | 374                                   | 370                                    |
+| 8486          | Beginhectometer negatief       | 367                                   | 368                                    |
+| 8486          | Eindhectometer negatief        | 359                                   | 358                                    |
+| 8675          | Beginhectometer negatief       | 922                                   | 923                                    |
+| 8780          | Locatienummer keten positief   | 22828                                 | null                                   |
+| 8780          | Locatienummer kruisverwijzing  | 10176                                 | 15299                                  |
+| 8780          | Naam 2                         | A7                                    | A7/N381                                |
+| 8979          | Locatienummer kruisverwijzing  | 13984                                 | 16140                                  |
+| 8979          | Naam 2                         | N340                                  | N48/N340                               |
+| 9000          | Hectometerrichting             | NEGATIVE                              | null                                   |
+| 9000          | Beginhectometer negatief       | 766                                   | null                                   |
+| 9000          | Eindhectometer negatief        | 766                                   | null                                   |
+| 9016          | Naam 1                         | Hengelo-West                          | Delden                                 |
+| 9208          | Naam 1                         | Leiden                                | Zoeterwoude-Dorp                       |
+| 9209          | Naam 1                         | Leiden-Oost                           | Zoeterwoude-Rijndijk                   |
+| 9298          | Naam 1                         | Kaag                                  | Kaag-Dorp                              |
+| 9548          | Naam 1                         | Middelburg-Dauwendaele                | Industriegebied Arnestein-Mortiere     |
+| 9548          | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 9788          | Locatienummer keten positief   | 9846                                  | 9789                                   |
+| 9791          | Locatienummer keten negatief   | 9846                                  | 9790                                   |
+| 9930          | Locatienummer keten positief   | 9932                                  | 9931                                   |
+| 9932          | Locatienummer keten positief   | 9943                                  | 22490                                  |
+| 9932          | Locatienummer keten negatief   | 9930                                  | 9931                                   |
+| 9932          | Locatienummer knooppunt        | 9943                                  | 9933                                   |
+| 10157         | Locatienummer keten positief   | 10158                                 | 22472                                  |
+| 10158         | Locatienummer keten positief   | 10271                                 | 10270                                  |
+| 10158         | Locatienummer keten negatief   | 10157                                 | 22472                                  |
+| 10160         | Toegankelijk inkomend negatief | false                                 | true                                   |
+| 10160         | Eindhectometer positief        | 1374                                  | 3118                                   |
+| 10160         | Locatienummer keten positief   | 10162                                 | 22482                                  |
+| 10160         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10160         | Beginhectometer positief       | 1367                                  | 3105                                   |
+| 10160         | Beginhectometer negatief       | 1374                                  | 3118                                   |
+| 10160         | Locatienummer keten negatief   | null                                  | 22473                                  |
+| 10160         | Toegankelijk uitgaand positief | false                                 | true                                   |
+| 10160         | Eindhectometer negatief        | 1367                                  | 3105                                   |
+| 10162         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10162         | Locatienummer keten negatief   | 10160                                 | 22482                                  |
+| 10163         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10164         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10165         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10166         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10167         | Locatienummer lijn             | 3419                                  | 3417                                   |
+| 10175         | Locatienummer keten positief   | 22269                                 | 22271                                  |
+| 10176         | Locatienummer keten negatief   | 22827                                 | 22269                                  |
+| 10176         | Naam 2                         | N31                                   | N31/N381                               |
+| 10190         | Eindhectometer positief        | 1927                                  | 1939                                   |
+| 10190         | Locatienummer keten positief   | 22795                                 | 21860                                  |
+| 10190         | Toegankelijk inkomend positief | false                                 | true                                   |
+| 10190         | Beginhectometer positief       | 1927                                  | 1928                                   |
+| 10190         | Beginhectometer negatief       | 1927                                  | 1939                                   |
+| 10190         | Toegankelijk uitgaand negatief | false                                 | true                                   |
+| 10190         | Naam 2                         | N7/N372                               | N372                                   |
+| 10190         | Eindhectometer negatief        | 1927                                  | 1928                                   |
+| 10191         | Eindhectometer positief        | 1963                                  | 1953                                   |
+| 10191         | Locatienummer keten positief   | 21869                                 | 21868                                  |
+| 10191         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 10191         | Wegnummer                      | N7                                    | A7                                     |
+| 10191         | Locatienummer lijn             | 3412                                  | 3403                                   |
+| 10191         | Locatienummer kruisverwijzing  | null                                  | 21868                                  |
+| 10191         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 10191         | Eindhectometer negatief        | 1953                                  | 1963                                   |
+| 10193         | Afritnummer                    | 36b                                   | null                                   |
+| 10270         | Locatienummer keten positief   | null                                  | 22481                                  |
+| 10270         | Locatienummer keten negatief   | 10271                                 | 10158                                  |
+| 10270         | Locatienummer kruisverwijzing  | 9943                                  | 9933                                   |
+| 10572         | Beginhectometer negatief       | 269                                   | 271                                    |
+| 10572         | Eindhectometer negatief        | 250                                   | 259                                    |
+| 10573         | Beginhectometer positief       | 270                                   | 277                                    |
+| 10605         | Naam 1                         | Leeuwarden                            | Heerhugowaard                          |
+| 10619         | Locatienummer keten negatief   | 10627                                 | 10618                                  |
+| 10627         | Eindhectometer positief        | 1017                                  | 1009                                   |
+| 10627         | Naam 1                         | Schagerbrug                           | Stolpen                                |
+| 10627         | Locatienummer keten positief   | 10619                                 | 10618                                  |
+| 10627         | Beginhectometer positief       | 1007                                  | 1009                                   |
+| 10627         | Beginhectometer negatief       | 1011                                  | 1009                                   |
+| 10627         | Locatienummer kruisverwijzing  | 11880                                 | 16351                                  |
+| 10627         | Naam 2                         | N248/N503                             | N503                                   |
+| 10627         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 10627         | Eindhectometer negatief        | 1008                                  | 1009                                   |
+| 10650         | Naam 1                         | A4: Leiden-Oost                       | A4: Zoeterwoude-Rijndijk               |
+| 10824         | Naam 1                         | A4: Leiden                            | A4: Zoeterwoude-Dorp                   |
+| 10826         | Locatienummer keten positief   | 22765                                 | 22349                                  |
+| 10830         | Naam 1                         | Wassenaar                             | Wassenaar/Rijnsburg                    |
+| 10842         | Naam 1                         | De Zilk                               | Hillegom                               |
+| 10842         | Toegankelijk inkomend positief | false                                 | true                                   |
+| 10842         | Beginhectometer positief       | 337                                   | 338                                    |
+| 10842         | Toegankelijk uitgaand negatief | false                                 | true                                   |
+| 10842         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 10842         | Eindhectometer negatief        | 337                                   | 338                                    |
+| 10882         | Locatienummer keten positief   | 10884                                 | 10883                                  |
+| 10884         | Locatienummer keten negatief   | 10882                                 | 10883                                  |
+| 11077         | Eindhectometer positief        | 238                                   | 236                                    |
+| 11077         | Beginhectometer positief       | 237                                   | 236                                    |
+| 11077         | Beginhectometer negatief       | 238                                   | 236                                    |
+| 11077         | Locatietype                    | P1_12_T_JUNCTION                      | P1_11_CROSS_ROADS                      |
+| 11077         | Eindhectometer negatief        | 237                                   | 236                                    |
+| 11078         | Eindhectometer positief        | 245                                   | 243                                    |
+| 11078         | Beginhectometer positief       | 240                                   | 243                                    |
+| 11078         | Beginhectometer negatief       | 245                                   | 243                                    |
+| 11078         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 11078         | Eindhectometer negatief        | 240                                   | 243                                    |
+| 11210         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11211         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11212         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11213         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11214         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11215         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 11217         | Locatienummer lijn             | 3712                                  | 3710                                   |
+| 11217         | Locatienummer keten negatief   | null                                  | 22230                                  |
+| 11218         | Locatienummer lijn             | 3712                                  | 3710                                   |
+| 11219         | Locatienummer lijn             | 3712                                  | 3710                                   |
+| 11220         | Locatienummer lijn             | 3712                                  | 3710                                   |
+| 11342         | Eindhectometer positief        | 585                                   | 586                                    |
+| 11342         | Beginhectometer positief       | 585                                   | 586                                    |
+| 11342         | Beginhectometer negatief       | 585                                   | 586                                    |
+| 11342         | Eindhectometer negatief        | 585                                   | 586                                    |
+| 11610         | Naam 1                         | N242: Nieuwe-Niedorp                  | Middenmeer                             |
+| 11610         | Beginhectometer positief       | 136                                   | 138                                    |
+| 11610         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 11610         | Eindhectometer negatief        | 136                                   | 138                                    |
+| 11710         | Naam 1                         | Nieuwe-Niedorp                        | Nieuwe Niedorp/Medemblik               |
+| 11710         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 11880         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 11880         | Naam 1                         | N9: Schagerbrug                       | Den Helder/Alkmaar                     |
+| 11880         | Locatienummer kruisverwijzing  | 22195                                 | 10618                                  |
+| 11880         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 11880         | Naam 2                         | N9/N503                               | N9                                     |
+| 11880         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 11881         | Naam 2                         | N249                                  | N249/N503                              |
+| 11910         | Naam 1                         | Schagen/Alkmaar                       | Schagen/Callantsoog                    |
+| 11910         | Locatienummer kruisverwijzing  | 11881                                 | 22195                                  |
+| 11910         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 11910         | Naam 2                         | N248                                  | N248/N503                              |
+| 12658         | Naam 1                         | Heerlen                               | Heerlen-Centrum                        |
+| 13016         | Eindhectometer positief        | 1086                                  | 1087                                   |
+| 13016         | Beginhectometer negatief       | 1086                                  | 1087                                   |
+| 13017         | Locatienummer keten positief   | 22824                                 | 13018                                  |
+| 13018         | Eindhectometer positief        | 1025                                  | 1048                                   |
+| 13018         | Beginhectometer positief       | 1025                                  | 1048                                   |
+| 13018         | Beginhectometer negatief       | 1025                                  | 1048                                   |
+| 13018         | Locatienummer keten negatief   | 22824                                 | 13017                                  |
+| 13018         | Eindhectometer negatief        | 1025                                  | 1048                                   |
+| 13019         | Eindhectometer positief        | 1017                                  | 1021                                   |
+| 13019         | Beginhectometer positief       | 1024                                  | 1021                                   |
+| 13019         | Beginhectometer negatief       | 1017                                  | 1021                                   |
+| 13019         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 13019         | Eindhectometer negatief        | 1024                                  | 1021                                   |
+| 13081         | Locatienummer lijn             | 4481                                  | 4480                                   |
+| 13082         | Locatienummer lijn             | 4482                                  | 4480                                   |
+| 13082         | Locatienummer keten negatief   | null                                  | 22531                                  |
+| 13085         | Locatienummer lijn             | 4482                                  | 4480                                   |
+| 13086         | Locatienummer lijn             | 4482                                  | 4480                                   |
+| 13087         | Locatienummer lijn             | 4481                                  | 4480                                   |
+| 13089         | Locatienummer lijn             | 4482                                  | 4480                                   |
+| 13120         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 13168         | Naam 1                         | Elburgerbrug                          | brug over het Drontermeer              |
+| 13238         | Locatienummer keten positief   | 22823                                 | 13239                                  |
+| 13331         | Locatienummer keten negatief   | 22775                                 | 13342                                  |
+| 13342         | Locatienummer keten positief   | 22775                                 | 13331                                  |
+| 13351         | Eindhectometer positief        | 32                                    | 33                                     |
+| 13351         | Beginhectometer positief       | 32                                    | 31                                     |
+| 13351         | Beginhectometer negatief       | 32                                    | 33                                     |
+| 13351         | Eindhectometer negatief        | 32                                    | 31                                     |
+| 13359         | Locatienummer keten positief   | 22776                                 | 22066                                  |
+| 13362         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 13362         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 13708         | Locatienummer kruisverwijzing  | null                                  | 19520                                  |
+| 13720         | Locatienummer keten positief   | 22811                                 | 22190                                  |
+| 13731         | Locatienummer lijn             | 4731                                  | 4730                                   |
+| 13732         | Locatienummer lijn             | 4731                                  | 4730                                   |
+| 13733         | Locatienummer lijn             | 4731                                  | 4730                                   |
+| 13734         | Locatienummer keten positief   | null                                  | 13737                                  |
+| 13734         | Locatienummer lijn             | 4731                                  | 4730                                   |
+| 13735         | Locatienummer lijn             | 4732                                  | 4730                                   |
+| 13736         | Locatienummer lijn             | 4732                                  | 4730                                   |
+| 13737         | Locatienummer lijn             | 4732                                  | 4730                                   |
+| 13737         | Locatienummer keten negatief   | null                                  | 13734                                  |
+| 13741         | Locatienummer keten negatief   | 22397                                 | 22342                                  |
+| 13784         | Locatienummer kruisverwijzing  | null                                  | 30309                                  |
+| 13785         | Locatienummer kruisverwijzing  | null                                  | 30307                                  |
+| 13802         | Locatienummer keten positief   | 13804                                 | 13803                                  |
+| 13802         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 13804         | Locatienummer keten positief   | 22794                                 | 13805                                  |
+| 13804         | Locatienummer keten negatief   | 13802                                 | 13803                                  |
+| 13805         | Locatienummer keten negatief   | 22794                                 | 13804                                  |
+| 13806         | Locatietype                    | P1_12_T_JUNCTION                      | P1_11_CROSS_ROADS                      |
+| 13840         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 13840         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 13846         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 13846         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 13880         | Locatienummer keten positief   | 21994                                 | 13881                                  |
+| 13954         | Naam 1                         | Industriegebied Leeuwerikenveld       | Klooster                               |
+| 13984         | Locatienummer keten positief   | 13986                                 | null                                   |
+| 13984         | Naam 2                         | N348                                  | N348/N48                               |
+| 13991         | Locatienummer keten positief   | 22786                                 | 13992                                  |
+| 13992         | Eindhectometer positief        | 92                                    | 90                                     |
+| 13992         | Beginhectometer positief       | 92                                    | 90                                     |
+| 13992         | Beginhectometer negatief       | 92                                    | 90                                     |
+| 13992         | Locatienummer keten negatief   | 22786                                 | 13991                                  |
+| 13992         | Eindhectometer negatief        | 92                                    | 90                                     |
+| 14128         | Locatienummer keten positief   | 22005                                 | 14129                                  |
+| 14131         | Locatienummer keten negatief   | 22822                                 | 14130                                  |
+| 14144         | Naam 1                         | A35: Hengelo-West                     | A35: Delden                            |
+| 14190         | Eindhectometer positief        | 188                                   | 187                                    |
+| 14190         | Beginhectometer positief       | 179                                   | 178                                    |
+| 14190         | Beginhectometer negatief       | 188                                   | 187                                    |
+| 14190         | Eindhectometer negatief        | 179                                   | 178                                    |
+| 14208         | Naam 1                         | N340: Ommen                           | N48: Ommen                             |
+| 14208         | Locatienummer kruisverwijzing  | 13986                                 | 16141                                  |
+| 14208         | Naam 2                         | N340                                  | N48                                    |
+| 14291         | Locatienummer keten negatief   | 22790                                 | 14290                                  |
+| 14338         | Eindhectometer positief        | 276                                   | 281                                    |
+| 14338         | Naam 1                         | Emmeloord                             | Urk                                    |
+| 14338         | Locatienummer keten positief   | 22787                                 | null                                   |
+| 14338         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 14338         | Beginhectometer positief       | 276                                   | 281                                    |
+| 14338         | Beginhectometer negatief       | 276                                   | 281                                    |
+| 14338         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 14338         | Eindhectometer negatief        | 276                                   | 281                                    |
+| 14382         | Naam 1                         | N7: Sneek                             | N7: Sneek-Centrum                      |
+| 14493         | Locatienummer keten positief   | 22802                                 | 14494                                  |
+| 14494         | Locatienummer keten negatief   | 22802                                 | 14493                                  |
+| 14556         | Eindhectometer positief        | 353                                   | 352                                    |
+| 14556         | Beginhectometer negatief       | 353                                   | 352                                    |
+| 14563         | Eindhectometer positief        | 223                                   | 222                                    |
+| 14563         | Naam 1                         | Zijlsterrydbrug                       | brug over het Dokkumer Grootdiep       |
+| 14563         | Beginhectometer negatief       | 223                                   | 222                                    |
+| 14609         | Naam 1                         | Workum/Nijhuizum                      | Industriegebied Horsa                  |
+| 14610         | Eindhectometer positief        | 323                                   | 324                                    |
+| 14610         | Beginhectometer negatief       | 323                                   | 324                                    |
+| 14618         | Eindhectometer positief        | 463                                   | 464                                    |
+| 14618         | Beginhectometer positief       | 457                                   | 456                                    |
+| 14618         | Beginhectometer negatief       | 463                                   | 464                                    |
+| 14618         | Eindhectometer negatief        | 457                                   | 456                                    |
+| 14650         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 14650         | Eindhectometer negatief        | 45                                    | 46                                     |
+| 14843         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 14849         | Locatienummer keten positief   | 22810                                 | null                                   |
+| 14980         | Locatienummer keten positief   | 22805                                 | 22376                                  |
+| 14993         | Naam 1                         | Pijlebrug                             | brug over de Drentse Hoofdvaart hm 408 |
+| 14994         | Naam 1                         | Boschkampsbrug                        | brug over de Drentse Hoofdvaart hm 369 |
+| 14996         | Naam 1                         | Havelte                               | Ruinerwold                             |
+| 14997         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 15002         | Eindhectometer positief        | 127                                   | 125                                    |
+| 15002         | Locatienummer keten positief   | 22799                                 | 15003                                  |
+| 15002         | Beginhectometer positief       | 127                                   | 125                                    |
+| 15002         | Beginhectometer negatief       | 127                                   | 125                                    |
+| 15002         | Eindhectometer negatief        | 127                                   | 125                                    |
+| 15003         | Naam 1                         | Veenhoopsbrug                         | brug over de Drentse Hoofdvaart hm 118 |
+| 15003         | Locatienummer keten negatief   | 22799                                 | 15002                                  |
+| 15033         | Locatienummer kruisverwijzing  | 22795                                 | 10190                                  |
+| 15050         | Eindhectometer positief        | 0                                     | 1                                      |
+| 15050         | Locatienummer keten positief   | 22800                                 | 15051                                  |
+| 15050         | Beginhectometer positief       | 0                                     | 1                                      |
+| 15050         | Beginhectometer negatief       | 0                                     | 1                                      |
+| 15050         | Eindhectometer negatief        | 0                                     | 1                                      |
+| 15051         | Locatienummer keten negatief   | 22800                                 | 15050                                  |
+| 15056         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 15217         | Naam 1                         | N336: Stadskanaal-Noord               | Ter Apel                               |
+| 15217         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 15281         | Locatienummer keten negatief   | null                                  | 15302                                  |
+| 15286         | Beginhectometer positief       | 440                                   | 441                                    |
+| 15286         | Eindhectometer negatief        | 440                                   | 441                                    |
+| 15363         | Locatienummer keten positief   | 22796                                 | 22356                                  |
+| 15380         | Locatienummer keten positief   | 22809                                 | 15381                                  |
+| 15381         | Locatienummer keten negatief   | 22809                                 | 15380                                  |
+| 15395         | Naam 1                         | Vriezerbrug                           | brug over het Noord-Willemskanaal      |
+| 15401         | Locatienummer keten positief   | 22807                                 | 15408                                  |
+| 15402         | Naam 1                         | Rengersbrug                           | brug over Winschoterdiep               |
+| 15408         | Locatienummer keten negatief   | 22807                                 | 15401                                  |
+| 15453         | Toegankelijk inkomend negatief | false                                 | true                                   |
+| 15453         | Eindhectometer positief        | 205                                   | 207                                    |
+| 15453         | Naam 1                         | Hunsingobrug                          | Zoutkamp                               |
+| 15453         | Toegankelijk inkomend positief | false                                 | true                                   |
+| 15453         | Code type                      | 3                                     | null                                   |
+| 15453         | Beginhectometer positief       | 205                                   | 207                                    |
+| 15453         | Beginhectometer negatief       | 205                                   | 207                                    |
+| 15453         | Toegankelijk uitgaand positief | false                                 | true                                   |
+| 15453         | Toegankelijk uitgaand negatief | false                                 | true                                   |
+| 15453         | Naam 2                         | Hunsingokanaal                        | null                                   |
+| 15453         | Locatietype                    | P3_2_BRIDGE                           | P3_37_PLACE_NAME                       |
+| 15453         | Eindhectometer negatief        | 205                                   | 207                                    |
+| 15531         | Locatienummer keten positief   | 22779                                 | 15532                                  |
+| 15531         | Locatienummer keten negatief   | 22778                                 | 15536                                  |
+| 15532         | Locatienummer keten negatief   | 22779                                 | 15531                                  |
+| 15536         | Locatienummer keten positief   | 22778                                 | 15531                                  |
+| 15540         | Locatienummer keten positief   | 22780                                 | 15541                                  |
+| 15541         | Locatienummer keten negatief   | 22780                                 | 15540                                  |
+| 15651         | Eindhectometer positief        | 14                                    | 15                                     |
+| 15651         | Locatienummer keten positief   | 22782                                 | 15652                                  |
+| 15651         | Beginhectometer positief       | 14                                    | 15                                     |
+| 15651         | Beginhectometer negatief       | 14                                    | 15                                     |
+| 15651         | Eindhectometer negatief        | 14                                    | 15                                     |
+| 15652         | Locatienummer keten negatief   | 22782                                 | 15651                                  |
+| 15702         | Naam 1                         | Rijnsburg/Valkenburg                  | Katwijk aan den Rijn                   |
+| 15702         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 15702         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 15741         | Locatienummer keten positief   | 22766                                 | 15742                                  |
+| 15742         | Locatienummer keten negatief   | 22766                                 | 15741                                  |
+| 15861         | Naam 1                         | Gouda                                 | Zuidzijde                              |
+| 15861         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 15862         | Naam 1                         | Waarder                               | Nieuwerbrug                            |
+| 15862         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 15863         | Eindhectometer positief        | 502                                   | 504                                    |
+| 15863         | Naam 1                         | Utrecht/Zegveld                       | Utrecht                                |
+| 15863         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 15863         | Beginhectometer positief       | 502                                   | 504                                    |
+| 15863         | Beginhectometer negatief       | 502                                   | 504                                    |
+| 15863         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 15863         | Eindhectometer negatief        | 502                                   | 504                                    |
+| 15864         | Locatienummer keten positief   | 22768                                 | 15865                                  |
+| 15865         | Naam 1                         | Meije                                 | Bodegraven                             |
+| 15865         | Locatienummer keten negatief   | 22768                                 | 15864                                  |
+| 15865         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 15961         | Locatienummer keten positief   | 22767                                 | 15962                                  |
+| 15962         | Locatienummer keten negatief   | 22767                                 | 15961                                  |
+| 15980         | Locatienummer keten positief   | 22769                                 | 15981                                  |
+| 15981         | Locatienummer keten negatief   | 22769                                 | 15980                                  |
+| 16350         | Locatienummer keten positief   | 22195                                 | 16351                                  |
+| 16481         | Locatienummer keten positief   | 16484                                 | 16482                                  |
+| 16482         | Locatienummer keten negatief   | 16484                                 | 16481                                  |
+| 16550         | Locatienummer keten positief   | 22781                                 | 16551                                  |
+| 16551         | Locatienummer keten negatief   | 22781                                 | 16550                                  |
+| 17490         | Naam 1                         | N286: Tholen-Centrum                  | Tholen                                 |
+| 17490         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 17540         | Naam 1                         | N288: Koudekerke                      | Vlissingen-Centrum                     |
+| 17540         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 17631         | Locatienummer keten positief   | 22770                                 | 17633                                  |
+| 17633         | Locatienummer keten negatief   | 22770                                 | 17631                                  |
+| 17763         | Locatienummer keten negatief   | 22772                                 | 17770                                  |
+| 17770         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 17770         | Locatienummer keten positief   | 22772                                 | 17763                                  |
+| 17770         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 17771         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 17771         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 17892         | Locatienummer keten positief   | 22784                                 | 22443                                  |
+| 17901         | Naam 1                         | Muziekwijk-Oost                       | Almere-Stad Centrum                    |
+| 17901         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 17902         | Naam 1                         | Utrecht                               | Almere-Buiten                          |
+| 17902         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 17903         | Naam 1                         | Almere-Buiten-Centrum                 | Almere-Centrum                         |
+| 17905         | Naam 1                         | Literatuurwijk                        | Literatuurwijk-Zuid                    |
+| 17910         | Naam 1                         | N702: Utrecht                         | Almere-Stad/Almere                     |
+| 17910         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 17950         | Naam 1                         | Zeewolde-Centrum                      | Zeewolde                               |
+| 17950         | Locatienummer keten positief   | 22783                                 | 17951                                  |
+| 17950         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 17951         | Eindhectometer positief        | 0                                     | 1                                      |
+| 17951         | Beginhectometer positief       | 0                                     | 1                                      |
+| 17951         | Beginhectometer negatief       | 0                                     | 1                                      |
+| 17951         | Locatienummer keten negatief   | 22783                                 | 17950                                  |
+| 17951         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 17951         | Eindhectometer negatief        | 0                                     | 1                                      |
+| 18001         | Locatienummer keten negatief   | 22788                                 | 18000                                  |
+| 18011         | Locatienummer keten positief   | 22791                                 | 18012                                  |
+| 18012         | Locatienummer keten negatief   | 22791                                 | 18011                                  |
+| 18043         | Naam 1                         | Lelystad/Lemmer                       | Emmeloord                              |
+| 18043         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 18060         | Locatienummer keten positief   | 22792                                 | 18061                                  |
+| 18061         | Locatienummer keten negatief   | 22792                                 | 18060                                  |
+| 18251         | Locatienummer keten positief   | 22785                                 | 18252                                  |
+| 18252         | Locatienummer keten negatief   | 22785                                 | 18251                                  |
+| 18260         | Locatienummer kruisverwijzing  | 18252                                 | 30325                                  |
+| 18381         | Locatienummer keten positief   | 22793                                 | 18382                                  |
+| 18382         | Locatienummer keten negatief   | 22793                                 | 18381                                  |
+| 18701         | Locatienummer keten positief   | 22777                                 | 18702                                  |
+| 18702         | Locatienummer keten negatief   | 22777                                 | 18701                                  |
+| 18740         | Locatienummer keten negatief   | 22774                                 | 22527                                  |
+| 18991         | Naam 1                         | Wijchen-Zuid                          | Wijchen                                |
+| 18991         | Locatienummer keten positief   | 18993                                 | 18992                                  |
+| 18992         | Locatienummer keten positief   | 18994                                 | null                                   |
+| 18992         | Locatienummer keten negatief   | 18993                                 | 18991                                  |
+| 19012         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 19012         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 19120         | Locatienummer keten positief   | 22806                                 | 19121                                  |
+| 19121         | Locatienummer keten negatief   | 22806                                 | 19120                                  |
+| 19142         | Eindhectometer positief        | 74                                    | 76                                     |
+| 19142         | Beginhectometer positief       | 78                                    | 76                                     |
+| 19142         | Beginhectometer negatief       | 74                                    | 76                                     |
+| 19142         | Eindhectometer negatief        | 78                                    | 76                                     |
+| 19170         | Locatienummer keten positief   | 22817                                 | 19172                                  |
+| 19171         | Locatienummer keten negatief   | 22818                                 | 19172                                  |
+| 19172         | Locatienummer keten positief   | 22818                                 | 19171                                  |
+| 19172         | Locatienummer keten negatief   | 22817                                 | 19170                                  |
+| 19200         | Naam 1                         | N31: Ureterp                          | N381: Ureterp                          |
+| 19200         | Locatienummer kruisverwijzing  | 22830                                 | 15281                                  |
+| 19200         | Naam 2                         | N31/N381                              | N381                                   |
+| 19232         | Eindhectometer positief        | 131                                   | 128                                    |
+| 19232         | Naam 1                         | Bantega                               | Echten                                 |
+| 19232         | Beginhectometer positief       | 131                                   | 128                                    |
+| 19232         | Beginhectometer negatief       | 131                                   | 128                                    |
+| 19232         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 19232         | Eindhectometer negatief        | 131                                   | 128                                    |
+| 19233         | Naam 1                         | Delfstrahuizen/Munnekeburen           | Echtenerbrug                           |
+| 19233         | Locatienummer keten positief   | 22797                                 | 19236                                  |
+| 19233         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 19234         | Locatienummer keten positief   | 22798                                 | 19238                                  |
+| 19236         | Locatienummer keten negatief   | 22797                                 | 19233                                  |
+| 19236         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 19237         | Locatietype                    | P1_12_T_JUNCTION                      | P1_11_CROSS_ROADS                      |
+| 19238         | Locatienummer keten negatief   | 22798                                 | 19234                                  |
+| 19260         | Locatienummer keten positief   | 22808                                 | 19261                                  |
+| 19261         | Locatienummer keten negatief   | 22808                                 | 19260                                  |
+| 19380         | Locatienummer keten positief   | 22801                                 | 19381                                  |
+| 19381         | Locatienummer keten negatief   | 22801                                 | 19380                                  |
+| 19401         | Toegankelijk inkomend negatief | false                                 | true                                   |
+| 19401         | Toegankelijk inkomend positief | false                                 | true                                   |
+| 19401         | Code type                      | 3                                     | null                                   |
+| 19401         | Toegankelijk uitgaand positief | false                                 | true                                   |
+| 19401         | Toegankelijk uitgaand negatief | false                                 | true                                   |
+| 19401         | Naam 2                         | Hoendiep                              | null                                   |
+| 19401         | Locatietype                    | P3_2_BRIDGE                           | P3_37_PLACE_NAME                       |
+| 19430         | Locatienummer keten positief   | 22804                                 | 19431                                  |
+| 19431         | Eindhectometer positief        | 23                                    | 19                                     |
+| 19431         | Naam 1                         | Enumatil                              | Leek                                   |
+| 19431         | Beginhectometer positief       | 23                                    | 19                                     |
+| 19431         | Beginhectometer negatief       | 23                                    | 19                                     |
+| 19431         | Locatienummer keten negatief   | 22804                                 | 19430                                  |
+| 19431         | Eindhectometer negatief        | 23                                    | 19                                     |
+| 19464         | Locatienummer keten positief   | 22803                                 | 19465                                  |
+| 19464         | Locatietype                    | P1_12_T_JUNCTION                      | P3_37_PLACE_NAME                       |
+| 19465         | Eindhectometer positief        | 143                                   | 123                                    |
+| 19465         | Beginhectometer positief       | 143                                   | 123                                    |
+| 19465         | Beginhectometer negatief       | 143                                   | 123                                    |
+| 19465         | Locatienummer keten negatief   | 22803                                 | 19464                                  |
+| 19465         | Eindhectometer negatief        | 143                                   | 123                                    |
+| 19466         | Eindhectometer positief        | 161                                   | 141                                    |
+| 19466         | Beginhectometer positief       | 161                                   | 141                                    |
+| 19466         | Beginhectometer negatief       | 161                                   | 141                                    |
+| 19466         | Eindhectometer negatief        | 161                                   | 141                                    |
+| 19468         | Naam 1                         | Brug Aduard                           | Tafelbrug                              |
+| 19550         | Locatienummer keten positief   | 22819                                 | 19551                                  |
+| 19551         | Locatienummer keten negatief   | 22819                                 | 19550                                  |
+| 19561         | Locatienummer keten positief   | 22821                                 | 19563                                  |
+| 19563         | Locatienummer keten positief   | 22820                                 | 19564                                  |
+| 19563         | Locatienummer keten negatief   | 22821                                 | 19561                                  |
+| 19564         | Locatienummer keten negatief   | 22820                                 | 19563                                  |
+| 19590         | Locatienummer keten positief   | 22812                                 | 19591                                  |
+| 19591         | Locatienummer keten negatief   | 22812                                 | 19590                                  |
+| 19600         | Locatienummer keten positief   | 22813                                 | 19601                                  |
+| 19601         | Locatienummer keten negatief   | 22814                                 | 19600                                  |
+| 19611         | Locatienummer keten positief   | 22815                                 | 19612                                  |
+| 19612         | Locatienummer keten negatief   | 22815                                 | 19611                                  |
+| 19640         | Locatienummer keten positief   | 22816                                 | 19641                                  |
+| 19641         | Locatienummer keten negatief   | 22816                                 | 19640                                  |
+| 21105         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P3_37_PLACE_NAME                       |
+| 21192         | Locatienummer kruisverwijzing  | 28887                                 | 29322                                  |
+| 21205         | Naam 1                         | Tholen-Centrum                        | Tholen                                 |
+| 21205         | Beginhectometer positief       | 108                                   | 107                                    |
+| 21205         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 21205         | Eindhectometer negatief        | 108                                   | 107                                    |
+| 21220         | Locatienummer keten positief   | 21250                                 | 21221                                  |
+| 21226         | Locatienummer keten positief   | 21247                                 | 21238                                  |
+| 21238         | Naam 1                         | Hoogerheide/Ossendrecht               | Hoogerheide                            |
+| 21238         | Locatienummer keten negatief   | 21247                                 | 21226                                  |
+| 21238         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 21240         | Locatienummer keten negatief   | 21250                                 | 21221                                  |
+| 21528         | Locatienummer keten positief   | 22678                                 | 21529                                  |
+| 21529         | Locatienummer keten negatief   | 22678                                 | 21528                                  |
+| 21548         | Naam 1                         | Helmond-Oost                          | Helmond-Centrum                        |
+| 21567         | Locatienummer keten negatief   | 22773                                 | 21845                                  |
+| 21587         | Eindhectometer positief        | 28                                    | 27                                     |
+| 21587         | Naam 1                         | Roswinkel                             | N379: Roswinkel                        |
+| 21589         | Eindhectometer positief        | 108                                   | 105                                    |
+| 21589         | Naam 1                         | Weerdinge                             | Emmer-Compascuum                       |
+| 21589         | Beginhectometer positief       | 98                                    | 105                                    |
+| 21589         | Beginhectometer negatief       | 109                                   | 105                                    |
+| 21589         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 21589         | Eindhectometer negatief        | 98                                    | 105                                    |
+| 21643         | Locatienummer keten positief   | 21645                                 | 21644                                  |
+| 21645         | Locatienummer keten negatief   | 21643                                 | 21644                                  |
+| 21652         | Eindhectometer positief        | 58                                    | 57                                     |
+| 21652         | Beginhectometer positief       | 58                                    | 57                                     |
+| 21652         | Beginhectometer negatief       | 58                                    | 57                                     |
+| 21652         | Locatietype                    | P1_11_CROSS_ROADS                     | P3_37_PLACE_NAME                       |
+| 21652         | Eindhectometer negatief        | 58                                    | 57                                     |
+| 21653         | Locatietype                    | P1_12_T_JUNCTION                      | P1_11_CROSS_ROADS                      |
+| 21722         | Locatienummer kruisverwijzing  | null                                  | 30305                                  |
+| 21785         | Naam 1                         | A9: Leeuwarden                        | A9: Heerhugowaard                      |
+| 21830         | Naam 1                         | Sneek                                 | Sneek-Centrum                          |
+| 21844         | Naam 1                         | Weert/Aarle-Rixtel                    | Weert                                  |
+| 21845         | Naam 1                         | Beek en Donk/Aare-Rixtel              | Beek en Donk                           |
+| 21845         | Locatienummer keten positief   | 22773                                 | 21567                                  |
+| 21860         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 21860         | Eindhectometer positief        | 1963                                  | 1953                                   |
+| 21860         | Wegnummer                      | N7                                    | A7                                     |
+| 21860         | Locatienummer lijn             | 3412                                  | 3403                                   |
+| 21860         | Beginhectometer negatief       | 1960                                  | 1953                                   |
+| 21860         | Locatienummer keten negatief   | 22795                                 | 10190                                  |
+| 21860         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 21862         | Naam 1                         | Groningen-Europapark                  | Groningen-Europark                     |
+| 21865         | Naam 1                         | Ommen/Dedemsvaart                     | Dedemsvaart/Raalte                     |
+| 21865         | Naam 2                         | N48/N340                              | N48                                    |
+| 21866         | Naam 1                         | Ommen/Hardenberg                      | Hardenberg                             |
+| 21866         | Locatienummer keten negatief   | null                                  | 16141                                  |
+| 21866         | Locatienummer kruisverwijzing  | 13987                                 | 21865                                  |
+| 21866         | Naam 2                         | N36/N340                              | N36                                    |
+| 21869         | Locatienummer keten negatief   | 10191                                 | 21868                                  |
+| 21994         | Locatienummer keten negatief   | 13880                                 | 13881                                  |
+| 21995         | Locatienummer keten positief   | 22825                                 | 21996                                  |
+| 21996         | Locatienummer keten positief   | 22826                                 | 21997                                  |
+| 21996         | Locatienummer keten negatief   | 22825                                 | 21995                                  |
+| 21997         | Locatienummer keten negatief   | 22826                                 | 21996                                  |
+| 22012         | Naam 1                         | Muziekwijk-West/Homeruskwartier       | Industriegebied Hollandsekant          |
+| 22013         | Naam 1                         | Almere-Centrum                        | Markerkant                             |
+| 22037         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 22037         | Naam 1                         | Nieuwstadt                            | Gelders Eind                           |
+| 22037         | Toegankelijk inkomend positief | false                                 | true                                   |
+| 22037         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 22037         | Toegankelijk uitgaand negatief | false                                 | true                                   |
+| 22037         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 22048         | Naam 1                         | N201: Schiphol-Oost                   | Hoofddorp/Uithoorn                     |
+| 22050         | Naam 1                         | Schiphol-Oost                         | Amsterdam                              |
+| 22066         | Locatienummer keten negatief   | 22776                                 | 13359                                  |
+| 22160         | Locatienummer keten positief   | 22771                                 | 22161                                  |
+| 22160         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 22161         | Locatienummer keten negatief   | 22771                                 | 22160                                  |
+| 22190         | Locatienummer keten negatief   | 22811                                 | 13720                                  |
+| 22195         | Naam 1                         | N9: Schagerbrug                       | 't Zand/Schagerbrug                    |
+| 22195         | Toegankelijk inkomend positief | true                                  | false                                  |
+| 22195         | Beginhectometer positief       | 5                                     | 0                                      |
+| 22195         | Locatienummer keten negatief   | 16350                                 | 16351                                  |
+| 22195         | Locatienummer kruisverwijzing  | 10627                                 | 11881                                  |
+| 22195         | Toegankelijk uitgaand negatief | true                                  | false                                  |
+| 22195         | Naam 2                         | N9/N248                               | N248/N249                              |
+| 22195         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_12_T_JUNCTION                       |
+| 22195         | Eindhectometer negatief        | 5                                     | 0                                      |
+| 22226         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 22227         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 22229         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 22230         | Locatienummer keten positief   | null                                  | 11217                                  |
+| 22230         | Locatienummer lijn             | 3711                                  | 3710                                   |
+| 22265         | Locatienummer keten negatief   | 22267                                 | 22641                                  |
+| 22267         | Locatienummer keten positief   | 22265                                 | 22641                                  |
+| 22269         | Locatienummer keten positief   | 22827                                 | 10176                                  |
+| 22269         | Locatienummer keten negatief   | 10175                                 | 22271                                  |
+| 22293         | Naam 1                         | Stadshagen                            | Stadhagenallee                         |
+| 22293         | Locatienummer kruisverwijzing  | 32186                                 | null                                   |
+| 22349         | Locatienummer keten negatief   | 22765                                 | 10826                                  |
+| 22356         | Locatienummer keten negatief   | 22796                                 | 15363                                  |
+| 22376         | Eindhectometer positief        | 547                                   | 542                                    |
+| 22376         | Beginhectometer positief       | 540                                   | 535                                    |
+| 22376         | Beginhectometer negatief       | 547                                   | 542                                    |
+| 22376         | Locatienummer keten negatief   | 22805                                 | 14980                                  |
+| 22376         | Eindhectometer negatief        | 540                                   | 535                                    |
+| 22397         | Locatienummer keten positief   | 13741                                 | 22342                                  |
+| 22443         | Locatienummer keten negatief   | 22784                                 | 17892                                  |
+| 22485         | Locatienummer kruisverwijzing  | null                                  | 12941                                  |
+| 22485         | Naam 2                         | null                                  | N299                                   |
+| 22490         | Eindhectometer positief        | 3110                                  | 3117                                   |
+| 22490         | Locatienummer keten positief   | null                                  | 9933                                   |
+| 22490         | Beginhectometer negatief       | 3110                                  | 3117                                   |
+| 22490         | Locatienummer keten negatief   | 9944                                  | 9932                                   |
+| 22490         | Locatienummer knooppunt        | null                                  | 9933                                   |
+| 22504         | Locatienummer kruisverwijzing  | 30246                                 | 30270                                  |
+| 22527         | Toegankelijk inkomend negatief | true                                  | false                                  |
+| 22527         | Locatienummer keten positief   | 22774                                 | 18740                                  |
+| 22527         | Toegankelijk uitgaand positief | true                                  | false                                  |
+| 22531         | Locatienummer keten positief   | null                                  | 13082                                  |
+| 22531         | Locatienummer lijn             | 4481                                  | 4480                                   |
+| 22574         | Afritnummer                    | 9                                     | null                                   |
+| 22603         | Locatienummer lijn             | 4481                                  | 4480                                   |
+| 22663         | Naam 1                         | Valkenburg                            | Torenvlietslaan                        |
+| 25305         | Naam 1                         | A10: Amsterdam-IJburg                 | A10: Zeeburg                           |
+| 25309         | Naam 1                         | A10: Amsterdam-Nieuwendam             | A10: Durgerdam                         |
+| 25360         | Naam 1                         | A10: Amsterdam-Nieuwendam             | A10: Durgerdam                         |
+| 25554         | Naam 1                         | N702: Muziekwijk-West/Homeruskwartier | N702: Industriegebied Hollandsekant    |
+| 26245         | Naam 1                         | A16: Rotterdam-Terbregge              | A16: Rotterdam-Prins Alexander         |
+| 26344         | Locatienummer keten positief   | null                                  | 26345                                  |
+| 26356         | Locatienummer kruisverwijzing  | 22362                                 | 26345                                  |
+| 26656         | Locatietype                    | P1_11_CROSS_ROADS                     | P1_3_MOTORWAY_JUNCTION                 |
+| 27646         | Locatienummer keten positief   | 28886                                 | null                                   |
+| 27652         | Locatienummer keten positief   | 27653                                 | null                                   |
+| 27653         | Locatienummer keten negatief   | 27652                                 | null                                   |
+| 27670         | Locatienummer keten positief   | 27671                                 | null                                   |
+| 27671         | Locatienummer keten negatief   | 27670                                 | null                                   |
+| 27672         | Naam 1                         | Weert/Helmond-Centrum                 | Weert                                  |
+| 27694         | Locatienummer keten positief   | 27695                                 | null                                   |
+| 27695         | Locatienummer keten negatief   | 27694                                 | null                                   |
+| 27747         | Locatienummer kruisverwijzing  | 27749                                 | null                                   |
+| 27749         | Locatienummer keten positief   | 27750                                 | null                                   |
+| 27749         | Locatienummer kruisverwijzing  | 27747                                 | null                                   |
+| 27750         | Locatienummer keten positief   | 27751                                 | null                                   |
+| 27750         | Locatienummer keten negatief   | 27749                                 | null                                   |
+| 27751         | Locatienummer keten negatief   | 27750                                 | null                                   |
+| 27751         | Locatienummer kruisverwijzing  | 29643                                 | null                                   |
+| 27768         | Locatienummer keten positief   | 27769                                 | null                                   |
+| 27769         | Locatienummer keten positief   | 27770                                 | null                                   |
+| 27769         | Locatienummer keten negatief   | 27768                                 | null                                   |
+| 27770         | Locatienummer keten negatief   | 27769                                 | null                                   |
+| 27770         | Locatienummer kruisverwijzing  | 22215                                 | null                                   |
+| 27773         | Locatienummer keten positief   | 27774                                 | null                                   |
+| 27774         | Locatienummer keten negatief   | 27773                                 | null                                   |
+| 27776         | Locatienummer keten positief   | 27777                                 | null                                   |
+| 27777         | Locatienummer keten negatief   | 27776                                 | null                                   |
+| 27780         | Locatienummer keten positief   | 27781                                 | null                                   |
+| 27781         | Locatienummer keten positief   | 27782                                 | null                                   |
+| 27781         | Locatienummer keten negatief   | 27780                                 | null                                   |
+| 27782         | Locatienummer keten negatief   | 27781                                 | null                                   |
+| 27784         | Locatienummer keten positief   | 27785                                 | null                                   |
+| 27785         | Locatienummer keten negatief   | 27784                                 | null                                   |
+| 27901         | Naam 1                         | Wilhelminalaan                        | A59: Raamsdonksveer                    |
+| 27901         | Locatienummer kruisverwijzing  | null                                  | 9789                                   |
+| 27901         | Naam 2                         | Oosterhoutseweg                       | A59                                    |
+| 27901         | Locatietype                    | P1_11_CROSS_ROADS                     | P1_3_MOTORWAY_JUNCTION                 |
+| 27999         | Locatienummer keten positief   | 28000                                 | null                                   |
+| 28000         | Locatienummer keten negatief   | 27999                                 | null                                   |
+| 28839         | Naam 1                         | A4: Leiden-Oost                       | A4: Zoeterwoude-Rijndijk               |
+| 28885         | Naam 1                         | Nauernaschebrug                       | Nauernasebrug                          |
+| 29063         | Locatienummer keten negatief   | 29643                                 | 29069                                  |
+| 29069         | Locatienummer keten positief   | 29643                                 | 29063                                  |
+| 29071         | Locatienummer kruisverwijzing  | 27770                                 | 22215                                  |
+| 29321         | Locatienummer keten positief   | 28887                                 | 29322                                  |
+| 30005         | Naam 2                         | N331                                  | Stadshagenallee                        |
+| 30006         | Naam 1                         | Ittersumallee                         | Oldeneelallee                          |
+| 30007         | Naam 1                         | N337                                  | IJsselallee (N337)                     |
+| 30007         | Naam 2                         | N35                                   | Heinoseweg (N35)                       |
+| 30008         | Naam 1                         | N337                                  | IJsselallee (N337)                     |
+| 30008         | Naam 2                         | Oldeneelallee                         | Marsweg                                |
+| 30010         | Naam 1                         | Wethouder Alferinkweg                 | Willemskade                            |
+| 30010         | Wegnaam                        | Luttenbergstraat                      | Burg van Roijensingel                  |
+| 30012         | Naam 1                         | Burgemeester Drijbersingel            | Burgemeester Roelenweg                 |
+| 30012         | Wegnaam                        | Van Wevelinkhovenstraat               | Schuttevaerkade                        |
+| 30012         | Codeerrichting                 | NORTH                                 | EAST                                   |
+| 30015         | Naam 1                         | N337                                  | Stationsplein                          |
+| 30015         | Wegnaam                        | Leo Majorlaan                         | Oosterlaan                             |
+| 30015         | Naam 2                         | N35                                   | Ceintuurbaan                           |
+| 30036         | Locatienummer kruisverwijzing  | 30053                                 | 30062                                  |
+| 30039         | Locatienummer keten negatief   | null                                  | 30038                                  |
+| 30042         | Locatienummer keten positief   | 32185                                 | 30043                                  |
+| 30044         | Locatienummer keten negatief   | 32185                                 | 30043                                  |
+| 30046         | Locatienummer keten positief   | 32184                                 | null                                   |
+| 30049         | Locatienummer kruisverwijzing  | null                                  | 30060                                  |
+| 30050         | Locatienummer kruisverwijzing  | null                                  | 30054                                  |
+| 30058         | Locatienummer keten negatief   | null                                  | 30057                                  |
+| 30064         | Locatienummer keten negatief   | null                                  | 30063                                  |
+| 30072         | Locatienummer keten negatief   | 32183                                 | 30138                                  |
+| 30139         | Locatienummer keten positief   | 32186                                 | 30140                                  |
+| 30244         | Naam 1                         | N36                                   | N46                                    |
+| 30244         | Naam 2                         | Bleskolksingel                        | Tubbergerweg                           |
+| 30260         | Naam 1                         | N36: Almelo-West                      | N36                                    |
+| 30260         | Naam 2                         | N36                                   | null                                   |
+| 30260         | Locatietype                    | P1_3_MOTORWAY_JUNCTION                | P1_11_CROSS_ROADS                      |
+| 30266         | Locatienummer keten positief   | null                                  | 30267                                  |
+| 30326         | Locatienummer keten negatief   | null                                  | 30325                                  |
+| 31023         | Naam 1                         | N7: Groningen-Corpus                  | A7: Groningen-Corpus                   |
+| 31023         | Naam 2                         | N7                                    | A7                                     |
+| 31627         | Locatienummer kruisverwijzing  | null                                  | 22486                                  |
+| 31917         | Locatietype                    | P1_11_CROSS_ROADS                     | P1_3_MOTORWAY_JUNCTION                 |
+| 32060         | Naam 2                         | Wilhelminalaan                        | A59                                    |
+| 32061         | Naam 1                         | Sluizeweg                             | Made                                   |
+| 32061         | Wegnaam                        | Kanaalweg-West                        | null                                   |
+| 32061         | Naam 2                         | Tuinbouwweg                           | null                                   |
+

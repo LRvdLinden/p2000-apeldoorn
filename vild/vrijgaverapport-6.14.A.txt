@@ -1,0 +1,2120 @@
+# Versierecord
+**Eis**  
+Er bestaat een record met locatienummer '0' en locatietype 'V1.0'.
+
+**Technisch handboek**  
+pag 12 §2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Er dient een geldig versienummer opgenomen te zijn. Hierbij dient de volgende systematiek gebruikt te worden: <releasenummer>.<versienummer>.<tussenversie-code>
+
+**Technisch handboek**  
+pag 12 §2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Er is een datum opgenomen. Het formaat dient te voldoen aan dd-mm-jjjj.
+
+**Technisch handboek**  
+pag 12 §2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De overige velden worden niet gebruikt en zijn leeg.
+
+**Technisch handboek**  
+pag 12 §2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+# Locatierecords algemeen
+**Eis**  
+Locatienummers die in een eerdere VILD-versie zijn vervallen, mogen niet opnieuw worden geïntroduceerd.
+
+**Technisch handboek**  
+pag 27 §4.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Locatienummers en referenties naar locatienummers dienen positieve getallen te zijn
+
+**Technisch handboek**  
+pag 27 §4.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Locatienummer' dient gevuld te zijn.
+
+**Technisch handboek**  
+pag 27 §4.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Locatietype dient te voldoen aan het voorgeschreven formaat. Het type dient voor te komen in het Technisch Handboek.
+
+**Technisch handboek**  
+pag 79-82 Bijlage A Lijst met locatietypes
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 1' dient gevuld te zijn. (Uitzonderingen)
+
+**Technisch handboek**  
+Uitzondering: pag 65 §5.3.2 L2.1 Ringweg
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Hectometervelden dienen geldige waarden te bevatten of leeg te zijn indien het niet van toepassing is.
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Afritnummer dient leeg te zijn voor alle locatietypes behalve Afrit (P1.3).
+
+**Technisch handboek**  
+pag 13 §3.4.3, pag 39 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Hectoletter dient slechts één tekstkarakter te bevatten.
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Hectoletter dient leeg te zijn voor alle locatietypes behalve Verbindingsweg (P1.14).
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Ver weg' wordt alleen gebruikt bij locatietypes Afrit (P1.3), Kruising (P1.11) en Aansluiting (P1.12).
+
+**Technisch handboek**  
+pag 18 §3.4.3 FAR_AWAY
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Wegnummer is een verplicht veld voor alle lijnelementen en puntlocaties. Indien geen stedelijk wegnummer aanwezig is conform bebording wordt een fictief wegnummer gebruikt. Een fictief wegnummer is een unieke combinatie bestaande uit 'x', 'y' of 'z' + 3 cijfers. Bij lijntypen is type L6.1 Veerdienst een uitzondering, dan dient het veld leeg te zijn. Ook van onderliggende punten op lijntype L6.1 dient het wegnummer leeg te zijn.
+
+**Technisch handboek**  
+pag 27 §4.2.3 en pag 62 §5.2.1, Parallelbanen: pag 20 §3.5.3
+
+**Afwijkingen**  
+- **Locatienummer 6520**  
+  Veld 'Wegnummer', waarde 'N282A'
+  - Veldwaarde 'N282A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 21175**  
+  Veld 'Wegnummer', waarde 'N282A'
+  - Veldwaarde 'N282A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 21199**  
+  Veld 'Wegnummer', waarde 'N282A'
+  - Veldwaarde 'N282A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22045**  
+  Veld 'Wegnummer', waarde 'N342+'
+  - Veldwaarde 'N342+' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22046**  
+  Veld 'Wegnummer', waarde 'N342+'
+  - Veldwaarde 'N342+' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22047**  
+  Veld 'Wegnummer', waarde 'N342+'
+  - Veldwaarde 'N342+' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22358**  
+  Veld 'Wegnummer', waarde 'A15 prb'
+  - Veldwaarde 'A15 prb' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22359**  
+  Veld 'Wegnummer', waarde 'A15 prb'
+  - Veldwaarde 'A15 prb' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22360**  
+  Veld 'Wegnummer', waarde 'A15 prb'
+  - Veldwaarde 'A15 prb' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22361**  
+  Veld 'Wegnummer', waarde 'A15 prb'
+  - Veldwaarde 'A15 prb' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 22362**  
+  Veld 'Wegnummer', waarde 'A15 prb'
+  - Veldwaarde 'A15 prb' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25009**  
+  Veld 'Wegnummer', waarde 's107A'
+  - Veldwaarde 's107A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25013**  
+  Veld 'Wegnummer', waarde 'v109-110'
+  - Veldwaarde 'v109-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25015**  
+  Veld 'Wegnummer', waarde 's111A'
+  - Veldwaarde 's111A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25024**  
+  Veld 'Wegnummer', waarde 'v100-CR1'
+  - Veldwaarde 'v100-CR1' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25025**  
+  Veld 'Wegnummer', waarde 'v100-CR2'
+  - Veldwaarde 'v100-CR2' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25026**  
+  Veld 'Wegnummer', waarde 'v100-CR3'
+  - Veldwaarde 'v100-CR3' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25027**  
+  Veld 'Wegnummer', waarde 'v100-CR4'
+  - Veldwaarde 'v100-CR4' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25028**  
+  Veld 'Wegnummer', waarde 'v104-106'
+  - Veldwaarde 'v104-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25029**  
+  Veld 'Wegnummer', waarde 'v105-106'
+  - Veldwaarde 'v105-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25030**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25031**  
+  Veld 'Wegnummer', waarde 'v106-107'
+  - Veldwaarde 'v106-107' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25032**  
+  Veld 'Wegnummer', waarde 'v106-108'
+  - Veldwaarde 'v106-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25033**  
+  Veld 'Wegnummer', waarde 'v108-108'
+  - Veldwaarde 'v108-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25034**  
+  Veld 'Wegnummer', waarde 'v108-109'
+  - Veldwaarde 'v108-109' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25035**  
+  Veld 'Wegnummer', waarde 'v111-113'
+  - Veldwaarde 'v111-113' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25036**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25037**  
+  Veld 'Wegnummer', waarde 'v117-118'
+  - Veldwaarde 'v117-118' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25038**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25039**  
+  Veld 'Wegnummer', waarde 'vCR-CR'
+  - Veldwaarde 'vCR-CR' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25040**  
+  Veld 'Wegnummer', waarde 'v109-111'
+  - Veldwaarde 'v109-111' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25041**  
+  Veld 'Wegnummer', waarde 'v100-116'
+  - Veldwaarde 'v100-116' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25042**  
+  Veld 'Wegnummer', waarde 'v100-Zuiderzwg'
+  - Veldwaarde 'v100-Zuiderzwg' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25043**  
+  Veld 'Wegnummer', waarde 'v100-CR5'
+  - Veldwaarde 'v100-CR5' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25256**  
+  Veld 'Wegnummer', waarde 's107A'
+  - Veldwaarde 's107A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25257**  
+  Veld 'Wegnummer', waarde 's107A'
+  - Veldwaarde 's107A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25280**  
+  Veld 'Wegnummer', waarde 'v109-110'
+  - Veldwaarde 'v109-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25281**  
+  Veld 'Wegnummer', waarde 'v109-110'
+  - Veldwaarde 'v109-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25289**  
+  Veld 'Wegnummer', waarde 's111A'
+  - Veldwaarde 's111A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25290**  
+  Veld 'Wegnummer', waarde 's111A'
+  - Veldwaarde 's111A' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25325**  
+  Veld 'Wegnummer', waarde 'v100-CR1'
+  - Veldwaarde 'v100-CR1' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25326**  
+  Veld 'Wegnummer', waarde 'v100-CR1'
+  - Veldwaarde 'v100-CR1' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25327**  
+  Veld 'Wegnummer', waarde 'v100-CR2'
+  - Veldwaarde 'v100-CR2' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25328**  
+  Veld 'Wegnummer', waarde 'v100-CR2'
+  - Veldwaarde 'v100-CR2' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25329**  
+  Veld 'Wegnummer', waarde 'v100-CR3'
+  - Veldwaarde 'v100-CR3' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25330**  
+  Veld 'Wegnummer', waarde 'v100-CR3'
+  - Veldwaarde 'v100-CR3' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25331**  
+  Veld 'Wegnummer', waarde 'v100-CR4'
+  - Veldwaarde 'v100-CR4' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25332**  
+  Veld 'Wegnummer', waarde 'v100-CR4'
+  - Veldwaarde 'v100-CR4' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25333**  
+  Veld 'Wegnummer', waarde 'v104-106'
+  - Veldwaarde 'v104-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25334**  
+  Veld 'Wegnummer', waarde 'v104-106'
+  - Veldwaarde 'v104-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25335**  
+  Veld 'Wegnummer', waarde 'v104-106'
+  - Veldwaarde 'v104-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25336**  
+  Veld 'Wegnummer', waarde 'v105-106'
+  - Veldwaarde 'v105-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25337**  
+  Veld 'Wegnummer', waarde 'v105-106'
+  - Veldwaarde 'v105-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25338**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25339**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25340**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25341**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25342**  
+  Veld 'Wegnummer', waarde 'v106-107'
+  - Veldwaarde 'v106-107' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25343**  
+  Veld 'Wegnummer', waarde 'v106-107'
+  - Veldwaarde 'v106-107' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25344**  
+  Veld 'Wegnummer', waarde 'v106-108'
+  - Veldwaarde 'v106-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25345**  
+  Veld 'Wegnummer', waarde 'v106-108'
+  - Veldwaarde 'v106-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25346**  
+  Veld 'Wegnummer', waarde 'v108-108'
+  - Veldwaarde 'v108-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25347**  
+  Veld 'Wegnummer', waarde 'v108-108'
+  - Veldwaarde 'v108-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25348**  
+  Veld 'Wegnummer', waarde 'v108-108'
+  - Veldwaarde 'v108-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25349**  
+  Veld 'Wegnummer', waarde 'v108-108'
+  - Veldwaarde 'v108-108' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25350**  
+  Veld 'Wegnummer', waarde 'v108-109'
+  - Veldwaarde 'v108-109' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25351**  
+  Veld 'Wegnummer', waarde 'v108-109'
+  - Veldwaarde 'v108-109' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25352**  
+  Veld 'Wegnummer', waarde 'v108-109'
+  - Veldwaarde 'v108-109' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25353**  
+  Veld 'Wegnummer', waarde 'v111-113'
+  - Veldwaarde 'v111-113' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25354**  
+  Veld 'Wegnummer', waarde 'v111-113'
+  - Veldwaarde 'v111-113' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25355**  
+  Veld 'Wegnummer', waarde 'v111-113'
+  - Veldwaarde 'v111-113' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25356**  
+  Veld 'Wegnummer', waarde 'v111-113'
+  - Veldwaarde 'v111-113' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25357**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25358**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25359**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25360**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25361**  
+  Veld 'Wegnummer', waarde 'v117-118'
+  - Veldwaarde 'v117-118' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25362**  
+  Veld 'Wegnummer', waarde 'v117-118'
+  - Veldwaarde 'v117-118' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25363**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25364**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25365**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25366**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25367**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25368**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25369**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25370**  
+  Veld 'Wegnummer', waarde 'vCR-CR'
+  - Veldwaarde 'vCR-CR' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25371**  
+  Veld 'Wegnummer', waarde 'vCR-CR'
+  - Veldwaarde 'vCR-CR' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25429**  
+  Veld 'Wegnummer', waarde 'v109-111'
+  - Veldwaarde 'v109-111' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25430**  
+  Veld 'Wegnummer', waarde 'v109-111'
+  - Veldwaarde 'v109-111' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25431**  
+  Veld 'Wegnummer', waarde 'v109-111'
+  - Veldwaarde 'v109-111' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25432**  
+  Veld 'Wegnummer', waarde 'v109-111'
+  - Veldwaarde 'v109-111' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25437**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25438**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25439**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25440**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25443**  
+  Veld 'Wegnummer', waarde 'v100-116'
+  - Veldwaarde 'v100-116' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25444**  
+  Veld 'Wegnummer', waarde 'v100-116'
+  - Veldwaarde 'v100-116' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25445**  
+  Veld 'Wegnummer', waarde 'v100-116'
+  - Veldwaarde 'v100-116' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25446**  
+  Veld 'Wegnummer', waarde 'v100-116'
+  - Veldwaarde 'v100-116' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25447**  
+  Veld 'Wegnummer', waarde 'v100-Zuiderzwg'
+  - Veldwaarde 'v100-Zuiderzwg' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25448**  
+  Veld 'Wegnummer', waarde 'v100-Zuiderzwg'
+  - Veldwaarde 'v100-Zuiderzwg' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25449**  
+  Veld 'Wegnummer', waarde 'v100-Zuiderzwg'
+  - Veldwaarde 'v100-Zuiderzwg' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25453**  
+  Veld 'Wegnummer', waarde 'v100-CR5'
+  - Veldwaarde 'v100-CR5' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25454**  
+  Veld 'Wegnummer', waarde 'v100-CR5'
+  - Veldwaarde 'v100-CR5' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25455**  
+  Veld 'Wegnummer', waarde 'v100-CR5'
+  - Veldwaarde 'v100-CR5' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25462**  
+  Veld 'Wegnummer', waarde 'v105-110'
+  - Veldwaarde 'v105-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25463**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25464**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25465**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25466**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25467**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25468**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25469**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25470**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25471**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25560**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25602**  
+  Veld 'Wegnummer', waarde 'v100-CR2'
+  - Veldwaarde 'v100-CR2' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25605**  
+  Veld 'Wegnummer', waarde 'v100-102'
+  - Veldwaarde 'v100-102' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25651**  
+  Veld 'Wegnummer', waarde 'vCityring'
+  - Veldwaarde 'vCityring' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 25662**  
+  Veld 'Wegnummer', waarde 'v112-115'
+  - Veldwaarde 'v112-115' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27013**  
+  Veld 'Wegnummer', waarde 'V100-100'
+  - Veldwaarde 'V100-100' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27014**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27015**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27016**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27017**  
+  Veld 'Wegnummer', waarde 'V230-Norbruisl'
+  - Veldwaarde 'V230-Norbruisl' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27018**  
+  Veld 'Wegnummer', waarde 'V100-Goylaan'
+  - Veldwaarde 'V100-Goylaan' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27019**  
+  Veld 'Wegnummer', waarde 'V100-Beneluxla'
+  - Veldwaarde 'V100-Beneluxla' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27238**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27239**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27240**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27241**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27242**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27243**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27244**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27245**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27246**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27247**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27248**  
+  Veld 'Wegnummer', waarde 'V100-100'
+  - Veldwaarde 'V100-100' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27249**  
+  Veld 'Wegnummer', waarde 'V100-100'
+  - Veldwaarde 'V100-100' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27255**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27256**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27257**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27258**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27259**  
+  Veld 'Wegnummer', waarde 'V230-Norbruisl'
+  - Veldwaarde 'V230-Norbruisl' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27260**  
+  Veld 'Wegnummer', waarde 'V230-Norbruisl'
+  - Veldwaarde 'V230-Norbruisl' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27261**  
+  Veld 'Wegnummer', waarde 'V100-Goylaan'
+  - Veldwaarde 'V100-Goylaan' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27262**  
+  Veld 'Wegnummer', waarde 'V100-Goylaan'
+  - Veldwaarde 'V100-Goylaan' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27263**  
+  Veld 'Wegnummer', waarde 'V100-Beneluxla'
+  - Veldwaarde 'V100-Beneluxla' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27264**  
+  Veld 'Wegnummer', waarde 'V100-Beneluxla'
+  - Veldwaarde 'V100-Beneluxla' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27265**  
+  Veld 'Wegnummer', waarde 'V100-Beneluxla'
+  - Veldwaarde 'V100-Beneluxla' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27266**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27267**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27268**  
+  Veld 'Wegnummer', waarde 'V101-106'
+  - Veldwaarde 'V101-106' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27296**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27302**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27303**  
+  Veld 'Wegnummer', waarde 'V100-404'
+  - Veldwaarde 'V100-404' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27629**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 27630**  
+  Veld 'Wegnummer', waarde 'V106-110'
+  - Veldwaarde 'V106-110' voldoet niet aan het verwachte patroon.
+
+---
+
+**Eis**  
+Het veld Codeerrichting is verplicht voor de locatietypes Snelweg, Ringweg, Eerste klasse weg, Tweede klasse weg en Stadsringweg.
+
+**Technisch handboek**  
+pag 63 §5.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Codeerrichting wordt uitsluitend gebruikt voor de locatietypes Snelweg, Ringweg, Eerste klasse weg, Tweede klasse weg en Stadsringweg.
+
+**Technisch handboek**  
+pag 63 §5.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Stad wijk' wordt alleen gebruikt bij locatietype Afrit (P1.3).
+
+**Technisch handboek**  
+pag 18 §3.4.3 CITY_DISTR, pag 39 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Referentievelden verwijzen niet naar zichzelf.
+
+**Technisch handboek**  
+Logische semantische eis
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Code type' heeft de vaste waarde '3' voor locatietypes Tunnel (P3.1), Brug (P3.2), Aquaduct (P3.40) en Sluis (P3.41). In alle andere gevallen is het veld leeg.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Referentie Meldwerk moet leeg zijn.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+In de tekstvelden mogen geen overbodige spaties voorkomen.
+
+**Technisch handboek**  
+pag 11 §2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Bovenste naam bord' moet leeg zijn.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Altijd gebruikt bij puntlocaties van het type Knooppunt (P1.1), Knooppunt (triangle) (P1.2), en Verbindingsweg (P1.14). Locatienummer knooppunt wordt ook gebruikt bij Afrit (P1.3), maar alleen als de afrit in een knooppunt ligt.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Referentie Actuele Wegenlijst dient ingevuld te zijn bij de puntlocaties op Rijkswegen. Een punt ligt op een Rijksweg als het Rijkswegnummer is ingevuld.
+
+**Technisch handboek**  
+pag 18 §3.4.3, pag 71 §6.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De aanwezigheidscodes dienen te worden afgeleid uit de bereikbaarheidscodes.
+
+**Technisch handboek**  
+pag 79-82 Bijlage A Lijst met locatietypes
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Hectometerrichting' geeft aan of de hectometrering in de codeerrichting oploopt (waarde +1) of juist afloopt (waarde -1).
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+- **Locatienummer 21815**  
+  Veld 'Beginhectometer negatief', waarde '639'
+  - Als veld Hectometerrichting negatief is, dan dient de waarde in het veld Beginhectometer negatief kleiner of gelijk te zijn aan de waarde in het veld Eindhectometer negatief.
+
+- **Locatienummer 21951**  
+  Veld 'Beginhectometer negatief', waarde '639'
+  - Als veld Hectometerrichting negatief is, dan dient de waarde in het veld Beginhectometer negatief kleiner of gelijk te zijn aan de waarde in het veld Eindhectometer negatief.
+
+---
+
+**Eis**  
+Indien de lengte van een locatie te groot is, kan dit op incorrecte invoer duiden. Het hoeft niet het geval te zijn. Als drempelwaarde wordt 10 km gehanteerd.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Geometrie' dient niet leeg te zijn.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Code stedelijk' moet leeg zijn.
+
+**Technisch handboek**  
+pag. 16 §3.4.1.7
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een keten van punten/segmenten dient een begin- en eindpunt te hebben.
+
+**Technisch handboek**  
+pag 28 §4.2.4 (punten), pag 63 §5.2.6 (segmenten)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+# Locatierelaties algemeen
+**Eis**  
+Locatienummer gebied is een verplicht veld voor alle locatietypes behalve werelddeel
+
+**Technisch handboek**  
+pag 28 §4.2.5, pag 63 §5.2.4, pag 71 §6.2.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een keten van punten/segmenten dient volledig circulair te zijn indien deze deel uitmaakt van een ringweg.
+
+**Technisch handboek**  
+pag 28 §4.2.4 (punten), pag 65 §5.3.2 (segmenten)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Locatienummer kruisverwijzing' dient leeg te zijn of het locatienummer van een VILD-punt te bevatten. Het veld 'Locatienummer kruisverwijzing' vormt een circulaire verwijzing.
+
+**Technisch handboek**  
+pag 28 §4.2.7
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Locatienummer knooppunt' is het locatienummer van het Knooppunt waarvan de locatie deel uitmaakt.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor elke lijnlocatie, en voor elk koppel lijnlocaties die met 'Locatienummer keten positief/negatief' naar elkaar verwijzen, geldt dat hun onderliggende lijn- of puntlocaties onderling via 'Locatienummer keten positief/negatief' gekoppeld moeten zijn.
+
+**Technisch handboek**  
+pag 28 §4.2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Naburige punten/segmenten in een keten verwijzen naar dezelfde weg, hetzelfde wegsegment of naar wegsegmenten die naar elkaar verwijzen.
+
+**Technisch handboek**  
+pag 28 §4.2.4 (punten), pag 65 §5.3.2 (segmenten)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het record waarnaar verwezen wordt, dient van het juiste type te zijn.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien gebruik wordt gemaakt van Orde 1 of 2 segmenten wordt het complete lijnelement onderverdeeld naar segmenten van die orde, zodat op dat niveau een sluitende keten bestaat tussen de begin- en eindlocatie van de weg.
+
+**Technisch handboek**  
+pag 13 §3.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+A/N-weg-overgangen zijn opgenomen op segment- en puntniveau.
+
+**Technisch handboek**  
+pag 23 §3.8.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien verwezen wordt naar een ander record, dan dient een record met dit locatienummer aanwezig te zijn in de database.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Als men vanaf een locatie via locatienummer keten positief of locatienummer keten negatief een buur kan bereiken, dient die buur naar de locatie terug te verwijzen.
+
+**Technisch handboek**  
+pag 13 §3.1, pag 28 §4.2.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De waarde van de hectometerrichting dient overeen te komen met die van de directe buren. Opmerking: Hectometerrichting-omkeringen (wisseling van oplopende naar aflopende hectometrering of andersom) worden gekenmerkt door een hectometersprong.
+
+**Technisch handboek**  
+pag 31 §4.2.11
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Hectometerrichting kan alleen leeg blijven als deze niet afgeleid kan worden uit de eigen hectometerwaarden en ook niet uit de hectometerwaarden of hectometerrichting van de buren. Als de eigen hectometerwaarden niet onbekend zijn, kan een hectometerrichting afgeleid worden, tenzij het een hectometersprong betreft.
+
+**Technisch handboek**  
+pag 31 §4.2.11.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Weg met doorlopend wegnummer: Indien het wegnummer (en dus de puntenketen) aan beide zijden van het veer doorloopt, wordt het veer als één puntlocatie Veer (P3.45) opgenomen ter hoogte van het kruisende water.
+
+**Technisch handboek**  
+pag 24 §3.8.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien het wegnummer aan beide zijden van het veer verschillend is, wordt het veer twee keer opgenomen. Eén keer als puntlocatie op de ene VILD-lijn, en één keer als puntlocatie op de andere VILD-lijn. Deze puntlocaties zijn aan elkaar gekoppeld door middel van het locatienummer kruisverwijzing.
+
+**Technisch handboek**  
+pag 24 §3.8.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Als een parkeerlocatie aan een gebiedslocatie gekoppeld is, dient deze van het type parkeergebied te zijn.
+
+**Technisch handboek**  
+pag 25 §3.8.5
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Parkeerlocaties worden niet opgenomen in een puntketen.
+
+**Technisch handboek**  
+pag 25 §3.8.5
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Parkeerlocaties zijn met een lijnreferentie gekoppeld aan een lijnsegment dat de weg representeert waarvandaan de parkeergelegenheid bereikbaar is.
+
+**Technisch handboek**  
+pag 25 §3.8.5
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Segmentlocaties en niet-zwevende puntlocaties zijn met een lijnreferentie gekoppeld aan (het segment van) de weg waarop ze zich bevinden.
+
+**Technisch handboek**  
+pag 28 §4.2.6
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De waarde van de hectometerrichting bij hectometersprongen wordt bepaald door de directe buren. Als beide buren dezelfde hectometerrichtingwaarden hebben, krijgt de hectometersprong diezelfde waarde. Indien de buren verschillende hectometerrichtingwaarden hebben, blijft de hectometerrichting van de sprong leeg. Opmerking: Met buren worden de meest nabije buurlocaties uit de keten bedoeld waarvan de hectometerrichting gevuld is.
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien er sprake is van oplopende hectometrering dient het volgende punt een hogere hectometerwaarde te hebben en het voorgaande punt een lagere. Opmerking: Gevonden afwijkingen zijn niet per definitie verkeerd. Zo zijn er locaties die ruimtelijk in elkaar liggen, zoals afritten die binnen een knooppunt vallen. In dat geval wordt onterecht een afwijking gevonden in de negatieve richting. Toch verdient elke gevonden locatie een nader onderzoek of er terecht van de eis is afgeweken.
+
+**Technisch handboek**  
+pag 31 §4.2.11
+
+**Afwijkingen**  
+- **Locatienummer 7458**  
+  Veld 'Beginhectometer negatief', waarde '767'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 7522**  
+  Veld 'Beginhectometer negatief', waarde '763'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10025**  
+  Veld 'Beginhectometer positief', waarde '182'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10231**  
+  Veld 'Beginhectometer negatief', waarde '2094'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10231**  
+  Veld 'Beginhectometer positief', waarde '2094'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10232**  
+  Veld 'Beginhectometer negatief', waarde '277'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10232**  
+  Veld 'Beginhectometer positief', waarde '277'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 10560**  
+  Veld 'Beginhectometer negatief', waarde '62'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 16145**  
+  Veld 'Beginhectometer positief', waarde '1154'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 21795**  
+  Veld 'Beginhectometer negatief', waarde '202'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 21951**  
+  Veld 'Beginhectometer negatief', waarde '639'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 22149**  
+  Veld 'Beginhectometer positief', waarde '1403'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 22494**  
+  Veld 'Beginhectometer negatief', waarde '51'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+- **Locatienummer 22668**  
+  Veld 'Beginhectometer positief', waarde '185'
+  - De waardes van de hectometervelden zijn niet logisch ten opzichte van de waardes van een van de directe buren.
+
+---
+
+**Eis**  
+De lijnlocatie is volledig zwevend en zelf geen deel van een weg (het locatienummer lijn is leeg). Alleen terminals die bereikbaar zijn vanaf een VILD-weg worden (ook) opgenomen als (eind)punt van die betreffende weg én als punt op het lijnsegment van de veerdienst (deze punten zijn via het Locatienummer kruisverwijzing aan elkaar gekoppeld aan het corresponderende punt op het lijnsegment van de veerdienst).
+
+**Technisch handboek**  
+pag 24 §3.8.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien met Locatienummer keten positief of negatief verwezen wordt naar een andere locatie, dan dient deze hetzelfde locatietype te hebben.
+
+**Technisch handboek**  
+pag 63 §5.2.6
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+# Puntrecords
+**Eis**  
+In een keten van kruisverwijzingen mag alleen een knooppunt (P1.1) of een triangle knooppunt (P1.2) voorkomen.
+
+**Technisch handboek**  
+pag 34 §4.3.1, pag 35 §4.3.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Op een knooppunt (P1.1) komen minstens vier richtingen samen, tenzij in het buitenland. Anders is sprake van een triangle (P1.2).
+
+**Technisch handboek**  
+pag 34 §4.3.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Op een triangle knooppunt (P1.2) komen minstens drie richtingen samen, tenzij in het buitenland. Minstens één van de betrokken wegen eindigt.
+
+**Technisch handboek**  
+pag 35 §4.3.2
+
+**Afwijkingen**  
+- **Locatienummer 7412**  
+  Veld 'Locatienummer kruisverwijzing', waarde '9198'
+  - In deze keten van kruisverwijzingen ligt geen triangle knooppunt op een eindigende weg of is het totaal aantal richtingen minder dan drie (een doorgaande weg - positieve en negatieve ketenverwijzing gevuld - telt als twee richtingen).
+
+- **Locatienummer 9198**  
+  Veld 'Locatienummer kruisverwijzing', waarde '7412'
+  - In deze keten van kruisverwijzingen ligt geen triangle knooppunt op een eindigende weg of is het totaal aantal richtingen minder dan drie (een doorgaande weg - positieve en negatieve ketenverwijzing gevuld - telt als twee richtingen).
+
+---
+
+**Eis**  
+Minstens één van de wegen is een aansluitende weg (de weg eindigt).
+
+**Technisch handboek**  
+pag 42 §4.4.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Knooppunten en verbindingswegen dienen op een A-weg of N-weg te liggen.
+
+**Technisch handboek**  
+pag 34 §4.3.1 (P1.1), pag 35 §4.3.2 (P1.2), pag 36 §4.3.3 (P1.14)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een puntlocatie van dit type is onderdeel van een niet-A-weg.
+
+**Technisch handboek**  
+pag 41-49 §4.4
+
+**Afwijkingen**  
+- **Locatienummer 8930**  
+  Veld 'Wegnummer', waarde 'A348'
+  - Veldwaarde 'A348' voldoet niet aan het verwachte patroon.
+
+- **Locatienummer 10606**  
+  Veld 'Wegnummer', waarde 'A9'
+  - Veldwaarde 'A9' voldoet niet aan het verwachte patroon.
+
+---
+
+**Eis**  
+Buurpunten op dezelfde lijn van hectometersprongen mogen geen hectometerwaarden hebben die in de sprong vallen.
+
+**Technisch handboek**  
+pag 31-33 §4.2.11.3
+
+**Afwijkingen**  
+- **Locatienummer 21965**  
+  Veld 'Eindhectometer negatief', waarde '646'
+  - Een hectometerwaarde van deze locatie valt binnen het bereik van een hectometersprong op dezelfde lijn.
+
+---
+
+**Eis**  
+Buurpunten op dezelfde lijn van hectometersprongen mogen geen hectometerwaarden hebben die de waardes van de hectometersprong overlappen.
+
+**Technisch handboek**  
+pag 32 §4.2.11.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Bij verbindingswegen dient locatienummer kruisverwijzing leeg te zijn.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De Naam 1 van locaties van het type Knooppunt en Knooppunt (triangle) is de knooppuntnaam zoals die op de knooppuntborden langs de weg te vinden is, maar zonder het woord 'knooppunt'.
+
+**Technisch handboek**  
+pag 34 §4.3.1 (P1.1), pag 35 §4.3.2 (P1.2)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 1' dient ingevuld te zijn voor alle puntlocaties.
+
+**Technisch handboek**  
+pag 55 §4.5.6, pag 84 bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor meerdere locatietypes dient het veld Naam 2 leeg te zijn.
+
+**Technisch handboek**  
+pag 44 §4.4.4, pag 45 §4.4.5, pag 46 §4.4.6, pag 47 §4.4.7, pag 48 §4.4.8, pag 49 §4.4.9
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor meerdere locatietypes dient het veld Naam 2 gevuld te zijn.
+
+**Technisch handboek**  
+pag 55 §4.5.6, pag 56 §4.5.7, pag 57 §4.5.8, pag 58 §4.5.9
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld Naam 2 dient het wegnummer van alle kruisende wegen te bevatten, gescheiden door een schuine streep.
+
+**Technisch handboek**  
+pag 34 §4.3.1 (P1.1), pag 35 §4.3.2 (P1.2), pag 41 §4.4.1 (P1.11), pag 42 §4.4.2 (P1.12)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Als er kruisende wegen met een wegnummer zijn, dient het veld Naam 2 minstens een van deze wegnummers te bevatten.
+
+**Technisch handboek**  
+pag 38 §4.3.4 (P1.3), pag 43 §4.4.3 (P1.9)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De Naam 2 van een verbindingsweg (P1.14) is van het formaat '<wegnummer bestemmingsweg> richting <plaatsnaam>'.
+
+**Technisch handboek**  
+pag 36 §4.3.3
+
+**Afwijkingen**  
+- **Locatienummer 22140**  
+  Veld 'Naam 2', waarde 'A28 richting Zwolle'
+  - Naam 2 voldoet niet aan het voorgeschreven formaat of het genoemde wegnummer komt niet voor in de keten van kruisverwijzingen van het bijbehorende knooppunt.
+
+- **Locatienummer 22212**  
+  Veld 'Naam 2', waarde 'A28 richting Assen'
+  - Naam 2 voldoet niet aan het voorgeschreven formaat of het genoemde wegnummer komt niet voor in de keten van kruisverwijzingen van het bijbehorende knooppunt.
+
+- **Locatienummer 22269**  
+  Veld 'Naam 2', waarde 'N381 richting Oosterwolde'
+  - Naam 2 voldoet niet aan het voorgeschreven formaat of het genoemde wegnummer komt niet voor in de keten van kruisverwijzingen van het bijbehorende knooppunt.
+
+- **Locatienummer 22270**  
+  Veld 'Naam 2', waarde 'N381 richting Oosterwolde'
+  - Naam 2 voldoet niet aan het voorgeschreven formaat of het genoemde wegnummer komt niet voor in de keten van kruisverwijzingen van het bijbehorende knooppunt.
+
+---
+
+**Eis**  
+De Naam 1 van een spoorwegovergang (P3.43) is gevuld en bevat 'Spoorwegovergang'.
+
+**Technisch handboek**  
+pag 47 §4.4.7
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De Naam 1 van een knooppunt (P1.1, P1.2) dient gelijk te zijn op alle betrokken wegen.
+
+**Technisch handboek**  
+pag 34 §4.3.1 (P1.1), pag 35 §4.3.2 (P1.2)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De Naam 1 van een verbindingsweg (P1.14) is van het formaat '<wegnummer herkomstweg> vanuit <plaatsnaam>'.
+
+**Technisch handboek**  
+pag 36 §4.3.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Bij een afrit dient op de niet-dominante weg de Naam 1 het wegnummer van de dominante weg te bevatten dat in Naam 2 staat.
+
+**Technisch handboek**  
+pag 38 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Bij een afrit dient op de dominante weg de Naam 1 geen wegnummer te bevatten.
+
+**Technisch handboek**  
+pag 38 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Bij een afrit dient op de niet-dominante weg de Naam 1 een combinatie te zijn van het wegnummer en de Naam 1 van de bijbehorende afrit op de dominante weg.
+
+**Technisch handboek**  
+pag 38 §4.3.4
+
+**Afwijkingen**  
+- **Locatienummer 21283**  
+  Veld 'Naam 1', waarde 'A73: Ewijk'
+  - In de keten van kruisverwijzingen is geen dominante afrit gevonden die overeenkomt met de Naam 1 van deze niet-dominante afrit.
+
+- **Locatienummer 21364**  
+  Veld 'Naam 1', waarde 'A17: Industriegeb. Oud Gastel-Borchwerf'
+  - In de keten van kruisverwijzingen is geen dominante afrit gevonden die overeenkomt met de Naam 1 van deze niet-dominante afrit.
+
+- **Locatienummer 27972**  
+  Veld 'Naam 1', waarde 'A17: Industriegeb. Oud Gastel-Borchwerf'
+  - In de keten van kruisverwijzingen is geen dominante afrit gevonden die overeenkomt met de Naam 1 van deze niet-dominante afrit.
+
+---
+
+**Eis**  
+De Naam 1 van een hectometersprong (P2.1) is van het formaat 'hm <Beginh. pos.>=<Eindh. pos.>'. De numerieke waarden zijn in kilometers, op 1 decimaal nauwkeurig en met een decimale punt.
+
+**Technisch handboek**  
+pag 59 §4.5.10
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De waarde van wegnaam dient gelijk te zijn aan de wegnaam van de directe wegverwijzing van het punt. Indien deze ongelijk zijn, dient de waarde van wegnaam gelijk te zijn aan de wegnaam van de directe wegverwijzing van het buurpunt in positieve richting of in negatieve richting.
+
+**Technisch handboek**  
+pag 27 §4.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien een afrit twee wegen verbindt, mogen dit niet allebei A-wegen zijn.
+
+**Technisch handboek**  
+pag 38 §4.3.4
+
+**Afwijkingen**  
+- **Locatienummer 7044**  
+  Veld 'Naam 2', waarde 'A28'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 7414**  
+  Veld 'Naam 2', waarde 'A4'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 7431**  
+  Veld 'Naam 2', waarde 'A24'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 8094**  
+  Veld 'Naam 2', waarde 'A13'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 8123**  
+  Veld 'Naam 2', waarde 'A15'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 8589**  
+  Veld 'Naam 2', waarde 'A1'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 9196**  
+  Veld 'Naam 2', waarde 'A13'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 10160**  
+  Veld 'Naam 2', waarde 'A6'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 21698**  
+  Veld 'Naam 2', waarde 'A2'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 22355**  
+  Veld 'Naam 2', waarde 'A20'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+- **Locatienummer 22490**  
+  Veld 'Naam 2', waarde 'A7'
+  - Deze afrit verbindt twee A-wegen met elkaar.
+
+---
+
+**Eis**  
+Voor locatietypes Knooppunt (P1.1), Knooppunt (triangle) (P1.2), Afrit (P1.3), Kruising (P1.11) moet de locatie toegankelijk zijn vanuit minstens één richting.
+
+**Technisch handboek**  
+pag 35 §4.3.2, pag 38 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor locatietypes P&R Terrein (P3.7) en Parkeerterrein (P3.8) dienen alle bereikbaarheidswaarden '0' te zijn.
+
+**Technisch handboek**  
+pag 29 §4.2.8
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor locatietype Verbindingsweg (P1.14) moet precies één van de velden 'Toegankelijk uitgaand positief' en 'Toegankelijk uitgaand negatief' de waarde '1' te hebben.
+
+**Technisch handboek**  
+pag 36 §4.3.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een Grensovergang (P1.14) dient bereikbaar te zijn in positieve richting en de bijhorende grensovergang in negatieve richting.
+
+**Technisch handboek**  
+pag 54 §4.5.5
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De locatietypes Parkeerplaats 'service' (P3.3), Parkeerplaats 'rest' (P3.4), Tankstation (P3.12) dienen eenzijdig bereikbaar te zijn als de locatie op een A-weg ligt.
+
+**Technisch handboek**  
+pag 50 §4.5.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Knooppunten (P1.1, P1.2) dienen op een weg met type L1.1, L1.2 of L2.1 te liggen.
+
+**Technisch handboek**  
+pag 34 §4.3.1 (P1.1), pag 35 §4.3.2 (P1.2)
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een grensovergang wordt tweemaal opgenomen. Eénmaal voor Nederland en éénmaal voor het betreffende buurland.
+
+**Technisch handboek**  
+pag 54 §4.5.5
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Grensovergangen die bij elkaar horen dienen naar elkaar te wijzen via het veld 'Locatienummer kruisverwijzing'
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Verbindingswegen naar de kruisende weg zijn voor het knooppunt gecodeerd, waarbij "voor" wordt gezien in de ketenrichting waaruit de verbindingsweg ontspringt.
+
+**Technisch handboek**  
+pag 36 §4.3.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+In een bepaalde richting (POS of NEG) zijn de start- en eind-hectometerwaarde beide leeg of beide gevuld.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De hectometerwaarden van Verbindingswegen (P1.14) zijn gevuld in de richting waarin deze toegankelijk is.
+
+**Technisch handboek**  
+niet vermeld in technisch handboek
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De waarde van het veld 'Hectometerrichting' volgt de hectometreringsrichting, of is leeg bij een tekenwisseling.
+
+**Technisch handboek**  
+pag 31 §4.2.11.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het locatietype Afrit wordt gebruikt voor het aanduiden van een ongelijkvloerse kruising van een A- of N-weg met een N-weg of stedelijke weg.
+
+**Technisch handboek**  
+pag 38 §4.3.4
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+# Lijnrecords
+**Eis**  
+Een locatie van type Snelweg of Ringweg heeft een wegnummer dat begint met A.
+
+**Technisch handboek**  
+pag 63 §5.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een locatie van type 'Eerste Klasse Weg' heeft een wegnummer dat begint met N.
+
+**Technisch handboek**  
+pag 66 §5.4.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Bij lijntype Veerdienst dient het veld leeg te zijn.
+
+**Technisch handboek**  
+pag 62 §5.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld wegnaam is verplicht voor locaties van type 'Tweede Klasse Weg', Stadsringweg en Veerdienst.
+
+**Technisch handboek**  
+pag 62 §5.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 1' dient leeg te zijn voor (stads)ringwegen.
+
+**Technisch handboek**  
+pag 65 §5.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Voor de naamgeving van segmenten worden de windrichtingen gebruikt. De eerste en tweede naam maken gebruik van een knooppunt- of afritnaam.
+
+**Technisch handboek**  
+pag 14 §3.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 1' dient ingevuld te zijn voor alle lijnlocatietypes behalve (stads)ringwegen.
+
+**Technisch handboek**  
+pag 62 §5.2.2, pag 84 bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 2' dient ingevuld te zijn voor alle lijnlocatietypes behalve (stads)ringwegen.
+
+**Technisch handboek**  
+pag 62 §5.2.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Hectometerwaarde-velden dienen bij weglocaties leeg te zijn
+
+**Technisch handboek**  
+pag 84 Bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Hoogste orde weglocaties dienen zwevend te zijn; dit betekent dat de locatienummer-velden 'lijn', 'keten positief' en 'keten negatief' leeg dienen te zijn.
+
+**Technisch handboek**  
+pag 62 §5.1, pag 63 §5.2.5, §5.2.6
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Stedelijke wegen (locatietypes 'Tweede Klasse Weg' en Stadsringweg) dienen een locatienummer van 25.000 of hoger te hebben.
+
+**Technisch handboek**  
+pag 22 §3.7
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Referentie Actuele Wegenlijst' wordt niet gebruikt voor lijnlocaties.
+
+**Technisch handboek**  
+pag 18 §3.4.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Alleen de velden 'Wegnummer', 'Wegnaam', 'Naam 1/2', 'Codeerrichting', 'Locatienummer lijn/gebied' en 'Locatienummer keten positief/negatief' worden gebruikt voor lijnlocaties.
+
+**Technisch handboek**  
+pag 62 §5.2, pag 84 Bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Als twee segmenten elkaar opvolgen, dan is de eindnaam van het eerste segment de startnaam van het opvolgende segment.
+
+**Technisch handboek**  
+pag 14 §3.2.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Indien een weg bestaat uit meerdere losstaande routedelen, worden deze delen altijd als aparte orde 1 segmenten opgenomen.
+
+**Technisch handboek**  
+pag 13 §3.2.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Ringwegen worden gesegmenteerd in minimaal vier segmenten.
+
+**Technisch handboek**  
+pag 14 §3.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Een orde 1 segment (L3.0) verwijst naar een hogere weg (L1.1, L1.2, L1.3, L2.1, L2.2), een orde 2 segment (L4.0) verwijst naar een orde 1 segment (L3.0).
+
+**Technisch handboek**  
+pag 62 §5.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+# Gebiedsrecords
+**Eis**  
+Alleen de velden 'Naam 1', 'Locatienummer gebied' en 'Referentie Actuele Wegenlijst' worden gebruikt voor gebiedslocaties.
+
+**Technisch handboek**  
+pag 71 §6.2, pag 84 Bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 1' dient ingevuld te zijn voor alle gebiedslocaties.
+
+**Technisch handboek**  
+pag 71 §6.2, pag 84 bijlage C
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Locatienummer gebied' dient leeg te zijn voor locaties van het type Werelddeel.
+
+**Technisch handboek**  
+pag 71 §6.2.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Als verwezen wordt van gebied naar gebied, dient deze te voldoen aan de voorgeschreven hiërarchie.
+
+**Technisch handboek**  
+pag 70-71 §6.1, figuur 20, §6.2.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Naam 2' dient leeg te zijn voor gebiedslocaties.
+
+**Technisch handboek**  
+pag 71 §6.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Referentie Actuele Wegenlijst' wordt alleen gebruikt voor gebiedslocaties van het type RWS Wegendistrict.
+
+**Technisch handboek**  
+pag 71 §6.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Het veld 'Referentie Actuele Wegenlijst' is verplicht voor locaties van het type 'RWS Wegendistrict'.
+
+**Technisch handboek**  
+pag 71 §6.2.3
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+De VILD bevat één gebied van het type werelddeel.
+
+**Technisch handboek**  
+pag 72 §6.3.1
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+**Eis**  
+Onderliggende punten van Parkeergebieden (A6.8) hebben locatietype parkeerterrein (P3.8).
+
+**Technisch handboek**  
+pag 75 §6.5.2
+
+**Afwijkingen**  
+Voor deze eis zijn geen afwijkingen vastgesteld.
+
+---
+
+
+
+---
+
+# Appendix
+
+Sommige velden in de DBF hebben waardes die aangeven dat er geen waarde bekend is. Deze waardes zijn in dit rapport vertaald naar een leeg veld.
+Om de vertaalslag terug te kunnen maken kan onderstaande tabel gebruikt worden.
+
+| dbf naam | naam in rapport | waarde indien leeg |
+|----------|-----------------|-------------------|
+| LOC_NR | Locatienummer | |
+| LOC_TYPE | Locatietype | |
+| LOC_DES | Locatietype omschrijving | |
+| ROADNUMBER | Wegnummer | |
+| ROADNAME | Wegnaam | |
+| FIRST_NAME | Naam 1 | |
+| SECND_NAME | Naam 2 | |
+| JUNCT_REF | Locatienummer knooppunt | 0 |
+| EXIT_NR | Afritnummer | |
+| HSTART_POS | Beginhectometer positief | -1 |
+| HEND_POS | Eindhectometer positief | -1 |
+| HSTART_NEG | Beginhectometer negatief | -1 |
+| HEND_NEG | Eindhectometer negatief | -1 |
+| HECTO_CHAR | Hectoletter | |
+| HECTO_DIR | Hectometerrichting | 0 |
+| POS_IN | Toegankelijk inkomend positief | |
+| POS_OUT | Toegankelijk uitgaand positief | |
+| NEG_IN | Toegankelijk inkomend negatief | |
+| NEG_OUT | Toegankelijk uitgaand negatief | |
+| DIR | Codeerrichting | 0 |
+| AREA_REF | Locatienummer gebied | 0 |
+| LIN_REF | Locatienummer lijn | 0 |
+| INTER_REF | Locatienummer kruisverwijzing | 0 |
+| POS_OFF | Locatienummer keten positief | 0 |
+| NEG_OFF | Locatienummer keten negatief | 0 |
+| URBAN_CODE | Code stedelijk | |
+| PRES_POS | Aanwezig positief | |
+| PRES_NEG | Aanwezig negatief | |
+| FAR_AWAY | Ver weg | |
+| CITY_DISTR | Stad wijk | |
+| TOP_SIGN | Bovenste naam bord | |
+| TYPE_CODE | Code type | 0 |
+| MW_REF | Referentie Meldwerk | 0 |
+| RW_NR | Rijkswegnummer | 0 |
+| AW_REF | Referentie Actuele Wegenlijst | 0 |
