@@ -150,6 +150,6 @@ addEventListener("popstate", route);
 route();
 setInterval(() => { if (!$("#lijst").hidden) laadLijst(); }, 120_000);
 
-// Side column: Live kaart, Weer and Verkeer nu (on a phone below the news).
+// Side column: Live kaart, Verkeer nu and Weer (on a phone below the news).
 const widgetsEl = document.getElementById("widgets");
-if (widgetsEl) maakWidgets(widgetsEl, { widgets: ["kaart", "weer", "verkeer"], thema: "auto" });
+if (widgetsEl) maakWidgets(widgetsEl, { widgets: ["kaart", "verkeer", "weer"], thema: "auto" });
