@@ -41,6 +41,8 @@ async function ophalen(env, now) {
   if (!res.ok) throw new Error(`verkeer HTTP ${res.status}`);
   const data = await res.json();
   if (!Array.isArray(data?.items)) throw new Error("verkeer: geen lijst");
+  // Right after a restart the service has no speed cameras yet (OpenStreetMap is read in the background): keep the old ones.
+  if (!data.flitsers?.length && oud?.data?.flitsers?.length) data.flitsers = oud.data.flitsers;
   await kvWrite(env, KEY, JSON.stringify({ etag: res.headers.get("etag"), at: Date.now(), data }));
   return { ok: true, nieuw: true, items: data.items.length, ndwOud: ndwOud(data) };
 }
