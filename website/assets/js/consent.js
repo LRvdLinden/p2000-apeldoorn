@@ -1,5 +1,6 @@
 // Cookie notice (AVG/ePrivacy), same pattern as weekdot.com. Necessary storage (this choice, read alerts and filters)
-// is always on. Apple Maps (MapKit JS, a third party that sees your IP address) only loads after "Accepteren".
+// is always on. Apple Maps (MapKit JS, a third party that sees your IP address) and Google Tag Manager (statistics)
+// only load after "Accepteren".
 // The choice is kept for 12 months, in localStorage and in a first-party cookie.
 (function () {
   "use strict";
@@ -8,7 +9,7 @@
   var T = {
     title: "Cookies en privacy",
     text: "A-Alerts gebruikt alleen opslag die nodig is voor de site: deze keuze, welke meldingen je al hebt bekeken en je filters. " +
-      "Met je toestemming laden we ook de kaarten van Apple Kaarten; daarbij ziet Apple je IP-adres. Geen advertenties, geen tracking.",
+      "Met je toestemming laden we ook de kaarten van Apple Kaarten en meten we het bezoek met Google Tag Manager; daarbij zien Apple en Google je IP-adres. Geen advertenties.",
     more: "Meer over cookies",
     accept: "Accepteren",
     necessary: "Alleen noodzakelijk",
@@ -58,7 +59,7 @@
         if (back && back.focus) try { back.focus({ preventScroll: true }); } catch (e) { back.focus(); }
       }
     }
-    d.querySelector(".y").onclick = function () { close("all"); };
+    d.querySelector(".y").onclick = function () { close("all"); laadGTM(); };
     d.querySelector(".n").onclick = function () { close("necessary"); };
     (document.body || document.documentElement).appendChild(d);
     try { d.focus({ preventScroll: true }); } catch (e) { d.focus(); }
@@ -76,10 +77,26 @@
   function showBubble(on) { var b = document.getElementById("p2000-cookie-btn"); if (on) bubble(); else if (b) b.remove(); }
   function open() { var x = document.getElementById("p2000-consent"); if (x) x.remove(); showBubble(false); banner(); }
 
+  // Google Tag Manager (GTM-PTJLKPQX): only with consent, once per page.
+  var GTM = "GTM-PTJLKPQX";
+  function laadGTM() {
+    if (window.__aalertsGTM) return;
+    window.__aalertsGTM = true;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
+    var s = document.createElement("script");
+    s.async = true; s.src = "https://www.googletagmanager.com/gtm.js?id=" + GTM;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
   window.P2000Consent = { open: open, get: read, maps: function () { var c = read(); return !!(c && c.choice === "all"); } };
 
   function start() {
-    if (read()) bubble(); else banner();
+    var c = read();
+    if (c && c.choice === "all") laadGTM();
+    if (c) bubble(); else banner();
     // Links and buttons "Cookie-instellingen" (fall back to the privacy page without JavaScript).
     document.addEventListener("click", function (e) {
       var a = e.target.closest && e.target.closest("[data-consent-open]");

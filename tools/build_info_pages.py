@@ -13,7 +13,7 @@ from datetime import date
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent / "website"
 SITE = "https://a-alerts.nl"
-V = "35"
+V = "59"
 
 PAGES = [
     # slug, data file, title (<title>), h1, description
