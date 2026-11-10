@@ -2,6 +2,7 @@
 // p2000-apeldoorn-api.lrvdlinden.workers.dev.
 //  - Cron (every minute): reads the p2000.page feed 3× per run, stores Apeldoorn alerts in D1 and sends pushes.
 //  - HTTP: the same REST API the app, the widgets and the website use.
+import { verkeer, verkeerRun } from "./verkeer.js";
 import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError } from "./rules.js";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
@@ -268,6 +269,7 @@ async function handle(req, env, ctx) {
   }
 
   // Rain radar (KNMI): one image of the Netherlands, or map tiles.
+  if (method === "GET" && path === "/v1/verkeer") return reply(200, await verkeer(env), { "cache-control": "public, max-age=60" });
   if (method === "GET" && path === "/v1/radar") return reply(200, radarInfo(env, url.origin), { "cache-control": "public, max-age=60" });
   if (method === "GET" && path === "/v1/radar.png") return radarImage(env, ctx);
   // Square map with a marker, for the image tags in Homey.
@@ -685,6 +687,7 @@ async function cron(env, event) {
   }
   try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
   await nieuwsRun(env, budget);
+  try { await verkeerRun(env, budget); } catch (e) { console.error("[verkeer]", e.message || e); }
   const homey = async () => { try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); } };
   await homey();
   // Five reads per minute: new alerts show up (and are pushed) within ~12 seconds.

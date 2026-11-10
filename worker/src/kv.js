@@ -8,6 +8,7 @@ const HARTSLAG = [
   [/^(cron_run|feed_ok)$/, 90_000],
   [/^status_heli_ok$/, 120_000],
   [/^(bron_ok:.+|status_weer_ok)$/, 240_000],
+  [/^verkeer$/, 120_000], // traffic list: at most every 2 minutes (delays change every minute)
 ];
 
 export const kvInterval = (key) => HARTSLAG.find(([re]) => re.test(key))?.[1] || 0;
