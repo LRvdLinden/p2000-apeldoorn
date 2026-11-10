@@ -1,8 +1,0 @@
-name: Probe
-on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
-jobs:
-  p:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          for f in js-brand-1 112-brand-1; do echo "== $f"; curl -sI -A "A-Alerts/73 CFNetwork/3826 Darwin/25.0.0" -H "Accept: image/webp,image/avif,image/jxl,image/heic,image/*,*/*;q=0.8" "https://a-alerts.nl/assets/img/nieuws/$f.webp?v=3" | grep -iE "^(HTTP|content-type|content-length|cache-control|cf-cache|age|last-modified|server|x-)" ; done
