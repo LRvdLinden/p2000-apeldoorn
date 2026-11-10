@@ -438,7 +438,8 @@ export async function fetchVerkeer() {
   return data || verkeerCache?.data || { items: [], flitsers: [] };
 }
 export const verkeerKleur = (v) => VERKEER_KLEUR[v.soort] || VERKEER_KLEUR.werk;
-export const verkeerIcon = (soort) => asset(`assets/img/verkeer_${soort}.png`);
+// ?v=2: the site caches images 30 days; raise when the icons change.
+export const verkeerIcon = (soort) => asset(`assets/img/verkeer_${soort}.png?v=2`);
 /** "2,4 km · +4 min" */
 export const verkeerFile = (v) => [v.lengte_km ? `${String(v.lengte_km).replace(".", ",")} km` : "", v.vertraging_min ? `+${v.vertraging_min} min` : ""].filter(Boolean).join(" · ");
 export function verkeerOverlay(mk, v) {
@@ -448,25 +449,28 @@ export function verkeerOverlay(mk, v) {
       ...(v.soort === "afsluiting" ? { lineDash: [6, 5] } : {}) }),
   });
 }
-function iconAnnotation(mk, lat, lon, src, title, size, onSelect, item) {
+// A pin (accident, breakdown, speed camera) stands with its point on the spot (MapKit JS anchors the bottom centre);
+// a round icon (closure, jam, roadworks) is centred on the spot.
+function iconAnnotation(mk, lat, lon, src, title, size, onSelect, item, pin = false) {
+  const h = pin ? Math.round(size * 1.25) : size;
   const a = new mk.Annotation(new mk.Coordinate(lat, lon), () => {
     const el = document.createElement("div");
-    el.innerHTML = `<img src="${src}" alt="" style="width:${size}px;height:${size}px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">`;
+    el.innerHTML = `<img src="${src}" alt="" style="width:${size}px;height:${h}px;display:block;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))">`;
     el.title = title;
     return el;
-  }, { calloutEnabled: false, title });
+  }, { calloutEnabled: false, title, ...(pin ? {} : { anchorOffset: new DOMPoint(0, size / 2) }) });
   if (onSelect) a.addEventListener("select", () => onSelect(item));
   return a;
 }
 export const verkeerAnnotation = (mk, v, onSelect) =>
-  iconAnnotation(mk, v.lat, v.lon, verkeerIcon(v.soort), [v.titel, v.weg, v.plaats].filter(Boolean).join(" · "), 24, onSelect, v);
+  iconAnnotation(mk, v.lat, v.lon, verkeerIcon(v.soort), [v.titel, v.weg, v.plaats].filter(Boolean).join(" · "), 26, onSelect, v, v.soort === "ongeval" || v.soort === "pech");
 export const flitserAnnotation = (mk, f, onSelect) =>
-  iconAnnotation(mk, f.lat, f.lon, verkeerIcon("flitser"), f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser", 20, onSelect, f);
+  iconAnnotation(mk, f.lat, f.lon, verkeerIcon("flitser"), f.soort === "trajectcontrole" ? "Trajectcontrole" : "Flitser", 24, onSelect, f, true);
 /** Panel text of a traffic item (HTML). */
 export function verkeerHTML(v) {
   const tijd = (t) => new Date(t).toLocaleString("nl-NL", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: TZ });
   const f = verkeerFile(v);
-  return `<p><img src="${verkeerIcon(v.soort)}" alt="" style="width:20px;height:20px;vertical-align:-4px"> <b style="color:${verkeerKleur(v)}">${esc(VERKEER_SOORT[v.soort] || "")}</b></p>
+  return `<p><img src="${verkeerIcon(v.soort)}" alt="" style="width:20px;height:auto;vertical-align:-4px"> <b style="color:${verkeerKleur(v)}">${esc(VERKEER_SOORT[v.soort] || "")}</b></p>
     ${v.weg || v.plaats ? `<p>${esc([v.weg, v.plaats].filter(Boolean).join(", "))}</p>` : ""}
     ${f ? `<p><b style="color:${verkeerKleur(v)}">${esc(f)}</b></p>` : ""}
     ${v.opmerking ? `<p>${esc(v.opmerking)}</p>` : ""}

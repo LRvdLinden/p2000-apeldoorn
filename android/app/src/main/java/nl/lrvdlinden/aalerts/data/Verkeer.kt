@@ -32,6 +32,8 @@ data class VerkeerItem(
         "ongeval" -> tr("Ongeval", "Accident"); "afsluiting" -> tr("Afsluiting", "Closure"); "file" -> tr("File", "Traffic jam")
         "pech" -> tr("Pech of obstakel", "Breakdown or obstacle"); else -> tr("Werkzaamheden", "Roadworks")
     }
+    /** Accident and breakdown are a spot: a pin. */
+    val isMarker: Boolean get() = soort == "ongeval" || soort == "pech"
     val titelLokaal: String get() = tr(titel, TITELS_EN[titel] ?: titel)
     val waar: String? get() = listOfNotNull(weg?.takeIf { it.isNotBlank() }, plaats?.takeIf { it.isNotBlank() }).joinToString(", ").ifBlank { null }
     val fileTekst: String? get() = listOfNotNull(

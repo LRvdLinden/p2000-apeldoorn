@@ -87,13 +87,13 @@ struct MeldkamerView: View {
                         MapPolyline(coordinates: v.route).stroke(v.soort.kleur, style: StrokeStyle(lineWidth: 5, lineCap: .round, dash: v.soort == .afsluiting ? [8, 6] : []))
                     }
                     ForEach(VerkeerStore.shared.items) { v in
-                        Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: .center) { VerkeerIcon(soort: v.soort, size: 30) }
+                        Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: v.soort.isMarker ? .bottom : .center) { VerkeerIcon(soort: v.soort, size: 32) }
                             .annotationTitles(.hidden)
                     }
                 }
                 if settings.laag(.flitsers) {
                     ForEach(VerkeerStore.shared.flitsers) { f in
-                        Annotation("", coordinate: f.coordinate, anchor: .center) { FlitserIcon(flitser: f, size: 26) }
+                        Annotation("", coordinate: f.coordinate, anchor: .bottom) { FlitserIcon(flitser: f, size: 28) }
                             .annotationTitles(.hidden)
                     }
                 }

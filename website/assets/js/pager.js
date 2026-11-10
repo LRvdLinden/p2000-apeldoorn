@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=58";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=59";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -862,7 +862,7 @@ const LAGEN = [
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
   ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B"],
-  ["flitsers", "Flitsers", "verkeer_flitser", "#1D1D1F"],
+  ["flitsers", "Flitsers", "verkeer_flitser", "#1A8CE8"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626"],
   ["buienradar", "Buien", "icon_knmi", "#2563EB"],
 ];
@@ -890,7 +890,7 @@ function renderMapChips() {
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {

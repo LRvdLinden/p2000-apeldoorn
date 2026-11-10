@@ -347,8 +347,8 @@ struct MapScreen: View {
                                                                dash: v.soort == .afsluiting ? [6, 5] : []))
             }
             ForEach(verkeer.items) { v in
-                Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: .center) {
-                    VerkeerIcon(soort: v.soort, size: selectedVerkeer?.id == v.id ? 32 : 24)
+                Annotation(v.titelLokaal, coordinate: v.coordinate, anchor: v.soort.isMarker ? .bottom : .center) {
+                    VerkeerIcon(soort: v.soort, size: selectedVerkeer?.id == v.id ? 32 : 26)
                         .onTapGesture { selectedVerkeer = v }
                         .accessibilityAddTraits(.isButton)
                         .accessibilityLabel([v.soort.label, v.titelLokaal, v.waar].compactMap { $0 }.joined(separator: ", "))
@@ -358,8 +358,8 @@ struct MapScreen: View {
         }
         if settings.laag(.flitsers) {
             ForEach(verkeer.flitsers) { f in
-                Annotation(f.isTraject ? L("Trajectcontrole") : L("Flitser"), coordinate: f.coordinate, anchor: .center) {
-                    FlitserIcon(flitser: f, size: 20)
+                Annotation(f.isTraject ? L("Trajectcontrole") : L("Flitser"), coordinate: f.coordinate, anchor: .bottom) {
+                    FlitserIcon(flitser: f, size: selectedFlitser?.id == f.id ? 30 : 24)
                         .onTapGesture { selectedFlitser = f }
                         .accessibilityAddTraits(.isButton)
                 }

@@ -75,6 +75,8 @@ struct VerkeerItem: Decodable, Identifiable, Hashable, Sendable {
 }
 
 extension VerkeerItem.Soort {
+    /// Accidents and breakdowns are a spot: a pin. Closures, jams and roadworks: a round icon on the stretch.
+    var isMarker: Bool { self == .ongeval || self == .pech }
     var label: String {
         switch self {
         case .ongeval: return L("Ongeval")
@@ -152,28 +154,16 @@ final class VerkeerStore {
     }
 }
 
-/// Map icon in the style of the traffic apps: a coloured rounded square with a white symbol; a closure is a red circle
-/// with a white bar (no entry), a speed camera a dark square with a camera.
+/// Map icon: a pin for a spot (accident, breakdown, speed camera: the point is the place), a round icon for things
+/// along a stretch of road (closure, jam, roadworks: the line on the map shows the stretch). Own drawings, in SharedAssets.
 struct VerkeerIcon: View {
     let soort: VerkeerItem.Soort
     var size: CGFloat = 24
 
     var body: some View {
-        ZStack {
-            if soort == .afsluiting {
-                Circle().fill(Color.white)
-                Circle().fill(soort.kleur).padding(size * 0.08)
-                RoundedRectangle(cornerRadius: size * 0.06).fill(Color.white).frame(width: size * 0.56, height: size * 0.16)
-            } else {
-                RoundedRectangle(cornerRadius: size * 0.26, style: .continuous).fill(Color.white)
-                RoundedRectangle(cornerRadius: size * 0.2, style: .continuous).fill(soort.kleur).padding(size * 0.08)
-                Image(systemName: soort.symbool)
-                    .font(.system(size: size * (soort == .ongeval ? 0.36 : 0.46), weight: .bold))
-                    .foregroundStyle(soort == .werk ? Color(hex: 0x1D1D1F) : .white)
-            }
-        }
-        .frame(width: size, height: size)
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+        Image("verkeer_\(soort.rawValue)").resizable().scaledToFit()
+            .frame(width: size, height: soort.isMarker ? size * 1.25 : size)
+            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
     }
 }
 
@@ -181,14 +171,9 @@ struct FlitserIcon: View {
     let flitser: Flitser
     var size: CGFloat = 22
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: size * 0.26, style: .continuous).fill(Color.white)
-            RoundedRectangle(cornerRadius: size * 0.2, style: .continuous).fill(Color(hex: 0x1D1D1F)).padding(size * 0.08)
-            Image(systemName: flitser.isTraject ? "point.topleft.down.to.point.bottomright.curvepath.fill" : "camera.fill")
-                .font(.system(size: size * 0.42, weight: .bold)).foregroundStyle(.white)
-        }
-        .frame(width: size, height: size)
-        .shadow(color: .black.opacity(0.25), radius: 2, y: 1)
+        Image("verkeer_flitser").resizable().scaledToFit()
+            .frame(width: size, height: size * 1.25)
+            .shadow(color: .black.opacity(0.3), radius: 2, y: 1)
     }
 }
 

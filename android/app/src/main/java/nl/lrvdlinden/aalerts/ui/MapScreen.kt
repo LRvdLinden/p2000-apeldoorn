@@ -161,10 +161,11 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.VERKEER.key in lagen) vk?.items?.forEach { v ->
         val r = v.route
         if (r.size >= 2) lines += MapLine("vl:${v.id}", r, v.kleur.toArgb().toLong(), dashed = v.soort == "afsluiting", width = if (v.soort == "file") 6.0 else 4.0)
-        points += MapPoint("v:${v.id}", v.lat, v.lon, v.icon, if (selected == "v:${v.id}") 32 else 24, anchorBottom = false)
+        // Accident and breakdown: a pin on the spot; closure, jam and roadworks: round on the stretch.
+        points += MapPoint("v:${v.id}", v.lat, v.lon, v.icon, if (selected == "v:${v.id}") 32 else 26, anchorBottom = v.isMarker)
     }
     if (KaartLaag.FLITSERS.key in lagen) vk?.flitsers?.forEach { f ->
-        points += MapPoint("f:${f.id}", f.lat, f.lon, R.drawable.verkeer_flitser, if (selected == "f:${f.id}") 28 else 20, anchorBottom = false)
+        points += MapPoint("f:${f.id}", f.lat, f.lon, R.drawable.verkeer_flitser, if (selected == "f:${f.id}") 30 else 24, anchorBottom = true)
     }
     if (KaartLaag.ZIEKENHUIZEN.key in lagen) Store.locaties.forEach { l ->
         points += MapPoint("l:${l.id}", l.lat, l.lon, l.icon, if (selected == "l:${l.id}") 30 else 22, anchorBottom = false)
@@ -274,7 +275,7 @@ fun MapScreen(nav: Nav) {
                     PreviewCard(onClose = { selected = null }) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(painterResource(v.icon), null, Modifier.size(36.dp))
+                                Image(painterResource(v.icon), null, Modifier.size(36.dp, if (v.isMarker) 45.dp else 36.dp))
                                 Spacer(Modifier.width(10.dp))
                                 Column {
                                     Text(v.soortLabel.uppercase(), color = v.kleur, fontSize = 11.sp, fontWeight = FontWeight.Bold)
@@ -294,7 +295,7 @@ fun MapScreen(nav: Nav) {
                     PreviewCard(onClose = { selected = null }) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Image(painterResource(R.drawable.verkeer_flitser), null, Modifier.size(36.dp))
+                                Image(painterResource(R.drawable.verkeer_flitser), null, Modifier.size(36.dp, 45.dp))
                                 Spacer(Modifier.width(10.dp))
                                 Text(if (f.isTraject) tr("Trajectcontrole", "Average speed check") else tr("Flitser", "Speed camera"), fontSize = 17.sp, fontWeight = FontWeight.Bold)
                             }
