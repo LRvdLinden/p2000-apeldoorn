@@ -1,12 +1,9 @@
 name: Probe
 on: { push: { branches: [a-alerts], paths: [".github/workflows/push-tail.yml"] } }
-permissions: { contents: write }
 jobs:
   p:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          mkdir s; cd s
-          for f in actueel_beeld.xml.gz veiligheidsgerelateerde_informatie_srti.xml.gz tijdelijke_verkeersmaatregelen_afsluitingen.xml.gz trafficspeed.xml.gz snelheden_en_intensiteiten_configuratie_meetlocaties.xml.gz traveltime.xml.gz reistijden_configuratie_meetlocaties.xml.gz; do curl -s -o $f https://opendata.ndw.nu/$f; done
-          git init -q -b ndw-samples && git add . && git -c user.name=probe -c user.email=p@p commit -qm samples
-          git push -qf "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" ndw-samples
+          Q='[out:json][timeout:25];node["highway"="speed_camera"](52.05,5.75,52.33,6.15);out body;'
+          for s in https://overpass-api.de/api/interpreter https://lz4.overpass-api.de/api/interpreter https://z.overpass-api.de/api/interpreter https://overpass.kumi.systems/api/interpreter; do echo "== $s"; curl -s -m 60 -w '\n%{http_code} %{time_total}\n' --data-urlencode "data=$Q" "$s" | tail -c 600; done
