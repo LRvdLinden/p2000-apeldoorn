@@ -52,3 +52,18 @@ if (process.argv.includes('--knmi')) {
     tx: 295, ty: 300, bigTop: 690, subOffset: 128, bigSize: 114 }));
   render(groen, OUT, 1200, false);
 }
+
+// Ended (square, for Homey and social media): Burgernet, AMBER Alert, Vermist Kind and NL-Alert after the call ended.
+if (process.argv.includes('--afgerond')) {
+  const TEKST = {
+    burgernet: { big: 'Afgerond', sub: 'De Burgernet-actie is beëindigd', label: 'AFGEROND' },
+    amber: { big: 'Afgerond', sub: 'De AMBER Alert is beëindigd', label: 'AFGEROND' },
+    vermistkind: { big: 'Afgerond', sub: 'De Vermist Kind Alert is beëindigd', label: 'AFGEROND' },
+    nlalert: { big: 'Ingetrokken', sub: 'Het NL-Alert geldt niet meer', label: 'INGETROKKEN' },
+  };
+  const afgerond = VIERKANT.filter((b) => Object.keys(TEKST).some((k) => b.name === `banner-${k}-apeldoorn-vierkant`)).map((b) => {
+    const t = TEKST[b.name.replace('banner-', '').replace('-apeldoorn-vierkant', '')];
+    return { ...b, name: `${b.name}-afgerond`, afgerond: true, afgerondLabel: t.label, big: t.big, sub: t.sub, bigSize: 110, subOffset: 124 };
+  });
+  render(afgerond, OUT, 1200, false);
+}

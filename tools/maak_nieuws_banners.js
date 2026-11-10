@@ -49,10 +49,12 @@ function page(b) {
   ${b.extra || ''}
   <div class="band"></div>
   ${rings(b.ringColor || '#fff', (b.tx ?? 820) + 140, (b.ty ?? 150) + 140)}
-  <div class="tile">${b.tile}</div>
+  ${b.afgerond ? '<div style="position:absolute;inset:0;background:rgba(10,14,24,.38)"></div>' : ''}
+  <div class="tile">${b.tile}${b.afgerond ? '<div style="position:absolute;right:-18px;bottom:-18px;width:96px;height:96px;border-radius:50%;background:#1E8A45;border:8px solid #fff;display:grid;place-items:center;color:#fff;font-size:52px;font-weight:700">✓</div>' : ''}</div>
   ${b.shade === false ? '' : '<div class="shade"></div>'}
   <div class="pill">${b.pillIcon}${b.pill}</div>
   ${b.live ? '<div class="live"><i></i>LIVEBLOG</div>' : ''}
+  ${b.afgerond ? `<div class="live" style="background:#1E8A45">✓ ${b.afgerondLabel || 'AFGEROND'}</div>` : ''}
   ${b.big ? `<div class="big">${b.big}</div>` : ''}${b.sub ? `<div class="sub">${b.sub}</div>` : ''}
   <div class="site"><img src="${IMG}aalerts-icon-180.png">a-alerts.nl</div>
   </div></body></html>`;
