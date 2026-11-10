@@ -1,0 +1,6 @@
+# Widgets: these pages are meant to be shown in an iframe on other websites. The site-wide X-Frame-Options SAMEORIGIN
+# (see ../.htaccess) would block that, so here every site may frame them; blocking a site goes via beheer (Widgets).
+<IfModule mod_headers.c>
+  Header always unset X-Frame-Options
+  Header always set Content-Security-Policy "frame-ancestors *"
+</IfModule>
