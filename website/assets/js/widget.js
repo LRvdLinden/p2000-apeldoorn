@@ -93,7 +93,8 @@ export function maakWidgets(el, opts = {}) {
     return sleutels.map((k) => {
       const vs = m.get(k).sort((a, b) => VOLGORDE.indexOf(a.soort) - VOLGORDE.indexOf(b.soort));
       const lokaal = k.startsWith("L:");
-      const open = state.groepen.has(k) ? state.groepen.get(k) : !lokaal || sleutels.every((x) => x.startsWith("L:"));
+      // Closed by default: the visitor sees the roads and places with their counts and opens what interests them.
+      const open = state.groepen.has(k) ? state.groepen.get(k) : false;
       const schild = lokaal ? `<span class="aw-schild L">📍</span><span>${esc(k.slice(2))}</span>` : `<span class="aw-schild ${k[0]}">${esc(k)}</span><span>${esc(ROUTE[k] || "")}</span>`;
       return `<div class="aw-groep${open ? " open" : ""}"><button type="button" class="aw-gkop" data-g="${esc(k)}" aria-expanded="${open}">${schild}<small>${vs.length} melding${vs.length === 1 ? "" : "en"}</small><i>›</i></button>
         ${open ? vs.map((v) => rij(v, gepland)).join("") : ""}</div>`;
