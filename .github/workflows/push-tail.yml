@@ -5,10 +5,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-          curl -s https://opendata.ndw.nu/ | sed 's/<[^>]*>/ /g' | grep -iE "\.gz|\.xml|\.json|\.zip" | tr -s ' ' | head -80
           mkdir s; cd s
-          for f in srti.xml.gz actuele_statusberichten.xml.gz incidents.xml.gz wegwerkzaamheden.xml.gz; do curl -s -o $f https://opendata.ndw.nu/$f; echo "$f $(stat -c%s $f) $(zcat $f 2>/dev/null | wc -c)"; done
-          zcat srti.xml.gz | head -c 4000; echo; echo =====
-          zcat actuele_statusberichten.xml.gz | head -c 5000; echo
+          for f in actueel_beeld.xml.gz veiligheidsgerelateerde_informatie_srti.xml.gz tijdelijke_verkeersmaatregelen_afsluitingen.xml.gz trafficspeed.xml.gz snelheden_en_intensiteiten_configuratie_meetlocaties.xml.gz traveltime.xml.gz reistijden_configuratie_meetlocaties.xml.gz; do curl -s -o $f https://opendata.ndw.nu/$f; echo "$f $(stat -c%s $f)"; done
+          curl -sI https://opendata.ndw.nu/actueel_beeld.xml.gz | grep -iE "last-mod|etag|cache"
       - uses: actions/upload-artifact@v4
-        with: { name: s, path: s }
+        with: { name: ndw, path: s }
