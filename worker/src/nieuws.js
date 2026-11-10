@@ -249,12 +249,17 @@ export async function sync112(env, budget, kv, now = Date.now()) {
   return [...new Set(nieuw)];
 }
 
-/** Royalty-free photos (Pixabay) per subject; the variant follows from the id so an article always keeps its photo. */
+/** Stock photos per subject (Pixabay and stock photos supplied by A-Alerts); the variant follows from the id, so an article keeps its photo. */
 const FOTOS_112 = {
-  brand: ["112-brand-1", "112-brand-2", "112-brand-3"], ambulance: ["112-ambulance-1", "112-ambulance-2", "112-ambulance-3"],
-  traumaheli: ["112-traumaheli-1"], verkeer: ["112-ambulance-2", "politie-verkeer"], politie: ["politie-algemeen", "politie-drugs", "politie-getuigen"],
-  algemeen: ["112-ambulance-1", "112-brand-1", "politie-algemeen"],
+  brand: ["112-brand-1", "112-brand-2", "112-brand-3", "112-brand-4"],
+  ambulance: ["112-ambulance-1", "112-ambulance-2", "112-ambulance-3", "112-ambulance-4", "112-ambulance-5"],
+  traumaheli: ["112-traumaheli-1"], verkeer: ["112-ambulance-2", "politie-verkeer", "politie-motor-2", "112-ambulance-5"],
+  politie: ["politie-algemeen", "politie-drugs", "politie-getuigen", "politie-auto", "politie-motor-1"],
+  algemeen: ["112-ambulance-1", "112-brand-1", "politie-algemeen", "112-ambulance-4", "politie-auto"],
 };
+/** Police news: more than one photo for the general and traffic subjects (same choice by id). */
+const POLITIE_FOTOS = { algemeen: ["politie-algemeen", "politie-auto", "politie-motor-1"], verkeer: ["politie-verkeer", "politie-motor-2"] };
+const kiesOpId = (lijst, id) => lijst[(parseInt(String(id).slice(2, 10), 16) || 0) % lijst.length];
 export function foto112(row) {
   const lijst = FOTOS_112[row.categorie] || FOTOS_112.algemeen;
   const h = parseInt(String(row.id).slice(2, 10), 16) || 0;
@@ -393,7 +398,7 @@ export function afbeeldingVoor(row, origin, stock = new Map()) {
   if (row.soort === "politie") {
     const cat = STOCK_CATEGORIEEN.includes(row.categorie) ? row.categorie : "algemeen";
     const eigen = stock.get(cat) || stock.get("algemeen");
-    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}politie-${cat}.webp${IMG_V}`;
+    return eigen ? `${origin}/v1/nieuws/foto/${eigen}` : `${IMG}${POLITIE_FOTOS[cat] ? kiesOpId(POLITIE_FOTOS[cat], row.id) : `politie-${cat}`}.webp${IMG_V}`;
   }
   if (row.soort === "weer") return `${IMG}knmi.webp`;
   if (row.soort === "regionaal") return foto112(row);

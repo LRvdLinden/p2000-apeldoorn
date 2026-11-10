@@ -100,7 +100,7 @@ async function toonArtikel(id) {
       ${url ? `<p><a href="${esc(url)}" rel="noopener" target="_blank">${esc(new URL(url).host)} ›</a></p>` : ""}
     </div></li>`;
   }).join("");
-  const bron = x.soort === "regionaal" ? "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay." : x.soort === "politie" ? "Bron: politie.nl. De afbeelding is een stockfoto van Pixabay." : x.soort === "weer" ? "Bron: KNMI."
+  const bron = x.soort === "regionaal" ? "Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto." : x.soort === "politie" ? "Bron: politie.nl. De afbeelding is een stockfoto." : x.soort === "weer" ? "Bron: KNMI."
     : x.bron === "burgernet" ? "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts." : "Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.";
   const bronUrl = veiligUrl(x.bron_url);
   const w = x.weer;

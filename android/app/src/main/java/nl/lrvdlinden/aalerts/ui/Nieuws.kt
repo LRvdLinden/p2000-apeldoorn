@@ -129,7 +129,7 @@ fun NieuwsScreen(nav: Nav) {
                 }
             }
             item {
-                Text(tr("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's van Pixabay.", "Police news: source politie.nl. Images with police news are stock photos from Pixabay."),
+                Text(tr("Politieberichten: bron politie.nl. Afbeeldingen bij politieberichten zijn stockfoto's.", "Police news: source politie.nl. Images with police news are stock photos."),
                     color = Muted, fontSize = 11.sp, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
             }
         }
@@ -268,9 +268,9 @@ fun NieuwsDetail(id: String, nav: Nav) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(when (d.soort) {
-                        "politie" -> tr("Bron: politie.nl. De afbeelding is een stockfoto van Pixabay.", "Source: politie.nl. The image is a stock photo from Pixabay.")
+                        "politie" -> tr("Bron: politie.nl. De afbeelding is een stockfoto.", "Source: politie.nl. The image is a stock photo.")
                         "weer" -> tr("Bron: KNMI.", "Source: KNMI.")
-                        "regionaal" -> tr("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto van Pixabay.", "Source: 112 Nieuws Nederland (112nieuws.net), with permission. The photo is a stock photo from Pixabay.")
+                        "regionaal" -> tr("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto.", "Source: 112 Nieuws Nederland (112nieuws.net), with permission. The photo is a stock photo.")
                         else -> if (d.bron == "burgernet") tr("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                             else tr("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Police, via Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                     }, color = Muted, fontSize = 12.sp)
