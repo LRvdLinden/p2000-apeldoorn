@@ -203,6 +203,6 @@ test("stock photos: JS Fotografie first, never the same photo twice in a row, cr
   const lijst = await listNieuws(env, "https://api", { limit: 10 });
   const brand = lijst.find((x) => x.id === "r-000000000003");
   assert.match(brand.afbeelding, /js-brand-1\.webp/);
-  assert.equal(brand.foto_bron, "JS Fotografie");
+  assert.equal(brand.foto_bron, null, "no photo credit (the photographer asked to leave the name out)");
   assert.equal(lijst.find((x) => x.id === "r-000000000004").foto_bron, null);
 });

@@ -251,7 +251,7 @@ export async function sync112(env, budget, kv, now = Date.now()) {
 }
 
 /**
- * Stock photos per subject. Photos of JS Fotografie (js-*, used with permission, credited) come first and are used
+ * Stock photos per subject. Photos of JS Fotografie (js-*, used with permission; no credit needed) come first and are used
  * as often as possible; the others are Pixabay and photos supplied by A-Alerts. Each article gets the first photo of its
  * subject that is not the photo of the article before it, so two articles in a row never share a photo.
  */
@@ -260,18 +260,18 @@ const FOTOS_112 = {
   ambulance: ["js-ambulance-1", "js-ambulance-2", "112-ambulance-4", "112-ambulance-1", "112-ambulance-2", "112-ambulance-3", "112-ambulance-5"],
   traumaheli: ["js-traumaheli-1", "js-traumaheli-2", "112-traumaheli-1"],
   verkeer: ["js-ambulance-2", "politie-motor-2", "112-ambulance-5", "politie-verkeer", "112-ambulance-2"],
-  politie: ["politie-auto", "politie-motor-1", "politie-algemeen", "politie-getuigen", "politie-drugs"],
+  politie: ["js-politie-1", "js-politieheli-1", "politie-auto", "politie-motor-1", "politie-algemeen", "politie-getuigen", "politie-drugs"],
   algemeen: ["js-ambulance-1", "js-brand-1", "js-traumaheli-2", "politie-auto", "112-ambulance-4", "112-brand-4"],
 };
 const POLITIE_FOTOS = {
-  algemeen: ["politie-algemeen", "politie-auto", "politie-motor-1"], verkeer: ["politie-verkeer", "politie-motor-2", "js-ambulance-2"],
-  brand: ["politie-brand", "js-brand-1", "112-brand-4"], inbraak: ["politie-inbraak", "politie-auto"], getuigen: ["politie-getuigen", "politie-motor-1"],
-  drugs: ["politie-drugs", "politie-auto"], vermist: ["politie-vermist", "politie-algemeen"],
+  algemeen: ["js-politie-1", "politie-algemeen", "js-politieheli-1", "politie-auto", "politie-motor-1"], verkeer: ["politie-verkeer", "politie-motor-2", "js-ambulance-2"],
+  brand: ["politie-brand", "js-brand-1", "112-brand-4"], inbraak: ["politie-inbraak", "politie-auto"], getuigen: ["politie-getuigen", "js-politie-1", "politie-motor-1"],
+  drugs: ["politie-drugs", "politie-auto"], vermist: ["js-politieheli-1", "politie-vermist", "politie-algemeen"],
 };
 const kiesOpId = (lijst, id) => lijst[(parseInt(String(id).slice(2, 10), 16) || 0) % lijst.length];
 const fotoLijst = (soort, categorie) => (soort === "politie" ? POLITIE_FOTOS[categorie] || POLITIE_FOTOS.algemeen : FOTOS_112[categorie] || FOTOS_112.algemeen);
-/** Credit for photos that need one. */
-export const fotoBron = (foto) => (String(foto || "").startsWith("js-") ? "JS Fotografie" : null);
+/** Credit for photos that need one: none at the moment (JS Fotografie asked to leave the name out). */
+export const fotoBron = () => null;
 
 /** Gives every police and 112 Nieuws article without a photo yet its photo, oldest first (also the existing ones, once). */
 export async function kiesStockFotos(env, now = Date.now()) {
