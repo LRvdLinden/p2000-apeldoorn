@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${FTP_SERVER:-}" ] && [ -n "${FTP_PASSWORD:-}" ] || { echo "::warning::FTP-secrets ontbreken"; exit 0; }
-          sudo apt-get update -qq || true; R=$(lsb_release -cs); for i in 1 2 3; do sudo apt-get install -y -qq lftp >/dev/null 2>&1 && break; echo "lftp via security-server mislukt (poging $i), nu uit $R zelf"; sudo apt-get install -y -qq -t "$R" "lftp/$R" >/dev/null 2>&1 && break; sleep 15; done; command -v lftp >/dev/null
+          (sudo apt-get update -qq && sudo apt-get install -y -qq lftp) >/dev/null 2>&1 || { echo "lftp via apt mislukt, nu via Homebrew"; B=/home/linuxbrew/.linuxbrew/bin/brew; [ -x "$B" ] && HOMEBREW_NO_AUTO_UPDATE=1 HOMEBREW_NO_INSTALL_CLEANUP=1 "$B" install lftp >/dev/null 2>&1 && echo "$($B --prefix)/bin" >> "$GITHUB_PATH" && export PATH="$($B --prefix)/bin:$PATH"; }; command -v lftp >/dev/null
           source tools/ftps.sh
           ftps_connect
           T="$FTPS_TARGET"
