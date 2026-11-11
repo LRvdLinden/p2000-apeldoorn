@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           [ -n "${FTP_SERVER:-}" ] && [ -n "${FTP_PASSWORD:-}" ] || { echo "::warning::FTP-secrets ontbreken"; exit 0; }
-          sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+          for i in 1 2 3 4 5; do (sudo apt-get update -qq || true) && sudo apt-get install -y -qq -o Acquire::Retries=3 --fix-missing lftp >/dev/null && break; echo "lftp-installatie mislukt, poging $i"; sleep 20; done; command -v lftp >/dev/null
           source tools/ftps.sh
           ftps_connect
           T="$FTPS_TARGET"
