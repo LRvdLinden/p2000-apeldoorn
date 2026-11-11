@@ -22,7 +22,7 @@ const phone = document.getElementById("heroPhone");
 if (phone && matchMedia("(pointer: fine)").matches && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
   addEventListener("pointermove", (e) => {
     const x = e.clientX / innerWidth - 0.5, y = e.clientY / innerHeight - 0.5;
-    phone.style.transform = `rotateY(${-14 + x * 12}deg) rotateX(${6 - y * 10}deg) rotateZ(2deg)`;
+    phone.style.transform = `rotateY(${-8 + x * 8}deg) rotateX(${3 - y * 6}deg) rotateZ(1deg)`;
   });
 }
 
