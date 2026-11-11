@@ -117,6 +117,7 @@ async function learn(env, list, learned) {
   }
 }
 
+let omwegTot = 0; // until when adsb.lol is read via the verkeer service (after a refusal)
 export async function helikopters(env) {
   if (memo && Date.now() - memo.at < TTL) return memo.data;
   const cache = typeof caches !== "undefined" ? caches.default : null;
@@ -131,14 +132,24 @@ export async function helikopters(env) {
   }
   let data;
   try {
-    const lees = () => fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
+    const direct = () => fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
       headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" },
       signal: AbortSignal.timeout(8_000),
     });
-    // One retry after a short pause: adsb.lol sometimes answers a single request with an error or not at all.
-    let res = await lees().catch(() => null);
-    if (!res?.ok) { await new Promise((r) => setTimeout(r, 1500)); res = await lees(); }
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    // adsb.lol sometimes refuses Cloudflare's shared addresses (HTTP 429). Then the same request goes via the A-Alerts
+    // verkeer service (own address, VERKEER_URL/VERKEER_TOKEN), and for 10 minutes straight there.
+    const viaService = () => fetch(`${String(env.VERKEER_URL).replace(/\/+$/, "")}/adsb?lat=${POINT.lat}&lon=${POINT.lon}&nm=${POINT.nm}`, {
+      headers: { authorization: `Bearer ${env.VERKEER_TOKEN}` }, signal: AbortSignal.timeout(12_000),
+    });
+    const kanService = Boolean(env?.VERKEER_URL && env?.VERKEER_TOKEN);
+    let res = null;
+    if (!(kanService && Date.now() < omwegTot)) {
+      res = await direct().catch(() => null);
+      if (!res?.ok && kanService) omwegTot = Date.now() + 10 * 60_000;
+    }
+    if (!res?.ok && kanService) res = await viaService().catch(() => null);
+    if (!res?.ok && !kanService) { await new Promise((r) => setTimeout(r, 1500)); res = await direct(); }
+    if (!res?.ok) throw new Error(`HTTP ${res?.status ?? "geen antwoord"}`);
     const body = await res.json();
     const learned = await loadLearned(env);
     const list = fromAdsb(body.ac, Number(body.now) || Date.now(), learned);
