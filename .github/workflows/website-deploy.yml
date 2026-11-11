@@ -43,7 +43,7 @@ jobs:
           if [ -n "$missing" ]; then echo "::warning::Secrets ontbreken:$missing — website niet geüpload."; echo "skip=1" >> "$GITHUB_OUTPUT"; fi
       - name: lftp installeren
         if: steps.check.outputs.skip != '1'
-        run: for i in 1 2 3 4 5; do (sudo apt-get update -qq || true) && sudo apt-get install -y -qq -o Acquire::Retries=3 --fix-missing lftp >/dev/null && break; echo "lftp-installatie mislukt, poging $i"; sleep 20; done; command -v lftp >/dev/null
+        run: sudo apt-get update -qq || true; R=$(lsb_release -cs); for i in 1 2 3; do sudo apt-get install -y -qq lftp >/dev/null 2>&1 && break; echo "lftp via security-server mislukt (poging $i), nu uit $R zelf"; sudo apt-get install -y -qq -t "$R" "lftp/$R" >/dev/null 2>&1 && break; sleep 15; done; command -v lftp >/dev/null
       - name: Uploaden via FTPS
         if: steps.check.outputs.skip != '1'
         env:
