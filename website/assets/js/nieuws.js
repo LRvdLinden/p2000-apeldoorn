@@ -1,5 +1,5 @@
 // A-Alerts: Nieuws. The list (/nieuws/) and one article or liveblog (/nieuws/<id>, also ?id=<id>).
-import { API, esc, loadMapKit } from "./core.js?v=58";
+import { API, esc, loadMapKit } from "./core.js?v=60";
 import { maakWidgets } from "./widget.js?v=8";
 import { weerKaartHTML, weerTekstHTML, tekenWeerKaart } from "./weerkaart.js?v=1";
 

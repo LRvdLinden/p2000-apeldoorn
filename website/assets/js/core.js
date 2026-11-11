@@ -35,11 +35,17 @@ async function demoData() {
 }
 
 export async function fetchMeldingen(limit = 500) {
-  try {
+  // One retry after 2 seconds: a single hiccup of the network or the API should not switch to example alerts.
+  const lees = async () => {
     const res = await fetch(`${API}/v1/meldingen?limit=${limit}`, { signal: AbortSignal.timeout(12_000) });
     if (!res.ok) throw new Error(res.status);
+    return res.json();
+  };
+  try {
+    let list;
+    try { list = await lees(); } catch { await new Promise((r) => setTimeout(r, 2000)); list = await lees(); }
     demoMode = false;
-    return { list: await res.json(), online: true };
+    return { list, online: true };
   } catch {
     demoMode = true;
     return { list: await demoData(), online: false };

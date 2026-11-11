@@ -4,7 +4,7 @@ import {
   trackVisit, fetchMeldingen, DIENSTEN, SELECTABLE, dienstOf, asset, date, fmtTime, fmtTimeSec, fmtDay, ago, esc,
   isRecent, isUrgent, prioText, plaatsText, today as todayStats, yesterday as yesterdayStats, prefs, loadMapKit, layout, clusterEl, hasStreet, capPlaats,
   demoMode, countUp,
-} from "./core.js?v=57";
+} from "./core.js?v=60";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
