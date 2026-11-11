@@ -186,7 +186,7 @@ export function maakWidgets(el, opts = {}) {
     if (!wBody) return;
     if (!weer.lijst.length) {
       wFig.innerHTML = ""; weer.getekend = null;
-      wBody.innerHTML = `<div class="aw-groen"><span>✓</span><div><b>Code groen</b><small>Er is nu geen KNMI-weerwaarschuwing voor Apeldoorn e.o.</small></div></div>`;
+      wBody.innerHTML = `<div class="aw-groen"><span>✓</span><div><b>Code groen</b><small>Er is nu geen KNMI-weerwaarschuwing.</small></div></div>`;
       meld(); return;
     }
     const a = weer.lijst[weer.keus], w = a.weer, kl = codeKleur(w, w.niveau), op = opKleur(w);
