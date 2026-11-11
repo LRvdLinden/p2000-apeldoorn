@@ -1,0 +1,26 @@
+name: Tail (tijdelijk)
+on: workflow_dispatch
+jobs:
+  t:
+    runs-on: ubuntu-latest
+    defaults: { run: { working-directory: worker } }
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci --silent >/dev/null 2>&1 || npm i --silent >/dev/null 2>&1
+      - run: |
+          timeout 150 npx wrangler tail p2000-apeldoorn-api --format json > /tmp/t.json 2>/dev/null || true
+          node -e '
+          const fs=require("fs");const s=fs.readFileSync("/tmp/t.json","utf8");
+          let depth=0,start=-1,objs=[];for(let i=0;i<s.length;i++){if(s[i]=="{"){if(!depth)start=i;depth++}else if(s[i]=="}"){depth--;if(!depth){try{objs.push(JSON.parse(s.slice(start,i+1)))}catch{}}}}
+          for(const o of objs){ if(o.event&&o.event.scheduledTime) console.log("CRON",new Date(o.eventTimestamp).toISOString(),o.outcome,(o.logs||[]).filter(l=>l.level!="log").map(l=>l.message.join(" ").slice(0,160)).join(" || ")) }'
+      - run: |
+          curl -s -m 20 https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/status | python3 -c "
+          import json,sys;d=json.load(sys.stdin)
+          for g in d['groepen']:
+            for o in g['onderdelen']:
+              if o['id'] in ('heli','verkeer'): print('ST',o['id'],o['staat'],o.get('detail'))"
