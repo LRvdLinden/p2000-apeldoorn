@@ -38,3 +38,15 @@ test("without secrets: empty and not available; old data: no items", async () =>
   assert.equal(v.verouderd, true);
   assert.equal(v.items.length, 0);
 });
+
+test("an unchanged list (304) on a quiet night is not old data: the service's read time counts", async () => {
+  const e = env();
+  const oud = new Date(Date.now() - 40 * 60_000).toISOString(), nu = new Date().toISOString();
+  e.kv.set("verkeer", JSON.stringify({ etag: '"a"', at: Date.now() - 40 * 60_000, data: { opgehaald: oud, items: [{ id: "1" }], flitsers: [] } }));
+  globalThis.fetch = async () => ({ status: 304, ok: false, headers: { get: (h) => (h === "x-opgehaald" ? nu : null) } });
+  assert.deepEqual(await verkeerRun(e, null), { ok: true, nieuw: false, ndwOud: 0 });
+  assert.ok(e.kv.has("bron_ok:verkeer"));
+  const v = await verkeer(e);
+  assert.equal(v.verouderd, false);
+  assert.equal(v.items.length, 1);
+});

@@ -703,7 +703,9 @@ async function cron(env, event) {
     await poll(env, budget);
     await drain(env, budget);
     await homey();
-    if (i % 2 === 0) { try { if (budget.take()) await heliRun(env); } catch (e) { console.error("[spoor]", e.message || e); } }
+    // Helicopters: the first read of the minute always runs (also on a busy morning when the budget is used up by
+    // alerts and pushes), the later ones when there is budget left.
+    if (i % 2 === 0) { try { if (i === 0 || budget.take()) await heliRun(env); } catch (e) { console.error("[spoor]", e.message || e); } }
     if (i < runs - 1) await sleep(Math.floor(57_000 / runs));
   }
   // Status page and beheer pushes (replaces the old P2000 and source outage checks).

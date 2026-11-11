@@ -5,7 +5,7 @@
 // Secrets: VERKEER_URL (https://<name>.koyeb.app) and VERKEER_TOKEN. Without them the layer is simply empty.
 import { kvWrite } from "./kv.js";
 
-const KEY = "verkeer";
+const KEY = "verkeer", VERS = "verkeer_vers";
 export const verkeerConfigured = (env) => Boolean(env.VERKEER_URL && env.VERKEER_TOKEN);
 
 async function lees(env) {
@@ -36,22 +36,32 @@ async function ophalen(env, now) {
     headers: { authorization: `Bearer ${env.VERKEER_TOKEN}`, ...(oud?.etag ? { "if-none-match": oud.etag } : {}) },
     signal: AbortSignal.timeout(15_000),
   });
-  const ndwOud = (d) => { const t = Date.parse(d?.opgehaald || 0) || 0; return t && now - t > 10 * 60_000 ? now - t : 0; };
-  if (res.status === 304) return { ok: true, nieuw: false, ndwOud: ndwOud(oud?.data) };
+  const ndwOud = (opgehaald) => { const t = Date.parse(opgehaald || 0) || 0; return t && now - t > 10 * 60_000 ? now - t : 0; };
+  // When the service last read the NDW (also on 304: an unchanged list does not mean old data, e.g. a quiet night).
+  const vers = (res.headers?.get?.("x-opgehaald")) || null;
+  if (res.status === 304) {
+    const opgehaald = vers || oud?.data?.opgehaald;
+    if (vers) await kvWrite(env, VERS, vers, now);
+    return { ok: true, nieuw: false, ndwOud: ndwOud(opgehaald) };
+  }
   if (!res.ok) throw new Error(`verkeer HTTP ${res.status}`);
   const data = await res.json();
   if (!Array.isArray(data?.items)) throw new Error("verkeer: geen lijst");
   // Right after a restart the service has no speed cameras yet (OpenStreetMap is read in the background): keep the old ones.
   if (!data.flitsers?.length && oud?.data?.flitsers?.length) data.flitsers = oud.data.flitsers;
   await kvWrite(env, KEY, JSON.stringify({ etag: res.headers.get("etag"), at: Date.now(), data }));
-  return { ok: true, nieuw: true, items: data.items.length, ndwOud: ndwOud(data) };
+  if (data.opgehaald) await kvWrite(env, VERS, data.opgehaald, now);
+  return { ok: true, nieuw: true, items: data.items.length, ndwOud: ndwOud(data.opgehaald) };
 }
 
 /** GET /v1/verkeer: the traffic layer for the apps, the website and Homey. */
 export async function verkeer(env) {
   const v = await lees(env);
   if (!v?.data) return { beschikbaar: verkeerConfigured(env), bijgewerkt: null, items: [], gepland: [], flitsers: [] };
-  const { bijgewerkt, opgehaald, items, flitsers, gepland } = v.data;
+  const { bijgewerkt, items, flitsers, gepland } = v.data;
+  // The last NDW read of the service (also when the list did not change since).
+  const vers = (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(VERS).first())?.value;
+  const opgehaald = [v.data.opgehaald, vers].filter(Boolean).sort().pop();
   // Older than 15 minutes: the service is down; then no items (an old accident on the map is worse than none).
   const oud = Date.now() - (Date.parse(opgehaald || 0) || v.at || 0) > 15 * 60_000;
   return { beschikbaar: true, bijgewerkt, verouderd: oud, items: oud ? [] : items, gepland: gepland || [], flitsers: flitsers || [],

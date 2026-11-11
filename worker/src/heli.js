@@ -131,10 +131,13 @@ export async function helikopters(env) {
   }
   let data;
   try {
-    const res = await fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
+    const lees = () => fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
       headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" },
       signal: AbortSignal.timeout(8_000),
     });
+    // One retry after a short pause: adsb.lol sometimes answers a single request with an error or not at all.
+    let res = await lees().catch(() => null);
+    if (!res?.ok) { await new Promise((r) => setTimeout(r, 1500)); res = await lees(); }
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const body = await res.json();
     const learned = await loadLearned(env);
