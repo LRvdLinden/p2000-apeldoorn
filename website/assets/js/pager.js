@@ -39,6 +39,7 @@ const state = {
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
   helis: [],
   lucht: [],
+  lagenOpen: prefs.get("p2000.lagenOpen", false),
   lagen: new Set(prefs.get("p2000.lagen", ["waarschuwingen", "knmi", "verkeer", "helikopters"])),
   view: "meldingen",
   history: null,
@@ -889,6 +890,7 @@ function renderMapChips() {
   const bronChip = (b, label, c) => {
     const n = alle.filter((w) => w.bron === b).length;
     const on = state.lagen.has("waarschuwingen") && state.mapBronnen.has(b);
+    if (!n) return ""; // a pill with 0 is hidden; it comes back as soon as there is one
     return `<button class="chip${on ? "" : " off"}" data-bron="${b}" style="--c:${c}" aria-pressed="${on}" title="${label}"><img src="${asset(`assets/img/icon_${b}.png`)}" alt="${label}">${n}</button>`;
   };
   const heliChip = (soort, label) => {
@@ -901,14 +903,17 @@ function renderMapChips() {
     ? `<button class="chip heli-chip" data-lucht style="--c:#586A33" title="Defensie en overheid"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</button>` : "");
   $("mapChips").innerHTML = SELECTABLE.map((d) => {
     const n = recent.filter((m) => m.dienst === d).length;
+    if (!n) return "";
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("") + bronChip("burgernet", "Burgernet", "#0067B1") + bronChip("nlalert", "NL-Alert", "#E3001B")
     + bronChip("amber", "AMBER Alert", "#EC6E24") + bronChip("vermistkind", "Vermist Kind Alert", "#1B265E")
-    + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip();
+    + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip()
+    + `<button class="chip pijl" data-lagen-pijl style="--c:#64748B" aria-expanded="${state.lagenOpen}" aria-controls="mapLagen" title="${state.lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen <span aria-hidden="true">${state.lagenOpen ? "▴" : "▾"}</span></button>`;
+  $("mapLagen").hidden = !state.lagenOpen;
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length : k === "defensie" ? (state.lagen.has("defensie") ? state.lucht.length : "") : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", defensie: "Defensie en overheid: Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", defensie: "Defensie en overheid: Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -940,6 +945,12 @@ $("mapChips").addEventListener("click", async (e) => {
     if (!state.lagen.has("waarschuwingen")) { state.lagen.add("waarschuwingen"); state.mapBronnen.add(b); prefs.set("p2000.lagen", [...state.lagen]); }
     else state.mapBronnen.has(b) ? state.mapBronnen.delete(b) : state.mapBronnen.add(b);
     renderMap();
+    return;
+  }
+  if (chip.dataset.lagenPijl !== undefined) {
+    state.lagenOpen = !state.lagenOpen;
+    prefs.set("p2000.lagenOpen", state.lagenOpen);
+    renderMapChips();
     return;
   }
   if (chip.dataset.lucht !== undefined) {

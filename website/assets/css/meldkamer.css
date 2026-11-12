@@ -146,6 +146,9 @@ body.mk {
 .row.warn.ended > img { filter: grayscale(1); }
 
 /* Map layers and helicopters in the air (like Apple TV). */
+.lagen[hidden] { display: none; }
+.chips { pointer-events: auto; }
+.chip.pijl { font: inherit; font-weight: 700; color: #fff; border: 0; cursor: pointer; }
 .lagen { display: flex; gap: .4em; flex-wrap: wrap; margin-left: auto; pointer-events: auto; }
 .laag { font: inherit; font-size: .82em; font-weight: 700; color: var(--muted); padding: .35em .8em; border-radius: 999px; border: 1px solid rgba(255,255,255,.12);
   background: rgba(20,20,26,.72); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); cursor: pointer; }

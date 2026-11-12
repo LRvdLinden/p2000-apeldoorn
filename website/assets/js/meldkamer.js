@@ -185,6 +185,14 @@ function renderHeliList() {
   box.hidden = !list.length;
 }
 
+// The layer bar opens with the arrow in the top bar and closes again (kept in this browser).
+let lagenOpen = prefs.get("mk.lagenOpen", false);
+$("chips").addEventListener("click", (e) => {
+  if (!e.target.closest("#lagenPijl")) return;
+  lagenOpen = !lagenOpen;
+  prefs.set("mk.lagenOpen", lagenOpen);
+  renderChips();
+});
 function renderLagen() {
   $("lagen").innerHTML = LAGEN.map(([k, l]) => `<button class="laag${state.lagen.has(k) ? " on" : ""}" data-laag="${k}">${l}</button>`).join("");
 }
@@ -272,13 +280,17 @@ function renderChips() {
     const list = state.helis.filter((h) => h.soort === soort);
     return list.length ? `<span class="chip heli-chip"><img src="${heliImg(list[0])}" alt="${label}">${list.length}</span>` : "";
   };
-  $("chips").innerHTML = SELECTABLE.map((d) =>
-    `<span class="chip"><img src="${icon({ dienst: d })}" alt="${DIENSTEN[d].label}">${items.filter((m) => m.dienst === d).length}</span>`).join("")
-    + `<span class="chip"><img src="${asset("assets/img/icon_burgernet.png")}" alt="Burgernet">${n("burgernet")}</span>`
-    + `<span class="chip"><img src="${asset("assets/img/icon_nlalert.png")}" alt="NL-Alert">${n("nlalert")}</span>`
+  // A pill with 0 is hidden; it comes back as soon as there is one.
+  const pill = (img, alt, aantal) => (aantal ? `<span class="chip"><img src="${img}" alt="${alt}">${aantal}</span>` : "");
+  $("chips").innerHTML = SELECTABLE.map((d) => pill(icon({ dienst: d }), DIENSTEN[d].label, items.filter((m) => m.dienst === d).length)).join("")
+    + pill(asset("assets/img/icon_burgernet.png"), "Burgernet", n("burgernet"))
+    + pill(asset("assets/img/icon_nlalert.png"), "NL-Alert", n("nlalert"))
     + (n("amber") ? `<span class="chip"><img src="${asset("assets/img/icon_amber.png")}" alt="AMBER Alert">${n("amber")}</span>` : "")
     + (n("vermistkind") ? `<span class="chip"><img src="${asset("assets/img/icon_vermistkind.png")}" alt="Vermist Kind Alert">${n("vermistkind")}</span>` : "")
-    + heli("trauma", "Lifeliner") + heli("politie", "Zulu");
+    + heli("trauma", "Lifeliner") + heli("politie", "Zulu")
+    + (state.lagen.has("defensie") && state.lucht.length ? `<span class="chip heli-chip"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</span>` : "")
+    + `<button class="chip pijl" id="lagenPijl" aria-expanded="${lagenOpen}" aria-controls="lagen" title="${lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen ${lagenOpen ? "▴" : "▾"}</button>`;
+  $("lagen").hidden = !lagenOpen;
 }
 
 function renderLatest() {

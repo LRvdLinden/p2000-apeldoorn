@@ -472,12 +472,13 @@ struct MapScreen: View {
             .pickerStyle(.segmented)
             .labelsHidden()
 
-            // One row of filter chips: the disciplines, Burgernet and NL-Alert (always) and the
+            // A pill with 0 is hidden and comes back as soon as there is one.
+            // One row of filter chips: the disciplines, Burgernet and NL-Alert and the
             // Lifeliners / Zulu's in the air (tap: to the helicopter, or all of that type when there are more).
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 6) {
                     if settings.laag(.p2000) || !visibleDiensten.isEmpty {
-                        ForEach(Dienst.selectable) { d in
+                        ForEach(Dienst.selectable.filter { count($0) > 0 }) { d in
                             let on = settings.laag(.p2000) && visibleDiensten.contains(d)
                             chip(on: on, color: d.color, label: "\(d.label): \(count(d))") {
                                 if !settings.laag(.p2000) { settings.setLaag(.p2000, true); visibleDiensten = [d] }
@@ -489,20 +490,19 @@ struct MapScreen: View {
                         }
                     }
                     let bn = aantal(.burgernet)
-                    chip(on: settings.laag(.burgernet), color: Color(hex: 0x0067B1), label: "Burgernet: \(bn)") {
+                    if bn > 0 { chip(on: settings.laag(.burgernet), color: Color(hex: 0x0067B1), label: "Burgernet: \(bn)") {
                         settings.setLaag(.burgernet, !settings.laag(.burgernet))
                     } content: {
                         Image("icon_burgernet").resizable().scaledToFit().frame(width: 16, height: 16)
                         Text("\(bn)")
-                    }
-                    // NL-Alert always, like Burgernet (also at 0).
+                    } }
                     let nl = aantal(.nlalert)
-                    chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {
+                    if nl > 0 { chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {
                         settings.setLaag(.nlalert, !settings.laag(.nlalert))
                     } content: {
                         Image("icon_nlalert").resizable().scaledToFit().frame(width: 16, height: 16)
                         Text("\(nl)")
-                    }
+                    } }
                     // AMBER Alert / Vermist Kind Alert: only when there is one (a missing child).
                     let kind = aantal(.amber) + aantal(.vermistkind)
                     if kind > 0 {

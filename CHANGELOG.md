@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 82)
+- Kaart: een pill met 0 is verborgen en komt terug zodra er iets is (app, Android, pager en meldkamer).
+- Website: de balk met kaartlagen in de pager en de meldkamer klapt open en dicht met de knop "Lagen" in de bovenste balk.
+
 ## A-Alerts 2.0.1 (build 81)
 - Nieuwe kaartlaag "Defensie en overheid" (standaard uit) in de app, Apple TV, Android, de pager en de meldkamer: Defensie, Kustwacht, Koninklijke Marechaussee en PH-GOV met veertien eigen tekeningen. Bron adsb.lol (`/v1/lucht`); herkenning op het vaste toesteladres en het type, de roepnaam is alleen een label. Pill "Defensie" zodra de laag aan staat en er iets vliegt.
 

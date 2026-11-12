@@ -244,7 +244,8 @@ fun MapScreen(nav: Nav) {
                 Store.helikopters.filter { it.soort == soort }.takeIf { it.isNotEmpty() }?.let { Triple(soort, naam, it) }
             }
             LazyRow(contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                items(listOf(Dienst.BRANDWEER, Dienst.AMBULANCE, Dienst.POLITIE, Dienst.TRAUMAHELI), key = { it.key }) { d ->
+                // A pill with 0 is hidden and comes back as soon as there is one.
+                items(listOf(Dienst.BRANDWEER, Dienst.AMBULANCE, Dienst.POLITIE, Dienst.TRAUMAHELI).filter { d -> alleMeldingen.any { it.soort == d } }, key = { it.key }) { d ->
                     val on = d.key !in verborgen && KaartLaag.MELDINGEN.key in lagen
                     KaartChip(on, d.color, "${d.label}: ${alleMeldingen.count { it.soort == d }}", {
                         if (KaartLaag.MELDINGEN.key !in lagen) { Settings.kaartLagen = Settings.kaartLagen + KaartLaag.MELDINGEN.key; verborgen = verborgen - d.key }
@@ -256,7 +257,7 @@ fun MapScreen(nav: Nav) {
                 }
                 val bronnen = listOf(Triple("burgernet", "Burgernet", Color(0xFF0067B1)), Triple("nlalert", "NL-Alert", Color(0xFFE3001B)),
                     Triple("amber", "AMBER Alert", Color(0xFFEC6E24)), Triple("vermistkind", tr("Vermist Kind Alert", "Missing Child Alert"), Color(0xFF1B265E)))
-                    .filter { it.first == "burgernet" || it.first == "nlalert" || aantalBron(it.first) > 0 }
+                    .filter { aantalBron(it.first) > 0 }
                 items(bronnen, key = { it.first }) { (b, naam, kleur) ->
                     val n = aantalBron(b)
                     val on = b !in verborgen && KaartLaag.WAARSCHUWINGEN.key in lagen
