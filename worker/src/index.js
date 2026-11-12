@@ -48,6 +48,9 @@ import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronn
 import { kvWrite } from "./kv.js";
 import { hmPaal, hmPunt, hmHerstel } from "./hm.js";
 
+/** Last run of the hectometre-post repair in this isolate (it reads the alerts of 48 hours, so not every round). */
+let hmLaatst = 0;
+
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
 /** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
 const deviceKey = (s) => {
@@ -464,7 +467,11 @@ async function poll(env, budget) {
     }
     if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
     // Earlier messages on a motorway that are not on their post yet.
-    if (budget.left > 20) try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
+    // Only after a new alert, and otherwise once per 15 minutes (a lookup that failed earlier gets another chance).
+    if (budget.left > 20 && (fresh.length || Date.now() - hmLaatst > 15 * 60_000)) {
+        hmLaatst = Date.now();
+        try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
+    }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
 

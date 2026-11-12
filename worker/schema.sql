@@ -22,6 +22,8 @@ CREATE TABLE IF NOT EXISTS meldingen (
   created_at INTEGER NOT NULL
 );
 CREATE INDEX IF NOT EXISTS meldingen_datum ON meldingen(datum DESC);
+-- "What is new since my last check?" (Homey changes, several times a minute) reads only the new rows with this index.
+CREATE INDEX IF NOT EXISTS meldingen_created ON meldingen(created_at);
 
 CREATE TABLE IF NOT EXISTS devices (
   token TEXT PRIMARY KEY,
@@ -183,6 +185,7 @@ CREATE TABLE IF NOT EXISTS nieuws (
   notified TEXT
 );
 CREATE INDEX IF NOT EXISTS nieuws_at ON nieuws (at);
+CREATE INDEX IF NOT EXISTS nieuws_created ON nieuws (created_at);
 CREATE TABLE IF NOT EXISTS nieuws_updates (
   id INTEGER PRIMARY KEY AUTOINCREMENT, nieuws_id TEXT NOT NULL, titel TEXT, tekst TEXT, url TEXT, foto TEXT,
   at INTEGER NOT NULL, created_at INTEGER NOT NULL

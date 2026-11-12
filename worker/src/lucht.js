@@ -90,7 +90,7 @@ export async function luchtGeleerd(env) {
   const map = new Map();
   if (!env?.DB) return map;
   try {
-    const { results } = await env.DB.prepare("SELECT key, value FROM kv WHERE key LIKE 'lucht_hex:%'").all();
+    const { results } = await env.DB.prepare("SELECT key, value FROM kv WHERE key >= 'lucht_hex:' AND key < 'lucht_hex;'").all();
     for (const r of results) { try { map.set(r.key.slice(10), JSON.parse(r.value)); } catch {} }
   } catch (e) { console.warn("[lucht] geleerd", e.message || e); }
   return map;

@@ -18,7 +18,7 @@ const kvSet = (env, key, value) => kvWrite(env, key, value);
 /** What changed since the last send: alerts stored after the cursor and warnings updated after it. */
 export async function homeyChanges(env, since) {
   const [m, w, n] = await Promise.all([
-    env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.created_at > ? ORDER BY m.datum ASC LIMIT 40`).bind(since).all(),
+    env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.created_at > ? ORDER BY m.created_at ASC LIMIT 40`).bind(since).all(),
     warningsSince(env, since),
     // New news articles: only their ids; the Homey app then reads GET /v1/nieuws (image, title, kind).
     env.DB.prepare("SELECT id FROM nieuws WHERE hidden = 0 AND created_at > ? ORDER BY created_at ASC LIMIT 20").bind(since).all(),
