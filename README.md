@@ -1,4 +1,4 @@
-# A-Alerts (voorheen P2000 Apeldoorn) – Apple apps
+# A-Alerts – Apple apps
 
 ![A-Alerts](docs/hero.jpg)
 

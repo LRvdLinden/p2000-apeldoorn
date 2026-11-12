@@ -6291,23 +6291,6 @@
         }
       }
     },
-    "Kustwacht overig": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Other coastguard"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Kustwacht overig"
-          }
-        }
-      }
-    },
     "Kustwacht vliegtuig": {
       "extractionState": "manual",
       "localizations": {

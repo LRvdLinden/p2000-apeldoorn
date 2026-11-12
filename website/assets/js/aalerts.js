@@ -59,7 +59,7 @@ export const LUCHT_SOORTEN = [
   ["heli", "Overige helikopter (Defensie)", "lucht_heli"], ["f35", "Straaljager", "lucht_f35"], ["hercules", "Transportvliegtuig", "lucht_hercules"],
   ["les", "Lesvliegtuig", "lucht_les"], ["vliegtuig", "Overig vliegtuig (Defensie)", "lucht_vliegtuig"],
   ["kustwacht_dash8", "Kustwacht vliegtuig", "lucht_kustwacht_dash8"], ["kustwacht_aw189", "Kustwacht helikopter", "lucht_kustwacht_aw189"],
-  ["kustwacht_heli", "Kustwacht overig", "lucht_kustwacht_heli"], ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov"],
+  ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov"],
 ];
 export const luchtSoort = (h) => h.icoon || h.soort;
 const LUCHT_KEY = "p2000.luchtSoorten";

@@ -24,15 +24,17 @@ test("luchtSoort: coastguard, Marechaussee and PH-GOV", () => {
   assert.equal(luchtSoort({ hex: "8", r: "PH-RSQ", t: "A189" }).soort, "kustwacht");
   assert.equal(luchtSoort({ hex: "2", r: "PH-CGX", t: "DH8A", ownOp: "Kustwacht Nederland" }).icoon, "kustwacht_dash8");
   assert.equal(luchtSoort({ hex: "3", r: "PH-NCX", t: "A189", ownOp: "Netherlands Coastguard" }).icoon, "kustwacht_aw189");
-  assert.equal(luchtSoort({ hex: "4", r: "OO-XXX", t: "NH90", ownOp: "Belgian Coast Guard" }).icoon, "kustwacht_heli");
+  assert.equal(luchtSoort({ hex: "4", r: "OO-XXX", t: "NH90", ownOp: "Belgian Coast Guard" }), null);
   assert.equal(luchtSoort({ hex: "5", r: "PH-XXX", t: "DA62", ownOp: "Koninklijke Marechaussee" }).soort, "kmar");
   assert.deepEqual(luchtSoort({ hex: "9", r: "D-IAMT", t: "DA62", flight: "CHARLEY1" }), { soort: "kmar", icoon: "kmar", naam: "Marechaussee D-IAMT" });
   assert.equal(luchtSoort({ hex: "a", r: "D-IBMT" }).soort, "kmar");
   // No type and no registration: the callsign is the name, not a guessed type.
-  assert.deepEqual(luchtSoort({ hex: "b", dbFlags: 1, flight: "ANGRY26 " }), { soort: "defensie", icoon: "vliegtuig", naam: "ANGRY26" });
-  assert.equal(luchtSoort({ hex: "c", dbFlags: 1, t: "GL5T", r: "14+04" }).naam, "Global 5000 14+04");
-  assert.equal(luchtSoort({ hex: "d", dbFlags: 1, t: "EUFI", r: "30+01" }).icoon, "f35");
-  assert.equal(luchtSoort({ hex: "e", dbFlags: 1, t: "H60", r: "" }).naam, "Black Hawk");
+  assert.deepEqual(luchtSoort({ hex: "480b01", dbFlags: 1, flight: "ANGRY26 " }), { soort: "defensie", icoon: "vliegtuig", naam: "ANGRY26" });
+  assert.equal(luchtSoort({ hex: "480c01", dbFlags: 1, t: "GLF6", r: "V-11" }).naam, "Gulfstream G650 V-11");
+  assert.equal(luchtSoort({ hex: "480d01", dbFlags: 1, t: "F16", r: "J-001" }).icoon, "f35");
+  // Only Dutch military aircraft: a German or American one flying over is left out.
+  assert.equal(luchtSoort({ hex: "3f62fc", dbFlags: 1, t: "A400", r: "54+44" }), null);
+  assert.equal(luchtSoort({ hex: "ae1234", dbFlags: 1, t: "H60" }), null);
 });
 
 test("luchtLijst: fixed id per airframe, another callsign is the same aircraft, helicopters of the other layer skipped", () => {

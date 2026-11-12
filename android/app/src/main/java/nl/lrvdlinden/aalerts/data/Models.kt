@@ -362,7 +362,6 @@ val LUCHT_SOORTEN: List<Triple<String, String, Int>> get() = listOf(
     Triple("les", tr("Lesvliegtuig", "Trainer aircraft"), R.drawable.lucht_les), Triple("vliegtuig", tr("Overig vliegtuig (Defensie)", "Other aircraft (defence)"), R.drawable.lucht_vliegtuig),
     Triple("kustwacht_dash8", tr("Kustwacht vliegtuig", "Coastguard aircraft"), R.drawable.lucht_kustwacht_dash8),
     Triple("kustwacht_aw189", tr("Kustwacht helikopter", "Coastguard helicopter"), R.drawable.lucht_kustwacht_aw189),
-    Triple("kustwacht_heli", tr("Kustwacht overig", "Other coastguard"), R.drawable.lucht_kustwacht_heli),
     Triple("kmar", "Koninklijke Marechaussee", R.drawable.lucht_kmar), Triple("phgov", tr("Regeringsvliegtuig PH-GOV", "Government aircraft PH-GOV"), R.drawable.lucht_phgov),
 )
 

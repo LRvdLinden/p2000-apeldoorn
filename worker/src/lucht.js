@@ -3,6 +3,8 @@
 // only a label, so a new callsign on the next flight changes the text and nothing else.
 
 const NL = { zuid: 50.7, noord: 53.7, west: 3.1, oost: 7.3 };
+/** Dutch airframes only: the ICAO addresses given out by the Netherlands are 480000–487FFF. */
+export const isNederlands = (hex) => { const n = parseInt(String(hex || ""), 16); return n >= 0x480000 && n <= 0x487fff; };
 
 /** ICAO type code → [icon, name]. */
 const TYPES = {
@@ -45,12 +47,12 @@ export function luchtSoort(ac, learned = new Map()) {
 
   if (reg === "PH-GOV") return { soort: "regering", icoon: "phgov", naam: "Regeringsvliegtuig PH-GOV" };
   if (KUSTWACHT[reg]) return { soort: "kustwacht", icoon: KUSTWACHT[reg], naam: `Kustwacht ${reg}` };
-  if (/KUSTWACHT|COAST\s?GUARD|KÜSTENWACHE/i.test(owner)) {
-    const nl = reg.startsWith("PH-");
-    return { soort: "kustwacht", icoon: !isHeli ? "kustwacht_dash8" : nl ? "kustwacht_aw189" : "kustwacht_heli", naam: `Kustwacht ${reg || type}`.trim() };
+  if (reg.startsWith("PH-") && /KUSTWACHT|COAST\s?GUARD/i.test(owner)) {
+    return { soort: "kustwacht", icoon: isHeli ? "kustwacht_aw189" : "kustwacht_dash8", naam: `Kustwacht ${reg}` };
   }
   if (KMAR.has(reg) || /MARECHAUSSEE/i.test(owner)) return { soort: "kmar", icoon: "kmar", naam: `Marechaussee ${reg}`.trim() };
-  if (Number(ac.dbFlags) & 1) {
+  // Defence: only Dutch military aircraft; foreign ones flying over are left out.
+  if (Number(ac.dbFlags) & 1 && isNederlands(hex)) {
     // A drawing per known type; a fighter gets the fighter drawing; anything else the general helicopter or aircraft.
     const [icoon, typeNaam] = TYPES[type] || [JAGERS.has(type) ? "f35" : isHeli ? "heli" : "vliegtuig", NAMEN[type] || type];
     // Without a type or registration the callsign is all there is: show that instead of guessing what it is.

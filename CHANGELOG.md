@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 84)
+- Laag Luchtvaart: bij Defensie alleen Nederlandse militaire toestellen (toesteladres 480000–487FFF); buitenlandse toestellen en "Kustwacht overig" zijn vervallen.
+- De toevoeging "(voorheen P2000 Apeldoorn)" is overal weg: website, juridische teksten, README.
+
 ## A-Alerts 2.0.1 (build 83)
 - Eén kaartlaag "Luchtvaart" in plaats van "Helikopters" en "Defensie en overheid". Bij Kaartlagen kies je per soort toestel of je het ziet (16 soorten, met tekening en het aantal in de lucht); standaard Lifeliner en Zulu. App, Apple TV, Android, pager en meldkamer.
 - Routespoor en vluchten van de laatste twee uur voor alle toestellen in de laag, niet alleen Lifeliner en Zulu (worker bewaart per toestel hooguit één positie per 30 seconden).

@@ -26,16 +26,15 @@ GROEPEN = [("Hulpdiensten", [
  ("apache", "Apache", "Gevechtshelikopter · AH-64", "Smalle gevechtshelikopter met twee bemanningsleden achter elkaar. Je ziet hem vooral bij oefeningen, vaak laag en in tweetallen."),
  ("cougar", "Cougar", "Transporthelikopter · AS532", "Middelgrote transporthelikopter voor militairen en gewonden. Wordt ook ingezet voor blussen en hulp bij rampen."),
  ("nh90", "NH90", "Maritieme helikopter", "De grijze helikopter van de marine. Vliegt vanaf schepen en vanaf de kust, voor opsporing, redding en transport."),
- ("heli", "Overige helikopter", "Buitenlandse en nieuwe types", "Militaire helikopters die geen eigen tekening hebben, zoals toestellen van buurlanden die door Nederland vliegen.")]),
+ ("heli", "Overige helikopter", "Andere types van Defensie", "Nederlandse militaire helikopters die geen eigen tekening hebben, zoals nieuwe types die in dienst komen.")]),
 ("Defensie: vliegtuigen", [
  ("f35", "Straaljager", "F-35", "Het jachtvliegtuig van de luchtmacht. Vliegt hoog en snel; je hoort hem meestal eerder dan je hem ziet."),
  ("hercules", "Transport", "C-130 Hercules", "Het viermotorige transportvliegtuig voor vracht, militairen en hulpgoederen."),
  ("les", "Lesvliegtuig", "Pilatus PC-7", "Het toestel waarin nieuwe vliegers van de luchtmacht leren vliegen. Maakt veel oefenvluchten boven Nederland."),
- ("vliegtuig", "Overig vliegtuig", "Tankers en transport", "Andere militaire vliegtuigen, zoals tankvliegtuigen, grote transporttoestellen en toestellen van buurlanden.")]),
+ ("vliegtuig", "Overig vliegtuig", "Andere types van Defensie", "Andere Nederlandse militaire vliegtuigen zonder eigen tekening, zoals het Gulfstream-transportvliegtuig.")]),
 ("Kustwacht, Marechaussee en regering", [
  ("kustwacht_dash8", "Kustwacht vliegtuig", "Dash-8", "Patrouilleert boven de Noordzee: let op scheepvaart, vervuiling en mensen in nood."),
  ("kustwacht_aw189", "Kustwacht helikopter", "AW189", "De reddingshelikopter van de Kustwacht, voor opsporing en redding op zee en langs de kust."),
- ("kustwacht_heli", "Kustwacht overig", "Buitenland", "Reddingshelikopters van buitenlandse kustwachten die boven Nederland of de Noordzee vliegen."),
  ("kmar", "Koninklijke Marechaussee", "Patrouillevliegtuig", "Klein tweemotorig vliegtuig met camera's, voor toezicht vanuit de lucht."),
  ("phgov", "Regeringsvliegtuig", "PH-GOV · Boeing 737", "Het vliegtuig van de Nederlandse regering, voor reizen van het Koninklijk Huis en ministers.")])]
 
@@ -166,15 +165,16 @@ def detail():
 <main>
 <span class="live"><i></i> <span id="lvAantal">Live op de kaart</span></span>
 <h1>{titel}</h1>
-<p class="sub">Zeventien soorten helikopters en vliegtuigen, live op de kaart in de app en op de website. Hieronder zie je wat ze zijn en wat ze doen.</p>
+<p class="sub">Zestien soorten helikopters en vliegtuigen, live op de kaart in de app en op de website. Hieronder zie je wat ze zijn en wat ze doen.</p>
 <a class="knop" href="/pager/#kaart">Open de live kaart →</a>
 <div class="lucht" aria-hidden="true"><span class="wolk" style="top:14%;width:180px;animation-duration:70s;animation-delay:-10s"></span><span class="wolk" style="top:50%;width:240px;animation-duration:95s;animation-delay:-50s"></span>{sky}</div>
 {uitleg}
 <h2>Goed om te weten</h2>
+<div class="hoe"><b>Alleen Nederlandse toestellen</b>Bij Defensie tonen we alleen Nederlandse militaire toestellen. Buitenlandse toestellen die over Nederland vliegen, staan niet op de kaart.</div>
 <div class="hoe"><b>Hoe herkent A-Alerts een toestel?</b>Elk toestel zendt een vast adres uit dat nooit verandert. Daaraan en aan het type herkennen we het, ook als de roepnaam per vlucht anders is. Een toestel dat zijn positie niet uitzendt, staat niet op de kaart. Posities: adsb.lol (ODbL).</div>
-<div class="hoe"><b>Zo zet je het aan</b>Open de kaart, kies Kaartlagen en zet <b style="display:inline">Defensie en overheid</b> aan. Lifeliners en politiehelikopters staan standaard aan.</div>
+<div class="hoe"><b>Zo zet je het aan</b>Open de kaart en zet de laag <b style="display:inline">Luchtvaart</b> aan. Bij Kaartlagen (in de app) of Weergave (op de website) kies je welke toestellen je ziet. Lifeliners en politiehelikopters staan standaard aan.</div>
 </main>
-<footer>A-Alerts (voorheen P2000 Apeldoorn) · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a> · tekeningen: A-Alerts</footer>
+<footer>A-Alerts · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a> · tekeningen: A-Alerts</footer>
 {TELLER}
 <script type="module">import {{ trackVisit }} from "/assets/js/core.js?v=61"; trackVisit();</script>
 </body>

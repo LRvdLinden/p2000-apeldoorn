@@ -1,6 +1,6 @@
 # P2000Beheer
 
-Beheer van A-Alerts (voorheen P2000 Apeldoorn), als app voor **iPhone, iPad en Mac** (`P2000Beheer.xcodeproj`) en als **webdashboard** (`web/`, voor beheer.a-alerts.nl).
+Beheer van A-Alerts, als app voor **iPhone, iPad en Mac** (`P2000Beheer.xcodeproj`) en als **webdashboard** (`web/`, voor beheer.a-alerts.nl).
 
 Beide praten met het beheerdeel van de API (Cloudflare Worker in `../worker`), achter een login:
 

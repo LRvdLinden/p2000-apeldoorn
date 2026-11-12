@@ -31,7 +31,7 @@ PAGES = [
      "A-Alerts is onafhankelijk en geen officiële dienst van hulpdiensten of overheid. Meldingen kunnen onvolledig of vertraagd zijn. Bel bij nood altijd 112."),
     ("wat-is-nieuw", "changelog", "Wat is nieuw: alle versies | A-Alerts",
      "Wat is nieuw",
-     "Alle versies van A-Alerts (voorheen P2000 Apeldoorn): NL-Alert, Burgernet en KNMI, live helikopters, kaartlagen, meldingsprofielen en meer."),
+     "Alle versies van A-Alerts: NL-Alert, Burgernet en KNMI, live helikopters, kaartlagen, meldingsprofielen en meer."),
 ]
 NAV = [("privacy", "Privacy"), ("voorwaarden", "Voorwaarden"), ("disclaimer", "Disclaimer"), ("cookies", "Cookies"), ("wat-is-nieuw", "Wat is nieuw")]
 
@@ -143,7 +143,7 @@ def page(slug, data_name, title, h1, desc):
 <main>
 <article><h1>{html.escape(h1)}</h1>{content}</article>
 </main>
-<footer>A-Alerts (voorheen P2000 Apeldoorn) · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a></footer>
+<footer>A-Alerts · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a></footer>
 <script type="module">import {{ trackVisit }} from "/assets/js/core.js?v={V}"; trackVisit();</script>
 </body>
 </html>

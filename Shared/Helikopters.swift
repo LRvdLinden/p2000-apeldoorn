@@ -192,7 +192,6 @@ struct LuchtSoort: Identifiable, Hashable {
          LuchtSoort(id: "vliegtuig", titel: L("Overig vliegtuig (Defensie)"), afbeelding: "lucht_vliegtuig"),
          LuchtSoort(id: "kustwacht_dash8", titel: L("Kustwacht vliegtuig"), afbeelding: "lucht_kustwacht_dash8"),
          LuchtSoort(id: "kustwacht_aw189", titel: L("Kustwacht helikopter"), afbeelding: "lucht_kustwacht_aw189"),
-         LuchtSoort(id: "kustwacht_heli", titel: L("Kustwacht overig"), afbeelding: "lucht_kustwacht_heli"),
          LuchtSoort(id: "kmar", titel: L("Koninklijke Marechaussee"), afbeelding: "lucht_kmar"),
          LuchtSoort(id: "phgov", titel: L("Regeringsvliegtuig PH-GOV"), afbeelding: "lucht_phgov")]
     }

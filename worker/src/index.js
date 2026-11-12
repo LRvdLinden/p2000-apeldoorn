@@ -1,4 +1,4 @@
-// A-Alerts API (formerly P2000 Apeldoorn) as a Cloudflare Worker (no server to maintain), at
+// A-Alerts API as a Cloudflare Worker (no server to maintain), at
 // p2000-apeldoorn-api.lrvdlinden.workers.dev.
 //  - Cron (every minute): reads the p2000.page feed 3× per run, stores Apeldoorn alerts in D1 and sends pushes.
 //  - HTTP: the same REST API the app, the widgets and the website use.

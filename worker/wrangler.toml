@@ -1,4 +1,4 @@
-# Cloudflare Worker: the API + ingest + pushmeldingen for A-Alerts (formerly P2000 Apeldoorn).
+# Cloudflare Worker: the API + ingest + pushmeldingen for A-Alerts.
 # Name, database and workers.dev address keep their old names so nothing has to move.
 # Deployed by the GitHub workflow "Worker" (database_id is filled in there).
 name = "p2000-apeldoorn-api"
