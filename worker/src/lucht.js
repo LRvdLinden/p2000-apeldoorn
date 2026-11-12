@@ -10,6 +10,15 @@ const TYPES = {
   NH90: ["nh90", "NH90"], F35: ["f35", "F-35"], F16: ["f35", "F-16"], C130: ["hercules", "Hercules"], C30J: ["hercules", "Hercules"],
   A400: ["hercules", "A400M"], PC7: ["les", "Pilatus PC-7"], PC21: ["les", "Pilatus PC-21"],
 };
+/**
+ * Netherlands Coastguard by registration (public registers: Scramble order of battle, helis.com). The source does not give
+ * the owner of an aircraft, and the coastguard flies under changing callsigns, so the registration is what counts; after the
+ * first sighting the airframe (hex) is remembered as well.
+ */
+const KUSTWACHT = {
+  "PH-CGD": "kustwacht_dash8", "PH-CGE": "kustwacht_dash8",
+  "PH-NCG": "kustwacht_aw189", "PH-SAR": "kustwacht_aw189", "PH-RSQ": "kustwacht_aw189", "PH-BSR": "kustwacht_aw189",
+};
 const HELI = new Set(["H47", "H64", "AS32", "AS3B", "NH90", "H60", "EC25", "H225", "EC45", "EC35", "A139", "A189", "LYNX", "MRF1", "TIGR", "H53", "S61", "S92", "A149", "AW10", "EH10", "UH1", "B412", "B06"]);
 
 /**
@@ -24,6 +33,7 @@ export function luchtSoort(ac, learned = new Map()) {
   const isHeli = HELI.has(type) || ac.category === "A7";
 
   if (reg === "PH-GOV") return { soort: "regering", icoon: "phgov", naam: "Regeringsvliegtuig PH-GOV" };
+  if (KUSTWACHT[reg]) return { soort: "kustwacht", icoon: KUSTWACHT[reg], naam: `Kustwacht ${reg}` };
   if (/KUSTWACHT|COAST\s?GUARD|KÜSTENWACHE/i.test(owner)) {
     const nl = reg.startsWith("PH-");
     return { soort: "kustwacht", icoon: !isHeli ? "kustwacht_dash8" : nl ? "kustwacht_aw189" : "kustwacht_heli", naam: `Kustwacht ${reg || type}`.trim() };

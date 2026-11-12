@@ -19,6 +19,9 @@ test("luchtSoort: type decides the icon, the callsign plays no part", () => {
 
 test("luchtSoort: coastguard, Marechaussee and PH-GOV", () => {
   assert.equal(luchtSoort({ hex: "1", r: "PH-GOV", t: "B737" }).icoon, "phgov");
+  assert.deepEqual(luchtSoort({ hex: "6", r: "PH-CGD", t: "DH8A", flight: "NCG01" }), { soort: "kustwacht", icoon: "kustwacht_dash8", naam: "Kustwacht PH-CGD" });
+  assert.equal(luchtSoort({ hex: "7", r: "PH-SAR", t: "A189", flight: "RESCUE1" }).icoon, "kustwacht_aw189");
+  assert.equal(luchtSoort({ hex: "8", r: "PH-RSQ", t: "A189" }).soort, "kustwacht");
   assert.equal(luchtSoort({ hex: "2", r: "PH-CGX", t: "DH8A", ownOp: "Kustwacht Nederland" }).icoon, "kustwacht_dash8");
   assert.equal(luchtSoort({ hex: "3", r: "PH-NCX", t: "A189", ownOp: "Netherlands Coastguard" }).icoon, "kustwacht_aw189");
   assert.equal(luchtSoort({ hex: "4", r: "OO-XXX", t: "NH90", ownOp: "Belgian Coast Guard" }).icoon, "kustwacht_heli");
