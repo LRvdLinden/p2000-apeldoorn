@@ -13,7 +13,7 @@ test("luchtSoort: type decides the icon, the callsign plays no part", () => {
   assert.equal(luchtSoort(mil("C130", "G-781")).icoon, "hercules");
   assert.equal(luchtSoort(mil("PC7", "L-05")).icoon, "les");
   assert.equal(luchtSoort(mil("H60", "")).icoon, "heli");
-  assert.equal(luchtSoort(mil("GLF6", "V-11")).icoon, "vliegtuig");
+  assert.equal(luchtSoort(mil("GLF6", "V-11")).naam, "Gulfstream G650 V-11");
   assert.equal(luchtSoort({ hex: "484000", t: "B738", r: "PH-BXA", lat: 52, lon: 5 }), null);
 });
 
@@ -26,6 +26,13 @@ test("luchtSoort: coastguard, Marechaussee and PH-GOV", () => {
   assert.equal(luchtSoort({ hex: "3", r: "PH-NCX", t: "A189", ownOp: "Netherlands Coastguard" }).icoon, "kustwacht_aw189");
   assert.equal(luchtSoort({ hex: "4", r: "OO-XXX", t: "NH90", ownOp: "Belgian Coast Guard" }).icoon, "kustwacht_heli");
   assert.equal(luchtSoort({ hex: "5", r: "PH-XXX", t: "DA62", ownOp: "Koninklijke Marechaussee" }).soort, "kmar");
+  assert.deepEqual(luchtSoort({ hex: "9", r: "D-IAMT", t: "DA62", flight: "CHARLEY1" }), { soort: "kmar", icoon: "kmar", naam: "Marechaussee D-IAMT" });
+  assert.equal(luchtSoort({ hex: "a", r: "D-IBMT" }).soort, "kmar");
+  // No type and no registration: the callsign is the name, not a guessed type.
+  assert.deepEqual(luchtSoort({ hex: "b", dbFlags: 1, flight: "ANGRY26 " }), { soort: "defensie", icoon: "vliegtuig", naam: "ANGRY26" });
+  assert.equal(luchtSoort({ hex: "c", dbFlags: 1, t: "GL5T", r: "14+04" }).naam, "Global 5000 14+04");
+  assert.equal(luchtSoort({ hex: "d", dbFlags: 1, t: "EUFI", r: "30+01" }).icoon, "f35");
+  assert.equal(luchtSoort({ hex: "e", dbFlags: 1, t: "H60", r: "" }).naam, "Black Hawk");
 });
 
 test("luchtLijst: fixed id per airframe, another callsign is the same aircraft, helicopters of the other layer skipped", () => {

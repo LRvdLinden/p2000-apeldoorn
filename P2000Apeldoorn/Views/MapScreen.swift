@@ -80,6 +80,10 @@ struct MapScreen: View {
         }
     }
 
+    /// Layer Luchtvaart: only the kinds chosen in the map options.
+    private var heliLijst: [Helikopter] { helis.items.filter { settings.luchtSoorten.contains($0.soort) } }
+    private var luchtLijst: [Helikopter] { lucht.items.filter { settings.luchtSoorten.contains($0.luchtSoort) } }
+    private var luchtAan: Bool { settings.laag(.helikopters) && LuchtSoort.meerDanHelis(settings.luchtSoorten) }
     private var heli: Helikopter? { selectedHeli.flatMap { id in helis.items.first { $0.id == id } ?? lucht.items.first { $0.id == id } } }
 
     /// "Volg Lifeliner 3 op de kaart" from an alert: helicopter layer on, select it and follow it.
@@ -231,8 +235,8 @@ struct MapScreen: View {
                     }
                 }
             }
-            .onAppear { helis.start(); lucht.zet(settings.laag(.defensie)); volgGevraagd() }
-            .onChange(of: settings.laag(.defensie)) { _, on in
+            .onAppear { helis.start(); lucht.zet(luchtAan); volgGevraagd() }
+            .onChange(of: luchtAan) { _, on in
                 lucht.zet(on)
                 if !on, selectedHeli?.hasPrefix("lucht-") == true { selectedHeli = nil }
             }
@@ -249,12 +253,12 @@ struct MapScreen: View {
             .onDisappear { helis.stop(); lucht.zet(false); spoor.volg(nil) }
             .onChange(of: selectedHeli) { _, id in
                 if id != nil, let b = SpoorBereik(rawValue: settings.spoorStandaard), spoor.bereik != b, spoor.heliID == nil { spoor.bereik = b }
-                spoor.volg(id?.hasPrefix("lucht-") == true ? nil : id)
+                spoor.volg(id)
             }
             // Smooth movement: every 2 seconds a new estimated position while a helicopter is in the air.
             .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
-                guard !settings.prestatieModus, (settings.laag(.helikopters) && helis.items.contains(where: { !$0.opGrond }))
-                        || (settings.laag(.defensie) && !lucht.items.isEmpty) else { return }
+                guard !settings.prestatieModus, settings.laag(.helikopters),
+                      heliLijst.contains(where: { !$0.opGrond }) || !luchtLijst.isEmpty else { return }
                 withAnimation(.linear(duration: 2)) { nu = t }
             }
             .onChange(of: settings.laag(.helikopters)) { _, on in
@@ -411,13 +415,13 @@ struct MapScreen: View {
                 }
             }
             // Where each helicopter is probably heading: a thin dashed line to the hospital or base.
-            ForEach(helis.items.filter { $0.voorspelling != nil && (selectedHeli == nil || selectedHeli == $0.id) }) { h in
+            ForEach(heliLijst.filter { $0.voorspelling != nil && (selectedHeli == nil || selectedHeli == $0.id) }) { h in
                 if let v = h.voorspelling {
                     MapPolyline(coordinates: [h.geschat(op: nu), v.coordinate])
                         .stroke(h.color.opacity(0.7), style: StrokeStyle(lineWidth: 2, lineCap: .round, dash: [3, 6]))
                 }
             }
-            ForEach(helis.items) { h in
+            ForEach(heliLijst) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                     HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
@@ -430,8 +434,8 @@ struct MapScreen: View {
 
     /// Defence, coastguard, Marechaussee and the government aircraft: same marker as the helicopters, own drawing per type.
     @MapContentBuilder private var luchtLaag: some MapContent {
-        if settings.laag(.defensie) {
-            ForEach(lucht.items) { h in
+        if settings.laag(.helikopters) {
+            ForEach(luchtLijst) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
                     HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
@@ -447,7 +451,7 @@ struct MapScreen: View {
             if let selected {
                 MapPreviewCard(melding: selected) { self.selected = nil }
             } else if let heli {
-                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: heli.isLucht ? nil : spoor) { selectedHeli = nil }
+                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor) { selectedHeli = nil }
             } else if let k = selectedKazerne {
                 KazerneKaart(kazerne: k) { selectedKazerne = nil }
             } else if let l = selectedLocatie {
@@ -514,12 +518,12 @@ struct MapScreen: View {
                         }
                     }
                     // Pill for the layer Defensie en overheid: only while the layer is on and something is flying.
-                    if settings.laag(.defensie), let eerste = lucht.items.first {
-                        chip(on: true, color: Color(hex: 0x586A33), label: "\(L("Defensie")): \(lucht.items.count)") {
-                            naarHelis(lucht.items, laag: .defensie)
+                    if settings.laag(.helikopters), let eerste = luchtLijst.first {
+                        chip(on: true, color: Color(hex: 0x586A33), label: "\(L("Defensie")): \(luchtLijst.count)") {
+                            naarHelis(luchtLijst)
                         } content: {
                             Image(eerste.afbeelding).resizable().scaledToFit().frame(width: 28, height: 14)
-                            Text("\(lucht.items.count)")
+                            Text("\(luchtLijst.count)")
                         }
                     }
                     ForEach(heliSoorten, id: \.soort) { g in
@@ -564,7 +568,7 @@ struct MapScreen: View {
     private struct HeliSoort { let soort: String; let naam: String; let color: Color; let items: [Helikopter] }
     /// Lifeliners and police helicopters in the air, one chip per type.
     private var heliSoorten: [HeliSoort] {
-        let lucht = helis.items
+        let lucht = heliLijst
         return [("trauma", "Lifeliner"), ("politie", "Zulu")].compactMap { soort, naam in
             let items = lucht.filter { $0.soort == soort }
             return items.isEmpty ? nil : HeliSoort(soort: soort, naam: naam, color: items[0].color, items: items)
@@ -572,8 +576,8 @@ struct MapScreen: View {
     }
 
     /// One helicopter: select and follow it. More: show all of them on the map.
-    private func naarHelis(_ items: [Helikopter], laag: KaartLaag = .helikopters) {
-        if !settings.laag(laag) { settings.setLaag(laag, true) }
+    private func naarHelis(_ items: [Helikopter]) {
+        if !settings.laag(.helikopters) { settings.setLaag(.helikopters, true) }
         selected = nil; selectedKazerne = nil; selectedLocatie = nil
         if items.count == 1, let h = items.first {
             selectedHeli = h.id
@@ -625,6 +629,21 @@ struct KaartLagenView: View {
                         KaartWeergaveView()
                     } label: {
                         Label(L("Kaart en helikopters"), systemImage: "slider.horizontal.3")
+                    }
+                }
+                if settings.laag(.helikopters) {
+                    Section {
+                        NavigationLink {
+                            LuchtKeuzeView()
+                        } label: {
+                            LabeledContent {
+                                Text("\(settings.luchtSoorten.count)")
+                            } label: {
+                                Label(L("Toestellen op de kaart"), systemImage: "checklist")
+                            }
+                        }
+                    } footer: {
+                        Text(L("Kies welke helikopters en vliegtuigen je ziet: Lifeliner, Zulu, Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig."))
                     }
                 }
                 if settings.laag(.helikopters) {
@@ -782,5 +801,43 @@ struct MapPreviewCard: View {
         .padding(14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+    }
+}
+
+/// Layer Luchtvaart: choose per kind of aircraft whether it shows on the map, with its drawing and how many are flying now.
+struct LuchtKeuzeView: View {
+    @Environment(AppSettings.self) private var settings
+    @State private var inDeLucht: [String: Int] = [:]
+
+    var body: some View {
+        Form {
+            Section {
+                ForEach(LuchtSoort.alle) { s in
+                    Toggle(isOn: Binding(get: { settings.luchtSoorten.contains(s.id) },
+                                         set: { aan in if aan { settings.luchtSoorten.insert(s.id) } else { settings.luchtSoorten.remove(s.id) } })) {
+                        HStack(spacing: 10) {
+                            Image(s.afbeelding).resizable().scaledToFit().frame(width: 62, height: 24)
+                            Text(s.titel)
+                            Spacer(minLength: 0)
+                            if let n = inDeLucht[s.id], n > 0 {
+                                Text("\(n)").font(AppFont.body(12, .bold)).padding(.horizontal, 7).padding(.vertical, 2)
+                                    .background(Color.secondary.opacity(0.18), in: Capsule())
+                            }
+                        }
+                    }
+                }
+            } footer: {
+                Text(L("Het getal is het aantal dat nu in de lucht is. Een toestel wordt herkend aan het toestel zelf, ook als de roepnaam per vlucht anders is."))
+            }
+            Section {
+                Button(L("Alles tonen")) { settings.luchtSoorten = Set(LuchtSoort.alle.map(\.id)) }
+                Button(L("Alleen Lifeliner en Zulu")) { settings.luchtSoorten = LuchtSoort.standaard }
+            }
+        }
+        .navigationTitle(L("Toestellen op de kaart"))
+        .task {
+            let alle = ((try? await P2000API.shared.helikopters()) ?? []) + ((try? await P2000API.shared.lucht()) ?? [])
+            inDeLucht = Dictionary(grouping: alle.filter { !$0.opGrond }, by: \.luchtSoort).mapValues(\.count)
+        }
     }
 }

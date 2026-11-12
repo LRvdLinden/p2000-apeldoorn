@@ -1,5 +1,11 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 83)
+- Eén kaartlaag "Luchtvaart" in plaats van "Helikopters" en "Defensie en overheid". Bij Kaartlagen kies je per soort toestel of je het ziet (16 soorten, met tekening en het aantal in de lucht); standaard Lifeliner en Zulu. App, Apple TV, Android, pager en meldkamer.
+- Routespoor en vluchten van de laatste twee uur voor alle toestellen in de laag, niet alleen Lifeliner en Zulu (worker bewaart per toestel hooguit één positie per 30 seconden).
+- Koninklijke Marechaussee herkend op registratie (D-IAMT, D-IBMT); militaire toestellen zonder eigen tekening krijgen een leesbare naam (Global 5000, A330 tanker, Eurofighter …) of, als er geen type bekend is, hun roepnaam.
+- Website: a-alerts.nl/luchtvaart heeft een eigen deelafbeelding (og/luchtvaart.jpg), volledige meta-tags en gestructureerde gegevens.
+
 ## Website (12 november 2026)
 - Nieuwe pagina a-alerts.nl/luchtvaart: alle 17 toestellen met tekening en uitleg, een vliegende lucht met draaiende rotors en een live teller.
 - Homepage: blok "Zie wat er boven je vliegt" met een bewegende kaart en een knop naar de uitleg. Beide gemaakt door `tools/maak_luchtvaart.py` (tekeningen in `tools/lucht/`).

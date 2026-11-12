@@ -1361,6 +1361,23 @@
         }
       }
     },
+    "Alleen Lifeliner en Zulu": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Only Lifeliner and Zulu"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alleen Lifeliner en Zulu"
+          }
+        }
+      }
+    },
     "Alleen bij spoed (A1, P1)": {
       "extractionState": "manual",
       "localizations": {
@@ -1476,6 +1493,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alles"
+          }
+        }
+      }
+    },
+    "Alles tonen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show everything"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alles tonen"
           }
         }
       }
@@ -3142,23 +3176,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Defensie"
-          }
-        }
-      }
-    },
-    "Defensie en overheid (live)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Defence and government (live)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Defensie en overheid (live)"
           }
         }
       }
@@ -4999,23 +5016,6 @@
         }
       }
     },
-    "Helikopters (live)": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helicopters (live)"
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Helikopters (live)"
-          }
-        }
-      }
-    },
     "Helikopters in je zone": {
       "extractionState": "manual",
       "localizations": {
@@ -5131,6 +5131,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Het alarmgeluid klinkt als er een nieuwe melding binnenkomt terwijl de app open is. Het volgt je filters en de stille modus. Op iPhone volgt het ook de stilschakelaar."
+          }
+        }
+      }
+    },
+    "Het getal is het aantal dat nu in de lucht is. Een toestel wordt herkend aan het toestel zelf, ook als de roepnaam per vlucht anders is.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The number is how many are flying now. An aircraft is recognised by the airframe itself, even when the callsign differs per flight."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Het getal is het aantal dat nu in de lucht is. Een toestel wordt herkend aan het toestel zelf, ook als de roepnaam per vlucht anders is."
           }
         }
       }
@@ -5985,6 +6002,23 @@
         }
       }
     },
+    "Kies welke helikopters en vliegtuigen je ziet: Lifeliner, Zulu, Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose which helicopters and aircraft you see: Lifeliner, Zulu, defence, coastguard, Marechaussee and the government aircraft."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kies welke helikopters en vliegtuigen je ziet: Lifeliner, Zulu, Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig."
+          }
+        }
+      }
+    },
     "Kind vermist en in levensgevaar, heel Nederland": {
       "extractionState": "manual",
       "localizations": {
@@ -6240,6 +6274,57 @@
         }
       }
     },
+    "Kustwacht helikopter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coastguard helicopter"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kustwacht helikopter"
+          }
+        }
+      }
+    },
+    "Kustwacht overig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other coastguard"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kustwacht overig"
+          }
+        }
+      }
+    },
+    "Kustwacht vliegtuig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Coastguard aircraft"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kustwacht vliegtuig"
+          }
+        }
+      }
+    },
     "LIVE": {
       "extractionState": "manual",
       "localizations": {
@@ -6461,6 +6546,23 @@
         }
       }
     },
+    "Lesvliegtuig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Trainer aircraft"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Lesvliegtuig"
+          }
+        }
+      }
+    },
     "Let op:": {
       "extractionState": "manual",
       "localizations": {
@@ -6661,6 +6763,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Look Around"
+          }
+        }
+      }
+    },
+    "Luchtvaart (live)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aviation (live)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Luchtvaart (live)"
           }
         }
       }
@@ -8348,6 +8467,23 @@
         }
       }
     },
+    "Overig vliegtuig (Defensie)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other aircraft (defence)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overig vliegtuig (Defensie)"
+          }
+        }
+      }
+    },
     "Overige gegevensbronnen": {
       "extractionState": "manual",
       "localizations": {
@@ -8361,6 +8497,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Overige gegevensbronnen"
+          }
+        }
+      }
+    },
+    "Overige helikopter (Defensie)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Other helicopter (defence)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Overige helikopter (Defensie)"
           }
         }
       }
@@ -9143,6 +9296,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Regering"
+          }
+        }
+      }
+    },
+    "Regeringsvliegtuig PH-GOV": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Government aircraft PH-GOV"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regeringsvliegtuig PH-GOV"
           }
         }
       }
@@ -9946,6 +10116,23 @@
         }
       }
     },
+    "Straaljager": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Fighter jet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Straaljager"
+          }
+        }
+      }
+    },
     "Stuur een testmelding": {
       "extractionState": "manual",
       "localizations": {
@@ -10371,6 +10558,23 @@
         }
       }
     },
+    "Toestellen op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aircraft on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toestellen op de kaart"
+          }
+        }
+      }
+    },
     "Toon": {
       "extractionState": "manual",
       "localizations": {
@@ -10520,6 +10724,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Trajectcontrole"
+          }
+        }
+      }
+    },
+    "Transportvliegtuig": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transport aircraft"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Transportvliegtuig"
           }
         }
       }
@@ -12594,6 +12815,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zulu"
+          }
+        }
+      }
+    },
+    "Zulu (politie)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zulu (police)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zulu (politie)"
           }
         }
       }

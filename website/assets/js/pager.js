@@ -5,11 +5,11 @@ import {
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js?v=61";
 import {
-  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLucht, LUCHT_SOORT, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=61";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=62";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -873,8 +873,7 @@ let bigMap = null, bigMapReady = null;
 const LAGEN = [
   ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800"],
   ["knmi", "KNMI", "icon_knmi", "#3E9FDB"],
-  ["helikopters", "Heli's", "icon_traumaheli", "#9333EA"],
-  ["defensie", "Defensie", "lucht_chinook", "#586A33"],
+  ["helikopters", "Luchtvaart", "icon_traumaheli", "#9333EA"],
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
   ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B"],
@@ -899,7 +898,7 @@ function renderMapChips() {
     return `<button class="chip heli-chip${state.lagen.has("helikopters") ? "" : " off"}" data-heli="${soort}" style="--c:${soort === "trauma" ? "#9333EA" : "#15428B"}" title="${label}"><img src="${heliImg(list[0])}" alt="${label}">${list.length}</button>`;
   };
   // Pill for the layer Defensie en overheid: only while the layer is on and something is flying.
-  const luchtChip = () => (state.lagen.has("defensie") && state.lucht.length
+  const luchtChip = () => (state.lagen.has("helikopters") && state.lucht.length
     ? `<button class="chip heli-chip" data-lucht style="--c:#586A33" title="Defensie en overheid"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</button>` : "");
   $("mapChips").innerHTML = SELECTABLE.map((d) => {
     const n = recent.filter((m) => m.dienst === d).length;
@@ -911,9 +910,9 @@ function renderMapChips() {
     + `<button class="chip pijl" data-lagen-pijl style="--c:#64748B" aria-expanded="${state.lagenOpen}" aria-controls="mapLagen" title="${state.lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen <span aria-hidden="true">${state.lagenOpen ? "▴" : "▾"}</span></button>`;
   $("mapLagen").hidden = !state.lagenOpen;
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
-    const n = k === "helikopters" ? state.helis.length : k === "defensie" ? (state.lagen.has("defensie") ? state.lucht.length : "") : k === "waarschuwingen" ? mapWarnings().length
+    const n = k === "helikopters" ? state.helis.length + state.lucht.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", defensie: "Defensie en overheid: Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -922,7 +921,6 @@ $("mapLagen").addEventListener("click", (e) => {
   if (!k) return;
   state.lagen.has(k) ? state.lagen.delete(k) : state.lagen.add(k);
   prefs.set("p2000.lagen", [...state.lagen]);
-  if (k === "defensie") { if (state.lagen.has(k)) pollHelis(); else state.lucht = []; }
   renderMap();
 });
 
@@ -934,7 +932,7 @@ function mapWarnings() {
 let heliTimer = null;
 async function pollHelis() {
   if (state.tab !== "kaart" || document.hidden) return;
-  [state.helis, state.lucht] = await Promise.all([fetchHelikopters(), state.lagen.has("defensie") ? fetchLucht() : []]);
+  ({ helis: state.helis, lucht: state.lucht } = await fetchLuchtvaart());
   renderMap();
 }
 $("mapChips").addEventListener("click", async (e) => {
@@ -956,7 +954,7 @@ $("mapChips").addEventListener("click", async (e) => {
   if (chip.dataset.lucht !== undefined) {
     const mk = await bigMapReady;
     if (!mk || !bigMap || !state.lucht.length) return;
-    if (state.lucht.length === 1) { bigMap.setCenterAnimated(new mk.Coordinate(state.lucht[0].lat, state.lucht[0].lon)); openLucht(state.lucht[0]); }
+    if (state.lucht.length === 1) { bigMap.setCenterAnimated(new mk.Coordinate(state.lucht[0].lat, state.lucht[0].lon)); openHeli(state.lucht[0]); }
     else {
       const la = state.lucht.map((t) => t.lat), lo = state.lucht.map((t) => t.lon);
       bigMap.setRegionAnimated(new mk.BoundingRegion(Math.max(...la) + 0.15, Math.max(...lo) + 0.25, Math.min(...la) - 0.15, Math.min(...lo) - 0.25).toCoordinateRegion());
@@ -1045,14 +1043,14 @@ async function renderMap() {
     if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
   }
   heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
-  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openLucht(t); } });
-  luchtMarkers.update(state.lagen.has("defensie") ? state.lucht : []);
+  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openHeli(t); } });
+  luchtMarkers.update(state.lagen.has("helikopters") ? state.lucht : []);
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
     state.helis.filter((h) => !heliSpoor.id || h.id === heliSpoor.id).forEach((h) => { const v = voorspellingOverlay(mk, h); if (v) bigMap.addOverlay(v); });
   }
   if (state.lagen.has("helikopters") && heliSpoor.id) {
-    const h = state.helis.find((x) => x.id === heliSpoor.id);
+    const h = vliegend().find((x) => x.id === heliSpoor.id);
     const ov = spoorOverlay(mk, heliSpoor.punten, h, Date.now(), afspelen.f == null ? {} : { live: false, opacity: 0.35 });
     if (ov) bigMap.addOverlay(ov);
     afspelen.ov = null; // removed with the other overlays above
@@ -1067,7 +1065,7 @@ async function renderMap() {
   ]);
   // "Volg … op de kaart": centre on the helicopter at every new position.
   if (state.volgHeli) {
-    const h = state.helis.find((x) => x.id === state.volgHeli);
+    const h = vliegend().find((x) => x.id === state.volgHeli);
     if (h) {
       const g = geschat(h);
       bigMap.setCenterAnimated(new mk.Coordinate(g.lat, g.lon));
@@ -1116,8 +1114,12 @@ function openWeergave() {
   const v = weergave();
   const box = $("clusterPanel");
   const opt = (name, val, label, cur) => `<label class="radio"><input type="radio" name="${name}" value="${val}"${cur === val ? " checked" : ""}> ${label}</label>`;
-  box.innerHTML = `<header><b>Kaart en helikopters</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+  const keuze = luchtKeuze();
+  const rij = ([k, label, img]) => `<label class="check lucht-keuze"><input type="checkbox" name="lucht" value="${k}"${keuze.has(k) ? " checked" : ""}><img src="${asset(`assets/img/${img}.png`)}" alt=""><span>${label}</span><small data-n="${k}"></small></label>`;
+  box.innerHTML = `<header><b>Kaart en luchtvaart</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
     <form id="weergaveForm" class="weergave">
+      <fieldset><legend>Toestellen op de kaart</legend><div class="lucht-lijst">${LUCHT_SOORTEN.map(rij).join("")}</div>
+        <p class="hint"><button type="button" class="linkknop" data-lucht-alles>Alles</button> · <button type="button" class="linkknop" data-lucht-geen>Alleen Lifeliner en Zulu</button> · <a href="${asset("luchtvaart/")}">Uitleg per toestel</a></p></fieldset>
       <fieldset><legend>Kaartkleuren</legend>${opt("kaart", "licht", "Licht", v.kaart)}${opt("kaart", "donker", "Donker", v.kaart)}${opt("kaart", "auto", "Automatisch", v.kaart)}</fieldset>
       <label class="check"><input type="checkbox" name="kleurPerToestel"${v.kleurPerToestel ? " checked" : ""}> Eigen kleur per helikopter</label>
       <fieldset><legend>Grootte op de kaart</legend>${opt("icoon", "klein", "Klein", v.icoon)}${opt("icoon", "normaal", "Normaal", v.icoon)}${opt("icoon", "groot", "Groot", v.icoon)}</fieldset>
@@ -1126,7 +1128,15 @@ function openWeergave() {
       <p class="hint">Deze keuzes gelden voor deze browser.</p>
     </form>`;
   box.hidden = false;
+  // How many of each kind are flying now (unfiltered).
+  fetchLuchtvaart({ alles: true }).then(({ alle }) => {
+    for (const el of box.querySelectorAll("[data-n]")) { const n = alle.filter((h) => luchtSoort(h) === el.dataset.n && !h.op_grond).length; el.textContent = n ? String(n) : ""; }
+  });
+  const bewaarKeuze = () => { zetLuchtKeuze(new Set([...box.querySelectorAll('input[name="lucht"]:checked')].map((i) => i.value))); pollHelis(); };
+  box.querySelector("[data-lucht-alles]").addEventListener("click", () => { box.querySelectorAll('input[name="lucht"]').forEach((i) => (i.checked = true)); bewaarKeuze(); });
+  box.querySelector("[data-lucht-geen]").addEventListener("click", () => { box.querySelectorAll('input[name="lucht"]').forEach((i) => (i.checked = i.value === "trauma" || i.value === "politie")); bewaarKeuze(); });
   $("weergaveForm").addEventListener("change", async (e) => {
+    if (e.target.name === "lucht") { bewaarKeuze(); return; }
     const f = e.currentTarget;
     const nieuw = zetWeergave({
       kaart: f.kaart.value, kleurPerToestel: f.kleurPerToestel.checked, prestatie: f.prestatie.checked,
@@ -1202,7 +1212,7 @@ function renderAfspeel(mk, h) {
 }
 const afspeelTick = async () => {
   const mk = await bigMapReady;
-  if (mk && bigMap) renderAfspeel(mk, state.helis.find((x) => x.id === heliSpoor.id));
+  if (mk && bigMap) renderAfspeel(mk, vliegend().find((x) => x.id === heliSpoor.id));
 };
 function speelAf(aan) {
   clearInterval(afspelen.timer);
@@ -1250,27 +1260,17 @@ function selectSpoor(id) {
 }
 
 /** Helicopter tapped: heading, altitude and speed (like the app's info card). */
-/** Defence or government aircraft tapped: what it is and how it flies. The callsign is only a label. */
-function openLucht(t) {
-  const box = $("clusterPanel");
-  const koers = t.koers != null && !t.op_grond ? `${t.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(t.koers / 45) % 8]}` : "–";
-  const hoogte = t.op_grond ? "Op de grond" : t.hoogte_ft != null ? `${Math.round((t.hoogte_ft * 0.3048) / 10) * 10} m` : "–";
-  const snelheid = t.snelheid_kt != null ? `${Math.round(t.snelheid_kt * 1.852)} km/u` : "–";
-  box.innerHTML = `<header><b>${esc(t.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
-    <p>${esc([LUCHT_SOORT[t.soort] || "Defensie", t.type, t.callsign ? `vliegt als ${t.callsign}` : null].filter(Boolean).join(" · "))}</p>
-    <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
-    <p class="hint" style="margin:8px 0 0">Herkend aan het toestel zelf; de roepnaam kan per vlucht anders zijn.</p>`;
-  box.hidden = false;
-}
+/** Helicopters plus the chosen defence and government aircraft (the route trail and flights work for all of them). */
+const vliegend = () => [...state.helis, ...state.lucht];
 function openHeli(h) {
   const box = $("clusterPanel");
   const koers = h.koers != null && !h.op_grond ? `${h.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(h.koers / 45) % 8]}` : "–";
   const hoogte = h.op_grond ? "Op de grond" : h.hoogte_ft != null ? `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m` : "–";
   const snelheid = h.snelheid_kt != null ? `${Math.round(h.snelheid_kt * 1.852)} km/u` : "–";
-  const herkenning = h.herkenning === "toestel" ? `Herkend aan het toestel; vliegt nu als ${esc(h.callsign || "–")}` : h.herkenning === "operator" ? "Herkend aan de eigenaar van het toestel" : "";
+  const herkenning = h.icoon ? `Herkend aan het toestel zelf${h.callsign ? `; vliegt nu als ${esc(h.callsign)}` : ""}` : h.herkenning === "toestel" ? `Herkend aan het toestel; vliegt nu als ${esc(h.callsign || "–")}` : h.herkenning === "operator" ? "Herkend aan de eigenaar van het toestel" : "";
   const afstand = state.here ? ` · ${distanceKm(state.here, h).toFixed(1).replace(".", ",")} km van je af` : "";
   box.innerHTML = `<header><b>${esc(h.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
-    <p>${esc([h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
+    <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}

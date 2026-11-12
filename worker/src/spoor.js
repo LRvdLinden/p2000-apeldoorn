@@ -37,6 +37,29 @@ export async function recordPositions(env, data) {
   return { stored: rows.length, prev };
 }
 
+/**
+ * The same for the layer Luchtvaart (defence, coastguard, Marechaussee, government): one point per aircraft per 30 seconds
+ * at most, so the route trail and the flights of the last two hours work for them too without many database writes.
+ */
+export async function recordLucht(env, lucht) {
+  const list = (lucht || []).slice(0, 40);
+  if (!list.length) return 0;
+  const ids = list.map((h) => h.id);
+  const { results: last } = await env.DB.prepare(
+    `SELECT heli, MAX(at) AS at FROM heli_posities WHERE heli IN (${ids.map(() => "?").join(",")}) GROUP BY heli`,
+  ).bind(...ids).all();
+  const prev = new Map(last.map((r) => [r.heli, r.at]));
+  const rows = [];
+  for (const h of list) {
+    const at = Date.parse(h.gezien) || Date.now();
+    if (at - (prev.get(h.id) || 0) < 30_000) continue;
+    rows.push(env.DB.prepare("INSERT OR IGNORE INTO heli_posities (heli, at, lat, lon, hoogte_ft, snelheid_kt, koers, grond) VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+      .bind(h.id, at, h.lat, h.lon, h.hoogte_ft, h.snelheid_kt, h.koers, h.op_grond ? 1 : 0));
+  }
+  if (rows.length) await env.DB.batch(rows);
+  return rows.length;
+}
+
 export async function spoorHousekeeping(env) {
   await env.DB.prepare("DELETE FROM heli_posities WHERE at < ?").bind(Date.now() - KEEP_MS).run();
 }

@@ -52,6 +52,30 @@ export async function fetchLucht() {
     return r.ok ? (await r.json()).toestellen || [] : [];
   } catch { return []; }
 }
+/** One map layer "Luchtvaart": the kinds of aircraft someone can choose to see, [key, label, drawing]. */
+export const LUCHT_SOORTEN = [
+  ["trauma", "Lifeliner", "heli_lifeliner"], ["politie", "Zulu (politie)", "heli_politie"],
+  ["chinook", "Chinook", "lucht_chinook"], ["apache", "Apache", "lucht_apache"], ["cougar", "Cougar", "lucht_cougar"], ["nh90", "NH90", "lucht_nh90"],
+  ["heli", "Overige helikopter (Defensie)", "lucht_heli"], ["f35", "Straaljager", "lucht_f35"], ["hercules", "Transportvliegtuig", "lucht_hercules"],
+  ["les", "Lesvliegtuig", "lucht_les"], ["vliegtuig", "Overig vliegtuig (Defensie)", "lucht_vliegtuig"],
+  ["kustwacht_dash8", "Kustwacht vliegtuig", "lucht_kustwacht_dash8"], ["kustwacht_aw189", "Kustwacht helikopter", "lucht_kustwacht_aw189"],
+  ["kustwacht_heli", "Kustwacht overig", "lucht_kustwacht_heli"], ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov"],
+];
+export const luchtSoort = (h) => h.icoon || h.soort;
+const LUCHT_KEY = "p2000.luchtSoorten";
+/** The chosen kinds (kept in this browser); Lifeliner and Zulu until someone chooses more. */
+export function luchtKeuze() {
+  try { const v = JSON.parse(localStorage.getItem(LUCHT_KEY)); if (Array.isArray(v)) return new Set(v); } catch {}
+  return new Set(["trauma", "politie"]);
+}
+export function zetLuchtKeuze(set) { try { localStorage.setItem(LUCHT_KEY, JSON.stringify([...set])); } catch {} }
+/** Everything that flies, limited to the chosen kinds; `alle` is unfiltered (for the numbers in the list of choices). */
+export async function fetchLuchtvaart({ alles = false } = {}) {
+  const keuze = luchtKeuze();
+  const metLucht = alles || [...keuze].some((k) => k !== "trauma" && k !== "politie");
+  const [h, l] = await Promise.all([fetchHelikopters(), metLucht ? fetchLucht() : []]);
+  return { helis: h.filter((x) => keuze.has(x.soort)), lucht: l.filter((x) => keuze.has(x.icoon)), alle: [...h, ...l] };
+}
 export const LUCHT_SOORT = { defensie: "Defensie", kustwacht: "Kustwacht", kmar: "Koninklijke Marechaussee", regering: "Regering" };
 
 export async function fetchHelikopters() {

@@ -106,6 +106,8 @@ object Settings {
 
     // Appearance
     var appearance by str("appearance", "systeem")
+    /** Layer Luchtvaart: the kinds of aircraft shown on the map ("trauma", "politie", "chinook", "f35", "kustwacht_dash8" …). */
+    var luchtSoorten by set("luchtSoorten", setOf("trauma", "politie"))
     var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "verkeer", "helikopters", "werkgebied", "ziekenhuizen"))
     var kaartPeriode by int("kaartPeriode", 24)
 

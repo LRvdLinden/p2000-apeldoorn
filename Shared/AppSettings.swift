@@ -85,6 +85,8 @@ final class AppSettings {
     var mapType: String = "standard" { didSet { save(.mapType, mapType) } }
     /// Map layers that are switched on (see KaartLaag).
     var kaartLagen: Set<String> = KaartLaag.standaard { didSet { save(.kaartLagen, Array(kaartLagen).sorted()) } }
+    /// Layer Luchtvaart: the kinds of aircraft shown on the map ("trauma", "politie", "chinook", "f35", "kustwacht_dash8" …).
+    var luchtSoorten: Set<String> = LuchtSoort.standaard { didSet { save(.luchtSoorten, Array(luchtSoorten).sorted()) } }
 
     // MARK: Notifications
     var notificationsEnabled: Bool = false { didSet { save(.notificationsEnabled, notificationsEnabled); notificationsChanged() } }
@@ -124,7 +126,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
+        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, luchtSoorten, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
         case heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
@@ -267,6 +269,7 @@ final class AppSettings {
         if let v = source(Key.volgCapcodes.storageKey) as? [String: String] { volgCapcodes = v }
         if let v = source(Key.pushKnmiVooraf.storageKey) as? Bool { pushKnmiVooraf = v }
         if let v = source(Key.pushKnmiOpgeheven.storageKey) as? Bool { pushKnmiOpgeheven = v }
+        if let v = set(.luchtSoorten) { luchtSoorten = v }
         if let v = set(.kaartLagen) {
             // New layer "ziekenhuizen" (build 37): on once for everyone who already chose layers.
             var lagen = v.contains("ziekenhuizen") || UserDefaults.standard.bool(forKey: "laag.ziekenhuizen.v1") ? v : v.union(["ziekenhuizen"])
@@ -332,6 +335,7 @@ final class AppSettings {
         waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true; pushNieuwsLiveblog = true; pushNieuwsPolitie = false; pushNieuwsRegio = false
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
+        luchtSoorten = LuchtSoort.standaard
         heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
         grootIncident = false; grootPlaatsen = []
         spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; kaartThema = "licht"; gedemptKaart = false

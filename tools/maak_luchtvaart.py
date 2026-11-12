@@ -73,7 +73,19 @@ def detail():
     sky = "".join(f'<div class="vl{" rev" if rev else ""}" style="top:{top}%;width:{w}px;animation-duration:{dur}s;animation-delay:{dl}s"><div class="bob" style="animation-delay:{-i * 0.7}s">{teken(f, f"k{i}")}</div></div>'
                   for i, (f, top, dur, dl, w, rev) in enumerate(lucht))
     titel = "Alles wat vliegt in A-Alerts"
+    OG_ALT = "Lifeliner, politiehelikopter, Chinook, Apache, F-35, kustwachthelikopter en het regeringsvliegtuig: alles wat vliegt in A-Alerts"
     desc = "Welke helikopters en vliegtuigen zie je live in A-Alerts? Lifeliners, politiehelikopters, Defensie (Chinook, Apache, F-35), de Kustwacht, de Marechaussee en het regeringsvliegtuig."
+    import json
+    LD = json.dumps({"@context": "https://schema.org", "@graph": [
+        {"@type": "WebPage", "@id": "https://a-alerts.nl/luchtvaart/", "url": "https://a-alerts.nl/luchtvaart/", "name": f"{titel}: helikopters en vliegtuigen live",
+         "description": desc, "inLanguage": "nl-NL", "isPartOf": {"@id": "https://a-alerts.nl/#website"},
+         "primaryImageOfPage": {"@type": "ImageObject", "url": "https://a-alerts.nl/og/luchtvaart.jpg", "width": 1200, "height": 630}},
+        {"@type": "BreadcrumbList", "itemListElement": [
+            {"@type": "ListItem", "position": 1, "name": "A-Alerts", "item": "https://a-alerts.nl/"},
+            {"@type": "ListItem", "position": 2, "name": "Luchtvaart", "item": "https://a-alerts.nl/luchtvaart/"}]},
+        {"@type": "ItemList", "name": "Toestellen in A-Alerts", "itemListElement": [
+            {"@type": "ListItem", "position": i + 1, "name": f"{naam} ({soort})"} for i, (_, naam, soort, _t) in enumerate(x for _, items in GROEPEN for x in items)]},
+    ]}, ensure_ascii=False)
     return f"""<!doctype html>
 <html lang="nl">
 <head>
@@ -82,16 +94,26 @@ def detail():
 <title>{titel}: helikopters en vliegtuigen live | A-Alerts</title>
 <meta name="description" content="{desc}">
 <link rel="canonical" href="https://a-alerts.nl/luchtvaart/">
-<meta name="robots" content="index, follow">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<meta name="keywords" content="Lifeliner live, politiehelikopter Zulu, Chinook, Apache, F-35, Kustwacht, Marechaussee, PH-GOV, helikopter volgen, vliegtuigen Defensie, Apeldoorn">
 <meta name="theme-color" content="#cf0a1e">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="A-Alerts">
 <meta property="og:locale" content="nl_NL">
-<meta property="og:title" content="{titel}">
+<meta property="og:title" content="{titel}: helikopters en vliegtuigen live">
 <meta property="og:description" content="{desc}">
 <meta property="og:url" content="https://a-alerts.nl/luchtvaart/">
-<meta property="og:image" content="https://a-alerts.nl/og/a-alerts.jpg">
+<meta property="og:image" content="https://a-alerts.nl/og/luchtvaart.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{OG_ALT}">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{titel}: helikopters en vliegtuigen live">
+<meta name="twitter:description" content="{desc}">
+<meta name="twitter:image" content="https://a-alerts.nl/og/luchtvaart.jpg">
+<meta name="twitter:image:alt" content="{OG_ALT}">
+<script type="application/ld+json">{LD}</script>
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" href="/assets/img/aalerts-icon-32.png">
 <link rel="apple-touch-icon" href="/assets/img/aalerts-icon-180.png">

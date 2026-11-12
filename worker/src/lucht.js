@@ -19,6 +19,17 @@ const KUSTWACHT = {
   "PH-CGD": "kustwacht_dash8", "PH-CGE": "kustwacht_dash8",
   "PH-NCG": "kustwacht_aw189", "PH-SAR": "kustwacht_aw189", "PH-RSQ": "kustwacht_aw189", "PH-BSR": "kustwacht_aw189",
 };
+/** Koninklijke Marechaussee: two Diamond DA62 MPP patrol aircraft (German registrations, flown via QinetiQ). */
+const KMAR = new Set(["D-IAMT", "D-IBMT"]);
+
+/** Readable names for types without a drawing of their own (they get the general helicopter or aircraft drawing). */
+const NAMEN = {
+  GL5T: "Global 5000", GLF6: "Gulfstream G650", GLF5: "Gulfstream G550", A332: "A330 tanker", A333: "A330", A310: "A310", A343: "A340",
+  K35R: "KC-135 tanker", K35E: "KC-135 tanker", C17: "C-17", E3TF: "AWACS", E3CF: "AWACS", P8: "P-8 Poseidon", C295: "C-295", CN35: "CN-235",
+  EUFI: "Eurofighter", TOR: "Tornado", F18: "F-18", F15: "F-15", RFAL: "Rafale", HAWK: "Hawk", B350: "King Air", BE20: "King Air", D228: "Dornier 228",
+  H60: "Black Hawk", H53: "CH-53", TIGR: "Tiger", EC45: "H145M", H145: "H145M", LYNX: "Lynx", EH10: "Merlin", A149: "AW149", EC25: "Caracal", H225: "Caracal", UH1: "Huey",
+};
+const JAGERS = new Set(["F35", "F16", "EUFI", "TOR", "F18", "F15", "RFAL"]);
 const HELI = new Set(["H47", "H64", "AS32", "AS3B", "NH90", "H60", "EC25", "H225", "EC45", "EC35", "A139", "A189", "LYNX", "MRF1", "TIGR", "H53", "S61", "S92", "A149", "AW10", "EH10", "UH1", "B412", "B06"]);
 
 /**
@@ -38,10 +49,13 @@ export function luchtSoort(ac, learned = new Map()) {
     const nl = reg.startsWith("PH-");
     return { soort: "kustwacht", icoon: !isHeli ? "kustwacht_dash8" : nl ? "kustwacht_aw189" : "kustwacht_heli", naam: `Kustwacht ${reg || type}`.trim() };
   }
-  if (/MARECHAUSSEE/i.test(owner)) return { soort: "kmar", icoon: "kmar", naam: `Marechaussee ${reg}`.trim() };
+  if (KMAR.has(reg) || /MARECHAUSSEE/i.test(owner)) return { soort: "kmar", icoon: "kmar", naam: `Marechaussee ${reg}`.trim() };
   if (Number(ac.dbFlags) & 1) {
-    const [icoon, typeNaam] = TYPES[type] || [isHeli ? "heli" : "vliegtuig", type || (isHeli ? "Helikopter" : "Vliegtuig")];
-    return { soort: "defensie", icoon, naam: `${typeNaam} ${reg}`.trim() };
+    // A drawing per known type; a fighter gets the fighter drawing; anything else the general helicopter or aircraft.
+    const [icoon, typeNaam] = TYPES[type] || [JAGERS.has(type) ? "f35" : isHeli ? "heli" : "vliegtuig", NAMEN[type] || type];
+    // Without a type or registration the callsign is all there is: show that instead of guessing what it is.
+    const naam = `${typeNaam} ${reg}`.trim() || String(ac.flight || "").trim() || "Militair toestel";
+    return { soort: "defensie", icoon, naam };
   }
   return hex && learned.has(hex) ? learned.get(hex) : null;
 }

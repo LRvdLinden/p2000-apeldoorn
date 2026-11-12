@@ -171,7 +171,41 @@ final class HeliStore {
     }
 }
 
-/// Polls the layer "Defensie en overheid" every 15 seconds, only while that layer is on.
+/// The kinds of aircraft someone can choose to see in the layer Luchtvaart.
+struct LuchtSoort: Identifiable, Hashable {
+    let id: String          // "trauma", "politie" or the drawing of a defence/government aircraft
+    let titel: String
+    let afbeelding: String
+
+    static let standaard: Set<String> = ["trauma", "politie"]
+    static var alle: [LuchtSoort] {
+        [LuchtSoort(id: "trauma", titel: "Lifeliner", afbeelding: "heli_lifeliner_ec135"),
+         LuchtSoort(id: "politie", titel: L("Zulu (politie)"), afbeelding: "heli_politie_ec135"),
+         LuchtSoort(id: "chinook", titel: "Chinook", afbeelding: "lucht_chinook"),
+         LuchtSoort(id: "apache", titel: "Apache", afbeelding: "lucht_apache"),
+         LuchtSoort(id: "cougar", titel: "Cougar", afbeelding: "lucht_cougar"),
+         LuchtSoort(id: "nh90", titel: "NH90", afbeelding: "lucht_nh90"),
+         LuchtSoort(id: "heli", titel: L("Overige helikopter (Defensie)"), afbeelding: "lucht_heli"),
+         LuchtSoort(id: "f35", titel: L("Straaljager"), afbeelding: "lucht_f35"),
+         LuchtSoort(id: "hercules", titel: L("Transportvliegtuig"), afbeelding: "lucht_hercules"),
+         LuchtSoort(id: "les", titel: L("Lesvliegtuig"), afbeelding: "lucht_les"),
+         LuchtSoort(id: "vliegtuig", titel: L("Overig vliegtuig (Defensie)"), afbeelding: "lucht_vliegtuig"),
+         LuchtSoort(id: "kustwacht_dash8", titel: L("Kustwacht vliegtuig"), afbeelding: "lucht_kustwacht_dash8"),
+         LuchtSoort(id: "kustwacht_aw189", titel: L("Kustwacht helikopter"), afbeelding: "lucht_kustwacht_aw189"),
+         LuchtSoort(id: "kustwacht_heli", titel: L("Kustwacht overig"), afbeelding: "lucht_kustwacht_heli"),
+         LuchtSoort(id: "kmar", titel: L("Koninklijke Marechaussee"), afbeelding: "lucht_kmar"),
+         LuchtSoort(id: "phgov", titel: L("Regeringsvliegtuig PH-GOV"), afbeelding: "lucht_phgov")]
+    }
+    /// True when something other than Lifeliner and Zulu is chosen (then the defence and government aircraft are fetched).
+    static func meerDanHelis(_ keuze: Set<String>) -> Bool { !keuze.subtracting(standaard).isEmpty }
+}
+
+extension Helikopter {
+    /// The kind this aircraft counts as in the list of choices.
+    var luchtSoort: String { icoon ?? soort }
+}
+
+/// Polls the defence and government aircraft every 15 seconds, only while the layer Luchtvaart shows any of them.
 @MainActor
 @Observable
 final class LuchtStore {

@@ -6,10 +6,10 @@ import {
   demoMode, countUp,
 } from "./core.js?v=61";
 import {
-  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLucht, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
-} from "./aalerts.js?v=61";
+} from "./aalerts.js?v=62";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -25,7 +25,7 @@ const state = {
   lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"])),
 };
 // Map layers, like the Apple TV control room and the live pager.
-const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["defensie", "Defensie"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Luchtvaart"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -160,13 +160,13 @@ async function renderExtra(kit) {
   heliMarkers ||= heliLaag(kit, map);
   heliMarkers.update(L.has("helikopters") ? state.helis : []);
   luchtMarkers ||= heliLaag(kit, map);
-  luchtMarkers.update(L.has("defensie") ? state.lucht : []);
+  luchtMarkers.update(L.has("helikopters") ? state.lucht : []);
   renderHeliList();
   renderChips();
 }
 
 async function refreshHelis() {
-  [state.helis, state.lucht] = await Promise.all([fetchHelikopters(), state.lagen.has("defensie") ? fetchLucht() : []]);
+  ({ helis: state.helis, lucht: state.lucht } = await fetchLuchtvaart());
   // Route of the last 30 minutes for every helicopter in the air (at most 6).
   const lucht = state.helis.filter((h) => !h.op_grond).slice(0, 6);
   const sporen = await Promise.all(lucht.map((h) => fetchSpoor(h.id, "kort")));
@@ -288,7 +288,7 @@ function renderChips() {
     + (n("amber") ? `<span class="chip"><img src="${asset("assets/img/icon_amber.png")}" alt="AMBER Alert">${n("amber")}</span>` : "")
     + (n("vermistkind") ? `<span class="chip"><img src="${asset("assets/img/icon_vermistkind.png")}" alt="Vermist Kind Alert">${n("vermistkind")}</span>` : "")
     + heli("trauma", "Lifeliner") + heli("politie", "Zulu")
-    + (state.lagen.has("defensie") && state.lucht.length ? `<span class="chip heli-chip"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</span>` : "")
+    + (state.lagen.has("helikopters") && state.lucht.length ? `<span class="chip heli-chip"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</span>` : "")
     + `<button class="chip pijl" id="lagenPijl" aria-expanded="${lagenOpen}" aria-controls="lagen" title="${lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen ${lagenOpen ? "▴" : "▾"}</button>`;
   $("lagen").hidden = !lagenOpen;
 }

@@ -127,8 +127,8 @@ struct MeldkamerView: View {
                     }
                 }
                 // Defence, coastguard, Marechaussee and the government aircraft.
-                if settings.laag(.defensie) {
-                    ForEach(LuchtStore.shared.items) { h in
+                if settings.laag(.helikopters) {
+                    ForEach(LuchtStore.shared.items.filter { settings.luchtSoorten.contains($0.luchtSoort) }) { h in
                         Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) { HeliMarker(heli: h, size: 34) }
                             .annotationTitles(.hidden)
                     }
@@ -158,8 +158,8 @@ struct MeldkamerView: View {
                     }
                 }
             }
-            .onAppear { HeliStore.shared.start(); LuchtStore.shared.zet(settings.laag(.defensie)) }
-            .onChange(of: settings.laag(.defensie)) { _, on in LuchtStore.shared.zet(on) }
+            .onAppear { HeliStore.shared.start(); LuchtStore.shared.zet(settings.laag(.helikopters) && LuchtSoort.meerDanHelis(settings.luchtSoorten)) }
+            .onChange(of: settings.laag(.helikopters) && LuchtSoort.meerDanHelis(settings.luchtSoorten)) { _, on in LuchtStore.shared.zet(on) }
             .task { await LocatieStore.shared.load() }
             .task(id: settings.laag(.verkeer) || settings.laag(.flitsers)) {
                 while settings.laag(.verkeer) || settings.laag(.flitsers), !Task.isCancelled {

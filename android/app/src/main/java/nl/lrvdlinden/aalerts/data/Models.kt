@@ -319,7 +319,7 @@ data class Helikopter(
         return h > 180 && h < 360
     }
     /** Route colour: purple for the Lifeliners, police blue for Zulu (same as iOS and the website). */
-    val kleur: Long get() = if (Settings.heliKleurPerToestel) eigenKleur else if (isTrauma) 0xFF9333EA else 0xFF15428B
+    val kleur: Long get() = if (isLucht) 0xFF586A33 else if (Settings.heliKleurPerToestel) eigenKleur else if (isTrauma) 0xFF9333EA else 0xFF15428B
     /** Fixed colour per helicopter ("Eigen kleur per helikopter"; same as iOS and the website). */
     val eigenKleur: Long get() = when (id) {
         "lifeliner1" -> 0xFFE11D48; "lifeliner2" -> 0xFFF59E0B; "lifeliner3" -> 0xFF16A34A; "lifeliner4" -> 0xFF7C3AED; "lifeliner5" -> 0xFF0891B2
@@ -333,7 +333,9 @@ data class Helikopter(
         else -> "$hoogteMeter m"
     }
     val snelheidTekst: String get() = snelheidKt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it)} kn" else tr("${Math.round(it * 1.852)} km/u", "${Math.round(it * 1.852)} km/h") } ?: "–"
-    val soortLabel get() = if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
+    val soortLabel get() = if (isLucht) luchtSoort else if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
+    /** The kind this aircraft counts as in the list of choices of the layer Luchtvaart. */
+    val keuzeSoort: String get() = icoon ?: soort
     val hoogteMeter: Int? get() = if (opGrond) 0 else hoogteFt?.let { Math.round(it * 0.3048 / 10).toInt() * 10 }
     val snelheidKmh: Int? get() = snelheidKt?.let { Math.round(it * 1.852).toInt() }
     val koersTekst: String? get() {
@@ -350,6 +352,19 @@ data class Helikopter(
 data class HeliResponse(val helikopters: List<Helikopter> = emptyList())
 @Serializable
 data class LuchtResponse(val toestellen: List<Helikopter> = emptyList())
+
+/** The kinds of aircraft someone can choose to see in the layer Luchtvaart: key, name, drawing. */
+val LUCHT_SOORTEN: List<Triple<String, String, Int>> get() = listOf(
+    Triple("trauma", "Lifeliner", R.drawable.heli_lifeliner), Triple("politie", tr("Zulu (politie)", "Zulu (police)"), R.drawable.heli_politie),
+    Triple("chinook", "Chinook", R.drawable.lucht_chinook), Triple("apache", "Apache", R.drawable.lucht_apache), Triple("cougar", "Cougar", R.drawable.lucht_cougar),
+    Triple("nh90", "NH90", R.drawable.lucht_nh90), Triple("heli", tr("Overige helikopter (Defensie)", "Other helicopter (defence)"), R.drawable.lucht_heli),
+    Triple("f35", tr("Straaljager", "Fighter jet"), R.drawable.lucht_f35), Triple("hercules", tr("Transportvliegtuig", "Transport aircraft"), R.drawable.lucht_hercules),
+    Triple("les", tr("Lesvliegtuig", "Trainer aircraft"), R.drawable.lucht_les), Triple("vliegtuig", tr("Overig vliegtuig (Defensie)", "Other aircraft (defence)"), R.drawable.lucht_vliegtuig),
+    Triple("kustwacht_dash8", tr("Kustwacht vliegtuig", "Coastguard aircraft"), R.drawable.lucht_kustwacht_dash8),
+    Triple("kustwacht_aw189", tr("Kustwacht helikopter", "Coastguard helicopter"), R.drawable.lucht_kustwacht_aw189),
+    Triple("kustwacht_heli", tr("Kustwacht overig", "Other coastguard"), R.drawable.lucht_kustwacht_heli),
+    Triple("kmar", "Koninklijke Marechaussee", R.drawable.lucht_kmar), Triple("phgov", tr("Regeringsvliegtuig PH-GOV", "Government aircraft PH-GOV"), R.drawable.lucht_phgov),
+)
 
 /** Estimated position now: the last position moved on along speed and heading (at most 90 s, never on the ground). */
 fun Helikopter.geschat(nu: Long = System.currentTimeMillis()): Pair<Double, Double> {

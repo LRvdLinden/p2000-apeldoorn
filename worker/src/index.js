@@ -32,7 +32,7 @@ import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { routesVoor } from "./routes.js";
 import { profielenFrom, capcodesFrom, meldingWanted, warningWanted } from "./profielen.js";
 import { helikopters } from "./heli.js";
-import { recordPositions, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
+import { recordPositions, recordLucht, spoor, vluchten, spoorHousekeeping } from "./spoor.js";
 import { koppelInstall, zoekToestel, testToestel } from "./toestel.js";
 import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
@@ -652,6 +652,7 @@ async function heliRun(env) {
   const data = await helikopters(env);
   await noteHeli(env, !data.fout);
   const { prev } = await recordPositions(env, data);
+  try { await recordLucht(env, data.lucht); } catch (e) { console.warn("[lucht spoor]", e.message || e); }
   if (!prev || data.fout) return;
   let devices = null, prefs = null;
   // Helicopter zones: take-off, landing or entering a zone of a device.
