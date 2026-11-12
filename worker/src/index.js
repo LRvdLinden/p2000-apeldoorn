@@ -46,6 +46,7 @@ import { kiesStockFotos, listNieuws, getNieuws, fotoResponse, wijzigNieuws, voeg
   syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 import { kvWrite } from "./kv.js";
+import { hmPaal, hmPunt, hmHerstel } from "./hm.js";
 
 const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
 /** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
@@ -445,6 +446,10 @@ async function poll(env, budget) {
     const known = await knownGuids(env, parsed.map((m) => m.guid));
     const fresh = parsed.filter((m) => !known.has(m.guid));
     for (const m of fresh) {
+      // A hectometre post on a motorway ("A50 Re 211,2"): the spot of that post itself.
+      const paal = hmPaal(m.title);
+      const hp = paal && budget.left > 20 ? await hmPunt(env, budget, paal) : null;
+      if (hp) { [m.lat, m.lon] = hp; continue; }
       // Precise coordinates for the street (keep a few requests over for the pushes).
       if (m.locatie && budget.left > 20 && budget.take()) {
         const c = await geocode(env, m.locatie, m.stad);
@@ -452,6 +457,8 @@ async function poll(env, budget) {
       }
     }
     if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+    // Earlier messages on a motorway that are not on their post yet.
+    if (budget.left > 20) try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
 
