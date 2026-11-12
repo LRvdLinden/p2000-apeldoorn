@@ -45,6 +45,15 @@ export async function fetchWaarschuwingen(days = 7) {
   } catch { return []; }
 }
 
+/** Map layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft. */
+export async function fetchLucht() {
+  try {
+    const r = await fetch(`${API}/v1/lucht`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? (await r.json()).toestellen || [] : [];
+  } catch { return []; }
+}
+export const LUCHT_SOORT = { defensie: "Defensie", kustwacht: "Kustwacht", kmar: "Koninklijke Marechaussee", regering: "Regering" };
+
 export async function fetchHelikopters() {
   try {
     const r = await fetch(`${API}/v1/helikopters`, { signal: AbortSignal.timeout(10_000) });
@@ -192,6 +201,7 @@ export function verband(m, list, max = 6) {
 // ------------------------------------------------------------------ helicopters
 
 export function heliImg(h) {
+  if (h.icoon) return asset(`assets/img/lucht_${h.icoon}.png`);
   if (h.soort === "trauma") return asset("assets/img/heli_lifeliner.png");
   return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") : asset("assets/img/heli_politie.png");
 }

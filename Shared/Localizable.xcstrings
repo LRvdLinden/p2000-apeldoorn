@@ -3129,6 +3129,40 @@
         }
       }
     },
+    "Defensie": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defence"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defensie"
+          }
+        }
+      }
+    },
+    "Defensie en overheid (live)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defence and government (live)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Defensie en overheid (live)"
+          }
+        }
+      }
+    },
     "Deselecteer alles": {
       "extractionState": "manual",
       "localizations": {
@@ -5016,6 +5050,23 @@
         }
       }
     },
+    "Herkend aan het toestel zelf; vliegt nu als %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Recognised by the aircraft itself; now flying as %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Herkend aan het toestel zelf; vliegt nu als %@"
+          }
+        }
+      }
+    },
     "Herkend aan het toestel; vliegt nu als %@": {
       "extractionState": "manual",
       "localizations": {
@@ -6066,6 +6117,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Kon de waarschuwingen niet laden"
+          }
+        }
+      }
+    },
+    "Koninklijke Marechaussee": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Royal Marechaussee"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Koninklijke Marechaussee"
           }
         }
       }
@@ -9058,6 +9126,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Radius"
+          }
+        }
+      }
+    },
+    "Regering": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Government"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Regering"
           }
         }
       }

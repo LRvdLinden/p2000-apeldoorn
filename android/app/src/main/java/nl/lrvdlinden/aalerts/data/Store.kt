@@ -35,6 +35,8 @@ object Store {
 
     suspend fun refreshAlleWaarschuwingen() { runCatching { alleWaarschuwingen = Api.waarschuwingen(14) } }
     suspend fun refreshHelikopters() { helikopters = Api.helikopters() }
+    var lucht by mutableStateOf<List<Helikopter>>(emptyList()); private set
+    suspend fun refreshLucht(aan: Boolean) { lucht = if (aan) Api.lucht() else emptyList() }
 
     /** Traffic (NDW) and fixed speed cameras: refreshed every minute while the map shows one of the two layers. */
     var verkeer by mutableStateOf<VerkeerResponse?>(null); private set

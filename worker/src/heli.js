@@ -2,6 +2,8 @@
 // Data: adsb.lol, Open Database License (ODbL). One request for the whole of the Netherlands, cached briefly
 // so many apps polling at the same time cost one upstream call.
 
+import { luchtLijst, luchtGeleerd, luchtLeer } from "./lucht.js";
+
 export const HELIS = [
   { id: "lifeliner1", naam: "Lifeliner 1", soort: "trauma", basis: "Amsterdam", callsigns: ["LIFELN1", "LIFELN01"] },
   { id: "lifeliner2", naam: "Lifeliner 2", soort: "trauma", basis: "Rotterdam", callsigns: ["LIFELN2", "LIFELN02"] },
@@ -154,7 +156,14 @@ export async function helikopters(env) {
     const learned = await loadLearned(env);
     const list = fromAdsb(body.ac, Number(body.now) || Date.now(), learned);
     await learn(env, list, learned);
-    data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list };
+    // Defence and government aircraft (own map layer); the helicopters above are never repeated there.
+    let lucht = [];
+    try {
+      const geleerd = await luchtGeleerd(env);
+      lucht = luchtLijst(body.ac, Number(body.now) || Date.now(), new Set(list.map((h) => String(h.hex || "").toLowerCase())), geleerd);
+      await luchtLeer(env, lucht, geleerd);
+    } catch (e) { console.warn("[lucht]", e.message || e); }
+    data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht };
   } catch (e) {
     console.warn("[heli]", e.message || e);
     // Show the last positions for a short while instead of an empty map.

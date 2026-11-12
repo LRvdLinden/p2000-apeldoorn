@@ -126,6 +126,13 @@ struct MeldkamerView: View {
                             .annotationTitles(.hidden)
                     }
                 }
+                // Defence, coastguard, Marechaussee and the government aircraft.
+                if settings.laag(.defensie) {
+                    ForEach(LuchtStore.shared.items) { h in
+                        Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) { HeliMarker(heli: h, size: 34) }
+                            .annotationTitles(.hidden)
+                    }
+                }
                 // Live trauma and police helicopters (A-Alerts).
                 if settings.laag(.helikopters) {
                     // Route of the last 30 minutes behind every helicopter in the air.
@@ -151,7 +158,8 @@ struct MeldkamerView: View {
                     }
                 }
             }
-            .onAppear { HeliStore.shared.start() }
+            .onAppear { HeliStore.shared.start(); LuchtStore.shared.zet(settings.laag(.defensie)) }
+            .onChange(of: settings.laag(.defensie)) { _, on in LuchtStore.shared.zet(on) }
             .task { await LocatieStore.shared.load() }
             .task(id: settings.laag(.verkeer) || settings.laag(.flitsers)) {
                 while settings.laag(.verkeer) || settings.laag(.flitsers), !Task.isCancelled {
@@ -159,7 +167,7 @@ struct MeldkamerView: View {
                     try? await Task.sleep(for: .seconds(60))
                 }
             }
-            .onDisappear { HeliStore.shared.stop() }
+            .onDisappear { HeliStore.shared.stop(); LuchtStore.shared.zet(false) }
             .task {
                 while !Task.isCancelled {
                     await sporen.refresh(HeliStore.shared.items)

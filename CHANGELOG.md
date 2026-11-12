@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 81)
+- Nieuwe kaartlaag "Defensie en overheid" (standaard uit) in de app, Apple TV, Android, de pager en de meldkamer: Defensie, Kustwacht, Koninklijke Marechaussee en PH-GOV met veertien eigen tekeningen. Bron adsb.lol (`/v1/lucht`); herkenning op het vaste toesteladres en het type, de roepnaam is alleen een label. Pill "Defensie" zodra de laag aan staat en er iets vliegt.
+
 ## A-Alerts 2.0.1 (build 80)
 - Hectometerpaal: een melding met bijvoorbeeld "A50 Re 211,2" in de titel staat op die paal op de kaart (PDOK), en bij de locatie staat het groene hectometerbordje (app, Android en website).
 - Kaart: meerdere meldingen op één adres staan samen op één marker met het aantal erboven; traumahelikopter bovenop, anders politie, anders de dienst met de meeste meldingen.

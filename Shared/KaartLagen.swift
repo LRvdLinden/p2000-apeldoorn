@@ -2,12 +2,12 @@ import SwiftUI
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
+    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, defensie, buienradar
 
     var id: String { rawValue }
 
     /// On by default: everything except the stations, the rain radar and the speed cameras (they make the map busy).
-    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers].contains($0) }.map(\.rawValue))
+    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers, .defensie].contains($0) }.map(\.rawValue))
 
     var titel: String {
         switch self {
@@ -22,6 +22,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .kazernes: return L("Kazernes en posten")
         case .ziekenhuizen: return L("Ziekenhuizen en vliegbases")
         case .helikopters: return L("Helikopters (live)")
+        case .defensie: return L("Defensie en overheid (live)")
         case .buienradar: return L("Buienradar (KNMI)")
         }
     }
@@ -39,6 +40,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .kazernes: return "building.2.fill"
         case .ziekenhuizen: return "cross.case.fill"
         case .helikopters: return "airplane"
+        case .defensie: return "shield.lefthalf.filled"
         case .buienradar: return "cloud.rain.fill"
         }
     }

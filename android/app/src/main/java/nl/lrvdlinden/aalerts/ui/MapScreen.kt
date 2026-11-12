@@ -45,10 +45,10 @@ import nl.lrvdlinden.aalerts.tr
 
 /** Map layers (same as the app, the website and Apple TV). */
 enum class KaartLaag(val key: String) {
-    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
+    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), DEFENSIE("defensie"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
-        HELIKOPTERS -> tr("Helikopters (live)", "Helicopters (live)"); KAZERNES -> tr("Kazernes en posten", "Stations")
+        HELIKOPTERS -> tr("Helikopters (live)", "Helicopters (live)"); DEFENSIE -> tr("Defensie en overheid (live)", "Defence and government (live)"); KAZERNES -> tr("Kazernes en posten", "Stations")
         ZIEKENHUIZEN -> tr("Ziekenhuizen en vliegbases", "Hospitals and air bases"); WERKGEBIED -> tr("Gemeentegrens", "Municipal border")
         BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
         VERKEER -> tr("Verkeer (NDW)", "Traffic (NDW)"); FLITSERS -> tr("Flitsers (vast)", "Speed cameras (fixed)")
@@ -72,6 +72,11 @@ fun MapScreen(nav: Nav) {
     val verkeerAan = KaartLaag.VERKEER.key in lagen || KaartLaag.FLITSERS.key in lagen
     LaunchedEffect(verkeerAan) {
         while (verkeerAan) { Store.refreshVerkeer(); delay(60_000) }
+    }
+    // Defence and government aircraft: only loaded while that layer is on.
+    val defensieAan = KaartLaag.DEFENSIE.key in Settings.kaartLagen
+    LaunchedEffect(defensieAan) {
+        while (true) { Store.refreshLucht(defensieAan); if (!defensieAan) break; delay(10_000) }
     }
     // Always loaded: the Lifeliner and Zulu chips show even when the helicopter layer is off.
     LaunchedEffect(Unit) {
@@ -181,6 +186,11 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.ZIEKENHUIZEN.key in lagen) Store.locaties.forEach { l ->
         points += MapPoint("l:${l.id}", l.lat, l.lon, l.icon, if (selected == "l:${l.id}") 30 else 22, anchorBottom = false)
     }
+    // Defence, coastguard, Marechaussee and the government aircraft: own drawing per type, the callsign is only a label.
+    if (KaartLaag.DEFENSIE.key in lagen) Store.lucht.forEach { h ->
+        val (la, lo) = h.geschat(nu)
+        points += MapPoint("d:${h.id}", la, lo, h.afbeelding, Settings.heliBreedte, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
+    }
     if (KaartLaag.HELIKOPTERS.key in lagen) Store.helikopters.forEach { h ->
         val (la, lo) = h.geschat(nu)
         points += MapPoint("h:${h.id}", la, lo, h.afbeelding, Settings.heliBreedte, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
@@ -258,6 +268,17 @@ fun MapScreen(nav: Nav) {
                         Spacer(Modifier.width(4.dp)); Text("$n", fontSize = 12.sp, fontWeight = FontWeight.Bold)
                     }
                 }
+                // Pill for the layer Defensie en overheid: only while the layer is on and something is flying.
+                if (KaartLaag.DEFENSIE.key in lagen && Store.lucht.isNotEmpty()) item(key = "defensie") {
+                    val list = Store.lucht
+                    KaartChip(true, Color(0xFF586A33), tr("Defensie", "Defence") + ": ${list.size}", {
+                        if (list.size == 1) { heliFit = null; selected = "d:${list[0].id}" }
+                        else { selected = null; heliFit = MapCamera(list[0].lat, list[0].lon, 8.0, fit = list.map { it.lat to it.lon }, key = "fit-defensie-${System.nanoTime()}") }
+                    }) {
+                        Image(painterResource(list[0].afbeelding), null, Modifier.width(30.dp).height(15.dp))
+                        Spacer(Modifier.width(4.dp)); Text("${list.size}", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                    }
+                }
                 items(heliGroepen, key = { it.first }) { (_, naam, list) ->
                     KaartChip(KaartLaag.HELIKOPTERS.key in lagen, Color(list[0].kleur), "$naam: ${list.size}", {
                         if (KaartLaag.HELIKOPTERS.key !in lagen) Settings.kaartLagen = Settings.kaartLagen + KaartLaag.HELIKOPTERS.key
@@ -276,6 +297,20 @@ fun MapScreen(nav: Nav) {
         Box(Modifier.align(Alignment.BottomCenter).padding(12.dp)) {
             when {
                 sel == null -> {}
+                sel.startsWith("d:") -> Store.lucht.firstOrNull { it.id == sel.removePrefix("d:") }?.let { t ->
+                    PreviewCard(onClose = { selected = null }) {
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            Image(painterResource(t.afbeelding), null, Modifier.width(84.dp).height(30.dp))
+                            Column {
+                                Text(t.naam, fontWeight = FontWeight.Bold)
+                                Text(listOfNotNull(t.luchtSoort, t.type, t.callsign?.let { tr("vliegt als $it", "flying as $it") }).joinToString(" · "), color = Muted, fontSize = 12.sp)
+                                Text(listOfNotNull(if (t.opGrond) tr("Op de grond", "On the ground") else t.hoogteFt?.let { "${(it * 0.3048 / 10).toInt() * 10} m" },
+                                    t.snelheidKt?.let { "${(it * 1.852).toInt()} km/u" }).joinToString(" · "), fontSize = 13.sp)
+                                Text(tr("Herkend aan het toestel zelf; de roepnaam kan per vlucht anders zijn.", "Recognised by the aircraft itself; the callsign can differ per flight."), color = Muted, fontSize = 11.sp)
+                            }
+                        }
+                    }
+                }
                 sel.startsWith("h:") -> Store.helikopters.firstOrNull { it.id == sel.removePrefix("h:") }?.let {
                     HeliCard(it, bereik, { b -> bereik = b }, selVluchten,
                         afspelen = Afspelen(afspeel, speelt, snelheid, afspeelMoment, kanAfspelen = selSpoor.size >= 2,

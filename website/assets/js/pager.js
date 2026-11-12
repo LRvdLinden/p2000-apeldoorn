@@ -5,11 +5,11 @@ import {
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
 } from "./core.js?v=61";
 import {
-  BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLucht, LUCHT_SOORT, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=60";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=61";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -38,6 +38,7 @@ const state = {
   warnings: [],
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
   helis: [],
+  lucht: [],
   lagen: new Set(prefs.get("p2000.lagen", ["waarschuwingen", "knmi", "verkeer", "helikopters"])),
   view: "meldingen",
   history: null,
@@ -872,6 +873,7 @@ const LAGEN = [
   ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800"],
   ["knmi", "KNMI", "icon_knmi", "#3E9FDB"],
   ["helikopters", "Heli's", "icon_traumaheli", "#9333EA"],
+  ["defensie", "Defensie", "lucht_chinook", "#586A33"],
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
   ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B"],
@@ -894,16 +896,19 @@ function renderMapChips() {
     if (!list.length) return "";
     return `<button class="chip heli-chip${state.lagen.has("helikopters") ? "" : " off"}" data-heli="${soort}" style="--c:${soort === "trauma" ? "#9333EA" : "#15428B"}" title="${label}"><img src="${heliImg(list[0])}" alt="${label}">${list.length}</button>`;
   };
+  // Pill for the layer Defensie en overheid: only while the layer is on and something is flying.
+  const luchtChip = () => (state.lagen.has("defensie") && state.lucht.length
+    ? `<button class="chip heli-chip" data-lucht style="--c:#586A33" title="Defensie en overheid"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</button>` : "");
   $("mapChips").innerHTML = SELECTABLE.map((d) => {
     const n = recent.filter((m) => m.dienst === d).length;
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("") + bronChip("burgernet", "Burgernet", "#0067B1") + bronChip("nlalert", "NL-Alert", "#E3001B")
     + bronChip("amber", "AMBER Alert", "#EC6E24") + bronChip("vermistkind", "Vermist Kind Alert", "#1B265E")
-    + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu");
+    + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip();
   $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
-    const n = k === "helikopters" ? state.helis.length : k === "waarschuwingen" ? mapWarnings().length
+    const n = k === "helikopters" ? state.helis.length : k === "defensie" ? (state.lagen.has("defensie") ? state.lucht.length : "") : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Lifeliners en politiehelikopters", defensie: "Defensie en overheid: Defensie, Kustwacht, Marechaussee en het regeringsvliegtuig", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n !== "" ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -912,6 +917,7 @@ $("mapLagen").addEventListener("click", (e) => {
   if (!k) return;
   state.lagen.has(k) ? state.lagen.delete(k) : state.lagen.add(k);
   prefs.set("p2000.lagen", [...state.lagen]);
+  if (k === "defensie") { if (state.lagen.has(k)) pollHelis(); else state.lucht = []; }
   renderMap();
 });
 
@@ -923,7 +929,7 @@ function mapWarnings() {
 let heliTimer = null;
 async function pollHelis() {
   if (state.tab !== "kaart" || document.hidden) return;
-  state.helis = await fetchHelikopters();
+  [state.helis, state.lucht] = await Promise.all([fetchHelikopters(), state.lagen.has("defensie") ? fetchLucht() : []]);
   renderMap();
 }
 $("mapChips").addEventListener("click", async (e) => {
@@ -934,6 +940,16 @@ $("mapChips").addEventListener("click", async (e) => {
     if (!state.lagen.has("waarschuwingen")) { state.lagen.add("waarschuwingen"); state.mapBronnen.add(b); prefs.set("p2000.lagen", [...state.lagen]); }
     else state.mapBronnen.has(b) ? state.mapBronnen.delete(b) : state.mapBronnen.add(b);
     renderMap();
+    return;
+  }
+  if (chip.dataset.lucht !== undefined) {
+    const mk = await bigMapReady;
+    if (!mk || !bigMap || !state.lucht.length) return;
+    if (state.lucht.length === 1) { bigMap.setCenterAnimated(new mk.Coordinate(state.lucht[0].lat, state.lucht[0].lon)); openLucht(state.lucht[0]); }
+    else {
+      const la = state.lucht.map((t) => t.lat), lo = state.lucht.map((t) => t.lon);
+      bigMap.setRegionAnimated(new mk.BoundingRegion(Math.max(...la) + 0.15, Math.max(...lo) + 0.25, Math.min(...la) - 0.15, Math.min(...lo) - 0.25).toCoordinateRegion());
+    }
     return;
   }
   if (chip.dataset.heli) {
@@ -1018,6 +1034,8 @@ async function renderMap() {
     if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
   }
   heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
+  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openLucht(t); } });
+  luchtMarkers.update(state.lagen.has("defensie") ? state.lucht : []);
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
     state.helis.filter((h) => !heliSpoor.id || h.id === heliSpoor.id).forEach((h) => { const v = voorspellingOverlay(mk, h); if (v) bigMap.addOverlay(v); });
@@ -1106,7 +1124,7 @@ function openWeergave() {
     const mk = await bigMapReady;
     if (mk && bigMap) bigMap.colorScheme = kaartKleur(mk);
     // Redraw the helicopter markers with the new size and colours.
-    heliMarkers?.clear();
+    heliMarkers?.clear(); luchtMarkers?.clear();
     renderMap();
   });
 }
@@ -1199,7 +1217,7 @@ function stopAfspelen() {
 }
 
 // Route trail and flights of the selected helicopter (refreshed every 20 seconds while its panel is open).
-let heliMarkers = null;
+let heliMarkers = null, luchtMarkers = null;
 const heliSpoor = { id: null, scope: (({ vandaag: "lang" })[prefs.get("p2000.spoorScope", "vlucht")] || prefs.get("p2000.spoorScope", "vlucht")), punten: [], vluchten: [], timer: null };
 async function loadSpoor() {
   const id = heliSpoor.id;
@@ -1221,6 +1239,18 @@ function selectSpoor(id) {
 }
 
 /** Helicopter tapped: heading, altitude and speed (like the app's info card). */
+/** Defence or government aircraft tapped: what it is and how it flies. The callsign is only a label. */
+function openLucht(t) {
+  const box = $("clusterPanel");
+  const koers = t.koers != null && !t.op_grond ? `${t.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(t.koers / 45) % 8]}` : "–";
+  const hoogte = t.op_grond ? "Op de grond" : t.hoogte_ft != null ? `${Math.round((t.hoogte_ft * 0.3048) / 10) * 10} m` : "–";
+  const snelheid = t.snelheid_kt != null ? `${Math.round(t.snelheid_kt * 1.852)} km/u` : "–";
+  box.innerHTML = `<header><b>${esc(t.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    <p>${esc([LUCHT_SOORT[t.soort] || "Defensie", t.type, t.callsign ? `vliegt als ${t.callsign}` : null].filter(Boolean).join(" · "))}</p>
+    <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
+    <p class="hint" style="margin:8px 0 0">Herkend aan het toestel zelf; de roepnaam kan per vlucht anders zijn.</p>`;
+  box.hidden = false;
+}
 function openHeli(h) {
   const box = $("clusterPanel");
   const koers = h.koers != null && !h.op_grond ? `${h.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(h.koers / 45) % 8]}` : "–";

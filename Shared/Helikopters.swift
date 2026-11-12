@@ -23,9 +23,11 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let herkenning: String?
     /// Where it is probably heading (hospital or its base), worked out by the server from its course.
     let voorspelling: HeliVoorspelling?
+    /// Layer "Defensie en overheid" (GET /v1/lucht): the drawing for this type ("chinook", "f35", "kustwacht_dash8" …).
+    let icoon: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
 
@@ -48,12 +50,14 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         gezien = Fmt.parseISO(raw) ?? .now
         herkenning = try? c.decodeIfPresent(String.self, forKey: .herkenning)
         voorspelling = try? c.decodeIfPresent(HeliVoorspelling.self, forKey: .voorspelling)
+        icoon = try? c.decodeIfPresent(String.self, forKey: .icoon)
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
 
     /// Side-view drawing per type: Lifeliner EC135 (yellow), police EC135, police AW139 (Zulu 24–26).
     var afbeelding: String {
+        if let icoon { return "lucht_" + icoon }
         if isTrauma { return "heli_lifeliner_ec135" }
         let t = (type ?? "").uppercased()
         if t == "A139" || ["zulu24", "zulu25", "zulu26"].contains(id) { return "heli_politie_aw139" }
@@ -67,8 +71,23 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         return h > 180 && h < 360
     }
     var isTrauma: Bool { soort == "trauma" }
-    var color: Color { HeliWeergave.kleur(id: id, soort: soort) ?? (isTrauma ? Dienst.traumaheli.color : Dienst.politie.color) }
-    var soortLabel: String { isTrauma ? L("Traumahelikopter") : L("Politiehelikopter") }
+    /// Defence, coastguard, Marechaussee or the government aircraft (own map layer).
+    var isLucht: Bool { icoon != nil }
+    var color: Color {
+        if isLucht { return Color(hex: 0x586A33) }
+        return HeliWeergave.kleur(id: id, soort: soort) ?? (isTrauma ? Dienst.traumaheli.color : Dienst.politie.color)
+    }
+    var soortLabel: String {
+        if isLucht {
+            switch soort {
+            case "kustwacht": return L("Kustwacht")
+            case "kmar": return L("Koninklijke Marechaussee")
+            case "regering": return L("Regering")
+            default: return L("Defensie")
+            }
+        }
+        return isTrauma ? L("Traumahelikopter") : L("Politiehelikopter")
+    }
 
     var hoogteMeter: Int? { opGrond ? 0 : hoogteFt.map { Int(($0 * 0.3048 / 10).rounded() * 10) } }
     var snelheidKmh: Int? { snelheidKt.map { Int(($0 * 1.852).rounded()) } }
@@ -81,6 +100,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
 
     /// Shown when the helicopter was not recognised by its usual callsign.
     var herkenningTekst: String? {
+        if isLucht { return callsign.map { Lf("Herkend aan het toestel zelf; vliegt nu als %@", $0) } }
         switch herkenning {
         case "toestel": return Lf("Herkend aan het toestel; vliegt nu als %@", callsign ?? "–")
         case "operator": return L("Herkend aan de eigenaar van het toestel")
@@ -95,10 +115,17 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
 private struct HeliResponse: Decodable {
     let helikopters: [Helikopter]
 }
+private struct LuchtResponse: Decodable {
+    let toestellen: [Helikopter]
+}
 
 extension P2000API {
     func helikopters() async throws -> [Helikopter] {
         try await getJSON("/v1/helikopters", as: HeliResponse.self).helikopters
+    }
+    /// Layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft above the Netherlands.
+    func lucht() async throws -> [Helikopter] {
+        try await getJSON("/v1/lucht", as: LuchtResponse.self).toestellen
     }
 }
 
@@ -140,6 +167,26 @@ final class HeliStore {
             failed = false
         } catch {
             failed = true
+        }
+    }
+}
+
+/// Polls the layer "Defensie en overheid" every 15 seconds, only while that layer is on.
+@MainActor
+@Observable
+final class LuchtStore {
+    static let shared = LuchtStore()
+    private(set) var items: [Helikopter] = []
+    @ObservationIgnored private var task: Task<Void, Never>?
+
+    func zet(_ aan: Bool) {
+        if !aan { task?.cancel(); task = nil; items = []; return }
+        guard task == nil else { return }
+        task = Task { [weak self] in
+            while !Task.isCancelled {
+                if let list = try? await P2000API.shared.lucht() { self?.items = list }
+                try? await Task.sleep(for: .seconds(15))
+            }
         }
     }
 }

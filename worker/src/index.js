@@ -193,8 +193,14 @@ async function handle(req, env, ctx) {
   }
   m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/vluchten$/);
   if (method === "GET" && m) return reply(200, await vluchten(env, m[1]), { "cache-control": "public, max-age=30" });
+  // Map layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft.
+  if (method === "GET" && path === "/v1/lucht") {
+    const d = await helikopters(env);
+    return reply(200, { bijgewerkt: d.bijgewerkt, bron: d.bron, toestellen: d.lucht || [], ...(d.fout ? { fout: true } : {}) }, { "cache-control": "public, max-age=10" });
+  }
   if (method === "GET" && path === "/v1/helikopters") {
-    const data = metVoorspelling(await helikopters(env));
+    const { lucht: _lucht, ...alleenHelis } = await helikopters(env);
+    const data = metVoorspelling(alleenHelis);
     // A Lifeliner on its way to a recent alert: that alert is the destination, then the hospital.
     try {
       const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.op_grond);

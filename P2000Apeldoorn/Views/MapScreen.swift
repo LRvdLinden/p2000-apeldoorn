@@ -30,6 +30,7 @@ struct MapScreen: View {
     @State private var visibleDiensten: Set<Dienst> = Set(Dienst.selectable)
     @State private var showLagen = false
     @State private var helis = HeliStore.shared
+    @State private var lucht = LuchtStore.shared
     @State private var volgen = false
     /// Route trail and flights of the selected helicopter.
     @State private var spoor = HeliSpoorStore()
@@ -79,7 +80,7 @@ struct MapScreen: View {
         }
     }
 
-    private var heli: Helikopter? { selectedHeli.flatMap { id in helis.items.first { $0.id == id } } }
+    private var heli: Helikopter? { selectedHeli.flatMap { id in helis.items.first { $0.id == id } ?? lucht.items.first { $0.id == id } } }
 
     /// "Volg Lifeliner 3 op de kaart" from an alert: helicopter layer on, select it and follow it.
     private func volgGevraagd() {
@@ -111,6 +112,7 @@ struct MapScreen: View {
                 waarschuwingMarkers(ws)
                 radiusLaag
                 helikoptersLaag
+                luchtLaag
                 UserAnnotation()
             }
             .mapStyle(MapStyleSetting.style(for: settings))
@@ -229,7 +231,11 @@ struct MapScreen: View {
                     }
                 }
             }
-            .onAppear { helis.start(); volgGevraagd() }
+            .onAppear { helis.start(); lucht.zet(settings.laag(.defensie)); volgGevraagd() }
+            .onChange(of: settings.laag(.defensie)) { _, on in
+                lucht.zet(on)
+                if !on, selectedHeli?.hasPrefix("lucht-") == true { selectedHeli = nil }
+            }
             .task { await locaties.load() }
             .onChange(of: Router.shared.volgHeli) { _, _ in volgGevraagd() }
             // Following a helicopter: the camera moves along with every new position, until the user moves the map.
@@ -240,14 +246,15 @@ struct MapScreen: View {
             .onMapCameraChange(frequency: .onEnd) { ctx in
                 if volgen, let h = heli, Werkgebied.distanceKm(ctx.region.center.latitude, ctx.region.center.longitude, h.lat, h.lon) > 3 { volgen = false }
             }
-            .onDisappear { helis.stop(); spoor.volg(nil) }
+            .onDisappear { helis.stop(); lucht.zet(false); spoor.volg(nil) }
             .onChange(of: selectedHeli) { _, id in
                 if id != nil, let b = SpoorBereik(rawValue: settings.spoorStandaard), spoor.bereik != b, spoor.heliID == nil { spoor.bereik = b }
-                spoor.volg(id)
+                spoor.volg(id?.hasPrefix("lucht-") == true ? nil : id)
             }
             // Smooth movement: every 2 seconds a new estimated position while a helicopter is in the air.
             .onReceive(Timer.publish(every: 2, on: .main, in: .common).autoconnect()) { t in
-                guard settings.laag(.helikopters), !settings.prestatieModus, helis.items.contains(where: { !$0.opGrond }) else { return }
+                guard !settings.prestatieModus, (settings.laag(.helikopters) && helis.items.contains(where: { !$0.opGrond }))
+                        || (settings.laag(.defensie) && !lucht.items.isEmpty) else { return }
                 withAnimation(.linear(duration: 2)) { nu = t }
             }
             .onChange(of: settings.laag(.helikopters)) { _, on in
@@ -421,12 +428,26 @@ struct MapScreen: View {
         }
     }
 
+    /// Defence, coastguard, Marechaussee and the government aircraft: same marker as the helicopters, own drawing per type.
+    @MapContentBuilder private var luchtLaag: some MapContent {
+        if settings.laag(.defensie) {
+            ForEach(lucht.items) { h in
+                Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
+                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
+                        .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
+                        .accessibilityAddTraits(.isButton)
+                }
+                .annotationTitles(.hidden)
+            }
+        }
+    }
+
     private var onderkaart: some View {
         Group {
             if let selected {
                 MapPreviewCard(melding: selected) { self.selected = nil }
             } else if let heli {
-                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor) { selectedHeli = nil }
+                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: heli.isLucht ? nil : spoor) { selectedHeli = nil }
             } else if let k = selectedKazerne {
                 KazerneKaart(kazerne: k) { selectedKazerne = nil }
             } else if let l = selectedLocatie {
@@ -492,6 +513,15 @@ struct MapScreen: View {
                             Text("\(kind)")
                         }
                     }
+                    // Pill for the layer Defensie en overheid: only while the layer is on and something is flying.
+                    if settings.laag(.defensie), let eerste = lucht.items.first {
+                        chip(on: true, color: Color(hex: 0x586A33), label: "\(L("Defensie")): \(lucht.items.count)") {
+                            naarHelis(lucht.items, laag: .defensie)
+                        } content: {
+                            Image(eerste.afbeelding).resizable().scaledToFit().frame(width: 28, height: 14)
+                            Text("\(lucht.items.count)")
+                        }
+                    }
                     ForEach(heliSoorten, id: \.soort) { g in
                         chip(on: settings.laag(.helikopters), color: g.color, label: "\(g.naam): \(g.items.count)") {
                             naarHelis(g.items)
@@ -542,8 +572,8 @@ struct MapScreen: View {
     }
 
     /// One helicopter: select and follow it. More: show all of them on the map.
-    private func naarHelis(_ items: [Helikopter]) {
-        if !settings.laag(.helikopters) { settings.setLaag(.helikopters, true) }
+    private func naarHelis(_ items: [Helikopter], laag: KaartLaag = .helikopters) {
+        if !settings.laag(laag) { settings.setLaag(laag, true) }
         selected = nil; selectedKazerne = nil; selectedLocatie = nil
         if items.count == 1, let h = items.first {
             selectedHeli = h.id

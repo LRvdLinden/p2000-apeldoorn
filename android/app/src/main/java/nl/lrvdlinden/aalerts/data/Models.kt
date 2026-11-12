@@ -290,9 +290,24 @@ data class Helikopter(
     @SerialName("snelheid_kt") val snelheidKt: Double? = null,
     val gezien: String? = null,
     val voorspelling: HeliVoorspelling? = null,
+    /** Layer "Defensie en overheid" (GET /v1/lucht): the drawing for this type ("chinook", "f35", "kustwacht_dash8" …). */
+    val icoon: String? = null,
 ) {
     val isTrauma get() = soort == "trauma"
+    val isLucht get() = icoon != null
+    val luchtSoort: String get() = when (soort) {
+        "kustwacht" -> tr("Kustwacht", "Coastguard"); "kmar" -> "Koninklijke Marechaussee"; "regering" -> tr("Regering", "Government")
+        else -> tr("Defensie", "Defence")
+    }
     val afbeelding: Int get() = when {
+        icoon != null -> when (icoon) {
+            "chinook" -> R.drawable.lucht_chinook; "apache" -> R.drawable.lucht_apache; "cougar" -> R.drawable.lucht_cougar
+            "nh90" -> R.drawable.lucht_nh90; "f35" -> R.drawable.lucht_f35; "hercules" -> R.drawable.lucht_hercules
+            "les" -> R.drawable.lucht_les; "vliegtuig" -> R.drawable.lucht_vliegtuig; "kustwacht_dash8" -> R.drawable.lucht_kustwacht_dash8
+            "kustwacht_aw189" -> R.drawable.lucht_kustwacht_aw189; "kustwacht_heli" -> R.drawable.lucht_kustwacht_heli
+            "kmar" -> R.drawable.lucht_kmar; "phgov" -> R.drawable.lucht_phgov
+            else -> R.drawable.lucht_heli
+        }
         isTrauma -> R.drawable.heli_lifeliner
         (type ?: "").uppercase() == "A139" || id in setOf("zulu24", "zulu25", "zulu26") -> R.drawable.heli_politie_aw139
         else -> R.drawable.heli_politie
@@ -333,6 +348,8 @@ data class Helikopter(
 
 @Serializable
 data class HeliResponse(val helikopters: List<Helikopter> = emptyList())
+@Serializable
+data class LuchtResponse(val toestellen: List<Helikopter> = emptyList())
 
 /** Estimated position now: the last position moved on along speed and heading (at most 90 s, never on the ground). */
 fun Helikopter.geschat(nu: Long = System.currentTimeMillis()): Pair<Double, Double> {

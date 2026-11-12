@@ -6,10 +6,10 @@ import {
   demoMode, countUp,
 } from "./core.js?v=61";
 import {
-  BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
+  BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLucht, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
-} from "./aalerts.js?v=60";
+} from "./aalerts.js?v=61";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -21,11 +21,11 @@ const state = {
   list: [], known: new Set(), first: true, online: false,
   tour: prefs.get("mk.tour", true), sound: false, urgentOnly: prefs.get("mk.urgentOnly", false),
   focus: null, tourIndex: 0, lastFly: 0,
-  warnings: [], helis: [], sporen: new Map(), knownWarn: new Map(),
+  warnings: [], helis: [], lucht: [], sporen: new Map(), knownWarn: new Map(),
   lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"])),
 };
 // Map layers, like the Apple TV control room and the live pager.
-const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Heli's"], ["defensie", "Defensie"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -111,7 +111,7 @@ async function renderMap() {
 
 // A-Alerts layers: NL-Alert / Burgernet / KNMI areas, municipality border, stations, the helicopters with their
 // route of the last 30 minutes (moving smoothly between updates), and for the focused alert its stations and Lifeliner.
-let extraAnn = [], extraOv = [], heliMarkers = null, radarOv = null, radarAt = 0;
+let extraAnn = [], extraOv = [], heliMarkers = null, luchtMarkers = null, radarOv = null, radarAt = 0;
 async function renderExtra(kit) {
   if (!kit || !map) return;
   if (extraAnn.length) map.removeAnnotations(extraAnn);
@@ -159,12 +159,14 @@ async function renderExtra(kit) {
   if (L.has("buienradar") && !radarOv) { radarOv = await radarLaag(kit); radarAt = Date.now(); if (radarOv) map.addTileOverlay(radarOv); }
   heliMarkers ||= heliLaag(kit, map);
   heliMarkers.update(L.has("helikopters") ? state.helis : []);
+  luchtMarkers ||= heliLaag(kit, map);
+  luchtMarkers.update(L.has("defensie") ? state.lucht : []);
   renderHeliList();
   renderChips();
 }
 
 async function refreshHelis() {
-  state.helis = await fetchHelikopters();
+  [state.helis, state.lucht] = await Promise.all([fetchHelikopters(), state.lagen.has("defensie") ? fetchLucht() : []]);
   // Route of the last 30 minutes for every helicopter in the air (at most 6).
   const lucht = state.helis.filter((h) => !h.op_grond).slice(0, 6);
   const sporen = await Promise.all(lucht.map((h) => fetchSpoor(h.id, "kort")));
