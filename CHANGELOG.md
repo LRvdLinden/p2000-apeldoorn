@@ -1,5 +1,9 @@
 # Changelog
 
+## Website (12 november 2026)
+- Nieuwe pagina a-alerts.nl/luchtvaart: alle 17 toestellen met tekening en uitleg, een vliegende lucht met draaiende rotors en een live teller.
+- Homepage: blok "Zie wat er boven je vliegt" met een bewegende kaart en een knop naar de uitleg. Beide gemaakt door `tools/maak_luchtvaart.py` (tekeningen in `tools/lucht/`).
+
 ## A-Alerts 2.0.1 (build 82)
 - Kaart: een pill met 0 is verborgen en komt terug zodra er iets is (app, Android, pager en meldkamer).
 - Website: de balk met kaartlagen in de pager en de meldkamer klapt open en dicht met de knop "Lagen" in de bovenste balk.

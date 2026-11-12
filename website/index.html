@@ -207,6 +207,80 @@
     </a>
   </section>
 
+<!-- LUCHT:START (made by tools/maak_luchtvaart.py) -->
+  <section class="lv" id="luchtvaart" aria-label="Helikopters en vliegtuigen">
+    <style>
+      .lv { max-width: 1120px; margin: 0 auto; padding: 4rem 20px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 28px; align-items: center; }
+      @media (max-width: 760px) { .lv { grid-template-columns: 1fr; padding: 3rem 20px; } }
+      .lv h2 { font-family: var(--display); font-weight: 900; font-size: clamp(1.8rem, 4vw, 2.6rem); line-height: 1.05; margin: 0; }
+      .lv .sub { color: var(--muted); margin: .8rem 0 0; max-width: 520px; }
+      .lv-live { display: inline-flex; align-items: center; gap: 8px; background: color-mix(in srgb, currentColor 12%, transparent); border-radius: 999px; padding: 7px 13px; font-weight: 700; font-size: .85rem; margin-bottom: 12px; }
+      .lv-live i { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; animation: lv-puls 1.6s ease-out infinite; }
+      .lv-knop { display: inline-flex; gap: 8px; align-items: center; background: var(--red); color: #fff; text-decoration: none; font-weight: 700; padding: 12px 18px; border-radius: 12px; margin: 18px 8px 0 0; }
+      .lv-knop.licht { background: color-mix(in srgb, currentColor 14%, transparent); color: inherit; }
+      .lv-map { --land: #e4ecd9; --weg: #fff; --water: #b9dcf2; --stad: #d6d9de; position: relative; aspect-ratio: 4/3; border-radius: 22px; overflow: hidden; background: var(--land); box-shadow: var(--shadow); display: block; }
+      .lv-map > svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+      .lv-mk { position: absolute; left: 0; top: 0; width: 86px; margin: -22px 0 0 -43px; text-align: center; z-index: 2; }
+      .lv-mk img, .lv-mk svg { width: 86px; height: auto; display: block; filter: drop-shadow(0 3px 4px rgba(0,0,0,.35)); }
+      .lv-mk span { display: inline-block; margin-top: 2px; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; background: rgba(255,255,255,.92); color: #111; white-space: nowrap; }
+      @keyframes lv-p1 { 0% { left: -8%; top: 70%; } 100% { left: 108%; top: 28%; } }
+      @keyframes lv-p2 { 0% { left: 20%; top: 108%; } 100% { left: 74%; top: -10%; } }
+      @keyframes lv-p3 { 0% { left: 38%; top: 44%; } 25% { left: 56%; top: 40%; } 50% { left: 60%; top: 58%; } 75% { left: 42%; top: 62%; } 100% { left: 38%; top: 44%; } }
+      @keyframes lv-p4 { 0% { left: -10%; top: 16%; } 100% { left: 112%; top: 8%; } }
+      @keyframes lv-p5 { 0% { left: -10%; top: 90%; } 100% { left: 112%; top: 66%; } }
+      
+.rot{transform-box:fill-box;transform-origin:center;animation:lv-draai .28s linear infinite}
+.trot{transform-box:fill-box;transform-origin:center;animation:lv-rond .35s linear infinite}
+@keyframes lv-draai{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.12)}}
+@keyframes lv-rond{to{transform:rotate(360deg)}}
+@keyframes lv-puls{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}100%{box-shadow:0 0 0 12px rgba(34,197,94,0)}}
+
+      @media (prefers-reduced-motion: reduce) { .lv .rot, .lv .trot, .lv-live i { animation: none; } .lv-mk { animation-play-state: paused !important; animation-delay: -6s !important; } }
+    </style>
+    <a class="lv-map" href="luchtvaart/" aria-label="Voorbeeld van de kaart met helikopters en vliegtuigen; naar de uitleg per toestel" data-reveal>
+      <svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+        <path d="M352 0 Q344 80 358 150 Q370 220 356 300 L372 300 Q386 220 374 150 Q360 80 368 0Z" fill="var(--water)"/>
+        <ellipse cx="190" cy="150" rx="58" ry="40" fill="var(--stad)"/><ellipse cx="300" cy="96" rx="16" ry="11" fill="var(--stad)"/><ellipse cx="110" cy="230" rx="18" ry="12" fill="var(--stad)"/>
+        <path d="M0 205 Q120 190 200 200 T400 178" fill="none" stroke="var(--weg)" stroke-width="7"/><path d="M262 300 Q250 200 258 150 T250 0" fill="none" stroke="var(--weg)" stroke-width="7"/>
+        <path d="M0 120 Q90 130 190 150 T330 70" fill="none" stroke="var(--weg)" stroke-width="3"/><path d="M190 150 Q170 220 110 230" fill="none" stroke="var(--weg)" stroke-width="3"/>
+        <g font-family="Arial" font-weight="700" fill="#6b7280"><text x="160" y="154" font-size="13" fill="#111827">Apeldoorn</text><text x="286" y="84" font-size="8">Teuge</text><text x="92" y="250" font-size="8">Beekbergen</text><text x="30" y="198" font-size="8">A1</text><text x="266" y="40" font-size="8">A50</text><text x="376" y="150" font-size="7">IJssel</text></g>
+      </svg>
+      <div class="lv-mk" style="animation:lv-p1 22s linear infinite"><div><img src="assets/img/heli_lifeliner.png" alt="" loading="lazy"></div><span>Lifeliner 3</span></div><div class="lv-mk" style="animation:lv-p2 30s linear infinite"><div><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320"><defs><linearGradient id="h1g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#76884a"/><stop offset=".5" stop-color="#586a33"/><stop offset="1" stop-color="#3c4921"/></linearGradient>
+<linearGradient id="h1d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4f5e2c"/><stop offset="1" stop-color="#2f3a18"/></linearGradient>
+<linearGradient id="h1gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#aab2b9"/><stop offset=".5" stop-color="#7f8991"/><stop offset="1" stop-color="#565f67"/></linearGradient>
+<linearGradient id="h1gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c757d"/><stop offset="1" stop-color="#40474e"/></linearGradient>
+<linearGradient id="h1gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4d6072"/><stop offset=".5" stop-color="#121a22"/><stop offset="1" stop-color="#34475a"/></linearGradient></defs><path class="rot" d="M10 50 Q112.0 37 214 40 Q327.0 37 440 50" fill="none" stroke="#1b1b1b" stroke-width="8" stroke-linecap="round"/><path class="rot" d="M430 102 Q553.0 89 676 92 Q783.0 89 890 102" fill="none" stroke="#1b1b1b" stroke-width="8" stroke-linecap="round"/><rect x="206" y="36" width="16" height="26" rx="3" fill="#2b2b2b"/><rect x="668" y="88" width="16" height="22" rx="3" fill="#2b2b2b"/><path fill="url(#h1d)" d="M120 150 L150 74 Q156 58 174 58 L250 58 Q266 58 274 74 L330 150Z"/><path fill="url(#h1d)" d="M590 150 L628 116 Q638 108 652 108 L706 108 Q722 108 734 118 L770 150Z"/><path fill="url(#h1g)" d="M92 176 Q96 150 130 148 L770 148 Q812 150 842 178 Q866 202 860 222 Q854 240 816 244 L250 248 Q214 248 196 236 L104 196 Q90 188 92 176Z"/><path fill="#2c3716" opacity=".5" d="M196 236 Q214 248 250 248 L816 244 Q854 240 860 222 Q600 232 180 226Z"/><rect x="128" y="118" width="124" height="38" rx="19" fill="#39451d"/><ellipse cx="252" cy="137" rx="9" ry="17" fill="#15171a"/><rect x="112" y="126" width="24" height="22" rx="6" fill="#23290f"/><path fill="url(#h1d)" d="M250 200 Q250 186 270 186 L720 186 Q752 188 764 212 Q770 236 740 244 L270 248 Q250 246 250 232Z"/><path fill="#8ea05c" opacity=".35" d="M268 190 L720 190 Q740 192 750 202 L268 200Z"/><path fill="url(#h1gl)" d="M776 160 L814 166 Q838 180 850 204 L800 206 Q776 206 776 190Z"/><path fill="url(#h1gl)" d="M716 160 h48 v44 h-38 q-10 0 -10 -10z"/><path fill="url(#h1gl)" d="M812 214 L850 214 Q846 232 820 236Z"/><circle cx="350" cy="168" r="12" fill="#dfe6ee" stroke="#34401b" stroke-width="3"/><circle cx="420" cy="168" r="12" fill="#dfe6ee" stroke="#34401b" stroke-width="3"/><circle cx="490" cy="168" r="12" fill="#dfe6ee" stroke="#34401b" stroke-width="3"/><circle cx="560" cy="168" r="12" fill="#dfe6ee" stroke="#34401b" stroke-width="3"/><circle cx="630" cy="168" r="12" fill="#dfe6ee" stroke="#34401b" stroke-width="3"/><rect x="664" y="156" width="40" height="52" rx="6" fill="none" stroke="#34401b" stroke-width="3"/><path d="M104 196 L196 236 M150 152 L196 236" stroke="#2f3a18" stroke-width="3" fill="none"/><path fill="#93a560" opacity=".4" d="M140 152 L768 152 Q800 154 818 166 L140 162Z"/><path stroke="#2b2b2b" stroke-width="7" d="M300 244 v14 M690 242 v14"/><circle cx="288" cy="270" r="17" fill="#15171a"/><circle cx="288" cy="270" r="7" fill="#8d9499"/><circle cx="322" cy="270" r="17" fill="#15171a"/><circle cx="322" cy="270" r="7" fill="#8d9499"/><circle cx="678" cy="268" r="17" fill="#15171a"/><circle cx="678" cy="268" r="7" fill="#8d9499"/><circle cx="712" cy="268" r="17" fill="#15171a"/><circle cx="712" cy="268" r="7" fill="#8d9499"/></svg></div><span>Chinook</span></div><div class="lv-mk" style="animation:lv-p3 26s linear infinite"><div><img src="assets/img/heli_politie.png" alt="" loading="lazy"></div><span>Zulu 05</span></div><div class="lv-mk" style="animation:lv-p4 9s linear infinite"><div><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320"><defs><linearGradient id="h3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d8f4c"/><stop offset=".55" stop-color="#5e6f35"/><stop offset="1" stop-color="#3f4c22"/></linearGradient>
+<linearGradient id="h3d" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#56652f"/><stop offset="1" stop-color="#34401b"/></linearGradient>
+<linearGradient id="h3gr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#a9b0b6"/><stop offset=".55" stop-color="#7d868e"/><stop offset="1" stop-color="#565e66"/></linearGradient>
+<linearGradient id="h3gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c747c"/><stop offset="1" stop-color="#434a51"/></linearGradient>
+<linearGradient id="h3gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a4654"/><stop offset=".5" stop-color="#10151b"/><stop offset="1" stop-color="#2a3644"/></linearGradient></defs><path fill="url(#h3gd)" d="M96 150 L60 70 L104 70 L196 150Z"/><path fill="url(#h3gd)" d="M30 176 L150 160 L210 176 L150 188Z"/><path fill="url(#h3gr)" d="M70 168 L250 138 L470 126 Q520 96 600 96 Q660 98 700 126 L800 150 Q860 164 880 178 Q860 190 800 196 L560 214 L250 212 L70 196Z"/><path fill="#3d444b" opacity=".6" d="M70 196 L250 212 L560 214 L800 196 Q860 190 880 178 Q600 200 70 186Z"/><path fill="url(#h3gl)" d="M520 124 Q560 92 620 96 Q664 102 690 126Z"/><path fill="url(#h3gd)" d="M250 176 L560 168 L640 186 L300 204Z"/><path fill="#2b2f33" d="M470 150 L560 144 L560 176 L490 180Z"/><rect x="40" y="160" width="46" height="40" rx="6" fill="#2b2f33"/><rect x="26" y="166" width="20" height="28" rx="4" fill="#15171a"/><path fill="#c2c8cd" opacity=".5" d="M250 142 L470 130 L700 132 L800 154 L250 152Z"/></svg></div><span>F-35</span></div><div class="lv-mk" style="animation:lv-p5 28s linear infinite"><div><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320"><defs><linearGradient id="h4w" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".6" stop-color="#eef1f4"/><stop offset="1" stop-color="#c9d0d7"/></linearGradient>
+<linearGradient id="h4wd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#dfe4e9"/><stop offset="1" stop-color="#aab3bc"/></linearGradient>
+<linearGradient id="h4bl" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2f56b0"/><stop offset="1" stop-color="#15306f"/></linearGradient>
+<linearGradient id="h4gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4d6072"/><stop offset=".5" stop-color="#121a22"/><stop offset="1" stop-color="#34475a"/></linearGradient>
+<clipPath id="h4c"><path id="h4romp" d="M60 156 Q200 132 330 130 L720 130 Q800 134 850 164 Q874 180 868 194 Q856 214 790 218 L330 222 Q220 220 140 196 Q80 176 60 156Z"/></clipPath></defs><path fill="url(#h4w)" stroke="#9aa3ac" stroke-width="2" d="M84 152 L70 44 L128 44 L224 152Z"/><path fill="#e2231a" d="M72 62 L70 44 L128 44 L144 62Z"/><path fill="#1f3f94" d="M74 78 L73 66 L148 66 L158 78Z"/><path fill="url(#h4wd)" stroke="#9aa3ac" stroke-width="2" d="M20 50 L150 42 L190 52 L150 60Z"/><path d="M60 156 Q200 132 330 130 L720 130 Q800 134 850 164 Q874 180 868 194 Q856 214 790 218 L330 222 Q220 220 140 196 Q80 176 60 156Z" fill="url(#h4w)" stroke="#9aa3ac" stroke-width="2"/><g clip-path="url(#h4c)"><path fill="#e2231a" d="M560 320 L620 0 L690 0 L630 320Z"/><path fill="#1f3f94" d="M660 320 L720 0 L754 0 L694 320Z"/></g><g clip-path="url(#h4c)"><rect x="0" y="196" width="900" height="80" fill="#8792a0" opacity=".35"/></g><path fill="url(#h4gl)" d="M776 142 Q814 148 838 164 L784 166 Q776 166 776 158Z"/><rect x="300" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="336" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="372" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="408" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="444" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="480" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="516" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="552" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="700" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="736" y="156" width="16" height="20" rx="7" fill="#2a3440"/><rect x="330" y="104" width="330" height="26" rx="10" fill="url(#h4wd)" stroke="#9aa3ac" stroke-width="2"/><path fill="url(#h4wd)" stroke="#9aa3ac" stroke-width="2" d="M420 120 h170 q30 4 34 22 q-4 20 -34 22 h-150 q-24 -2 -24 -22z"/><ellipse cx="632" cy="142" rx="8" ry="72" fill="#1b1b1b" opacity=".7"/><circle cx="632" cy="142" r="11" fill="#2b2f33"/><rect x="380" y="206" width="160" height="26" rx="13" fill="#2a3440"/></svg></div><span>Kustwacht</span></div>
+    </a>
+    <div data-reveal>
+      <span class="lv-live"><i></i> <span id="lvAantal">Live op de kaart</span></span>
+      <h2>Zie wat er boven je vliegt</h2>
+      <p class="sub">Lifeliners en politiehelikopters, en nu ook Defensie, de Kustwacht en het regeringsvliegtuig. Live op de kaart, elk toestel met zijn eigen tekening.</p>
+      <a class="lv-knop" href="luchtvaart/">Welke toestellen zie je? →</a><a class="lv-knop licht" href="pager/#kaart">Open de kaart</a>
+    </div>
+    <script type="module">
+import { API } from "./assets/js/core.js?v=61";
+// Live number: Lifeliners and police helicopters in the air plus defence and government aircraft above the Netherlands.
+const el = document.getElementById("lvAantal");
+async function tel() {
+  try {
+    const [h, l] = await Promise.all([fetch(`${API}/v1/helikopters`).then((r) => r.json()), fetch(`${API}/v1/lucht`).then((r) => r.json())]);
+    const n = (h.helikopters || []).filter((x) => !x.op_grond).length + (l.toestellen || []).filter((x) => !x.op_grond).length;
+    el.textContent = n === 1 ? "1 toestel nu in de lucht" : `${n} toestellen nu in de lucht`;
+  } catch { el.textContent = "Live op de kaart"; }
+}
+tel(); setInterval(() => { if (!document.hidden) tel(); }, 30000);
+</script>
+  </section>
+  <!-- LUCHT:END -->
+
   <!-- DEVICES -->
   <section class="devices" id="apparaten">
     <div class="sec-head" data-reveal>
