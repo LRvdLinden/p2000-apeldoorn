@@ -82,6 +82,8 @@ data class Melding(
     /** Share link: a-alerts.nl/melding/<dienst>/<guid> shows the banner of the service in previews and opens the app when installed. */
     val shareUrl: String get() = "https://a-alerts.nl/melding/${soort.key}/$guid"
     val hasCoordinate: Boolean get() = lat != null && lon != null && lat != 0.0 && lon != 0.0
+    /** A hectometre post in the title ("A50 Re 211,2"). */
+    val hectometerpaal: Hectometerpaal? get() = Hectometerpaal.uit(title)
     val hasStreet: Boolean get() = !locatie.isNullOrBlank() && locatie.trim().lowercase() != "onbekend"
     val plaatsNaam: String get() = stad?.trim()?.takeIf { it.isNotEmpty() && it.lowercase() != "onbekend" }?.capPlaats() ?: "Apeldoorn"
     val plaatsText: String get() {
@@ -529,3 +531,18 @@ data class HeliZone(val id: String = java.util.UUID.randomUUID().toString(), val
 /** GET /v1/radar */
 @Serializable
 data class RadarInfo(val beschikbaar: Boolean = false, val tiles: String? = null)
+
+/** The sign along a motorway or provincial road: "A50 Re 211,2". */
+data class Hectometerpaal(val weg: String, val zijde: String, val km: String) {
+    val isSnelweg: Boolean get() = weg.startsWith("A")
+    val tekst: String get() = listOf(weg, zijde, km).filter { it.isNotEmpty() }.joinToString(" ")
+    companion object {
+        private val RE = Regex("""(?<![\p{L}\d])([ANan])\s?(\d{1,3})\s+(?:([Rr][Ee]?|[Ll][Ii]?)\s+)?(\d{1,3})[,.](\d)(?!\d)""")
+        fun uit(titel: String?): Hectometerpaal? {
+            val m = RE.find(titel ?: return null) ?: return null
+            val z = m.groupValues[3].lowercase()
+            return Hectometerpaal(m.groupValues[1].uppercase() + m.groupValues[2], if (z.startsWith("r")) "Re" else if (z.startsWith("l")) "Li" else "",
+                "${m.groupValues[4].toInt()},${m.groupValues[5]}")
+        }
+    }
+}

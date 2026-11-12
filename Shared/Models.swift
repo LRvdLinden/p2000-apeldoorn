@@ -134,6 +134,9 @@ struct Melding: Identifiable, Hashable, Codable {
         return lat != 0 && lon != 0
     }
 
+    /// A hectometre post in the title ("A50 Re 211,2"): the road, the side and the number on the sign.
+    var hectometerpaal: Hectometerpaal? { Hectometerpaal(titel: title) }
+
     /// The dispatcher sent a street name. Without one the coordinate is only the town centre.
     var hasStreet: Bool {
         guard let loc = locatie?.trimmingCharacters(in: .whitespaces) else { return false }
@@ -320,5 +323,26 @@ extension String {
     /// Normalised for comparing places ("Beemte-broekland" == "Beemte broekland").
     var plaatsKey: String {
         lowercased().replacingOccurrences(of: "-", with: " ").trimmingCharacters(in: .whitespaces)
+    }
+}
+
+/// The sign along a motorway or provincial road: "A50 Re 211,2".
+struct Hectometerpaal: Equatable {
+    let weg: String      // A50, N345
+    let zijde: String    // Re, Li or empty
+    let km: String       // 211,2
+
+    var isSnelweg: Bool { weg.hasPrefix("A") }
+    var tekst: String { [weg, zijde, km].filter { !$0.isEmpty }.joined(separator: " ") }
+
+    init?(titel: String) {
+        let patroon = #"(?<![\p{L}\d])([ANan])\s?(\d{1,3})\s+(?:([Rr][Ee]?|[Ll][Ii]?)\s+)?(\d{1,3})[,.](\d)(?!\d)"#
+        guard let re = try? NSRegularExpression(pattern: patroon),
+              let m = re.firstMatch(in: titel, range: NSRange(titel.startIndex..., in: titel)) else { return nil }
+        func deel(_ i: Int) -> String { Range(m.range(at: i), in: titel).map { String(titel[$0]) } ?? "" }
+        let z = deel(3).lowercased()
+        weg = deel(1).uppercased() + deel(2)
+        zijde = z.hasPrefix("r") ? "Re" : z.hasPrefix("l") ? "Li" : ""
+        km = "\(Int(deel(4)) ?? 0),\(deel(5))"
     }
 }

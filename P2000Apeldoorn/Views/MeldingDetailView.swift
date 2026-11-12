@@ -452,7 +452,8 @@ struct MeldingDetailView: View {
 
             infoRow(symbol: "location.fill", color: Color(hex: 0x3B82F6),
                     title: melding.stad?.capitalizedPlaats ?? "Apeldoorn",
-                    subtitle: hasStreet ? (melding.locatie ?? "") : L("Specifieke locatie niet bekend"))
+                    subtitle: melding.hectometerpaal?.tekst ?? (hasStreet ? (melding.locatie ?? "") : L("Specifieke locatie niet bekend")),
+                    paal: melding.hectometerpaal)
             infoRow(symbol: "exclamationmark.triangle.fill", color: Color(hex: 0xDC2626),
                     title: melding.categorie ?? melding.dienst.label,
                     subtitle: priorityLine)
@@ -486,7 +487,7 @@ struct MeldingDetailView: View {
         return melding.dienst.label
     }
 
-    private func infoRow(symbol: String, color: Color, title: String, subtitle: String) -> some View {
+    private func infoRow(symbol: String, color: Color, title: String, subtitle: String, paal: Hectometerpaal? = nil) -> some View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
                 .font(.system(size: 15, weight: .semibold))
@@ -500,6 +501,7 @@ struct MeldingDetailView: View {
                 }
             }
             Spacer(minLength: 0)
+            if let paal { HectometerBord(paal: paal) }
         }
         .accessibilityElement(children: .combine)
     }

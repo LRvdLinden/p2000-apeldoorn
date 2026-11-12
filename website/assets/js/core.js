@@ -285,30 +285,41 @@ export function spread(list) {
  *  become one marker per town instead of a big ring of identical pins. */
 export function layout(list) {
   const withCoord = list.filter((m) => m.lat != null && m.lon != null);
-  const pins = spread(withCoord.filter(hasStreet));
+  // The marker on top: trauma helicopter first, then police, otherwise the service with the most alerts.
+  const maak = (id, plaats, items, extra) => {
+    const per = {};
+    items.forEach((m) => (per[m.dienst] = (per[m.dienst] || 0) + 1));
+    const main = per.traumaheli ? "traumaheli" : per.politie ? "politie" : Object.entries(per).sort((x, y) => y[1] - x[1])[0][0];
+    return { id, plaats, meldingen: items.sort((x, y) => date(y) - date(x)), main, diensten: SELECTABLE.filter((d) => per[d]), ...extra };
+  };
+  // Several alerts at one address: one marker with the number on top (no ring of pins).
+  const plekken = new Map();
+  for (const m of withCoord.filter(hasStreet)) {
+    const k = `${m.lat.toFixed(4)},${m.lon.toFixed(4)}`;
+    if (!plekken.has(k)) plekken.set(k, []);
+    plekken.get(k).push(m);
+  }
+  const pins = [], adressen = [];
+  for (const [k, items] of plekken) {
+    if (items.length === 1) { pins.push(items[0]); continue; }
+    adressen.push(maak(`adres-${k}`, plaatsText(items[0]), items, { adres: true, lat: items[0].lat, lon: items[0].lon }));
+  }
   const towns = new Map();
   for (const m of withCoord.filter((x) => !hasStreet(x))) {
     const k = capPlaats(m.stad || "") || "Apeldoorn";
     if (!towns.has(k)) towns.set(k, []);
     towns.get(k).push(m);
   }
-  const clusters = [...towns].map(([plaats, items]) => {
-    const per = {};
-    items.forEach((m) => (per[m.dienst] = (per[m.dienst] || 0) + 1));
-    const main = Object.entries(per).sort((a, b) => b[1] - a[1])[0][0];
-    return {
-      id: `plaats-${plaats}`, plaats, meldingen: items.sort((a, b) => date(b) - date(a)), main,
-      diensten: SELECTABLE.filter((d) => per[d]),
-      lat: items.reduce((t, m) => t + m.lat, 0) / items.length, lon: items.reduce((t, m) => t + m.lon, 0) / items.length,
-    };
-  });
-  return { pins, clusters };
+  const clusters = [...towns].map(([plaats, items]) => maak(`plaats-${plaats}`, plaats, items, {
+    lat: items.reduce((t, m) => t + m.lat, 0) / items.length, lon: items.reduce((t, m) => t + m.lon, 0) / items.length,
+  }));
+  return { pins, clusters: [...clusters, ...adressen] };
 }
 
 export function clusterEl(c, onClick) {
   const el = document.createElement("div");
   el.className = "mk-marker mk-cluster";
-  el.title = `${c.meldingen.length} meldingen zonder adres in ${c.plaats}`;
+  el.title = c.adres ? `${c.meldingen.length} meldingen op ${c.plaats}` : `${c.meldingen.length} meldingen zonder adres in ${c.plaats}`;
   el.innerHTML = `<img src="${asset(`assets/img/${(DIENSTEN[c.main] || DIENSTEN.onbekend).marker}.png`)}" alt=""><b class="mk-count">${c.meldingen.length}</b>`;
   if (onClick) el.addEventListener("click", (e) => { e.stopPropagation(); onClick(c); });
   return el;

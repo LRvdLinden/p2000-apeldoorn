@@ -4,7 +4,7 @@
 // The map: municipal border in the colour of the active KNMI code, traffic (NDW), P2000 alerts of the last 3 hours,
 // helicopters inside the area, hospitals, rain radar and (optional) fixed speed cameras. Light/dark follows the device.
 import { weerKaartHTML, tekenWeerKaart, codeKleur, opKleur, CODE_KLEUR } from "./weerkaart.js?v=1";
-import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, prefs } from "./core.js?v=60";
+import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, prefs } from "./core.js?v=61";
 import {
   fetchWaarschuwingen, fetchHelikopters, heliLaag, fetchLocaties, locatieAnnotation, radarLaag, CODES, mShareUrl,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerIcon, verkeerFile, VERKEER_SOORT, verkeerRegels, verkeerTijdvak, verkeerKleur,

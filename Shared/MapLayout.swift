@@ -14,17 +14,22 @@ struct PlaatsCluster: Identifiable {
     let plaats: String
     let meldingen: [Melding]          // newest first
     let coordinate: CLLocationCoordinate2D
-    var id: String { "plaats-" + plaats }
-    /// The service with the most alerts in this group, used for the marker colour.
+    /// True when these are several alerts at one address (not alerts without a street in one town).
+    var adres = false
+    var sleutel: String? = nil
+    var id: String { adres ? "adres-" + (sleutel ?? plaats) : "plaats-" + plaats }
+    /// The marker on top: trauma helicopter first, then police, otherwise the service with the most alerts.
     var hoofdDienst: Dienst {
-        Dictionary(grouping: meldingen, by: \.dienst).max { $0.value.count < $1.value.count }?.key ?? .ambulance
+        if meldingen.contains(where: { $0.dienst == .traumaheli }) { return .traumaheli }
+        if meldingen.contains(where: { $0.dienst == .politie }) { return .politie }
+        return Dictionary(grouping: meldingen, by: \.dienst).max { $0.value.count < $1.value.count }?.key ?? .ambulance
     }
     var diensten: [Dienst] { Dienst.selectable.filter { d in meldingen.contains { $0.dienst == d } } }
 }
 
 enum MapLayout {
     /// Splits alerts into exact pins (with a street) and one cluster per town for alerts without a street.
-    /// Exact pins at the same spot are spread in a small circle, like the website.
+    /// Exact pins at the same spot become one marker with a number, like the website.
     static func build(_ list: [Melding]) -> (pins: [MapPin], clusters: [PlaatsCluster]) {
         let withCoord = list.filter(\.hasCoordinate)
         let exact = withCoord.filter(\.hasStreet)
@@ -34,18 +39,17 @@ enum MapLayout {
         let groups = Dictionary(grouping: exact) { m in
             "\(Int(((m.lat ?? 0) * 1000).rounded())),\(Int(((m.lon ?? 0) * 1000).rounded()))"
         }
-        for (_, group) in groups {
-            let sorted = group.sorted { $0.datum < $1.datum }
-            for (i, m) in sorted.enumerated() {
-                var lat = m.lat ?? 0, lon = m.lon ?? 0
-                if sorted.count > 1 {
-                    let angle = Double(i) / Double(sorted.count) * .pi * 2
-                    let r = min(0.0003 + Double(sorted.count) * 0.00004, 0.0008)
-                    lat += cos(angle) * r
-                    lon += sin(angle) * r / cos(lat * .pi / 180)
-                }
-                pins.append(MapPin(melding: m, coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon)))
+        // Several alerts at one address: one marker with the number on top (no ring of pins).
+        var adressen: [PlaatsCluster] = []
+        for (key, group) in groups {
+            let sorted = group.sorted { $0.datum > $1.datum }
+            guard sorted.count > 1, let m = sorted.first else {
+                for m in sorted { pins.append(MapPin(melding: m, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0))) }
+                continue
             }
+            let naam = [m.locatie, m.plaatsNaam].compactMap { $0 }.joined(separator: ", ")
+            adressen.append(PlaatsCluster(plaats: naam, meldingen: sorted,
+                                          coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), adres: true, sleutel: key))
         }
         pins.sort { $0.melding.datum < $1.melding.datum } // newest on top
 
@@ -56,6 +60,6 @@ enum MapLayout {
             return PlaatsCluster(plaats: plaats, meldingen: sorted, coordinate: CLLocationCoordinate2D(latitude: lat, longitude: lon))
         }
         .sorted { $0.meldingen.count < $1.meldingen.count }
-        return (pins, clusters)
+        return (pins, clusters + adressen)
     }
 }

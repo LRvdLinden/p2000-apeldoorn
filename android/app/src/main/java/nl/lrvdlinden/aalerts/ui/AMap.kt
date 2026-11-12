@@ -37,6 +37,8 @@ data class MapPoint(
     val label: String? = null, val flip: Boolean = false, val dim: Boolean = false, val anchorBottom: Boolean = true,
     /** Station style (like the web meldkamer): white rounded square with a border in this colour around the icon. */
     val kazerne: Long? = null,
+    /** Several alerts at one address: this number in a black badge on top of the marker. */
+    val count: Int? = null,
 )
 /** An area of rings of [lon, lat]. */
 data class MapArea(val id: String, val rings: List<List<List<Double>>>, val color: Long, val fill: Double = 0.18, val dashed: Boolean = false, val width: Double = 2.0)
@@ -169,7 +171,7 @@ fun AMap(
         val density = ctx.resources.displayMetrics.density
         for (p in points) {
             val name = imgName(p)
-            if (s.getImage(name) == null) (if (p.kazerne != null) kazerneBitmap(ctx, p.image, (p.widthDp * density).toInt(), p.kazerne) else bitmap(ctx, p.image, (p.widthDp * density).toInt(), p.flip))?.let { s.addImage(name, it) }
+            if (s.getImage(name) == null) (if (p.count != null) countBitmap(ctx, p.image, (p.widthDp * density).toInt(), p.count) else if (p.kazerne != null) kazerneBitmap(ctx, p.image, (p.widthDp * density).toInt(), p.kazerne) else bitmap(ctx, p.image, (p.widthDp * density).toInt(), p.flip))?.let { s.addImage(name, it) }
         }
         s.getSourceAs<GeoJsonSource>("a-points")?.setGeoJson(FeatureCollection.fromFeatures(points.mapIndexed { i, p ->
             Feature.fromGeometry(Point.fromLngLat(p.lon, p.lat)).apply {
@@ -221,7 +223,7 @@ fun AMap(
     AndroidView(factory = { mapView }, modifier = modifier)
 }
 
-private fun imgName(p: MapPoint) = "img-${p.image}-${p.widthDp}-${p.flip}" + (p.kazerne?.let { "-k$it" } ?: "")
+private fun imgName(p: MapPoint) = "img-${p.image}-${p.widthDp}-${p.flip}" + (p.kazerne?.let { "-k$it" } ?: "") + (p.count?.let { "-c$it" } ?: "")
 
 private val cache = mutableMapOf<String, Bitmap>()
 
@@ -243,6 +245,31 @@ private fun kazerneBitmap(ctx: Context, res: Int, sizePx: Int, color: Long): Bit
     c.drawRoundRect(android.graphics.RectF(rect.left + stroke / 2, rect.top + stroke / 2, rect.right - stroke / 2, rect.bottom - stroke / 2), r, r,
         android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { style = android.graphics.Paint.Style.STROKE; strokeWidth = stroke; this.color = (color and 0xFFFFFFFF).toInt() })
     c.drawBitmap(icon, (total - icon.width) / 2f, (total - icon.height) / 2f, null)
+    cache[key] = b
+    return b
+}
+/** Marker with the number of alerts at that address in a black badge at the top right (the marker stays centred). */
+private fun countBitmap(ctx: Context, res: Int, widthPx: Int, count: Int): Bitmap? {
+    val key = "c-$res-$widthPx-$count"
+    cache[key]?.let { return it }
+    val icon = bitmap(ctx, res, widthPx, false) ?: return null
+    val pad = (widthPx * 0.3f).toInt()
+    val b = Bitmap.createBitmap(icon.width + pad * 2, icon.height + pad, Bitmap.Config.ARGB_8888)
+    val c = android.graphics.Canvas(b)
+    c.drawBitmap(icon, pad.toFloat(), pad.toFloat(), null)
+    val tekst = if (count > 99) "99+" else count.toString()
+    val paint = android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply {
+        color = android.graphics.Color.WHITE; textSize = widthPx * 0.34f; typeface = android.graphics.Typeface.DEFAULT_BOLD; textAlign = android.graphics.Paint.Align.CENTER
+    }
+    val hoog = widthPx * 0.5f
+    val breed = maxOf(hoog, paint.measureText(tekst) + widthPx * 0.2f)
+    val rechts = b.width - 1f
+    val vak = android.graphics.RectF(rechts - breed, 1f, rechts, 1f + hoog)
+    c.drawRoundRect(vak, hoog / 2, hoog / 2, android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.WHITE })
+    val rand = maxOf(2f, widthPx * 0.045f)
+    c.drawRoundRect(android.graphics.RectF(vak.left + rand, vak.top + rand, vak.right - rand, vak.bottom - rand), hoog / 2, hoog / 2,
+        android.graphics.Paint(android.graphics.Paint.ANTI_ALIAS_FLAG).apply { color = android.graphics.Color.BLACK })
+    c.drawText(tekst, vak.centerX(), vak.centerY() - (paint.descent() + paint.ascent()) / 2, paint)
     cache[key] = b
     return b
 }

@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 80)
+- Hectometerpaal: een melding met bijvoorbeeld "A50 Re 211,2" in de titel staat op die paal op de kaart (PDOK), en bij de locatie staat het groene hectometerbordje (app, Android en website).
+- Kaart: meerdere meldingen op één adres staan samen op één marker met het aantal erboven; traumahelikopter bovenop, anders politie, anders de dienst met de meeste meldingen.
+
 ## A-Alerts 2.0.0 (build 33)
 - Instellingen: 'Verstuur feedback' (mail) is weg.
 - Gebruiksvoorwaarden, privacyverklaring en disclaimer komen als A-Alerts-teksten van de server zodra de nieuwe worker live staat.

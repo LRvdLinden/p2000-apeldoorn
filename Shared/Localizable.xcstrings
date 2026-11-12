@@ -358,6 +358,23 @@
         }
       }
     },
+    "%lld meldingen op %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alerts at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld meldingen op %@"
+          }
+        }
+      }
+    },
     "%lld meldingen zonder adres in %@": {
       "extractionState": "manual",
       "localizations": {
@@ -456,6 +473,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld nu actief"
+          }
+        }
+      }
+    },
+    "%lld op %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld op %@"
           }
         }
       }
@@ -4825,6 +4859,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Heb je een vraag of werkt iets niet? Geef dit toestel-ID door, dan kunnen we jouw toestel terugvinden. Er staat geen naam of telefoonnummer in."
+          }
+        }
+      }
+    },
+    "Hectometerpaal %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hectometre post %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hectometerpaal %@"
           }
         }
       }

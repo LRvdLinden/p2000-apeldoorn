@@ -125,7 +125,34 @@ struct ClusterMarker: View {
                     .scaleEffect(selected ? 1.25 : 1, anchor: .bottom)
             }
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel(Lf("%lld meldingen zonder adres in %@", cluster.meldingen.count, cluster.plaats))
+            .accessibilityLabel(cluster.adres ? Lf("%lld meldingen op %@", cluster.meldingen.count, cluster.plaats) : Lf("%lld meldingen zonder adres in %@", cluster.meldingen.count, cluster.plaats))
+    }
+}
+
+/// The green hectometre sign with the road number (red for an A road, yellow for an N road), the side and the number.
+struct HectometerBord: View {
+    let paal: Hectometerpaal
+
+    var body: some View {
+        VStack(spacing: 2) {
+            HStack(spacing: 4) {
+                Text(paal.weg)
+                    .font(.system(size: 11, weight: .bold))
+                    .foregroundStyle(paal.isSnelweg ? Color.white : Color.black)
+                    .padding(.horizontal, 4).padding(.vertical, 1)
+                    .background(paal.isSnelweg ? Color(hex: 0xD0021B) : Color(hex: 0xFFD200), in: RoundedRectangle(cornerRadius: 3))
+                    .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(paal.isSnelweg ? Color.white : Color.black, lineWidth: 1))
+                if !paal.zijde.isEmpty { Text(paal.zijde).font(.system(size: 10, weight: .bold)) }
+            }
+            Text(paal.km).font(.system(size: 17, weight: .bold).monospacedDigit())
+        }
+        .foregroundStyle(.white)
+        .padding(.horizontal, 6).padding(.vertical, 4)
+        .frame(minWidth: 50)
+        .background(Color(hex: 0x0A7A3D), in: RoundedRectangle(cornerRadius: 6))
+        .overlay(RoundedRectangle(cornerRadius: 6).inset(by: 1.5).strokeBorder(.white, lineWidth: 1.5))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(Lf("Hectometerpaal %@", paal.tekst))
     }
 }
 

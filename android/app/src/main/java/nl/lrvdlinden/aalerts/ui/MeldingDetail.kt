@@ -4,6 +4,9 @@ import android.content.Context
 import nl.lrvdlinden.aalerts.isDutch
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.border
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
@@ -149,7 +152,8 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     Text(m.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
-                        Text(m.plaatsText, color = Muted)
+                        Text(m.hectometerpaal?.let { "${it.tekst}, ${m.plaatsNaam}" } ?: m.plaatsText, color = Muted, modifier = Modifier.weight(1f))
+                        m.hectometerpaal?.let { HectometerBord(it) }
                     }
                     if (m.prioriteitText.isNotBlank()) Text(m.prioriteitText, fontSize = 14.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -461,5 +465,25 @@ fun HeliLiveCard(m: Melding, h: Helikopter?, naam: String?, onFollow: (String) -
             Icon(Icons.Outlined.MyLocation, null); Spacer(Modifier.width(8.dp)); Text(tr("Volg ${h.naam} op de kaart", "Follow ${h.naam} on the map"))
         }
         Text(tr("Positie via adsb.lol, kan enkele seconden achterlopen.", "Position via adsb.lol, may lag a few seconds."), color = Muted, fontSize = 11.sp)
+    }
+}
+
+/** The green hectometre sign: road number (red for an A road, yellow for an N road), the side and the number. */
+@Composable
+fun HectometerBord(p: nl.lrvdlinden.aalerts.data.Hectometerpaal) {
+    val groen = Color(0xFF0A7A3D)
+    Column(
+        Modifier.semantics(mergeDescendants = true) { contentDescription = tr("Hectometerpaal ${p.tekst}", "Hectometre post ${p.tekst}") }
+            .background(groen, RoundedCornerShape(6.dp)).padding(1.5.dp).border(1.5.dp, Color.White, RoundedCornerShape(5.dp))
+            .widthIn(min = 50.dp).padding(horizontal = 6.dp, vertical = 3.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(p.weg, color = if (p.isSnelweg) Color.White else Color.Black, fontSize = 11.sp, lineHeight = 13.sp, fontWeight = FontWeight.Bold,
+                modifier = Modifier.background(if (p.isSnelweg) Color(0xFFD0021B) else Color(0xFFFFD200), RoundedCornerShape(3.dp))
+                    .border(1.dp, if (p.isSnelweg) Color.White else Color.Black, RoundedCornerShape(3.dp)).padding(horizontal = 4.dp))
+            if (p.zijde.isNotEmpty()) Text(p.zijde, color = Color.White, fontSize = 10.sp, lineHeight = 12.sp, fontWeight = FontWeight.Bold)
+        }
+        Text(p.km, color = Color.White, fontSize = 17.sp, lineHeight = 19.sp, fontWeight = FontWeight.Bold)
     }
 }

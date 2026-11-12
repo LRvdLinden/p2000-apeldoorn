@@ -1,5 +1,5 @@
 // A-Alerts: the weather picture of a KNMI warning (like knmi.nl) and its text, for the news article and the Weer widget.
-import { esc, loadMapKit } from "./core.js?v=60";
+import { esc, loadMapKit } from "./core.js?v=61";
 
 
 export const CODE_KLEUR = { yellow: "#F7C600", orange: "#F28C28", red: "#E3001B", green: "#2E9E44" };

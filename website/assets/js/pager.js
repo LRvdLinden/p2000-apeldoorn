@@ -3,7 +3,7 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=60";
+} from "./core.js?v=61";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
@@ -471,10 +471,23 @@ function closeDetail(push = true) {
   renderList();
 }
 
+/** A hectometre post in the title ("A50 Re 211,2") → the road, the side and the number on the sign. */
+const HM_RE = /(?<![\p{L}\d])([AN])\s?(\d{1,3})\s+(?:(Re|Li|R|L)\s+)?(\d{1,3})[,.](\d)(?!\d)/iu;
+function hmPaal(titel) {
+  const m = String(titel || "").match(HM_RE);
+  if (!m) return null;
+  const z = (m[3] || "").toLowerCase();
+  const zijde = z.startsWith("r") ? "Re" : z.startsWith("l") ? "Li" : "";
+  const weg = `${m[1].toUpperCase()}${m[2]}`, km = `${Number(m[4])},${m[5]}`;
+  return { weg, zijde, km, soort: weg[0], tekst: [weg, zijde, km].filter(Boolean).join(" ") };
+}
+const hmBord = (p) => `<span class="hm" role="img" aria-label="Hectometerpaal ${esc(p.tekst)}"><span class="hm-r"><span class="hm-s ${p.soort}">${esc(p.weg)}</span>${p.zijde ? `<span class="hm-z">${p.zijde}</span>` : ""}</span><span class="hm-km">${esc(p.km)}</span></span>`;
+
 function renderDetail(m) {
   const d = date(m), dienst = dienstOf(m), units = m.eenheden || [], cars = m.voertuigen || [];
   const t = todayStats(state.list), y = yesterdayStats(state.list);
   const stad = capPlaats(m.stad) || "Apeldoorn";
+  const paal = hmPaal(m.title);
   $("detail").innerHTML = `
   <article class="detail">
     <button class="d-back" data-close>‹ Pager</button>
@@ -492,7 +505,7 @@ function renderDetail(m) {
         <h1>${esc(m.title)}</h1>
         <button class="share" id="shareBtn" aria-label="Delen">${ICO.share}</button>
       </div>
-      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(hasStreet(m) ? m.locatie : stad)}</b><small>${hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div></div>
+      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(paal ? paal.tekst : hasStreet(m) ? m.locatie : stad)}</b><small>${paal || hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div>${paal ? hmBord(paal) : ""}</div>
       <div class="info"><span class="ico" style="background:${isUrgent(m) ? "#DC2626" : "#f59e0b"}">${ICO.warn}</span><div><b>${esc(m.categorie || dienst.label)}</b><small>${m.prioriteit ? `Prioriteit ${esc(m.prioriteit)}` : "Prioriteit onbekend"}</small></div></div>
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
       ${m.lat != null || hasStreet(m) ? `<button class="amaps" id="routeBtn" type="button">${ICO.maps} Route naar incident</button>` : ""}
@@ -1259,8 +1272,8 @@ async function werkgebiedOverlays(mk) {
 /** Town marker tapped: list the alerts without a street name in that town. */
 function openCluster(c) {
   const box = $("clusterPanel");
-  box.innerHTML = `<header><b>${c.meldingen.length} in ${esc(c.plaats)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
-    <p>De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats.</p>
+  box.innerHTML = `<header><b>${c.meldingen.length} ${c.adres ? "op" : "in"} ${esc(c.plaats)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    ${c.adres ? "" : "<p>De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats.</p>"}
     <div class="cp-list">${c.meldingen.map((m) => `<button data-guid="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(ago(date(m)))} · ${fmtTime(date(m))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div>`;
   box.hidden = false;
 }

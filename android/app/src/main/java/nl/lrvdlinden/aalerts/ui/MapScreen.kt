@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -154,7 +156,16 @@ fun MapScreen(nav: Nav) {
         if (w.hasCoordinate) points += MapPoint("w:${w.id}", w.lat!!, w.lon!!, w.marker, 34, dim = w.isBeeindigd)
     }
     if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, if (selected == "k:${k.id}") 30 else 24, anchorBottom = false, kazerne = k.dienst.color.toArgb().toLong()) } }
-    if (KaartLaag.MELDINGEN.key in lagen) meldingen.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
+    // Several alerts at one address: one marker with the number on top; trauma helicopter first, then police.
+    val adressen = remember(meldingen) { meldingen.groupBy { "%.4f,%.4f".format(java.util.Locale.US, it.lat, it.lon) }.filterValues { it.size > 1 }.mapValues { (_, l) -> l.sortedByDescending { it.millis } } }
+    if (KaartLaag.MELDINGEN.key in lagen) {
+        val samen = adressen.values.flatten().map { it.guid }.toSet()
+        meldingen.filter { it.guid !in samen }.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
+        adressen.forEach { (k, l) ->
+            val boven = l.firstOrNull { it.soort == Dienst.TRAUMAHELI } ?: l.firstOrNull { it.soort == Dienst.POLITIE } ?: l.groupBy { it.soort }.maxBy { it.value.size }.value.first()
+            boven.soort.marker?.let { points += MapPoint("a:$k", l[0].lat!!, l[0].lon!!, it, if (selected == "a:$k") 46 else 38, count = l.size) }
+        }
+    }
     val lines = mutableListOf<MapLine>()
     // Traffic from the NDW: the route as a line (closure dashed), every item as an icon; fixed speed cameras.
     val vk = Store.verkeer
@@ -324,6 +335,14 @@ fun MapScreen(nav: Nav) {
                         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                             KazerneIcon(k.dienst, 36.dp); Spacer(Modifier.width(10.dp))
                             Column { Text(k.naam, fontWeight = FontWeight.SemiBold); Text(k.plaats ?: "", color = Muted, fontSize = 12.sp) }
+                        }
+                    }
+                }
+                sel.startsWith("a:") -> adressen[sel.removePrefix("a:")]?.let { l ->
+                    PreviewCard(onClose = { selected = null }) {
+                        Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())) {
+                            Text(tr("${l.size} meldingen op ${l[0].plaatsText}", "${l.size} alerts at ${l[0].plaatsText}"), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 4.dp))
+                            l.forEach { m -> MeldingRow(m) { nav.melding(m.guid) } }
                         }
                     }
                 }

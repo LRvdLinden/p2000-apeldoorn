@@ -696,10 +696,12 @@ struct ClusterSheet: View {
                         NavigationLink { MeldingDetailView(melding: m) } label: { MeldingRow(melding: m) }
                     }
                 } footer: {
-                    Text(L("De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats."))
+                    if !cluster.adres {
+                        Text(L("De meldkamer heeft bij deze meldingen geen straatnaam doorgegeven. Daarom staan ze samen op één punt in de plaats."))
+                    }
                 }
             }
-            .navigationTitle(Lf("%lld in %@", cluster.meldingen.count, cluster.plaats))
+            .navigationTitle(cluster.adres ? Lf("%lld op %@", cluster.meldingen.count, cluster.plaats) : Lf("%lld in %@", cluster.meldingen.count, cluster.plaats))
             #if os(iOS)
             .navigationBarTitleDisplayMode(.inline)
             #endif
