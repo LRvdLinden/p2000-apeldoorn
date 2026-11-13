@@ -93,7 +93,7 @@ test("sync: police (first run silent, later new ones pushed), warnings, beheer m
   assert.equal(nieuw.length, 1);
   const lijst = await listNieuws(env, "https://api.test", { soort: "politie" });
   assert.equal(lijst.length, 2, "Deventer is not ours");
-  assert.equal(lijst[0].afbeelding, "https://a-alerts.nl/assets/img/nieuws/politie-getuigen.webp?v=4");
+  assert.equal(lijst[0].afbeelding, "https://a-alerts.nl/assets/img/nieuws/politie-getuigen.webp?v=5");
   assert.match(lijst[0].link, /^https:\/\/a-alerts\.nl\/nieuws\/p-[0-9a-f]{12}\/$/);
 
   // A missing child alert with its official messages.
@@ -108,7 +108,7 @@ test("sync: police (first run silent, later new ones pushed), warnings, beheer m
   const live = await getNieuws(env, "https://api.test", lid);
   assert.equal(live.soort, "liveblog");
   assert.equal(live.tijdlijn.length, 1);
-  assert.equal(live.afbeelding, "https://a-alerts.nl/assets/img/nieuws/vermistkind.webp?v=4");
+  assert.equal(live.afbeelding, "https://a-alerts.nl/assets/img/nieuws/vermistkind.webp?v=5");
   const weer = (await listNieuws(env, "https://api.test", { soort: "weer" }))[0];
   assert.equal(weer.titel, "Code geel voor windstoten");
   // Same code: the article follows. Another code (also code groen when lifted): a new article, the earlier one stays.
@@ -184,7 +184,7 @@ test("112 Nieuws: title, short intro and link only; Loenen only when in Gelderla
   assert.equal(parse112(`<rss>${item("Ongeval in Loenen", ["Utrecht", "Loenen aan de Vecht"])}</rss>`, "Loenen").length, 0);
   assert.equal(parse112(`<rss>${item("Ongeval in Loenen", ["Gelderland", "Loenen"])}</rss>`, "Loenen").length, 1);
   assert.equal(korteIntro("<p>Kort.</p>"), "Kort.");
-  assert.match(foto112({ id: "r-0123456789ab", categorie: "brand" }), /\/nieuws\/112-brand-\d\.webp\?v=4$/);
+  assert.match(foto112({ id: "r-0123456789ab", categorie: "brand" }), /\/nieuws\/112-brand-\d\.webp\?v=5$/);
 });
 
 test("stock photos: JS Fotografie first, never the same photo twice in a row, credit in the API", async () => {

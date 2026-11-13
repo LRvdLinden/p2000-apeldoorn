@@ -29,7 +29,7 @@ def og_image(url):
     """Static images as JPEG 1200×630 (WhatsApp does not always show WebP); own photos from the beheer are JPEG already."""
     u = (url or "").split("?")[0]
     if u.startswith(IMG) and u.endswith(".webp"):
-        return IMG + "og/" + u[len(IMG):-5] + ".jpg", "image/jpeg", 1200, 630
+        return IMG + "og/" + u[len(IMG):-5] + ".jpg?v=5", "image/jpeg", 1200, 630
     if "/v1/nieuws/foto/" in u:
         return url, "image/jpeg", None, None
     return SITE + "/og/a-alerts.jpg", "image/jpeg", 1200, 630

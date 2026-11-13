@@ -1,5 +1,10 @@
 # Changelog
 
+## Nieuws en website (13 november 2026)
+- Stockfoto's bij het nieuws: het label "Foto: JS Fotografie" stond nog in vijf foto's zelf (en in hun deelafbeeldingen). Die zijn opnieuw gemaakt uit de originelen, zonder label; de naam staat nu nergens meer (`?v=5`).
+- Pager: de kaart van een helikopter of vliegtuig heeft marges, schuift binnen het paneel en is op een telefoon een blad onderaan; de kaartlagen staan per categorie op een eigen regel en het paneel is niet breder dan nodig.
+- Status: de controle van de website probeert het na een fout nog één keer voordat er een storing wordt gemeld (tijdens het uploaden van een nieuwe versie geeft de host kort HTTP 403).
+
 ## A-Alerts 2.0.1 (build 88)
 - Verloop en "Eenheden bij deze inzet": een herbezetting van een kazerne ("Herbezet./kazerneren") of een proefalarm hoort nooit bij een inzet, ook niet als dezelfde eenheid is opgeroepen. App, Android (daar nu ook besteld vervoer B1–B3 uitgesloten) en pager.
 

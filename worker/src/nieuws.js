@@ -14,7 +14,7 @@ const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
 // New version of the images (browsers keep them 30 days): raise when an image is replaced under the same name.
 // Raise when images change or are added: the site caches images 30 days, also a 404 seen before a new file was live.
-const IMG_V = "?v=4";
+const IMG_V = "?v=5";
 const SITE = "https://a-alerts.nl/nieuws/";
 const DAY = 86_400_000;
 const CENTRUM = { lat: 52.2112, lon: 5.9699 };
