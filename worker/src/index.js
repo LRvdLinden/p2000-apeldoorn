@@ -46,7 +46,7 @@ import { kiesStockFotos, listNieuws, getNieuws, fotoResponse, wijzigNieuws, voeg
   syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 import { kvWrite } from "./kv.js";
-import { hmPaal, hmPunt, hmHerstel } from "./hm.js";
+import { hmPaal, hmPunt, hmHerstel, straatPunt, straatHerstel } from "./hm.js";
 import { pandVoor } from "./pand.js";
 
 /** Last run of the hectometre-post repair in this isolate (it reads the alerts of 48 hours, so not every round). */
@@ -468,6 +468,9 @@ async function poll(env, budget) {
       const hp = paal && budget.left > 20 ? await hmPunt(env, budget, paal) : null;
       if (hp) { [m.lat, m.lon] = hp; continue; }
       // Precise coordinates for the street (keep a few requests over for the pushes).
+      // Only a street name: the middle of that street from the road register (PDOK), so the marker is on the street.
+      const sp = m.locatie && budget.left > 20 ? await straatPunt(env, budget, m.locatie, m.stad) : null;
+      if (sp) { [m.lat, m.lon] = sp; continue; }
       if (m.locatie && budget.left > 20 && budget.take()) {
         const c = await geocode(env, m.locatie, m.stad);
         if (c) [m.lat, m.lon] = c;
@@ -479,6 +482,7 @@ async function poll(env, budget) {
     if (budget.left > 20 && (fresh.length || Date.now() - hmLaatst > 15 * 60_000)) {
         hmLaatst = Date.now();
         try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
+        try { await straatHerstel(env, budget); } catch (e) { console.warn("[straat herstel]", e.message || e); }
     }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();

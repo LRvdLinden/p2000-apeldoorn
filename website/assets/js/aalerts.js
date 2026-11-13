@@ -233,7 +233,11 @@ export function inzetEenheden(m, list) {
     const key = u.code || u.naam;
     if (!key || gezien.has(key)) continue;
     gezien.add(key);
-    out.push({ naam: u.naam || u.code, code: u.code || "", type: u.type || "", tijd: date(x), melding: x });
+    // A Lifeliner or Zulu in the list: shown as the helicopter itself, tappable to the map.
+    const t = String(u.naam || "");
+    const ll = t.match(/life\s*liner\s*0?([1-4])/i), zu = t.match(/zulu\s*0?(\d{1,2})/i);
+    const heli = ll ? { id: `lifeliner${ll[1]}`, naam: `Lifeliner ${ll[1]}`, soort: "trauma" } : zu ? { id: `zulu${zu[1].padStart(2, "0")}`, naam: `Zulu ${zu[1].padStart(2, "0")}`, soort: "politie" } : null;
+    out.push({ naam: u.naam || u.code, code: u.code || "", type: u.type || "", tijd: date(x), melding: x, heli });
   }
   return { eenheden: out, meldingen: bij.length };
 }

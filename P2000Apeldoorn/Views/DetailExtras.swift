@@ -519,6 +519,8 @@ struct InzetEenheid: Identifiable, Hashable {
     let type: String?
     let tijd: Date
     let dienst: Dienst
+    /// A Lifeliner or Zulu ("lifeliner3"): shown as the helicopter itself, tappable to the map.
+    var heli: String? = nil
     var id: String { naam + "|" + String(tijd.timeIntervalSince1970) }
 }
 
@@ -532,7 +534,7 @@ extension Verband {
         for x in bij {
             for e in x.eenheden {
                 guard let key = e.code ?? e.naam, gezien.insert(key).inserted else { continue }
-                out.append(InzetEenheid(naam: e.naam ?? key, type: e.type, tijd: x.datum, dienst: x.dienst))
+                out.append(InzetEenheid(naam: e.naam ?? key, type: e.type, tijd: x.datum, dienst: x.dienst, heli: HeliKoppeling.genoemd(in: e.naam ?? "")))
             }
         }
         return (out, bij.count)
@@ -542,6 +544,8 @@ extension Verband {
 /// "Eenheden bij deze inzet": all units of the alerts that belong to this incident, with the time of their alarm.
 struct InzetKaart: View {
     let melding: Melding
+    /// Tap on a Lifeliner or Zulu: to the map, following that helicopter.
+    var onVolg: ((String) -> Void)?
     @Environment(MeldingStore.self) private var store
 
     var body: some View {
@@ -551,6 +555,25 @@ struct InzetKaart: View {
                 Text(Lf("Eenheden bij deze inzet (%lld)", inzet.eenheden.count)).font(AppFont.heading(18)).padding(.horizontal, 4)
                 VStack(spacing: 0) {
                     ForEach(Array(inzet.eenheden.enumerated()), id: \.element.id) { i, e in
+                        if let heli = e.heli {
+                            Button { onVolg?(heli) } label: {
+                                HStack(spacing: 12) {
+                                    Text(Fmt.time(e.tijd)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 48, alignment: .leading)
+                                    Image(heli.hasPrefix("lifeliner") ? "heli_lifeliner_ec135" : "heli_politie_ec135")
+                                        .resizable().scaledToFit().frame(width: 54, height: 20)
+                                    VStack(alignment: .leading, spacing: 1) {
+                                        Text(HeliKoppeling.naam(heli)).font(AppFont.body(14, .semibold))
+                                        Text(heli.hasPrefix("lifeliner") ? L("Traumahelikopter · toon op de kaart") : L("Politiehelikopter · toon op de kaart"))
+                                            .font(AppFont.body(12)).foregroundStyle(.secondary)
+                                    }
+                                    Spacer(minLength: 0)
+                                    Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary)
+                                }
+                                .padding(.horizontal, 14).padding(.vertical, 8)
+                                .contentShape(Rectangle())
+                            }
+                            .buttonStyle(.plain)
+                        } else {
                         HStack(spacing: 12) {
                             Text(Fmt.time(e.tijd)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 48, alignment: .leading)
                             RoundedRectangle(cornerRadius: 3).fill(e.dienst.color).frame(width: 6, height: 28)
@@ -561,6 +584,7 @@ struct InzetKaart: View {
                             Spacer(minLength: 0)
                         }
                         .padding(.horizontal, 14).padding(.vertical, 8)
+                        }
                         if i < inzet.eenheden.count - 1 { Divider().padding(.leading, 74) }
                     }
                 }

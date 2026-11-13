@@ -9266,6 +9266,23 @@
         }
       }
     },
+    "Politiehelikopter · toon op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Police helicopter · show on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Politiehelikopter · toon op de kaart"
+          }
+        }
+      }
+    },
     "Politiehelikopters (Zulu)": {
       "extractionState": "manual",
       "localizations": {
@@ -11200,6 +11217,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Traumahelikopter"
+          }
+        }
+      }
+    },
+    "Traumahelikopter · toon op de kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air ambulance · show on the map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traumahelikopter · toon op de kaart"
           }
         }
       }

@@ -60,3 +60,60 @@ export async function hmHerstel(env, budget, max = 5) {
   }
   return n;
 }
+
+// ------------------------------------------------------------------ a street without a house number
+
+/** The doc of exactly this street in this place ("Kanaal Noord, Apeldoorn"), near Apeldoorn → [lat, lon], or null. */
+export function kiesStraat(docs, straat, stad) {
+  const wil = `${straat}, ${stad}`.toLowerCase();
+  for (const d of docs || []) {
+    if (String(d.weergavenaam || "").toLowerCase() !== wil) continue;
+    const m = String(d.centroide_ll || "").match(/POINT\((-?[\d.]+) (-?[\d.]+)\)/);
+    if (!m) continue;
+    const lat = Number(m[2]), lon = Number(m[1]);
+    if (distanceKm(lat, lon, MIDDEN[0], MIDDEN[1]) <= MAX_KM) return [Math.round(lat * 1e5) / 1e5, Math.round(lon * 1e5) / 1e5];
+  }
+  return null;
+}
+
+/** Only a street name, no house number ("Kanaal Noord"; not "Hoofdstraat 50", not a motorway). */
+export const alleenStraat = (locatie) => { const s = String(locatie || "").trim(); return s.length >= 4 && !/\d/.test(s); };
+
+/**
+ * [lat, lon] of the middle of a street (PDOK, the road register), or null when PDOK does not know exactly this street in
+ * this place. A general geocoder puts a street without a number at an arbitrary house, sometimes beside the road.
+ */
+export async function straatPunt(env, budget, locatie, stad) {
+  if (!alleenStraat(locatie)) return null;
+  const straat = String(locatie).trim(), plaats = String(stad || "Apeldoorn").trim();
+  const key = `straat:${straat.toLowerCase()}|${plaats.toLowerCase()}`;
+  const oud = (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(key).first())?.value;
+  if (oud) return oud === "-" ? null : oud.split(",").map(Number);
+  if (!budget.take()) return null;
+  let punt = null;
+  try {
+    const url = `https://api.pdok.nl/bzk/locatieserver/search/v3_1/free?q=${encodeURIComponent(`${straat} ${plaats}`)}&fq=type:weg&rows=5&fl=weergavenaam,centroide_ll`;
+    const res = await fetch(url, { headers: UA, signal: AbortSignal.timeout(8_000) });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    punt = kiesStraat((await res.json())?.response?.docs, straat, plaats);
+  } catch (e) { console.warn("[straat]", key, e.message || e); return null; }
+  await kvWrite(env, key, punt ? punt.join(",") : "-");
+  return punt;
+}
+
+/** Alerts of the last 6 hours with only a street name that are not on the middle of that street yet (at most `max`). */
+export async function straatHerstel(env, budget, max = 6) {
+  const { results } = await env.DB.prepare(
+    "SELECT guid, title, locatie, stad, lat, lon FROM meldingen WHERE datum > ? AND locatie IS NOT NULL AND locatie != '' AND locatie NOT GLOB '*[0-9]*' ORDER BY datum DESC LIMIT 30",
+  ).bind(Date.now() - 6 * 3600_000).all();
+  let n = 0;
+  for (const r of results || []) {
+    if (n >= max) break;
+    if (hmPaal(r.title)) continue;
+    const p = await straatPunt(env, budget, r.locatie, r.stad);
+    if (!p || (r.lat === p[0] && r.lon === p[1])) continue;
+    await env.DB.prepare("UPDATE meldingen SET lat = ?, lon = ? WHERE guid = ?").bind(p[0], p[1], r.guid).run();
+    n++;
+  }
+  return n;
+}

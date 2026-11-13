@@ -147,7 +147,7 @@ struct MeldingDetailView: View {
                     }
                     GealarmeerdeKazernesKaart(routes: kazerneRoutes)
                     VerloopKaart(melding: melding)
-                    InzetKaart(melding: melding)
+                    InzetKaart(melding: melding) { id in Router.shared.volg(heli: id); dismiss() }
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }

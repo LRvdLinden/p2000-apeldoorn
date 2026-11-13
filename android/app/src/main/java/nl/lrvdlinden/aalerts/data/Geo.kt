@@ -179,7 +179,10 @@ object Kazernes {
 data class MeldingVerband(val melding: Melding, val redenen: List<String>, val score: Int)
 
 /** One unit of an incident with the time of its alarm. */
-data class InzetEenheid(val naam: String, val type: String?, val tijd: java.time.Instant, val melding: Melding)
+data class InzetEenheid(val naam: String, val type: String?, val tijd: java.time.Instant, val melding: Melding) {
+    /** A Lifeliner or Zulu ("lifeliner3"): shown as the helicopter itself, tappable to the map. */
+    val heli: String? get() = HeliKoppeling.genoemdIn(naam)
+}
 
 object Verband {
     /**
@@ -242,8 +245,10 @@ object HeliKoppeling {
     private val LIFELINER = Regex("life\\s*liner\\s*0?([1-4])", RegexOption.IGNORE_CASE)
     private val ZULU = Regex("zulu\\s*0?(\\d{1,2})", RegexOption.IGNORE_CASE)
 
-    fun genoemd(m: Melding): String? {
-        val tekst = (m.eenheden.mapNotNull { it.naam } + listOfNotNull(m.fullMelding, m.title)).joinToString(" ")
+    fun genoemd(m: Melding): String? = genoemdIn((m.eenheden.mapNotNull { it.naam } + listOfNotNull(m.fullMelding, m.title)).joinToString(" "))
+
+    /** Helicopter id in a text such as the name of a unit ("Traumaheli LifeLiner 3" → "lifeliner3"). */
+    fun genoemdIn(tekst: String): String? {
         LIFELINER.find(tekst)?.let { return "lifeliner${it.groupValues[1]}" }
         ZULU.find(tekst)?.let { return "zulu" + it.groupValues[1].padStart(2, '0') }
         return null

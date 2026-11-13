@@ -9,7 +9,7 @@ import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
-} from "./aalerts.js?v=64";
+} from "./aalerts.js?v=65";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();

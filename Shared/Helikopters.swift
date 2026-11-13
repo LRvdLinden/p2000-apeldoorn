@@ -386,7 +386,10 @@ enum HeliKoppeling {
 
     /// Helicopter id named in the alert ("lifeliner3", "zulu05").
     static func genoemd(_ m: Melding) -> String? {
-        let tekst = (m.eenheden.compactMap(\.naam) + [m.fullMelding ?? "", m.title]).joined(separator: " ")
+        genoemd(in: (m.eenheden.compactMap(\.naam) + [m.fullMelding ?? "", m.title]).joined(separator: " "))
+    }
+    /// Helicopter id in a text such as the name of a unit ("Traumaheli LifeLiner 3" → "lifeliner3").
+    static func genoemd(in tekst: String) -> String? {
         if let n = eerste("life\\s*liner\\s*0?([1-4])", in: tekst) { return "lifeliner\(n)" }
         if let n = eerste("zulu\\s*0?(\\d{1,2})", in: tekst), let i = Int(n) { return String(format: "zulu%02d", i) }
         return nil

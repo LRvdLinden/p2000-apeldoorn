@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=64";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=65";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -586,6 +586,8 @@ function renderDetail(m) {
   if (heliRelevant(m)) loadHeli(m, mapReady);
   loadPand(m);
   $("detail").querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
+  // A Lifeliner or Zulu in "Eenheden bij deze inzet": to the map, following that helicopter.
+  $("detail").querySelectorAll("[data-volg-heli]").forEach((b) => b.addEventListener("click", () => { state.volgHeli = b.dataset.volgHeli; if (innerWidth <= 900) closeDetail(); setTab("kaart"); }));
 }
 
 /** Every unit alarmed for this incident with the time of its alarm (only when more than one alert belongs to it). */
@@ -593,7 +595,9 @@ function inzetHTML(m) {
   const { eenheden, meldingen } = inzetEenheden(m, state.list);
   if (meldingen < 2 || eenheden.length < 2) return "";
   return `<section class="card"><h2>Eenheden bij deze inzet (${eenheden.length})</h2><p class="hint">Alle eenheden uit de ${meldingen} meldingen die bij deze inzet horen, met de tijd van alarmering.</p>
-    <ol class="inzet">${eenheden.map((u) => `<li style="--c:${dienstOf(u.melding).color}"><time>${fmtTime(u.tijd)}</time><i></i><span><b>${esc(u.naam)}</b>${u.type ? `<small>${esc(u.type)}</small>` : ""}</span></li>`).join("")}</ol></section>`;
+    <ol class="inzet">${eenheden.map((u) => u.heli
+      ? `<li style="--c:${u.heli.soort === "trauma" ? "#9333EA" : "#15428B"}"><time>${fmtTime(u.tijd)}</time><i></i><button class="inzet-heli" data-volg-heli="${esc(u.heli.id)}" title="Toon ${esc(u.heli.naam)} op de kaart"><img src="${heliImg({ id: u.heli.id, soort: u.heli.soort })}" alt=""><span><b>${esc(u.heli.naam)}</b><small>${u.heli.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter"} · toon op de kaart</small></span><em aria-hidden="true">›</em></button></li>`
+      : `<li style="--c:${dienstOf(u.melding).color}"><time>${fmtTime(u.tijd)}</time><i></i><span><b>${esc(u.naam)}</b>${u.type ? `<small>${esc(u.type)}</small>` : ""}</span></li>`).join("")}</ol></section>`;
 }
 /** Year built and use of the building, at a fire alert with a house number. */
 async function loadPand(m) {

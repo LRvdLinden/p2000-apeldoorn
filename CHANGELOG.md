@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 86)
+- Een melding met alleen een straatnaam (zonder huisnummer) staat nu op het midden van die straat volgens het wegenbestand (PDOK), in plaats van bij een willekeurig huis ernaast. Voorbeeld: Kanaal Noord in Apeldoorn. Meldingen van de laatste zes uur worden rechtgezet.
+- "Eenheden bij deze inzet": een Lifeliner of Zulu staat er met de tekening van de helikopter en is aan te tikken; je gaat dan naar de kaart en volgt dat toestel. App, Android en pager.
+
 ## A-Alerts 2.0.1 (build 85)
 - Helikopter- en vliegtuigkaart: "Nu boven <plaats>" (dichtstbijzijnde Nederlandse woonplaats uit een vaste lijst van 2503 plaatsen in de worker, PDOK; boven zee of over de grens als er binnen 7 km geen plaats ligt), "25 min in de lucht", en de vlucht als lijst van plaatsen met de tijd (één regel per plaats, nieuwste bovenaan; korte uitstapjes en korte stukken boven zee vallen weg). Hoogte in meters én voet, snelheid in km/u én knopen, kompasje bij de koers. App, Android en pager.
 - Bel per toestel (app en Android): een pushmelding zodra dat toestel opstijgt, waar het ook is (`settings.heli.volg`, hooguit 40 toestellen).

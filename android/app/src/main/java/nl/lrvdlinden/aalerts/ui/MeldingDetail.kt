@@ -266,7 +266,17 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                 if (inzet.second >= 2 && inzet.first.size >= 2) SectionCard(tr("Eenheden bij deze inzet (${inzet.first.size})", "Units at this incident (${inzet.first.size})"), Icons.Outlined.LocalShipping) {
                     Text(tr("Alle eenheden uit de ${inzet.second} meldingen die bij deze inzet horen, met de tijd van alarmering.", "All units from the ${inzet.second} alerts that belong to this incident, with the time of their alarm."), color = Muted, fontSize = 12.sp)
                     inzet.first.forEach { e ->
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        val hid = e.heli
+                        if (hid != null) Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.toonHeli(hid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                            val trauma = hid.startsWith("lifeliner")
+                            Text(Fmt.time(e.tijd), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.width(52.dp))
+                            androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(if (trauma) R.drawable.heli_lifeliner else R.drawable.heli_politie), null, Modifier.width(54.dp).height(20.dp)); Spacer(Modifier.width(10.dp))
+                            Column(Modifier.weight(1f)) {
+                                Text(if (trauma) "Lifeliner ${hid.removePrefix("lifeliner")}" else "Zulu ${hid.removePrefix("zulu")}", fontSize = 14.sp, fontWeight = FontWeight.SemiBold)
+                                Text(if (trauma) tr("Traumahelikopter · toon op de kaart", "Air ambulance · show on the map") else tr("Politiehelikopter · toon op de kaart", "Police helicopter · show on the map"), color = Muted, fontSize = 12.sp)
+                            }
+                            Icon(Icons.Filled.ChevronRight, null, tint = Muted)
+                        } else Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(Fmt.time(e.tijd), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.width(52.dp))
                             Box(Modifier.width(6.dp).height(28.dp).background(e.melding.soort.color, RoundedCornerShape(3.dp))); Spacer(Modifier.width(10.dp))
                             Column { Text(e.naam, fontSize = 14.sp); e.type?.takeIf { it.isNotBlank() }?.let { Text(it, color = Muted, fontSize = 12.sp) } }
