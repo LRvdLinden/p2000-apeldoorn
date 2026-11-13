@@ -903,7 +903,7 @@ const LAGEN = [
   ["helikopters", "Luchtvaart", "icon_traumaheli", "#9333EA", "Lucht"],
   ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B", "Verkeer"],
   ["flitsers", "Flitsers", "verkeer_flitser", "#1A8CE8", "Verkeer"],
-  ["kazernes", "Kazernes en posten", "icon_brandweer", "#E30613", "Posten"],
+  ["kazernes", "Kazernes", "icon_brandweer", "#E30613", "Posten"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626", "Posten"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626", "Kaart"],
   ["buienradar", "Buien", "icon_knmi", "#2563EB", "Kaart"],
