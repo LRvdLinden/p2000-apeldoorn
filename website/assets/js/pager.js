@@ -943,7 +943,7 @@ function renderMapChips() {
     return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   };
   const cats = [...new Set(LAGEN.map((l) => l[4]))];
-  $("mapLagen").innerHTML = cats.map((cat) => `<div class="lg-rij"><span class="lg-kop">${cat}</span><div class="lg-chips">${LAGEN.filter((l) => l[4] === cat).map(laagChip).join("")}${cat === "Kaart" ? `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>` : ""}</div></div>`).join("");
+  $("mapLagen").innerHTML = `<div class="lg-paneel">` + cats.map((cat) => `<div class="lg-rij"><span class="lg-kop">${cat}</span><div class="lg-chips">${LAGEN.filter((l) => l[4] === cat).map(laagChip).join("")}${cat === "Kaart" ? `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>` : ""}</div></div>`).join("") + `</div>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
   if (e.target.closest("[data-weergave]")) { openWeergave(); return; }
@@ -1282,6 +1282,7 @@ async function loadSpoor() {
   if (pl) {
     pl.innerHTML = vol.plaatsen.slice(0, 12).map((p, i) => `<li class="${i === 0 && vol.vlucht?.onderweg ? "nu" : ""}"><time>${fmtTime(new Date(p.van))}${i === 0 && vol.vlucht?.onderweg ? "" : `–${fmtTime(new Date(p.tot))}`}</time><span>${p.plaats ? `<b>${esc(p.plaats)}</b>${p.gemeente && p.gemeente !== p.plaats ? ` <small>${esc(p.gemeente)}</small>` : ""}` : "<i>Boven zee of over de grens</i>"}</span></li>`).join("");
     $("heliPlaatsenKop").hidden = pl.hidden = !vol.plaatsen.length;
+    $("heliPlaatsenKop").textContent = heliSpoor.scope === "vlucht" ? "Waar geweest (deze vlucht)" : "Waar geweest";
   }
   Object.assign(heliSpoor, afspelen.f == null ? { punten, vluchten } : { vluchten });
   const box = $("heliVluchten");
@@ -1310,10 +1311,10 @@ function openHeli(h) {
   const herkenning = h.icoon ? `Herkend aan het toestel zelf${h.callsign ? `; vliegt nu als ${esc(h.callsign)}` : ""}` : h.herkenning === "toestel" ? `Herkend aan het toestel; vliegt nu als ${esc(h.callsign || "–")}` : h.herkenning === "operator" ? "Herkend aan de eigenaar van het toestel" : "";
   const afstand = state.here ? ` · ${distanceKm(state.here, h).toFixed(1).replace(".", ",")} km van je af` : "";
   box.innerHTML = `<header><b>${esc(h.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
+    <div class="heli-body">
     <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     ${!h.op_grond ? `<p class="heli-boven">${h.boven ? `Nu boven <b>${esc(h.boven)}</b>` : "Nu boven zee of over de grens"}<span id="heliDuur" hidden></span></p>` : ""}
     <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
-    ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
     ${inzetVan(h.id) ? `<div class="inzet-status geannuleerd"><b>${esc(inzetTekst(inzetVan(h.id))[0])}</b><small>${esc(inzetTekst(inzetVan(h.id))[1])}</small></div>` : ""}
     <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["lang", "2 uur"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
@@ -1324,7 +1325,8 @@ function openHeli(h) {
     <small class="hint" id="afspeelTijd"></small>
     <h4 class="vl-head" id="heliPlaatsenKop" hidden>Waar geweest</h4><ol class="plaatsen" id="heliPlaatsen" hidden></ol>
     <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
-    <p class="hint" style="margin:8px 0 0">Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>`;
+    <p class="hint">${herkenning ? `${herkenning}. ` : ""}Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>
+    </div>`;
   box.hidden = false;
   box.querySelectorAll("[data-scope]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();

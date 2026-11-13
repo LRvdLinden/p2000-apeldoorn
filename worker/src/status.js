@@ -79,7 +79,10 @@ export async function checkWebsite(env, budget) {
   await kvSet(env, "status_web_try", Date.now());
   const url = env.STATUS_WEB_URL || "https://a-alerts.nl/";
   try {
-    const res = await fetch(url, { method: "HEAD", redirect: "follow", signal: AbortSignal.timeout(10_000), headers: { "user-agent": "A-Alerts status" } });
+    const probeer = () => fetch(url, { method: "HEAD", redirect: "follow", signal: AbortSignal.timeout(10_000), headers: { "user-agent": "A-Alerts status" } });
+    let res = await probeer();
+    // One failed request is not an outage: while a new version is uploaded the host answers 403 for a moment.
+    if (!res.ok) { await new Promise((r) => setTimeout(r, 8_000)); res = await probeer(); }
     if (res.ok) { await kvSet(env, "status_web_ok", Date.now()); await kvDel(env, "status_web_fout"); }
     else await kvSet(env, "status_web_fout", JSON.stringify({ at: Date.now(), fout: `HTTP ${res.status}` }));
   } catch (e) {
