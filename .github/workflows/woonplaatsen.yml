@@ -16,6 +16,6 @@ jobs:
       - run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add worker/src/woonplaatsen.json
+          git add worker/src/woonplaatsen.json worker/src/woonplaatsen.js
           git commit -m "Geodata: alle woonplaatsen met middelpunt (PDOK)" || echo "geen wijzigingen"
           git pull --rebase -q && git push

@@ -48,7 +48,37 @@ struct HeliVlucht: Decodable, Hashable, Identifiable, Sendable {
     }
 }
 
-private struct SpoorResponse: Decodable { let punten: [HeliSpoorPunt] }
+/// One stretch of a flight above a place (nil = above sea or abroad).
+struct SpoorPlaats: Decodable, Hashable, Identifiable, Sendable {
+    let van: Date
+    let tot: Date
+    let plaats: String?
+    let gemeente: String?
+    var id: Date { van }
+
+    enum CodingKeys: String, CodingKey { case van, tot, plaats, gemeente }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        van = Fmt.parseISO((try? c.decode(String.self, forKey: .van)) ?? "") ?? .now
+        tot = Fmt.parseISO((try? c.decode(String.self, forKey: .tot)) ?? "") ?? van
+        plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
+        gemeente = try? c.decodeIfPresent(String.self, forKey: .gemeente)
+    }
+}
+
+struct SpoorResponse: Decodable {
+    let punten: [HeliSpoorPunt]
+    let plaatsen: [SpoorPlaats]
+    let vlucht: HeliVlucht?
+
+    enum CodingKeys: String, CodingKey { case punten, plaatsen, vlucht }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        punten = (try? c.decode([HeliSpoorPunt].self, forKey: .punten)) ?? []
+        plaatsen = (try? c.decodeIfPresent([SpoorPlaats].self, forKey: .plaatsen)) ?? []
+        vlucht = try? c.decodeIfPresent(HeliVlucht.self, forKey: .vlucht)
+    }
+}
 private struct VluchtenResponse: Decodable { let vluchten: [HeliVlucht] }
 
 /// How much of the trail to show: the current (or last) flight, the last 30 minutes, or everything kept (2 hours).
@@ -67,6 +97,10 @@ enum SpoorBereik: String, CaseIterable, Identifiable, Sendable {
 extension P2000API {
     func heliSpoor(id: String, bereik: SpoorBereik) async throws -> [HeliSpoorPunt] {
         try await getJSON("/v1/helikopters/\(id)/spoor", query: ["scope": bereik.rawValue], as: SpoorResponse.self).punten
+    }
+    /// The trail with the places of the flight and the flight itself.
+    func heliSpoorVol(id: String, bereik: SpoorBereik) async throws -> SpoorResponse {
+        try await getJSON("/v1/helikopters/\(id)/spoor", query: ["scope": bereik.rawValue], as: SpoorResponse.self)
     }
     func heliVluchten(id: String) async throws -> [HeliVlucht] {
         try await getJSON("/v1/helikopters/\(id)/vluchten", as: VluchtenResponse.self).vluchten
@@ -93,6 +127,9 @@ extension Helikopter {
 final class HeliSpoorStore {
     private(set) var punten: [HeliSpoorPunt] = []
     private(set) var vluchten: [HeliVlucht] = []
+    /// The flight as a list of places (newest first) and the flight itself ("25 min in de lucht").
+    private(set) var plaatsen: [SpoorPlaats] = []
+    private(set) var vlucht: HeliVlucht?
     private(set) var heliID: String?
     var bereik: SpoorBereik = .vlucht {
         didSet { if oldValue != bereik { stopAfspelen(); Task { await load() } } }
@@ -155,7 +192,7 @@ final class HeliSpoorStore {
         guard id != heliID else { return }
         heliID = id
         stopAfspelen()
-        punten = []; vluchten = []
+        punten = []; vluchten = []; plaatsen = []; vlucht = nil
         task?.cancel()
         guard id != nil else { return }
         task = Task { [weak self] in
@@ -168,11 +205,14 @@ final class HeliSpoorStore {
 
     func load() async {
         guard let id = heliID else { return }
-        async let p = try? P2000API.shared.heliSpoor(id: id, bereik: bereik)
+        async let p = try? P2000API.shared.heliSpoorVol(id: id, bereik: bereik)
         async let v = try? P2000API.shared.heliVluchten(id: id)
         let (pp, vv) = await (p, v)
         guard id == heliID else { return }
-        if let pp, afspeel == nil { punten = pp }
+        if let pp {
+            if afspeel == nil { punten = pp.punten }
+            plaatsen = pp.plaatsen; vlucht = pp.vlucht
+        }
         if let vv { vluchten = vv }
     }
 

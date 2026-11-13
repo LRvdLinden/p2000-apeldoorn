@@ -25,9 +25,11 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let voorspelling: HeliVoorspelling?
     /// Layer "Defensie en overheid" (GET /v1/lucht): the drawing for this type ("chinook", "f35", "kustwacht_dash8" …).
     let icoon: String?
+    /// "Now above …": the nearest Dutch place ("Teuge, Voorst"); nil on the ground, above sea or abroad.
+    let boven: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon, boven
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
 
@@ -51,6 +53,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         herkenning = try? c.decodeIfPresent(String.self, forKey: .herkenning)
         voorspelling = try? c.decodeIfPresent(HeliVoorspelling.self, forKey: .voorspelling)
         icoon = try? c.decodeIfPresent(String.self, forKey: .icoon)
+        boven = try? c.decodeIfPresent(String.self, forKey: .boven)
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
@@ -279,6 +282,9 @@ struct HeliInfoKaart: View {
                         .foregroundStyle(.secondary)
                 }
                 Spacer()
+                #if os(iOS)
+                HeliBel(heli: heli)
+                #endif
                 if let onClose {
                     Button(action: onClose) {
                         Image(systemName: "xmark.circle.fill").font(.title3).foregroundStyle(.secondary)
@@ -287,11 +293,23 @@ struct HeliInfoKaart: View {
                     .accessibilityLabel(L("Sluit"))
                 }
             }
-            HStack(spacing: 8) {
-                waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill")
-                waarde(L("Hoogte"), heli.hoogteTekst, "arrow.up.and.down")
-                waarde(L("Snelheid"), heli.snelheidTekst, "speedometer")
+            if !heli.opGrond {
+                // "Now above Teuge, Voorst · 25 min in the air"
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(heli.boven.map { Lf("Nu boven %@", $0) } ?? L("Nu boven zee of over de grens"))
+                        .font(AppFont.body(15, .semibold, relativeTo: .subheadline))
+                    if let v = spoor?.vlucht, v.onderweg {
+                        Text(v.inDeLucht).font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.green)
+                    }
+                    Spacer(minLength: 0)
+                }
             }
+            HStack(spacing: 8) {
+                waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill", koers: heli.opGrond ? nil : heli.koers)
+                waarde(L("Hoogte"), heli.hoogteTekst, "arrow.up.and.down", tweede: heli.hoogteTweede)
+                waarde(L("Snelheid"), heli.snelheidTekst, "speedometer", tweede: heli.snelheidTweede)
+            }
+            .fixedSize(horizontal: false, vertical: true)
             if let v = heli.voorspelling { VoorspellingRegel(voorspelling: v) }
             #if !os(watchOS)
             if let spoor {
@@ -303,6 +321,7 @@ struct HeliInfoKaart: View {
                 #if !os(tvOS)
                 AfspeelBalk(spoor: spoor)
                 #endif
+                HeliPlaatsenLijst(plaatsen: spoor.plaatsen, onderweg: spoor.vlucht?.onderweg ?? false)
                 HeliVluchtenLijst(vluchten: spoor.vluchten, aantal: 3)
             }
             #endif
@@ -325,14 +344,29 @@ struct HeliInfoKaart: View {
         .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
     }
 
-    private func waarde(_ titel: String, _ value: String, _ icon: String) -> some View {
+    /// One value; `tweede` is the same value in the other unit (feet next to metres), `koers` draws a small compass.
+    private func waarde(_ titel: String, _ value: String, _ icon: String, tweede: String? = nil, koers: Double? = nil) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Label(titel, systemImage: icon)
                 .font(AppFont.body(11, .medium, relativeTo: .caption2))
                 .foregroundStyle(.secondary)
-            Text(value).font(AppFont.body(15, .semibold, relativeTo: .subheadline)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
+            HStack(spacing: 6) {
+                if let koers {
+                    Image(systemName: "location.north.fill")
+                        .font(.system(size: 12, weight: .bold))
+                        .foregroundStyle(.red)
+                        .rotationEffect(.degrees(koers))
+                        .frame(width: 20, height: 20)
+                        .background(Circle().stroke(Color.secondary.opacity(0.35), lineWidth: 1.5))
+                        .accessibilityHidden(true)
+                }
+                Text(value).font(AppFont.body(15, .semibold, relativeTo: .subheadline)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.7)
+            }
+            if let tweede {
+                Text(tweede).font(AppFont.body(11, .medium, relativeTo: .caption2)).foregroundStyle(.secondary).monospacedDigit().lineLimit(1)
+            }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .padding(10)
         .background(Color.secondary.opacity(0.1), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
@@ -374,3 +408,85 @@ enum HeliKoppeling {
     }
 }
 
+
+// MARK: - Both units, the bell and the places of a flight
+
+extension Helikopter {
+    /// The altitude in the other unit than `hoogteTekst` (feet next to metres, or the other way round).
+    var hoogteTweede: String? {
+        guard !opGrond, let ft = hoogteFt else { return nil }
+        if HeliWeergave.luchtvaart { return hoogteMeter.map { "\($0) m" } }
+        return "\(Int((ft / 25).rounded() * 25).formatted()) ft"
+    }
+    /// The speed in the other unit than `snelheidTekst`.
+    var snelheidTweede: String? {
+        guard let kt = snelheidKt else { return nil }
+        return HeliWeergave.luchtvaart ? Lf("%lld km/u", Int((kt * 1.852).rounded())) : "\(Int(kt.rounded())) kn"
+    }
+}
+
+extension HeliVlucht {
+    /// "25 min in de lucht" / "1 u 05 min in de lucht".
+    var inDeLucht: String {
+        if duurMin < 1 { return L("Net opgestegen") }
+        if duurMin < 60 { return Lf("%lld min in de lucht", duurMin) }
+        return Lf("%lld u %@ min in de lucht", duurMin / 60, String(format: "%02d", duurMin % 60))
+    }
+}
+
+#if os(iOS)
+/// The bell on one aircraft: a push when it takes off, wherever that is.
+struct HeliBel: View {
+    let heli: Helikopter
+    @Environment(AppSettings.self) private var settings
+
+    var body: some View {
+        let aan = settings.heliVolg.contains(heli.id)
+        Button {
+            if aan { settings.heliVolg.remove(heli.id) } else if settings.heliVolg.count < 40 { settings.heliVolg.insert(heli.id) }
+        } label: {
+            Image(systemName: aan ? "bell.fill" : "bell")
+                .font(.title3)
+                .foregroundStyle(aan ? Color.orange : Color.secondary)
+                .frame(width: 36, height: 36)
+        }
+        .buttonStyle(.plain)
+        .sensoryFeedback(.selection, trigger: aan)
+        .accessibilityLabel(aan ? Lf("Geen melding meer als %@ opstijgt", heli.naam) : Lf("Melding als %@ opstijgt", heli.naam))
+    }
+}
+#endif
+
+#if !os(watchOS)
+/// The flight as a list of places, newest first: "14:12–14:16  Teuge (Voorst)".
+struct HeliPlaatsenLijst: View {
+    let plaatsen: [SpoorPlaats]
+    let onderweg: Bool
+    var aantal = 6
+
+    var body: some View {
+        if !plaatsen.isEmpty {
+            VStack(alignment: .leading, spacing: 5) {
+                Text(L("Waar geweest")).font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.secondary)
+                ForEach(Array(plaatsen.prefix(aantal).enumerated()), id: \.element.id) { i, p in
+                    let nu = i == 0 && onderweg
+                    HStack(alignment: .firstTextBaseline, spacing: 8) {
+                        Text(nu ? Fmt.time(p.van) : "\(Fmt.time(p.van))–\(Fmt.time(p.tot))")
+                            .font(AppFont.body(12, .regular, relativeTo: .caption)).monospacedDigit().foregroundStyle(.secondary)
+                            .frame(width: 86, alignment: .leading)
+                        if let plaats = p.plaats {
+                            Text(plaats).font(AppFont.body(13, .semibold, relativeTo: .footnote)).foregroundStyle(nu ? Color.green : Color.primary)
+                            if let g = p.gemeente, g != plaats {
+                                Text(g).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary).lineLimit(1)
+                            }
+                        } else {
+                            Text(L("Boven zee of over de grens")).font(AppFont.body(13, .regular, relativeTo: .footnote)).italic().foregroundStyle(.secondary)
+                        }
+                        Spacer(minLength: 0)
+                    }
+                }
+            }
+        }
+    }
+}
+#endif

@@ -140,6 +140,8 @@ object Settings {
     var heliLanden by bool("heliLanden", true, push = true)
     var heliBinnen by bool("heliBinnen", true, push = true)
     var heliSoorten by set("heliSoorten", setOf("trauma"), push = true)
+    /** The bell on one aircraft: a push when it takes off (ids such as "lifeliner3" or "lucht-480c21"). */
+    var heliVolg by set("heliVolg", emptySet(), push = true)
     /** Zone notifications paused until (epoch ms; 0 = not paused). */
     var heliPauzeTot by P("heliPauzeTot", 0L, true, { p, k, x -> p.getLong(k, x) }, { e, k, v -> e.putLong(k, v) }).also { all += it }
     var grootIncident by bool("grootIncident", false, push = true)
@@ -315,6 +317,7 @@ object Settings {
             "heli" to mutableMapOf<String, Any?>(
                 "zones" to heliZones.map { mapOf("id" to it.id, "naam" to it.naam, "lat" to it.lat, "lon" to it.lon, "km" to it.km) },
                 "opstijgen" to heliOpstijgen, "landen" to heliLanden, "binnen" to heliBinnen, "soorten" to heliSoorten.sorted(),
+                "volg" to heliVolg.sorted(),
             ).also { if (heliGepauzeerd) it["pauze_tot"] = heliPauzeTot },
             "groot" to mapOf("aan" to grootIncident, "plaatsen" to grootPlaatsen.sorted()),
             "profielen" to p.map {

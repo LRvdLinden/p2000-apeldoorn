@@ -3,6 +3,7 @@
 // so many apps polling at the same time cost one upstream call.
 
 import { luchtLijst, luchtGeleerd, luchtLeer } from "./lucht.js";
+import { plaatsBij } from "./plaats.js";
 
 export const HELIS = [
   { id: "lifeliner1", naam: "Lifeliner 1", soort: "trauma", basis: "Amsterdam", callsigns: ["LIFELN1", "LIFELN01"] },
@@ -163,6 +164,8 @@ export async function helikopters(env) {
       lucht = luchtLijst(body.ac, Number(body.now) || Date.now(), new Set(list.map((h) => String(h.hex || "").toLowerCase())), geleerd);
       await luchtLeer(env, lucht, geleerd);
     } catch (e) { console.warn("[lucht]", e.message || e); }
+    // "Now above …": the nearest Dutch place, or null above sea or abroad.
+    for (const h of [...list, ...lucht]) h.boven = h.op_grond ? null : plaatsBij(h.lat, h.lon)?.tekst || null;
     data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht };
   } catch (e) {
     console.warn("[heli]", e.message || e);

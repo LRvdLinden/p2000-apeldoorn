@@ -169,3 +169,5 @@ body.mk {
 .mk-code { pointer-events: auto; display: inline-flex; align-items: center; gap: .45em; padding: .45em .9em; border-radius: 999px; background: var(--c); color: var(--on); text-decoration: none; font-weight: 700; box-shadow: 0 4px 14px rgba(0,0,0,.35); }
 .mk-code img { width: 1.4em; height: 1.4em; border-radius: 6px; }
 .mk-code small { font-weight: 600; opacity: .85; }
+
+.lg-kop { align-self: center; font-size: .62rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; opacity: .6; padding: 0 2px 0 8px; }

@@ -1,5 +1,12 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 85)
+- Helikopter- en vliegtuigkaart: "Nu boven <plaats>" (dichtstbijzijnde Nederlandse woonplaats uit een vaste lijst van 2503 plaatsen in de worker, PDOK; boven zee of over de grens als er binnen 7 km geen plaats ligt), "25 min in de lucht", en de vlucht als lijst van plaatsen met de tijd (één regel per plaats, nieuwste bovenaan; korte uitstapjes en korte stukken boven zee vallen weg). Hoogte in meters én voet, snelheid in km/u én knopen, kompasje bij de koers. App, Android en pager.
+- Bel per toestel (app en Android): een pushmelding zodra dat toestel opstijgt, waar het ook is (`settings.heli.volg`, hooguit 40 toestellen).
+- "Eenheden bij deze inzet": alle eenheden uit de meldingen die bij dezelfde inzet horen (zelfde adres, of vlakbij met dezelfde eenheid), met de tijd van alarmering. App, Android en pager.
+- Gebouwgegevens bij een brandmelding met huisnummer: bouwjaar, gebruik en aantal adressen uit de BAG (Kadaster, via PDOK), `GET /v1/meldingen/<guid>/pand`, één keer opgezocht per melding.
+- Kaartlagen per categorie (meldingen en alerts, lucht, verkeer, posten en ziekenhuizen, kaart) in de app, Apple TV, Android, pager en meldkamer. De laag "Kazernes en posten" noemt nu ook ambulanceposten en politiebureaus (die stonden er al in).
+
 ## A-Alerts 2.0.1 (build 84)
 - Laag Luchtvaart: bij Defensie alleen Nederlandse militaire toestellen (toesteladres 480000–487FFF); buitenlandse toestellen en "Kustwacht overig" zijn vervallen.
 - De toevoeging "(voorheen P2000 Apeldoorn)" is overal weg: website, juridische teksten, README.

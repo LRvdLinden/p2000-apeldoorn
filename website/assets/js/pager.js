@@ -7,9 +7,9 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=63";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=64";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -510,11 +510,13 @@ function renderDetail(m) {
       <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(paal ? paal.tekst : hasStreet(m) ? m.locatie : stad)}</b><small>${paal || hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div>${paal ? hmBord(paal) : ""}</div>
       <div class="info"><span class="ico" style="background:${isUrgent(m) ? "#DC2626" : "#f59e0b"}">${ICO.warn}</span><div><b>${esc(m.categorie || dienst.label)}</b><small>${m.prioriteit ? `Prioriteit ${esc(m.prioriteit)}` : "Prioriteit onbekend"}</small></div></div>
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
+      <div class="info" id="pandRij" hidden><span class="ico" style="background:#64748B">${ICO.pin}</span><div><b id="pandTekst"></b><small>Gebouw volgens de BAG (Kadaster)</small></div></div>
       ${m.lat != null || hasStreet(m) ? `<button class="amaps" id="routeBtn" type="button">${ICO.maps} Route naar incident</button>` : ""}
     </section>
     <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
     ${verloopHTML(m)}
+    ${inzetHTML(m)}
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
     <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
@@ -582,7 +584,24 @@ function renderDetail(m) {
   loadMeteo(m);
   loadKazernes(m, mapReady);
   if (heliRelevant(m)) loadHeli(m, mapReady);
+  loadPand(m);
   $("detail").querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
+}
+
+/** Every unit alarmed for this incident with the time of its alarm (only when more than one alert belongs to it). */
+function inzetHTML(m) {
+  const { eenheden, meldingen } = inzetEenheden(m, state.list);
+  if (meldingen < 2 || eenheden.length < 2) return "";
+  return `<section class="card"><h2>Eenheden bij deze inzet (${eenheden.length})</h2><p class="hint">Alle eenheden uit de ${meldingen} meldingen die bij deze inzet horen, met de tijd van alarmering.</p>
+    <ol class="inzet">${eenheden.map((u) => `<li style="--c:${dienstOf(u.melding).color}"><time>${fmtTime(u.tijd)}</time><i></i><span><b>${esc(u.naam)}</b>${u.type ? `<small>${esc(u.type)}</small>` : ""}</span></li>`).join("")}</ol></section>`;
+}
+/** Year built and use of the building, at a fire alert with a house number. */
+async function loadPand(m) {
+  if (m.dienst !== "brandweer" || !hasStreet(m) || !/\d/.test(m.locatie || "")) return;
+  const p = await fetchPand(m.guid);
+  if (!p || state.selected !== m.guid || !$("pandRij")) return;
+  $("pandTekst").textContent = pandTekst(p);
+  $("pandRij").hidden = false;
 }
 
 /** Alerts that may belong to the same incident, as a timeline. Always a possible link, never a fact. */
@@ -870,16 +889,17 @@ document.querySelectorAll("button[data-tab]").forEach((b) => b.addEventListener(
 // ------------------------------------------------------------------ map
 
 let bigMap = null, bigMapReady = null;
+// [key, label, image, colour, category]: the layer bar shows them per category.
 const LAGEN = [
-  ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800"],
-  ["knmi", "KNMI", "icon_knmi", "#3E9FDB"],
-  ["helikopters", "Luchtvaart", "icon_traumaheli", "#9333EA"],
-  ["kazernes", "Kazernes", "icon_brandweer", "#E30613"],
-  ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626"],
-  ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B"],
-  ["flitsers", "Flitsers", "verkeer_flitser", "#1A8CE8"],
-  ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626"],
-  ["buienradar", "Buien", "icon_knmi", "#2563EB"],
+  ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800", "Alerts"],
+  ["knmi", "KNMI", "icon_knmi", "#3E9FDB", "Alerts"],
+  ["helikopters", "Luchtvaart", "icon_traumaheli", "#9333EA", "Lucht"],
+  ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B", "Verkeer"],
+  ["flitsers", "Flitsers", "verkeer_flitser", "#1A8CE8", "Verkeer"],
+  ["kazernes", "Kazernes en posten", "icon_brandweer", "#E30613", "Posten"],
+  ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626", "Posten"],
+  ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626", "Kaart"],
+  ["buienradar", "Buien", "icon_knmi", "#2563EB", "Kaart"],
 ];
 function renderMapChips() {
   const cutoff = Date.now() - state.mapHours * 3600_000;
@@ -909,10 +929,11 @@ function renderMapChips() {
     + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip()
     + `<button class="chip pijl" data-lagen-pijl style="--c:#64748B" aria-expanded="${state.lagenOpen}" aria-controls="mapLagen" title="${state.lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen <span aria-hidden="true">${state.lagenOpen ? "▴" : "▾"}</span></button>`;
   $("mapLagen").hidden = !state.lagenOpen;
-  $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c]) => {
+  $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c, cat], i) => {
+    const kop = i === 0 || LAGEN[i - 1][4] !== cat ? `<span class="lg-kop">${cat}</span>` : "";
     const n = k === "helikopters" ? state.helis.length + state.lucht.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Kazernes", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
+    return `${kop}<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
 }
 $("mapLagen").addEventListener("click", (e) => {
@@ -1243,8 +1264,16 @@ const heliSpoor = { id: null, scope: (({ vandaag: "lang" })[prefs.get("p2000.spo
 async function loadSpoor() {
   const id = heliSpoor.id;
   if (!id) return;
-  const [punten, vluchten] = await Promise.all([fetchSpoor(id, heliSpoor.scope), fetchVluchten(id)]);
+  const [vol, vluchten] = await Promise.all([fetchSpoorVol(id, heliSpoor.scope), fetchVluchten(id)]);
   if (heliSpoor.id !== id) return;
+  const punten = vol.punten;
+  // "25 min in de lucht" and the flight as a list of places, newest first.
+  const duur = $("heliDuur"), pl = $("heliPlaatsen");
+  if (duur) { duur.textContent = vol.vlucht?.onderweg ? inDeLucht(vol.vlucht.duur_min) : ""; duur.hidden = !vol.vlucht?.onderweg; }
+  if (pl) {
+    pl.innerHTML = vol.plaatsen.slice(0, 12).map((p, i) => `<li class="${i === 0 && vol.vlucht?.onderweg ? "nu" : ""}"><time>${fmtTime(new Date(p.van))}${i === 0 && vol.vlucht?.onderweg ? "" : `–${fmtTime(new Date(p.tot))}`}</time><span>${p.plaats ? `<b>${esc(p.plaats)}</b>${p.gemeente && p.gemeente !== p.plaats ? ` <small>${esc(p.gemeente)}</small>` : ""}` : "<i>Boven zee of over de grens</i>"}</span></li>`).join("");
+    $("heliPlaatsenKop").hidden = pl.hidden = !vol.plaatsen.length;
+  }
   Object.assign(heliSpoor, afspelen.f == null ? { punten, vluchten } : { vluchten });
   const box = $("heliVluchten");
   if (box) box.innerHTML = vluchten.length ? vluchten.slice(0, 4).map((v) => `<li class="${v.onderweg ? "on" : ""}">${esc(vluchtTekst(v))}</li>`).join("") : `<li class="hint">Nog geen vluchten opgeslagen.</li>`;
@@ -1265,13 +1294,16 @@ const vliegend = () => [...state.helis, ...state.lucht];
 function openHeli(h) {
   const box = $("clusterPanel");
   const koers = h.koers != null && !h.op_grond ? `${h.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(h.koers / 45) % 8]}` : "–";
-  const hoogte = h.op_grond ? "Op de grond" : h.hoogte_ft != null ? `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m` : "–";
-  const snelheid = h.snelheid_kt != null ? `${Math.round(h.snelheid_kt * 1.852)} km/u` : "–";
+  // Both units at once: metres with feet, km/h with knots.
+  const hoogte = h.op_grond ? "Op de grond" : h.hoogte_ft != null ? `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m <small>${Math.round(h.hoogte_ft / 25) * 25} ft</small>` : "–";
+  const snelheid = h.snelheid_kt != null ? `${Math.round(h.snelheid_kt * 1.852)} km/u <small>${Math.round(h.snelheid_kt)} kn</small>` : "–";
+  const kompas = h.koers != null && !h.op_grond ? `<svg class="kompas" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"/><path d="M12 3.5l4 9.5h-8z" fill="#DC2626" transform="rotate(${Math.round(h.koers)} 12 12)"/><path d="M12 20.5l-4-7.5h8z" fill="currentColor" fill-opacity=".35" transform="rotate(${Math.round(h.koers)} 12 12)"/></svg>` : "";
   const herkenning = h.icoon ? `Herkend aan het toestel zelf${h.callsign ? `; vliegt nu als ${esc(h.callsign)}` : ""}` : h.herkenning === "toestel" ? `Herkend aan het toestel; vliegt nu als ${esc(h.callsign || "–")}` : h.herkenning === "operator" ? "Herkend aan de eigenaar van het toestel" : "";
   const afstand = state.here ? ` · ${distanceKm(state.here, h).toFixed(1).replace(".", ",")} km van je af` : "";
   box.innerHTML = `<header><b>${esc(h.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
     <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
-    <div class="heli-vals"><div><small>Koers</small><b>${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
+    ${!h.op_grond ? `<p class="heli-boven">${h.boven ? `Nu boven <b>${esc(h.boven)}</b>` : "Nu boven zee of over de grens"}<span id="heliDuur" hidden></span></p>` : ""}
+    <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
     <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["lang", "2 uur"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
@@ -1280,6 +1312,7 @@ function openHeli(h) {
       <button id="afspeelSnelheid" class="icon-btn" aria-label="Afspeelsnelheid">${afspelen.snelheid}×</button>
       <button id="afspeelStop" class="icon-btn" aria-label="Terug naar live">⟲</button></div>
     <small class="hint" id="afspeelTijd"></small>
+    <h4 class="vl-head" id="heliPlaatsenKop" hidden>Waar geweest</h4><ol class="plaatsen" id="heliPlaatsen" hidden></ol>
     <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
     <p class="hint" style="margin:8px 0 0">Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>`;
   box.hidden = false;

@@ -80,6 +80,9 @@ object Api {
     suspend fun nieuwsItem(id: String): NieuwsItem? = runCatching { AppJson.decodeFromString<NieuwsItem>(getText("${base}v1/nieuws/${enc(id)}")) }.getOrNull()
 
     suspend fun heliSpoor(id: String, bereik: SpoorBereik): List<HeliSpoorPunt> = runCatching { AppJson.decodeFromString<HeliSpoor>(getText("${base}v1/helikopters/${enc(id)}/spoor?scope=${bereik.key}")).punten }.getOrDefault(emptyList())
+    /** The trail with the places of the flight and the flight itself. */
+    suspend fun heliSpoorVol(id: String, bereik: SpoorBereik): HeliSpoor = runCatching { AppJson.decodeFromString<HeliSpoor>(getText("${base}v1/helikopters/${enc(id)}/spoor?scope=${bereik.key}")) }.getOrDefault(HeliSpoor())
+    suspend fun pand(guid: String): Pand? = runCatching { AppJson.decodeFromString<PandAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/pand")).pand }.getOrNull()
     suspend fun heliVluchten(id: String): List<HeliVlucht> = runCatching { AppJson.decodeFromString<HeliVluchten>(getText("${base}v1/helikopters/${enc(id)}/vluchten")).vluchten }.getOrDefault(emptyList())
     suspend fun status(): AppStatus? = runCatching { AppJson.decodeFromString<AppStatus>(getText("${base}v1/status")) }.getOrNull()
     suspend fun verkeer(): VerkeerResponse? = runCatching { AppJson.decodeFromString<VerkeerResponse>(getText("${base}v1/verkeer")) }.getOrNull()

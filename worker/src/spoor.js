@@ -1,6 +1,7 @@
 // Route trail and flight history of the trauma and police helicopters. The Worker stores the positions it
 // already reads from adsb.lol (ODbL) a few times per minute in D1 (kept 2 hours) and cuts them into flights.
 import { helikopters } from "./heli.js";
+import { plaatsenUit } from "./plaats.js";
 
 export const KEEP_MS = 2 * 3600_000; // two hours is plenty; older lines only clutter the map
 const GAP_MS = 10 * 60_000; // no position for 10 minutes = flight over (landed or out of range)
@@ -43,11 +44,12 @@ export async function recordPositions(env, data) {
  */
 export async function recordLucht(env, lucht) {
   const list = (lucht || []).slice(0, 40);
-  if (!list.length) return 0;
+  if (!list.length) return { stored: 0, prev: new Map() };
   const ids = list.map((h) => h.id);
   const { results: last } = await env.DB.prepare(
-    `SELECT heli, MAX(at) AS at FROM heli_posities WHERE heli IN (${ids.map(() => "?").join(",")}) GROUP BY heli`,
+    `SELECT heli, MAX(at) AS at, grond FROM heli_posities WHERE heli IN (${ids.map(() => "?").join(",")}) GROUP BY heli`,
   ).bind(...ids).all();
+  const vorige = new Map(last.map((r) => [r.heli, { at: r.at, grond: r.grond }]));
   const prev = new Map(last.map((r) => [r.heli, r.at]));
   const rows = [];
   for (const h of list) {
@@ -57,7 +59,7 @@ export async function recordLucht(env, lucht) {
       .bind(h.id, at, h.lat, h.lon, h.hoogte_ft, h.snelheid_kt, h.koers, h.op_grond ? 1 : 0));
   }
   if (rows.length) await env.DB.batch(rows);
-  return rows.length;
+  return { stored: rows.length, prev: vorige };
 }
 
 export async function spoorHousekeeping(env) {
@@ -112,7 +114,8 @@ export async function spoor(env, id, scope = "vlucht") {
     vlucht = vl[0] || null;
     rows = vlucht ? results.filter((r) => r.at >= Date.parse(vlucht.start) && (!vlucht.einde || r.at <= Date.parse(vlucht.einde))) : [];
   }
-  return { id, scope, vlucht, punten: rows.map(punt), bron: "adsb.lol (ODbL)" };
+  // The flight as a readable list of places (newest first), next to the points for the trail on the map.
+  return { id, scope, vlucht, punten: rows.map(punt), plaatsen: plaatsenUit(rows), bron: "adsb.lol (ODbL)" };
 }
 
 export async function vluchten(env, id) {

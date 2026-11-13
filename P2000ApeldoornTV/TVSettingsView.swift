@@ -29,14 +29,18 @@ struct TVSettingsView: View {
                         Text(L("Satelliet")).tag("satellite")
                     }
                 }
-                Section {
-                    ForEach(KaartLaag.allCases) { l in
-                        Toggle(isOn: Binding(get: { settings.laag(l) }, set: { settings.setLaag(l, $0) })) {
-                            Label(l.titel, systemImage: l.systemImage)
+                ForEach(KaartLaagGroep.allCases) { groep in
+                    Section {
+                        ForEach(groep.lagen) { l in
+                            Toggle(isOn: Binding(get: { settings.laag(l) }, set: { settings.setLaag(l, $0) })) {
+                                Label(l.titel, systemImage: l.systemImage)
+                            }
                         }
+                    } header: {
+                        Text(Lf("Kaartlagen: %@", groep.titel))
                     }
-                } header: {
-                    Text(L("Kaartlagen"))
+                }
+                Section {
                 } footer: {
                     Text(L("Wat je op de meldkamerkaart ziet. Gedeeld via iCloud met je andere apparaten."))
                 }

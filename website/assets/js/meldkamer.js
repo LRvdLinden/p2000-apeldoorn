@@ -9,7 +9,7 @@ import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
-} from "./aalerts.js?v=63";
+} from "./aalerts.js?v=64";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -25,7 +25,8 @@ const state = {
   lagen: new Set(prefs.get("mk.lagen", ["waarschuwingen", "knmi", "helikopters", "werkgebied", "ziekenhuizen"])),
 };
 // Map layers, like the Apple TV control room and the live pager.
-const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet"], ["knmi", "KNMI"], ["helikopters", "Luchtvaart"], ["kazernes", "Kazernes"], ["ziekenhuizen", "Ziekenhuizen"], ["verkeer", "Verkeer"], ["flitsers", "Flitsers"], ["werkgebied", "Grens"], ["buienradar", "Buienradar"]];
+// [key, label, category]: shown per category.
+const LAGEN = [["waarschuwingen", "NL-Alert & Burgernet", "Alerts"], ["knmi", "KNMI", "Alerts"], ["helikopters", "Luchtvaart", "Lucht"], ["verkeer", "Verkeer", "Verkeer"], ["flitsers", "Flitsers", "Verkeer"], ["kazernes", "Kazernes en posten", "Posten"], ["ziekenhuizen", "Ziekenhuizen", "Posten"], ["werkgebied", "Grens", "Kaart"], ["buienradar", "Buienradar", "Kaart"]];
 const icon = (m) => asset(`assets/img/${dienstOf(m).icon}.png`);
 const marker = (m) => asset(`assets/img/${dienstOf(m).marker}.png`);
 const inWindow = () => state.list.filter((m) => Date.now() - date(m).getTime() < WINDOW_MS);
@@ -194,7 +195,7 @@ $("chips").addEventListener("click", (e) => {
   renderChips();
 });
 function renderLagen() {
-  $("lagen").innerHTML = LAGEN.map(([k, l]) => `<button class="laag${state.lagen.has(k) ? " on" : ""}" data-laag="${k}">${l}</button>`).join("");
+  $("lagen").innerHTML = LAGEN.map(([k, l, cat], i) => `${i === 0 || LAGEN[i - 1][2] !== cat ? `<span class="lg-kop">${cat}</span>` : ""}<button class="laag${state.lagen.has(k) ? " on" : ""}" data-laag="${k}">${l}</button>`).join("");
 }
 $("lagen").addEventListener("click", (e) => {
   const k = e.target.closest("[data-laag]")?.dataset.laag;

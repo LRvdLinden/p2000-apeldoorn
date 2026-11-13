@@ -28,7 +28,41 @@ export function heliPrefsFrom(s) {
     opstijgen: bool(s.opstijgen, true), landen: bool(s.landen, true), binnen: bool(s.binnen, true),
     soorten: soorten.length ? [...new Set(soorten)] : ["trauma"],
     pauze_tot: num(s.pauze_tot, 0, 4e12),
+    // The bell on one aircraft: a push when it takes off, wherever that is ("lifeliner3", "lucht-480c21" …).
+    volg: Array.isArray(s.volg) ? [...new Set(s.volg.filter((x) => typeof x === "string" && /^[\w-]{3,40}$/.test(x)))].slice(0, 40) : [],
   };
+}
+
+/**
+ * Pushes for followed aircraft (the bell): once when an aircraft is in the air after being on the ground or not seen
+ * for 15 minutes. `prev` maps id → { at, grond } of the last stored position before this round.
+ * Returns [{ key, heli, texts, tokens }].
+ */
+export function volgPushes(devices, prefs, vliegend, prev, now = Date.now()) {
+  const groups = new Map();
+  const date = new Date(now);
+  const nieuw = vliegend.filter((h) => {
+    if (h.op_grond || h.lat == null) return false;
+    const p = prev.get(h.id);
+    return !p || p.grond === 1 || now - p.at > 15 * 60_000;
+  });
+  if (!nieuw.length) return [];
+  for (const d of devices) {
+    const hp = prefs.get(d.token)?.heli;
+    if (!d.enabled || !hp?.volg?.length) continue;
+    if (hp.pauze_tot && hp.pauze_tot > now) continue;
+    if (isQuiet(d, date)) continue;
+    for (const h of nieuw) {
+      if (!hp.volg.includes(h.id)) continue;
+      const key = `hv:${h.id}:${Math.floor(now / (15 * 60_000))}`;
+      if (!groups.has(key)) {
+        const waarNl = h.boven ? `Nu boven ${h.boven}` : "In de lucht", waarEn = h.boven ? `Now above ${h.boven}` : "In the air";
+        groups.set(key, { key, heli: h.id, texts: { nl: { title: `${h.naam} is opgestegen`, body: waarNl }, en: { title: `${h.naam} has taken off`, body: waarEn } }, tokens: [] });
+      }
+      groups.get(key).tokens.push(d.token);
+    }
+  }
+  return [...groups.values()];
 }
 
 /** settings.groot: push for large incidents, optionally only in some places (empty = whole area). */

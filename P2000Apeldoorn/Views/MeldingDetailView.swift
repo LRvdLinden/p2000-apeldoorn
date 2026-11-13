@@ -22,6 +22,7 @@ struct MeldingDetailView: View {
 
     @State private var lookAround: MKLookAroundScene?
     @State private var meteo: Meteo?
+    @State private var pand: Pand?
     @State private var attribution: WeatherAttribution?
     @State private var copied = false
     @State private var topSafeArea: CGFloat = 0
@@ -100,6 +101,12 @@ struct MeldingDetailView: View {
         }
         .task(id: melding.guid) { await loadLookAround() }
         .task(id: melding.guid) {
+            // Year built and use of the building (BAG), at a fire alert with a house number.
+            pand = nil
+            guard melding.dienst == .brandweer, hasStreet, melding.locatie?.contains(where: \.isNumber) == true else { return }
+            pand = try? await P2000API.shared.pand(guid: melding.guid)
+        }
+        .task(id: melding.guid) {
             kazerneRoutes = await Aanrijtijd.routes(voor: melding)
             Task { @MainActor in
                 while !Task.isCancelled, kazerneRoutes.contains(where: { $0.aankomst > .now }) {
@@ -140,6 +147,7 @@ struct MeldingDetailView: View {
                     }
                     GealarmeerdeKazernesKaart(routes: kazerneRoutes)
                     VerloopKaart(melding: melding)
+                    InzetKaart(melding: melding)
                     GerelateerdeWaarschuwingen(melding: melding)
                     if !melding.eenheden.isEmpty { capcodesCard }
                     if !melding.voertuigen.isEmpty { vehiclesCard }
@@ -462,6 +470,9 @@ struct MeldingDetailView: View {
                         title: Lf("%@ om %@", melding.datum.formatted(.dateTime.day().month(.wide).year()),
                                   melding.datum.formatted(.dateTime.hour(.twoDigits(amPM: .omitted)).minute(.twoDigits).second(.twoDigits))),
                         subtitle: Fmt.ago(melding.datum, now: ctx.date))
+            }
+            if let pand, !pand.tekst.isEmpty {
+                infoRow(symbol: "building.2.fill", color: Color(hex: 0x64748B), title: pand.tekst, subtitle: L("Gebouw volgens de BAG (Kadaster)"))
             }
             if let d = location.distance(to: melding) {
                 infoRow(symbol: "figure.walk", color: Color(hex: 0x8B5CF6), title: Fmt.distance(d), subtitle: L("bij je vandaan"))

@@ -292,7 +292,12 @@ data class Helikopter(
     val voorspelling: HeliVoorspelling? = null,
     /** Layer "Defensie en overheid" (GET /v1/lucht): the drawing for this type ("chinook", "f35", "kustwacht_dash8" …). */
     val icoon: String? = null,
+    /** "Now above …": the nearest Dutch place ("Teuge, Voorst"); null on the ground, above sea or abroad. */
+    val boven: String? = null,
 ) {
+    /** The same altitude and speed in the other unit (feet next to metres, knots next to km/h). */
+    val hoogteTweede: String? get() = if (opGrond) null else hoogteFt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it * 0.3048 / 10) * 10} m" else "${Math.round(it / 25) * 25} ft" }
+    val snelheidTweede: String? get() = snelheidKt?.let { if (Settings.eenheden == "luchtvaart") tr("${Math.round(it * 1.852)} km/u", "${Math.round(it * 1.852)} km/h") else "${Math.round(it)} kn" }
     val isTrauma get() = soort == "trauma"
     val isLucht get() = icoon != null
     val luchtSoort: String get() = when (soort) {
@@ -381,7 +386,25 @@ fun Helikopter.geschat(nu: Long = System.currentTimeMillis()): Pair<Double, Doub
 data class HeliSpoorPunt(val t: String, val lat: Double, val lon: Double, @SerialName("hoogte_ft") val hoogteFt: Double? = null, val grond: Boolean = false)
 
 @Serializable
-data class HeliSpoor(val punten: List<HeliSpoorPunt> = emptyList())
+data class HeliSpoor(val punten: List<HeliSpoorPunt> = emptyList(), val plaatsen: List<SpoorPlaats> = emptyList(), val vlucht: HeliVlucht? = null)
+
+/** One stretch of a flight above a place (plaats null = above sea or abroad). */
+@Serializable
+data class SpoorPlaats(val van: String, val tot: String, val plaats: String? = null, val gemeente: String? = null)
+
+/** Building facts from the BAG (GET /v1/meldingen/<guid>/pand). */
+@Serializable
+data class Pand(val bouwjaar: Int? = null, val gebruik: List<String> = emptyList(), val adressen: Int? = null) {
+    val tekst: String get() = listOfNotNull(
+        bouwjaar?.let { tr("Bouwjaar $it", "Built in $it") },
+        gebruik.takeIf { it.isNotEmpty() }?.joinToString(", ") { PAND_EN[it]?.let { en -> tr(it, en) } ?: it },
+        adressen?.takeIf { it > 1 }?.let { tr("$it adressen", "$it addresses") },
+    ).joinToString(" · ")
+}
+private val PAND_EN = mapOf("Wonen" to "Residential", "Winkel" to "Shop", "Kantoor" to "Office", "Industrie" to "Industry", "Bijeenkomst" to "Assembly",
+    "Zorg" to "Healthcare", "Onderwijs" to "Education", "Logies" to "Lodging", "Sport" to "Sports", "Cel" to "Detention", "Overig" to "Other")
+@Serializable
+data class PandAntwoord(val pand: Pand? = null)
 
 @Serializable
 data class HeliVlucht(
@@ -392,6 +415,12 @@ data class HeliVlucht(
     @SerialName("afstand_km") val afstandKm: Double = 0.0,
     @SerialName("max_hoogte_ft") val maxHoogteFt: Double = 0.0,
 ) {
+    /** "25 min in de lucht" */
+    val inDeLucht: String get() = when {
+        duurMin < 1 -> tr("Net opgestegen", "Just took off")
+        duurMin < 60 -> tr("$duurMin min in de lucht", "$duurMin min in the air")
+        else -> "${duurMin / 60}".let { u -> val m = "%02d".format(duurMin % 60); tr("$u u $m min in de lucht", "$u h $m min in the air") }
+    }
     val tekst: String get() {
         val s = parseInstant(start)?.let { "${Fmt.shortDay(it)} ${Fmt.time(it)}" } ?: ""
         val e = parseInstant(einde)?.let { Fmt.time(it) }

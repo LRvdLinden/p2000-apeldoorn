@@ -178,7 +178,25 @@ object Kazernes {
 /** Possible links between alerts ("verloop"), same rules as the app and website. */
 data class MeldingVerband(val melding: Melding, val redenen: List<String>, val score: Int)
 
+/** One unit of an incident with the time of its alarm. */
+data class InzetEenheid(val naam: String, val type: String?, val tijd: java.time.Instant, val melding: Melding)
+
 object Verband {
+    /**
+     * Every unit alarmed for this incident: the units of this alert plus those of alerts that almost certainly belong to
+     * it (same address, or close by with the same unit). Oldest first, one line per unit. Second value: number of alerts.
+     */
+    fun inzet(m: Melding, list: List<Melding>): Pair<List<InzetEenheid>, Int> {
+        val bij = (listOf(m) + gekoppeld(m, list, 12).filter { it.score >= 3 }.map { it.melding }).sortedBy { it.datum }
+        val gezien = mutableSetOf<String>()
+        val out = mutableListOf<InzetEenheid>()
+        for (x in bij) for (e in x.eenheden) {
+            val key = e.code ?: e.naam ?: continue
+            if (gezien.add(key)) out += InzetEenheid(e.naam ?: key, e.type, x.datum, x)
+        }
+        return out to bij.size
+    }
+
     private fun norm(s: String?) = java.text.Normalizer.normalize((s ?: "").lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("[^a-z0-9]"), "")
 
     fun gekoppeld(m: Melding, list: List<Melding>, max: Int = 6): List<MeldingVerband> {

@@ -606,15 +606,19 @@ struct KaartLagenView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    ForEach(KaartLaag.allCases) { laag in
-                        Toggle(isOn: Binding(get: { settings.laag(laag) }, set: { settings.setLaag(laag, $0) })) {
-                            Label(laag.titel, systemImage: laag.systemImage)
+                ForEach(KaartLaagGroep.allCases) { groep in
+                    Section(groep.titel) {
+                        ForEach(groep.lagen) { laag in
+                            Toggle(isOn: Binding(get: { settings.laag(laag) }, set: { settings.setLaag(laag, $0) })) {
+                                Label(laag.titel, systemImage: laag.systemImage)
+                            }
                         }
                     }
+                }
+                Section {
                 } footer: {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten komen uit OpenStreetMap."))
+                        Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap."))
                         if settings.laag(.buienradar) {
                             if RadarStore.shared.info?.beschikbaar == false {
                                 Text(L("De buienradar is nog niet beschikbaar.")).foregroundStyle(.orange)

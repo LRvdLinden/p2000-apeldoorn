@@ -222,6 +222,22 @@ export function verband(m, list, max = 6) {
   return out.sort((a, b) => b.score - a.score || Math.abs(date(a.melding) - date(m)) - Math.abs(date(b.melding) - date(m))).slice(0, max);
 }
 
+/**
+ * Every unit alarmed for this incident, with the time of its alarm: the units of this alert plus those of alerts that
+ * almost certainly belong to it (same address, or close by with the same unit). Oldest first, one line per unit.
+ */
+export function inzetEenheden(m, list) {
+  const bij = [m, ...verband(m, list, 12).filter((l) => l.score >= 3).map((l) => l.melding)].sort((a, b) => date(a) - date(b));
+  const gezien = new Set(), out = [];
+  for (const x of bij) for (const u of x.eenheden || []) {
+    const key = u.code || u.naam;
+    if (!key || gezien.has(key)) continue;
+    gezien.add(key);
+    out.push({ naam: u.naam || u.code, code: u.code || "", type: u.type || "", tijd: date(x), melding: x });
+  }
+  return { eenheden: out, meldingen: bij.length };
+}
+
 // ------------------------------------------------------------------ helicopters
 
 export function heliImg(h) {
@@ -372,6 +388,30 @@ export async function fetchSpoor(id, scope = "vlucht") {
     const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/spoor?scope=${scope}`, { signal: AbortSignal.timeout(10_000) });
     return r.ok ? (await r.json()).punten || [] : [];
   } catch { return []; }
+}
+/** The same trail with everything around it: { punten, plaatsen (newest first), vlucht }. */
+export async function fetchSpoorVol(id, scope = "vlucht") {
+  try {
+    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/spoor?scope=${scope}`, { signal: AbortSignal.timeout(10_000) });
+    const j = r.ok ? await r.json() : {};
+    return { punten: j.punten || [], plaatsen: j.plaatsen || [], vlucht: j.vlucht || null };
+  } catch { return { punten: [], plaatsen: [], vlucht: null }; }
+}
+/** Building facts from the BAG for an alert at an address with a house number: { bouwjaar, gebruik[], adressen } or null. */
+export async function fetchPand(guid) {
+  try {
+    const r = await fetch(`${API}/v1/meldingen/${encodeURIComponent(guid)}/pand`, { signal: AbortSignal.timeout(12_000) });
+    return r.ok ? (await r.json()).pand || null : null;
+  } catch { return null; }
+}
+/** "Bouwjaar 1966 · Winkel, Wonen · 3 adressen" */
+export function pandTekst(p) {
+  return [p.bouwjaar ? `Bouwjaar ${p.bouwjaar}` : null, (p.gebruik || []).join(", ") || null, p.adressen > 1 ? `${p.adressen} adressen` : null].filter(Boolean).join(" · ");
+}
+/** "25 min in de lucht" / "1 u 05 min in de lucht" */
+export function inDeLucht(min) {
+  if (!(min >= 1)) return "Net opgestegen";
+  return `${min < 60 ? `${Math.round(min)} min` : `${Math.floor(min / 60)} u ${String(Math.round(min % 60)).padStart(2, "0")} min`} in de lucht`;
 }
 export async function fetchVluchten(id) {
   try {

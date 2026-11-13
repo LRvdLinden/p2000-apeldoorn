@@ -95,6 +95,10 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
     val heliPos = heli?.geschat(nu)
     val heliNaam = remember(m.guid) { HeliKoppeling.genoemd(m)?.let { id -> id.replace("lifeliner", "Lifeliner ").replace("zulu", "Zulu ") } }
     val verband = remember(m.guid, Store.meldingen) { Verband.gekoppeld(m, Store.meldingen) }
+    // Every unit of this incident with the time of its alarm, and the building (BAG) at a fire alert with a house number.
+    val inzet = remember(m.guid, Store.meldingen) { Verband.inzet(m, Store.meldingen) }
+    var pand by remember(m.guid) { mutableStateOf<nl.lrvdlinden.aalerts.data.Pand?>(null) }
+    LaunchedEffect(m.guid) { if (m.soort == Dienst.BRANDWEER && m.hasStreet && m.locatie?.any { it.isDigit() } == true) pand = Api.pand(m.guid) }
     val waarschuwingen = remember(m.guid, Store.waarschuwingen) { Store.waarschuwingen.filter { it.bron != "knmi" && it.relates(m) } }
     val knmi = remember(m.guid, Store.waarschuwingen) {
         Store.waarschuwingen.filter { it.bron == "knmi" && (m.lat == null || m.lon == null || it.contains(m.lat, m.lon) || it.gebied == null) && !m.datum.isBefore(it.startAt) && (it.eindeAt?.let { e -> !m.datum.isAfter(e) } ?: true) }
@@ -154,6 +158,12 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                         Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
                         Text(m.hectometerpaal?.let { "${it.tekst}, ${m.plaatsNaam}" } ?: m.plaatsText, color = Muted, modifier = Modifier.weight(1f))
                         m.hectometerpaal?.let { HectometerBord(it) }
+                    }
+                    pand?.tekst?.takeIf { it.isNotBlank() }?.let { t ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Outlined.Apartment, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
+                            Column { Text(t, fontSize = 14.sp); Text(tr("Gebouw volgens de BAG (Kadaster)", "Building according to the BAG (Kadaster)"), color = Muted, fontSize = 11.sp) }
+                        }
                     }
                     if (m.prioriteitText.isNotBlank()) Text(m.prioriteitText, fontSize = 14.sp)
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.horizontalScroll(rememberScrollState())) {
@@ -250,6 +260,16 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                                 Text(w.titel, color = Muted, fontSize = 12.sp, maxLines = 1)
                             }
                             Icon(Icons.Filled.ChevronRight, null, tint = Muted)
+                        }
+                    }
+                }
+                if (inzet.second >= 2 && inzet.first.size >= 2) SectionCard(tr("Eenheden bij deze inzet (${inzet.first.size})", "Units at this incident (${inzet.first.size})"), Icons.Outlined.LocalShipping) {
+                    Text(tr("Alle eenheden uit de ${inzet.second} meldingen die bij deze inzet horen, met de tijd van alarmering.", "All units from the ${inzet.second} alerts that belong to this incident, with the time of their alarm."), color = Muted, fontSize = 12.sp)
+                    inzet.first.forEach { e ->
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(Fmt.time(e.tijd), fontWeight = FontWeight.SemiBold, fontSize = 14.sp, modifier = Modifier.width(52.dp))
+                            Box(Modifier.width(6.dp).height(28.dp).background(e.melding.soort.color, RoundedCornerShape(3.dp))); Spacer(Modifier.width(10.dp))
+                            Column { Text(e.naam, fontSize = 14.sp); e.type?.takeIf { it.isNotBlank() }?.let { Text(it, color = Muted, fontSize = 12.sp) } }
                         }
                     }
                 }

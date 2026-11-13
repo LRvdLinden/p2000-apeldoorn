@@ -36,7 +36,7 @@ import { recordPositions, recordLucht, spoor, vluchten, spoorHousekeeping } from
 import { koppelInstall, zoekToestel, testToestel } from "./toestel.js";
 import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
-import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, recenteHeliMeldingen, meldingVoorspelling,
+import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, volgPushes, recenteHeliMeldingen, meldingVoorspelling,
   noteerTerPlaatse, terPlaatseSet, saveFeedback, feedbackLijst, updateFeedback, deleteFeedback } from "./extra.js";
 import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
@@ -47,6 +47,7 @@ import { kiesStockFotos, listNieuws, getNieuws, fotoResponse, wijzigNieuws, voeg
 import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
 import { kvWrite } from "./kv.js";
 import { hmPaal, hmPunt, hmHerstel } from "./hm.js";
+import { pandVoor } from "./pand.js";
 
 /** Last run of the hectometre-post repair in this isolate (it reads the alerts of 48 hours, so not every round). */
 let hmLaatst = 0;
@@ -136,6 +137,13 @@ async function handle(req, env, ctx) {
     if (!item) return reply(404, { error: "Not found" });
     if (!String(item.locatie || "").trim() || item.lat == null) return reply(200, { guid: item.guid, kazernes: [] });
     return reply(200, await routesVoor(env, item), { "cache-control": "public, max-age=3600" });
+  }
+  // Building facts (year built, use) from the BAG, for an alert at an address with a house number.
+  m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/pand$/);
+  if (method === "GET" && m) {
+    const item = await getMelding(env, m[1]);
+    if (!item) return reply(404, { error: "Not found" });
+    return reply(200, { guid: item.guid, pand: await pandVoor(env, item) }, { "cache-control": "public, max-age=3600" });
   }
   m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/weather$/);
   if (method === "GET" && m) {
@@ -659,9 +667,25 @@ async function heliRun(env) {
   const data = await helikopters(env);
   await noteHeli(env, !data.fout);
   const { prev } = await recordPositions(env, data);
-  try { await recordLucht(env, data.lucht); } catch (e) { console.warn("[lucht spoor]", e.message || e); }
+  let luchtPrev = new Map();
+  try { luchtPrev = (await recordLucht(env, data.lucht)).prev; } catch (e) { console.warn("[lucht spoor]", e.message || e); }
   if (!prev || data.fout) return;
   let devices = null, prefs = null;
+  // The bell on one aircraft: a push when a followed helicopter or aircraft takes off.
+  try {
+    const vliegend = [...(data.helikopters || []), ...(data.lucht || [])];
+    const vorige = new Map([...luchtPrev, ...[...prev].map(([id, p]) => [id, { at: p.at, grond: p.grond }])]);
+    const kandidaat = vliegend.some((h) => { const p = vorige.get(h.id); return !h.op_grond && h.lat != null && (!p || p.grond === 1 || Date.now() - p.at > 15 * 60_000); });
+    if (kandidaat) {
+      devices ||= await activeDevices(env);
+      prefs ||= await devicePrefs(env);
+      for (const g of volgPushes(devices, prefs, vliegend, vorige)) {
+        if (await kvGet(env, `broadcast:${g.key}`)) continue;
+        await kvSet(env, `broadcast:${g.key}`, JSON.stringify({ ...g.texts.nl, en: g.texts.en, heli: g.heli }));
+        await queue(env, `broadcast:${g.key}`, g.tokens);
+      }
+    }
+  } catch (e) { console.error("[heli-volg]", e.message || e); }
   // Helicopter zones: take-off, landing or entering a zone of a device.
   try {
     const events = heliEvents(data.helikopters || [], prev);

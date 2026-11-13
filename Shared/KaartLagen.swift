@@ -44,6 +44,31 @@ enum KaartLaag: String, CaseIterable, Identifiable {
     }
 }
 
+/// The layers per category, as they are listed under "Kaartlagen".
+enum KaartLaagGroep: String, CaseIterable, Identifiable {
+    case meldingen, lucht, verkeer, posten, kaart
+
+    var id: String { rawValue }
+    var titel: String {
+        switch self {
+        case .meldingen: return L("Meldingen en alerts")
+        case .lucht: return L("Lucht")
+        case .verkeer: return L("Verkeer")
+        case .posten: return L("Posten en ziekenhuizen")
+        case .kaart: return L("Kaart")
+        }
+    }
+    var lagen: [KaartLaag] {
+        switch self {
+        case .meldingen: return [.p2000, .nlalert, .burgernet, .kind, .knmi]
+        case .lucht: return [.helikopters]
+        case .verkeer: return [.verkeer, .flitsers]
+        case .posten: return [.kazernes, .ziekenhuizen]
+        case .kaart: return [.werkgebied, .buienradar]
+        }
+    }
+}
+
 extension AppSettings {
     func laag(_ l: KaartLaag) -> Bool { kaartLagen.contains(l.rawValue) }
     func setLaag(_ l: KaartLaag, _ on: Bool) {

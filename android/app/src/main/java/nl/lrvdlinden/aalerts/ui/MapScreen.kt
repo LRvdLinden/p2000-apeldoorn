@@ -24,6 +24,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Navigation
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.Layers
@@ -44,11 +47,20 @@ import nl.lrvdlinden.aalerts.data.*
 import nl.lrvdlinden.aalerts.tr
 
 /** Map layers (same as the app, the website and Apple TV). */
+/** The layers per category, as they are listed under "Kaartlagen". */
+private val LAAG_GROEPEN get() = listOf(
+    tr("Meldingen en alerts", "Alerts") to listOf(KaartLaag.MELDINGEN, KaartLaag.WAARSCHUWINGEN, KaartLaag.KNMI),
+    tr("Lucht", "Air") to listOf(KaartLaag.HELIKOPTERS),
+    tr("Verkeer", "Traffic") to listOf(KaartLaag.VERKEER, KaartLaag.FLITSERS),
+    tr("Posten en ziekenhuizen", "Stations and hospitals") to listOf(KaartLaag.KAZERNES, KaartLaag.ZIEKENHUIZEN),
+    tr("Kaart", "Map") to listOf(KaartLaag.WERKGEBIED, KaartLaag.BUIENRADAR),
+)
+
 enum class KaartLaag(val key: String) {
     MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
-        HELIKOPTERS -> tr("Luchtvaart (live)", "Aviation (live)"); KAZERNES -> tr("Kazernes en posten", "Stations")
+        HELIKOPTERS -> tr("Luchtvaart (live)", "Aviation (live)"); KAZERNES -> tr("Kazernes en posten (brandweer, ambulance, politie)", "Stations (fire, ambulance, police)")
         ZIEKENHUIZEN -> tr("Ziekenhuizen en vliegbases", "Hospitals and air bases"); WERKGEBIED -> tr("Gemeentegrens", "Municipal border")
         BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
         VERKEER -> tr("Verkeer (NDW)", "Traffic (NDW)"); FLITSERS -> tr("Flitsers (vast)", "Speed cameras (fixed)")
@@ -114,10 +126,13 @@ fun MapScreen(nav: Nav) {
     val ctx = androidx.compose.ui.platform.LocalContext.current
     var selSpoor by remember { mutableStateOf<List<HeliSpoorPunt>>(emptyList()) }
     var selVluchten by remember { mutableStateOf<List<HeliVlucht>?>(null) }
+    // The flight as a list of places (newest first) and the flight itself ("25 min in de lucht").
+    var selPlaatsen by remember { mutableStateOf<List<SpoorPlaats>>(emptyList()) }
+    var selVlucht by remember { mutableStateOf<HeliVlucht?>(null) }
     LaunchedEffect(selHeli, bereik) {
-        selSpoor = emptyList()
+        selSpoor = emptyList(); selPlaatsen = emptyList(); selVlucht = null
         val id = selHeli ?: return@LaunchedEffect
-        while (true) { selSpoor = Api.heliSpoor(id, bereik); delay(20_000) }
+        while (true) { val s = Api.heliSpoorVol(id, bereik); selSpoor = s.punten; selPlaatsen = s.plaatsen; selVlucht = s.vlucht; delay(20_000) }
     }
     LaunchedEffect(selHeli) { selVluchten = null; selHeli?.let { selVluchten = Api.heliVluchten(it) } }
     LaunchedEffect(Unit) { Store.loadLocaties() }
@@ -298,7 +313,7 @@ fun MapScreen(nav: Nav) {
             when {
                 sel == null -> {}
                 sel.startsWith("h:") -> (Store.helikopters + Store.lucht).firstOrNull { it.id == sel.removePrefix("h:") }?.let {
-                    HeliCard(it, bereik, { b -> bereik = b }, selVluchten,
+                    HeliCard(it, bereik, { b -> bereik = b }, selVluchten, selPlaatsen, selVlucht,
                         afspelen = Afspelen(afspeel, speelt, snelheid, afspeelMoment, kanAfspelen = selSpoor.size >= 2,
                             onSpeel = { if (afspeel == null || afspeel!! >= 1f) afspeel = 0f; speelt = true }, onPauze = { speelt = false },
                             onZoek = { speelt = false; afspeel = it }, onSnelheid = { snelheid = it }, onStop = { speelt = false; afspeel = null })) { selected = null }
@@ -392,8 +407,11 @@ fun MapScreen(nav: Nav) {
     if (showLayers) ModalBottomSheet(onDismissRequest = { showLayers = false }, containerColor = MaterialTheme.colorScheme.background) {
         Column(Modifier.verticalScroll(rememberScrollState()).padding(horizontal = 16.dp).padding(bottom = 32.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
             Text(tr("Kaartlagen", "Map layers"), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-            KaartLaag.entries.forEach { l ->
-                SwitchRow(l.label, checked = l.key in Settings.kaartLagen) { Settings.kaartLagen = Settings.kaartLagen.toggle(l.key) }
+            LAAG_GROEPEN.forEach { (titel, lagen) ->
+                Text(titel.uppercase(), color = Muted, fontSize = 11.sp, fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 10.dp))
+                lagen.forEach { l ->
+                    SwitchRow(l.label, checked = l.key in Settings.kaartLagen) { Settings.kaartLagen = Settings.kaartLagen.toggle(l.key) }
+                }
             }
             // Layer Luchtvaart: which kinds of aircraft show on the map, with the number flying now.
             if (KaartLaag.HELIKOPTERS.key in Settings.kaartLagen) {
@@ -432,17 +450,34 @@ private fun PreviewCard(onClose: () -> Unit, content: @Composable () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik) -> Unit, vluchten: List<HeliVlucht>?, afspelen: Afspelen, onClose: () -> Unit) {
+private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik) -> Unit, vluchten: List<HeliVlucht>?, plaatsen: List<SpoorPlaats>, vlucht: HeliVlucht?, afspelen: Afspelen, onClose: () -> Unit) {
     PreviewCard(onClose) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(painterResource(h.afbeelding), null, Modifier.width(80.dp).graphicsLayer { scaleX = if (h.vliegtWest) -1f else 1f })
                 Spacer(Modifier.width(12.dp))
-                Column { Text(h.naam, fontWeight = FontWeight.Bold, fontSize = 17.sp); Text(h.soortLabel + (h.basis?.let { " · $it" } ?: ""), color = Muted, fontSize = 13.sp) }
+                Column(Modifier.weight(1f)) { Text(h.naam, fontWeight = FontWeight.Bold, fontSize = 17.sp); Text(h.soortLabel + (h.basis?.let { " · $it" } ?: ""), color = Muted, fontSize = 13.sp) }
+                // The bell on this aircraft: a push when it takes off, wherever that is.
+                val volgt = h.id in Settings.heliVolg
+                IconButton(onClick = { Settings.heliVolg = if (volgt) Settings.heliVolg - h.id else if (Settings.heliVolg.size < 40) Settings.heliVolg + h.id else Settings.heliVolg }, modifier = Modifier.padding(end = 24.dp)) {
+                    Icon(if (volgt) Icons.Filled.Notifications else Icons.Outlined.Notifications,
+                        if (volgt) tr("Geen melding meer als ${h.naam} opstijgt", "No more notification when ${h.naam} takes off") else tr("Melding als ${h.naam} opstijgt", "Notify me when ${h.naam} takes off"),
+                        tint = if (volgt) androidx.compose.ui.graphics.Color(0xFFF59E0B) else Muted)
+                }
             }
-            InfoRow(tr("Hoogte", "Altitude"), h.hoogteTekst)
-            InfoRow(tr("Snelheid", "Speed"), h.snelheidTekst)
-            InfoRow(tr("Koers", "Heading"), h.koersTekst)
+            if (!h.opGrond) Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(h.boven?.let { tr("Nu boven $it", "Now above $it") } ?: tr("Nu boven zee of over de grens", "Now above sea or across the border"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp, modifier = Modifier.weight(1f))
+                if (vlucht?.onderweg == true) Text(vlucht.inDeLucht, color = androidx.compose.ui.graphics.Color(0xFF16A34A), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
+            }
+            InfoRow(tr("Hoogte", "Altitude"), listOfNotNull(h.hoogteTekst, h.hoogteTweede).joinToString(" · "))
+            InfoRow(tr("Snelheid", "Speed"), listOfNotNull(h.snelheidTekst, h.snelheidTweede).joinToString(" · "))
+            if (!h.opGrond && h.koers != null) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(tr("Koers", "Heading"), color = Muted, fontSize = 14.sp, modifier = Modifier.weight(1f))
+                // A small compass: the needle points where the aircraft is heading.
+                Icon(Icons.Filled.Navigation, null, tint = androidx.compose.ui.graphics.Color(0xFFDC2626),
+                    modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = h.koers.toFloat() })
+                Spacer(Modifier.width(6.dp)); Text(h.koersTekst ?: "–", fontSize = 14.sp, fontWeight = FontWeight.Medium)
+            }
             InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) })
             h.voorspelling?.let { Text(it.tekst, fontWeight = FontWeight.Medium, fontSize = 13.sp) }
             // Route on the map: this flight, the last 30 minutes or the whole day.
@@ -453,6 +488,19 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                 }
             }
             if (afspelen.kanAfspelen) AfspeelBalk(afspelen)
+            if (plaatsen.isNotEmpty()) {
+                Text(tr("Waar geweest", "Where it has been"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
+                plaatsen.take(5).forEachIndexed { i, p ->
+                    val nu = i == 0 && vlucht?.onderweg == true
+                    val van = parseInstant(p.van)?.let { Fmt.time(it) } ?: ""
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(if (nu) van else "$van–${parseInstant(p.tot)?.let { Fmt.time(it) } ?: ""}", color = Muted, fontSize = 12.sp, modifier = Modifier.width(88.dp))
+                        Text(p.plaats ?: tr("Boven zee of over de grens", "Above sea or across the border"), fontSize = 13.sp, fontWeight = if (p.plaats != null) FontWeight.SemiBold else FontWeight.Normal,
+                            color = if (nu) androidx.compose.ui.graphics.Color(0xFF16A34A) else if (p.plaats == null) Muted else androidx.compose.ui.graphics.Color.Unspecified)
+                        p.gemeente?.takeIf { it != p.plaats }?.let { Spacer(Modifier.width(6.dp)); Text(it, color = Muted, fontSize = 12.sp, maxLines = 1) }
+                    }
+                }
+            }
             Text(tr("Vluchten", "Flights"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
             when {
                 vluchten == null -> LinearProgressIndicator(Modifier.fillMaxWidth())

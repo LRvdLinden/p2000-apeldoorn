@@ -473,3 +473,102 @@ struct VerloopKaart: View {
         }
     }
 }
+
+// MARK: - Units of the incident, building facts
+
+/// Building facts from the BAG (GET /v1/meldingen/<guid>/pand).
+struct Pand: Decodable, Hashable, Sendable {
+    let bouwjaar: Int?
+    let gebruik: [String]
+    let adressen: Int?
+
+    enum CodingKeys: String, CodingKey { case bouwjaar, gebruik, adressen }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        bouwjaar = try? c.decodeIfPresent(Int.self, forKey: .bouwjaar)
+        gebruik = (try? c.decodeIfPresent([String].self, forKey: .gebruik)) ?? []
+        adressen = try? c.decodeIfPresent(Int.self, forKey: .adressen)
+    }
+
+    /// The uses of the BAG, in the language of the app.
+    private static let namen: [String: String] = [
+        "Wonen": L("Wonen"), "Winkel": L("Winkel"), "Kantoor": L("Kantoor"), "Industrie": L("Industrie"), "Bijeenkomst": L("Bijeenkomst"),
+        "Zorg": L("Zorg"), "Onderwijs": L("Onderwijs"), "Logies": L("Logies"), "Sport": L("Sport"), "Cel": L("Cel"), "Overig": L("Overig"),
+    ]
+
+    /// "Bouwjaar 1966 · Winkel, Wonen · 3 adressen"
+    var tekst: String {
+        var delen: [String] = []
+        if let bouwjaar { delen.append(Lf("Bouwjaar %@", String(bouwjaar))) }
+        if !gebruik.isEmpty { delen.append(gebruik.map { Self.namen[$0] ?? $0 }.joined(separator: ", ")) }
+        if let adressen, adressen > 1 { delen.append(Lf("%lld adressen", adressen)) }
+        return delen.joined(separator: " · ")
+    }
+}
+private struct PandResponse: Decodable { let pand: Pand? }
+
+extension P2000API {
+    func pand(guid: String) async throws -> Pand? {
+        try await getJSON("/v1/meldingen/\(guid)/pand", as: PandResponse.self).pand
+    }
+}
+
+/// One unit of an incident with the time of its alarm.
+struct InzetEenheid: Identifiable, Hashable {
+    let naam: String
+    let type: String?
+    let tijd: Date
+    let dienst: Dienst
+    var id: String { naam + "|" + String(tijd.timeIntervalSince1970) }
+}
+
+extension Verband {
+    /// Every unit alarmed for this incident: the units of this alert plus those of alerts that almost certainly belong
+    /// to it (same address, or close by with the same unit). Oldest first, one line per unit.
+    static func inzet(van m: Melding, in list: [Melding]) -> (eenheden: [InzetEenheid], meldingen: Int) {
+        let bij = ([m] + gekoppeld(aan: m, in: list, max: 12).filter { $0.score >= 3 }.map(\.melding)).sorted { $0.datum < $1.datum }
+        var gezien = Set<String>()
+        var out: [InzetEenheid] = []
+        for x in bij {
+            for e in x.eenheden {
+                guard let key = e.code ?? e.naam, gezien.insert(key).inserted else { continue }
+                out.append(InzetEenheid(naam: e.naam ?? key, type: e.type, tijd: x.datum, dienst: x.dienst))
+            }
+        }
+        return (out, bij.count)
+    }
+}
+
+/// "Eenheden bij deze inzet": all units of the alerts that belong to this incident, with the time of their alarm.
+struct InzetKaart: View {
+    let melding: Melding
+    @Environment(MeldingStore.self) private var store
+
+    var body: some View {
+        let inzet = Verband.inzet(van: melding, in: store.meldingen)
+        if inzet.meldingen >= 2, inzet.eenheden.count >= 2 {
+            VStack(alignment: .leading, spacing: 10) {
+                Text(Lf("Eenheden bij deze inzet (%lld)", inzet.eenheden.count)).font(AppFont.heading(18)).padding(.horizontal, 4)
+                VStack(spacing: 0) {
+                    ForEach(Array(inzet.eenheden.enumerated()), id: \.element.id) { i, e in
+                        HStack(spacing: 12) {
+                            Text(Fmt.time(e.tijd)).font(.subheadline.weight(.semibold).monospacedDigit()).frame(width: 48, alignment: .leading)
+                            RoundedRectangle(cornerRadius: 3).fill(e.dienst.color).frame(width: 6, height: 28)
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(e.naam).font(AppFont.body(14, .medium))
+                                if let t = e.type, !t.isEmpty { Text(t).font(AppFont.body(12)).foregroundStyle(.secondary) }
+                            }
+                            Spacer(minLength: 0)
+                        }
+                        .padding(.horizontal, 14).padding(.vertical, 8)
+                        if i < inzet.eenheden.count - 1 { Divider().padding(.leading, 74) }
+                    }
+                }
+                .padding(.vertical, 6)
+                .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                Text(Lf("Alle eenheden uit de %lld meldingen die bij deze inzet horen, met de tijd van alarmering.", inzet.meldingen))
+                    .font(.footnote).foregroundStyle(.secondary).padding(.horizontal, 4)
+            }
+        }
+    }
+}

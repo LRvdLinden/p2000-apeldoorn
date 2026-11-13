@@ -434,3 +434,25 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 .kind-card b { display: block; margin-bottom: 8px; }
 .kind-bel { display: inline-block; padding: 8px 16px; border-radius: 999px; background: #DC2626; color: #fff; font-weight: 800; text-decoration: none; }
 .kind-bar { box-shadow: 0 0 0 2px var(--c) inset; }
+
+/* Layer bar per category, helicopter card (now above, places, compass) and the units of an incident */
+.chips.lagen .lg-kop { align-self: center; font-size: .66rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); padding: 0 2px 0 8px; }
+.chips.lagen .lg-kop:first-child { padding-left: 4px; }
+.heli-boven { margin: 8px 0 0; font-size: .95rem; display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.heli-boven span { color: #16a34a; font-weight: 700; font-size: .82rem; }
+.heli-vals b small { display: block; color: var(--muted); font-weight: 600; font-size: .72rem; }
+.met-kompas { display: flex; align-items: center; gap: 6px; }
+.kompas { width: 22px; height: 22px; flex: none; }
+.plaatsen, .inzet { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: .84rem; }
+.plaatsen { max-height: 190px; overflow: auto; }
+.plaatsen li { display: grid; grid-template-columns: 92px 1fr; gap: 8px; padding: 3px 0; }
+.plaatsen time, .inzet time { color: var(--muted); font-variant-numeric: tabular-nums; }
+.plaatsen small { color: var(--muted); }
+.plaatsen li.nu b { color: #16a34a; }
+.plaatsen i { color: var(--muted); }
+.inzet li { display: grid; grid-template-columns: 48px 8px 1fr; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--line); }
+.inzet li:first-child { border-top: 0; }
+.inzet time { font-weight: 700; color: inherit; }
+.inzet i { width: 8px; height: 26px; border-radius: 4px; background: var(--c); }
+.inzet span { display: grid; min-width: 0; }
+.inzet small { color: var(--muted); font-size: .75rem; }
