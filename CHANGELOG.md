@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 90)
+- De WhatsApp-knop en de regel "© A-Alerts … Made & Powered by PixelForges" staan niet meer onder iedere melding (ze staan nog in Instellingen).
+
 ## A-Alerts 2.0.1 (build 89)
 - Onder iedere melding staat de bron: "Bron: p2000.page" (aan te tikken in de app, op Android en in de pager; als tekst op Apple TV en Apple Watch).
 

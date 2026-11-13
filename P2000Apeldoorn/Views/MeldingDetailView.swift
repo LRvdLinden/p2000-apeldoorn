@@ -165,7 +165,7 @@ struct MeldingDetailView: View {
                     }
                     .buttonStyle(.bordered)
                     .tint(.secondary)
-                    footer.id("einde")
+                    Color.clear.frame(height: 8).id("einde")
                 }
                 .padding(16)
                 .frame(maxWidth: 760)
@@ -851,26 +851,6 @@ struct MeldingDetailView: View {
 
     // MARK: - Footer
 
-    private var footer: some View {
-        VStack(spacing: 14) {
-            HStack(spacing: 16) {
-                Link(destination: Config.whatsapp) {
-                    Image(systemName: "message").frame(width: 46, height: 46)
-                        .background(Color.innerCard, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-                }
-                .accessibilityLabel(L("WhatsApp-groep"))
-            }
-            .foregroundStyle(.primary)
-            HStack(spacing: 4) {
-                Text(verbatim: "© \(Calendar.current.component(.year, from: .now)) A-Alerts. All rights reserved. | Made & Powered by")
-                Link("PixelForges", destination: Config.pixelForges).foregroundStyle(Theme.red)
-            }
-            .multilineTextAlignment(.center)
-        }
-        .font(AppFont.body(12))
-        .foregroundStyle(.secondary)
-        .padding(.vertical, 20)
-    }
 
     private func heading(_ text: String) -> some View {
         Text(text).font(AppFont.heading(18))
