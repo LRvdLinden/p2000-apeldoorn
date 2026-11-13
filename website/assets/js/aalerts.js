@@ -78,10 +78,23 @@ export async function fetchLuchtvaart({ alles = false } = {}) {
 }
 export const LUCHT_SOORT = { defensie: "Defensie", kustwacht: "Kustwacht", kmar: "Koninklijke Marechaussee", regering: "Regering" };
 
+/** Lifeliners that were probably cancelled on their way to an alert, or did not take off (filled by fetchHelikopters). */
+let heliInzet = [];
+export const inzetVoor = (guid) => heliInzet.find((x) => x.guid === guid) || null;
+/** The last cancellation of this helicopter, at most half an hour ago. */
+export const inzetVan = (heliId, now = Date.now()) => heliInzet.find((x) => x.heli === heliId && x.status === "geannuleerd" && now - new Date(x.at).getTime() < 30 * 60_000) || null;
+/** ["Waarschijnlijk geannuleerd om 11:42", "Keerde om boven Ugchelen. Afgeleid uit de vlucht; P2000 meldt geen annulering."] */
+export function inzetTekst(x) {
+  if (x.status === "niet_opgestegen") return ["Opgeroepen, maar niet opgestegen", "De helikopter staat nog aan de grond."];
+  return [`Waarschijnlijk geannuleerd om ${fmtTime(new Date(x.at))}`, `${x.boven ? `Keerde om boven ${x.boven}. ` : ""}Afgeleid uit de vlucht; P2000 meldt geen annulering.`];
+}
 export async function fetchHelikopters() {
   try {
     const r = await fetch(`${API}/v1/helikopters`, { signal: AbortSignal.timeout(10_000) });
-    return r.ok ? (await r.json()).helikopters || [] : [];
+    if (!r.ok) return [];
+    const j = await r.json();
+    heliInzet = j.inzet || [];
+    return j.helikopters || [];
   } catch { return []; }
 }
 

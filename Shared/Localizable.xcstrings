@@ -1038,6 +1038,23 @@
         }
       }
     },
+    "Afgeleid uit de vlucht; P2000 meldt geen annulering.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Worked out from the flight; P2000 reports no cancellation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgeleid uit de vlucht; P2000 meldt geen annulering."
+          }
+        }
+      }
+    },
     "Afgelopen": {
       "extractionState": "manual",
       "localizations": {
@@ -2972,6 +2989,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De helikopter is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms."
+          }
+        }
+      }
+    },
+    "De helikopter staat nog aan de grond.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The helicopter is still on the ground."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De helikopter staat nog aan de grond."
           }
         }
       }
@@ -6172,6 +6206,23 @@
         }
       }
     },
+    "Keerde om boven %@.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turned back above %@."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Keerde om boven %@."
+          }
+        }
+      }
+    },
     "Kies een melding": {
       "extractionState": "manual",
       "localizations": {
@@ -8718,6 +8769,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opgeheven · code groen"
+          }
+        }
+      }
+    },
+    "Opgeroepen, maar niet opgestegen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Called, but did not take off"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeroepen, maar niet opgestegen"
           }
         }
       }
@@ -12424,6 +12492,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waar wil je meldingen van?"
+          }
+        }
+      }
+    },
+    "Waarschijnlijk geannuleerd om %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Probably cancelled at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Waarschijnlijk geannuleerd om %@"
           }
         }
       }

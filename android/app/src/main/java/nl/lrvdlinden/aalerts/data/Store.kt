@@ -34,7 +34,12 @@ object Store {
     }
 
     suspend fun refreshAlleWaarschuwingen() { runCatching { alleWaarschuwingen = Api.waarschuwingen(14) } }
-    suspend fun refreshHelikopters() { helikopters = Api.helikopters() }
+    suspend fun refreshHelikopters() { val r = Api.helikoptersVol(); helikopters = r.helikopters; heliInzet = r.inzet }
+    /** Lifeliners that were probably cancelled on their way to an alert, or did not take off. */
+    var heliInzet by mutableStateOf<List<HeliInzet>>(emptyList()); private set
+    fun inzetVoor(guid: String) = heliInzet.firstOrNull { it.guid == guid }
+    /** The last cancellation of this helicopter, at most half an hour ago. */
+    fun annuleringVan(heliId: String) = heliInzet.firstOrNull { x -> x.heli == heliId && x.geannuleerd && (parseInstant(x.at)?.let { java.time.Duration.between(it, java.time.Instant.now()).toMinutes() < 30 } ?: false) }
     var lucht by mutableStateOf<List<Helikopter>>(emptyList()); private set
     suspend fun refreshLucht(aan: Boolean) { lucht = if (aan) Api.lucht() else emptyList(); if (aan) luchtAlle = lucht }
     /** Unfiltered, for the numbers in the list of choices. */

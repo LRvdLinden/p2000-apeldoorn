@@ -480,6 +480,7 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
             }
             InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) })
             h.voorspelling?.let { Text(it.tekst, fontWeight = FontWeight.Medium, fontSize = 13.sp) }
+            Store.annuleringVan(h.id)?.let { HeliInzetRegel(it) }
             // Route on the map: this flight, the last 30 minutes or the whole day.
             Text(tr("Routespoor", "Route"), fontWeight = FontWeight.SemiBold, fontSize = 13.sp, modifier = Modifier.padding(top = 4.dp))
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {

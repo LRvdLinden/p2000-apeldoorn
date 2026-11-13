@@ -7,9 +7,9 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=65";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=66";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -637,13 +637,16 @@ async function loadHeli(m, mapReady) {
     if (!box) return false;
     box.hidden = false;
     const naam = h?.naam || (heliGenoemd(m) ? heliNaam(heliGenoemd(m)) : "Traumahelikopter");
+    // Probably cancelled on its way here, or did not take off (worked out from the flight).
+    const iz = inzetVoor(m.guid), izT = iz ? inzetTekst(iz) : null;
+    const izHTML = izT ? `<div class="inzet-status ${iz.status}"><b>${esc(izT[0])}</b><small>${esc(izT[1])}</small></div>` : "";
     if (!h) {
-      box.innerHTML = `<h2>${esc(naam)}</h2><p class="hint">${esc(naam)} is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.</p>`;
+      box.innerHTML = `<h2>${esc(naam)}</h2>${izHTML}<p class="hint">${esc(naam)} is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.</p>`;
     } else {
       const km = m.lat != null ? distanceKm(h, m) : null;
       const v = h.snelheid_kt != null ? h.snelheid_kt * 1.852 : null;
       const eta = km != null && v > 40 && !h.op_grond ? Math.round((km / v) * 60) : null;
-      box.innerHTML = `<h2>${esc(h.naam)} <span class="live-tag">LIVE</span></h2>
+      box.innerHTML = `<h2>${esc(h.naam)} <span class="live-tag">LIVE</span></h2>${izHTML}
         <div class="kz heli-live"><img src="${heliImg(h)}" alt="" style="width:84px;height:auto;${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">
         <div><b>${esc(heliInfo(h))}</b>${km != null ? `<small>${km.toFixed(1).replace(".", ",")} km van de melding${eta ? ` · ± ${eta} min` : ""}</small>` : ""}${h.voorspelling ? `<small>${esc(voorspellingTekst(h.voorspelling))}</small>` : ""}</div></div>
         <button class="btn btn-red" id="volgHeli" style="width:100%;margin-top:10px">Volg ${esc(h.naam)} op de kaart</button>
@@ -1310,6 +1313,7 @@ function openHeli(h) {
     <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${herkenning ? `<p class="hint" style="margin:8px 0 0">${herkenning}</p>` : ""}
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
+    ${inzetVan(h.id) ? `<div class="inzet-status geannuleerd"><b>${esc(inzetTekst(inzetVan(h.id))[0])}</b><small>${esc(inzetTekst(inzetVan(h.id))[1])}</small></div>` : ""}
     <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["lang", "2 uur"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
     <div class="afspeel"><button id="afspeelKnop" class="icon-btn" aria-label="Vlucht terugspelen">▶</button>
       <input type="range" id="afspeelSlider" min="0" max="1" step="0.001" value="${afspelen.f ?? 1}" aria-label="Afspeelpositie">

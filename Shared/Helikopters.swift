@@ -115,8 +115,66 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     var isVerouderd: Bool { Date.now.timeIntervalSince(gezien) > 120 }
 }
 
+/// A Lifeliner that was probably cancelled on its way to an alert, or did not take off. P2000 sends no cancellation:
+/// the server works this out from the flight.
+struct HeliInzet: Decodable, Hashable, Sendable {
+    let guid: String
+    let heli: String
+    let status: String      // "geannuleerd" or "niet_opgestegen"
+    let at: Date
+    let boven: String?
+
+    enum CodingKeys: String, CodingKey { case guid, heli, status, at, boven }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        guid = try c.decode(String.self, forKey: .guid)
+        heli = try c.decode(String.self, forKey: .heli)
+        status = (try? c.decode(String.self, forKey: .status)) ?? ""
+        at = Fmt.parseISO((try? c.decode(String.self, forKey: .at)) ?? "") ?? .now
+        boven = try? c.decodeIfPresent(String.self, forKey: .boven)
+    }
+
+    var geannuleerd: Bool { status == "geannuleerd" }
+    var titel: String {
+        geannuleerd ? Lf("Waarschijnlijk geannuleerd om %@", Fmt.time(at)) : L("Opgeroepen, maar niet opgestegen")
+    }
+    var uitleg: String {
+        guard geannuleerd else { return L("De helikopter staat nog aan de grond.") }
+        let los = L("Afgeleid uit de vlucht; P2000 meldt geen annulering.")
+        return boven.map { Lf("Keerde om boven %@.", $0) + " " + los } ?? los
+    }
+}
+
+/// The orange line "Waarschijnlijk geannuleerd om 11:42".
+struct HeliInzetRegel: View {
+    let inzet: HeliInzet
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: inzet.geannuleerd ? "arrow.uturn.backward.circle.fill" : "pause.circle.fill")
+                .font(.title3).foregroundStyle(inzet.geannuleerd ? Color.orange : Color.secondary)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(inzet.titel).font(AppFont.body(14, .semibold, relativeTo: .subheadline))
+                Text(inzet.uitleg).font(AppFont.body(12, .regular, relativeTo: .caption)).foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(10)
+        .background((inzet.geannuleerd ? Color.orange : Color.secondary).opacity(0.14), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
 private struct HeliResponse: Decodable {
     let helikopters: [Helikopter]
+    let inzet: [HeliInzet]
+
+    enum CodingKeys: String, CodingKey { case helikopters, inzet }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        helikopters = try c.decode([Helikopter].self, forKey: .helikopters)
+        inzet = (try? c.decodeIfPresent([HeliInzet].self, forKey: .inzet)) ?? []
+    }
 }
 private struct LuchtResponse: Decodable {
     let toestellen: [Helikopter]
@@ -125,6 +183,11 @@ private struct LuchtResponse: Decodable {
 extension P2000API {
     func helikopters() async throws -> [Helikopter] {
         try await getJSON("/v1/helikopters", as: HeliResponse.self).helikopters
+    }
+    /// The helicopters with what is known about cancelled call-outs.
+    func helikoptersMetInzet() async throws -> (helikopters: [Helikopter], inzet: [HeliInzet]) {
+        let r = try await getJSON("/v1/helikopters", as: HeliResponse.self)
+        return (r.helikopters, r.inzet)
     }
     /// Layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft above the Netherlands.
     func lucht() async throws -> [Helikopter] {
@@ -139,7 +202,15 @@ final class HeliStore {
     static let shared = HeliStore()
 
     private(set) var items: [Helikopter] = []
+    /// Lifeliners that were probably cancelled on their way to an alert, or did not take off.
+    private(set) var inzet: [HeliInzet] = []
     private(set) var lastUpdated: Date?
+
+    func inzetVoor(_ guid: String) -> HeliInzet? { inzet.first { $0.guid == guid } }
+    /// The last cancellation of this helicopter, at most half an hour ago.
+    func annulering(van heliID: String) -> HeliInzet? {
+        inzet.first { $0.heli == heliID && $0.geannuleerd && Date.now.timeIntervalSince($0.at) < 30 * 60 }
+    }
     private(set) var failed = false
 
     @ObservationIgnored private var task: Task<Void, Never>?
@@ -165,7 +236,9 @@ final class HeliStore {
 
     func refresh() async {
         do {
-            items = try await P2000API.shared.helikopters()
+            let r = try await P2000API.shared.helikoptersMetInzet()
+            items = r.helikopters
+            inzet = r.inzet
             lastUpdated = .now
             failed = false
         } catch {
@@ -311,6 +384,7 @@ struct HeliInfoKaart: View {
             }
             .fixedSize(horizontal: false, vertical: true)
             if let v = heli.voorspelling { VoorspellingRegel(voorspelling: v) }
+            if let a = HeliStore.shared.annulering(van: heli.id) { HeliInzetRegel(inzet: a) }
             #if !os(watchOS)
             if let spoor {
                 @Bindable var s = spoor

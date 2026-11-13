@@ -89,6 +89,7 @@ object Api {
     suspend fun locaties(): List<Locatie> = runCatching { AppJson.decodeFromString<Locaties>(getText("${base}v1/locaties")).let { it.bases + it.ziekenhuizen } }.getOrDefault(emptyList())
     /** Layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft. */
     suspend fun lucht(): List<Helikopter> = runCatching { AppJson.decodeFromString<LuchtResponse>(getText("${base}v1/lucht")).toestellen }.getOrDefault(emptyList())
+    suspend fun helikoptersVol(): HeliResponse = runCatching { AppJson.decodeFromString<HeliResponse>(getText("${base}v1/helikopters")) }.getOrDefault(HeliResponse())
     suspend fun helikopters(): List<Helikopter> = runCatching { AppJson.decodeFromString<HeliResponse>(getText("${base}v1/helikopters")).helikopters }.getOrDefault(emptyList())
 
     suspend fun content(name: String): ContentPage? = runCatching { AppJson.decodeFromString<ContentPage>(getText("${base}v1/content/$name")) }.getOrNull()

@@ -354,7 +354,17 @@ data class Helikopter(
 }
 
 @Serializable
-data class HeliResponse(val helikopters: List<Helikopter> = emptyList())
+data class HeliResponse(val helikopters: List<Helikopter> = emptyList(), val inzet: List<HeliInzet> = emptyList())
+
+/** A Lifeliner that was probably cancelled on its way to an alert, or did not take off (worked out from the flight). */
+@Serializable
+data class HeliInzet(val guid: String, val heli: String, val status: String = "", val at: String? = null, val boven: String? = null) {
+    val geannuleerd get() = status == "geannuleerd"
+    val titel: String get() = if (geannuleerd) (parseInstant(at)?.let { Fmt.time(it) } ?: "").let { tr("Waarschijnlijk geannuleerd om $it", "Probably cancelled at $it") }
+        else tr("Opgeroepen, maar niet opgestegen", "Called, but did not take off")
+    val uitleg: String get() = if (!geannuleerd) tr("De helikopter staat nog aan de grond.", "The helicopter is still on the ground.")
+        else (boven?.let { tr("Keerde om boven $it. ", "Turned back above $it. ") } ?: "") + tr("Afgeleid uit de vlucht; P2000 meldt geen annulering.", "Worked out from the flight; P2000 reports no cancellation.")
+}
 @Serializable
 data class LuchtResponse(val toestellen: List<Helikopter> = emptyList())
 

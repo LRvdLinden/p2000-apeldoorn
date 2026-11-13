@@ -182,6 +182,8 @@ struct HeliLiveKaart: View {
             Text(heli?.naam ?? HeliKoppeling.genoemd(melding).map(HeliKoppeling.naam) ?? L("Traumahelikopter"))
                 .font(.headline).padding(.horizontal, 4)
             VStack(alignment: .leading, spacing: 12) {
+                // Probably cancelled on its way here, or did not take off (worked out from the flight).
+                if let inzet = HeliStore.shared.inzetVoor(melding.guid) { HeliInzetRegel(inzet: inzet) }
                 if let h = heli {
                     HStack(spacing: 12) {
                         Image(h.afbeelding).resizable().scaledToFit().frame(width: 84, height: 30)

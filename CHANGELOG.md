@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 87)
+- Lifeliner waarschijnlijk geannuleerd: P2000 meldt geen annulering, dus de server leidt het af uit de vlucht. De helikopter die in de melding is genoemd kwam dichterbij, is niet in de buurt van de melding geweest (4 km, of 6 km bij alleen een straatnaam) en vliegt daarna minstens twee minuten en 3 km van de melding af. Bij de melding en op de helikopterkaart staat dan "Waarschijnlijk geannuleerd om 11:42" met de plaats waar hij omkeerde. Staat de helikopter tien minuten na de oproep nog aan de grond: "Opgeroepen, maar niet opgestegen". App, Android en pager (`inzet` in `GET /v1/helikopters`).
+- Wie de bel bij die helikopter aan heeft staan, krijgt er een pushmelding van.
+
 ## A-Alerts 2.0.1 (build 86)
 - Een melding met alleen een straatnaam (zonder huisnummer) staat nu op het midden van die straat volgens het wegenbestand (PDOK), in plaats van bij een willekeurig huis ernaast. Voorbeeld: Kanaal Noord in Apeldoorn. Meldingen van de laatste zes uur worden rechtgezet.
 - "Eenheden bij deze inzet": een Lifeliner of Zulu staat er met de tekening van de helikopter en is aan te tikken; je gaat dan naar de kaart en volgt dat toestel. App, Android en pager.

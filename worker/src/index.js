@@ -36,7 +36,7 @@ import { recordPositions, recordLucht, spoor, vluchten, spoorHousekeeping } from
 import { koppelInstall, zoekToestel, testToestel } from "./toestel.js";
 import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
-import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, volgPushes, recenteHeliMeldingen, meldingVoorspelling,
+import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, volgPushes, volgInzetten, heliInzetten, inzetPush, recenteHeliMeldingen, meldingVoorspelling,
   noteerTerPlaatse, terPlaatseSet, saveFeedback, feedbackLijst, updateFeedback, deleteFeedback } from "./extra.js";
 import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
@@ -223,6 +223,8 @@ async function handle(req, env, ctx) {
         });
       }
     } catch (e) { console.error("[voorspelling]", e.message || e); }
+    // Lifeliners that were probably cancelled on their way to an alert, or did not take off.
+    try { data.inzet = await heliInzetten(env); } catch (e) { console.error("[inzet]", e.message || e); data.inzet = []; }
     return reply(200, data, { "cache-control": "public, max-age=10" });
   }
   if (method === "GET" && path === "/v1/status") {
@@ -703,7 +705,21 @@ async function heliRun(env) {
       }
     }
     const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma");
-    if (lucht.length) await noteerTerPlaatse(env, lucht, await recenteHeliMeldingen(env));
+    if (lucht.length) {
+      const meldingen = await recenteHeliMeldingen(env);
+      await noteerTerPlaatse(env, lucht, meldingen);
+      // A Lifeliner that turned back before it reached its alert: probably cancelled (P2000 sends no cancellation).
+      if (meldingen.length) {
+        for (const x of await volgInzetten(env, lucht, meldingen, await terPlaatseSet(env))) {
+          devices ||= await activeDevices(env);
+          prefs ||= await devicePrefs(env);
+          const g = inzetPush(devices, prefs, x);
+          if (!g.tokens.length || await kvGet(env, `broadcast:${g.key}`)) continue;
+          await kvSet(env, `broadcast:${g.key}`, JSON.stringify({ ...g.texts.nl, en: g.texts.en, heli: g.heli, guid: g.guid }));
+          await queue(env, `broadcast:${g.key}`, g.tokens);
+        }
+      }
+    }
   } catch (e) { console.error("[heli-zones]", e.message || e); }
   await checkOpstijgen(env, data.helikopters || [], prev, async (m, key, texts) => {
     devices ||= await activeDevices(env);
@@ -765,7 +781,7 @@ async function cron(env, event) {
     try { await nieuwsHousekeeping(env); } catch (e) { console.error("[nieuws]", e.message || e); }
     await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
     await env.DB.prepare("DELETE FROM melding_feedback WHERE at < ?").bind(Date.now() - 90 * 86_400_000).run().catch(() => {});
-    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'broadcast:hz:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'heli_inzet:%' OR key LIKE 'broadcast:hz:%' OR key LIKE 'broadcast:hx:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }

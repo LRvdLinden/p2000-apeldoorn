@@ -460,3 +460,7 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 .inzet-heli img { width: 52px; height: 20px; object-fit: contain; flex: none; }
 .inzet-heli span { flex: 1; }
 .inzet-heli em { font-style: normal; color: var(--muted); font-size: 1.2rem; }
+.inzet-status { display: grid; gap: 2px; margin: 8px 0; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, #F59E0B 16%, transparent); border-left: 4px solid #F59E0B; }
+.inzet-status b { font-size: .92rem; }
+.inzet-status small { color: var(--muted); font-size: .78rem; }
+.inzet-status.niet_opgestegen { background: var(--surface-2); border-left-color: var(--muted); }

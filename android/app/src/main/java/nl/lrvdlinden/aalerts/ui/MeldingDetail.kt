@@ -465,10 +465,22 @@ fun openRoute(ctx: Context, lat: Double, lon: Double, label: String) {
         .recoverCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com/maps/dir/?api=1&destination=$lat,$lon"))) }
 }
 
+/** The orange line "Waarschijnlijk geannuleerd om 11:42". */
+@Composable
+fun HeliInzetRegel(x: nl.lrvdlinden.aalerts.data.HeliInzet) {
+    val kleur = if (x.geannuleerd) Color(0xFFF59E0B) else Muted
+    Column(Modifier.fillMaxWidth().background(kleur.copy(alpha = 0.14f), RoundedCornerShape(12.dp)).padding(10.dp)) {
+        Text(x.titel, fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+        Text(x.uitleg, color = Muted, fontSize = 12.sp)
+    }
+}
+
 /** The Lifeliner (or Zulu) of this alert, live: altitude, speed, distance to the scene and "Volg op kaart". */
 @Composable
 fun HeliLiveCard(m: Melding, h: Helikopter?, naam: String?, onFollow: (String) -> Unit) {
     SectionCard(h?.naam ?: naam ?: tr("Traumahelikopter", "Air ambulance"), Icons.Outlined.Flight) {
+        // Probably cancelled on its way here, or did not take off (worked out from the flight).
+        Store.inzetVoor(m.guid)?.let { HeliInzetRegel(it) }
         if (h == null) {
             Text(tr("${naam ?: "De traumahelikopter"} is nu niet live te zien. Laag vliegend of aan de grond ontbreekt de positie soms.",
                 "${naam ?: "The air ambulance"} is not visible live right now. Flying low or on the ground, the position is sometimes missing."), color = Muted, fontSize = 13.sp)

@@ -232,6 +232,91 @@ export async function noteerTerPlaatse(env, list, meldingen, now = Date.now()) {
   }
 }
 
+// ------------------------------------------------------------------ Lifeliner cancelled on its way to an alert
+
+/**
+ * One step of following a Lifeliner that was called for an alert. P2000 sends no cancellation, so this is worked out
+ * from the flight: it came closer to the alert, never got near it, and has been flying away from it since.
+ * state: { first_km, min_km, min_at, min_boven, status: "onderweg" | "geannuleerd" | "niet_opgestegen", at } or null.
+ * Returns the new state (the same object when nothing changed).
+ */
+export function inzetStap(state, h, m, now = Date.now()) {
+  if (!h || h.lat == null || m.lat == null) return state;
+  if (state?.status === "geannuleerd") return state;
+  const d = km(h, m);
+  const leeftijd = now - Date.parse(m.datum_tijd);
+  if (!state || state.status === "niet_opgestegen") {
+    if (!h.op_grond) return { first_km: d, min_km: d, min_at: now, min_boven: h.boven || null, status: "onderweg" };
+    // Called, known to stand on the ground far from the alert, ten minutes later: it did not take off.
+    if (!state && leeftijd >= 10 * 60_000 && d > 5) return { status: "niet_opgestegen", at: now };
+    return state;
+  }
+  let s = state;
+  if (d < s.min_km - 0.3) s = { ...s, min_km: d, min_at: now, min_boven: h.boven || s.min_boven || null };
+  // Only a street name: the marker is the middle of that street, so the real spot can be further away.
+  const grens = /\d/.test(String(m.locatie || "")) ? 4 : 6;
+  const naderde = s.first_km - s.min_km >= 2;
+  if (naderde && s.min_km > grens && d >= s.min_km + 3 && now - s.min_at >= 120_000) {
+    return { ...s, status: "geannuleerd", at: s.min_at };
+  }
+  return s;
+}
+
+/** Runs inzetStap for every Lifeliner named in a recent alert; returns the ones that were cancelled just now. */
+export async function volgInzetten(env, helis, meldingen, terPlaatse, now = Date.now()) {
+  const nieuw = [];
+  for (const m of meldingen) {
+    const id = genoemd(m);
+    if (!id || now - Date.parse(m.datum_tijd) > 50 * 60_000) continue;
+    if (terPlaatse.has(`${id}:${m.guid}`)) continue;
+    const h = helis.find((x) => x.id === id);
+    if (!h) continue;
+    const key = `heli_inzet:${id}:${m.guid}`;
+    const raw = (await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(key).first())?.value;
+    const oud = raw ? JSON.parse(raw) : null;
+    const s = inzetStap(oud, h, m, now);
+    if (s === oud || !s) continue;
+    await env.DB.prepare("INSERT INTO kv (key, value, at) VALUES (?, ?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value, at = excluded.at")
+      .bind(key, JSON.stringify(s), now).run();
+    if (s.status === "geannuleerd") nieuw.push({ heli: h, melding: m, state: s });
+  }
+  return nieuw;
+}
+
+let inzetMemo = { at: 0, lijst: [] };
+/** What is known about Lifeliners and their alerts: [{ guid, heli, status, at, boven }] (cancelled or not taken off). */
+export async function heliInzetten(env, now = Date.now()) {
+  if (now - inzetMemo.at < 20_000) return inzetMemo.lijst;
+  const { results } = await env.DB.prepare("SELECT key, value FROM kv WHERE key >= 'heli_inzet:' AND key < 'heli_inzet;'").all();
+  const lijst = [];
+  for (const r of results || []) {
+    const [, heli, guid] = r.key.split(":");
+    let s = null;
+    try { s = JSON.parse(r.value); } catch { continue; }
+    if (s?.status !== "geannuleerd" && s?.status !== "niet_opgestegen") continue;
+    lijst.push({ guid, heli, status: s.status, at: new Date(s.at).toISOString(), boven: s.min_boven || null });
+  }
+  inzetMemo = { at: now, lijst };
+  return lijst;
+}
+
+/** Push for devices that follow this helicopter with the bell: "Lifeliner 3 waarschijnlijk geannuleerd". */
+export function inzetPush(devices, prefs, { heli, melding, state }, now = Date.now()) {
+  const date = new Date(now);
+  const tokens = devices.filter((d) => {
+    const hp = prefs.get(d.token)?.heli;
+    return d.enabled && hp?.volg?.includes(heli.id) && !(hp.pauze_tot && hp.pauze_tot > now) && !isQuiet(d, date);
+  }).map((d) => d.token);
+  const plek = melding.stad ? ` (${melding.stad})` : "";
+  return {
+    key: `hx:${heli.id}:${melding.guid}`, heli: heli.id, guid: melding.guid, tokens,
+    texts: {
+      nl: { title: `${heli.naam} waarschijnlijk geannuleerd`, body: `${state.min_boven ? `Keerde om boven ${state.min_boven}. ` : ""}Was onderweg naar: ${melding.title || "een melding"}${plek}` },
+      en: { title: `${heli.naam} probably cancelled`, body: `${state.min_boven ? `Turned back above ${state.min_boven}. ` : ""}Was on its way to: ${melding.title || "an alert"}${plek}` },
+    },
+  };
+}
+
 export async function terPlaatseSet(env) {
   const { results } = await env.DB.prepare("SELECT key FROM kv WHERE key LIKE 'heli_scene:%'").all();
   return new Set(results.map((r) => r.key.slice(11)));
