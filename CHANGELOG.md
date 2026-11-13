@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 88)
+- Verloop en "Eenheden bij deze inzet": een herbezetting van een kazerne ("Herbezet./kazerneren") of een proefalarm hoort nooit bij een inzet, ook niet als dezelfde eenheid is opgeroepen. App, Android (daar nu ook besteld vervoer B1–B3 uitgesloten) en pager.
+
 ## A-Alerts 2.0.1 (build 87)
 - Lifeliner waarschijnlijk geannuleerd: P2000 meldt geen annulering, dus de server leidt het af uit de vlucht. De helikopter die in de melding is genoemd kwam dichterbij, is niet in de buurt van de melding geweest (4 km, of 6 km bij alleen een straatnaam) en vliegt daarna minstens twee minuten en 3 km van de melding af. Bij de melding en op de helikopterkaart staat dan "Waarschijnlijk geannuleerd om 11:42" met de plaats waar hij omkeerde. Staat de helikopter tien minuten na de oproep nog aan de grond: "Opgeroepen, maar niet opgestegen". App, Android en pager (`inzet` in `GET /v1/helikopters`).
 - Wie de bel bij die helikopter aan heeft staan, krijgt er een pushmelding van.

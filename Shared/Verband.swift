@@ -60,7 +60,9 @@ enum Verband {
     }
 
     private static func isBesteld(_ m: Melding) -> Bool {
+        // Also restaffing a station or a test alarm: sent to the same units as the incident before it, but a call of its own.
         ["B1", "B2", "B3"].contains((m.prioriteit ?? "").uppercased())
+            || m.title.range(of: "herbezet|kazerneren|proefalarm", options: [.regularExpression, .caseInsensitive]) != nil
     }
 
     private static func norm(_ s: String?) -> String {

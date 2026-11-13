@@ -201,7 +201,9 @@ export function geschattePositie(r, now = Date.now()) {
 
 // ------------------------------------------------------------------ possible links between alerts ("verloop")
 
-const besteld = (m) => ["B1", "B2", "B3"].includes(String(m.prioriteit || "").toUpperCase());
+// Never part of an incident: planned patient transport (B1–B3), and restaffing a station or a test alarm (those go out
+// to the same units as the incident before them, but are a call of their own).
+const besteld = (m) => ["B1", "B2", "B3"].includes(String(m.prioriteit || "").toUpperCase()) || /herbezet|kazerneren|proefalarm/i.test(m.title || "");
 const norm = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]/g, "");
 const plaats = (m) => capPlaats(m.stad) || "Apeldoorn";
 

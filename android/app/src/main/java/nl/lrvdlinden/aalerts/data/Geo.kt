@@ -202,13 +202,18 @@ object Verband {
 
     private fun norm(s: String?) = java.text.Normalizer.normalize((s ?: "").lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("[^a-z0-9]"), "")
 
+    private val LOS = Regex("herbezet|kazerneren|proefalarm", RegexOption.IGNORE_CASE)
+    /** Never part of an incident: planned patient transport (B1–B3), restaffing a station or a test alarm. */
+    private fun los(m: Melding) = (m.prioriteit ?: "").uppercase() in setOf("B1", "B2", "B3") || LOS.containsMatchIn(m.title)
+
     fun gekoppeld(m: Melding, list: List<Melding>, max: Int = 6): List<MeldingVerband> {
         val groot = !m.grip.isNullOrBlank() || !m.opschaling.isNullOrBlank()
         val venster = (if (groot) 120 else 45) * 60_000L
         val codes = m.eenheden.mapNotNull { it.code }.toSet()
         val out = mutableListOf<MeldingVerband>()
+        if (los(m)) return emptyList()
         for (o in list) {
-            if (o.guid == m.guid) continue
+            if (o.guid == m.guid || los(o)) continue
             val dt = o.millis - m.millis
             if (abs(dt) > venster || o.isBesteld || m.isBesteld) continue
             val redenen = mutableListOf<String>()
