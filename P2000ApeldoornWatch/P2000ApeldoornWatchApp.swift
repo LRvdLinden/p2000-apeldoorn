@@ -166,6 +166,7 @@ struct WatchDetailView: View {
                           systemImage: settings.bewaard.contains(melding.guid) ? "bookmark.fill" : "bookmark")
                 }
                 .padding(.top, 4)
+                Text(L("Bron: p2000.page")).font(AppFont.body(11, .regular, relativeTo: .caption2)).foregroundStyle(.secondary)
             }
         }
         .navigationTitle(melding.dienst.label)

@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 89)
+- Onder iedere melding staat de bron: "Bron: p2000.page" (aan te tikken in de app, op Android en in de pager; als tekst op Apple TV en Apple Watch).
+
 ## Nieuws en website (13 november 2026)
 - Stockfoto's bij het nieuws: het label "Foto: JS Fotografie" stond nog in vijf foto's zelf (en in hun deelafbeeldingen). Die zijn opnieuw gemaakt uit de originelen, zonder label; de naam staat nu nergens meer (`?v=5`).
 - Pager: de kaart van een helikopter of vliegtuig heeft marges, schuift binnen het paneel en is op een telefoon een blad onderaan; de kaartlagen staan per categorie op een eigen regel en het paneel is niet breder dan nodig.

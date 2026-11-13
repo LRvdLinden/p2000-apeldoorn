@@ -307,6 +307,10 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     Settings.afstandKm(m)?.let { InfoRow(tr("Afstand", "Distance"), "%.1f km".format(it).replace(".", ",")) }
                     if (m.lat != null && m.lon != null) InfoRow(tr("Coördinaten", "Coordinates"), "%.5f, %.5f".format(m.lat, m.lon))
                 }
+                // The source of every P2000 alert.
+                val bronOpen = androidx.compose.ui.platform.LocalUriHandler.current
+                Text(tr("Bron: p2000.page", "Source: p2000.page"), color = Muted, fontSize = 13.sp, textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().clickable { bronOpen.openUri("https://p2000.page") }.padding(vertical = 4.dp))
                 OutlinedButton(onClick = { toonFeedback = true }, modifier = Modifier.fillMaxWidth()) {
                     Icon(Icons.Outlined.Feedback, null); Spacer(Modifier.width(8.dp)); Text(tr("Klopt deze melding niet?", "Is this alert wrong?"))
                 }

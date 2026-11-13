@@ -88,6 +88,7 @@ struct TVDetailView: View {
                         section(L("Volledige melding"))
                         Text(f).font(AppFont.body(18, .regular).monospaced()).foregroundStyle(.secondary)
                     }
+                    Text(L("Bron: p2000.page")).font(AppFont.body(16, .regular)).foregroundStyle(.secondary)
                     Button(L("Sluiten")) { dismiss() }.padding(.top, 10)
                 }
                 .padding(.trailing, 20)

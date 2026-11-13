@@ -534,6 +534,7 @@ function renderDetail(m) {
       ${m.grip ? `<dt>GRIP</dt><dd>${esc(m.grip)}</dd>` : ""}
       <dt>Volledige melding</dt><dd>${esc(m.full_melding || m.title)}</dd>
     </dl></section>
+    <p class="source">Bron: <a href="https://p2000.page" target="_blank" rel="noopener">p2000.page</a></p>
     <section class="card feedback">
       <button class="link-btn" id="fbOpen">Klopt deze melding niet?</button>
       <form id="fbForm" hidden>

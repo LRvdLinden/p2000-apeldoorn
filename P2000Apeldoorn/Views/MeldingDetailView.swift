@@ -153,6 +153,11 @@ struct MeldingDetailView: View {
                     if !melding.voertuigen.isEmpty { vehiclesCard }
                     if let reden = settings.geenPushReden(melding) { geenPushCard(reden) }
                     dataCard
+                    // The source of every P2000 alert.
+                    Link(L("Bron: p2000.page"), destination: Config.source)
+                        .font(AppFont.body(13, .regular, relativeTo: .footnote))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity)
                     Button { toonFeedback = true } label: {
                         Label(L("Klopt deze melding niet?"), systemImage: "exclamationmark.bubble")
                             .font(AppFont.body(14, .medium))
