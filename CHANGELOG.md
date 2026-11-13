@@ -1,5 +1,8 @@
 # Changelog
 
+## Worker (13 november 2026, avond)
+- Burgernet: de tekst begon soms twee keer met dezelfde zin(nen), omdat burgernet.nl de openingszin vóór het bericht herhaalt. De herhaling wordt nu weggehaald in de worker (`ontdubbel`), dus ook in het kant-en-klare bericht van de Homey-app, de pushmelding en de app.
+
 ## A-Alerts 2.0.1 (build 90)
 - De WhatsApp-knop en de regel "© A-Alerts … Made & Powered by PixelForges" staan niet meer onder iedere melding (ze staan nog in Instellingen).
 

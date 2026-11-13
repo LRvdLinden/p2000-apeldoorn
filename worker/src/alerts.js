@@ -93,6 +93,23 @@ function burgernetPlaats(report, location) {
 }
 
 /** Title of a Burgernet call: the first sentence, or the first two when the first is only a word like "Opgelet!". */
+/**
+ * Burgernet sometimes puts the first sentence(s) of a message in front of the message itself, so the text starts
+ * twice: "De politie zoekt een Mazda 3. De politie zoekt een Mazda 3. Het kenteken …". The repeat is dropped.
+ */
+export function ontdubbel(tekst) {
+  const t = String(tekst || "").replace(/[ \t]+/g, " ").trim();
+  const plat = (x) => x.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ").trim();
+  // Every sentence end is a possible end of the repeated opening; the longest repeat wins.
+  const einden = [...t.matchAll(/[.!?:](?=\s)/g)].map((m) => m.index + 1).reverse();
+  for (const i of einden) {
+    const kop = t.slice(0, i), rest = t.slice(i).trim();
+    const k = plat(kop);
+    if (k.length >= 15 && plat(rest).startsWith(k)) return rest;
+  }
+  return t;
+}
+
 export function burgernetTitel(report) {
   const clean = String(report || "").replace(/^\d{4}\s?[A-Z]{2}\s+/, "");
   const zinnen = clean.split(/(?<=[.:!?])\s/);
@@ -158,7 +175,7 @@ export function fromBurgernet(a, now = Date.now()) {
   const link = String(a.link || "");
   const idMatch = link.match(/\/burgernet\/([^/?#]+)/);
   const id = idMatch ? idMatch[1] : `${key}-${a.date}-${String(a.report || "").slice(0, 40)}`;
-  const report = String(a.report || "").replace(/\r/g, "").trim();
+  const report = ontdubbel(String(a.report || "").replace(/\r/g, ""));
   // The feed often has a date without a time: then the moment it was first seen, never a made-up 13:00.
   const t = String(a.time || "").match(/(\d{1,2}):(\d{2})/);
   const start = t ? (amsterdamTime(a.date, `${t[1]}:${t[2]}`) ?? now) : now;
@@ -198,7 +215,7 @@ export function burgernetBerichten(html) {
   const out = [];
   for (const deel of delen) {
     const label = decode(deel.slice(0, deel.indexOf("</h5>")));
-    const tekst = decode((deel.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i) || [])[1] || "");
+    const tekst = ontdubbel(decode((deel.match(/<h3[^>]*>([\s\S]*?)<\/h3>/i) || [])[1] || ""));
     if (!label || !tekst) continue;
     const items = [...deel.slice(0, deel.search(/<h3/i)).matchAll(/action-message__heading-item[^>]*>([^<]*)</gi)].map((m) => decode(m[1]));
     const datum = items.find((x) => /^\d{2}\/\d{2}\/\d{4}$/.test(x));
@@ -222,7 +239,7 @@ export function fromBurgernetSite(id, html, now = Date.now()) {
   };
   const message = (label) => {
     const m = h.match(new RegExp(`>${label}</h5>[\\s\\S]*?<h3[^>]*>([\\s\\S]*?)</h3>`, "i"));
-    return m ? decode(m[1]) : "";
+    return m ? ontdubbel(decode(m[1])) : "";
   };
   const location = spec("Locatie");
   const key = plaatsKey(location);

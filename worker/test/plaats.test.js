@@ -76,3 +76,17 @@ test("inzetStap: a Lifeliner that turns back before its alert is probably cancel
   a = inzetStap(a, h(52.0), m, t0 + 20 * 60_000);
   assert.equal(a.status, "onderweg");
 });
+
+test("ontdubbel: a Burgernet text that starts twice", async () => {
+  const { ontdubbel } = await import("../src/alerts.js");
+  const een = "De politie van Apeldoorn is in verband met een vermissing op zoek naar een zwarte Mazda 3.";
+  const rest = "Het kenteken begint met K135. Tips? Bel nu 112";
+  assert.equal(ontdubbel(`${een} ${een} ${rest}`), `${een} ${rest}`);
+  assert.equal(ontdubbel(`${een}\n${een} ${rest}`), `${een} ${rest}`);
+  assert.equal(ontdubbel(`${een} ${rest}`), `${een} ${rest}`);
+  // two opening sentences repeated
+  assert.equal(ontdubbel(`Vermist: man van 80. Hij draagt een rode jas. Vermist: man van 80. Hij draagt een rode jas. Bel 112.`), "Vermist: man van 80. Hij draagt een rode jas. Bel 112.");
+  // a short repeated word is left alone
+  assert.equal(ontdubbel("Let op. Let op. Er is brand."), "Let op. Let op. Er is brand.");
+  assert.equal(ontdubbel(""), "");
+});
