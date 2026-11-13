@@ -1,0 +1,21 @@
+name: Woonplaatsen (eenmalig)
+# Fetches every Dutch place with its centre from PDOK and commits worker/src/woonplaatsen.json.
+on:
+  workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [tools/geodata/fetch_woonplaatsen.py, .github/workflows/woonplaatsen.yml]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/geodata/fetch_woonplaatsen.py
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add worker/src/woonplaatsen.json
+          git commit -m "Geodata: alle woonplaatsen met middelpunt (PDOK)" || echo "geen wijzigingen"
+          git pull --rebase -q && git push
