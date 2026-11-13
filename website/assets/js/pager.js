@@ -936,12 +936,14 @@ function renderMapChips() {
     + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip()
     + `<button class="chip pijl" data-lagen-pijl style="--c:#64748B" aria-expanded="${state.lagenOpen}" aria-controls="mapLagen" title="${state.lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen <span aria-hidden="true">${state.lagenOpen ? "▴" : "▾"}</span></button>`;
   $("mapLagen").hidden = !state.lagenOpen;
-  $("mapLagen").innerHTML = LAGEN.map(([k, label, img, c, cat], i) => {
-    const kop = i === 0 || LAGEN[i - 1][4] !== cat ? `<span class="lg-kop">${cat}</span>` : "";
+  // One row per category: the label in front, its layers behind it.
+  const laagChip = ([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length + state.lucht.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `${kop}<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
-  }).join("") + `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
+  };
+  const cats = [...new Set(LAGEN.map((l) => l[4]))];
+  $("mapLagen").innerHTML = cats.map((cat) => `<div class="lg-rij"><span class="lg-kop">${cat}</span><div class="lg-chips">${LAGEN.filter((l) => l[4] === cat).map(laagChip).join("")}${cat === "Kaart" ? `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>` : ""}</div></div>`).join("");
 }
 $("mapLagen").addEventListener("click", (e) => {
   if (e.target.closest("[data-weergave]")) { openWeergave(); return; }

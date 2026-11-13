@@ -323,9 +323,9 @@ a.drow { text-decoration: none; color: inherit; }
 .live-tag { display: inline-block; font-size: .65rem; font-weight: 900; letter-spacing: .04em; color: #fff; background: #DC2626; border-radius: 6px; padding: 2px 6px; vertical-align: middle; margin-left: 6px; }
 
 /* Helicopter panel: trail range and flights */
-.seg { display: flex; gap: 4px; margin: 10px 0 4px; background: rgba(127,127,127,.12); border-radius: 10px; padding: 3px; }
-.seg button { flex: 1; border: 0; background: transparent; padding: 6px 4px; border-radius: 8px; font: inherit; font-size: .8rem; font-weight: 600; color: inherit; cursor: pointer; }
-.seg button.on { background: var(--surface, #fff); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
+.cluster-panel .seg { display: flex; gap: 4px; margin: 10px 0 4px; background: rgba(127,127,127,.12); border-radius: 10px; padding: 3px; box-shadow: none; backdrop-filter: none; }
+.cluster-panel .seg button { flex: 1; border: 0; background: transparent; padding: 6px 4px; border-radius: 8px; font: inherit; font-size: .8rem; font-weight: 600; color: inherit; cursor: pointer; }
+.cluster-panel .seg button.on { background: var(--surface, #fff); box-shadow: 0 1px 3px rgba(0,0,0,.15); }
 .vl-head { margin: 10px 0 4px; font-size: .8rem; color: var(--muted); }
 .vluchten { list-style: none; margin: 0; padding: 0; font-size: .82rem; display: grid; gap: 3px; }
 .vluchten li.on { font-weight: 700; color: #16a34a; }
@@ -464,3 +464,20 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 .inzet-status b { font-size: .92rem; }
 .inzet-status small { color: var(--muted); font-size: .78rem; }
 .inzet-status.niet_opgestegen { background: var(--surface-2); border-left-color: var(--muted); }
+
+/* Map bar: tidy on every width. Period and pills on one line each, the layers as one row per category. */
+#period button { white-space: nowrap; }
+.chips.lagen { display: grid; gap: 6px; padding: 8px 10px; flex-basis: 100%; width: max-content; max-width: 100%; justify-self: start; margin-right: auto; }
+.chips.lagen[hidden] { display: none; }
+.lg-rij { display: grid; grid-template-columns: 62px 1fr; align-items: center; gap: 8px; }
+.lg-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips.lagen .lg-kop { padding: 0; }
+@media (max-width: 900px) {
+  .map-ui { left: 10px; right: 10px; top: 10px; gap: 8px; }
+  #mapChips { max-width: 100%; overflow-x: auto; scrollbar-width: none; }
+  #mapChips::-webkit-scrollbar { display: none; }
+  #mapChips .chip { flex: none; }
+  .chips.lagen { width: 100%; }
+  .brand-text small { white-space: nowrap; }
+  .brand-text small span:last-child { overflow: hidden; text-overflow: ellipsis; max-width: 34vw; }
+}
