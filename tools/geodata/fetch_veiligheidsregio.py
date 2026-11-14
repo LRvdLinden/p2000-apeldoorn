@@ -54,7 +54,9 @@ ringen = []
 for poly in polys:
     buiten = [lonlat(p) for p in poly[0]]
     if len(buiten) < 20: continue  # tiny islands
-    dun = dp(buiten, 0.0008)
+    # A closed ring starts and ends at the same point: thin the two halves between that point and the farthest one.
+    ver = max(range(len(buiten)), key=lambda i: (buiten[i][0] - buiten[0][0]) ** 2 + (buiten[i][1] - buiten[0][1]) ** 2)
+    dun = dp(buiten[:ver + 1], 0.0008)[:-1] + dp(buiten[ver:], 0.0008)
     ringen.append([[round(lat, 5), round(lon, 5)] for lon, lat in dun])
 uit = {"naam": NAAM, "bron": bron, "ringen": ringen}
 print(bron, [len(r) for r in ringen])
