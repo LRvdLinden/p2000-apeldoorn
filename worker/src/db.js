@@ -101,6 +101,7 @@ export async function housekeeping(env, retentionDays) {
   await env.DB.batch([
     env.DB.prepare("DELETE FROM meldingen WHERE datum < ?").bind(cutoff),
     env.DB.prepare("DELETE FROM weather WHERE fetched_at < ?").bind(cutoff),
+    env.DB.prepare("DELETE FROM post_inzet WHERE at < ?").bind(Date.now() - 400 * 86_400_000),
     env.DB.prepare("DELETE FROM outbox WHERE created_at < ?").bind(Date.now() - 30 * 60_000),
   ]);
 }

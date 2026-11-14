@@ -1,13 +1,14 @@
 import SwiftUI
+import CoreLocation
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar
+    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar, regio
 
     var id: String { rawValue }
 
     /// On by default: everything except the stations, the rain radar and the speed cameras (they make the map busy).
-    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers].contains($0) }.map(\.rawValue))
+    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers, .regio].contains($0) }.map(\.rawValue))
 
     var titel: String {
         switch self {
@@ -23,6 +24,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .ziekenhuizen: return L("Ziekenhuizen en vliegbases")
         case .helikopters: return L("Luchtvaart (live)")
         case .buienradar: return L("Buienradar (KNMI)")
+        case .regio: return L("Grens veiligheidsregio")
         }
     }
 
@@ -40,6 +42,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .ziekenhuizen: return "cross.case.fill"
         case .helikopters: return "airplane"
         case .buienradar: return "cloud.rain.fill"
+        case .regio: return "map"
         }
     }
 }
@@ -64,7 +67,7 @@ enum KaartLaagGroep: String, CaseIterable, Identifiable {
         case .lucht: return [.helikopters]
         case .verkeer: return [.verkeer, .flitsers]
         case .posten: return [.kazernes, .ziekenhuizen]
-        case .kaart: return [.werkgebied, .buienradar]
+        case .kaart: return [.werkgebied, .regio, .buienradar]
         }
     }
 }
@@ -73,5 +76,25 @@ extension AppSettings {
     func laag(_ l: KaartLaag) -> Bool { kaartLagen.contains(l.rawValue) }
     func setLaag(_ l: KaartLaag, _ on: Bool) {
         if on { kaartLagen.insert(l.rawValue) } else { kaartLagen.remove(l.rawValue) }
+    }
+}
+
+// MARK: - Border of the safety region
+
+/// The border of the safety region Noord- en Oost-Gelderland (CBS, via PDOK), asked once from the server.
+@MainActor
+@Observable
+final class RegioStore {
+    static let shared = RegioStore()
+    private(set) var ringen: [[CLLocationCoordinate2D]] = []
+    @ObservationIgnored private var bezig = false
+
+    func laad() async {
+        guard ringen.isEmpty, !bezig else { return }
+        bezig = true
+        defer { bezig = false }
+        struct Antwoord: Decodable { let ringen: [[[Double]]] }
+        guard let a = try? await P2000API.shared.getJSON("v1/veiligheidsregio", as: Antwoord.self) else { return }
+        ringen = a.ringen.map { $0.compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[0], longitude: $0[1]) : nil } }
     }
 }

@@ -548,13 +548,26 @@ data class ApiRoute(
     val aankomst: String, val route: List<List<Double>> = emptyList(),
 )
 
+/** Figures of one station (GET /v1/posten/<id>). */
+@Serializable
+data class PostRegel(val nr: String? = null, val code: String? = null, val label: String? = null, val naam: String? = null)
+@Serializable
+data class PostCijfers(val inzetten: Int = 0, val sinds: String? = null, val laatste: String? = null,
+    @SerialName("per_uur") val perUur: List<Int> = emptyList(), @SerialName("per_dag") val perDag: List<Int> = emptyList(),
+    val voertuigen: List<PostRegel> = emptyList(), val capcodes: List<PostRegel> = emptyList())
+/** The border of the safety region (GET /v1/veiligheidsregio): rings of [lat, lon]. */
+@Serializable
+data class RegioAntwoord(val ringen: List<List<List<Double>>> = emptyList())
+@Serializable
+data class Mededeling(val id: String = "", val titel: String = "", val tekst: String = "")
+
 /** GET /v1/meldingen/<guid>/verloop and GET /v1/app. */
 @Serializable
 data class VerloopAntwoord(val meldingen: List<Melding> = emptyList())
 @Serializable
 data class MinBuild(val ios: Int = 0, val android: Int = 0)
 @Serializable
-data class AppAntwoord(@SerialName("min_build") val minBuild: MinBuild = MinBuild())
+data class AppAntwoord(@SerialName("min_build") val minBuild: MinBuild = MinBuild(), val mededeling: Mededeling? = null)
 
 /** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
 @Serializable

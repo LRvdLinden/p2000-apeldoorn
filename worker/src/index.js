@@ -49,11 +49,13 @@ import { kvWrite } from "./kv.js";
 import { hmPaal, hmPunt, hmHerstel, straatPunt, straatHerstel } from "./hm.js";
 import { pandVoor } from "./pand.js";
 import { kenToe, recenteVoorIncident, incidentHerstel } from "./incident.js";
+import { noteerPosten, postenInhalen, postInfo } from "./posten.js";
+import REGIO from "./veiligheidsregio.js";
 
 /** Last run of the hectometre-post repair in this isolate (it reads the alerts of 48 hours, so not every round). */
 let hmLaatst = 0;
 
-const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp };
+const CONTENT = { privacy, cookies, terms, disclaimer, changelog, hulp, mededeling: { title: "", content: "", version: "", updated_at: "" } };
 /** Path part → devices.token: hex tokens are lower case, Android tokens keep their case. */
 const deviceKey = (s) => {
   const t = decodeURIComponent(s);
@@ -254,7 +256,22 @@ async function handle(req, env, ctx) {
   // What the apps need at start-up: the lowest build that still works (below it the app asks to update). No database.
   if (method === "GET" && path === "/v1/app") {
     const n = (v) => Math.max(0, Number.parseInt(v || "0", 10) || 0);
-    return reply(200, { min_build: { ios: n(env.MIN_BUILD_IOS), android: n(env.MIN_BUILD_ANDROID) } }, { "cache-control": "public, max-age=3600" });
+    // A message of the makers for everyone (set in beheer): shown once as a banner in the apps and on the site.
+    let mededeling = null;
+    try {
+      const c = await contentFor(env, "mededeling", { mededeling: null });
+      const tekst = String(c?.content || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+      if (tekst) mededeling = { id: c.updated_at || c.version || "1", titel: String(c.title || "").trim() || "Mededeling", tekst: tekst.slice(0, 600) };
+    } catch (e) { console.warn("[mededeling]", e.message || e); }
+    return reply(200, { min_build: { ios: n(env.MIN_BUILD_IOS), android: n(env.MIN_BUILD_ANDROID) }, mededeling }, { "cache-control": "public, max-age=600" });
+  }
+  // The border of the safety region (map layer).
+  if (method === "GET" && path === "/v1/veiligheidsregio") return reply(200, REGIO, { "cache-control": "public, max-age=86400" });
+  // Figures of one station: call-outs (an incident counts once), per hour and per day, vehicles and capcodes.
+  m = path.match(/^\/v1\/posten\/([\w-]{3,60})$/);
+  if (method === "GET" && m) {
+    const post = await postInfo(env, m[1]);
+    return post ? reply(200, post, { "cache-control": "public, max-age=120" }) : reply(404, { error: "Not found" });
   }
   if (method === "GET" && path === "/v1/changelog") return reply(200, await contentFor(env, "changelog", CONTENT), { "cache-control": "public, max-age=300" });
 
@@ -501,6 +518,8 @@ async function poll(env, budget) {
       catch (e) { console.warn("[incident]", e.message || e); for (const m of fresh) m.incident ||= m.guid; }
     }
     if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+    // Figures per station: one row per station per incident.
+    if (fresh.length) { try { await noteerPosten(env, fresh); } catch (e) { console.warn("[posten]", e.message || e); } }
     // Earlier messages on a motorway that are not on their post yet.
     // Only after a new alert, and otherwise once per 15 minutes (a lookup that failed earlier gets another chance).
     if (budget.left > 20 && (fresh.length || Date.now() - hmLaatst > 15 * 60_000)) {
@@ -509,6 +528,7 @@ async function poll(env, budget) {
         try { await straatHerstel(env, budget); } catch (e) { console.warn("[straat herstel]", e.message || e); }
         try { await categorieHerstel(env); } catch (e) { console.warn("[categorie herstel]", e.message || e); }
         try { await incidentHerstel(env); } catch (e) { console.warn("[incident herstel]", e.message || e); }
+        try { await postenInhalen(env); } catch (e) { console.warn("[posten inhalen]", e.message || e); }
     }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
@@ -719,11 +739,24 @@ async function heliRun(env) {
   try {
     const vliegend = [...(data.helikopters || []), ...(data.lucht || [])];
     const vorige = new Map([...luchtPrev, ...[...prev].map(([id, p]) => [id, { at: p.at, grond: p.grond }])]);
-    const kandidaat = vliegend.some((h) => { const p = vorige.get(h.id); return !h.op_grond && h.lat != null && (!p || p.grond === 1 || Date.now() - p.at > 15 * 60_000); });
+    const kandidaat = vliegend.some((h) => {
+      const p = vorige.get(h.id);
+      if (h.lat == null) return false;
+      return h.op_grond ? Boolean(p && p.grond === 0 && Date.now() - p.at <= 15 * 60_000) : (!p || p.grond === 1 || Date.now() - p.at > 15 * 60_000);
+    });
     if (kandidaat) {
       devices ||= await activeDevices(env);
       prefs ||= await devicePrefs(env);
-      for (const g of volgPushes(devices, prefs, vliegend, vorige)) {
+      // When did the followed aircraft land last? (kept for 90 minutes, to tell a flight back from a new call-out)
+      const gevolgd = new Set([...prefs.values()].flatMap((p) => p?.heli?.volg || []));
+      const geland = new Map();
+      for (const h of vliegend) {
+        if (!gevolgd.has(h.id)) continue;
+        const p = vorige.get(h.id);
+        if (h.op_grond && p && p.grond === 0) await kvSet(env, `heli_land:${h.id}`, String(Date.now()));
+        else if (!h.op_grond) { const l = await kvGet(env, `heli_land:${h.id}`); if (l) geland.set(h.id, Number(l.value)); }
+      }
+      for (const g of volgPushes(devices, prefs, vliegend, vorige, Date.now(), geland)) {
         if (await kvGet(env, `broadcast:${g.key}`)) continue;
         await kvSet(env, `broadcast:${g.key}`, JSON.stringify({ ...g.texts.nl, en: g.texts.en, heli: g.heli }));
         await queue(env, `broadcast:${g.key}`, g.tokens);
@@ -819,7 +852,7 @@ async function cron(env, event) {
     try { await nieuwsHousekeeping(env); } catch (e) { console.error("[nieuws]", e.message || e); }
     await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
     await env.DB.prepare("DELETE FROM melding_feedback WHERE at < ?").bind(Date.now() - 90 * 86_400_000).run().catch(() => {});
-    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'heli_inzet:%' OR key LIKE 'broadcast:hz:%' OR key LIKE 'broadcast:hx:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'heli_inzet:%' OR key LIKE 'heli_land:%' OR key LIKE 'broadcast:hz:%' OR key LIKE 'broadcast:hx:%' OR key LIKE 'broadcast:hl:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }

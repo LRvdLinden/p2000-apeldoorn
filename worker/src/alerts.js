@@ -516,7 +516,7 @@ const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { .
 
 /** kind = true: also AMBER Alert and Vermist Kind Alert (apps from 2.0.1, website, Homey); older apps cannot decode them. */
 export async function listWarnings(env, days = 7, { kind = false } = {}) {
-  const since = Date.now() - Math.min(Number(days) || 7, 14) * DAY;
+  const since = Date.now() - Math.min(Number(days) || 7, 30) * DAY;
   const { results } = await env.DB.prepare(
     `${PUBLIC_SELECT} AND (COALESCE(w.end_at, w.start_at) >= ? OR w.status != 'beeindigd') ORDER BY w.start_at DESC LIMIT 200`,
   ).bind(since).all();
@@ -857,7 +857,7 @@ export async function savePrefs(env, token, prefs) {
 
 export async function warningsHousekeeping(env) {
   await env.DB.batch([
-    env.DB.prepare("DELETE FROM waarschuwingen WHERE status = 'beeindigd' AND COALESCE(end_at, updated_at) < ?").bind(Date.now() - 14 * DAY),
+    env.DB.prepare("DELETE FROM waarschuwingen WHERE status = 'beeindigd' AND COALESCE(end_at, updated_at) < ?").bind(Date.now() - 31 * DAY),
     env.DB.prepare("DELETE FROM device_prefs WHERE token NOT IN (SELECT token FROM devices)"),
     env.DB.prepare("DELETE FROM waarschuwing_knmi WHERE id NOT IN (SELECT id FROM waarschuwingen)"),
     env.DB.prepare("DELETE FROM kv WHERE key LIKE 'knmi_push:%' AND at < ?").bind(Date.now() - 3 * DAY),

@@ -80,3 +80,22 @@ enum Verband {
             .replacingOccurrences(of: #"[^a-z0-9]"#, with: "", options: .regularExpression)
     }
 }
+
+extension Verband {
+    /// The size of the incident as the alert gives it: 0 nothing, 1 klein, 2 middel, 3 groot, 4 zeer groot; GRIP counts above that.
+    private static func niveau(_ m: Melding) -> (Int, String)? {
+        if let g = m.grip.flatMap({ Int($0.filter(\.isNumber)) }), g > 0 { return (10 + g, "GRIP \(g)") }
+        let o = (m.opschaling ?? "").lowercased()
+        if o.contains("zeer groot") { return (4, m.dienst == .brandweer ? L("Zeer grote brand") : L("Zeer groot")) }
+        if o.contains("groot") { return (3, m.dienst == .brandweer ? L("Grote brand") : L("Groot")) }
+        if o.contains("middel") { return (2, m.dienst == .brandweer ? L("Middelbrand") : L("Middel")) }
+        if o.contains("klein") { return (1, m.dienst == .brandweer ? L("Kleine brand") : L("Klein")) }
+        return nil
+    }
+
+    /// "Middelbrand" when `naar` is a step up from `van` (the alert before it in the same timeline), else nil.
+    static func opschaling(van: Melding, naar: Melding) -> String? {
+        guard let n = niveau(naar) else { return nil }
+        return n.0 > (niveau(van)?.0 ?? 0) ? n.1 : nil
+    }
+}

@@ -1,5 +1,17 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 92)
+- **Cijfers per kazerne.** Tik op de kaart op een post: aantal inzetten (een herhaling of opschaling van hetzelfde incident telt als één), per uur van de dag en per dag van de week, en de voertuigen en capcodes van die post. Server: tabel `post_inzet` (één rij per post per inzet), `GET /v1/posten/<id>`; de meldingen die er al stonden zijn één keer meegeteld. App, Android en pager.
+- **Bel bij een toestel:** ook een pushmelding bij landen (standaard uit) en bij de terugvlucht (standaard aan; een start binnen 90 minuten na een landing). Instellingen › Helikopters, app en Android (`heli.volg_landen`, `heli.volg_terug`).
+- **Verloop:** een regel "Opgeschaald naar Middelbrand" (of GRIP) bij de melding waarmee de inzet groter wordt. App, Android en pager.
+- **Kaartlaag "Grens veiligheidsregio"** (Noord- en Oost-Gelderland; CBS gebiedsindelingen via PDOK, `tools/geodata/fetch_veiligheidsregio.py`, `GET /v1/veiligheidsregio`). App, Android en pager.
+- **Ander app-icoon** (iPhone en iPad): Standaard (volgt het systeem, dus donker in de donkere modus), Donker en Blauw.
+- **Zoeken ook buiten je filters** (app en Android; de pager zocht al binnen de filters) en zoeken in de eenheden. **Hulp is doorzoekbaar** in de app, op Android en op de site, met vijf nieuwe vragen.
+- **Waarschuwingen 30 dagen terug** (was 14).
+- **Mededeling van de makers:** in beheer (P2000Beheer, LRbeheer en web-beheer) bij Teksten; verschijnt als balk in de app, als venster op Android en als kaartje op de pager, tot je hem sluit. `GET /v1/app` geeft hem mee.
+- Uit de bron: `groep` is het groepsnummer van de pagerzender (geen koppeling van meldingen) en wordt niet gebruikt.
+- Niet gebouwd: een ander app-icoon op Android. De status uitrukken, onderweg en ter plaatse en de capcode met een ster bestonden al op alle platformen.
+
 ## A-Alerts 2.0.1 (build 91)
 - **Incident op de server.** Elke nieuwe melding krijgt bij binnenkomst een `incident`: de guid van de eerste melding van die inzet (`worker/src/incident.js`). Zelfde regels als eerst in de apps: zelfde adres in dezelfde plaats, of binnen 350 m met dezelfde eenheid, binnen 45 minuten (120 bij een groot incident); besteld vervoer, herbezetting en proefalarm horen nooit bij een inzet. Meldingen van de laatste zes uur zonder incident krijgen er alsnog een.
 - `GET /v1/meldingen/<guid>/verloop`: alle meldingen van dezelfde inzet, oudste eerst. De app, Android en de pager halen hiermee ook meldingen op die niet (meer) in de lijst staan.

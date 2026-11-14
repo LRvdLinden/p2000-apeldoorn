@@ -12,6 +12,9 @@ import java.time.LocalDate
 /** Alerts, warnings and helicopters in memory, refreshed by the screens (15 s for alerts, 10 s for helicopters). */
 object Store {
     var meldingen by mutableStateOf<List<Melding>>(emptyList()); private set
+    /** The border of the safety region as rings of [lon, lat] (the order the map wants), asked once. */
+    var regio by mutableStateOf<List<List<List<Double>>>>(emptyList()); private set
+    suspend fun laadRegio() { if (regio.isEmpty()) regio = Api.regio().map { ring -> ring.filter { it.size == 2 }.map { listOf(it[1], it[0]) } } }
     /** Alerts of an opened incident that the server knows but the list does not hold (any more). */
     var incidentExtra by mutableStateOf<List<Melding>>(emptyList()); private set
     /** The list plus those extra alerts: what the timeline of an alert is built from. */
@@ -43,7 +46,7 @@ object Store {
         runCatching { waarschuwingen = Api.waarschuwingen(7) }
     }
 
-    suspend fun refreshAlleWaarschuwingen() { runCatching { alleWaarschuwingen = Api.waarschuwingen(14) } }
+    suspend fun refreshAlleWaarschuwingen() { runCatching { alleWaarschuwingen = Api.waarschuwingen(30) } }
     suspend fun refreshHelikopters() { val r = Api.helikoptersVol(); helikopters = r.helikopters; heliInzet = r.inzet }
     /** Lifeliners that were probably cancelled on their way to an alert, or did not take off. */
     var heliInzet by mutableStateOf<List<HeliInzet>>(emptyList()); private set

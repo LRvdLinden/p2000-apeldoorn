@@ -8,7 +8,7 @@ import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, pr
 import {
   fetchWaarschuwingen, fetchHelikopters, heliLaag, fetchLocaties, locatieAnnotation, radarLaag, CODES, mShareUrl,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerIcon, verkeerFile, VERKEER_SOORT, verkeerRegels, verkeerTijdvak, verkeerKleur,
-} from "./aalerts.js?v=68";
+} from "./aalerts.js?v=69";
 
 // The area: Apeldoorn, the villages and hamlets, Teuge, with the A1 and A50 around it.
 const GEBIED = { noord: 52.36, zuid: 52.03, oost: 6.20, west: 5.70 };

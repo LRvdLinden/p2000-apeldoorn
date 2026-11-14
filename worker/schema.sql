@@ -204,3 +204,6 @@ CREATE TABLE IF NOT EXISTS nieuws_fotos (id TEXT PRIMARY KEY, mime TEXT NOT NULL
 CREATE TABLE IF NOT EXISTS widget_sites (site TEXT PRIMARY KEY, widgets TEXT, eerst INTEGER NOT NULL, laatst INTEGER NOT NULL);
 CREATE TABLE IF NOT EXISTS widget_views (site TEXT NOT NULL, dag TEXT NOT NULL, n INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (site, dag));
 CREATE TABLE IF NOT EXISTS widget_blok (site TEXT PRIMARY KEY, at INTEGER NOT NULL);
+
+-- One row per station per incident (a repeat or scale-up of the same incident counts once): figures per station.
+CREATE TABLE IF NOT EXISTS post_inzet (post TEXT NOT NULL, incident TEXT NOT NULL, at INTEGER NOT NULL, PRIMARY KEY (post, incident));

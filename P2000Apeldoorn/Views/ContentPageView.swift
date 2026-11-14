@@ -8,11 +8,26 @@ struct ContentPageView: View {
 
     @State private var page: ContentPage?
     @State private var failed = false
+    @State private var zoek = ""
+
+    /// The help page is a list of questions (every <h2> with the text under it): only the questions that hold the search text.
+    private func gefilterd(_ html: String) -> String {
+        let q = zoek.trimmingCharacters(in: .whitespaces).lowercased()
+        guard name == "hulp", !q.isEmpty else { return html }
+        let delen = html.components(separatedBy: "<h2")
+        let vragen = delen.dropFirst().filter { $0.replacingOccurrences(of: #"<[^>]+>"#, with: " ", options: .regularExpression).lowercased().contains(q) }
+        return vragen.isEmpty ? "<p>" + L("Geen vraag gevonden. Probeer een ander woord.") + "</p>" : vragen.map { "<h2" + $0 }.joined()
+    }
 
     var body: some View {
         Group {
             if let page {
-                HTMLView(html: page.content ?? "", footer: footer(for: page))
+                if name == "hulp" {
+                    HTMLView(html: gefilterd(page.content ?? ""), footer: footer(for: page))
+                        .searchable(text: $zoek, prompt: L("Zoek in de vragen"))
+                } else {
+                    HTMLView(html: page.content ?? "", footer: footer(for: page))
+                }
             } else if failed {
                 ContentUnavailableView(L("Kon de tekst niet laden"), systemImage: "wifi.exclamationmark",
                                        description: Text(L("Controleer je internetverbinding en probeer het opnieuw.")))

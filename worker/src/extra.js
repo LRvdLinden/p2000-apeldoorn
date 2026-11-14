@@ -3,6 +3,7 @@
 import locaties from "./locaties.js";
 import { km, genoemd, heliVoorMelding } from "./heliplus.js";
 import { SELECT, toAPI as meldingAPI } from "./db.js";
+import { plaatsBij } from "./plaats.js";
 import { isQuiet, isUrgent, HttpError } from "./rules.js";
 import { matchesPlaatsen } from "./werkgebied.js";
 
@@ -30,6 +31,9 @@ export function heliPrefsFrom(s) {
     pauze_tot: num(s.pauze_tot, 0, 4e12),
     // The bell on one aircraft: a push when it takes off, wherever that is ("lifeliner3", "lucht-480c21" …).
     volg: Array.isArray(s.volg) ? [...new Set(s.volg.filter((x) => typeof x === "string" && /^[\w-]{3,40}$/.test(x)))].slice(0, 40) : [],
+    // With the bell: also a push when the aircraft lands, and (on by default) when it takes off again shortly after a landing.
+    volg_landen: s.volg_landen === true,
+    volg_terug: s.volg_terug !== false,
   };
 }
 
@@ -38,7 +42,7 @@ export function heliPrefsFrom(s) {
  * for 15 minutes. `prev` maps id → { at, grond } of the last stored position before this round.
  * Returns [{ key, heli, texts, tokens }].
  */
-export function volgPushes(devices, prefs, vliegend, prev, now = Date.now()) {
+export function volgPushes(devices, prefs, vliegend, prev, now = Date.now(), geland = new Map()) {
   const groups = new Map();
   const date = new Date(now);
   const nieuw = vliegend.filter((h) => {
@@ -46,7 +50,26 @@ export function volgPushes(devices, prefs, vliegend, prev, now = Date.now()) {
     const p = prev.get(h.id);
     return !p || p.grond === 1 || now - p.at > 15 * 60_000;
   });
-  if (!nieuw.length) return [];
+  // Landed just now: on the ground, and in the air at the previous position (at most 15 minutes ago).
+  const landingen = vliegend.filter((h) => {
+    const p = prev.get(h.id);
+    return h.op_grond && h.lat != null && p && p.grond === 0 && now - p.at <= 15 * 60_000;
+  });
+  for (const d of devices) {
+    const hp = prefs.get(d.token)?.heli;
+    if (!d.enabled || !hp?.volg?.length || !hp.volg_landen) continue;
+    if ((hp.pauze_tot && hp.pauze_tot > now) || isQuiet(d, date)) continue;
+    for (const h of landingen) {
+      if (!hp.volg.includes(h.id)) continue;
+      const key = `hl:${h.id}:${Math.floor(now / (15 * 60_000))}`;
+      if (!groups.has(key)) {
+        const plek = plaatsBij(h.lat, h.lon)?.tekst;
+        groups.set(key, { key, heli: h.id, landing: true, texts: { nl: { title: `${h.naam} is geland`, body: plek ? `In ${plek}` : "Op de grond" }, en: { title: `${h.naam} has landed`, body: plek ? `In ${plek}` : "On the ground" } }, tokens: [] });
+      }
+      groups.get(key).tokens.push(d.token);
+    }
+  }
+  if (!nieuw.length) return [...groups.values()];
   for (const d of devices) {
     const hp = prefs.get(d.token)?.heli;
     if (!d.enabled || !hp?.volg?.length) continue;
@@ -54,6 +77,9 @@ export function volgPushes(devices, prefs, vliegend, prev, now = Date.now()) {
     if (isQuiet(d, date)) continue;
     for (const h of nieuw) {
       if (!hp.volg.includes(h.id)) continue;
+      // A take-off within 90 minutes after a landing is the flight back (or on to a hospital).
+      const terug = geland.has(h.id) && now - geland.get(h.id) <= 90 * 60_000;
+      if (terug && !hp.volg_terug) continue;
       const key = `hv:${h.id}:${Math.floor(now / (15 * 60_000))}`;
       if (!groups.has(key)) {
         const waarNl = h.boven ? `Nu boven ${h.boven}` : "In de lucht", waarEn = h.boven ? `Now above ${h.boven}` : "In the air";

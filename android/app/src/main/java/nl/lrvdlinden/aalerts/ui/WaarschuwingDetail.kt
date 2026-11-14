@@ -225,7 +225,7 @@ fun WaarschuwingenScreen(nav: Nav) {
                         item { SelectChip(tr("Alles", "All"), bron == null) { bron = null } }
                         items(listOf("nlalert", "burgernet", "amber", "vermistkind", "knmi")) { b -> SelectChip(bronNaam(b), bron == b) { bron = if (bron == b) null else b } }
                     }
-                    Text(tr("Laatste 14 dagen in de gemeente Apeldoorn", "Last 14 days in the municipality of Apeldoorn"), color = Muted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
+                    Text(tr("Laatste 30 dagen in de gemeente Apeldoorn", "Last 30 days in the municipality of Apeldoorn"), color = Muted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
                 }
                 if (list.isEmpty()) item { EmptyState(tr("Geen waarschuwingen", "No warnings"), tr("Er waren de afgelopen 14 dagen geen waarschuwingen.", "There were no warnings in the last 14 days.")) }
                 items(list, key = { it.id }) { w ->

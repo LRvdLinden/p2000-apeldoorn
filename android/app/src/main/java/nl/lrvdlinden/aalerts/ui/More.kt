@@ -193,8 +193,21 @@ fun ContentScreen(name: String, nav: Nav) {
     Scaffold(containerColor = MaterialTheme.colorScheme.background, topBar = { BackBar(title, nav) }) { pad ->
         Column(Modifier.padding(pad).fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp)) {
             val p = page
+            // Help: search in the questions (every <h2> with the text under it is one question).
+            var zoek by remember(name) { mutableStateOf("") }
+            if (name == "hulp" && p?.content != null) {
+                OutlinedTextField(zoek, { zoek = it }, singleLine = true, placeholder = { Text(tr("Zoek in de vragen", "Search the questions")) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp), shape = RoundedCornerShape(12.dp))
+            }
+            val inhoud = p?.content?.let { html ->
+                val q = zoek.trim().lowercase()
+                if (name != "hulp" || q.isEmpty()) html else {
+                    val vragen = html.split("<h2").drop(1).filter { it.replace(Regex("<[^>]+>"), " ").lowercase().contains(q) }
+                    if (vragen.isEmpty()) "<p>" + tr("Geen vraag gevonden. Probeer een ander woord.", "No question found. Try another word.") + "</p>" else vragen.joinToString("") { "<h2$it" }
+                }
+            }
             when {
-                p?.content != null -> SectionCard { p.version?.let { Text(tr("Laatst bijgewerkt: ", "Last updated: ") + it, color = Muted, fontSize = 12.sp) }; Html(p.content) }
+                p?.content != null && inhoud != null -> SectionCard { p.version?.let { Text(tr("Laatst bijgewerkt: ", "Last updated: ") + it, color = Muted, fontSize = 12.sp) }; Html(inhoud) }
                 !loaded -> Box(Modifier.fillMaxWidth().padding(40.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                 else -> EmptyState(tr("Niet beschikbaar", "Not available"), tr("De tekst kon niet worden geladen.", "The text could not be loaded."))
             }

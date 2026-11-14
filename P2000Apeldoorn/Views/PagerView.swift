@@ -14,12 +14,14 @@ struct PagerView: View {
     }
 
     @State private var search = ""
+    /// While searching: also find alerts outside the list filters.
+    @AppStorage("zoekBuitenFilters") private var zoekBuitenFilters = false
     @State private var scope: Scope = .alle
     @State private var selection: String?
     @State private var showFilters = false
 
     private var list: [Melding] {
-        store.filtered(settings, search: search, onlyBewaard: scope == .bewaard)
+        store.filtered(settings, search: search, onlyBewaard: scope == .bewaard, buitenFilters: zoekBuitenFilters)
     }
 
     /// P2000 alerts with NL-Alert and Burgernet in between, newest first (bewaard: alerts only).
@@ -55,6 +57,14 @@ struct PagerView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 #endif
                 .searchable(text: $search, prompt: L("Zoek op plaats, straat of capcode"))
+                .safeAreaInset(edge: .top, spacing: 0) {
+                    if !search.isEmpty && scope == .alle {
+                        Toggle(L("Zoek ook buiten mijn filters"), isOn: $zoekBuitenFilters)
+                            .font(.footnote)
+                            .padding(.horizontal, 16).padding(.vertical, 6)
+                            .background(.bar)
+                    }
+                }
                 .refreshable {
                     await store.refresh()
                 }

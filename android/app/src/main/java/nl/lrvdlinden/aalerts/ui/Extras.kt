@@ -70,6 +70,12 @@ fun HeliZonesScreen(nav: Nav) {
                 SwitchRow(tr("Landen in je zone", "Landing in your zone"), checked = Settings.heliLanden) { Settings.heliLanden = it }
                 SwitchRow(tr("Je zone in vliegen", "Flying into your zone"), checked = Settings.heliBinnen) { Settings.heliBinnen = it }
             }
+            SectionCard(tr("Toestellen met de bel", "Aircraft with the bell"), Icons.Outlined.NotificationsActive) {
+                SwitchRow(tr("Ook als het toestel landt", "Also when the aircraft lands"), checked = Settings.heliVolgLanden) { Settings.heliVolgLanden = it }
+                SwitchRow(tr("Ook bij de terugvlucht", "Also on the flight back"), checked = Settings.heliVolgTerug) { Settings.heliVolgTerug = it }
+                Text(if (Settings.heliVolg.isEmpty()) tr("Tik op de kaart op een helikopter of vliegtuig en dan op de bel: je krijgt een pushmelding als dat toestel opstijgt.", "Tap a helicopter or aircraft on the map and then the bell: you get a notification when that aircraft takes off.")
+                    else tr("Je volgt ${Settings.heliVolg.size} toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing.", "You follow ${Settings.heliVolg.size} aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing."), color = Muted, fontSize = 12.sp)
+            }
             SectionCard(tr("Welke helikopters", "Which helicopters"), Icons.Outlined.FlightTakeoff) {
                 fun zet(s: String, on: Boolean) { val v = if (on) Settings.heliSoorten + s else Settings.heliSoorten - s; if (v.isNotEmpty()) Settings.heliSoorten = v }
                 SwitchRow(tr("Traumahelikopters (Lifeliner)", "Trauma helicopters (Lifeliner)"), checked = "trauma" in Settings.heliSoorten) { zet("trauma", it) }

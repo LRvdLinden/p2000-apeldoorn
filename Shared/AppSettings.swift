@@ -52,6 +52,9 @@ final class AppSettings {
     var heliZones: [HeliZone] = [] { didSet { saveCodable(.heliZones, heliZones); notificationsChanged() } }
     /// The bell on one aircraft: a push when it takes off (ids such as "lifeliner3" or "lucht-480c21").
     var heliVolg: Set<String> = [] { didSet { save(.heliVolg, Array(heliVolg).sorted()); notificationsChanged() } }
+    /// With the bell: also a push when the aircraft lands, and when it takes off again shortly after a landing.
+    var heliVolgLanden: Bool = false { didSet { save(.heliVolgLanden, heliVolgLanden); notificationsChanged() } }
+    var heliVolgTerug: Bool = true { didSet { save(.heliVolgTerug, heliVolgTerug); notificationsChanged() } }
     var heliOpstijgen: Bool = true { didSet { save(.heliOpstijgen, heliOpstijgen); notificationsChanged() } }
     var heliLanden: Bool = true { didSet { save(.heliLanden, heliLanden); notificationsChanged() } }
     var heliBinnen: Bool = true { didSet { save(.heliBinnen, heliBinnen); notificationsChanged() } }
@@ -129,7 +132,7 @@ final class AppSettings {
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
         case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, luchtSoorten, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
-        case heliVolg, heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
+        case heliVolg, heliVolgLanden, heliVolgTerug, heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
         var synced: Bool {
@@ -287,6 +290,8 @@ final class AppSettings {
         if let s = source(Key.heliZones.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([HeliZone].self, from: data) { heliZones = Array(list.prefix(HeliZone.maximum)) }
         if let v = set(.heliVolg) { heliVolg = v }
+        if let v = source(Key.heliVolgLanden.storageKey) as? Bool { heliVolgLanden = v }
+        if let v = source(Key.heliVolgTerug.storageKey) as? Bool { heliVolgTerug = v }
         if let v = source(Key.heliOpstijgen.storageKey) as? Bool { heliOpstijgen = v }
         if let v = source(Key.heliLanden.storageKey) as? Bool { heliLanden = v }
         if let v = source(Key.heliBinnen.storageKey) as? Bool { heliBinnen = v }
@@ -339,7 +344,7 @@ final class AppSettings {
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
         luchtSoorten = LuchtSoort.standaard
-        heliVolg = []; heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
+        heliVolg = []; heliVolgLanden = false; heliVolgTerug = true; heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
         grootIncident = false; grootPlaatsen = []
         spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; kaartThema = "licht"; gedemptKaart = false
         isLoading = false
@@ -357,6 +362,8 @@ final class AppSettings {
             "zones": heliZones.map { ["id": $0.id, "naam": $0.naam, "lat": $0.lat, "lon": $0.lon, "km": $0.km] as [String: Any] },
             "opstijgen": heliOpstijgen, "landen": heliLanden, "binnen": heliBinnen, "soorten": Array(heliSoorten).sorted(),
             "volg": Array(heliVolg).sorted(),
+            "volg_landen": heliVolgLanden,
+            "volg_terug": heliVolgTerug,
         ]
         if heliGepauzeerd { out["pauze_tot"] = heliPauzeTot * 1000 }
         return out

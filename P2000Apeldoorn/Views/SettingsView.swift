@@ -159,6 +159,15 @@ struct SettingsView: View {
                     SettingsRow(icon: "star.fill", color: .red, title: L("Schrijf een recensie"), chevron: true)
                 }
                 StatusRij()
+                #if os(iOS)
+                if UIApplication.shared.supportsAlternateIcons {
+                    NavigationLink {
+                        AppIcoonKeuze()
+                    } label: {
+                        SettingsRow(icon: "app.badge.fill", color: .red, title: L("App-icoon"))
+                    }
+                }
+                #endif
                 NavigationLink {
                     ContentPageView(name: "hulp", title: L("Hulp en veelgestelde vragen"))
                 } label: {

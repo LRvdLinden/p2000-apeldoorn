@@ -381,7 +381,22 @@ export function warnOverlays(mk, w) {
   }));
 }
 
-export function kazerneAnnotation(mk, k, color) {
+/** Figures of one station: call-outs (an incident counts once), per hour and per day, vehicles and capcodes. */
+export async function fetchPost(id) {
+  try {
+    const r = await fetch(`${API}/v1/posten/${encodeURIComponent(id)}`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+/** What the apps and the site ask at start-up: { min_build, mededeling: { id, titel, tekst } | null }. */
+export async function fetchApp() {
+  try {
+    const r = await fetch(`${API}/v1/app`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? await r.json() : {};
+  } catch { return {}; }
+}
+
+export function kazerneAnnotation(mk, k, color, onClick = null) {
   const factory = () => {
     const el = document.createElement("div");
     el.className = "kazerne-marker";
@@ -389,6 +404,7 @@ export function kazerneAnnotation(mk, k, color) {
     el.style.cssText = "width:28px;height:28px;border-radius:8px;background:#fff;display:grid;place-items:center;box-shadow:0 0 0 2px " + color + ",0 3px 8px rgba(0,0,0,.3)";
     el.innerHTML = `<img src="${asset(`assets/img/icon_${k.soort}.png`)}" alt="" style="width:20px;height:20px;object-fit:contain">`;
     el.title = k.naam;
+    if (onClick) { el.style.cursor = "pointer"; el.addEventListener("click", (e) => { e.stopPropagation(); onClick(k); }); }
     return el;
   };
   return new mk.Annotation(new mk.Coordinate(k.lat, k.lon), factory, { calloutEnabled: false, title: k.naam });

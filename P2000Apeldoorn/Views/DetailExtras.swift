@@ -408,6 +408,13 @@ struct VerloopKaart: View {
                 VStack(spacing: 0) {
                     ForEach(Array(lijst.enumerated()), id: \.element.guid) { index, m in
                         let reden = verbanden.first { $0.melding.guid == m.guid }?.redenen
+                        // "↑ Opgeschaald naar Middelbrand": this alert is a step up from the one before it.
+                        if index > 0, let op = Verband.opschaling(van: lijst[index - 1], naar: m) {
+                            Label(Lf("Opgeschaald naar %@", op), systemImage: "arrow.up.circle.fill")
+                                .font(.footnote.weight(.semibold)).foregroundStyle(.orange)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding(.leading, 82).padding(.vertical, 2)
+                        }
                         rij(m, eerste: eerste, isHuidig: m.guid == melding.guid, isLaatste: index == lijst.count - 1, redenen: reden)
                     }
                 }
@@ -599,17 +606,40 @@ struct InzetKaart: View {
 
 // MARK: - Minimum version
 
-/// Asks the server once at start-up for the lowest build that still works; an older build is asked to update.
+/// Asks the server once at start-up for the lowest build that still works (an older build is asked to update) and
+/// for a message of the makers, shown as a bar until it is closed.
 struct MinVersieWacht: ViewModifier {
     @State private var verouderd = false
+    @State private var mededeling: P2000API.AppInfo.Mededeling?
+    @AppStorage("mededelingGesloten") private var gesloten = ""
     @Environment(\.openURL) private var openURL
 
     func body(content: Content) -> some View {
         content
             .task {
-                let min = await P2000API.shared.minBuild()
+                guard let info = await P2000API.shared.appInfo() else { return }
+                let min = info.min_build?.ios ?? 0
                 let build = Int(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") ?? 0
                 verouderd = min > 0 && build > 0 && build < min
+                mededeling = info.mededeling
+            }
+            .safeAreaInset(edge: .top, spacing: 0) {
+                if let md = mededeling, md.id != gesloten {
+                    HStack(alignment: .top, spacing: 10) {
+                        Image(systemName: "megaphone.fill").foregroundStyle(.white)
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(md.titel).font(AppFont.body(14, .semibold, relativeTo: .subheadline))
+                            Text(md.tekst).font(AppFont.body(13, .regular, relativeTo: .footnote))
+                        }
+                        .foregroundStyle(.white)
+                        Spacer(minLength: 0)
+                        Button { gesloten = md.id } label: { Image(systemName: "xmark").font(.footnote.weight(.bold)).foregroundStyle(.white) }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(L("Sluit"))
+                    }
+                    .padding(.horizontal, 14).padding(.vertical, 10)
+                    .background(Theme.red)
+                }
             }
             .alert(L("Werk de app bij"), isPresented: $verouderd) {
                 if !Config.appStoreID.isEmpty, let url = URL(string: "https://apps.apple.com/app/id\(Config.appStoreID)") {
@@ -621,3 +651,46 @@ struct MinVersieWacht: ViewModifier {
             }
     }
 }
+
+// MARK: - App icon
+
+#if os(iOS)
+/// Choose the icon of the app. "Standaard" follows the system: the dark icon in dark mode.
+struct AppIcoonKeuze: View {
+    private static let opties: [(naam: String?, titel: String, uitleg: String, beeld: String)] = [
+        (nil, L("Standaard"), L("Past zich aan: in de donkere modus het donkere icoon."), "icoon_standaard"),
+        ("AppIcon-Donker", L("Donker"), L("Altijd het donkere icoon."), "icoon_donker"),
+        ("AppIcon-Blauw", L("Blauw"), L("Blauwe achtergrond."), "icoon_blauw"),
+    ]
+    @State private var huidig: String? = UIApplication.shared.alternateIconName
+
+    var body: some View {
+        List {
+            Section {
+                ForEach(Self.opties, id: \.beeld) { o in
+                    Button {
+                        UIApplication.shared.setAlternateIconName(o.naam) { fout in
+                            if fout == nil { huidig = o.naam }
+                        }
+                    } label: {
+                        HStack(spacing: 14) {
+                            Image(o.beeld).resizable().frame(width: 60, height: 60)
+                                .clipShape(RoundedRectangle(cornerRadius: 13.5, style: .continuous))
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(o.titel).font(AppFont.body(16, .semibold)).foregroundStyle(.primary)
+                                Text(o.uitleg).font(.footnote).foregroundStyle(.secondary)
+                            }
+                            Spacer()
+                            if huidig == o.naam { Image(systemName: "checkmark.circle.fill").foregroundStyle(Theme.red) }
+                        }
+                    }
+                    .buttonStyle(.plain)
+                }
+            } footer: {
+                Text(L("iOS laat kort een melding zien als het icoon is gewijzigd."))
+            }
+        }
+        .navigationTitle(L("App-icoon"))
+    }
+}
+#endif

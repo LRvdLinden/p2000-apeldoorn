@@ -286,10 +286,10 @@ struct TVWaarschuwingenView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 14) {
-                Text(L("NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge."))
+                Text(L("NL-Alert, Burgernet en KNMI van de laatste 30 dagen voor de gemeente Apeldoorn en Teuge."))
                     .font(AppFont.body(20, .regular)).foregroundStyle(.secondary)
                 if loaded && items.isEmpty {
-                    Text(L("Geen waarschuwingen in de laatste twee weken.")).foregroundStyle(.secondary).frame(maxWidth: .infinity, minHeight: 200)
+                    Text(L("Geen waarschuwingen in de laatste dertig dagen.")).foregroundStyle(.secondary).frame(maxWidth: .infinity, minHeight: 200)
                 }
                 ForEach(perDag, id: \.dag) { groep in
                     Text(groep.dag.formatted(.dateTime.weekday(.wide).day().month(.wide))).font(AppFont.heading(24)).padding(.top, 14)
@@ -304,7 +304,7 @@ struct TVWaarschuwingenView: View {
         }
         .fullScreenCover(item: $selected) { w in TVWaarschuwingDetail(waarschuwing: w) }
         .task {
-            items = (try? await P2000API.shared.waarschuwingen(days: 14)) ?? []
+            items = (try? await P2000API.shared.waarschuwingen(days: 30)) ?? []
             loaded = true
         }
     }

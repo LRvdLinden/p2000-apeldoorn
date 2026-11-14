@@ -47,22 +47,63 @@ import nl.lrvdlinden.aalerts.data.*
 import nl.lrvdlinden.aalerts.tr
 
 /** Map layers (same as the app, the website and Apple TV). */
+/** Figures of one station: call-outs (an incident counts once), per hour and per day, vehicles and capcodes. */
+@Composable
+private fun PostCijfersBlok(id: String) {
+    var c by remember(id) { mutableStateOf<PostCijfers?>(null) }
+    var klaar by remember(id) { mutableStateOf(false) }
+    LaunchedEffect(id) { c = Api.post(id); klaar = true }
+    val p = c
+    when {
+        p == null && !klaar -> LinearProgressIndicator(Modifier.fillMaxWidth())
+        p == null -> Text(tr("De cijfers van deze post zijn nu niet op te halen.", "The figures of this station cannot be loaded right now."), color = Muted, fontSize = 12.sp)
+        p.inzetten == 0 -> Text(tr("Van deze post zijn nog geen inzetten geteld. We tellen sinds november 2026.", "No call-outs counted for this station yet. We count since November 2026."), color = Muted, fontSize = 12.sp)
+        else -> {
+            Text("${p.inzetten} " + (if (p.inzetten == 1) tr("inzet", "call-out") else tr("inzetten", "call-outs")) + (parseInstant(p.sinds)?.let { " · " + tr("sinds ", "since ") + Fmt.shortDay(it) } ?: ""), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            @Composable fun balken(titel: String, rij: List<Int>, labels: List<String>) {
+                val hoogste = (rij.maxOrNull() ?: 1).coerceAtLeast(1)
+                Text(titel, color = Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                Row(Modifier.fillMaxWidth().height(56.dp), verticalAlignment = Alignment.Bottom, horizontalArrangement = Arrangement.spacedBy(2.dp)) {
+                    rij.forEachIndexed { i, n ->
+                        Column(Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Bottom) {
+                            Box(Modifier.fillMaxWidth().height((2 + 40 * n / hoogste).dp).background(androidx.compose.ui.graphics.Color(0xFFDC2626), RoundedCornerShape(2.dp)))
+                            Text(labels.getOrElse(i) { "" }, fontSize = 9.sp, color = Muted, maxLines = 1)
+                        }
+                    }
+                }
+            }
+            balken(tr("Per uur van de dag", "Per hour of the day"), p.perUur, List(24) { if (it % 6 == 0) "$it" else "" })
+            balken(tr("Per dag van de week", "Per day of the week"), p.perDag, listOf(tr("ma", "Mo"), tr("di", "Tu"), tr("wo", "We"), tr("do", "Th"), tr("vr", "Fr"), tr("za", "Sa"), tr("zo", "Su")))
+            if (p.voertuigen.isNotEmpty()) {
+                Text(tr("Voertuigen (${p.voertuigen.size})", "Vehicles (${p.voertuigen.size})"), color = Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                p.voertuigen.take(6).forEach { Text("${it.nr ?: ""}  ${it.label ?: ""}", fontSize = 12.sp, maxLines = 1) }
+            }
+            if (p.capcodes.isNotEmpty()) {
+                Text(tr("Capcodes (${p.capcodes.size})", "Capcodes (${p.capcodes.size})"), color = Muted, fontSize = 12.sp, fontWeight = FontWeight.SemiBold)
+                p.capcodes.take(6).forEach { Text("${it.code ?: ""}  ${it.naam ?: ""}", fontSize = 12.sp, maxLines = 1) }
+            }
+            Text(tr("Een herhaling of opschaling van hetzelfde incident telt als één inzet.", "A repeat or scale-up of the same incident counts as one call-out."), color = Muted, fontSize = 11.sp)
+        }
+    }
+}
+
 /** The layers per category, as they are listed under "Kaartlagen". */
 private val LAAG_GROEPEN get() = listOf(
     tr("Meldingen en alerts", "Alerts") to listOf(KaartLaag.MELDINGEN, KaartLaag.WAARSCHUWINGEN, KaartLaag.KNMI),
     tr("Lucht", "Air") to listOf(KaartLaag.HELIKOPTERS),
     tr("Verkeer", "Traffic") to listOf(KaartLaag.VERKEER, KaartLaag.FLITSERS),
     tr("Posten en ziekenhuizen", "Stations and hospitals") to listOf(KaartLaag.KAZERNES, KaartLaag.ZIEKENHUIZEN),
-    tr("Kaart", "Map") to listOf(KaartLaag.WERKGEBIED, KaartLaag.BUIENRADAR),
+    tr("Kaart", "Map") to listOf(KaartLaag.WERKGEBIED, KaartLaag.REGIO, KaartLaag.BUIENRADAR),
 )
 
 enum class KaartLaag(val key: String) {
-    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar");
+    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar"), REGIO("regio");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
         HELIKOPTERS -> tr("Luchtvaart (live)", "Aviation (live)"); KAZERNES -> tr("Kazernes en posten (brandweer, ambulance, politie)", "Stations (fire, ambulance, police)")
         ZIEKENHUIZEN -> tr("Ziekenhuizen en vliegbases", "Hospitals and air bases"); WERKGEBIED -> tr("Gemeentegrens", "Municipal border")
         BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
+        REGIO -> tr("Grens veiligheidsregio", "Border of the safety region")
         VERKEER -> tr("Verkeer (NDW)", "Traffic (NDW)"); FLITSERS -> tr("Flitsers (vast)", "Speed cameras (fixed)")
     }
 }
@@ -95,6 +136,9 @@ fun MapScreen(nav: Nav) {
     val luchtLijst = Store.lucht.filter { it.keuzeSoort in Settings.luchtSoorten }
     val vliegend = heliLijst + luchtLijst
     // Always loaded: the Lifeliner and Zulu chips show even when the helicopter layer is off.
+    // The border of the safety region is asked once, when its layer is switched on.
+    val regioAan = KaartLaag.REGIO.key in Settings.kaartLagen
+    LaunchedEffect(regioAan) { if (regioAan) Store.laadRegio() }
     LaunchedEffect(Unit) {
         while (true) { Store.refreshHelikopters(); delay(10_000) }
     }
@@ -174,6 +218,8 @@ fun MapScreen(nav: Nav) {
     val points = mutableListOf<MapPoint>()
     val areas = mutableListOf<MapArea>()
     if (KaartLaag.WERKGEBIED.key in lagen) areas += MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.03, width = 1.5)
+    // The border of the safety region (CBS, via PDOK): a solid teal line, hardly any fill.
+    if (KaartLaag.REGIO.key in lagen && Store.regio.isNotEmpty()) areas += MapArea("regio", Store.regio, 0xFF0F766E, 0.0, width = 2.5)
     if (KaartLaag.KNMI.key in lagen) warns.filter { it.bron == "knmi" && !it.isBeeindigd }.forEach { areas += MapArea(it.id, it.gebied ?: emptyList(), it.color.toArgb().toLong(), 0.18) }
     if (KaartLaag.WAARSCHUWINGEN.key in lagen) warns.filter { it.bron != "knmi" && it.bron !in verborgen }.forEach { w ->
         if (w.bron == "nlalert") areas += MapArea(w.id, w.gebied ?: emptyList(), w.color.toArgb().toLong(), if (w.isBeeindigd) 0.06 else 0.2)
@@ -368,9 +414,12 @@ fun MapScreen(nav: Nav) {
                 sel.startsWith("w:") -> Store.waarschuwing(sel.removePrefix("w:"))?.let { w -> PreviewCard(onClose = { selected = null }) { WaarschuwingRow(w) { nav.waarschuwing(w.id) } } }
                 sel.startsWith("k:") -> Werkgebied.kazernes.firstOrNull { it.id == sel.removePrefix("k:") }?.let { k ->
                     PreviewCard(onClose = { selected = null }) {
-                        Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
-                            KazerneIcon(k.dienst, 36.dp); Spacer(Modifier.width(10.dp))
-                            Column { Text(k.naam, fontWeight = FontWeight.SemiBold); Text(k.plaats ?: "", color = Muted, fontSize = 12.sp) }
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                KazerneIcon(k.dienst, 36.dp); Spacer(Modifier.width(10.dp))
+                                Column { Text(k.naam, fontWeight = FontWeight.SemiBold); Text(k.plaats ?: "", color = Muted, fontSize = 12.sp) }
+                            }
+                            PostCijfersBlok(k.id)
                         }
                     }
                 }

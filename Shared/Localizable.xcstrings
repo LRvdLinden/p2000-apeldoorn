@@ -1633,6 +1633,23 @@
         }
       }
     },
+    "Altijd het donkere icoon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Always the dark icon."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Altijd het donkere icoon."
+          }
+        }
+      }
+    },
     "Ambulance": {
       "extractionState": "manual",
       "localizations": {
@@ -1697,6 +1714,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Annuleren"
+          }
+        }
+      }
+    },
+    "App-icoon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App icon"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "App-icoon"
           }
         }
       }
@@ -2241,6 +2275,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Binnen %@ km van waar je bent"
+          }
+        }
+      }
+    },
+    "Blauw": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blauw"
+          }
+        }
+      }
+    },
+    "Blauwe achtergrond.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blue background."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Blauwe achtergrond."
           }
         }
       }
@@ -2955,6 +3023,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De buienradar is nog niet beschikbaar."
+          }
+        }
+      }
+    },
+    "De cijfers van deze post zijn nu niet op te halen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The figures of this station cannot be loaded right now."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De cijfers van deze post zijn nu niet op te halen."
           }
         }
       }
@@ -3809,6 +3894,23 @@
         }
       }
     },
+    "Een herhaling of opschaling van hetzelfde incident telt als één inzet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "A repeat or scale-up of the same incident counts as one call-out."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Een herhaling of opschaling van hetzelfde incident telt als één inzet."
+          }
+        }
+      }
+    },
     "Een uur voordat de code ingaat": {
       "extractionState": "manual",
       "localizations": {
@@ -3979,19 +4081,19 @@
         }
       }
     },
-    "Er waren de afgelopen twee weken geen waarschuwingen voor de gemeente Apeldoorn en Teuge.": {
+    "Er waren de afgelopen dertig dagen geen waarschuwingen voor de gemeente Apeldoorn en Teuge.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "There were no warnings for the municipality of Apeldoorn and Teuge in the past two weeks."
+            "value": "There were no warnings for the municipality of Apeldoorn and Teuge in the past thirty days."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Er waren de afgelopen twee weken geen waarschuwingen voor de gemeente Apeldoorn en Teuge."
+            "value": "Er waren de afgelopen dertig dagen geen waarschuwingen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -4506,6 +4608,23 @@
         }
       }
     },
+    "Geen vraag gevonden. Probeer een ander woord.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No question found. Try another word."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen vraag gevonden. Probeer een ander woord."
+          }
+        }
+      }
+    },
     "Geen waarschuwingen": {
       "extractionState": "manual",
       "localizations": {
@@ -4523,19 +4642,19 @@
         }
       }
     },
-    "Geen waarschuwingen in de laatste twee weken.": {
+    "Geen waarschuwingen in de laatste dertig dagen.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No warnings in the last two weeks."
+            "value": "No warnings in the last thirty days."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Geen waarschuwingen in de laatste twee weken."
+            "value": "Geen waarschuwingen in de laatste dertig dagen."
           }
         }
       }
@@ -5016,6 +5135,23 @@
         }
       }
     },
+    "Grens veiligheidsregio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Border of the safety region"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grens veiligheidsregio"
+          }
+        }
+      }
+    },
     "Grens werkgebied": {
       "extractionState": "manual",
       "localizations": {
@@ -5097,6 +5233,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Grootte op de kaart"
+          }
+        }
+      }
+    },
+    "Grote brand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Large fire"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grote brand"
           }
         }
       }
@@ -5832,6 +5985,23 @@
         }
       }
     },
+    "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You follow %lld aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing."
+          }
+        }
+      }
+    },
     "Je zone in vliegen": {
       "extractionState": "manual",
       "localizations": {
@@ -6372,6 +6542,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klein"
+          }
+        }
+      }
+    },
+    "Kleine brand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Small fire"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Kleine brand"
           }
         }
       }
@@ -7566,6 +7753,40 @@
         }
       }
     },
+    "Middel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middel"
+          }
+        }
+      }
+    },
+    "Middelbrand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Medium fire"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Middelbrand"
+          }
+        }
+      }
+    },
     "Middelpunt": {
       "extractionState": "manual",
       "localizations": {
@@ -7736,19 +7957,19 @@
         }
       }
     },
-    "NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge.": {
+    "NL-Alert, Burgernet en KNMI van de laatste 30 dagen voor de gemeente Apeldoorn en Teuge.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "NL-Alert, Burgernet and KNMI of the last 14 days for the municipality of Apeldoorn and Teuge."
+            "value": "NL-Alert, Burgernet and KNMI of the last 30 days for the municipality of Apeldoorn and Teuge."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "NL-Alert, Burgernet en KNMI van de laatste 14 dagen voor de gemeente Apeldoorn en Teuge."
+            "value": "NL-Alert, Burgernet en KNMI van de laatste 30 dagen voor de gemeente Apeldoorn en Teuge."
           }
         }
       }
@@ -8637,6 +8858,23 @@
         }
       }
     },
+    "Ook als het toestel landt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also when the aircraft lands"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook als het toestel landt"
+          }
+        }
+      }
+    },
     "Ook besteld vervoer en meldingen zonder haast": {
       "extractionState": "manual",
       "localizations": {
@@ -8650,6 +8888,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ook besteld vervoer en meldingen zonder haast"
+          }
+        }
+      }
+    },
+    "Ook bij de terugvlucht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also on the flight back"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook bij de terugvlucht"
           }
         }
       }
@@ -8854,6 +9109,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Opgeroepen, maar niet opgestegen"
+          }
+        }
+      }
+    },
+    "Opgeschaald naar %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Scaled up to %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opgeschaald naar %@"
           }
         }
       }
@@ -9113,6 +9385,23 @@
         }
       }
     },
+    "Past zich aan: in de donkere modus het donkere icoon.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Adapts: the dark icon in dark mode."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Past zich aan: in de donkere modus het donkere icoon."
+          }
+        }
+      }
+    },
     "Pauze": {
       "extractionState": "manual",
       "localizations": {
@@ -9164,6 +9453,23 @@
         }
       }
     },
+    "Per dag van de week": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per day of the week"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per dag van de week"
+          }
+        }
+      }
+    },
     "Per discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -9204,7 +9510,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "By hour of the day"
+            "value": "Per hour of the day"
           }
         },
         "nl": {
@@ -10462,7 +10768,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Standard"
+            "value": "Default"
           }
         },
         "nl": {
@@ -11000,6 +11306,23 @@
         }
       }
     },
+    "Tik op de kaart op een helikopter of vliegtuig en dan op de bel: je krijgt een pushmelding als dat toestel opstijgt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tap a helicopter or aircraft on the map and then the bell: you get a notification when that aircraft takes off."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tik op de kaart op een helikopter of vliegtuig en dan op de bel: je krijgt een pushmelding als dat toestel opstijgt."
+          }
+        }
+      }
+    },
     "Tik op de ster om een eenheid te volgen. Je krijgt dan ook meldingen van die capcode buiten je plaatsen en straal.": {
       "extractionState": "manual",
       "localizations": {
@@ -11115,6 +11438,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toestel-ID"
+          }
+        }
+      }
+    },
+    "Toestellen met de bel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Aircraft with the bell"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toestellen met de bel"
           }
         }
       }
@@ -11574,6 +11914,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Van %@ tot %@"
+          }
+        }
+      }
+    },
+    "Van deze post zijn nog geen inzetten geteld. We tellen sinds november 2026.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No call-outs counted for this station yet. We count since November 2026."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Van deze post zijn nog geen inzetten geteld. We tellen sinds november 2026."
           }
         }
       }
@@ -13108,6 +13465,40 @@
         }
       }
     },
+    "Zeer groot": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very large"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeer groot"
+          }
+        }
+      }
+    },
+    "Zeer grote brand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Very large fire"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zeer grote brand"
+          }
+        }
+      }
+    },
     "Zelfde adres": {
       "extractionState": "manual",
       "localizations": {
@@ -13342,6 +13733,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zoek een adres of plaats"
+          }
+        }
+      }
+    },
+    "Zoek in de vragen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search the questions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek in de vragen"
+          }
+        }
+      }
+    },
+    "Zoek ook buiten mijn filters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also search outside my filters"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek ook buiten mijn filters"
           }
         }
       }
@@ -13675,7 +14100,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Tue"
+            "value": "Tu"
           }
         },
         "nl": {
@@ -13692,7 +14117,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thu"
+            "value": "Th"
           }
         },
         "nl": {
@@ -13788,6 +14213,57 @@
         }
       }
     },
+    "iOS laat kort een melding zien als het icoon is gewijzigd.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS briefly shows a message when the icon has changed."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "iOS laat kort een melding zien als het icoon is gewijzigd."
+          }
+        }
+      }
+    },
+    "inzet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "call-out"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inzet"
+          }
+        }
+      }
+    },
+    "inzetten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "call-outs"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "inzetten"
+          }
+        }
+      }
+    },
     "laatste": {
       "extractionState": "manual",
       "localizations": {
@@ -13828,7 +14304,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mon"
+            "value": "Mo"
           }
         },
         "nl": {
@@ -14094,6 +14570,23 @@
         }
       }
     },
+    "sinds %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "since %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "sinds %@"
+          }
+        }
+      }
+    },
     "stil (voorlopig)": {
       "extractionState": "manual",
       "localizations": {
@@ -14270,7 +14763,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Fri"
+            "value": "Fr"
           }
         },
         "nl": {
@@ -14338,7 +14831,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Wed"
+            "value": "We"
           }
         },
         "nl": {
@@ -14355,7 +14848,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sat"
+            "value": "Sa"
           }
         },
         "nl": {
@@ -14372,7 +14865,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sun"
+            "value": "Su"
           }
         },
         "nl": {

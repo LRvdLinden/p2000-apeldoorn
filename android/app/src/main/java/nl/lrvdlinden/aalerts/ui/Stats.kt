@@ -102,7 +102,7 @@ fun StatsScreen(nav: Nav) {
 @Composable
 private fun WaarschuwingStats(nav: Nav) {
     val list = Store.alleWaarschuwingen.ifEmpty { Store.waarschuwingen }
-    SectionCard(tr("Waarschuwingen (14 dagen)", "Warnings (14 days)"), Icons.Outlined.WarningAmber) {
+    SectionCard(tr("Waarschuwingen (30 dagen)", "Warnings (30 days)"), Icons.Outlined.WarningAmber) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             (listOf("nlalert", "burgernet", "knmi") + listOf("amber", "vermistkind").filter { b -> list.any { it.bron == b } }).forEach { b ->
                 val n = list.count { it.bron == b }

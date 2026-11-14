@@ -67,7 +67,9 @@ object Api {
     /** Every alert of the incident this alert belongs to, oldest first. */
     suspend fun verloop(guid: String): List<Melding> = runCatching { AppJson.decodeFromString<VerloopAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/verloop")).meldingen }.getOrDefault(emptyList())
     /** The lowest build of the app that still works (0 = no minimum). */
-    suspend fun minBuild(): Int = runCatching { AppJson.decodeFromString<AppAntwoord>(getText("${base}v1/app")).minBuild.android }.getOrDefault(0)
+    suspend fun appInfo(): AppAntwoord? = runCatching { AppJson.decodeFromString<AppAntwoord>(getText("${base}v1/app")) }.getOrNull()
+    suspend fun post(id: String): PostCijfers? = runCatching { AppJson.decodeFromString<PostCijfers>(getText("${base}v1/posten/${enc(id)}")) }.getOrNull()
+    suspend fun regio(): List<List<List<Double>>> = runCatching { AppJson.decodeFromString<RegioAntwoord>(getText("${base}v1/veiligheidsregio")).ringen }.getOrDefault(emptyList())
     suspend fun melding(guid: String): Melding? = runCatching { AppJson.decodeFromString<Melding>(getText("${base}v1/meldingen/${enc(guid)}")) }.getOrNull()
     suspend fun addView(guid: String) { runCatching { send("POST", "v1/meldingen/${enc(guid)}/view") } }
     suspend fun routes(guid: String): RoutesAntwoord? = runCatching { AppJson.decodeFromString<RoutesAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/routes")) }.getOrNull()

@@ -509,3 +509,18 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 @media (max-width: 900px) {
   .cluster-panel { left: 10px; right: 10px; bottom: 10px; width: auto; max-height: 58%; }
 }
+
+/* Figures of a station, and the announcement of the makers */
+.balken { display: grid; grid-template-columns: repeat(var(--n), 1fr); gap: 3px; align-items: end; height: 74px; }
+.balken div { display: grid; grid-template-rows: 1fr auto; height: 100%; align-items: end; justify-items: stretch; min-width: 0; }
+.balken i { display: block; min-height: 2px; border-radius: 3px 3px 0 0; background: var(--accent, #DC2626); }
+.balken small { text-align: center; font-size: .66rem; color: var(--muted); padding-top: 2px; }
+.balk-as { display: grid; grid-template-columns: repeat(24, 1fr); gap: 3px; font-size: .66rem; color: var(--muted); margin-top: -6px !important; }
+.post-lijst { list-style: none; padding: 0; display: grid; gap: 4px; font-size: .82rem; }
+.post-lijst li { display: grid; grid-template-columns: 74px 1fr; gap: 8px; }
+.post-lijst b { font-variant-numeric: tabular-nums; }
+.post-lijst span { color: var(--muted); }
+.mededeling { position: fixed; left: 50%; transform: translateX(-50%); bottom: 84px; z-index: 60; width: min(560px, calc(100vw - 24px)); box-sizing: border-box; display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 16px; background: var(--surface); color: var(--text); box-shadow: var(--shadow); border-left: 4px solid #DC2626; }
+.mededeling div { display: grid; gap: 2px; flex: 1; font-size: .88rem; }
+.mededeling span { color: var(--muted); }
+.verloop li.opschaling { display: block; padding: 2px 0 2px 78px; color: #D97706; font-weight: 700; font-size: .82rem; }

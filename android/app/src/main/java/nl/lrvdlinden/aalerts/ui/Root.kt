@@ -67,7 +67,22 @@ fun AAlertsRoot(activity: MainActivity) {
 
         // The lowest build that still works, asked once at start-up: an older build is asked to update.
         var verouderd by remember { mutableStateOf(false) }
-        LaunchedEffect(Unit) { val min = Api.minBuild(); verouderd = min > 0 && BuildConfig.VERSION_CODE < min }
+        // A message of the makers (set in beheer): a dialog, once, until it is closed.
+        var mededeling by remember { mutableStateOf<nl.lrvdlinden.aalerts.data.Mededeling?>(null) }
+        LaunchedEffect(Unit) {
+            val info = Api.appInfo() ?: return@LaunchedEffect
+            val min = info.minBuild.android
+            verouderd = min > 0 && BuildConfig.VERSION_CODE < min
+            mededeling = info.mededeling?.takeIf { it.id.isNotEmpty() && it.id != Settings.mededelingGesloten }
+        }
+        mededeling?.let { md ->
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { Settings.mededelingGesloten = md.id; mededeling = null },
+                title = { androidx.compose.material3.Text(md.titel) },
+                text = { androidx.compose.material3.Text(md.tekst) },
+                confirmButton = { androidx.compose.material3.TextButton(onClick = { Settings.mededelingGesloten = md.id; mededeling = null }) { androidx.compose.material3.Text(tr("Sluiten", "Close")) } },
+            )
+        }
         if (verouderd) {
             val ctx = androidx.compose.ui.platform.LocalContext.current
             androidx.compose.material3.AlertDialog(

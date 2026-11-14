@@ -7,9 +7,9 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=68";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=69";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -303,7 +303,7 @@ $("viewSeg").addEventListener("click", async (e) => {
   if (!v || v === state.view) return;
   state.view = v;
   $("viewSeg").querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.view === v));
-  if (v === "waarschuwingen" && !state.history) { state.history = []; renderList(); state.history = await fetchWaarschuwingen(14); }
+  if (v === "waarschuwingen" && !state.history) { state.history = []; renderList(); state.history = await fetchWaarschuwingen(30); }
   renderList();
 });
 
@@ -599,6 +599,18 @@ function bindVerband(root = $("detail")) {
 }
 
 /** Every unit alarmed for this incident with the time of its alarm (only when more than one alert belongs to it). */
+/** The size of the incident as an alert gives it: [1 klein … 4 zeer groot, GRIP above that, name], or null. */
+function niveau(x) {
+  const g = Number(String(x.grip || "").replace(/\D/g, ""));
+  if (g > 0) return [10 + g, `GRIP ${g}`];
+  const o = String(x.opschaling || "").toLowerCase(), brand = x.dienst === "brandweer";
+  if (o.includes("zeer groot")) return [4, brand ? "Zeer grote brand" : "Zeer groot"];
+  if (o.includes("groot")) return [3, brand ? "Grote brand" : "Groot"];
+  if (o.includes("middel")) return [2, brand ? "Middelbrand" : "Middel"];
+  if (o.includes("klein")) return [1, brand ? "Kleine brand" : "Klein"];
+  return null;
+}
+
 /** The list plus alerts of this incident that the server knows but the list does not hold (any more). */
 const metExtra = () => (state.extra.size ? [...state.list, ...[...state.extra.values()].filter((x) => !state.list.some((l) => l.guid === x.guid))] : state.list);
 
@@ -637,12 +649,16 @@ function verloopHTML(m) {
   const zeker = links.every((l) => l.zeker);
   const lijst = [m, ...links.map((l) => l.melding)].sort((a, b) => date(a) - date(b));
   const t0 = date(lijst[0]);
+  let hoogste = 0;
   return `<section class="card"><h2>Verloop (${lijst.length} meldingen)</h2><p class="hint">${zeker ? "Meldingen van dezelfde inzet." : "Meldingen van dezelfde inzet, en meldingen die er mogelijk bij horen (geen zekerheid)."}</p>
     <ol class="verloop">${lijst.map((x) => {
       const plus = Math.round((date(x) - t0) / 60_000);
       const reden = links.find((l) => l.melding.guid === x.guid)?.redenen.join(" · ") || "";
       const zelf = x.guid === m.guid;
-      return `<li class="${zelf ? "zelf" : ""}" style="--c:${dienstOf(x).color}"><time>${fmtTime(date(x))}${plus ? `<small>+${plus} min</small>` : ""}</time>
+      // "↑ Opgeschaald naar Middelbrand": this alert is a step up from the ones before it.
+      const nv = niveau(x), op = nv && nv[0] > hoogste && x !== lijst[0] ? `<li class="opschaling">↑ Opgeschaald naar ${esc(nv[1])}</li>` : "";
+      hoogste = Math.max(hoogste, nv ? nv[0] : 0);
+      return `${op}<li class="${zelf ? "zelf" : ""}" style="--c:${dienstOf(x).color}"><time>${fmtTime(date(x))}${plus ? `<small>+${plus} min</small>` : ""}</time>
         <a href="?melding=${encodeURIComponent(x.guid)}" ${zelf ? "" : `data-goto="${esc(x.guid)}"`}><img src="${icon(x)}" alt=""><span><b>${esc(x.title)}</b>${zelf ? `<em>Deze melding</em>` : reden ? `<small>${esc(reden)}</small>` : ""}</span></a></li>`;
     }).join("")}</ol></section>`;
 }
@@ -929,6 +945,7 @@ const LAGEN = [
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613", "Posten"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626", "Posten"],
   ["werkgebied", "Grens", "aalerts-icon-32", "#DC2626", "Kaart"],
+  ["regio", "Veiligheidsregio", "icon_brandweer", "#0F766E", "Kaart"],
   ["buienradar", "Buien", "icon_knmi", "#2563EB", "Kaart"],
 ];
 function renderMapChips() {
@@ -963,7 +980,7 @@ function renderMapChips() {
   const laagChip = ([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length + state.lucht.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", regio: "De grens van de veiligheidsregio Noord- en Oost-Gelderland", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus; tik op een post voor zijn cijfers", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   };
   const cats = [...new Set(LAGEN.map((l) => l[4]))];
   $("mapLagen").innerHTML = `<div class="lg-paneel">` + cats.map((cat) => `<div class="lg-rij"><span class="lg-kop">${cat}</span><div class="lg-chips">${LAGEN.filter((l) => l[4] === cat).map(laagChip).join("")}${cat === "Kaart" ? `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>` : ""}</div></div>`).join("") + `</div>`;
@@ -1084,7 +1101,7 @@ async function renderMap() {
       if (w.lat != null) extra.push(warnAnnotation(mk, w, (x) => selectWarning(x.id)));
     });
   }
-  if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613")));
+  if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613", openPost)));
   if (state.lagen.has("ziekenhuizen")) (await fetchLocaties()).forEach((l) => extra.push(locatieAnnotation(mk, l, openLocatie)));
   if (state.lagen.has("verkeer") || state.lagen.has("flitsers")) {
     const vk = await fetchVerkeer();
@@ -1110,6 +1127,7 @@ async function renderMap() {
     renderAfspeel(mk, h);
   }
   if (state.lagen.has("werkgebied")) bigMap.addOverlays(await werkgebiedOverlays(mk));
+  if (state.lagen.has("regio")) bigMap.addOverlays(await regioOverlays(mk));
   await zetRadar(mk);
   bigMap.addAnnotations([
     ...clusters.map((c) => clusterAnnotation(mk, c, openCluster)),
@@ -1377,6 +1395,51 @@ async function werkgebiedOverlays(mk) {
   return gebied.map((ring) => new mk.PolylineOverlay([...ring, ring[0]].map(([lon, lat]) => new mk.Coordinate(lat, lon)),
     { style: new mk.Style({ strokeColor: "#DC2626", strokeOpacity: 0.8, lineWidth: 2.5, lineDash: [10, 6] }) }));
 }
+
+/** The border of the safety region (CBS, via PDOK). */
+let regioCache = null;
+async function regioOverlays(mk) {
+  if (!regioCache) regioCache = fetch(asset("assets/veiligheidsregio.json?v=1")).then((r) => r.json()).catch(() => ({ ringen: [] }));
+  const { ringen } = await regioCache;
+  return (ringen || []).map((ring) => new mk.PolylineOverlay(ring.map(([lat, lon]) => new mk.Coordinate(lat, lon)),
+    { style: new mk.Style({ strokeColor: "#0F766E", strokeOpacity: 0.85, lineWidth: 3 }) }));
+}
+
+/** A station tapped on the map: its call-outs (an incident counts once), per hour and per day, vehicles and capcodes. */
+async function openPost(k) {
+  const box = $("clusterPanel");
+  const kop = `<header><b>${esc(k.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>`;
+  box.innerHTML = `${kop}<div class="heli-body"><p class="hint">Cijfers ophalen…</p></div>`;
+  box.hidden = false;
+  const p = await fetchPost(k.id);
+  if (box.hidden || !box.querySelector(".heli-body")) return;
+  if (!p) { box.innerHTML = `${kop}<div class="heli-body"><p class="hint">De cijfers van deze post zijn nu niet op te halen.</p></div>`; return; }
+  const balken = (rij, labels, metLabel = true) => { const max = Math.max(1, ...rij); return `<div class="balken" style="--n:${rij.length}">${rij.map((n, i) => `<div title="${labels[i]}: ${n}"><i style="height:${Math.round((n / max) * 100)}%"></i>${metLabel ? `<small>${labels[i]}</small>` : ""}</div>`).join("")}</div>`; };
+  const uren = Array.from({ length: 24 }, (_, i) => (i % 6 === 0 ? String(i) : ""));
+  const sinds = p.sinds ? new Date(p.sinds).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" }) : null;
+  box.innerHTML = `${kop}<div class="heli-body">
+    <p>${esc(DIENSTEN[p.soort]?.label || "Post")} · ${esc(p.plaats || "")}</p>
+    ${p.inzetten ? `<div class="heli-vals"><div><small>Inzetten</small><b>${p.inzetten}</b></div><div><small>Sinds</small><b>${esc(sinds)}</b></div><div><small>Laatste</small><b>${esc(ago(new Date(p.laatste)))}</b></div></div>
+    <h4 class="vl-head">Per uur van de dag</h4>${balken(p.per_uur, Array.from({ length: 24 }, (_, i) => `${i} uur`), false)}
+    <div class="balk-as">${uren.map((u) => `<span>${u}</span>`).join("")}</div>
+    <h4 class="vl-head">Per dag van de week</h4>${balken(p.per_dag, ["ma", "di", "wo", "do", "vr", "za", "zo"])}`
+    : `<p class="hint">Van deze post zijn nog geen inzetten geteld. We tellen sinds november 2026.</p>`}
+    ${p.voertuigen.length ? `<h4 class="vl-head">Voertuigen (${p.voertuigen.length})</h4><ul class="post-lijst">${p.voertuigen.map((v) => `<li><b>${esc(v.nr)}</b><span>${esc(v.label)}</span></li>`).join("")}</ul>` : ""}
+    ${p.capcodes.length ? `<h4 class="vl-head">Capcodes (${p.capcodes.length})</h4><ul class="post-lijst">${p.capcodes.map((c) => `<li><b>${esc(c.code)}</b><span>${esc(c.naam)}</span></li>`).join("")}</ul>` : ""}
+    <p class="hint">Een herhaling of opschaling van hetzelfde incident telt als één inzet. Voertuigen en capcodes zijn afgeleid uit de meldingen waarin deze post is genoemd.</p></div>`;
+}
+
+/** A message of the makers (set in beheer): shown once, until it is closed. */
+async function toonMededeling() {
+  const { mededeling: md } = await fetchApp();
+  if (!md || prefs.get("p2000.mededeling", "") === md.id) return;
+  const el = document.createElement("div");
+  el.className = "mededeling";
+  el.innerHTML = `<div><b>${esc(md.titel)}</b><span>${esc(md.tekst)}</span></div><button class="icon-btn" aria-label="Sluit">✕</button>`;
+  el.querySelector("button").addEventListener("click", () => { prefs.set("p2000.mededeling", md.id); el.remove(); });
+  document.body.append(el);
+}
+toonMededeling();
 
 /** Town marker tapped: list the alerts without a street name in that town. */
 function openCluster(c) {

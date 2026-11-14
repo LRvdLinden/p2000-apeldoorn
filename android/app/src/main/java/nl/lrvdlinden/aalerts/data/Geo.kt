@@ -203,6 +203,31 @@ object Verband {
 
     private fun norm(s: String?) = java.text.Normalizer.normalize((s ?: "").lowercase(), java.text.Normalizer.Form.NFD).replace(Regex("[^a-z0-9]"), "")
 
+    /** The size of the incident as the alert gives it (klein 1 … zeer groot 4, GRIP above that) with its name. */
+    private fun niveau(m: Melding): Pair<Int, String>? {
+        val g = m.grip?.filter { it.isDigit() }?.toIntOrNull() ?: 0
+        if (g > 0) return (10 + g) to "GRIP $g"
+        val o = (m.opschaling ?: "").lowercase(); val brand = m.soort == Dienst.BRANDWEER
+        return when {
+            "zeer groot" in o -> 4 to if (brand) tr("Zeer grote brand", "Very large fire") else tr("Zeer groot", "Very large")
+            "groot" in o -> 3 to if (brand) tr("Grote brand", "Large fire") else tr("Groot", "Large")
+            "middel" in o -> 2 to if (brand) tr("Middelbrand", "Medium fire") else tr("Middel", "Medium")
+            "klein" in o -> 1 to if (brand) tr("Kleine brand", "Small fire") else tr("Klein", "Small")
+            else -> null
+        }
+    }
+    /** Per alert of a timeline (any order given): the name of the level it stepped up to, compared with the alert before it. */
+    fun opschalingen(lijst: List<Melding>): Map<String, String> {
+        val out = mutableMapOf<String, String>()
+        var vorig = 0
+        for (m in lijst.sortedBy { it.millis }) {
+            val n = niveau(m)
+            if (n != null && n.first > vorig && m != lijst.minByOrNull { it.millis }) out[m.guid] = n.second
+            vorig = maxOf(vorig, n?.first ?: 0)
+        }
+        return out
+    }
+
     private val LOS = Regex("herbezet|kazerneren|proefalarm", RegexOption.IGNORE_CASE)
     /** Never part of an incident: planned patient transport (B1–B3), restaffing a station or a test alarm. */
     private fun los(m: Melding) = (m.prioriteit ?: "").uppercase() in setOf("B1", "B2", "B3") || LOS.containsMatchIn(m.title)

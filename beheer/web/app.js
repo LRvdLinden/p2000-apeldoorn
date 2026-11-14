@@ -763,7 +763,7 @@ async function push(el) {
   };
 }
 
-const DOCS = { privacy: "Privacyverklaring", cookies: "Cookies", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer", hulp: "Hulp en veelgestelde vragen", changelog: "Changelog" };
+const DOCS = { privacy: "Privacyverklaring", cookies: "Cookies", terms: "Gebruiksvoorwaarden", disclaimer: "Disclaimer", hulp: "Hulp en veelgestelde vragen", mededeling: "Mededeling in de app (leeg = geen)", changelog: "Changelog" };
 let doc = "privacy";
 async function teksten(el) {
   const data = await api("GET", `/v1/beheer/content/${doc}`);

@@ -142,6 +142,12 @@ object Settings {
     var heliSoorten by set("heliSoorten", setOf("trauma"), push = true)
     /** The bell on one aircraft: a push when it takes off (ids such as "lifeliner3" or "lucht-480c21"). */
     var heliVolg by set("heliVolg", emptySet(), push = true)
+    /** With the bell: also a push when the aircraft lands, and when it takes off again shortly after a landing. */
+    var heliVolgLanden by bool("heliVolgLanden", false, push = true)
+    var heliVolgTerug by bool("heliVolgTerug", true, push = true)
+    /** The announcement of the makers that was closed, and searching outside the list filters. */
+    var mededelingGesloten by str("mededelingGesloten", "")
+    var zoekBuitenFilters by bool("zoekBuitenFilters", false)
     /** Zone notifications paused until (epoch ms; 0 = not paused). */
     var heliPauzeTot by P("heliPauzeTot", 0L, true, { p, k, x -> p.getLong(k, x) }, { e, k, v -> e.putLong(k, v) }).also { all += it }
     var grootIncident by bool("grootIncident", false, push = true)
@@ -318,6 +324,8 @@ object Settings {
                 "zones" to heliZones.map { mapOf("id" to it.id, "naam" to it.naam, "lat" to it.lat, "lon" to it.lon, "km" to it.km) },
                 "opstijgen" to heliOpstijgen, "landen" to heliLanden, "binnen" to heliBinnen, "soorten" to heliSoorten.sorted(),
                 "volg" to heliVolg.sorted(),
+                "volg_landen" to heliVolgLanden,
+                "volg_terug" to heliVolgTerug,
             ).also { if (heliGepauzeerd) it["pauze_tot"] = heliPauzeTot },
             "groot" to mapOf("aan" to grootIncident, "plaatsen" to grootPlaatsen.sorted()),
             "profielen" to p.map {

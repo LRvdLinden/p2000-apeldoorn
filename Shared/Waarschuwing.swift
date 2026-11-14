@@ -333,7 +333,7 @@ extension P2000API {
         try await getJSON("v1/waarschuwingen/\(id)", as: WaarschuwingDetail.self)
     }
 
-    /// NL-Alert, Burgernet and KNMI of the last `days` days (the server keeps up to 14).
+    /// NL-Alert, Burgernet and KNMI of the last `days` days (the server keeps up to 30).
     func waarschuwingen(days: Int) async throws -> [Waarschuwing] {
         try await getJSON("v1/waarschuwingen", query: ["days": String(days), "kind": "1"], as: [LosseWaarschuwing].self).compactMap(\.waarschuwing)
     }

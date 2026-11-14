@@ -54,7 +54,7 @@
   <nav aria-label="Informatie"><a href="/privacy/">Privacy</a><a href="/voorwaarden/">Voorwaarden</a><a href="/disclaimer/">Disclaimer</a><a href="/cookies/">Cookies</a><a href="/wat-is-nieuw/">Wat is nieuw</a><a href="/pager/">Live pager</a><a href="/status/">Status</a><a href="/hulp/" aria-current="page">Hulp</a></nav>
 </header>
 <main>
-<article><h1>Hulp en veelgestelde vragen</h1><p class="meta">Laatst bijgewerkt: 8 november 2026</p><p>Hier vind je antwoorden op de vragen die we het vaakst krijgen. Staat je vraag er niet bij? Mail naar <a href="mailto:hallo@pixelforges.nl">hallo@pixelforges.nl</a>.</p>
+<article><h1>Hulp en veelgestelde vragen</h1><p class="meta">Laatst bijgewerkt: 14 november 2026</p><p>Hier vind je antwoorden op de vragen die we het vaakst krijgen. Staat je vraag er niet bij? Mail naar <a href="mailto:hallo@pixelforges.nl">hallo@pixelforges.nl</a>.</p>
 <h2>Waar komen de meldingen vandaan?</h2>
 <p>A-Alerts toont meldingen van het P2000-netwerk: het alarmeringssysteem van brandweer, ambulance, politie en de traumahelikopter. De meldingen komen via p2000.page binnen op onze eigen server. A-Alerts ontvangt zelf geen P2000-signalen en verstuurt zelf geen alarmeringen. Daarnaast tonen we NL-Alert, Burgernet en de weerwaarschuwingen van het KNMI.</p>
 <h2>Ontbreekt er een melding?</h2>
@@ -86,9 +86,37 @@
 <h2>Helikopters op de kaart</h2>
 <p>De kaart toont de traumahelikopters (Lifeliners) en politiehelikopters met hun route van de laatste twee uur. Vliegt een Lifeliner voor een melding in de gemeente, dan zie je waar hij waarschijnlijk heen gaat. De posities komen van openbare vliegtuigontvangers en kunnen even achterlopen.</p>
 <h2>Kost A-Alerts iets?</h2>
-<p>Nee. A-Alerts heeft geen account nodig, toont geen advertenties en volgt je niet. Lees meer in de <a href="https://a-alerts.nl/privacy/">privacyverklaring</a>.</p></article>
+<p>Nee. A-Alerts heeft geen account nodig, toont geen advertenties en volgt je niet. Lees meer in de <a href="https://a-alerts.nl/privacy/">privacyverklaring</a>.</p><h2>Hoe weet A-Alerts welke meldingen bij elkaar horen?</h2>
+<p>Onze server zet meldingen van dezelfde inzet bij elkaar: hetzelfde adres in dezelfde plaats, of vlak bij elkaar met dezelfde eenheid, binnen drie kwartier (twee uur bij een groot incident). Bij een melding zie je dan het <b>Verloop</b> met alle meldingen van die inzet, een regel als "Opgeschaald naar Middelbrand" als de inzet groter wordt, en <b>Eenheden bij deze inzet</b> met de tijd van alarmering. Je krijgt nog steeds van iedere melding een pushmelding.</p>
+<h2>Hoe volg ik een helikopter of vliegtuig?</h2>
+<p>Tik op de kaart op een toestel en dan op de <b>bel</b>. Je krijgt een pushmelding zodra dat toestel opstijgt. Bij Instellingen › Helikopters kies je of je ook een melding wilt als het landt, en bij de terugvlucht (een nieuwe start binnen anderhalf uur na een landing). In het kaartje van het toestel zie je boven welke plaats het vliegt, hoe lang het in de lucht is en waar het is geweest.</p>
+<h2>Wat betekent "Waarschijnlijk geannuleerd" bij een Lifeliner?</h2>
+<p>P2000 meldt niet dat een traumahelikopter wordt geannuleerd. Wij leiden het af uit de vlucht: de helikopter kwam dichterbij, is niet bij de melding geweest en vliegt er daarna weer vandaan. Het is een inschatting. Valt de positie van de helikopter weg, dan tonen we niets.</p>
+<h2>Waar vind ik de cijfers van een kazerne?</h2>
+<p>Zet op de kaart de laag <b>Kazernes en posten</b> aan en tik op een post. Je ziet hoe vaak die post is uitgerukt, op welke uren en dagen, en welke voertuigen en capcodes erbij horen. Een herhaling of opschaling van hetzelfde incident telt als één inzet. We tellen sinds november 2026.</p>
+<h2>Kan ik een ander app-icoon kiezen?</h2>
+<p>Ja, op iPhone en iPad bij Instellingen › App-icoon. <b>Standaard</b> past zich aan: in de donkere modus zie je het donkere icoon. Daarnaast kun je kiezen voor altijd donker of blauw.</p>
+</article>
 </main>
 <footer>A-Alerts · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a></footer>
 <script type="module">import { trackVisit } from "/assets/js/core.js?v=61"; trackVisit();</script>
+<script>
+// Search in the questions: every <h2> with the paragraphs under it is one question.
+(() => {
+  const art = document.querySelector("main article"); if (!art) return;
+  const koppen = [...art.querySelectorAll("h2")]; if (!koppen.length) return;
+  const blokken = koppen.map((h) => { const els = [h]; let n = h.nextElementSibling; while (n && n.tagName !== "H2") { els.push(n); n = n.nextElementSibling; } return els; });
+  const zoek = document.createElement("input");
+  zoek.type = "search"; zoek.placeholder = "Zoek in de vragen, bijvoorbeeld pushmelding of helikopter"; zoek.setAttribute("aria-label", "Zoek in de vragen");
+  zoek.style.cssText = "width:100%;box-sizing:border-box;padding:12px 14px;border-radius:12px;border:1px solid rgba(127,127,127,.35);background:transparent;color:inherit;font:inherit;margin:8px 0 4px";
+  const niets = document.createElement("p"); niets.textContent = "Geen vraag gevonden. Probeer een ander woord, of mail ons."; niets.hidden = true;
+  koppen[0].before(zoek, niets);
+  zoek.addEventListener("input", () => {
+    const q = zoek.value.trim().toLowerCase(); let n = 0;
+    for (const els of blokken) { const hit = !q || els.some((e) => e.textContent.toLowerCase().includes(q)); els.forEach((e) => { e.hidden = !hit; }); if (hit) n++; }
+    niets.hidden = n > 0;
+  });
+})();
+</script>
 </body>
 </html>

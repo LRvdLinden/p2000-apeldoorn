@@ -89,10 +89,15 @@ struct P2000API: Sendable {
         return (try? await get(url("v1/meldingen/\(guid)/verloop"), as: Antwoord.self).meldingen) ?? []
     }
 
-    /// The lowest build of the app that still works (0 = no minimum).
-    func minBuild() async -> Int {
-        struct Antwoord: Decodable { struct Min: Decodable { let ios: Int? }; let min_build: Min? }
-        return (try? await get(url("v1/app"), as: Antwoord.self).min_build?.ios) ?? 0
+    /// What the app asks at start-up: the lowest build that still works (0 = no minimum) and a message of the makers.
+    struct AppInfo: Decodable {
+        struct Min: Decodable { let ios: Int? }
+        struct Mededeling: Decodable, Hashable { let id: String; let titel: String; let tekst: String }
+        let min_build: Min?
+        let mededeling: Mededeling?
+    }
+    func appInfo() async -> AppInfo? {
+        try? await get(url("v1/app"), as: AppInfo.self)
     }
 
     /// View counter ("1x", "4x" in the list). Best effort.

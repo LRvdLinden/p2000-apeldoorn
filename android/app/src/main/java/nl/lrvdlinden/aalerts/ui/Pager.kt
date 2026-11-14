@@ -42,11 +42,13 @@ fun PagerScreen(nav: Nav) {
 
     val gelezen = Settings.gelezen
     val items: List<TimelineItem> = remember(Store.meldingen, Store.waarschuwingen, Settings.diensten, Settings.plaatsen, Settings.prioriteiten,
-        Settings.waarschuwingFilter, Settings.radiusEnabled, Settings.radiusKm, Settings.hideRead, query, gelezen.size) {
+        Settings.waarschuwingFilter, Settings.radiusEnabled, Settings.radiusKm, Settings.hideRead, query, gelezen.size, Settings.zoekBuitenFilters) {
         val q = query.trim().lowercase()
-        val ms = Store.meldingen.filter { Settings.matchesList(it) }
-            .filter { !Settings.hideRead || it.guid !in gelezen }
-            .filter { q.isEmpty() || it.title.lowercase().contains(q) || it.plaatsText.lowercase().contains(q) || (it.capcode ?: "").contains(q) || (it.fullMelding ?: "").lowercase().contains(q) }
+        // While searching, "also outside my filters" finds alerts that the list filters would hide.
+        val alles = q.isNotEmpty() && Settings.zoekBuitenFilters
+        val ms = Store.meldingen.filter { alles || Settings.matchesList(it) }
+            .filter { alles || !Settings.hideRead || it.guid !in gelezen }
+            .filter { q.isEmpty() || it.title.lowercase().contains(q) || it.plaatsText.lowercase().contains(q) || (it.capcode ?: "").contains(q) || (it.fullMelding ?: "").lowercase().contains(q) || it.eenheden.any { u -> (u.code ?: "").contains(q) || (u.naam ?: "").lowercase().contains(q) } }
             .map { TMelding(it) }
         val oldest = Store.meldingen.minOfOrNull { it.millis } ?: 0L
         val ws = Store.waarschuwingen.filter { it.bron != "knmi" && Settings.matchesList(it) && it.startAt.toEpochMilli() >= oldest }
@@ -68,6 +70,12 @@ fun PagerScreen(nav: Nav) {
                     else Text("A-Alerts", fontWeight = FontWeight.Bold)
                 },
                 actions = {
+                    // While searching: also find alerts outside the list filters.
+                    if (searching) IconButton(onClick = { Settings.zoekBuitenFilters = !Settings.zoekBuitenFilters }) {
+                        Icon(if (Settings.zoekBuitenFilters) Icons.Filled.FilterAltOff else Icons.Outlined.FilterAlt,
+                            if (Settings.zoekBuitenFilters) tr("Zoekt ook buiten je filters; tik om alleen binnen je filters te zoeken", "Also searching outside your filters; tap to search within your filters only")
+                            else tr("Zoekt binnen je filters; tik om ook daarbuiten te zoeken", "Searching within your filters; tap to also search outside them"))
+                    }
                     IconButton(onClick = { searching = !searching; if (!searching) query = "" }) { Icon(if (searching) Icons.Filled.Close else Icons.Outlined.Search, tr("Zoeken", "Search")) }
                     IconButton(onClick = { nav.open("waarschuwingen") }) { Icon(Icons.Outlined.WarningAmber, tr("Alle waarschuwingen", "All warnings")) }
                     // Quick switch: hide viewed alerts (as on iOS).

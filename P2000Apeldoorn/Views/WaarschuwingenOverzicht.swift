@@ -176,7 +176,7 @@ struct WaarschuwingenHistorieView: View {
             if items.isEmpty && !loading {
                 ContentUnavailableView(failed ? L("Kon de waarschuwingen niet laden") : L("Geen waarschuwingen"),
                                        systemImage: "checkmark.shield",
-                                       description: Text(failed ? L("Controleer je internetverbinding en probeer het opnieuw.") : L("Er waren de afgelopen twee weken geen waarschuwingen voor de gemeente Apeldoorn en Teuge.")))
+                                       description: Text(failed ? L("Controleer je internetverbinding en probeer het opnieuw.") : L("Er waren de afgelopen dertig dagen geen waarschuwingen voor de gemeente Apeldoorn en Teuge.")))
             }
             ForEach(perDag, id: \.dag) { groep in
                 Section {
@@ -217,7 +217,7 @@ struct WaarschuwingenHistorieView: View {
         loading = true
         defer { loading = false }
         do {
-            items = try await P2000API.shared.waarschuwingen(days: 14)
+            items = try await P2000API.shared.waarschuwingen(days: 30)
             failed = false
         } catch {
             failed = true

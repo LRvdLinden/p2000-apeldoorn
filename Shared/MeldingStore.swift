@@ -107,7 +107,8 @@ final class MeldingStore {
     /// Alerts stay on the timeline for 24 hours.
     nonisolated static let timelineWindow: TimeInterval = 24 * 60 * 60
 
-    func filtered(_ settings: AppSettings, search: String = "", onlyBewaard: Bool = false) -> [Melding] {
+    /// `buitenFilters`: while searching, also find alerts that the list filters would hide.
+    func filtered(_ settings: AppSettings, search: String = "", onlyBewaard: Bool = false, buitenFilters: Bool = false) -> [Melding] {
         let q = search.trimmingCharacters(in: .whitespaces).lowercased()
         let cutoff = Date.now.addingTimeInterval(-Self.timelineWindow)
         return meldingen.filter { m in
@@ -115,10 +116,11 @@ final class MeldingStore {
             // The timeline only shows the last 24 hours.
             guard m.datum >= cutoff else { return false }
             // A followed capcode is always shown, also outside the list filters.
-            guard settings.matchesList(m) || settings.volgtCapcode(m) else { return false }
-            if settings.hideRead && settings.isRead(m) { return false }
+            let alles = buitenFilters && !q.isEmpty
+            guard alles || settings.matchesList(m) || settings.volgtCapcode(m) else { return false }
+            if !alles && settings.hideRead && settings.isRead(m) { return false }
             guard !q.isEmpty else { return true }
-            return [m.title, m.stad ?? "", m.locatie ?? "", m.categorie ?? "", m.capcode ?? "", m.fullMelding ?? ""]
+            return ([m.title, m.stad ?? "", m.locatie ?? "", m.categorie ?? "", m.capcode ?? "", m.fullMelding ?? ""] + m.eenheden.flatMap { [$0.code ?? "", $0.naam ?? ""] })
                 .contains { $0.lowercased().contains(q) }
         }
     }

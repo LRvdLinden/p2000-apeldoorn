@@ -16,7 +16,7 @@
 // A-Alerts widget for other websites: /widget/?w=kaart,verkeer&thema=auto|licht|donker[&site=<host>]
 // Reports the site it is shown on (domain only); a blocked site gets a link to a-alerts.nl instead.
 import { API } from "/assets/js/core.js?v=61";
-import { maakWidgets } from "/assets/js/widget.js?v=13";
+import { maakWidgets } from "/assets/js/widget.js?v=14";
 const q = new URLSearchParams(location.search);
 const widgets = (q.get("w") || "kaart,verkeer,weer").split(",");
 const thema = ["licht", "donker"].includes(q.get("thema")) ? q.get("thema") : "auto";

@@ -108,6 +108,7 @@ struct MapScreen: View {
             MapReader { proxy in
             Map(position: $position) {
                 werkgebiedLaag
+                regioLaag
                 gebiedenLaag(ws)
                 kazernesLaag
                 verkeerLaag
@@ -241,6 +242,7 @@ struct MapScreen: View {
                 if !on, selectedHeli?.hasPrefix("lucht-") == true { selectedHeli = nil }
             }
             .task { await locaties.load() }
+            .task(id: settings.laag(.regio)) { if settings.laag(.regio) { await RegioStore.shared.laad() } }
             .onChange(of: Router.shared.volgHeli) { _, _ in volgGevraagd() }
             // Following a helicopter: the camera moves along with every new position, until the user moves the map.
             .onChange(of: heli?.lat) { _, _ in
@@ -275,6 +277,15 @@ struct MapScreen: View {
         for p in ring where p.count == 2 { coords.append(CLLocationCoordinate2D(latitude: p[1], longitude: p[0])) }
         if let first = coords.first { coords.append(first) }
         return coords
+    }
+
+    /// The border of the safety region (solid teal line).
+    @MapContentBuilder private var regioLaag: some MapContent {
+        if settings.laag(.regio) {
+            ForEach(Array(RegioStore.shared.ringen.enumerated()), id: \.offset) { _, ring in
+                MapPolyline(coordinates: ring).stroke(Color(hex: 0x0F766E).opacity(0.85), lineWidth: 3)
+            }
+        }
     }
 
     @MapContentBuilder private var werkgebiedLaag: some MapContent {
@@ -715,8 +726,11 @@ struct LocatieKaart: View {
 struct KazerneKaart: View {
     let kazerne: Kazerne
     var onClose: () -> Void
+    @State private var cijfers: PostCijfers?
+    @State private var geladen = false
 
     var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
         HStack(spacing: 12) {
             KazerneIcon(soort: kazerne.soort, size: 40)
             VStack(alignment: .leading, spacing: 2) {
@@ -730,9 +744,117 @@ struct KazerneKaart: View {
             .buttonStyle(.plain)
             .accessibilityLabel(L("Sluit"))
         }
+            // Figures of this station: call-outs (an incident counts once), per hour and per day, vehicles and capcodes.
+            if let c = cijfers {
+                PostCijfersView(cijfers: c)
+            } else if geladen {
+                Text(L("De cijfers van deze post zijn nu niet op te halen.")).font(.footnote).foregroundStyle(.secondary)
+            } else {
+                ProgressView().frame(maxWidth: .infinity)
+            }
+        }
         .padding(14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
         .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+        .task(id: kazerne.id) {
+            cijfers = nil; geladen = false
+            cijfers = await P2000API.shared.post(id: kazerne.id)
+            geladen = true
+        }
+    }
+}
+
+/// Figures of one station (GET /v1/posten/<id>).
+struct PostCijfers: Decodable, Hashable, Sendable {
+    struct Regel: Decodable, Hashable, Sendable { let nr: String?; let code: String?; let label: String?; let naam: String? }
+    let inzetten: Int
+    let sinds: String?
+    let laatste: String?
+    let perUur: [Int]
+    let perDag: [Int]
+    let voertuigen: [Regel]
+    let capcodes: [Regel]
+
+    enum CodingKeys: String, CodingKey { case inzetten, sinds, laatste, perUur = "per_uur", perDag = "per_dag", voertuigen, capcodes }
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        inzetten = (try? c.decode(Int.self, forKey: .inzetten)) ?? 0
+        sinds = try? c.decodeIfPresent(String.self, forKey: .sinds)
+        laatste = try? c.decodeIfPresent(String.self, forKey: .laatste)
+        perUur = (try? c.decode([Int].self, forKey: .perUur)) ?? []
+        perDag = (try? c.decode([Int].self, forKey: .perDag)) ?? []
+        voertuigen = (try? c.decode([Regel].self, forKey: .voertuigen)) ?? []
+        capcodes = (try? c.decode([Regel].self, forKey: .capcodes)) ?? []
+    }
+}
+
+extension P2000API {
+    func post(id: String) async -> PostCijfers? {
+        try? await getJSON("v1/posten/\(id)", as: PostCijfers.self)
+    }
+}
+
+struct PostCijfersView: View {
+    let cijfers: PostCijfers
+
+    var body: some View {
+        if cijfers.inzetten == 0 {
+            Text(L("Van deze post zijn nog geen inzetten geteld. We tellen sinds november 2026."))
+                .font(.footnote).foregroundStyle(.secondary)
+        } else {
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 6) {
+                    Text(verbatim: "\(cijfers.inzetten)").font(AppFont.heading(26))
+                    Text(cijfers.inzetten == 1 ? L("inzet") : L("inzetten")).font(.subheadline).foregroundStyle(.secondary)
+                    Spacer()
+                    if let s = cijfers.sinds.flatMap(Fmt.parseISO) {
+                        Text(Lf("sinds %@", s.formatted(date: .abbreviated, time: .omitted))).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+                balken(L("Per uur van de dag"), cijfers.perUur, labels: (0..<24).map { $0 % 6 == 0 ? String($0) : "" })
+                balken(L("Per dag van de week"), cijfers.perDag, labels: [L("ma"), L("di"), L("wo"), L("do"), L("vr"), L("za"), L("zo")])
+                if !cijfers.voertuigen.isEmpty {
+                    lijst(Lf("Voertuigen (%lld)", cijfers.voertuigen.count), cijfers.voertuigen.prefix(8).map { ($0.nr ?? "", $0.label ?? "") })
+                }
+                if !cijfers.capcodes.isEmpty {
+                    lijst(Lf("Capcodes (%lld)", cijfers.capcodes.count), cijfers.capcodes.prefix(8).map { ($0.code ?? "", $0.naam ?? "") })
+                }
+                Text(L("Een herhaling of opschaling van hetzelfde incident telt als één inzet."))
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+        }
+    }
+
+    private func balken(_ titel: String, _ rij: [Int], labels: [String]) -> some View {
+        let hoogste = max(1, rij.max() ?? 1)
+        return VStack(alignment: .leading, spacing: 4) {
+            Text(titel).font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.secondary)
+            HStack(alignment: .bottom, spacing: 2) {
+                ForEach(Array(rij.enumerated()), id: \.offset) { i, n in
+                    VStack(spacing: 2) {
+                        RoundedRectangle(cornerRadius: 2).fill(Theme.red)
+                            .frame(height: max(2, 44 * CGFloat(n) / CGFloat(hoogste)))
+                        Text(verbatim: i < labels.count ? labels[i] : "").font(.system(size: 9)).foregroundStyle(.secondary).frame(height: 10)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .accessibilityLabel(Text(verbatim: "\(i < labels.count ? labels[i] : String(i)): \(n)"))
+                }
+            }
+            .frame(height: 58, alignment: .bottom)
+        }
+    }
+
+    private func lijst(_ titel: String, _ regels: [(String, String)]) -> some View {
+        VStack(alignment: .leading, spacing: 3) {
+            Text(titel).font(AppFont.body(12, .semibold, relativeTo: .caption)).foregroundStyle(.secondary)
+            ForEach(Array(regels.enumerated()), id: \.offset) { _, r in
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(verbatim: r.0).font(.caption.monospacedDigit().weight(.semibold)).frame(width: 66, alignment: .leading)
+                    Text(verbatim: r.1).font(.caption).foregroundStyle(.secondary).lineLimit(1)
+                    Spacer(minLength: 0)
+                }
+            }
+        }
     }
 }
 
