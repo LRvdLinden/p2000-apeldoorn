@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 94)
+- **Verloop: de nieuwste melding staat bovenaan** (app, Android en pager); de regel "Opgeschaald naar …" staat nog steeds bij de melding waarmee de inzet groter werd.
+- Ambulance zonder adres bij een verkeersongeval: het venster is 5 minuten (was 15).
+
 ## A-Alerts 2.0.1 (build 93)
 Alles wat vliegt. Server: `worker/src/vliegend.js`.
 - **Waar een toestel op de grond staat:** ziekenhuis, basis of op locatie (`plek`, `plek_soort` in `GET /v1/helikopters` en `/v1/lucht`); de pushmelding bij landen zegt "Bij Radboudumc", "Terug op de basis: …" of "Op locatie in …".

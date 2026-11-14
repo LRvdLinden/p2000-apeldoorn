@@ -394,9 +394,10 @@ struct VerloopKaart: View {
     var body: some View {
         let verbanden = Verband.gekoppeld(aan: melding, in: store.metVerloop, max: 8)
         if !verbanden.isEmpty {
-            let lijst = ([melding] + verbanden.map(\.melding)).sorted { $0.datum < $1.datum }
-            let eerste = lijst.first?.datum ?? melding.datum
-            let spanMin = Int(((lijst.last?.datum ?? eerste).timeIntervalSince(eerste) / 60).rounded())
+            // The newest alert on top.
+            let lijst = ([melding] + verbanden.map(\.melding)).sorted { $0.datum > $1.datum }
+            let eerste = lijst.last?.datum ?? melding.datum
+            let spanMin = Int(((lijst.first?.datum ?? eerste).timeIntervalSince(eerste) / 60).rounded())
             VStack(alignment: .leading, spacing: 10) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(L("Verloop")).font(AppFont.heading(18))
@@ -409,7 +410,7 @@ struct VerloopKaart: View {
                     ForEach(Array(lijst.enumerated()), id: \.element.guid) { index, m in
                         let reden = verbanden.first { $0.melding.guid == m.guid }?.redenen
                         // "↑ Opgeschaald naar Middelbrand": this alert is a step up from the one before it.
-                        if index > 0, let op = Verband.opschaling(van: lijst[index - 1], naar: m) {
+                        if index < lijst.count - 1, let op = Verband.opschaling(van: lijst[index + 1], naar: m) {
                             Label(Lf("Opgeschaald naar %@", op), systemImage: "arrow.up.circle.fill")
                                 .font(.footnote.weight(.semibold)).foregroundStyle(.orange)
                                 .frame(maxWidth: .infinity, alignment: .leading)

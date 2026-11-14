@@ -660,7 +660,7 @@ function verloopHTML(m) {
       hoogste = Math.max(hoogste, nv ? nv[0] : 0);
       return `${op}<li class="${zelf ? "zelf" : ""}" style="--c:${dienstOf(x).color}"><time>${fmtTime(date(x))}${plus ? `<small>+${plus} min</small>` : ""}</time>
         <a href="?melding=${encodeURIComponent(x.guid)}" ${zelf ? "" : `data-goto="${esc(x.guid)}"`}><img src="${icon(x)}" alt=""><span><b>${esc(x.title)}</b>${zelf ? `<em>Deze melding</em>` : reden ? `<small>${esc(reden)}</small>` : ""}</span></a></li>`;
-    }).join("")}</ol></section>`;
+    }).reverse().join("")}</ol></section>`; // worked out from old to new, shown with the newest on top
 }
 
 /** The Lifeliner (or Zulu) named in the alert: live on the detail map, every 10 seconds, with "Volg op de kaart". */

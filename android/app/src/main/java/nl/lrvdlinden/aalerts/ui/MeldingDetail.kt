@@ -291,7 +291,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     // "↑ Opgeschaald naar Middelbrand": an alert that is a step up from the one before it.
                     val stappen = remember(m.guid, verband) { Verband.opschalingen(listOf(m) + verband.map { it.melding }) }
                     stappen[m.guid]?.let { Text("↑ " + tr("Deze melding: opgeschaald naar $it", "This alert: scaled up to $it"), color = Color(0xFFF59E0B), fontSize = 12.sp, fontWeight = FontWeight.SemiBold) }
-                    verband.sortedBy { it.melding.millis }.forEach { v ->
+                    verband.sortedByDescending { it.melding.millis }.forEach { v ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.melding(v.melding.guid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             DienstIcon(v.melding.soort, 28.dp); Spacer(Modifier.width(10.dp))
                             Column(Modifier.weight(1f)) {
