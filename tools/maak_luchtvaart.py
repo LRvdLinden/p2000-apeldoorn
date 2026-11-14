@@ -15,10 +15,11 @@ def inline(name, pref):
     return s.replace("<svg ", '<svg aria-hidden="true" ', 1)
 
 def teken(f, pref):
-    return f'<img src="/assets/img/{f}" alt="" loading="lazy">' if f.endswith(".png") else inline(f, pref)
+    return f'<img src="/assets/img/{f}" alt="" loading="lazy">' if ".png" in f else inline(f, pref)
 
 GROEPEN = [("Hulpdiensten", [
  ("heli_lifeliner.png", "Lifeliner", "Traumahelikopter · EC135", "Brengt een arts en verpleegkundige van het Mobiel Medisch Team snel naar een ernstig ongeval. Er zijn vier Lifeliners, met als bases Amsterdam, Rotterdam, Volkel en Groningen."),
+ ("heli_lifeliner.png", "Medic 01", "Ambulancehelikopter · H145", "De ambulancehelikopter voor de Waddeneilanden. Haalt patiënten op van de eilanden en brengt ze naar een ziekenhuis op het vasteland. Het is geen traumahelikopter: er vliegt geen arts van het Mobiel Medisch Team mee."),
  ("heli_politie.png", "Zulu", "Politiehelikopter · EC135", "De helikopter van de Luchtvaartpolitie. Zoekt vermiste personen en verdachten, vaak met een warmtebeeldcamera, en ondersteunt bij achtervolgingen en grote incidenten."),
  ("heli_politie_aw139.png?v=2", "Zulu", "Politiehelikopter · AW139", "De grotere politiehelikopter. Kan meer mensen en materiaal meenemen, bijvoorbeeld een arrestatieteam.")]),
 ("Defensie: helikopters", [
@@ -182,8 +183,8 @@ def detail():
 """
 
 def home():
-    mk = [("heli_lifeliner.png", "Lifeliner 3", "lv-p1", 22), ("chinook", "Chinook", "lv-p2", 30), ("heli_politie.png", "Zulu 05", "lv-p3", 26), ("f35", "F-35", "lv-p4", 9), ("kustwacht_dash8", "Kustwacht", "lv-p5", 28)]
-    def t(f, pref): return f'<img src="assets/img/{f}" alt="" loading="lazy">' if f.endswith(".png") else inline(f, pref)
+    mk = [("heli_lifeliner.png", "Lifeliner 3", "lv-p1", 22), ("chinook", "Chinook", "lv-p2", 30), ("heli_politie.png", "Zulu 05", "lv-p3", 26), ("f35", "F-35", "lv-p4", 9), ("kustwacht_dash8", "Kustwacht", "lv-p5", 28), ("heli_lifeliner.png", "Medic 01", "lv-p6", 34)]
+    def t(f, pref): return f'<img src="assets/img/{f}" alt="" loading="lazy">' if ".png" in f else inline(f, pref)
     markers = "".join(f'<div class="lv-mk" style="animation:{p} {d}s linear infinite"><div>{t(f, f"h{i}")}</div><span>{l}</span></div>' for i, (f, l, p, d) in enumerate(mk))
     return f"""<!-- LUCHT:START (made by tools/maak_luchtvaart.py) -->
   <section class="lv" id="luchtvaart" aria-label="Helikopters en vliegtuigen">
@@ -206,6 +207,7 @@ def home():
       @keyframes lv-p3 {{ 0% {{ left: 38%; top: 44%; }} 25% {{ left: 56%; top: 40%; }} 50% {{ left: 60%; top: 58%; }} 75% {{ left: 42%; top: 62%; }} 100% {{ left: 38%; top: 44%; }} }}
       @keyframes lv-p4 {{ 0% {{ left: -10%; top: 16%; }} 100% {{ left: 112%; top: 8%; }} }}
       @keyframes lv-p5 {{ 0% {{ left: -10%; top: 90%; }} 100% {{ left: 112%; top: 66%; }} }}
+      @keyframes lv-p6 {{ 0% {{ left: 112%; top: 6%; }} 100% {{ left: -12%; top: 40%; }} }}
       {ANIM}
       @media (prefers-reduced-motion: reduce) {{ .lv .rot, .lv .trot, .lv-live i {{ animation: none; }} .lv-mk {{ animation-play-state: paused !important; animation-delay: -6s !important; }} }}
     </style>
@@ -222,7 +224,7 @@ def home():
     <div data-reveal>
       <span class="lv-live"><i></i> <span id="lvAantal">Live op de kaart</span></span>
       <h2>Zie wat er boven je vliegt</h2>
-      <p class="sub">Lifeliners en politiehelikopters, en nu ook Defensie, de Kustwacht en het regeringsvliegtuig. Live op de kaart, elk toestel met zijn eigen tekening.</p>
+      <p class="sub">Lifeliners, Medic 01 en politiehelikopters, en ook Defensie, de Kustwacht en het regeringsvliegtuig. Live op de kaart, elk toestel met zijn eigen tekening.</p>
       <a class="lv-knop" href="luchtvaart/">Welke toestellen zie je? →</a><a class="lv-knop licht" href="pager/#kaart">Open de kaart</a>
     </div>
     {TELLER.replace('"/assets/js/core.js?v=61"', '"./assets/js/core.js?v=61"')}

@@ -75,14 +75,14 @@ export function heliVoorMelding(m, helis) {
   const id = genoemd(m);
   if (id) return helis.find((h) => h.id === id) || null;
   if (!isHeliMelding(m) || m.lat == null) return null;
-  const best = helis.filter((h) => h.soort === "trauma").sort((a, b) => km(a, m) - km(b, m))[0];
+  const best = helis.filter((h) => h.soort === "trauma" && !h.medic).sort((a, b) => km(a, m) - km(b, m))[0];
   return best && km(best, m) < 120 ? best : null;
 }
 
 /** Trauma helicopters that just left the ground (or appeared in the air after a gap). */
 export function opgestegen(list, prev, now = Date.now()) {
   return list.filter((h) => {
-    if (h.soort !== "trauma" || h.op_grond) return false;
+    if (h.soort !== "trauma" || h.medic || h.op_grond) return false;
     const p = prev.get(h.id);
     return !p || p.grond === 1 || now - p.at > GAP_MS;
   });
@@ -110,7 +110,7 @@ export async function checkOpstijgen(env, list, prev, queuePush, now = Date.now(
   for (const h of opgestegen(list, prev, now)) {
     await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(`heli_start:${h.id}`, String(now), now).run();
   }
-  const lucht = list.filter((h) => h.soort === "trauma" && !h.op_grond);
+  const lucht = list.filter((h) => h.soort === "trauma" && !h.medic && !h.op_grond);
   if (!lucht.length) return 0;
   const { results: starts } = await env.DB.prepare("SELECT key, value FROM kv WHERE key LIKE 'heli_start:%'").all();
   const start = new Map(starts.map((r) => [r.key.slice(11), Number(r.value)]));

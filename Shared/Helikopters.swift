@@ -32,9 +32,11 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let plekSoort: String?
     /// Other helicopters at the same spot.
     let samen: HeliSamen?
+    /// Medic 01: an ambulance helicopter (same drawing as a Lifeliner, but not a trauma helicopter).
+    let medic: Bool
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon, boven, plek, samen
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon, boven, plek, samen, medic
         case plekSoort = "plek_soort"
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
@@ -63,6 +65,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         plek = try? c.decodeIfPresent(String.self, forKey: .plek)
         plekSoort = try? c.decodeIfPresent(String.self, forKey: .plekSoort)
         samen = try? c.decodeIfPresent(HeliSamen.self, forKey: .samen)
+        medic = (try? c.decodeIfPresent(Bool.self, forKey: .medic)) ?? false
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
@@ -90,6 +93,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         return HeliWeergave.kleur(id: id, soort: soort) ?? (isTrauma ? Dienst.traumaheli.color : Dienst.politie.color)
     }
     var soortLabel: String {
+        if medic { return L("Ambulancehelikopter") }
         if isLucht {
             switch soort {
             case "kustwacht": return L("Kustwacht")
@@ -550,7 +554,7 @@ enum HeliKoppeling {
     static func heli(voor m: Melding, in helis: [Helikopter]) -> Helikopter? {
         if let id = genoemd(m) { return helis.first { $0.id == id } }
         guard m.dienst == .traumaheli, let lat = m.lat, let lon = m.lon else { return nil }
-        return helis.filter(\.isTrauma)
+        return helis.filter { $0.isTrauma && !$0.medic }
             .min { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < Werkgebied.distanceKm($1.lat, $1.lon, lat, lon) }
             .flatMap { Werkgebied.distanceKm($0.lat, $0.lon, lat, lon) < 120 ? $0 : nil }
     }

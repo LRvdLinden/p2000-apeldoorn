@@ -314,6 +314,8 @@ data class Helikopter(
     @SerialName("plek_soort") val plekSoort: String? = null,
     /** Other helicopters at the same spot (not a hospital or a base). */
     val samen: HeliSamen? = null,
+    /** Medic 01: an ambulance helicopter (same drawing as a Lifeliner, but not a trauma helicopter). */
+    val medic: Boolean = false,
 ) {
     /** The same altitude and speed in the other unit (feet next to metres, knots next to km/h). */
     val hoogteTweede: String? get() = if (opGrond) null else hoogteFt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it * 0.3048 / 10) * 10} m" else "${Math.round(it / 25) * 25} ft" }
@@ -358,7 +360,7 @@ data class Helikopter(
         else -> "$hoogteMeter m"
     }
     val snelheidTekst: String get() = snelheidKt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it)} kn" else tr("${Math.round(it * 1.852)} km/u", "${Math.round(it * 1.852)} km/h") } ?: "–"
-    val soortLabel get() = if (isLucht) luchtSoort else if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
+    val soortLabel get() = if (medic) tr("Ambulancehelikopter", "Ambulance helicopter") else if (isLucht) luchtSoort else if (isTrauma) tr("Traumahelikopter", "Air ambulance") else tr("Politiehelikopter", "Police helicopter")
     /** The kind this aircraft counts as in the list of choices of the layer Luchtvaart. */
     val keuzeSoort: String get() = icoon ?: soort
     val hoogteMeter: Int? get() = if (opGrond) 0 else hoogteFt?.let { Math.round(it * 0.3048 / 10).toInt() * 10 }

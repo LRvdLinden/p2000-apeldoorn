@@ -233,7 +233,7 @@ export async function recenteHeliMeldingen(env, now = Date.now()) {
  * destination, with the expected time and the hospital it probably flies to afterwards.
  */
 export function meldingVoorspelling(h, meldingen, terPlaatse, now = Date.now()) {
-  if (!h || h.op_grond || h.soort !== "trauma") return null;
+  if (!h || h.op_grond || h.soort !== "trauma" || h.medic) return null;
   const lucht = [h];
   for (const m of meldingen) {
     if (heliVoorMelding(m, lucht) !== h) continue;
@@ -255,7 +255,7 @@ export function meldingVoorspelling(h, meldingen, terPlaatse, now = Date.now()) 
 
 /** Marks Lifeliners that are (or were) at their alert, so the prediction moves on to the hospital. */
 export async function noteerTerPlaatse(env, list, meldingen, now = Date.now()) {
-  for (const h of list.filter((x) => x.soort === "trauma")) {
+  for (const h of list.filter((x) => x.soort === "trauma" && !x.medic)) {
     for (const m of meldingen) {
       if (heliVoorMelding(m, [h]) !== h) continue;
       if (km(h, m) <= (h.op_grond ? 3 : 1.5)) {

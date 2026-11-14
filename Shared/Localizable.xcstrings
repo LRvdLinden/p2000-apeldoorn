@@ -1667,6 +1667,23 @@
         }
       }
     },
+    "Ambulancehelikopter": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ambulance helicopter"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ambulancehelikopter"
+          }
+        }
+      }
+    },
     "Ambulancepost": {
       "extractionState": "manual",
       "localizations": {

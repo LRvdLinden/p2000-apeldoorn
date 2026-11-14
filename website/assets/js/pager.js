@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=72";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=73";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -1357,7 +1357,7 @@ function openHeli(h) {
   const afstand = state.here ? ` · ${distanceKm(state.here, h).toFixed(1).replace(".", ",")} km van je af` : "";
   box.innerHTML = `<header><b>${esc(h.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
     <div class="heli-body">
-    <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
+    <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.medic ? "Ambulancehelikopter" : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     ${!h.op_grond ? `<p class="heli-boven">${h.boven ? `Nu boven <b>${esc(h.boven)}</b>` : "Nu boven zee of over de grens"}<span id="heliDuur" hidden></span></p>` : ""}
     ${h.op_grond && h.plek ? `<p class="heli-boven">${h.plek_soort === "basis" ? "Op de basis: " : "Op de grond bij "}<b>${esc(h.plek)}</b></p>` : ""}
     ${h.samen ? `<p class="heli-samen"><b>Samen met ${esc(h.samen.met.join(", "))}</b> op één plek${h.samen.plaats ? ` in ${esc(h.samen.plaats)}` : ""}. Mogelijk een groot incident.</p>` : ""}

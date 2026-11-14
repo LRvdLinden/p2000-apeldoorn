@@ -342,7 +342,7 @@ export async function meldingFeedback(guid, body) {
 export function heliInfo(h) {
   const hoogte = hoogteTekst(h);
   const snelheid = snelheidTekst(h);
-  return `${h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter"} · ${hoogte} · ${snelheid}`;
+  return `${h.medic ? "Ambulancehelikopter" : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter"} · ${hoogte} · ${snelheid}`;
 }
 
 /** MapKit JS annotation for a helicopter (side view, mirrored when flying west). */
@@ -427,7 +427,7 @@ export function heliVoor(m, helis) {
   const id = heliGenoemd(m);
   if (id) return helis.find((h) => h.id === id) || null;
   if (!heliRelevant(m) || m.lat == null) return null;
-  const best = helis.filter((h) => h.soort === "trauma").sort((a, b) => distanceKm(a, m) - distanceKm(b, m))[0];
+  const best = helis.filter((h) => h.soort === "trauma" && !h.medic).sort((a, b) => distanceKm(a, m) - distanceKm(b, m))[0];
   return best && distanceKm(best, m) < 120 ? best : null;
 }
 

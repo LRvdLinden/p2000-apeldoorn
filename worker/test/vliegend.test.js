@@ -68,3 +68,15 @@ test("weather that limits flying", () => {
   assert.equal(weerBeperking([w({ soort: "Hitte" })], now), null);
   assert.equal(weerBeperking([w({ niveau: "green" })], now), null);
 });
+
+import { identify, fromAdsb } from "../src/heli.js";
+import { heliVoorMelding } from "../src/heliplus.js";
+test("Medic 01 is on the map but never counts as a Lifeliner", () => {
+  assert.equal(identify({ flight: "MEDIC01 ", r: "PH-XXX" }).naam, "Medic 01");
+  assert.equal(identify({ flight: "", r: "PH-OOP" }).id, "medic01");
+  const [h] = fromAdsb([{ flight: "MEDIC01", r: "PH-OOP", hex: "4853e2", lat: 53.2, lon: 5.8, alt_baro: 900, gs: 110 }]);
+  assert.equal(h.soort, "trauma"); assert.equal(h.medic, true); assert.equal(h.basis, "Leeuwarden");
+  const m = { dienst: "traumaheli", lat: 52.9, lon: 5.9, eenheden: [], title: "A1 MMT" };
+  assert.equal(heliVoorMelding(m, [h]), null);
+  assert.equal(fromAdsb([{ flight: "LIFELN3", lat: 52, lon: 5, alt_baro: 900 }])[0].medic, undefined);
+});

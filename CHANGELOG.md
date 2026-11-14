@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 97)
+- **Medic 01** (ambulancehelikopter voor de Waddeneilanden; roepnaam `MEDIC01`, registratie `PH-OOP`, basis Leeuwarden) staat op de kaart als "Medic 01 · Ambulancehelikopter", met de tekening van de Lifeliner, het spoor, de vluchten en de bel. De server geeft `medic: true` mee; voor oudere app-versies blijft `soort` "trauma", zodat de tekening en de kaartlaag blijven werken (daar heet hij "Traumahelikopter"). Hij telt nergens als Lifeliner: niet bij "opgestegen voor de melding", niet bij de bestemming, niet bij "waarschijnlijk geannuleerd" en niet als dichtstbijzijnde traumaheli bij een melding (server, app, Android en pager).
+- Homepage en luchtvaartpagina: Medic 01 toegevoegd. `tools/maak_luchtvaart.py` kon niet meer draaien door het versienummer achter een afbeelding; hersteld.
+
 ## A-Alerts 2.0.1 (build 96)
 - **Kaartje van een toestel opent klein** (app, Android en pager): naam, boven welke plaats, hoe lang in de lucht en één regel met koers, hoogte en snelheid. "Meer over deze vlucht" (in de app ook omhoog vegen) vouwt de rest uit: de drie vakken, het spoor, terugspelen, waar geweest, de vluchten en "Klopt dit toestel niet?". Zo blijven het toestel en zijn vliegspoor in beeld. De bel is ongewijzigd.
 - **Naam onder een toestel alleen nog bij het gekozen toestel** op de kaart (app, Android en pager). De meldkamer, de widget en de kaart bij een melding tonen de naam nog wel.

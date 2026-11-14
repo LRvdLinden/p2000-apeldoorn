@@ -241,7 +241,7 @@ async function handle(req, env, ctx) {
     data.helikopters = verrijk(data.helikopters, [...(data.helikopters || []), ...(_lucht || [])]);
     // A Lifeliner on its way to a recent alert: that alert is the destination, then the hospital.
     try {
-      const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.op_grond);
+      const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.medic && !h.op_grond);
       if (lucht.length) {
         const [meldingen, ter] = [await recenteHeliMeldingen(env), await terPlaatseSet(env)];
         data.helikopters = data.helikopters.map((h) => {
@@ -817,7 +817,7 @@ async function heliRun(env) {
         await queue(env, `broadcast:${g.key}`, g.tokens);
       }
     }
-    const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma");
+    const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.medic);
     if (lucht.length) {
       const meldingen = await recenteHeliMeldingen(env);
       await noteerTerPlaatse(env, lucht, meldingen);

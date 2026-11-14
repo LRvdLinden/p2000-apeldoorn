@@ -10,6 +10,9 @@ export const HELIS = [
   { id: "lifeliner2", naam: "Lifeliner 2", soort: "trauma", basis: "Rotterdam", callsigns: ["LIFELN2", "LIFELN02"] },
   { id: "lifeliner3", naam: "Lifeliner 3", soort: "trauma", basis: "Volkel", callsigns: ["LIFELN3", "LIFELN03"] },
   { id: "lifeliner4", naam: "Lifeliner 4", soort: "trauma", basis: "Groningen", callsigns: ["LIFELN4", "LIFELN04"] },
+  // Medic 01: the ambulance helicopter for the Wadden islands. Not a trauma helicopter with a doctor on board, so it
+  // never counts as a Lifeliner for a P2000 alert (medic: true). For the apps it keeps soort "trauma" (same drawing).
+  { id: "medic01", naam: "Medic 01", soort: "trauma", medic: true, basis: "Leeuwarden", callsigns: ["MEDIC01", "MEDIC1"], regs: ["PH-OOP"] },
   { id: "zulu01", naam: "Zulu 01", soort: "politie", callsigns: ["ZXP01"], regs: ["PH-PXA"] },
   { id: "zulu02", naam: "Zulu 02", soort: "politie", callsigns: ["ZXP02"], regs: ["PH-PXB"] },
   { id: "zulu03", naam: "Zulu 03", soort: "politie", callsigns: ["ZXP03"], regs: ["PH-PXC"] },
@@ -46,6 +49,8 @@ export function identify(ac, learned = new Map()) {
 
   let m = cs.match(/^(?:LIFELN|LIFELINER|LIFE)0?([1-9])$/);
   if (m && byId(`lifeliner${m[1]}`)) return { ...byId(`lifeliner${m[1]}`), herkenning: "callsign" };
+  m = cs.match(/^MEDIC0?([1-9])$/);
+  if (m) return { ...(byId(`medic0${m[1]}`) || { id: `medic0${m[1]}`, naam: `Medic 0${m[1]}`, soort: "trauma", medic: true, callsigns: [] }), herkenning: "callsign" };
   m = cs.match(/^(?:ZXP|ZULU|POLITIE)0?(\d{1,2})$/);
   if (m) {
     const nr = m[1].padStart(2, "0");
@@ -75,7 +80,7 @@ export function fromAdsb(list, now = Date.now(), learned = new Map()) {
     if (!h || typeof ac.lat !== "number" || typeof ac.lon !== "number") continue;
     const seen = Number(ac.seen_pos ?? ac.seen ?? 0);
     const item = {
-      id: h.id, naam: h.naam, soort: h.soort, basis: h.basis || null, herkenning: h.herkenning,
+      id: h.id, naam: h.naam, soort: h.soort, ...(h.medic ? { medic: true } : {}), basis: h.basis || null, herkenning: h.herkenning,
       callsign: String(ac.flight || "").trim() || null, registratie: ac.r || null, type: ac.t || null, hex: ac.hex || null,
       lat: ac.lat, lon: ac.lon,
       koers: typeof ac.track === "number" ? Math.round(ac.track) : (typeof ac.true_heading === "number" ? Math.round(ac.true_heading) : null),
@@ -113,7 +118,7 @@ async function learn(env, list, learned) {
     const hex = h.hex.toLowerCase();
     const prev = learned.get(hex);
     if (prev && prev.id === h.id) continue;
-    const value = JSON.stringify({ id: h.id, naam: h.naam, soort: h.soort, basis: h.basis || null, callsigns: [] });
+    const value = JSON.stringify({ id: h.id, naam: h.naam, soort: h.soort, ...(h.medic ? { medic: true } : {}), basis: h.basis || null, callsigns: [] });
     try {
       await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(`heli_hex:${hex}`, value, Date.now()).run();
     } catch (e) { console.warn("[heli] learn", e.message || e); }

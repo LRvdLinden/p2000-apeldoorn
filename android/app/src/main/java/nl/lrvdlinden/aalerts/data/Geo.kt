@@ -300,6 +300,6 @@ object HeliKoppeling {
         genoemd(m)?.let { id -> helis.firstOrNull { it.id == id }?.let { return it } }
         if (m.soort != Dienst.TRAUMAHELI || genoemd(m) != null) return null
         val la = m.lat ?: return null; val lo = m.lon ?: return null
-        return helis.filter { it.isTrauma }.minByOrNull { Geo.distanceKm(it.lat, it.lon, la, lo) }?.takeIf { Geo.distanceKm(it.lat, it.lon, la, lo) < 120 }
+        return helis.filter { it.isTrauma && !it.medic }.minByOrNull { Geo.distanceKm(it.lat, it.lon, la, lo) }?.takeIf { Geo.distanceKm(it.lat, it.lon, la, lo) < 120 }
     }
 }
