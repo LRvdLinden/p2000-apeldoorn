@@ -56,12 +56,13 @@ export async function fetchLucht() {
 export const LUCHT_SOORTEN = [
   ["trauma", "Lifeliner", "heli_lifeliner"], ["politie", "Zulu (politie)", "heli_politie"],
   ["chinook", "Chinook", "lucht_chinook"], ["apache", "Apache", "lucht_apache"], ["cougar", "Cougar", "lucht_cougar"], ["nh90", "NH90", "lucht_nh90"],
-  ["heli", "Overige helikopter (Defensie)", "lucht_heli"], ["f35", "Straaljager", "lucht_f35"], ["hercules", "Transportvliegtuig", "lucht_hercules"],
-  ["les", "Lesvliegtuig", "lucht_les"], ["vliegtuig", "Overig vliegtuig (Defensie)", "lucht_vliegtuig"],
-  ["kustwacht_dash8", "Kustwacht vliegtuig", "lucht_kustwacht_dash8"], ["kustwacht_aw189", "Kustwacht helikopter", "lucht_kustwacht_aw189"],
+  ["heli", "Overige helikopter (Defensie)", "lucht_heli"], ["f35", "Straaljager", "lucht_f35"], ["hercules", "Transportvliegtuig", "lucht_hercules2"],
+  ["les", "Lesvliegtuig", "lucht_les2"], ["vliegtuig", "Overig vliegtuig (Defensie)", "lucht_vliegtuig"],
+  ["kustwacht_dash8", "Kustwacht vliegtuig", "lucht_kustwacht_dash82"], ["kustwacht_aw189", "Kustwacht helikopter", "lucht_kustwacht_aw189"],
   ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov2"],
 ];
 export const luchtSoort = (h) => h.icoon || h.soort;
+const NIEUWE_TEKENING = new Set(["phgov", "kustwacht_dash8", "les", "hercules"]);
 const LUCHT_KEY = "p2000.luchtSoorten";
 /** The chosen kinds (kept in this browser); Lifeliner and Zulu until someone chooses more. */
 export function luchtKeuze() {
@@ -276,8 +277,8 @@ export function inzetEenheden(m, list) {
 // ------------------------------------------------------------------ helicopters
 
 export function heliImg(h) {
-  // lucht_phgov2: the new drawing of the government aircraft under a new name (images stay cached for 30 days).
-  if (h.icoon) return asset(`assets/img/lucht_${h.icoon === "phgov" ? "phgov2" : h.icoon}.png`);
+  // A new drawing gets a new file name ("…2"), because images stay cached for 30 days.
+  if (h.icoon) return asset(`assets/img/lucht_${h.icoon}${NIEUWE_TEKENING.has(h.icoon) ? "2" : ""}.png`);
   if (h.soort === "trauma") return asset("assets/img/heli_lifeliner.png");
   return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") + "?v=2" : asset("assets/img/heli_politie.png");
 }

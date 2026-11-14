@@ -1,14 +1,39 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 320"><defs>
-<linearGradient id="y" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset=".55" stop-color="#f2c21a"/><stop offset="1" stop-color="#c79a0a"/></linearGradient>
-<linearGradient id="k" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f45"/><stop offset="1" stop-color="#15181b"/></linearGradient>
-<linearGradient id="gl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5b7388"/><stop offset=".5" stop-color="#1b2630"/><stop offset="1" stop-color="#40566a"/></linearGradient></defs>
-<path fill="url(#k)" d="M110 160 L84 56 L140 56 L250 160Z"/><path fill="url(#y)" d="M60 150 L190 142 L230 154 L190 166Z"/>
-<path fill="url(#y)" d="M80 170 Q220 142 380 138 L640 134 Q740 136 800 152 L836 168 Q842 182 836 196 L800 210 Q700 226 420 226 Q220 222 120 200 Q84 190 80 170Z"/>
-<path fill="url(#k)" d="M120 200 Q220 222 420 226 Q700 226 800 210 L836 196 Q600 214 110 190Z"/>
-<path fill="url(#gl)" d="M440 136 Q470 92 560 88 Q640 90 690 134Z"/><path stroke="#15181b" stroke-width="6" d="M566 90 L566 134"/>
-<path fill="url(#k)" d="M360 200 L640 192 L560 236 L420 238Z"/>
-<path fill="url(#k)" d="M800 152 L836 168 Q842 182 836 196 L800 210Z"/><path fill="#c9ccd0" d="M836 172 L866 182 L836 192Z"/>
-<ellipse cx="852" cy="182" rx="7" ry="96" fill="#1b1b1b" opacity=".7"/>
-<path fill="#fff3b0" opacity=".6" d="M240 150 Q300 144 380 142 L640 138 Q720 140 770 148 L240 158Z"/>
-<path stroke="#2b2b2b" stroke-width="8" stroke-linecap="round" d="M520 234 L520 262 M760 212 L764 258"/><circle cx="520" cy="270" r="17" fill="#15171a"/><circle cx="520" cy="270" r="6" fill="#8d9499"/><circle cx="766" cy="266" r="15" fill="#15171a"/><circle cx="766" cy="266" r="5" fill="#8d9499"/>
+<linearGradient id="z" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a4f58"/><stop offset=".35" stop-color="#23262c"/><stop offset="1" stop-color="#0e1013"/></linearGradient>
+<linearGradient id="zd" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2c3037"/><stop offset="1" stop-color="#0c0d10"/></linearGradient>
+<linearGradient id="kap" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#eaf3fa"/><stop offset="1" stop-color="#9fb6c8"/></linearGradient>
+<clipPath id="c"><path d="M52 168 C120 158 250 150 400 148 L792 150 C820 152 840 164 846 178 C846 194 826 204 796 206 L420 210 C280 208 150 194 60 182 C50 178 48 172 52 168Z"/></clipPath>
+<clipPath id="f"><path d="M196 158 L150 62 Q146 54 136 54 L84 54 Q76 54 78 62 L92 166Z"/></clipPath></defs>
+<g transform="translate(0 -50) scale(1 1.35)">
+<!-- far stabiliser -->
+<path fill="url(#zd)" d="M22 160 L150 156 L176 164 L150 170 L30 168Z"/>
+<!-- fin with the yellow band -->
+<path fill="url(#z)" stroke="#7b828d" stroke-width="1.5" d="M196 158 L150 62 Q146 54 136 54 L84 54 Q76 54 78 62 L92 166Z"/>
+<g clip-path="url(#f)"><path fill="#f2c81e" d="M60 116 L200 84 L200 100 L60 132Z"/><path d="M118 54 L128 166" stroke="#3a3f47" stroke-width="2"/></g>
+<!-- fuselage -->
+<path fill="url(#z)" stroke="#7b828d" stroke-width="1.5" d="M52 168 C120 158 250 150 400 148 L792 150 C820 152 840 164 846 178 C846 194 826 204 796 206 L420 210 C280 208 150 194 60 182 C50 178 48 172 52 168Z"/>
+<g clip-path="url(#c)">
+<!-- yellow line from the nose to the tail -->
+<path d="M850 190 L560 196 C480 196 420 184 340 178 L40 170" fill="none" stroke="#f2c81e" stroke-width="5"/>
+<path d="M400 152 L790 153" stroke="#6b717b" stroke-width="2" opacity=".6"/>
+</g>
+<!-- bubble canopy with frames, two seats -->
+<path fill="url(#kap)" stroke="#15171a" stroke-width="3" d="M470 150 C490 116 540 104 590 104 C640 104 690 122 716 150Z" opacity=".92"/>
+<path d="M590 104 L586 150 M658 118 L664 150" stroke="#15171a" stroke-width="3" fill="none"/>
+<path fill="#15171a" d="M530 150 C530 132 544 126 556 126 C566 126 572 134 572 150Z M612 150 C612 134 624 128 636 128 C646 128 652 136 652 150Z" opacity=".75"/>
+<path d="M500 132 C520 118 548 112 572 110" stroke="#ffffff" stroke-width="3" stroke-linecap="round" fill="none" opacity=".7"/>
+<!-- exhaust, cowling line -->
+<rect x="770" y="176" width="34" height="10" rx="5" fill="#5a6068"/><ellipse cx="772" cy="181" rx="4" ry="5" fill="#0c0d10"/>
+<path d="M760 152 L762 206" stroke="#3a3f47" stroke-width="2"/>
+<!-- roundel -->
+<circle cx="330" cy="180" r="15" fill="#ffffff"/><path d="M330 180 L330 165 A15 15 0 0 1 343 187.5Z" fill="#c8102e"/><path d="M330 180 L343 187.5 A15 15 0 0 1 317 187.5Z" fill="#1e4785"/><circle cx="330" cy="180" r="5" fill="#f28c1e"/>
+<!-- low wing, seen from the side -->
+<path fill="url(#zd)" stroke="#3a3f47" stroke-width="1.5" d="M664 200 L470 202 L430 218 L640 216Z"/>
+<path d="M650 204 L450 208" stroke="#f2c81e" stroke-width="3"/>
+<!-- near stabiliser -->
+<path fill="url(#zd)" stroke="#3a3f47" stroke-width="1.5" d="M14 174 L150 168 L184 176 L150 184 L24 182Z"/>
+<!-- propeller and yellow spinner -->
+<ellipse cx="848" cy="178" rx="5" ry="66" fill="#2a2d33"/><ellipse cx="848" cy="114" rx="5" ry="4" fill="#f2c81e"/><ellipse cx="848" cy="242" rx="5" ry="4" fill="#f2c81e"/>
+<path fill="#f2c81e" d="M844 162 C866 166 880 172 884 178 C880 184 866 190 844 194Z"/>
+</g>
 </svg>
