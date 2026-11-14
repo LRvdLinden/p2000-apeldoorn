@@ -548,8 +548,6 @@ data class ApiRoute(
     val aankomst: String, val route: List<List<Double>> = emptyList(),
 )
 
-/** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
-@Serializable
 /** GET /v1/meldingen/<guid>/verloop and GET /v1/app. */
 @Serializable
 data class VerloopAntwoord(val meldingen: List<Melding> = emptyList())
@@ -558,6 +556,7 @@ data class MinBuild(val ios: Int = 0, val android: Int = 0)
 @Serializable
 data class AppAntwoord(@SerialName("min_build") val minBuild: MinBuild = MinBuild())
 
+/** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
 @Serializable
 data class ApkInfo(val version: String = "", val build: Int = 0, val url: String = "", val notes: String? = null, val size: Long? = null)
 
