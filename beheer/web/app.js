@@ -241,6 +241,7 @@ function androidCard(a) {
 const BRON = {
   nlalert: [icon("nlalert", "NL-Alert"), "NL-Alert", "#FFC800"], burgernet: [icon("burgernet", "Burgernet"), "Burgernet", "#0067B1"], knmi: [icon("knmi", "KNMI"), "KNMI", "#3E9FDB"],
   amber: ["🧒", "AMBER Alert", "#EC6E24"], vermistkind: ["🧒", "Vermist Kind Alert", "#1B265E"], kind: ["🧒", "AMBER Alert / Vermist Kind (Burgernet)", "#EC6E24"],
+  vnog: ["🛡️", "VNOG-incidenten", "#48277F"],
   helikopters: ["🚁", "Helikopters (adsb.lol)", "#9333EA"],
   verkeer: ["🚧", "Verkeer (NDW, Koyeb)", "#F08C00"],
 };
@@ -254,13 +255,15 @@ function aAlertsCards(a, status) {
     <div class="card"><h2>A-Alerts-bronnen</h2>
       ${Object.keys(BRON).map((k) => a.bronnen[k] ? status(!a.bronnen[k].storing, BRON[k][1],
         a.bronnen[k].storing ? (a.bronnen[k].laatsteFout || "geen gegevens") : `${ago(a.bronnen[k].laatstOk)} · ${a.bronnen[k].laatsteStatus || ""}`) : "").join("")}
+      ${a.bronnen.vnog?.schakelbaar ? `<label class="chips"><label><input type="checkbox" id="vnogAan" ${a.bronnen.vnog.aan ? "checked" : ""}> VNOG-incidenten ophalen</label></label>
+      <p class="muted" style="font-size:.75rem;margin:2px 0 0">Uit: er wordt niets meer opgehaald bij VNOG. Wat er al staat blijft staan.</p>` : ""}
       <p class="muted" style="font-size:.75rem;margin:6px 0 0">Storing = langer dan 30 minuten geen gegevens (pushmelding in de beheer-app).</p>
     </div>
     <div class="card"><h2>Helikopters in de lucht</h2>
       ${a.inDeLucht.length ? a.inDeLucht.map((h) => `<div class="row"><span>🚁</span><span class="grow"><b>${esc(h.naam)}</b></span><small>${h.hoogte_m === 0 ? "op de grond" : h.hoogte_m != null ? `${h.hoogte_m} m` : ""}${h.snelheid_kmh != null ? ` · ${h.snelheid_kmh} km/u` : ""}</small></div>`).join("") : `<p class="muted">Er is nu geen Lifeliner of Zulu in de lucht.</p>`}
     </div>
     <div class="card"><h2>Waarschuwingen · 7 dagen</h2>
-      ${["nlalert", "burgernet", "knmi", "amber", "vermistkind"].map((k) => `<div class="row"><span>${BRON[k][0]}</span><span class="grow">${BRON[k][1]}</span><b>${wb[k]?.week || 0}</b><small>${wb[k]?.actief || 0} actief</small></div>`).join("")}
+      ${["nlalert", "burgernet", "knmi", "amber", "vermistkind", "vnog"].map((k) => `<div class="row"><span>${BRON[k][0]}</span><span class="grow">${BRON[k][1]}</span><b>${wb[k]?.week || 0}</b><small>${wb[k]?.actief || 0} actief</small></div>`).join("")}
       ${a.waarschuwingen.verborgen ? `<p class="muted" style="font-size:.8rem">${a.waarschuwingen.verborgen} verborgen</p>` : ""}
     </div>
     <div class="card"><h2>Notificatieprofielen</h2>
@@ -271,6 +274,7 @@ function aAlertsCards(a, status) {
         <div class="row"><span class="grow">Met eigen tijden</span><b>${p.metTijden}</b></div>
         <div class="row"><span class="grow">Wil NL-Alert / Burgernet</span><b>${p.waarschuwingen.nlalert} / ${p.waarschuwingen.burgernet}</b></div>
         <div class="row"><span class="grow">Wil AMBER Alert / Vermist Kind</span><b>${p.waarschuwingen.amber ?? 0} / ${p.waarschuwingen.vermistkind ?? 0}</b></div>
+        <div class="row"><span class="grow">Wil VNOG-incidenten</span><b>${p.waarschuwingen.vnog ?? 0}</b></div>
         <div class="row"><span class="grow">Wil KNMI geel / oranje / rood</span><b>${p.waarschuwingen.knmi.yellow} / ${p.waarschuwingen.knmi.orange} / ${p.waarschuwingen.knmi.red}</b></div>
         ${p.topPlaatsen.length ? `<p class="muted" style="font-size:.8rem;margin:8px 0 2px">Populairste plaatsen</p>${p.topPlaatsen.slice(0, 6).map((x) => `<div class="row"><span class="grow">${esc(x.plaats)}</span><small>${x.n}</small></div>`).join("")}` : ""}
         <p class="muted" style="font-size:.75rem;margin:6px 0 0">Gemiddeld ${p.gemiddeld} profiel per toestel · ${p.pushToestellen} toestellen met push</p>
@@ -278,15 +282,22 @@ function aAlertsCards(a, status) {
     </div>`;
 }
 
+// Source switch (VNOG) on the dashboard: saved at once.
+document.addEventListener("change", async (e) => {
+  if (e.target?.id !== "vnogAan") return;
+  try { await api("POST", "/v1/beheer/bronnen/vnog", { aan: e.target.checked }); toast(e.target.checked ? "VNOG staat aan" : "VNOG staat uit"); }
+  catch (err) { e.target.checked = !e.target.checked; toast(err.message); }
+});
+
 let wBron = "", wStatus = "", wQuery = "";
 async function waarschuwingen(el) {
   const qs = new URLSearchParams({ days: "30", ...(wBron ? { bron: wBron } : {}), ...(wStatus ? { status: wStatus } : {}), ...(wQuery ? { q: wQuery } : {}) });
   const list = await api("GET", `/v1/beheer/waarschuwingen?${qs}`);
-  const kop = (w) => w.bron === "knmi" ? `${CODE[w.niveau] || "KNMI"} · ${w.soort || ""}` : w.bron === "burgernet" ? `Burgernet · ${w.plaats || "Apeldoorn"}` : w.bron === "amber" ? "AMBER Alert" : w.bron === "vermistkind" ? `Vermist Kind Alert · ${w.plaats || ""}` : "NL-Alert";
+  const kop = (w) => w.bron === "knmi" ? `${CODE[w.niveau] || "KNMI"} · ${w.soort || ""}` : w.bron === "burgernet" ? `Burgernet · ${w.plaats || "Apeldoorn"}` : w.bron === "amber" ? "AMBER Alert" : w.bron === "vermistkind" ? `Vermist Kind Alert · ${w.plaats || ""}` : w.bron === "vnog" ? `VNOG · ${w.grip ? `GRIP ${w.grip} · ` : ""}${w.plaats || ""}` : "NL-Alert";
   el.innerHTML = `
     <div class="toolbar">
       <input type="search" id="wq" placeholder="Zoek in titel, tekst of plaats" value="${esc(wQuery)}">
-      <select id="wb"><option value="">Alle bronnen</option>${["nlalert", "burgernet", "knmi", "amber", "vermistkind"].map((b) => `<option value="${b}" ${wBron === b ? "selected" : ""}>${BRON[b][1]}</option>`).join("")}</select>
+      <select id="wb"><option value="">Alle bronnen</option>${["nlalert", "burgernet", "knmi", "amber", "vermistkind", "vnog"].map((b) => `<option value="${b}" ${wBron === b ? "selected" : ""}>${BRON[b][1]}</option>`).join("")}</select>
       <select id="ws"><option value="">Alle statussen</option>${Object.entries(STATUS).map(([k, v]) => `<option value="${k}" ${wStatus === k ? "selected" : ""}>${v}</option>`).join("")}</select>
     </div>
     <div class="list">${list.length ? list.map((w) => `
@@ -313,15 +324,29 @@ function editWaarschuwing(w) {
     <p><b>${esc(w.titel || "–")}</b></p>
     ${w.tekst && w.tekst !== w.titel ? `<p style="white-space:pre-wrap">${esc(w.tekst)}</p>` : ""}
     ${w.link ? `<p><a href="${esc(w.link)}" target="_blank" rel="noopener">Bekijk bij de bron ↗</a></p>` : ""}
+    ${w.bron === "vnog" ? `<div class="card" style="margin:8px 0"><b>Plek op de kaart</b>
+      <p class="muted" style="font-size:.8rem;margin:4px 0">${w.lat == null ? "Nu geen marker." : `Nu: ${w.lat}, ${w.lon} · ${w.plek === "p2000" ? "van het gekoppelde P2000-incident" : w.plek === "beheer" ? "door het beheer gezet" : "midden van de straat"}`}${w.straat ? ` · straat: ${esc(w.straat)}` : " · geen straat genoemd"}${w.incident ? ` · incident ${esc(w.incident)}` : ""}</p>
+      <select id="vPlek"><option value="">Niets wijzigen</option><option value="melding">Koppelen aan een P2000-melding</option><option value="punt">Zelf een punt opgeven</option><option value="geen">Geen marker tonen</option><option value="auto">Terug naar automatisch</option></select>
+      <input id="vMelding" placeholder="Guid van de P2000-melding (staat onderaan de melding in het beheer)" style="display:none;margin-top:6px">
+      <input id="vPunt" placeholder="52.2112, 5.9699" style="display:none;margin-top:6px"></div>` : ""}
     <label class="chips"><label><input type="checkbox" id="wHide" ${w.verborgen ? "checked" : ""}> Verbergen in apps en website</label></label>
     <label class="chips"><label><input type="checkbox" id="wEnd" ${w.handmatig_beeindigd ? "checked" : ""}> Handmatig beëindigd</label></label>
     <p class="muted" style="font-size:.8rem">Werkt binnen een minuut in de apps. Zet je het terug, dan geldt weer wat de bron zegt.</p>
     <p class="muted" style="font-size:.75rem">${esc(w.id)}</p>
     <div class="actions"><button class="btn" id="wClose">Annuleren</button><button class="btn primary" id="wSave">Opslaan</button></div>`);
   $("wClose").addEventListener("click", closeModal);
+  $("vPlek")?.addEventListener("change", (e) => { $("vMelding").style.display = e.target.value === "melding" ? "" : "none"; $("vPunt").style.display = e.target.value === "punt" ? "" : "none"; });
   $("wSave").addEventListener("click", async () => {
     try {
-      await api("PATCH", `/v1/beheer/waarschuwingen/${encodeURIComponent(w.id)}`, { verborgen: $("wHide").checked, beeindigd: $("wEnd").checked });
+      // VNOG: the spot or the link with a P2000 incident, corrected by hand.
+      const keus = $("vPlek")?.value, plek = {};
+      if (keus === "melding") { if (!$("vMelding").value.trim()) throw new Error("Vul de guid van de melding in"); plek.melding = $("vMelding").value.trim(); }
+      else if (keus === "punt") {
+        const [lat, lon] = $("vPunt").value.split(/[,;\s]+/).map(Number);
+        if (!(lat > 50 && lat < 54 && lon > 3 && lon < 8)) throw new Error("Vul een punt in als 52.2112, 5.9699");
+        plek.lat = lat; plek.lon = lon;
+      } else if (keus === "geen" || keus === "auto") plek.plek = keus;
+      await api("PATCH", `/v1/beheer/waarschuwingen/${encodeURIComponent(w.id)}`, { verborgen: $("wHide").checked, beeindigd: $("wEnd").checked, ...plek });
       closeModal();
       toast("Opgeslagen");
       run();
@@ -332,7 +357,7 @@ function editWaarschuwing(w) {
 // ------------------------------------------------------------------ nieuws (tab Nieuws in the apps and on a-alerts.nl)
 
 const N_SOORT = { liveblog: "Meldingen (Burgernet, AMBER, NL-Alert, Vermist Kind)", politie: "Politie", regionaal: "112 Nieuws", weer: "Weer" };
-const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
+const N_BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", vnog: "VNOG", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
 const N_CAT = { algemeen: "Algemeen", verkeer: "Verkeer", inbraak: "Inbraak", getuigen: "Getuigen gezocht", drugs: "Drugs", brand: "Brand", vermist: "Vermist" };
 let nSoort = "";
 

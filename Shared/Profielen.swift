@@ -76,6 +76,7 @@ struct MeldingProfiel: Codable, Identifiable, Hashable {
         case .burgernet: if !burgernet { return false }
         case .knmi: if !knmi.contains(w.niveau ?? "") { return false }
         case .amber, .vermistkind: return true // one switch per device (Instellingen › Waarschuwingen)
+        case .vnog: break // one switch per device, for the places of the profile
         }
         return plaatsen.isEmpty || plaatsen.contains { w.covers(plaats: $0) }
     }

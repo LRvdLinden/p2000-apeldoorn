@@ -94,7 +94,7 @@ struct KnmiBanner: View {
                         }
                         VStack(alignment: .leading, spacing: 2) {
                             Text(verbatim: w.kop).font(AppFont.body(15, .bold, relativeTo: .subheadline))
-                            Text(w.isKind ? [w.titel, w.plaats].compactMap { $0 }.joined(separator: " · ") : validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
+                            Text(w.isKind || w.isVnog ? [w.titel, w.isVnog && w.titel.localizedCaseInsensitiveContains(w.plaats ?? "–") ? nil : w.plaats].compactMap { $0 }.joined(separator: " · ") : validity(w)).font(AppFont.body(12, .regular, relativeTo: .caption))
                             if let regel = (w.knmiKop ?? w.verwachting)?.split(separator: "\n").first {
                                 Text(String(regel)).font(AppFont.body(12, .regular, relativeTo: .caption)).lineLimit(1).opacity(0.9)
                             }
@@ -107,7 +107,7 @@ struct KnmiBanner: View {
                     .background(w.color, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
                 }
                 .buttonStyle(.plain)
-                .accessibilityHint(w.isKind ? L("Open de oproep") : L("Open de weerwaarschuwing"))
+                .accessibilityHint(w.isKind ? L("Open de oproep") : w.isVnog ? L("Open het incident") : L("Open de weerwaarschuwing"))
             }
         }
     }
@@ -296,7 +296,7 @@ struct KnmiCodesView: View {
 struct WaarschuwingFilterSection: View {
     @Environment(AppSettings.self) private var settings
     private let keys: [(String, String)] = [
-        ("nlalert", "NL-Alert"), ("burgernet", "Burgernet"), ("amber", "AMBER Alert"), ("vermistkind", L("Vermist Kind Alert")),
+        ("nlalert", "NL-Alert"), ("burgernet", "Burgernet"), ("amber", "AMBER Alert"), ("vermistkind", L("Vermist Kind Alert")), ("vnog", L("VNOG-incidenten")),
         ("knmi:yellow", L("KNMI code geel")), ("knmi:orange", L("KNMI code oranje")), ("knmi:red", L("KNMI code rood")),
     ]
 

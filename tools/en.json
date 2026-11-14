@@ -958,5 +958,18 @@
   "Minder": "Less",
   "koers": "heading",
   "hoogte": "altitude",
-  "Ambulancehelikopter": "Ambulance helicopter"
+  "Ambulancehelikopter": "Ambulance helicopter",
+  "Incident": "Incident",
+  "Afgesloten": "Closed",
+  "VNOG-incidenten": "VNOG incidents",
+  "Bekijk bij VNOG": "View at VNOG",
+  "Berichten van VNOG": "Messages from VNOG",
+  "Open het incident": "Open the incident",
+  "Grote incidenten waarover de Veiligheidsregio Noord- en Oost-Gelderland bericht: een melding bij een nieuw incident, elke update, een hogere GRIP en de afsluiting. Alleen de gemeente Apeldoorn en Teuge.": "Major incidents the safety region Noord- en Oost-Gelderland reports on: a notification for a new incident, every update, a higher GRIP level and the closing. Only the municipality of Apeldoorn and Teuge.",
+  "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG. Bel bij nood altijd 112.": "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is not part of VNOG. In an emergency always call 112.",
+  "P2000-meldingen bij dit incident (%lld)": "P2000 alerts for this incident (%lld)",
+  "Geen P2000-incident gevonden bij dit bericht van VNOG.": "No P2000 incident found for this message from VNOG.",
+  "De P2000-meldingen van het incident in de straat die VNOG noemt, rond het begin. De plek op de kaart komt van dit incident.": "The P2000 alerts of the incident in the street VNOG names, around the start. The spot on the map comes from this incident.",
+  "P2000-meldingen in de straat die VNOG noemt, rond het begin van het incident. Dit is een mogelijk verband, geen bevestiging.": "P2000 alerts in the street VNOG names, around the start of the incident. This is a possible link, not a confirmation.",
+  "Grote incidenten met updates van de veiligheidsregio": "Major incidents with updates from the safety region"
 }

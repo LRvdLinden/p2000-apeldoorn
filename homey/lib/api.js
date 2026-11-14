@@ -34,7 +34,7 @@ function getJSON(path, { timeout = 15000, retries = 2 } = {}) {
 
 module.exports = {
   meldingen: (limit = 60) => getJSON(`/v1/meldingen?limit=${limit}`),
-  waarschuwingen: (days = 3) => getJSON(`/v1/waarschuwingen?days=${days}&kind=1`),
+  waarschuwingen: (days = 3) => getJSON(`/v1/waarschuwingen?days=${days}&kind=1&vnog=1`),
   waarschuwing: (id) => getJSON(`/v1/waarschuwingen/${encodeURIComponent(id)}`),
   nieuws: (limit = 20) => getJSON(`/v1/nieuws?limit=${limit}`),
   helikopters: async () => (await getJSON('/v1/helikopters')).helikopters || [],

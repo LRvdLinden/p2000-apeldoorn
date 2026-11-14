@@ -248,7 +248,7 @@ fun NieuwsDetail(id: String, nav: Nav) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(DATUM.format(b.atInstant.atZone(ZONE)), color = Muted, fontSize = 12.sp)
                                 Spacer(Modifier.width(6.dp))
-                                Text(if (b.isEigen) "A-Alerts" else if (b.door == "burgernet") "Burgernet" else if (b.door == "amber" || b.door == "vermistkind") tr("Politie", "Police") else d.bronNaam,
+                                Text(if (b.isEigen) "A-Alerts" else if (b.door == "burgernet") "Burgernet" else if (b.door == "amber" || b.door == "vermistkind") tr("Politie", "Police") else if (b.door == "vnog") "VNOG" else d.bronNaam,
                                     color = if (b.isEigen || d.bron != "vermistkind") kleur else MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold,
                                     modifier = Modifier.background(kleur.copy(alpha = 0.12f), RoundedCornerShape(50)).padding(horizontal = 7.dp, vertical = 2.dp))
                             }

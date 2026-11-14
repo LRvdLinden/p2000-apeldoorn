@@ -73,6 +73,8 @@ struct MapScreen: View {
             case .nlalert: guard settings.laag(.nlalert) else { return false }
             case .burgernet: guard settings.laag(.burgernet) else { return false }
             case .amber, .vermistkind: guard settings.laag(.kind), w.coordinate != nil else { return false }
+            // VNOG: only with a known spot (the linked P2000 incident or the street); never a made-up one.
+            case .vnog: guard settings.laag(.vnog), w.coordinate != nil else { return false }
             case .knmi: guard settings.laag(.knmi), !w.isBeeindigd else { return false }
             }
             guard !w.isBeeindigd || (w.einde ?? w.start) >= cutoff else { return false }
@@ -511,6 +513,13 @@ struct MapScreen: View {
                     } content: {
                         Image("icon_burgernet").resizable().scaledToFit().frame(width: 16, height: 16)
                         Text("\(bn)")
+                    } }
+                    let vn = aantal(.vnog)
+                    if vn > 0 { chip(on: settings.laag(.vnog), color: Color(hex: 0x48277F), label: "VNOG: \(vn)") {
+                        settings.setLaag(.vnog, !settings.laag(.vnog))
+                    } content: {
+                        Image("icon_vnog").resizable().scaledToFit().frame(width: 16, height: 16)
+                        Text("\(vn)")
                     } }
                     let nl = aantal(.nlalert)
                     if nl > 0 { chip(on: settings.laag(.nlalert), color: Color(hex: 0xE3001B), label: "NL-Alert: \(nl)") {

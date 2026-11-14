@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { vnogDatum, platTekst, vnogPlaats, vnogWarning, vnogStraat, vnogLijst, vnogGrip } from "../src/vnog.js";
+import { vnogDatum, platTekst, vnogPlaats, vnogWarning, vnogStraat, vnogLijst, vnogGrip, inStraat, straatKey } from "../src/vnog.js";
 import { payloadForWarning, wantsPush, prefsFrom } from "../src/alerts.js";
 
 // Shapes as the API of VNOG returned them on 14 November 2026 (https://www.vnog.nl/api/v1/incidents).
@@ -153,4 +153,14 @@ test("push: own switch, places of the device, texts per kind", () => {
   assert.match(a.aps.alert.body, /Het incident is afgesloten\.$/);
   assert.equal(a.aps["interruption-level"], "active");
   assert.equal(payloadForWarning({ ...w, grip: null }, "nl", { kind: "n" }).aps.alert.title, "VNOG · Beekbergen");
+});
+
+test("the street of VNOG against the address of P2000 (seen live on 14 November 2026)", () => {
+  assert.equal(straatKey("Laan van de Dierenriem"), "laan dierenriem");
+  assert.equal(inStraat("Laan van de Dierenriem", "Laan van Dierenriem"), true);
+  assert.equal(inStraat("Laan van de Dierenriem 12", "Laan van Dierenriem"), true);
+  assert.equal(inStraat("Lage Bergweg 31", "Lage Bergweg"), true);
+  assert.equal(inStraat("Bergweg 3", "Lage Bergweg"), false);
+  assert.equal(inStraat("Deventerstraat", "Stationsstraat"), false);
+  assert.equal(inStraat("", "Stationsweg"), false);
 });

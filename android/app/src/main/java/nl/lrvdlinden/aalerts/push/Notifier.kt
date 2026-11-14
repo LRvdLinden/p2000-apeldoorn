@@ -65,10 +65,10 @@ object Notifier {
     }
 
     private val DIENST_KLEUR = mapOf("brandweer" to 0xFFE30613, "ambulance" to 0xFFF4C400, "politie" to 0xFF15428B, "traumaheli" to 0xFF9333EA,
-        "nlalert" to 0xFFFFC800, "burgernet" to 0xFF0067B1, "knmi" to 0xFF3E9FDB, "amber" to 0xFFEC6E24, "vermistkind" to 0xFF1B265E)
+        "nlalert" to 0xFFFFC800, "burgernet" to 0xFF0067B1, "knmi" to 0xFF3E9FDB, "amber" to 0xFFEC6E24, "vermistkind" to 0xFF1B265E, "vnog" to 0xFF48277F)
     private val ICON = mapOf("brandweer" to R.drawable.icon_brandweer, "ambulance" to R.drawable.icon_ambulance, "politie" to R.drawable.icon_politie,
         "traumaheli" to R.drawable.icon_traumaheli, "nlalert" to R.drawable.icon_nlalert, "burgernet" to R.drawable.icon_burgernet, "knmi" to R.drawable.icon_knmi,
-        "amber" to R.drawable.icon_amber, "vermistkind" to R.drawable.icon_vermistkind)
+        "amber" to R.drawable.icon_amber, "vermistkind" to R.drawable.icon_vermistkind, "vnog" to R.drawable.icon_vnog)
 
     /** A push from the server (data message, see worker/src/fcm.js). */
     fun show(ctx: Context, data: Map<String, String>) {

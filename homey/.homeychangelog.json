@@ -1,4 +1,8 @@
 {
+  "0.1.16": {
+    "en": "New: incidents of the safety region VNOG (Apeldoorn and Teuge). Four trigger cards (new incident, update, higher GRIP, closed), a condition, the tags GRIP and street, a ready-made message and the square VNOG banner or a map with marker.",
+    "nl": "Nieuw: incidenten van de veiligheidsregio VNOG (Apeldoorn en Teuge). Vier triggerkaarten (nieuw incident, update, hogere GRIP, afgesloten), een voorwaarde, de tags GRIP en straat, een kant-en-klaar bericht en de vierkante VNOG-banner of een kaart met marker."
+  },
   "0.1.9": {
     "en": "When a Burgernet action, AMBER Alert, Vermist Kind Alert or NL-Alert ends, the image tag is the square \"ended\" banner of that source.",
     "nl": "Als een Burgernet-actie, AMBER Alert, Vermist Kind Alert of NL-Alert afloopt, is de afbeelding-tag de vierkante afgeronde banner van die bron."

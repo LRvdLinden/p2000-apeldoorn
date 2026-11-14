@@ -117,7 +117,7 @@ struct MeldkamerView: View {
                     .annotationTitles(.hidden)
                 }
                 // Active NL-Alert areas and Burgernet calls (A-Alerts).
-                ForEach(waarschuwingen.items.filter { $0.isActief && $0.bron != .knmi && settings.laag($0.bron == .nlalert ? .nlalert : .burgernet) }) { w in
+                ForEach(waarschuwingen.items.filter { $0.isActief && $0.bron != .knmi && settings.laag($0.bron == .nlalert ? .nlalert : $0.bron == .vnog ? .vnog : $0.isKind ? .kind : .burgernet) }) { w in
                     ForEach(Array(w.rings.enumerated()), id: \.offset) { _, ring in
                         MapPolygon(coordinates: ring).foregroundStyle(w.color.opacity(0.2)).stroke(w.color, lineWidth: 2)
                     }

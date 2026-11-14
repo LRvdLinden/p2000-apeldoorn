@@ -173,7 +173,7 @@ fun KnmiBar(list: List<Waarschuwing>, onClick: (Waarschuwing) -> Unit) {
                 Spacer(Modifier.width(8.dp))
                 Column(Modifier.weight(1f)) {
                     Text(w.kop, color = w.onColor, fontWeight = FontWeight.Bold, fontSize = 14.sp)
-                    Text(if (w.isKind) listOfNotNull(w.titel.takeIf { it.isNotBlank() }, w.plaats).joinToString(" · ")
+                    Text(if (w.isKind || w.isVnog) listOfNotNull(w.titel.takeIf { it.isNotBlank() }, w.plaats?.takeUnless { w.isVnog && w.titel.contains(it, ignoreCase = true) }).joinToString(" · ")
                         else "${w.statusLabel} · ${wTijd(w)}" + (w.eindeAt?.let { tr(" tot ", " until ") + Fmt.dayTime(it) } ?: ""), color = w.onColor.copy(alpha = 0.85f), fontSize = 12.sp)
                 }
                 Icon(Icons.Filled.ChevronRight, null, tint = w.onColor)

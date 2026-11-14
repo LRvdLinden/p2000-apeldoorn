@@ -134,6 +134,8 @@ struct WaarschuwingDetailView: View {
                 dataCard(w)
                 Text(w.bron == .nlalert
                      ? L("A-Alerts is aanvullend op NL-Alert en vervangt het niet. Een NL-Alert komt ook rechtstreeks op je telefoon binnen. Bel bij nood altijd 112.")
+                     : w.isVnog
+                     ? L("Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG. Bel bij nood altijd 112.")
                      : Lf("Bron: %@. Bel bij nood altijd 112.", MeldingDetailView.bronNaam(w.bron)))
                     .font(AppFont.body(12))
                     .foregroundStyle(.secondary)
@@ -334,7 +336,7 @@ struct WaarschuwingDetailView: View {
             }
             if let link = w.link, let url = URL(string: link) {
                 Link(destination: url) {
-                    Label(w.isKind ? L("Meer informatie bij de politie") : Lf("Bekijk bij %@", MeldingDetailView.bronNaam(w.bron)), systemImage: "safari.fill")
+                    Label(w.isKind ? L("Meer informatie bij de politie") : w.isVnog ? L("Bekijk bij VNOG") : Lf("Bekijk bij %@", MeldingDetailView.bronNaam(w.bron)), systemImage: "safari.fill")
                         .font(AppFont.body(15, .semibold))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 14)
@@ -375,7 +377,8 @@ struct WaarschuwingDetailView: View {
                     Text(L("VERMIST KIND ALERT")).font(AppFont.body(11, .bold)).foregroundStyle(Color(hex: 0x1B265E))
                         .padding(.horizontal, 8).padding(.vertical, 4).background(Color(hex: 0xF4E005), in: Capsule())
                 }
-                Text(w.isKind ? L("Berichten van de politie") : L("Berichten van Burgernet")).font(AppFont.heading(18))
+                if w.isVnog { Image("icon_vnog").resizable().scaledToFit().frame(height: 26) }
+                Text(w.isKind ? L("Berichten van de politie") : w.isVnog ? L("Berichten van VNOG") : L("Berichten van Burgernet")).font(AppFont.heading(18))
             }
             VStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(lijst.enumerated()), id: \.element.id) { i, b in
@@ -558,7 +561,7 @@ struct WaarschuwingDetailView: View {
 
     private func meldingenCard(_ w: Waarschuwing) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(Lf("Meldingen in de buurt (%lld)", detail?.meldingen.count ?? 0)).font(AppFont.heading(18))
+            Text(w.isVnog ? Lf("P2000-meldingen bij dit incident (%lld)", detail?.meldingen.count ?? 0) : Lf("Meldingen in de buurt (%lld)", detail?.meldingen.count ?? 0)).font(AppFont.heading(18))
             if let list = detail?.meldingen, !list.isEmpty {
                 ForEach(list) { m in
                     NavigationLink { MeldingDetailView(melding: m) } label: {
@@ -568,11 +571,14 @@ struct WaarschuwingDetailView: View {
                     if m.guid != list.last?.guid { Divider() }
                 }
             } else if detail != nil {
-                Text(L("Geen P2000-meldingen gevonden in het gebied rond dit tijdstip.")).font(AppFont.body(14)).foregroundStyle(.secondary)
+                Text(w.isVnog ? L("Geen P2000-incident gevonden bij dit bericht van VNOG.") : L("Geen P2000-meldingen gevonden in het gebied rond dit tijdstip.")).font(AppFont.body(14)).foregroundStyle(.secondary)
             } else {
                 ProgressView().frame(maxWidth: .infinity)
             }
-            Text(w.bron == .burgernet
+            Text(w.isVnog
+                 ? (w.incident != nil ? L("De P2000-meldingen van het incident in de straat die VNOG noemt, rond het begin. De plek op de kaart komt van dit incident.")
+                                      : L("P2000-meldingen in de straat die VNOG noemt, rond het begin van het incident. Dit is een mogelijk verband, geen bevestiging."))
+                 : w.bron == .burgernet
                  ? L("Politiemeldingen in dezelfde plaats rond het tijdstip van de oproep. Dit is een mogelijk verband, geen bevestiging.")
                  : L("P2000-meldingen in het gebied van deze waarschuwing, rond het tijdstip waarop hij werd uitgezonden. Dit is een mogelijk verband, geen bevestiging."))
                 .font(AppFont.body(12)).foregroundStyle(.secondary)
@@ -731,6 +737,7 @@ extension MeldingDetailView {
         case .knmi: return "KNMI"
         case .amber: return "AMBER Alert"
         case .vermistkind: return L("Vermist Kind Alert")
+        case .vnog: return "VNOG"
         }
     }
 

@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "There is an active VNOG incident",
+    "nl": "Er is een actief VNOG-incident"
+  },
+  "hint": {
+    "en": "An incident of VNOG that is not closed yet.",
+    "nl": "Een incident van VNOG dat nog niet is afgesloten."
+  },
+  "titleFormatted": {
+    "en": "There !{{is|is no}} active VNOG incident",
+    "nl": "Er !{{is|is geen}} actief VNOG-incident"
+  }
+}

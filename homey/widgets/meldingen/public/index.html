@@ -24,7 +24,7 @@
 <body>
 <div class="list" id="list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
 <script>
-  const ICON = { brandweer: 'icon_brandweer', ambulance: 'icon_ambulance', politie: 'icon_politie', traumaheli: 'icon_traumaheli', overig: 'icon_brandweer', nlalert: 'icon_nlalert', burgernet: 'icon_burgernet', knmi: 'icon_knmi', amber: 'icon_amber', vermistkind: 'icon_vermistkind' };
+  const ICON = { brandweer: 'icon_brandweer', ambulance: 'icon_ambulance', politie: 'icon_politie', traumaheli: 'icon_traumaheli', overig: 'icon_brandweer', nlalert: 'icon_nlalert', burgernet: 'icon_burgernet', knmi: 'icon_knmi', amber: 'icon_amber', vermistkind: 'icon_vermistkind', vnog: 'icon_vnog' };
   const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   async function load(Homey) {
     const box = document.getElementById('list');

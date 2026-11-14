@@ -124,6 +124,8 @@ object Settings {
     /** AMBER Alert and Vermist Kind Alert: one switch each (not per profile), on by default. */
     var pushAmber by bool("pushAmber", true, push = true)
     var pushVermistKind by bool("pushVermistKind", true, push = true)
+    /** VNOG incidents (build 100): a new incident, every update, a higher GRIP and the closing. */
+    var pushVnog by bool("pushVnog", true, push = true)
     /** Tab Nieuws: push when A-Alerts adds a message to a liveblog (on), and for new police news (off). */
     var pushNieuwsLiveblog by bool("pushNieuwsLiveblog", true, push = true)
     var pushNieuwsPolitie by bool("pushNieuwsPolitie", false, push = true)
@@ -291,6 +293,8 @@ object Settings {
         val c = radiusCenter
         if (radiusEnabled && c != null) {
             if (w.bron == "amber") return true // all of the Netherlands
+            // A VNOG incident without a known spot: the place filter decides.
+            if (w.bron == "vnog" && !w.hasCoordinate) return true
             if (w.bron == "burgernet" || w.gebied == null) {
                 val la = w.lat ?: return false; val lo = w.lon ?: return false
                 if (Geo.distanceKm(c.first, c.second, la, lo) > radiusKm + 2) return false
@@ -317,6 +321,7 @@ object Settings {
                 "knmiOpgeheven" to pushKnmiOpgeheven,
                 "amber" to pushAmber,
                 "vermistkind" to pushVermistKind,
+                "vnog" to pushVnog,
                 "nieuwsLiveblog" to pushNieuwsLiveblog,
                 "nieuwsPolitie" to pushNieuwsPolitie,
                 "nieuwsRegio" to pushNieuwsRegio,

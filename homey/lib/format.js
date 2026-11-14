@@ -14,7 +14,7 @@ const DIENSTEN = {
   politie: { banner: 'pol', emoji: '🚓' },
   traumaheli: { banner: 'life', emoji: '🚨🚁' },
 };
-const BRON_BANNER = { nlalert: 'nlalert', burgernet: 'burgernet', knmi: 'knmi', amber: 'amber', vermistkind: 'vermistkind' };
+const BRON_BANNER = { nlalert: 'nlalert', burgernet: 'burgernet', knmi: 'knmi', amber: 'amber', vermistkind: 'vermistkind', vnog: 'vnog' };
 
 /** Discipline key: brandweer, ambulance, politie, traumaheli or overig. */
 function dienst(m) {
@@ -38,7 +38,7 @@ const bannerUrl = (key) => {
   if (k.endsWith('-afgerond')) return `${BANNERS}/banner-${k.slice(0, -9)}-apeldoorn-vierkant-afgerond.png`;
   return `${BANNERS}/banner-${k}-apeldoorn-vierkant.png`;
 };
-const AFGEROND_BRONNEN = ['burgernet', 'amber', 'vermistkind', 'nlalert'];
+const AFGEROND_BRONNEN = ['burgernet', 'amber', 'vermistkind', 'nlalert', 'vnog'];
 const KNMI_ICOON = [[/mist/i, 'fog'], [/wind/i, 'wind'], [/onweer|tornado|hagel/i, 'thunderstorm'], [/regen/i, 'rain'], [/sneeuw/i, 'snow'],
   [/glad|ijzel|vorst/i, 'ice'], [/hitte/i, 'heat'], [/kou/i, 'cold'], [/kust/i, 'waterspout']];
 /** KNMI code green (lifted): the green banner of the kind of weather. */
@@ -83,7 +83,7 @@ function plaatsenVoor(m) {
 
 /** Places for a warning: Burgernet has one place, NL-Alert/KNMI cover the places inside their area. */
 function plaatsenVoorWaarschuwing(w) {
-  if (w.bron === 'burgernet') return [capPlaats(w.plaats || 'Apeldoorn')];
+  if (w.bron === 'burgernet' || w.bron === 'vnog') return [capPlaats(w.plaats || 'Apeldoorn')];
   // AMBER Alert: all of the Netherlands, so every place.
   if (w.bron === 'amber') return WERKGEBIED.plaatsen.map((p) => p.naam);
   // Vermist Kind Alert: every place and hamlet of the working area in (or within 1 km of) the search circle, same rule as the server.
@@ -193,7 +193,7 @@ const KNMI_RANG = { yellow: 1, orange: 2, red: 3 };
 
 /** Burgernet messages (start, updates, closing), newest first. Built from start/afloop for older API data. */
 function tijdlijn(w) {
-  if (!['burgernet', 'amber', 'vermistkind'].includes(w.bron)) return [];
+  if (!['burgernet', 'amber', 'vermistkind', 'vnog'].includes(w.bron)) return [];
   const lijst = Array.isArray(w.berichten) && w.berichten.length ? w.berichten : [
     { soort: 'start', at: w.start, tekst: w.startbericht || w.tekst || '' },
     ...(w.afloop ? [{ soort: 'afloop', at: w.einde, tekst: w.afloop }] : []),
@@ -252,6 +252,23 @@ function waarschuwingTokens(w, gebeurtenis, __, whatsapp) {
       `*${__('bericht.bekijk')}*: ${link}`,
       `${__('bericht.bron_politie')}`,
     ];
+  } else if (w.bron === 'vnog') {
+    // An incident page of the safety region (VNOG): every message with its time, newest first. The GRIP is the official one of VNOG.
+    const open = gebeurtenis !== 'einde';
+    const kop = `bericht.vnog_${gebeurtenis === 'update' ? 'update' : gebeurtenis === 'grip' ? 'grip' : open ? 'open' : 'dicht'}`;
+    const laatste = lijn[0];
+    const tijdBericht = gebeurtenis !== 'nieuw' && laatste && laatste.at ? new Date(laatste.at) : moment;
+    regels = [
+      `🟣 *${__(kop, { plaats: plaats.toUpperCase(), grip: w.grip || '' })}*`, '',
+      w.titel ? `*${w.titel}*` : null,
+      w.grip && gebeurtenis !== 'grip' ? `*GRIP ${w.grip}*` : null, '',
+      ...lijn.flatMap((b) => [`*${__(`bericht.vnog_soort_${b.soort}`)}*${b.at ? ` · ${datum(new Date(b.at))} ${tijd(new Date(b.at))}${__('bericht.uur_kort')}` : ''}`, `${b.tekst}\n`]),
+      `*${__('bericht.woonplaats')}*: ${plaats.toUpperCase()}`,
+      `*${__('bericht.datum')}*: ${datum(tijdBericht)}`,
+      `*${__(gebeurtenis === 'update' || gebeurtenis === 'grip' ? 'bericht.tijd_update' : open ? 'bericht.tijd_open' : 'bericht.tijd_dicht')}*: ${tijd(tijdBericht)}${__('bericht.uur_kort')}`,
+      `*${__('bericht.bekijk')}*: ${link}`,
+      `${__('bericht.bron_vnog')}`,
+    ];
   } else if (w.bron === 'nlalert') {
     const open = gebeurtenis !== 'einde';
     regels = [
@@ -289,6 +306,8 @@ function waarschuwingTokens(w, gebeurtenis, __, whatsapp) {
       aantal_updates: lijn.filter((b) => b.soort === 'update').length,
       foto_url: w.status !== 'beeindigd' && w.foto ? w.foto : '',
       zoekgebied_km: Number(w.straal_km) || 0,
+      grip: Number(w.grip) || 0,
+      straat: w.straat || '',
       plaats,
       status: __(`status.${w.status}`) || w.status || '',
       code,
@@ -322,7 +341,7 @@ function nieuwsTokens(n, __, whatsapp) {
   const afbeeldingUrl = eigen ? bannerUrl(eigen)
     : m ? `${m[1]}og/${m[2]}.jpg` : (n.afbeelding || `${SITE}/assets/img/nieuws/og/politie-algemeen.jpg`);
   const soortNaam = n.soort === 'liveblog'
-    ? ({ burgernet: 'Burgernet', amber: 'AMBER Alert', vermistkind: 'Vermist Kind Alert', nlalert: 'NL-Alert' }[n.bron] || __('bericht.soort_liveblog'))
+    ? ({ burgernet: 'Burgernet', amber: 'AMBER Alert', vermistkind: 'Vermist Kind Alert', nlalert: 'NL-Alert', vnog: 'VNOG' }[n.bron] || __('bericht.soort_liveblog'))
     : __(`bericht.soort_${n.soort}`);
   const titel = String(n.titel || '').trim();
   const bericht = [`*${titel}*`, '', `${__('bericht.lees_verder')}: ${link}`, '', `© ${__('bericht.footer')}`].join('\n');

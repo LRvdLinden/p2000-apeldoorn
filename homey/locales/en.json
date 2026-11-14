@@ -12,7 +12,8 @@
     "burgernet": "Burgernet",
     "knmi": "KNMI",
     "amber": "AMBER Alert",
-    "vermistkind": "Missing Child Alert"
+    "vermistkind": "Missing Child Alert",
+    "vnog": "VNOG"
   },
   "status": {
     "actief": "Actief",
@@ -79,7 +80,15 @@
     "soort_politie": "Politie",
     "soort_regionaal": "112 Nieuws",
     "soort_weer": "Weer",
-    "soort_liveblog": "Burgernet, AMBER, Vermist Kind of NL-Alert"
+    "soort_liveblog": "Burgernet, AMBER, Vermist Kind of NL-Alert",
+    "vnog_open": "New VNOG incident in __plaats__!",
+    "vnog_update": "Update on the VNOG incident in __plaats__!",
+    "vnog_grip": "VNOG incident in __plaats__ raised to GRIP __grip__!",
+    "vnog_dicht": "VNOG incident in __plaats__ closed!",
+    "vnog_soort_start": "First message",
+    "vnog_soort_update": "Update",
+    "vnog_soort_afloop": "Closed",
+    "bron_vnog": "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl)."
   },
   "fout": {
     "geen_melding": "Er is nog geen melding gevonden die bij deze keuze past.",

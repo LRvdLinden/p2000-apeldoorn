@@ -47,7 +47,7 @@ class AAlertsApp extends Homey.App {
       this.webhook = await this.homey.cloud.createWebhook(id, secret, { $key: 'aalerts' });
       this.webhook.on('message', (args) => {
         const body = args && args.body ? args.body : {};
-        this.process(body.meldingen || [], body.waarschuwingen || [], 'webhook').catch((e) => this.error('webhook', e.message));
+        this.process(body.meldingen || [], [...(body.waarschuwingen || []), ...(body.vnog || [])], 'webhook').catch((e) => this.error('webhook', e.message));
         // New news articles: the webhook only sends their ids; the list itself is read from the API.
         if (Array.isArray(body.nieuws) && body.nieuws.some((id) => !this.nieuwsSeen.has(id))) this.refreshNieuws().catch((e) => this.error('nieuws', e.message));
       });
@@ -140,7 +140,8 @@ class AAlertsApp extends Homey.App {
       const ended = w.status === 'beeindigd';
       const rank = F.KNMI_RANG[w.niveau] || 0;
       const updates = F.tijdlijn(w).filter((b) => b.soort === 'update').length;
-      this.warn[w.id] = { s: w.status, r: rank, t: now, u: updates };
+      // g: the official GRIP of a VNOG incident (0 = none).
+      this.warn[w.id] = { s: w.status, r: rank, t: now, u: updates, g: Number(w.grip) || 0 };
       if (first) continue;
       const recent = now - new Date(w.einde || w.start).getTime() < RECENT_MS;
       if (!prev) {
@@ -150,7 +151,9 @@ class AAlertsApp extends Homey.App {
         await this.fireWaarschuwing(w, 'einde');
       } else if (w.bron === 'knmi' && !ended && rank > (prev.r || 0)) {
         await this.fireWaarschuwing(w, 'nieuw'); // code raised
-      } else if (['burgernet', 'amber', 'vermistkind'].includes(w.bron) && !ended && prev.u != null && updates > prev.u) {
+      } else if (w.bron === 'vnog' && !ended && prev.g != null && (Number(w.grip) || 0) > prev.g) {
+        await this.fireWaarschuwing(w, 'grip'); // VNOG raised the GRIP
+      } else if (['burgernet', 'amber', 'vermistkind', 'vnog'].includes(w.bron) && !ended && prev.u != null && updates > prev.u) {
         await this.fireWaarschuwing(w, 'update'); // Burgernet posted a follow-up message
       }
     }
@@ -246,6 +249,7 @@ class AAlertsApp extends Homey.App {
       amber: { nieuw: 'amber_nieuw', update: 'amber_update', einde: 'amber_beeindigd' },
       vermistkind: { nieuw: 'vermistkind_nieuw', update: 'vermistkind_update', einde: 'vermistkind_beeindigd' },
       knmi: { nieuw: 'knmi_nieuw', einde: 'knmi_vervallen' },
+      vnog: { nieuw: 'vnog_nieuw', update: 'vnog_update', grip: 'vnog_grip', einde: 'vnog_afgesloten' },
     }[w.bron]?.[gebeurtenis];
     if (!id) return;
     const r = F.waarschuwingTokens(w, gebeurtenis, this.__.bind(this), this.wa(w.bron));
@@ -303,7 +307,7 @@ class AAlertsApp extends Homey.App {
       card.registerArgumentAutocompleteListener('plaats', autocomplete);
     }
     // Vermist Kind Alert has no place to choose: every alert in the working area (Apeldoorn, the villages, hamlets and Teuge).
-    for (const id of ['nlalert_nieuw', 'nlalert_beeindigd', 'burgernet_geopend', 'burgernet_update', 'burgernet_gesloten']) {
+    for (const id of ['nlalert_nieuw', 'nlalert_beeindigd', 'burgernet_geopend', 'burgernet_update', 'burgernet_gesloten', 'vnog_nieuw', 'vnog_update', 'vnog_grip', 'vnog_afgesloten']) {
       const card = this.homey.flow.getTriggerCard(id);
       card.registerRunListener(async (args, state) => plaatsOk(args, state));
       card.registerArgumentAutocompleteListener('plaats', autocomplete);
@@ -321,6 +325,7 @@ class AAlertsApp extends Homey.App {
     this.homey.flow.getConditionCard('burgernet_actief').registerRunListener(async () => (await actief('burgernet')).length > 0);
     this.homey.flow.getConditionCard('amber_actief').registerRunListener(async () => (await actief('amber')).length > 0);
     this.homey.flow.getConditionCard('vermistkind_actief').registerRunListener(async () => (await actief('vermistkind')).length > 0);
+    this.homey.flow.getConditionCard('vnog_actief').registerRunListener(async () => (await actief('vnog')).length > 0);
     this.homey.flow.getConditionCard('knmi_actief').registerRunListener(async (args) => (await actief('knmi')).some((w) => (F.KNMI_RANG[w.niveau] || 0) >= Number(args.code || 1)));
     this.homey.flow.getConditionCard('lifeliner_in_lucht').registerRunListener(async (args) => {
       const helis = await api.helikopters();

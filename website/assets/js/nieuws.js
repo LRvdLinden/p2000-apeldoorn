@@ -1,15 +1,15 @@
 // A-Alerts: Nieuws. The list (/nieuws/) and one article or liveblog (/nieuws/<id>, also ?id=<id>).
 import { API, esc, loadMapKit } from "./core.js?v=61";
-import { maakWidgets } from "./widget.js?v=8";
+import { maakWidgets } from "./widget.js?v=21";
 import { weerKaartHTML, weerTekstHTML, tekenWeerKaart } from "./weerkaart.js?v=1";
 
 const TZ = "Europe/Amsterdam";
 const $ = (s) => document.querySelector(s);
-const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", nlalert: "#1D1D1F", politie: "#1E3A8C", "112nieuws": "#DC2626" };
+const KLEUR = { burgernet: "#0067B1", amber: "#EC6E24", vermistkind: "#1B265E", vnog: "#48277F", nlalert: "#1D1D1F", politie: "#1E3A8C", "112nieuws": "#DC2626" };
 const CODE = { yellow: ["Code geel", "#F7C600"], orange: ["Code oranje", "#F28C28"], red: ["Code rood", "#E3001B"], green: ["Code groen", "#2E9E44"] };
-const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
+const BRON = { burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind", vnog: "VNOG", nlalert: "NL-Alert", knmi: "KNMI", politie: "Politie", "112nieuws": "112 Nieuws" };
 const ICOON = (b, cat) => b === "112nieuws" ? `/assets/img/icon_${{ brand: "brandweer", traumaheli: "traumaheli", politie: "politie" }[cat] || "ambulance"}.png`
-  : `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi", "nlalert"].includes(b) ? b : "politie"}.png`;
+  : `/assets/img/icon_${["burgernet", "amber", "vermistkind", "knmi", "nlalert", "vnog"].includes(b) ? b : "politie"}.png`;
 const kleur = (x) => (x.bron === "knmi" ? (CODE[x.niveau] || CODE.yellow)[1] : KLEUR[x.bron] || KLEUR.politie);
 /** Liveblog (set in the beheer; older servers: every Burgernet/AMBER/Vermist Kind item). */
 const isLiveblog = (x) => (typeof x.liveblog === "boolean" ? x.liveblog : x.soort === "liveblog");
@@ -101,7 +101,7 @@ async function toonArtikel(id) {
   const alineas = (x.alineas || []).map((a) => `${a.titel ? `<h2>${esc(a.titel)}</h2>` : ""}<p>${esc(a.tekst)}</p>`).join("");
   const tl = (x.tijdlijn || []).map((b) => {
     const eigen = b.door === "a-alerts", c = eigen ? "#DC2626" : k;
-    const door = eigen ? "A-Alerts" : b.door === "burgernet" ? "Burgernet" : ["amber", "vermistkind"].includes(b.door) ? "Politie" : BRON[x.bron];
+    const door = eigen ? "A-Alerts" : b.door === "burgernet" ? "Burgernet" : ["amber", "vermistkind"].includes(b.door) ? "Politie" : b.door === "vnog" ? "VNOG" : BRON[x.bron];
     const url = veiligUrl(b.url), foto = veiligUrl(b.foto);
     return `<li><span class="dot" style="background:${c}"></span><div class="kaartje">
       <div class="meta">${esc(datum(b.at))}<span class="tag" style="color:${c};background:${c}1f">${esc(door)}</span></div>

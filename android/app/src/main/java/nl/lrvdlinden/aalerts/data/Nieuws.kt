@@ -55,6 +55,7 @@ data class NieuwsItem(
         "burgernet" -> "Burgernet"
         "amber" -> "AMBER Alert"
         "vermistkind" -> tr("Vermist Kind", "Missing Child")
+        "vnog" -> "VNOG"
         "nlalert" -> "NL-Alert"
         "knmi" -> "KNMI"
         "112nieuws" -> "112 Nieuws"
@@ -71,6 +72,7 @@ data class NieuwsItem(
         "burgernet" -> Color(0xFF0067B1)
         "amber" -> Color(0xFFEC6E24)
         "vermistkind" -> Color(0xFF1B265E)
+        "vnog" -> Color(0xFF48277F)
         "nlalert" -> Color(0xFF1D1D1F)
         "knmi" -> Waarschuwing.codeColor(niveau)
         "112nieuws" -> Color(0xFFDC2626)
@@ -80,6 +82,7 @@ data class NieuwsItem(
         "burgernet" -> R.drawable.icon_burgernet
         "amber" -> R.drawable.icon_amber
         "vermistkind" -> R.drawable.icon_vermistkind
+        "vnog" -> R.drawable.icon_vnog
         "nlalert" -> R.drawable.icon_nlalert
         "knmi" -> R.drawable.icon_knmi
         "112nieuws" -> when (categorie) { "brand" -> R.drawable.icon_brandweer; "traumaheli" -> R.drawable.icon_traumaheli; "politie" -> R.drawable.icon_politie; else -> R.drawable.icon_ambulance }

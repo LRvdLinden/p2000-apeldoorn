@@ -144,6 +144,10 @@ data class Waarschuwing(
     /** AMBER Alert / Vermist Kind Alert: photo of the child (only while it runs) and the search radius. */
     val foto: String? = null,
     @SerialName("straal_km") val straalKm: Double? = null,
+    /** VNOG: the official GRIP now (1…4), the street VNOG names and the linked P2000 incident (guid of its first alert). */
+    val grip: Int? = null,
+    val straat: String? = null,
+    val incident: String? = null,
     val plaats: String? = null,
     val niveau: String? = null,
     val soort: String? = null,
@@ -175,6 +179,8 @@ data class Waarschuwing(
     val isBeeindigd get() = status == "beeindigd"
     /** AMBER Alert (national) or Vermist Kind Alert (regional): a missing child, from the police via Burgernet. */
     val isKind get() = bron == "amber" || bron == "vermistkind"
+    /** An incident page of the safety region (Veiligheidsregio Noord- en Oost-Gelderland). */
+    val isVnog get() = bron == "vnog"
     val filterKey get() = if (bron == "knmi") "knmi:${niveau ?: "yellow"}" else bron
     val hasCoordinate get() = lat != null && lon != null
 
@@ -183,6 +189,7 @@ data class Waarschuwing(
         "burgernet" -> "Burgernet"
         "amber" -> "AMBER Alert"
         "vermistkind" -> tr("Vermist Kind Alert", "Missing Child Alert")
+        "vnog" -> "VNOG"
         else -> codeLabel(niveau)
     }
     /** KNMI: the code that applies now; a lifted (ended) warning is code green. */
@@ -192,9 +199,11 @@ data class Waarschuwing(
     val shareUrl: String get() = "https://a-alerts.nl/waarschuwing/" + java.net.URLEncoder.encode(id, "UTF-8")
     val kop: String get() = when (bron) {
         "nlalert", "amber", "vermistkind" -> label
+        // The GRIP is the official one of VNOG.
+        "vnog" -> label + " · " + (grip?.let { "GRIP $it" } ?: "Incident")
         else -> listOfNotNull(label, soort?.takeIf { it.isNotBlank() }).joinToString(" · ")
     }
-    val statusLabel: String get() = if (isOpgeheven) tr("Opgeheven · code groen", "Lifted · code green") else when (status) {
+    val statusLabel: String get() = if (isOpgeheven) tr("Opgeheven · code groen", "Lifted · code green") else if (isVnog && isBeeindigd) tr("Afgesloten", "Closed") else when (status) {
         "beeindigd" -> tr("Beëindigd", "Ended")
         "verwacht" -> tr("Verwacht", "Expected")
         else -> tr("Actief", "Active")
@@ -204,11 +213,12 @@ data class Waarschuwing(
         "burgernet" -> Color(0xFF0067B1)
         "amber" -> Color(0xFFEC6E24)
         "vermistkind" -> Color(0xFF1B265E)
+        "vnog" -> Color(0xFF48277F)
         else -> codeColor(niveau)
     }
     val onColor: Color get() = when (bron) {
         "nlalert" -> Color.Black
-        "burgernet", "amber" -> Color.White
+        "burgernet", "amber", "vnog" -> Color.White
         "vermistkind" -> Color(0xFFF4E005)
         else -> if (niveau == "yellow" || niveau == null) Color.Black else Color.White
     }
@@ -217,12 +227,14 @@ data class Waarschuwing(
         "burgernet" -> R.drawable.icon_burgernet
         "amber" -> R.drawable.icon_amber
         "vermistkind" -> R.drawable.icon_vermistkind
+        "vnog" -> R.drawable.icon_vnog
         else -> R.drawable.icon_knmi
     }
     val marker: Int get() = when (bron) {
         "burgernet" -> R.drawable.marker_burgernet
         "amber" -> R.drawable.marker_amber
         "vermistkind" -> R.drawable.marker_vermistkind
+        "vnog" -> R.drawable.marker_vnog
         else -> R.drawable.marker_nlalert
     }
     /** Dutch text, or the English one when the app runs in English and there is one. */
@@ -231,7 +243,7 @@ data class Waarschuwing(
     fun contains(lat: Double, lon: Double) = (gebied ?: emptyList()).any { Geo.ringContains(it, lat, lon) }
 
     fun covers(plaatsNaam: String): Boolean {
-        if (bron == "burgernet") return (plaats ?: "Apeldoorn").plaatsKey() == plaatsNaam.plaatsKey()
+        if (bron == "burgernet" || bron == "vnog") return (plaats ?: "Apeldoorn").plaatsKey() == plaatsNaam.plaatsKey()
         if (bron == "amber") return true
         val g = gebied ?: return true
         val p = Werkgebied.plaats(plaatsNaam) ?: return true
@@ -240,6 +252,8 @@ data class Waarschuwing(
 
     /** Whether a P2000 alert lies in this warning's area around its time window. */
     fun relates(m: Melding): Boolean {
+        // VNOG: only the alerts of the P2000 incident the server linked to it.
+        if (isVnog) return incident != null && (m.incident == incident || m.guid == incident)
         val from = startAt.minusSeconds(2 * 3600)
         val to = (eindeAt ?: startAt.plusSeconds(6 * 3600)).plusSeconds(3600)
         if (m.datum.isBefore(from) || m.datum.isAfter(to)) return false

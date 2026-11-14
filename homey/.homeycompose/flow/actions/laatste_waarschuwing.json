@@ -54,6 +54,13 @@
             "nl": "Vermist Kind Alert",
             "en": "Missing Child Alert"
           }
+        },
+        {
+          "id": "vnog",
+          "label": {
+            "en": "VNOG incident",
+            "nl": "VNOG-incident"
+          }
         }
       ]
     }

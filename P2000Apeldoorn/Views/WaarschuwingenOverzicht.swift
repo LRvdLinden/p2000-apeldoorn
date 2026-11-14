@@ -9,19 +9,21 @@ extension AppSettings {
         case .knmi: return profielen.contains { $0.actief && !$0.knmi.isEmpty }
         case .amber: return pushAmber
         case .vermistkind: return pushVermistKind
+        case .vnog: return pushVnog
         }
     }
 
     func zetPush(_ bron: Waarschuwing.Bron, _ aan: Bool) {
         if bron == .amber { pushAmber = aan; return }
         if bron == .vermistkind { pushVermistKind = aan; return }
+        if bron == .vnog { pushVnog = aan; return }
         var list = profielen
         for i in list.indices {
             switch bron {
             case .nlalert: list[i].nlalert = aan
             case .burgernet: list[i].burgernet = aan
             case .knmi: list[i].knmi = aan ? (list[i].knmi.isEmpty ? ["orange", "red"] : list[i].knmi) : []
-            case .amber, .vermistkind: break
+            case .amber, .vermistkind, .vnog: break
             }
         }
         profielen = list
@@ -63,6 +65,9 @@ struct WaarschuwingenOverzichtView: View {
                 }
                 Toggle(isOn: Binding(get: { settings.pushAan(.vermistkind) }, set: { settings.zetPush(.vermistkind, $0) })) {
                     rij(.vermistkind, L("Vermist Kind Alert"), L("Regionale oproep van de politie bij een vermist kind, als het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge)."))
+                }
+                Toggle(isOn: Binding(get: { settings.pushAan(.vnog) }, set: { settings.zetPush(.vnog, $0) })) {
+                    rij(.vnog, L("VNOG-incidenten"), L("Grote incidenten waarover de Veiligheidsregio Noord- en Oost-Gelderland bericht: een melding bij een nieuw incident, elke update, een hogere GRIP en de afsluiting. Alleen de gemeente Apeldoorn en Teuge."))
                 }
                 NavigationLink {
                     KnmiDrempelView()

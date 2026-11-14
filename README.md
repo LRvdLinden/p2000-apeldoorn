@@ -14,7 +14,7 @@ De app van [a-alerts.nl](https://a-alerts.nl) voor **iPhone, iPad, Mac, Apple Wa
 
 ## Nieuws
 
-Tabblad Nieuws (iPhone, iPad, Mac, Apple Watch, Apple TV, Android en a-alerts.nl/nieuws): politieberichten (bron politie.nl), 112 Nieuws (titel en intro, met toestemming), liveblogs bij Burgernet, AMBER Alert en Vermist Kind Alert, een artikel bij elke Burgernet-oproep, AMBER Alert, Vermist Kind Alert en NL-Alert, en een weerartikel bij elke KNMI-waarschuwing. In beheer zet je per artikel de schakelaar Liveblog aan (standaard uit): dan staat er "Liveblog" bij, LIVEBLOG op de afbeelding en valt het onder het filter Liveblogs. Een weerartikel is opgebouwd zoals de waarschuwing op knmi.nl: kaart van heel Nederland met de gebieden in hun code en het tijdvenster ("maandag 23:30 tot dinsdag 12:00"), de kop van het KNMI, de code, de uitleg, de uitgiftetijd, Risico's en advies en de details. Eén artikel per code: zolang de code gelijk blijft volgt het artikel de waarschuwing; een nieuwe code (hoger, lager of opgeheven/code groen) geeft een nieuw artikel en het vorige blijft zoals het was.
+Tabblad Nieuws (iPhone, iPad, Mac, Apple Watch, Apple TV, Android en a-alerts.nl/nieuws): politieberichten (bron politie.nl), 112 Nieuws (titel en intro, met toestemming), liveblogs bij Burgernet, AMBER Alert, Vermist Kind Alert en VNOG-incidenten, een artikel bij elke Burgernet-oproep, AMBER Alert, Vermist Kind Alert en NL-Alert, en een weerartikel bij elke KNMI-waarschuwing. In beheer zet je per artikel de schakelaar Liveblog aan (standaard uit): dan staat er "Liveblog" bij, LIVEBLOG op de afbeelding en valt het onder het filter Liveblogs. Een weerartikel is opgebouwd zoals de waarschuwing op knmi.nl: kaart van heel Nederland met de gebieden in hun code en het tijdvenster ("maandag 23:30 tot dinsdag 12:00"), de kop van het KNMI, de code, de uitleg, de uitgiftetijd, Risico's en advies en de details. Eén artikel per code: zolang de code gelijk blijft volgt het artikel de waarschuwing; een nieuwe code (hoger, lager of opgeheven/code groen) geeft een nieuw artikel en het vorige blijft zoals het was.
 
 ## Verkeer
 
@@ -151,3 +151,6 @@ worker/                API, ingest, pushmeldingen, WeatherKit/Maps (Cloudflare W
 ```
 
 © 2026 A-Alerts. Made & Powered by [PixelForges](https://pixelforges.nl). Bron: [p2000.page](https://p2000.page).
+
+## VNOG-incidenten
+Bron: de open API van de Veiligheidsregio Noord- en Oost-Gelderland (`https://www.vnog.nl/api/v1/incidents`, gemeente Apeldoorn = 47, Voorst = 66; van Voorst alleen Teuge). De worker leest de lopende incidenten om de twee minuten (`worker/src/vnog.js`, ingest in `worker/src/alerts.js`) en bewaart ze als waarschuwing met `bron: "vnog"`. De API geeft geen tijd per update en geen plek: een update krijgt het moment waarop de server hem zag, de plek komt van het P2000-incident in de genoemde straat of van PDOK. Alleen tekst wordt overgenomen, geen foto's. Oudere apps krijgen deze bron niet (`/v1/waarschuwingen?vnog=1`). Het logo en de kleuren op de banners zijn van VNOG; toestemming voor naam, logo en berichten regelt de eigenaar van de app met VNOG. Beelden: `node tools/maak_vnog_banners.js`.

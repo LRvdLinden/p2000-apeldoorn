@@ -233,6 +233,11 @@ function plan(item, soort, gebeurtenis) {
     if (!item.straat || item.lat == null || item.lon == null || !Number(item.lat)) return null;
     return { view: { lat: Number(item.lat), lon: Number(item.lon), z: 15.5 }, marker: 'burgernet' };
   }
+  // VNOG: a map with the VNOG marker only when the spot is known (the linked P2000 incident or the street VNOG names).
+  if (item.bron === 'vnog') {
+    if (item.lat == null || item.lon == null || !Number(item.lat)) return null;
+    return { view: { lat: Number(item.lat), lon: Number(item.lon), z: 15.5 }, marker: 'vnog' };
+  }
   if (item.bron === 'knmi') return { view: KNMI_VIEW, knmi: true, gebeurtenis };
   // AMBER Alert: all of the Netherlands, no spot: the banner is used.
   if (item.bron === 'amber') return null;

@@ -73,6 +73,8 @@ object Store {
     /** Active KNMI codes for the bar above the list. */
     /** Bar at the top of the pager: a missing child (AMBER Alert, Vermist Kind Alert) first, then the KNMI codes. */
     val knmiActief: List<Waarschuwing> get() = waarschuwingen.filter { it.isKind && it.isActief }.sortedByDescending { it.startAt } +
+        // A running VNOG incident next: it stays in the bar until VNOG closes it.
+        waarschuwingen.filter { it.isVnog && it.isActief && Settings.matchesList(it) }.sortedByDescending { it.startAt } +
         waarschuwingen.filter { it.bron == "knmi" && !it.isBeeindigd }
 
     fun stats(day: LocalDate): DayStats = DayStats(day, meldingen)

@@ -89,6 +89,7 @@ fun ProfielScreen(id: String, nav: Nav) {
                 // Missing children: one switch per device (same on iOS).
                 SwitchRow("AMBER Alert", tr("Landelijke oproep als een kind vermist is en in levensgevaar kan zijn", "National call when a child is missing and may be in danger"), Settings.pushAmber) { Settings.pushAmber = it }
                 SwitchRow(tr("Vermist Kind Alert", "Missing Child Alert"), tr("Regionale oproep, als het zoekgebied in het werkgebied valt (alle plaatsen en buurtschappen)", "Regional call, when the search area lies in the working area (all places and hamlets)"), Settings.pushVermistKind) { Settings.pushVermistKind = it }
+                SwitchRow(tr("VNOG-incidenten", "VNOG incidents"), tr("Grote incidenten van de Veiligheidsregio Noord- en Oost-Gelderland: nieuw incident, elke update, hogere GRIP en afsluiting. Alleen de gemeente Apeldoorn en Teuge", "Major incidents from the safety region Noord- en Oost-Gelderland: new incident, every update, higher GRIP level and closing. Only the municipality of Apeldoorn and Teuge"), Settings.pushVnog) { Settings.pushVnog = it }
                 Text(tr("KNMI-weercodes", "KNMI weather codes"), fontSize = 15.sp)
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     listOf("yellow", "orange", "red").forEach { c -> SelectChip(Waarschuwing.codeLabel(c), c in p.knmi) { save(p.copy(knmi = p.knmi.toggle(c))) } }
@@ -330,6 +331,7 @@ fun Onboarding(onDone: () -> Unit) {
                     Schakelaar("Burgernet", tr("Vermissingen en zoekacties", "Missing persons and searches"), p.burgernet) { save(p.copy(burgernet = it)) }
                     Schakelaar("AMBER Alert", tr("Kind vermist en in levensgevaar, heel Nederland", "Child missing and in danger, all of the Netherlands"), Settings.pushAmber) { Settings.pushAmber = it }
                     Schakelaar(tr("Vermist Kind Alert", "Missing Child Alert"), tr("Vermist kind in het werkgebied (alle plaatsen en buurtschappen)", "Missing child in the working area (all places and hamlets)"), Settings.pushVermistKind) { Settings.pushVermistKind = it }
+                    Schakelaar(tr("VNOG-incidenten", "VNOG incidents"), tr("Grote incidenten met updates van de veiligheidsregio", "Major incidents with updates from the safety region"), Settings.pushVnog) { Settings.pushVnog = it }
                     Schakelaar(tr("Liveblogs", "Live blogs"), tr("Aanvullingen van A-Alerts op een liveblog (tab Nieuws)", "Updates from A-Alerts in a live blog (News tab)"), Settings.pushNieuwsLiveblog) { Settings.pushNieuwsLiveblog = it }
                     Text(tr("KNMI-weercodes", "KNMI weather codes"), color = Color.White, fontWeight = FontWeight.SemiBold, modifier = Modifier.fillMaxWidth())
                     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {

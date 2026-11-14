@@ -69,6 +69,7 @@ final class NotificationService: UNNotificationServiceExtension {
         case "burgernet": return UIColor(red: 0, green: 0.4, blue: 0.69, alpha: 1)
         case "amber": return UIColor(red: 0.93, green: 0.43, blue: 0.14, alpha: 1)
         case "vermistkind": return UIColor(red: 0.11, green: 0.15, blue: 0.37, alpha: 1)
+        case "vnog": return UIColor(red: 0.28, green: 0.15, blue: 0.50, alpha: 1)
         case "knmi": return niveau == "red" ? .systemRed : niveau == "yellow" ? UIColor(red: 1, green: 0.84, blue: 0, alpha: 1) : .systemOrange
         default: break
         }

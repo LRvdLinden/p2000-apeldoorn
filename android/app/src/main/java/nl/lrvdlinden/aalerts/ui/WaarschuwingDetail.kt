@@ -150,7 +150,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                         x.details?.let { Text(tr("Meer informatie", "More information"), fontWeight = FontWeight.SemiBold); Text(it, fontSize = 15.sp) }
                         x.plaats?.let { Text(tr("Geldt voor: ", "Applies to: ") + it, color = Muted, fontSize = 13.sp) }
                     }
-                } else if ((x.bron == "burgernet" || x.isKind) && (!x.berichten.isNullOrEmpty() || !x.afloop.isNullOrBlank())) {
+                } else if ((x.bron == "burgernet" || x.isKind || x.isVnog) && (!x.berichten.isNullOrEmpty() || !x.afloop.isNullOrBlank())) {
                     BurgernetTijdlijn(x)
                 } else x.tekstLokaal?.takeIf { it.isNotBlank() }?.let {
                     SectionCard(tr("Bericht", "Message"), Icons.Outlined.Campaign) { Text(it, fontSize = 15.sp) }
@@ -162,7 +162,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 }
                 WeerCard(weer, live = x.bron == "knmi")
                 // A weather code covers a whole region: no alerts nearby.
-                if (x.bron != "knmi" && nearby.isNotEmpty()) SectionCard(tr("Meldingen in de buurt", "Alerts nearby"), Icons.Outlined.NotificationsActive) {
+                if (x.bron != "knmi" && nearby.isNotEmpty()) SectionCard(if (x.isVnog) tr("P2000-meldingen bij dit incident", "P2000 alerts for this incident") else tr("Meldingen in de buurt", "Alerts nearby"), Icons.Outlined.NotificationsActive) {
                     nearby.forEach { m ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.melding(m.guid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             DienstIcon(m.soort, 28.dp); Spacer(Modifier.width(10.dp))
@@ -179,7 +179,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 }
                 x.link?.let { link ->
                     OutlinedButton(onClick = { runCatching { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(link))) } }, modifier = Modifier.fillMaxWidth()) {
-                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(8.dp)); Text(if (x.isKind) tr("Meer informatie bij de politie", "More information from the police") else tr("Meer bij ", "More at ") + bronNaam(x.bron))
+                        Icon(Icons.AutoMirrored.Filled.OpenInNew, null); Spacer(Modifier.width(8.dp)); Text(if (x.isKind) tr("Meer informatie bij de politie", "More information from the police") else if (x.isVnog) tr("Bekijk bij VNOG", "View at VNOG") else tr("Meer bij ", "More at ") + bronNaam(x.bron))
                     }
                 }
                 Spacer(Modifier.height(24.dp))
@@ -199,7 +199,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
     }
 }
 
-fun bronNaam(bron: String) = when (bron) { "nlalert" -> "NL-Alert"; "burgernet" -> "Burgernet"; "amber" -> "AMBER Alert"; "vermistkind" -> tr("Vermist Kind Alert", "Missing Child Alert"); else -> "KNMI" }
+fun bronNaam(bron: String) = when (bron) { "nlalert" -> "NL-Alert"; "burgernet" -> "Burgernet"; "amber" -> "AMBER Alert"; "vermistkind" -> tr("Vermist Kind Alert", "Missing Child Alert"); "vnog" -> "VNOG"; else -> "KNMI" }
 
 fun codeUitleg(niveau: String?) = when (niveau) {
     "red" -> tr("Code rood: extreem weer met grote kans op enorme schade, letsel of verkeersontwrichting. Kom in actie en volg de adviezen van de overheid.",
@@ -223,7 +223,7 @@ fun WaarschuwingenScreen(nav: Nav) {
                 item {
                     LazyRow(contentPadding = PaddingValues(horizontal = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         item { SelectChip(tr("Alles", "All"), bron == null) { bron = null } }
-                        items(listOf("nlalert", "burgernet", "amber", "vermistkind", "knmi")) { b -> SelectChip(bronNaam(b), bron == b) { bron = if (bron == b) null else b } }
+                        items(listOf("nlalert", "burgernet", "amber", "vermistkind", "vnog", "knmi")) { b -> SelectChip(bronNaam(b), bron == b) { bron = if (bron == b) null else b } }
                     }
                     Text(tr("Laatste 30 dagen in de gemeente Apeldoorn", "Last 30 days in the municipality of Apeldoorn"), color = Muted, fontSize = 12.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
                 }
@@ -246,7 +246,7 @@ fun BurgernetTijdlijn(x: Waarschuwing) {
         BurgernetBericht("start", x.plaats, x.start, x.startbericht ?: x.tekstLokaal ?: ""),
         x.afloop?.let { BurgernetBericht("afloop", x.plaats, x.einde, it) },
     )).reversed()
-    SectionCard(if (x.isKind) tr("Berichten van de politie", "Police messages") else tr("Berichten van Burgernet", "Burgernet messages"), Icons.Outlined.Campaign) {
+    SectionCard(if (x.isKind) tr("Berichten van de politie", "Police messages") else if (x.isVnog) tr("Berichten van VNOG", "Messages from VNOG") else tr("Berichten van Burgernet", "Burgernet messages"), Icons.Outlined.Campaign) {
         if (x.bron == "amber") androidx.compose.foundation.Image(androidx.compose.ui.res.painterResource(nl.lrvdlinden.aalerts.R.drawable.logo_amber), "AMBER Alert", Modifier.height(30.dp))
         if (x.bron == "vermistkind") Text(tr("VERMIST KIND ALERT", "MISSING CHILD ALERT"), fontWeight = FontWeight.Black, fontSize = 11.sp, color = Color(0xFF1B265E),
             modifier = Modifier.clip(RoundedCornerShape(50)).background(Color(0xFFF4E005)).padding(horizontal = 10.dp, vertical = 4.dp))
@@ -267,6 +267,7 @@ fun BurgernetTijdlijn(x: Waarschuwing) {
                 }
             }
         }
+        if (x.isVnog) Text(tr("Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG.", "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is not part of VNOG."), color = Muted, fontSize = 12.sp)
     }
 }
 

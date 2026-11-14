@@ -349,6 +349,7 @@ struct NieuwsDetailView: View {
         switch door {
         case "burgernet": return "Burgernet"
         case "amber", "vermistkind": return L("Politie")
+        case "vnog": return "VNOG"
         default: return item.bronNaam
         }
     }

@@ -4,7 +4,7 @@
 import { polygonOverlaps, inWerkgebied, inRing, distanceKm, PLAATSEN_ALL, plaatsKey, matchesPlaatsen } from "./werkgebied.js";
 import { KIND_API, KIND_BRONNEN, groepeer, kindWarning } from "./kind.js";
 import { kvWrite } from "./kv.js";
-import { VNOG_API, vnogLijst, vnogWarning } from "./vnog.js";
+import { VNOG_API, vnogLijst, vnogWarning, inStraat } from "./vnog.js";
 
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
@@ -598,8 +598,9 @@ async function vnogMeldingen(env, w, toAPIMelding, SELECT) {
     ({ results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND (m.incident = ? OR m.guid = ?) ORDER BY m.datum DESC LIMIT 40`).bind(w.incident, w.incident).all());
   } else if (w.straat) {
     const start = Date.parse(w.start);
-    ({ results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? AND COALESCE(o.locatie, m.locatie) LIKE ? ORDER BY m.datum DESC LIMIT 40`)
-      .bind(start - VNOG_VOOR_MS, start + VNOG_NA_MS, `%${w.straat}%`).all());
+    ({ results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? ORDER BY m.datum DESC LIMIT 400`)
+      .bind(start - VNOG_VOOR_MS, start + VNOG_NA_MS).all());
+    results = results.filter((m) => inStraat(m.locatie, w.straat)).slice(0, 40);
   }
   return results.map(toAPIMelding).map((m) => ({ ...m, relatie: w.incident ? "zelfde-incident" : "zelfde-straat-rond-tijdstip" }));
 }
@@ -616,10 +617,12 @@ export async function vnogLocatie(env, budget, w) {
   const straat = w.extra?.straat;
   // A spot set in the beheer always stays.
   if (!straat || w.extra?.plek === "beheer" || (w.lat != null && w.extra?.incident)) return w;
-  const { results } = await env.DB.prepare(`SELECT m.guid, m.incident, m.dienst, COALESCE(o.lat, m.lat) AS lat, COALESCE(o.lon, m.lon) AS lon FROM meldingen m
-    LEFT JOIN overrides o ON o.guid = m.guid WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? AND COALESCE(o.locatie, m.locatie) LIKE ?
-    AND COALESCE(o.lat, m.lat) IS NOT NULL ORDER BY m.datum LIMIT 20`).bind(w.start_at - VNOG_VOOR_MS, w.start_at + VNOG_NA_MS, `%${straat}%`).all();
-  const m = results.find((r) => r.dienst === "brandweer") || results[0];
+  const { results } = await env.DB.prepare(`SELECT m.guid, m.incident, m.dienst, COALESCE(o.locatie, m.locatie) AS locatie, COALESCE(o.lat, m.lat) AS lat, COALESCE(o.lon, m.lon) AS lon FROM meldingen m
+    LEFT JOIN overrides o ON o.guid = m.guid WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ?
+    AND COALESCE(o.lat, m.lat) IS NOT NULL ORDER BY m.datum LIMIT 400`).bind(w.start_at - VNOG_VOOR_MS, w.start_at + VNOG_NA_MS).all();
+  // The street is compared loosely: VNOG and P2000 do not always write it the same way ("Laan van Dierenriem", "Laan van de Dierenriem").
+  const inDeStraat = results.filter((r) => inStraat(r.locatie, straat));
+  const m = inDeStraat.find((r) => r.dienst === "brandweer") || inDeStraat[0];
   if (m) return { ...w, lat: m.lat, lon: m.lon, extra: { ...w.extra, incident: m.incident || m.guid, plek: "p2000" } };
   if (w.lat != null) return w;
   const plaats = PLAATSEN_ALL.find((p) => p.naam === w.plaats) || PLAATSEN_ALL.find((p) => p.naam === "Apeldoorn");
@@ -837,7 +840,8 @@ export async function ingestWarnings(env, budget, kv) {
         if (!w) return null;
         // The spot is looked for while the incident is young, and again when a new update may name the street.
         if (w.extra.plek !== "beheer" && (w.lat == null || !w.extra.incident)) {
-          if (!row || w._nieuw || now - w.start_at < 2 * 3_600_000) { try { w = await vnogLocatie(env, budget, w); } catch (e) { console.warn("[vnog plek]", e.message || e); } }
+          // Also every ten minutes while it runs: the P2000 incident may have been corrected or linked later.
+          if (!row || w._nieuw || now - w.start_at < 2 * 3_600_000 || (w.status === "actief" && Math.floor(now / 60_000) % 10 === 0)) { try { w = await vnogLocatie(env, budget, w); } catch (e) { console.warn("[vnog plek]", e.message || e); } }
         }
         const { _nieuw, _gripHoger, _afgesloten, _vers, ...opslag } = w;
         await upsert(env, opslag, now);

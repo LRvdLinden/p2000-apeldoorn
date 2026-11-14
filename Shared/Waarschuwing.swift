@@ -8,7 +8,8 @@ import CoreLocation
 /// NL-Alert, Burgernet or KNMI warning for the working area, as returned by GET /v1/waarschuwingen.
 struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     /// amber = AMBER Alert (national), vermistkind = Vermist Kind Alert (regional): missing children, from the police via Burgernet.
-    enum Bron: String, Decodable, Sendable, CaseIterable { case nlalert, burgernet, knmi, amber, vermistkind }
+    /// vnog = an incident page of the safety region (Veiligheidsregio Noord- en Oost-Gelderland).
+    enum Bron: String, Decodable, Sendable, CaseIterable { case nlalert, burgernet, knmi, amber, vermistkind, vnog }
 
     let id: String
     let bron: Bron
@@ -23,6 +24,10 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     var straalKm: Double? = nil
     /// Burgernet: every message with place and time (start, updates, closing), oldest first.
     var berichten: [BurgernetBericht]? = nil
+    /// VNOG: the official GRIP now (1…4), the street named by VNOG and the linked P2000 incident (guid of its first alert).
+    var grip: Int? = nil
+    var straat: String? = nil
+    var incident: String? = nil
     let plaats: String?
     /// KNMI: "yellow", "orange" or "red".
     let niveau: String?
@@ -62,7 +67,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     let uitgifte: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken, startbericht, afloop, berichten, foto
+        case id, bron, titel, tekst, plaats, niveau, soort, status, start, einde, lat, lon, link, gebied, verwachting, advies, omschrijving, details, uitgifte, tijdvakken, startbericht, afloop, berichten, foto, grip, straat, incident
         case straalKm = "straal_km"
         case knmiKop = "kop"
         case tekstEn = "tekst_en"
@@ -79,6 +84,9 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         afloop = (try? c.decodeIfPresent(String.self, forKey: .afloop)).flatMap { $0 }
         berichten = (try? c.decodeIfPresent([BurgernetBericht].self, forKey: .berichten)).flatMap { $0 }
         foto = (try? c.decodeIfPresent(String.self, forKey: .foto)).flatMap { $0 }
+        grip = (try? c.decodeIfPresent(Int.self, forKey: .grip)).flatMap { $0 }
+        straat = (try? c.decodeIfPresent(String.self, forKey: .straat)).flatMap { $0 }
+        incident = (try? c.decodeIfPresent(String.self, forKey: .incident)).flatMap { $0 }
         straalKm = (try? c.decodeIfPresent(Double.self, forKey: .straalKm)).flatMap { $0 }
         plaats = try? c.decodeIfPresent(String.self, forKey: .plaats)
         niveau = try? c.decodeIfPresent(String.self, forKey: .niveau)
@@ -109,6 +117,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     var isBeeindigd: Bool { status == "beeindigd" }
     /// AMBER Alert or Vermist Kind Alert (a missing child).
     var isKind: Bool { bron == .amber || bron == .vermistkind }
+    var isVnog: Bool { bron == .vnog }
     /// Key for the list filter: "nlalert", "burgernet", "knmi:yellow" …
     var filterKey: String { bron == .knmi ? "knmi:\(niveau ?? "yellow")" : bron.rawValue }
     var selectionTag: String { "w:\(id)" }
@@ -129,7 +138,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
 
     /// Whether a place (by name) is in or near this warning (2 km), for the place filter.
     func covers(plaats naam: String) -> Bool {
-        if bron == .burgernet { return (plaats ?? "Apeldoorn").plaatsKey == naam.plaatsKey }
+        if bron == .burgernet || bron == .vnog { return (plaats ?? "Apeldoorn").plaatsKey == naam.plaatsKey }
         if bron == .amber { return true }
         guard let gebied, let p = Werkgebied.shared.plaats(naam) else { return true }
         if gebied.contains(where: { Werkgebied.ring($0, contains: p.lat, p.lon) }) { return true }
@@ -138,6 +147,8 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
 
     /// Whether a P2000 alert lies in this warning's area around its time window.
     func relates(to m: Melding) -> Bool {
+        // VNOG: only the alerts of the P2000 incident the server linked to it.
+        if bron == .vnog { return incident != nil && (m.incident == incident || m.guid == incident) }
         let from = start.addingTimeInterval(-2 * 3600)
         let to = (einde ?? start.addingTimeInterval(6 * 3600)).addingTimeInterval(3600)
         guard m.datum >= from, m.datum <= to else { return false }
@@ -156,6 +167,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         case .knmi: return Self.codeLabel(niveau)
         case .amber: return "AMBER Alert"
         case .vermistkind: return L("Vermist Kind Alert")
+        case .vnog: return "VNOG"
         }
     }
 
@@ -183,12 +195,15 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         case .knmi: return [label, soort].compactMap { $0 }.joined(separator: " · ")
         case .burgernet: return [label, soort].compactMap { $0 }.joined(separator: " · ")
         case .nlalert, .amber, .vermistkind: return label
+        // "VNOG · GRIP 1" or "VNOG · Incident": the GRIP is the official one of VNOG.
+        case .vnog: return [label, grip.map { "GRIP \($0)" } ?? L("Incident")].joined(separator: " · ")
         }
     }
 
     var statusLabel: String {
         // KNMI: the old code stays visible; ended = lifted, code green now.
         if isOpgeheven { return L("Opgeheven · code groen") }
+        if bron == .vnog && isBeeindigd { return L("Afgesloten") }
         switch status {
         case "beeindigd": return L("Beëindigd")
         case "verwacht": return L("Verwacht")
@@ -203,6 +218,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         case .knmi: return Self.codeColor(niveau)
         case .amber: return Color(hex: 0xEC6E24)
         case .vermistkind: return Color(hex: 0x1B265E)
+        case .vnog: return Color(hex: 0x48277F)
         }
     }
 
@@ -210,7 +226,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
     var onColor: Color {
         switch bron {
         case .nlalert: return .black
-        case .burgernet, .amber: return .white
+        case .burgernet, .amber, .vnog: return .white
         case .knmi: return niveau == "yellow" ? .black : .white
         case .vermistkind: return Color(hex: 0xF4E005)
         }
@@ -222,6 +238,7 @@ struct Waarschuwing: Decodable, Identifiable, Hashable, Sendable {
         case .burgernet: return soort == "Vermissing" ? "figure.walk" : soort == "Voertuig" ? "car.fill" : "megaphone.fill"
         case .knmi: return Self.weatherSymbol(soort)
         case .amber, .vermistkind: return "figure.child"
+        case .vnog: return "exclamationmark.shield.fill"
         }
     }
 
@@ -290,7 +307,7 @@ struct BurgernetBericht: Decodable, Hashable, Sendable, Identifiable {
 extension Waarschuwing {
     /// Burgernet timeline, newest on top (as on burgernet.nl). Empty for other sources.
     var tijdlijn: [BurgernetBericht] {
-        guard bron == .burgernet || isKind else { return [] }
+        guard bron == .burgernet || isKind || bron == .vnog else { return [] }
         if let b = berichten, !b.isEmpty { return b.reversed() }
         guard let afloop, !afloop.isEmpty else { return [] }
         return [BurgernetBericht(soort: .afloop, plaats: plaats, at: einde, tekst: afloop),
@@ -325,7 +342,7 @@ struct LosseWaarschuwing: Decodable {
 extension P2000API {
     func waarschuwingen() async throws -> [Waarschuwing] {
         // kind=1: also AMBER Alert and Vermist Kind Alert. A kind this version does not know is skipped (never the whole list).
-        try await getJSON("v1/waarschuwingen", query: ["kind": "1"], as: [LosseWaarschuwing].self).compactMap(\.waarschuwing)
+        try await getJSON("v1/waarschuwingen", query: ["kind": "1", "vnog": "1"], as: [LosseWaarschuwing].self).compactMap(\.waarschuwing)
     }
 
     func waarschuwing(id: String) async throws -> WaarschuwingDetail {
@@ -335,7 +352,7 @@ extension P2000API {
 
     /// NL-Alert, Burgernet and KNMI of the last `days` days (the server keeps up to 30).
     func waarschuwingen(days: Int) async throws -> [Waarschuwing] {
-        try await getJSON("v1/waarschuwingen", query: ["days": String(days), "kind": "1"], as: [LosseWaarschuwing].self).compactMap(\.waarschuwing)
+        try await getJSON("v1/waarschuwingen", query: ["days": String(days), "kind": "1", "vnog": "1"], as: [LosseWaarschuwing].self).compactMap(\.waarschuwing)
     }
 
     /// Weather at the place and time of the warning (WeatherKit via the Worker, like an alert).
@@ -397,7 +414,9 @@ final class WaarschuwingStore {
         let order = ["red": 0, "orange": 1, "yellow": 2]
         // A missing child (AMBER Alert, Vermist Kind Alert) first, while the call runs.
         let kind = items.filter { $0.isKind && $0.isActief && s.matchesList($0) }.sorted { $0.start > $1.start }
-        return kind + items.filter { $0.bron == .knmi && !$0.isBeeindigd && s.matchesList($0) }
+        // A running VNOG incident next: it stays in the bar until VNOG closes it.
+        let vnog = items.filter { $0.bron == .vnog && $0.isActief && s.matchesList($0) }.sorted { $0.start > $1.start }
+        return kind + vnog + items.filter { $0.bron == .knmi && !$0.isBeeindigd && s.matchesList($0) }
             .sorted { (order[$0.niveau ?? ""] ?? 3, $0.start) < (order[$1.niveau ?? ""] ?? 3, $1.start) }
     }
 

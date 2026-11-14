@@ -1,0 +1,209 @@
+{
+  "title": {
+    "en": "A VNOG incident was closed",
+    "nl": "Een VNOG-incident is afgesloten"
+  },
+  "hint": {
+    "en": "VNOG closed the incident. The image is the square closed banner.",
+    "nl": "VNOG heeft het incident afgesloten. De afbeelding is de vierkante afgesloten-banner."
+  },
+  "titleFormatted": {
+    "en": "A VNOG incident in [[plaats]] was closed",
+    "nl": "Een VNOG-incident in [[plaats]] is afgesloten"
+  },
+  "args": [
+    {
+      "name": "plaats",
+      "type": "autocomplete",
+      "title": {
+        "en": "Plaats",
+        "nl": "Plaats"
+      },
+      "placeholder": {
+        "en": "Alle plaatsen",
+        "nl": "Alle plaatsen"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "en": "VNOG image (map with marker, else the square banner)",
+        "nl": "VNOG-afbeelding (kaart met marker, anders de vierkante banner)"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+        "en": "Image (URL, map without watermark or banner)"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-vnog-apeldoorn-vierkant.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "en": "VNOG message (ready-made)",
+        "nl": "VNOG-bericht (kant-en-klaar)"
+      },
+      "example": "Nieuw VNOG-incident in APELDOORN! …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "en": "Title of the incident",
+        "nl": "Titel van het incident"
+      },
+      "example": {
+        "en": "Brand autobedrijf Laan van Dierenriem Apeldoorn",
+        "nl": "Brand autobedrijf Laan van Dierenriem Apeldoorn"
+      }
+    },
+    {
+      "name": "update",
+      "type": "string",
+      "title": {
+        "en": "Update (newest)",
+        "nl": "Update (nieuwste)"
+      },
+      "example": {
+        "en": "Brand meester: De brand is uit.",
+        "nl": "Brand meester: De brand is uit."
+      }
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "en": "Newest message from VNOG",
+        "nl": "Nieuwste bericht van VNOG"
+      },
+      "example": {
+        "en": "Werkplaats onder de rook: de brandweer is gealarmeerd …",
+        "nl": "Werkplaats onder de rook: de brandweer is gealarmeerd …"
+      }
+    },
+    {
+      "name": "tijdlijn",
+      "type": "string",
+      "title": {
+        "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+        "en": "All Burgernet messages (newest first)"
+      },
+      "example": {
+        "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+        "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+      }
+    },
+    {
+      "name": "aantal_updates",
+      "type": "number",
+      "title": {
+        "nl": "Aantal updates",
+        "en": "Number of updates"
+      },
+      "example": 1
+    },
+    {
+      "name": "grip",
+      "type": "number",
+      "title": {
+        "en": "GRIP level (0 = none)",
+        "nl": "GRIP (0 = geen)"
+      },
+      "example": 1
+    },
+    {
+      "name": "straat",
+      "type": "string",
+      "title": {
+        "en": "Street (when VNOG names it)",
+        "nl": "Straat (als VNOG die noemt)"
+      },
+      "example": {
+        "en": "Laan van Dierenriem",
+        "nl": "Laan van Dierenriem"
+      }
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "en": "Kind (Incident or GRIP 1…4)",
+        "nl": "Soort (Incident of GRIP 1…4)"
+      },
+      "example": {
+        "en": "GRIP 1",
+        "nl": "GRIP 1"
+      }
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Plaats",
+        "en": "Place"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "nl": "Status",
+        "en": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "nl": "Begin (datum en tijd)",
+        "en": "Start (date and time)"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "nl": "Einde (datum en tijd)",
+        "en": "End (date and time)"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar de melding op a-alerts.nl",
+        "en": "Link to the alert on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar burgernet.nl",
+        "en": "Link to burgernet.nl"
+      },
+      "example": "https://www.burgernet.nl/burgernet/3967274"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    }
+  ]
+}

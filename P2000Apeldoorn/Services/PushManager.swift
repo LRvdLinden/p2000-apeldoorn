@@ -210,6 +210,7 @@ enum PushManager {
                 // 2.0.1: missing children (the server only sends these to apps that pass them).
                 "amber": s.pushAmber,
                 "vermistkind": s.pushVermistKind,
+                "vnog": s.pushVnog,
                 // Tab Nieuws (build 67): liveblog messages from A-Alerts and new police news.
                 "nieuwsLiveblog": s.pushNieuwsLiveblog,
                 "nieuwsPolitie": s.pushNieuwsPolitie,

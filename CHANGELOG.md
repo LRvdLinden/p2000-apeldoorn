@@ -1,5 +1,14 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 100)
+- **Nieuwe bron: VNOG-incidenten.** De incidentpagina's van de Veiligheidsregio Noord- en Oost-Gelderland (open API van vnog.nl), alleen voor de gemeente Apeldoorn en voor Teuge (gemeente Voorst, alleen als Teuge in de tekst staat). Per incident: de berichten als tijdlijn, de officiële GRIP, en de afsluiting. Alleen tekst; foto's van VNOG worden niet overgenomen.
+- **Plek:** VNOG geeft geen adres of coördinaten. Noemt VNOG een straat, dan zoekt de server het P2000-incident in die straat (4 uur voor tot 1 uur na het begin; "Laan van Dierenriem" en "Laan van de Dierenriem" tellen als dezelfde straat), neemt die plek en koppelt het incident. Anders het midden van de straat (PDOK). Zonder straat geen marker.
+- **Push:** eigen schakelaar bij Instellingen › Waarschuwingen (staat aan). Een melding bij een nieuw incident, elke update, een hogere GRIP en de afsluiting; stille uren gelden (vanaf GRIP 1 komt hij door bij wie kritieke meldingen toestaat). Een incident dat bij het eerste zien al langer dan 3 uur loopt geeft geen push.
+- **Overal:** pager (balk bovenaan zolang het loopt, tijdlijn, P2000-meldingen van het incident), kaart (eigen laag en marker), Nieuws (liveblog met eigen banner, afgesloten-banner na afloop), statistieken, statuspagina, delen (a-alerts.nl/waarschuwing/vnog:…), iPhone, iPad, Mac, Apple TV, Android en de website (pager, meldkamer, nieuws, homepage).
+- **Beheer** (P2000Beheer 19, LRbeheer 48, web-beheer): VNOG bij de bronnen met een schakelaar aan/uit, in de lijst met waarschuwingen, en per incident de plek corrigeren (koppelen aan een P2000-melding, zelf een punt, geen marker, of terug naar automatisch).
+- **Homey 0.1.16:** vier triggerkaarten (nieuw, update, hogere GRIP, afgesloten), een voorwaarde, tags GRIP en straat, kant-en-klaar bericht, kaart met marker of de vierkante banner.
+- Website: scripts `aalerts.js` v76, `pager.js` v84, `meldkamer.js` v77, `landing.js` v72, `nieuws.js` v76, `widget.js` v21; nieuwsafbeeldingen v6.
+
 ## A-Alerts 2.0.1 (build 99)
 - **Drie nieuwe tekeningen** naar het echte toestel: de Kustwacht Dash 8 (oranje band met blauwe streep, T-staart, radarbult), het lesvliegtuig van Defensie (PC-7: zwart met gele lijn, band en spinner) en de C-130 Hercules (lichtgrijs, hoge vleugel, twee motoren met propellers, hoge staart, kokarde). App, Android, de kaart op de website en de luchtvaartpagina. Zonder registraties, tekst en emblemen.
 - De kaart toont een toestel nu ook bij zwakke ontvangst (zie build 98, server).

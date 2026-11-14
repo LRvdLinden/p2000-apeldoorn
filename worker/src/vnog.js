@@ -65,6 +65,20 @@ export function vnogPlaats(inc) {
   return dorpen.find((p) => namenVan(p).some((n) => heeft(tekst, `(?:in|te) ${n}`))) || stad;
 }
 
+/**
+ * A street name as a key to compare: lower case, no accents or punctuation, without small words. VNOG writes
+ * "Laan van Dierenriem" where P2000 has "Laan van de Dierenriem": both become "laan dierenriem".
+ */
+export function straatKey(s) {
+  return String(s || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, " ")
+    .split(" ").filter((w) => w && !["van", "de", "der", "den", "het", "t", "te", "ter", "ten", "op", "aan"].includes(w)).join(" ");
+}
+/** Whether the address of a P2000 alert is in the street VNOG names. */
+export function inStraat(locatie, straat) {
+  const a = straatKey(locatie), b = straatKey(straat);
+  return b.length >= 5 && ` ${a} `.includes(` ${b} `);
+}
+
 /** GRIP of the API (false, or "1" to "4") → 1…4 or null. */
 export const vnogGrip = (g) => { const n = Number(g); return Number.isInteger(n) && n >= 1 && n <= 5 ? n : null; };
 const afgesloten = (s) => s === false || s === 0 || s === "0" || s === "false";

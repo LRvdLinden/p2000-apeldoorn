@@ -31,6 +31,8 @@ final class AppSettings {
     /// AMBER Alert (national) and Vermist Kind Alert (regional): a missing child. On by default; one switch each, not per profile.
     var pushAmber: Bool = true { didSet { save(.pushAmber, pushAmber); notificationsChanged() } }
     var pushVermistKind: Bool = true { didSet { save(.pushVermistKind, pushVermistKind); notificationsChanged() } }
+    /// VNOG incidents (build 100): a new incident, every update, a higher GRIP and the closing.
+    var pushVnog: Bool = true { didSet { save(.pushVnog, pushVnog); notificationsChanged() } }
     /// Tab Nieuws: push when A-Alerts adds a message to a liveblog (on), and for new police news (off).
     var pushNieuwsLiveblog: Bool = true { didSet { save(.pushNieuwsLiveblog, pushNieuwsLiveblog); notificationsChanged() } }
     var pushNieuwsPolitie: Bool = false { didSet { save(.pushNieuwsPolitie, pushNieuwsPolitie); notificationsChanged() } }
@@ -133,7 +135,7 @@ final class AppSettings {
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
-        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, luchtSoorten, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
+        case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, luchtSoorten, pushAmber, pushVermistKind, pushVnog, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
         case heliVolg, heliVolgLanden, heliVolgTerug, heliVolgRoepnaam, heliMeerdere, heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
@@ -269,6 +271,7 @@ final class AppSettings {
         if let v = source(Key.pushBurgernet.storageKey) as? Bool { pushBurgernet = v }
         if let v = source(Key.pushAmber.storageKey) as? Bool { pushAmber = v }
         if let v = source(Key.pushVermistKind.storageKey) as? Bool { pushVermistKind = v }
+        if let v = source(Key.pushVnog.storageKey) as? Bool { pushVnog = v }
         if let v = source(Key.pushNieuwsLiveblog.storageKey) as? Bool { pushNieuwsLiveblog = v }
         if let v = source(Key.pushNieuwsPolitie.storageKey) as? Bool { pushNieuwsPolitie = v }
         if let v = source(Key.pushNieuwsRegio.storageKey) as? Bool { pushNieuwsRegio = v }
@@ -284,10 +287,13 @@ final class AppSettings {
             if !UserDefaults.standard.bool(forKey: "laag.kind.v1") { lagen.insert("kind") }
             // New layer "verkeer" (NDW: closures, roadworks, accidents, breakdowns, jams): on once for everyone.
             if !UserDefaults.standard.bool(forKey: "laag.verkeer.v1") { lagen.insert("verkeer") }
+            // New layer "vnog" (build 100, incidents of the safety region): on once for everyone.
+            if !UserDefaults.standard.bool(forKey: "laag.vnog.v1") { lagen.insert("vnog") }
             kaartLagen = lagen
             UserDefaults.standard.set(true, forKey: "laag.verkeer.v1")
             UserDefaults.standard.set(true, forKey: "laag.ziekenhuizen.v1")
             UserDefaults.standard.set(true, forKey: "laag.kind.v1")
+            UserDefaults.standard.set(true, forKey: "laag.vnog.v1")
         }
         if let s = source(Key.heliZones.storageKey) as? String, let data = s.data(using: .utf8),
            let list = try? JSONDecoder().decode([HeliZone].self, from: data) { heliZones = Array(list.prefix(HeliZone.maximum)) }
@@ -344,7 +350,7 @@ final class AppSettings {
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
         radiusEnabled = false; radiusKm = 5; radiusMode = "huidig"; fixedLat = 0; fixedLon = 0; fixedName = ""
-        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true; pushNieuwsLiveblog = true; pushNieuwsPolitie = false; pushNieuwsRegio = false
+        waarschuwingFilter = []; pushNLAlert = true; pushBurgernet = false; pushKnmi = ["orange", "red"]; pushAmber = true; pushVermistKind = true; pushVnog = true; pushNieuwsLiveblog = true; pushNieuwsPolitie = false; pushNieuwsRegio = false
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
         luchtSoorten = LuchtSoort.standaard
@@ -419,6 +425,8 @@ final class AppSettings {
         if !plaatsen.isEmpty, !plaatsen.contains(where: { w.covers(plaats: $0) }) { return false }
         if radiusEnabled, let c = radiusCenter {
             if w.bron == .amber { return true } // all of the Netherlands
+            // A VNOG incident without a known spot: the place filter decides.
+            if w.bron == .vnog && w.coordinate == nil { return true }
             if w.bron == .burgernet || w.gebied == nil {
                 guard let lat = w.lat, let lon = w.lon, Self.distanceKm(c.lat, c.lon, lat, lon) <= radiusKm + 2 else { return false }
             } else if !w.contains(lat: c.lat, lon: c.lon),

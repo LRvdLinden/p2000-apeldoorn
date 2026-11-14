@@ -9,7 +9,7 @@ import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, wKop, wTijd, wKleur, wOpKleur, wIcon, wStart, isActief, isBeeindigd, warnAnnotation, warnOverlays,
   heliLaag, fetchSpoor, spoorOverlay, geschat, fetchLocaties, locatieAnnotation, voorspellingOverlay, voorspellingTekst, heliImg, heliInfo, vliegtWest, heliVoor, heliRelevant, kazernes, kazerneAnnotation, kazerneRoutes, werkgebiedLijnen, radarLaag,
   kaartKleur, volgKaartKleur, fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation,
-} from "./aalerts.js?v=75";
+} from "./aalerts.js?v=76";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -288,6 +288,7 @@ function renderChips() {
     + pill(asset("assets/img/icon_nlalert.png"), "NL-Alert", n("nlalert"))
     + (n("amber") ? `<span class="chip"><img src="${asset("assets/img/icon_amber.png")}" alt="AMBER Alert">${n("amber")}</span>` : "")
     + (n("vermistkind") ? `<span class="chip"><img src="${asset("assets/img/icon_vermistkind.png")}" alt="Vermist Kind Alert">${n("vermistkind")}</span>` : "")
+    + pill(asset("assets/img/icon_vnog.png"), "VNOG", n("vnog"))
     + heli("trauma", "Lifeliner") + heli("politie", "Zulu")
     + (state.lagen.has("helikopters") && state.lucht.length ? `<span class="chip heli-chip"><img src="${heliImg(state.lucht[0])}" alt="Defensie">${state.lucht.length}</span>` : "")
     + `<button class="chip pijl" id="lagenPijl" aria-expanded="${lagenOpen}" aria-controls="lagen" title="${lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen ${lagenOpen ? "▴" : "▾"}</button>`;
@@ -339,7 +340,7 @@ function renderKnmi() {
   const kaart = $("mapKnmi");
   if (kaart) kaart.innerHTML = state.lagen.has("knmi") ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
     `<a class="mk-code" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><b>${esc(wKop(w))}</b>${w.einde ? `<small>tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}</small>` : ""}</a>`).join("") : "";
-  $("knmi").innerHTML = state.warnings.filter((w) => (w.bron === "amber" || w.bron === "vermistkind") && isActief(w)).map((w) =>
+  $("knmi").innerHTML = state.warnings.filter((w) => (w.bron === "amber" || w.bron === "vermistkind" || w.bron === "vnog") && isActief(w)).map((w) =>
     `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}${w.plaats && w.bron === "vermistkind" ? ` · ${esc(w.plaats)}` : ""}</b><small>${esc(w.titel)}</small></span></a>`).join("")
     + state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).map((w) =>
     `<a class="knmi" href="../pager/?waarschuwing=${encodeURIComponent(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}"><img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(new Date(w.einde).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" }))}` : ""}</small>${w.kop || w.advies || w.verwachting ? `<small>${esc(String(w.kop || w.advies || w.verwachting).split("\n")[0])}</small>` : ""}</span></a>`).join("");

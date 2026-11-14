@@ -102,6 +102,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "burgernet": return "Burgernet"
         case "amber": return "AMBER Alert"
         case "vermistkind": return L("Vermist Kind")
+        case "vnog": return "VNOG"
         case "nlalert": return "NL-Alert"
         case "knmi": return "KNMI"
         case "112nieuws": return "112 Nieuws"
@@ -112,7 +113,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
     /// Small icon next to the label (same images as the warnings).
     var icoon: String? {
         switch bron {
-        case "burgernet", "amber", "vermistkind", "knmi", "nlalert": return "icon_\(bron)"
+        case "burgernet", "amber", "vermistkind", "knmi", "nlalert", "vnog": return "icon_\(bron)"
         case "112nieuws":
             switch categorie {
             case "brand": return "icon_brandweer"
@@ -129,6 +130,7 @@ struct NieuwsItem: Decodable, Identifiable, Hashable, Sendable {
         case "burgernet": return Color(hex: 0x0067B1)
         case "amber": return Color(hex: 0xEC6E24)
         case "vermistkind": return Color(hex: 0x1B265E)
+        case "vnog": return Color(hex: 0x48277F)
         case "nlalert": return Color(hex: 0x1D1D1F)
         case "knmi": return Waarschuwing.codeColor(niveau ?? "yellow")
         case "112nieuws": return Color(hex: 0xDC2626)

@@ -3,7 +3,7 @@ import CoreLocation
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, kind, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar, regio
+    case p2000, nlalert, burgernet, kind, vnog, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar, regio
 
     var id: String { rawValue }
 
@@ -16,6 +16,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .nlalert: return "NL-Alert"
         case .burgernet: return "Burgernet"
         case .kind: return L("AMBER Alert en Vermist Kind Alert")
+        case .vnog: return L("VNOG-incidenten")
         case .knmi: return L("KNMI-waarschuwingsgebieden")
         case .verkeer: return L("Verkeer (NDW)")
         case .flitsers: return L("Flitsers (vast)")
@@ -34,6 +35,7 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .nlalert: return "exclamationmark.triangle.fill"
         case .burgernet: return "megaphone.fill"
         case .kind: return "figure.child"
+        case .vnog: return "exclamationmark.shield.fill"
         case .knmi: return "cloud.sun.rain.fill"
         case .verkeer: return "car.side.fill"
         case .flitsers: return "camera.fill"
@@ -63,7 +65,7 @@ enum KaartLaagGroep: String, CaseIterable, Identifiable {
     }
     var lagen: [KaartLaag] {
         switch self {
-        case .meldingen: return [.p2000, .nlalert, .burgernet, .kind, .knmi]
+        case .meldingen: return [.p2000, .nlalert, .burgernet, .kind, .vnog, .knmi]
         case .lucht: return [.helikopters]
         case .verkeer: return [.verkeer, .flitsers]
         case .posten: return [.kazernes, .ziekenhuizen]

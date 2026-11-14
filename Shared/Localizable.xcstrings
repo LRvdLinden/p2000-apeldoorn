@@ -1089,6 +1089,23 @@
         }
       }
     },
+    "Afgesloten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Closed"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afgesloten"
+          }
+        }
+      }
+    },
     "Afgesloten voor evenement": {
       "extractionState": "manual",
       "localizations": {
@@ -1888,6 +1905,23 @@
         }
       }
     },
+    "Bekijk bij VNOG": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View at VNOG"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk bij VNOG"
+          }
+        }
+      }
+    },
     "Bekijk de bron": {
       "extractionState": "manual",
       "localizations": {
@@ -2088,6 +2122,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Berichten van Burgernet"
+          }
+        }
+      }
+    },
+    "Berichten van VNOG": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Messages from VNOG"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Berichten van VNOG"
           }
         }
       }
@@ -2602,6 +2653,23 @@
         }
       }
     },
+    "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG. Bel bij nood altijd 112.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is not part of VNOG. In an emergency always call 112."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG. Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
     "Bron: p2000.page": {
       "extractionState": "manual",
       "localizations": {
@@ -3023,6 +3091,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De %@ van %@ is %@ gealarmeerd voor een \"%@\""
+          }
+        }
+      }
+    },
+    "De P2000-meldingen van het incident in de straat die VNOG noemt, rond het begin. De plek op de kaart komt van dit incident.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The P2000 alerts of the incident in the street VNOG names, around the start. The spot on the map comes from this incident."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De P2000-meldingen van het incident in de straat die VNOG noemt, rond het begin. De plek op de kaart komt van dit incident."
           }
         }
       }
@@ -4523,6 +4608,23 @@
         }
       }
     },
+    "Geen P2000-incident gevonden bij dit bericht van VNOG.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No P2000 incident found for this message from VNOG."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen P2000-incident gevonden bij dit bericht van VNOG."
+          }
+        }
+      }
+    },
     "Geen P2000-meldingen gevonden in het gebied rond dit tijdstip.": {
       "extractionState": "manual",
       "localizations": {
@@ -5305,6 +5407,40 @@
         }
       }
     },
+    "Grote incidenten met updates van de veiligheidsregio": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Major incidents with updates from the safety region"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grote incidenten met updates van de veiligheidsregio"
+          }
+        }
+      }
+    },
+    "Grote incidenten waarover de Veiligheidsregio Noord- en Oost-Gelderland bericht: een melding bij een nieuw incident, elke update, een hogere GRIP en de afsluiting. Alleen de gemeente Apeldoorn en Teuge.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Major incidents the safety region Noord- en Oost-Gelderland reports on: a notification for a new incident, every update, a higher GRIP level and the closing. Only the municipality of Apeldoorn and Teuge."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Grote incidenten waarover de Veiligheidsregio Noord- en Oost-Gelderland bericht: een melding bij een nieuw incident, elke update, een hogere GRIP en de afsluiting. Alleen de gemeente Apeldoorn en Teuge."
+          }
+        }
+      }
+    },
     "Handig als je een dagje weg bent of een helikopterbasis in je zone hebt. De stille modus geldt ook voor zonemeldingen.": {
       "extractionState": "manual",
       "localizations": {
@@ -5777,6 +5913,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "In de lucht boven %@"
+          }
+        }
+      }
+    },
+    "Incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Incident"
           }
         }
       }
@@ -9266,6 +9419,23 @@
         }
       }
     },
+    "Open het incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open the incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Open het incident"
+          }
+        }
+      }
+    },
     "Open in Apple Kaarten": {
       "extractionState": "manual",
       "localizations": {
@@ -9585,6 +9755,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "P2000-meldingen"
+          }
+        }
+      }
+    },
+    "P2000-meldingen bij dit incident (%lld)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 alerts for this incident (%lld)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000-meldingen bij dit incident (%lld)"
+          }
+        }
+      }
+    },
+    "P2000-meldingen in de straat die VNOG noemt, rond het begin van het incident. Dit is een mogelijk verband, geen bevestiging.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000 alerts in the street VNOG names, around the start of the incident. This is a possible link, not a confirmation."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "P2000-meldingen in de straat die VNOG noemt, rond het begin van het incident. Dit is een mogelijk verband, geen bevestiging."
           }
         }
       }
@@ -12186,6 +12390,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "VERMIST KIND ALERT"
+          }
+        }
+      }
+    },
+    "VNOG-incidenten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VNOG incidents"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VNOG-incidenten"
           }
         }
       }

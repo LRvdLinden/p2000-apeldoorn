@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=75";
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=76";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -34,7 +34,7 @@ const state = {
   hideRead: prefs.get("p2000.hideRead", false),
   mapHours: 24,
   mapDiensten: new Set(SELECTABLE),
-  mapBronnen: new Set(["nlalert", "burgernet", "amber", "vermistkind"]),
+  mapBronnen: new Set(["nlalert", "burgernet", "amber", "vermistkind", "vnog"]),
   // A-Alerts
   warnings: [],
   bron: BRONNEN[params.get("bron")] ? params.get("bron") : "",
@@ -248,7 +248,7 @@ function warnRowHTML(w) {
 /** Warnings shown in the timeline: NL-Alert and Burgernet of the last 24 hours (or still active). */
 function timelineWarnings() {
   if (state.diensten.size || state.prio || state.radiusKm) return [];
-  if (state.bron && !["nlalert", "burgernet", "amber", "vermistkind"].includes(state.bron)) return [];
+  if (state.bron && !["nlalert", "burgernet", "amber", "vermistkind", "vnog"].includes(state.bron)) return [];
   const q = state.search.toLowerCase();
   return state.warnings.filter((w) => w.bron !== "knmi" && (!state.bron || w.bron === state.bron)
     && (isActief(w) || Date.now() - wStart(w).getTime() < WINDOW_MS)
@@ -287,11 +287,12 @@ function knmiHTML(w) {
 }
 
 function renderKnmi() {
-  const kind = state.warnings.filter((w) => isKind(w) && isActief(w));
+  // A missing child first, then a running VNOG incident (it stays here until VNOG closes it), then the weather codes.
+  const kind = [...state.warnings.filter((w) => isKind(w) && isActief(w)), ...state.warnings.filter((w) => isVnog(w) && isActief(w))];
   const items = state.warnings.filter((w) => w.bron === "knmi" && isActief(w));
   $("knmiBar").innerHTML = kind.map((w) => `
     <a class="knmi kind-bar" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
-      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}${w.bron === "vermistkind" && w.plaats ? ` · ${esc(w.plaats)}` : ""}</b><small>${esc(w.titel)}</small><small>${esc(regels(w.tekst)[0] || "")}</small></span><i>›</i>
+      <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}${w.bron === "vermistkind" && w.plaats ? ` · ${esc(w.plaats)}` : ""}</b><small>${esc(w.titel)}</small><small>${esc((regels(w.tekst)[0] || "").slice(0, 140))}</small></span><i>›</i>
     </a>`).join("") + items.map((w) => `
     <a class="knmi" href="?waarschuwing=${encodeURIComponent(w.id)}" data-wid="${esc(w.id)}" style="--c:${wKleur(w)};--on:${wOpKleur(w)}">
       <img src="${wIcon(w)}" alt=""><span><b>${esc(wKop(w))}</b><small>${esc(w.titel)}${w.einde ? ` · tot ${esc(fmtTime(new Date(w.einde)))}` : ""}</small>${w.kop || w.verwachting ? `<small>${esc(regels(w.kop || w.verwachting)[0])}</small>` : ""}</span><i>›</i>
@@ -378,7 +379,7 @@ function tijdlijnHTML(w) {
     { soort: "start", label: "Startbericht", plaats: w.plaats, at: w.start, tekst: w.startbericht || w.tekst },
     ...(w.afloop ? [{ soort: "afloop", label: "Afloopbericht", plaats: w.plaats, at: w.einde, tekst: w.afloop }] : []),
   ];
-  const kop = { start: "Startbericht", update: "Update", afloop: "Afloopbericht" };
+  const kop = isVnog(w) ? { start: "Eerste bericht", update: "Update", afloop: "Afgesloten" } : { start: "Startbericht", update: "Update", afloop: "Afloopbericht" };
   const items = [...lijst].reverse().map((b) => {
     const d = b.at ? new Date(b.at) : null;
     // Like burgernet.nl: place, date (09/11/2026) and time.
@@ -389,9 +390,9 @@ function tijdlijnHTML(w) {
   }).join("");
   const titel = isKind(w)
     ? `${w.bron === "amber" ? `<img class="tl-logo" src="${asset("assets/img/logo_amber.png")}" alt="AMBER Alert">` : `<span class="tl-vk">Vermist Kind Alert</span>`}Berichten van de politie`
-    : "Berichten van Burgernet";
+    : isVnog(w) ? `<img class="tl-logo" src="${asset("assets/img/logo_vnog.png")}" alt="VNOG">Berichten van VNOG` : "Berichten van Burgernet";
   return `<section class="card story tijdlijn tijdlijn-${esc(w.bron)}"><h2>${titel}</h2><ol>${items}</ol>
-    ${isKind(w) ? `<p class="hint">Bron: Politie, via Burgernet.</p>` : ""}</section>`;
+    ${isKind(w) ? `<p class="hint">Bron: Politie, via Burgernet.</p>` : isVnog(w) ? `<p class="hint">Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG.</p>` : ""}</section>`;
 }
 
 /** AMBER Alert / Vermist Kind Alert: photo of the child (only while it runs) and what to do. */
@@ -798,17 +799,17 @@ async function selectWarning(id, { push = true } = {}) {
       <div class="head"><img src="${wIcon(w)}" alt="${esc(b.label)}"><h1><small style="color:${w.bron === "knmi" ? wKleur(w) : b.text}">${esc(wKop(w))}</small>${esc(w.titel)}</h1>
         <button class="share" id="wShareBtn" aria-label="Delen">${ICO.share}</button></div>
       <div class="info"><span class="ico" style="background:${isActief(w) ? "#DC2626" : "#6b7280"}">${ICO.warn}</span><div><b>${esc(wStatus(w))}</b><small>${esc(wTijd(w))}</small></div></div>
-      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : w.bron === "amber" ? "Landelijke oproep" : w.bron === "vermistkind" ? `Zoekgebied${w.straal_km ? ` van ${esc(w.straal_km)} km` : ""}` : "Plaats van de oproep"}</small></div></div>
+      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(w.plaats || "Gemeente Apeldoorn")}</b><small>${w.bron === "nlalert" ? "Het gebied staat op de kaart" : w.bron === "knmi" ? "Gebied van de waarschuwing" : w.bron === "amber" ? "Landelijke oproep" : w.bron === "vermistkind" ? `Zoekgebied${w.straal_km ? ` van ${esc(w.straal_km)} km` : ""}` : isVnog(w) ? (w.lat == null ? "Geen exacte plek bekend" : w.incident ? `${esc(w.straat || "")} · plek van het P2000-incident`.replace(/^ · /, "") : `${esc(w.straat || "Straat")} · de straat die VNOG noemt`) : "Plaats van de oproep"}</small></div></div>
       ${w.link ? `<a class="amaps" href="${esc(w.link)}" target="_blank" rel="noopener">${ICO.maps} ${isKind(w) ? "Meer informatie bij de politie" : `Bekijk bij ${esc(b.label)}`}</a>` : ""}
     </section>
     ${isOpgeheven(w) ? opgehevenHTML(w) : ""}
     ${kindHTML(w)}
     ${w.bron === "knmi" && (w.kop || w.omschrijving || w.verwachting || w.advies) ? knmiHTML(w)
-    : (w.bron === "burgernet" || isKind(w)) && (w.berichten?.length || w.afloop) ? tijdlijnHTML(w)
+    : (w.bron === "burgernet" || isKind(w) || isVnog(w)) && (w.berichten?.length || w.afloop) ? tijdlijnHTML(w)
     : w.tekst ? `<section class="card story"><h2>Bericht</h2>${String(w.tekst).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
     <section class="card"><h2>METEO-gegevens${w.bron === "knmi" ? ` <span class="live-tag">● Live</span>` : ""}</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${w.tekst_en ? `<section class="card story"><h2>English</h2>${String(w.tekst_en).split(/\n+/).map((p) => `<p>${esc(p)}</p>`).join("")}</section>` : ""}
-    ${near.length ? `<section class="card"><h2>Meldingen in de buurt</h2><p class="hint">P2000-meldingen in hetzelfde gebied rond dezelfde tijd. Mogelijk verband, geen zekerheid.</p>
+    ${near.length ? `<section class="card"><h2>${isVnog(w) ? "P2000-meldingen bij dit incident" : "Meldingen in de buurt"}</h2><p class="hint">${isVnog(w) ? (w.incident ? "De P2000-meldingen van het incident in de straat die VNOG noemt. De plek op de kaart komt van dit incident." : "P2000-meldingen in de straat die VNOG noemt, rond het begin. Mogelijk verband, geen zekerheid.") : "P2000-meldingen in hetzelfde gebied rond dezelfde tijd. Mogelijk verband, geen zekerheid."}</p>
       <div class="cp-list">${near.slice(0, 10).map((m) => `<button data-goto="${esc(m.guid)}"><img src="${icon(m)}" alt=""><span><small>${esc(fmtTime(date(m)))}</small><b>${esc(m.title)}</b></span></button>`).join("")}</div></section>` : ""}
   </article>`;
   $("detail").querySelectorAll("[data-close]").forEach((x) => x.addEventListener("click", () => closeDetail()));
@@ -972,7 +973,7 @@ function renderMapChips() {
     if (!n) return "";
     return `<button class="chip${state.mapDiensten.has(d) ? "" : " off"}" data-d="${d}" style="--c:${DIENSTEN[d].color}"><img src="${icon({ dienst: d })}" alt="">${n}</button>`;
   }).join("") + bronChip("burgernet", "Burgernet", "#0067B1") + bronChip("nlalert", "NL-Alert", "#E3001B")
-    + bronChip("amber", "AMBER Alert", "#EC6E24") + bronChip("vermistkind", "Vermist Kind Alert", "#1B265E")
+    + bronChip("amber", "AMBER Alert", "#EC6E24") + bronChip("vermistkind", "Vermist Kind Alert", "#1B265E") + bronChip("vnog", "VNOG", "#48277F")
     + heliChip("trauma", "Lifeliner") + heliChip("politie", "Zulu") + luchtChip()
     + `<button class="chip pijl" data-lagen-pijl style="--c:#64748B" aria-expanded="${state.lagenOpen}" aria-controls="mapLagen" title="${state.lagenOpen ? "Kaartlagen verbergen" : "Kaartlagen tonen"}">Lagen <span aria-hidden="true">${state.lagenOpen ? "▴" : "▾"}</span></button>`;
   $("mapLagen").hidden = !state.lagenOpen;

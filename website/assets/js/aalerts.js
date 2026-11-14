@@ -13,7 +13,11 @@ export const BRONNEN = {
   // Missing children, from the police (through Burgernet): national AMBER Alert and regional Vermist Kind Alert.
   amber: { label: "AMBER Alert", color: "#EC6E24", on: "#fff", icon: "icon_amber", text: "#C2410C" },
   vermistkind: { label: "Vermist Kind Alert", color: "#1B265E", on: "#F4E005", icon: "icon_vermistkind", text: "#1B265E" },
+  // Incident pages of the safety region (Veiligheidsregio Noord- en Oost-Gelderland), in its own colours.
+  vnog: { label: "VNOG", color: "#48277F", on: "#fff", icon: "icon_vnog", text: "#7350C4" },
 };
+/** An incident of VNOG. */
+export const isVnog = (w) => w?.bron === "vnog";
 /** Warnings about a missing child (AMBER Alert, Vermist Kind Alert). */
 export const isKind = (w) => w?.bron === "amber" || w?.bron === "vermistkind";
 export const CODES = { yellow: ["Code geel", "#F7C600", "#000"], orange: ["Code oranje", "#F28C28", "#fff"], red: ["Code rood", "#E3001B", "#fff"], green: ["Code groen", "#2E9E44", "#fff"] };
@@ -40,7 +44,7 @@ export const routeLinks = (m, adres) => {
 
 export async function fetchWaarschuwingen(days = 7) {
   try {
-    const r = await fetch(`${API}/v1/waarschuwingen?days=${days}&kind=1`, { signal: AbortSignal.timeout(10_000) });
+    const r = await fetch(`${API}/v1/waarschuwingen?days=${days}&kind=1&vnog=1`, { signal: AbortSignal.timeout(10_000) });
     return r.ok ? await r.json() : [];
   } catch { return []; }
 }
@@ -115,9 +119,11 @@ export function wKop(w) {
   if (w.bron === "knmi") return [(CODES[w.niveau] || CODES.yellow)[0], w.soort].filter(Boolean).join(" · ");
   if (w.bron === "burgernet") return ["Burgernet", w.soort].filter(Boolean).join(" · ");
   if (w.bron === "amber" || w.bron === "vermistkind") return BRONNEN[w.bron].label;
+  // The GRIP is the official one of VNOG.
+  if (w.bron === "vnog") return `VNOG · ${w.grip ? `GRIP ${w.grip}` : "Incident"}`;
   return "NL-Alert";
 }
-export const wStatus = (w) => (isOpgeheven(w) ? "Opgeheven · code groen" : w.status === "beeindigd" ? "Beëindigd" : w.status === "verwacht" ? "Verwacht" : "Actief");
+export const wStatus = (w) => (isOpgeheven(w) ? "Opgeheven · code groen" : w.status === "beeindigd" ? (w.bron === "vnog" ? "Afgesloten" : "Beëindigd") : w.status === "verwacht" ? "Verwacht" : "Actief");
 export const wIcon = (w) => asset(`assets/img/${BRONNEN[w.bron].icon}.png`);
 
 /** The time of the warning ("13:15", or "5 nov 13:15"), with the end time once ended – never "x min ago". */
