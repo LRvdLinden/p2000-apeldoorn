@@ -3,6 +3,7 @@
 ## A-Alerts 2.0.1 (build 99)
 - **Drie nieuwe tekeningen** naar het echte toestel: de Kustwacht Dash 8 (oranje band met blauwe streep, T-staart, radarbult), het lesvliegtuig van Defensie (PC-7: zwart met gele lijn, band en spinner) en de C-130 Hercules (lichtgrijs, hoge vleugel, twee motoren met propellers, hoge staart, kokarde). App, Android, de kaart op de website en de luchtvaartpagina. Zonder registraties, tekst en emblemen.
 - De kaart toont een toestel nu ook bij zwakke ontvangst (zie build 98, server).
+- De Kustwacht Dash 8 heet weer "Kustwacht C-FCGE", de registratie die op het toestel staat (was vanmiddag omgezet naar PH-CGE). Alleen de server.
 
 ## A-Alerts 2.0.1 (build 98)
 - **Nieuwe tekening van het regeringstoestel PH-GOV** naar de echte beschildering: zilvergrijze neus, oranje zwaai, donkerblauwe staart en achterbuik, oranje winglet. App, Android, de kaart op de website, de homepage en de luchtvaartpagina (`tools/lucht/phgov.svg`; op de website als `lucht_phgov2.png`, omdat afbeeldingen 30 dagen in de cache blijven). Zonder rijkswapen, tekst en registratie.

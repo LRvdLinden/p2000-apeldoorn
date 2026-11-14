@@ -51,9 +51,10 @@ test("luchtLijst: fixed id per airframe, another callsign is the same aircraft, 
 
 test("coastguard Dash 8 listed under its earlier Canadian registration, and the NCG callsign", () => {
   const ac = { hex: "c005e9", r: "C-FCGE", t: "DH8A", flight: "NCG01   ", category: "A2", lat: 53.51, lon: 4.95, alt_baro: 1500, gs: 148 };
-  assert.deepEqual(luchtSoort(ac), { soort: "kustwacht", icoon: "kustwacht_dash8", naam: "Kustwacht PH-CGE", registratie: "PH-CGE" });
+  assert.deepEqual(luchtSoort(ac), { soort: "kustwacht", icoon: "kustwacht_dash8", naam: "Kustwacht C-FCGE" });
+  assert.equal(luchtSoort({ ...ac, flight: "" }).naam, "Kustwacht C-FCGE");
   const [l] = luchtLijst([ac]);
-  assert.equal(l.registratie, "PH-CGE"); assert.equal(l.naam, "Kustwacht PH-CGE"); assert.equal(l.callsign, "NCG01");
+  assert.equal(l.registratie, "C-FCGE"); assert.equal(l.naam, "Kustwacht C-FCGE"); assert.equal(l.callsign, "NCG01");
   assert.equal(luchtSoort({ hex: "abc123", r: "C-FXYZ", t: "DH8A", flight: "NCG02" }).naam, "Kustwacht C-FXYZ");
   assert.equal(luchtSoort({ hex: "abc123", r: "C-FXYZ", t: "DH8A", flight: "JZA123" }), null);
 });

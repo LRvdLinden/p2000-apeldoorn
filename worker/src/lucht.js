@@ -44,13 +44,12 @@ const TYPES = {
  */
 const KUSTWACHT = {
   "PH-CGD": "kustwacht_dash8", "PH-CGE": "kustwacht_dash8",
+  // This Dash 8 flies under its Canadian registration; that is also what is painted on the aircraft.
+  "C-FCGE": "kustwacht_dash8",
   "PH-NCG": "kustwacht_aw189", "PH-SAR": "kustwacht_aw189", "PH-RSQ": "kustwacht_aw189", "PH-BSR": "kustwacht_aw189",
 };
-/**
- * The source still lists a coastguard Dash 8 under its earlier Canadian registration (airframe c005e9: C-FCGE), so the
- * Dutch registration never matched. Earlier registration → the Dutch one.
- */
-const EERDER = { "C-FCGE": "PH-CGE" };
+/** Registrations to show under another one (none at the moment). */
+const EERDER = {};
 /** The callsign of the Netherlands Coastguard: NCG01, NCG02 … (kept as a second way in, next to the registration). */
 const NCG = /^NCG\d{1,3}$/;
 /** Koninklijke Marechaussee: two Diamond DA62 MPP patrol aircraft (German registrations, flown via QinetiQ). */
