@@ -1,0 +1,19 @@
+name: probe
+on: push
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          A=https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+          sleep 200
+          echo "R status $(curl -s $A/health | python3 -c 'import sys,json; print(json.dumps(json.load(sys.stdin).get("waarschuwingen")))')"
+          curl -s "$A/v1/waarschuwingen/vnog:2418" | python3 -c '
+          import sys,json
+          w=json.load(sys.stdin)
+          print("R", json.dumps({k:w.get(k) for k in ["id","status","lat","lon","straat","incident","plek","grip"]}))
+          print("R meldingen", len(w.get("meldingen") or []), [(m.get("datum_tijd"), m.get("relatie")) for m in (w.get("meldingen") or [])][:6])
+          '
+          echo "R site $(curl -s https://a-alerts.nl/pager/ | grep -o 'pager.js?v=[0-9]*') $(curl -s 'https://a-alerts.nl/assets/js/pager.js?v=84' | grep -c isVnog) $(curl -s https://a-alerts.nl/ | grep -c wVnog) $(curl -s -o /dev/null -w '%{http_code}' https://a-alerts.nl/waarschuwing/vnog:2418) $(curl -s https://a-alerts.nl/waarschuwing/vnog:2418 | grep -c banner-vnog-apeldoorn) $(curl -s -o /dev/null -w '%{http_code}' https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-vnog-apeldoorn-vierkant.png) $(curl -s -o /dev/null -w '%{http_code}' https://a-alerts.nl/assets/img/banner_vnog.webp)"
+          echo "R kaart $(curl -s -o /dev/null -w '%{http_code} %{content_type} %{size_download}' "$A/v1/kaart.png?c=52.23793,5.98355&z=15.5&m=vnog")"
+          echo "R hulp $(curl -s $A/v1/hulp | grep -c 'VNOG-incidenten') $(curl -s $A/v1/changelog | grep -c 'VNOG-incidenten')"
