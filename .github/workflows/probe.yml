@@ -1,0 +1,8 @@
+name: probe
+on: push
+jobs:
+  p:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "R $(curl -s https://a-alerts.nl/nieuws/l-1d1925ae5f57 | grep -o 'nieuws.js?v=[0-9]*' | head -1) $(curl -s 'https://a-alerts.nl/assets/js/nieuws.js?v=77' | grep -c 'Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl)')"
