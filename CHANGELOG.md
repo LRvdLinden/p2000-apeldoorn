@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 102)
+- **VNOG-bericht bij de P2000-meldingen.** In de lijst van meldingen op één adres (kaart) staat bovenaan het bericht van VNOG dat bij dat incident hoort. Op de detailpagina van zo'n melding heet het blok nu "Bericht van VNOG over dit incident". iPhone, iPad, Mac en Android.
+
 ## Server (14-11-2026, geen nieuwe build)
 - **Reanimatie: alle meldingen in één incident.** Bij een reanimatie komen de ambulances vaak zonder adres binnen ("Reanimatie Lieren") en alleen de brandweer of een latere ambulance noemt de straat. Die ambulances sluiten nu aan bij het ene reanimatie-incident met adres in dezelfde plaats binnen 5 minuten, en staan dan op dat adres op de kaart. Is er nog geen adres, dan horen de ambulances zonder adres in dezelfde plaats binnen 5 minuten bij elkaar. Twee adressen tegelijk: geen gok. Voor verkeersongevallen blijft de regel zoals hij was.
 

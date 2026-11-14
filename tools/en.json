@@ -975,5 +975,7 @@
   "Geen exacte plek bekend": "No exact spot known",
   "%@ · plek van het P2000-incident": "%@ · spot of the P2000 incident",
   "%@ · de straat die VNOG noemt": "%@ · the street VNOG names",
-  "Straat": "Street"
+  "Straat": "Street",
+  "Bericht van VNOG over dit incident": "Message from VNOG about this incident",
+  "VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld.": "VNOG names the street of this incident. That is why the message is linked to it."
 }

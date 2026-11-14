@@ -430,6 +430,11 @@ fun MapScreen(nav: Nav) {
                     PreviewCard(onClose = { selected = null }) {
                         Column(Modifier.heightIn(max = 320.dp).verticalScroll(rememberScrollState())) {
                             Text(tr("${l.size} meldingen op ${l[0].plaatsText}", "${l.size} alerts at ${l[0].plaatsText}"), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 4.dp))
+                            // The VNOG incident these alerts belong to (the server linked it to their P2000 incident).
+                            Store.waarschuwingen.filter { w -> w.isVnog && l.any { w.relates(it) } }.forEach { w ->
+                                Text(tr("Bericht van VNOG over dit incident", "Message from VNOG about this incident"), color = Muted, fontSize = 12.sp)
+                                WaarschuwingRow(w) { nav.waarschuwing(w.id) }
+                            }
                             l.forEach { m -> MeldingRow(m) { nav.melding(m.guid) } }
                         }
                     }

@@ -253,7 +253,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                         Text(tr("De melding staat wel in de lijst. Pas je meldingen aan in Instellingen › Meldingen.", "The alert is in the list. Change your notifications in Settings › Notifications."), color = Muted, fontSize = 12.sp)
                     }
                 }
-                if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {
+                if (knmi.isNotEmpty() || waarschuwingen.isNotEmpty()) SectionCard(if (knmi.isEmpty() && waarschuwingen.all { it.isVnog }) tr("Bericht van VNOG over dit incident", "Message from VNOG about this incident") else tr("Waarschuwingen in de buurt", "Warnings nearby"), Icons.Outlined.WarningAmber) {
                     (waarschuwingen + knmi).forEach { w ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.waarschuwing(w.id) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             WaarschuwingIcon(w, 28.dp); Spacer(Modifier.width(10.dp))

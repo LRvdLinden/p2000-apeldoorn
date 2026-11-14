@@ -517,6 +517,10 @@ function renderDetail(m) {
     </section>
     <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
+    ${state.warnings.filter((w) => isVnog(w) && w.incident && (w.incident === m.incident || w.incident === m.guid)).map((w) => `<section class="card"><h2>Bericht van VNOG over dit incident</h2>
+      <a class="vnog-link" href="?waarschuwing=${encodeURIComponent(w.id)}" style="display:flex;gap:12px;align-items:center;text-decoration:none;color:inherit">
+        <img src="${asset("assets/img/icon_vnog.png")}" alt="" width="36" height="36"><span style="flex:1"><b style="display:block">${esc(w.titel)}</b><small>${esc(wKop(w))} · ${esc(wStatus(w))}</small></span><i>›</i></a>
+      <p class="hint">VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld.</p></section>`).join("")}
     <div id="verbandBlok">${verloopHTML(m)}
     ${inzetHTML(m)}</div>
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>

@@ -175,7 +175,7 @@ struct GerelateerdeWaarschuwingen: View {
         let list = store.related(to: melding)
         if !list.isEmpty {
             VStack(alignment: .leading, spacing: 8) {
-                Text(L("Waarschuwingen in dit gebied"))
+                Text(list.allSatisfy { $0.isVnog } ? L("Bericht van VNOG over dit incident") : L("Waarschuwingen in dit gebied"))
                     .font(AppFont.heading(18, relativeTo: .headline))
                 ForEach(list) { w in
                     NavigationLink { WaarschuwingDetailView(id: w.id) } label: {
@@ -185,7 +185,7 @@ struct GerelateerdeWaarschuwingen: View {
                     }
                     .buttonStyle(.plain)
                 }
-                Text(L("Deze melding ligt in het gebied van de waarschuwing, rond het tijdstip waarop hij gold. Dit is een mogelijk verband, geen bevestiging."))
+                Text(list.allSatisfy { $0.isVnog } ? L("VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld.") : L("Deze melding ligt in het gebied van de waarschuwing, rond het tijdstip waarop hij gold. Dit is een mogelijk verband, geen bevestiging."))
                     .font(AppFont.body(12, .regular, relativeTo: .caption))
                     .foregroundStyle(.secondary)
             }

@@ -872,10 +872,25 @@ struct PostCijfersView: View {
 struct ClusterSheet: View {
     let cluster: PlaatsCluster
     @Environment(\.dismiss) private var dismiss
+    @Environment(WaarschuwingStore.self) private var waarschuwingen
+
+    /// The VNOG incident these alerts belong to (the server linked it to their P2000 incident).
+    private var vnog: [Waarschuwing] {
+        waarschuwingen.items.filter { w in w.bron == .vnog && cluster.meldingen.contains { w.relates(to: $0) } }
+    }
 
     var body: some View {
         NavigationStack {
             List {
+                if !vnog.isEmpty {
+                    Section {
+                        ForEach(vnog) { w in
+                            NavigationLink { WaarschuwingDetailView(id: w.id) } label: { WaarschuwingRow(waarschuwing: w) }
+                        }
+                    } header: {
+                        Text(L("Bericht van VNOG over dit incident"))
+                    }
+                }
                 Section {
                     ForEach(cluster.meldingen) { m in
                         NavigationLink { MeldingDetailView(melding: m) } label: { MeldingRow(melding: m) }

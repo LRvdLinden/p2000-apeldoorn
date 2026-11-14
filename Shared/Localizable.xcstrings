@@ -2126,6 +2126,23 @@
         }
       }
     },
+    "Bericht van VNOG over dit incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Message from VNOG about this incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bericht van VNOG over dit incident"
+          }
+        }
+      }
+    },
     "Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
       "extractionState": "manual",
       "localizations": {
@@ -12458,6 +12475,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "VERMIST KIND ALERT"
+          }
+        }
+      }
+    },
+    "VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VNOG names the street of this incident. That is why the message is linked to it."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld."
           }
         }
       }
