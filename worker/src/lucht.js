@@ -21,6 +21,13 @@ const KUSTWACHT = {
   "PH-CGD": "kustwacht_dash8", "PH-CGE": "kustwacht_dash8",
   "PH-NCG": "kustwacht_aw189", "PH-SAR": "kustwacht_aw189", "PH-RSQ": "kustwacht_aw189", "PH-BSR": "kustwacht_aw189",
 };
+/**
+ * The source still lists a coastguard Dash 8 under its earlier Canadian registration (airframe c005e9: C-FCGE), so the
+ * Dutch registration never matched. Earlier registration → the Dutch one.
+ */
+const EERDER = { "C-FCGE": "PH-CGE" };
+/** The callsign of the Netherlands Coastguard: NCG01, NCG02 … (kept as a second way in, next to the registration). */
+const NCG = /^NCG\d{1,3}$/;
 /** Koninklijke Marechaussee: two Diamond DA62 MPP patrol aircraft (German registrations, flown via QinetiQ). */
 const KMAR = new Set(["D-IAMT", "D-IBMT"]);
 
@@ -39,12 +46,18 @@ const HELI = new Set(["H47", "H64", "AS32", "AS3B", "NH90", "H60", "EC25", "H225
  * was recognised by its operator stays recognised when the database misses a field on a later flight.
  */
 export function luchtSoort(ac, learned = new Map()) {
-  const reg = String(ac.r || "").trim().toUpperCase();
+  const bron = String(ac.r || "").trim().toUpperCase();
+  const reg = EERDER[bron] || bron;
   const type = String(ac.t || "").trim().toUpperCase();
   const hex = String(ac.hex || "").trim().toLowerCase();
   const owner = `${ac.ownOp || ""} ${ac.desc || ""}`;
   const isHeli = HELI.has(type) || ac.category === "A7";
+  const anders = reg !== bron ? { registratie: reg } : {};
 
+  if (KUSTWACHT[reg]) return { soort: "kustwacht", icoon: KUSTWACHT[reg], naam: `Kustwacht ${reg}`, ...anders };
+  if (NCG.test(String(ac.flight || "").trim().toUpperCase())) {
+    return { soort: "kustwacht", icoon: isHeli ? "kustwacht_aw189" : "kustwacht_dash8", naam: `Kustwacht ${reg || String(ac.flight).trim()}`, ...anders };
+  }
   if (reg === "PH-GOV") return { soort: "regering", icoon: "phgov", naam: "Regeringsvliegtuig PH-GOV" };
   if (KUSTWACHT[reg]) return { soort: "kustwacht", icoon: KUSTWACHT[reg], naam: `Kustwacht ${reg}` };
   if (reg.startsWith("PH-") && /KUSTWACHT|COAST\s?GUARD/i.test(owner)) {
@@ -73,7 +86,7 @@ export function luchtLijst(list, now = Date.now(), overslaan = new Set(), learne
     if (!s) continue;
     const seen = Number(ac.seen_pos ?? ac.seen ?? 0);
     out.set(hex, {
-      id: `lucht-${hex}`, ...s, callsign: String(ac.flight || "").trim() || null, registratie: ac.r || null, type: ac.t || null, hex,
+      id: `lucht-${hex}`, ...s, callsign: String(ac.flight || "").trim() || null, registratie: s.registratie || ac.r || null, type: ac.t || null, hex,
       lat: ac.lat, lon: ac.lon,
       koers: typeof ac.track === "number" ? Math.round(ac.track) : (typeof ac.true_heading === "number" ? Math.round(ac.true_heading) : null),
       hoogte_ft: typeof ac.alt_baro === "number" ? Math.round(ac.alt_baro) : null,
