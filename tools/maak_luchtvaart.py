@@ -20,7 +20,7 @@ def teken(f, pref):
 GROEPEN = [("Hulpdiensten", [
  ("heli_lifeliner.png", "Lifeliner", "Traumahelikopter · EC135", "Brengt een arts en verpleegkundige van het Mobiel Medisch Team snel naar een ernstig ongeval. Er zijn vier Lifeliners, met als bases Amsterdam, Rotterdam, Volkel en Groningen."),
  ("heli_politie.png", "Zulu", "Politiehelikopter · EC135", "De helikopter van de Luchtvaartpolitie. Zoekt vermiste personen en verdachten, vaak met een warmtebeeldcamera, en ondersteunt bij achtervolgingen en grote incidenten."),
- ("heli_politie_aw139.png", "Zulu", "Politiehelikopter · AW139", "De grotere politiehelikopter. Kan meer mensen en materiaal meenemen, bijvoorbeeld een arrestatieteam.")]),
+ ("heli_politie_aw139.png?v=2", "Zulu", "Politiehelikopter · AW139", "De grotere politiehelikopter. Kan meer mensen en materiaal meenemen, bijvoorbeeld een arrestatieteam.")]),
 ("Defensie: helikopters", [
  ("chinook", "Chinook", "Transporthelikopter · CH-47", "De grote helikopter met twee rotors. Vervoert militairen en zwaar materieel en helpt bij natuurbranden met een blusbak onder de romp."),
  ("apache", "Apache", "Gevechtshelikopter · AH-64", "Smalle gevechtshelikopter met twee bemanningsleden achter elkaar. Je ziet hem vooral bij oefeningen, vaak laag en in tweetallen."),
