@@ -1,0 +1,21 @@
+name: Veiligheidsregio (eenmalig)
+# Fetches the border of the safety region from PDOK and commits it for the worker and the website.
+on:
+  workflow_dispatch:
+  push:
+    branches: [a-alerts]
+    paths: [tools/geodata/fetch_veiligheidsregio.py, .github/workflows/veiligheidsregio.yml]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 tools/geodata/fetch_veiligheidsregio.py
+      - run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add worker/src/veiligheidsregio.js website/assets/veiligheidsregio.json
+          git commit -m "Geodata: grens van de veiligheidsregio (CBS, via PDOK)" || echo "geen wijzigingen"
+          git pull --rebase -q && git push
