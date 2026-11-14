@@ -64,7 +64,8 @@ test("helicopters: Lifeliner and Zulu found by callsign or registration", () => 
   assert.equal(l3.hoogte_ft, 725);
   assert.equal(l3.snelheid_kt, 122);
   assert.equal(identify({ r: "PH-PXA" }).naam, "Zulu 01");
-  assert.equal(identify({ flight: "MEDIC01" }), null);
+  assert.equal(identify({ flight: "MEDIC01" }).id, "medic01"); // since build 97: the ambulance helicopter, not a Lifeliner
+  assert.equal(identify({ flight: "KLM123" }), null);
 });
 
 test("helicopters: still recognised after a callsign change", () => {
