@@ -199,6 +199,6 @@ fun MoreAppsCard() {
     val ctx = LocalContext.current
     SectionCard(tr("Meer apps van de ontwikkelaar", "More apps by the developer"), Icons.Outlined.Apps) {
         Text(tr("Bekijk alle apps van LRvdLinden: voor iPhone, iPad, Mac, Apple TV, Homey en Android.", "See all apps by LRvdLinden: for iPhone, iPad, Mac, Apple TV, Homey and Android."), color = Muted, fontSize = 13.sp)
-        OutlinedButton(onClick = { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://lrvdlinden.app"))) }) { Text("lrvdlinden.app") }
+        OutlinedButton(onClick = { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://lrvdlinden.app"))) }) { Text(tr("Bekijk", "View")) }
     }
 }

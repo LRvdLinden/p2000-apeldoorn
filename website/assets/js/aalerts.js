@@ -59,7 +59,7 @@ export const LUCHT_SOORTEN = [
   ["heli", "Overige helikopter (Defensie)", "lucht_heli"], ["f35", "Straaljager", "lucht_f35"], ["hercules", "Transportvliegtuig", "lucht_hercules"],
   ["les", "Lesvliegtuig", "lucht_les"], ["vliegtuig", "Overig vliegtuig (Defensie)", "lucht_vliegtuig"],
   ["kustwacht_dash8", "Kustwacht vliegtuig", "lucht_kustwacht_dash8"], ["kustwacht_aw189", "Kustwacht helikopter", "lucht_kustwacht_aw189"],
-  ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov"],
+  ["kmar", "Koninklijke Marechaussee", "lucht_kmar"], ["phgov", "Regeringsvliegtuig PH-GOV", "lucht_phgov2"],
 ];
 export const luchtSoort = (h) => h.icoon || h.soort;
 const LUCHT_KEY = "p2000.luchtSoorten";
@@ -276,7 +276,8 @@ export function inzetEenheden(m, list) {
 // ------------------------------------------------------------------ helicopters
 
 export function heliImg(h) {
-  if (h.icoon) return asset(`assets/img/lucht_${h.icoon}.png`);
+  // lucht_phgov2: the new drawing of the government aircraft under a new name (images stay cached for 30 days).
+  if (h.icoon) return asset(`assets/img/lucht_${h.icoon === "phgov" ? "phgov2" : h.icoon}.png`);
   if (h.soort === "trauma") return asset("assets/img/heli_lifeliner.png");
   return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") + "?v=2" : asset("assets/img/heli_politie.png");
 }

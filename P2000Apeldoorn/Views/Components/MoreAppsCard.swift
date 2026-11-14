@@ -72,17 +72,11 @@ struct MoreAppsCard: View {
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
-                VStack(spacing: 4) {
-                    Text(text.action)
-                        .font(AppFont.body(15, .bold, relativeTo: .subheadline))
-                        .foregroundStyle(Brand.onAccent)
-                        .padding(.horizontal, 14).padding(.vertical, 6)
-                        .background(Brand.accent, in: Capsule())
-                    Text("lrvdlinden.app")
-                        .font(AppFont.body(11, .regular, relativeTo: .caption2))
-                        .foregroundStyle(Brand.muted)
-                        .lineLimit(1)
-                }
+                Text(text.action)
+                    .font(AppFont.body(15, .bold, relativeTo: .subheadline))
+                    .foregroundStyle(Brand.onAccent)
+                    .padding(.horizontal, 14).padding(.vertical, 6)
+                    .background(Brand.accent, in: Capsule())
             }
             .padding(16)
             .background(Brand.surface, in: RoundedRectangle(cornerRadius: 22, style: .continuous))

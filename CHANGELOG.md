@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 98)
+- **Nieuwe tekening van het regeringstoestel PH-GOV** naar de echte beschildering: zilvergrijze neus, oranje zwaai, donkerblauwe staart en achterbuik, oranje winglet. App, Android, de kaart op de website, de homepage en de luchtvaartpagina (`tools/lucht/phgov.svg`; op de website als `lucht_phgov2.png`, omdat afbeeldingen 30 dagen in de cache blijven). Zonder rijkswapen, tekst en registratie.
+- **Kaart "Meer apps van de ontwikkelaar"** in Instellingen: de regel `lrvdlinden.app` onder de knop is weg (app); op Android heet de knop nu "Bekijk".
+- De server van build 97 (Medic 01) was niet uitgerold omdat een oude test faalde; die gaat met deze build mee.
+
 ## A-Alerts 2.0.1 (build 97)
 - **Medic 01** (ambulancehelikopter voor de Waddeneilanden; roepnaam `MEDIC01`, registratie `PH-OOP`, basis Leeuwarden) staat op de kaart als "Medic 01 · Ambulancehelikopter", met de tekening van de Lifeliner, het spoor, de vluchten en de bel. De server geeft `medic: true` mee; voor oudere app-versies blijft `soort` "trauma", zodat de tekening en de kaartlaag blijven werken (daar heet hij "Traumahelikopter"). Hij telt nergens als Lifeliner: niet bij "opgestegen voor de melding", niet bij de bestemming, niet bij "waarschijnlijk geannuleerd" en niet als dichtstbijzijnde traumaheli bij een melding (server, app, Android en pager).
 - Homepage en luchtvaartpagina: Medic 01 toegevoegd. `tools/maak_luchtvaart.py` kon niet meer draaien door het versienummer achter een afbeelding; hersteld.
