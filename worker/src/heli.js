@@ -2,7 +2,7 @@
 // Data: adsb.lol, Open Database License (ODbL). One request for the whole of the Netherlands, cached briefly
 // so many apps polling at the same time cost one upstream call.
 
-import { luchtLijst, luchtGeleerd, luchtLeer } from "./lucht.js";
+import { luchtLijst, luchtGeleerd, luchtLeer, positie, vulAan } from "./lucht.js";
 import { plaatsBij } from "./plaats.js";
 
 export const HELIS = [
@@ -28,6 +28,8 @@ export const HELIS = [
 const POINT = { lat: 52.2, lon: 5.4, nm: 160 };
 const TTL = 12_000;
 let memo = null;
+/** The last item of every aircraft in this isolate, to fill what a later answer leaves out. */
+const laatste = new Map();
 
 const HELI_TYPES = new Set(["EC35", "EC45", "A139", "H135", "H145", "EC30", "A169", "H160"]);
 const byId = (id) => HELIS.find((h) => h.id === id) || null;
@@ -77,12 +79,13 @@ export function fromAdsb(list, now = Date.now(), learned = new Map()) {
   const out = new Map();
   for (const ac of Array.isArray(list) ? list : []) {
     const h = identify(ac, learned);
-    if (!h || typeof ac.lat !== "number" || typeof ac.lon !== "number") continue;
-    const seen = Number(ac.seen_pos ?? ac.seen ?? 0);
+    const p = positie(ac);
+    if (!h || !p) continue;
+    const seen = p.oud;
     const item = {
       id: h.id, naam: h.naam, soort: h.soort, ...(h.medic ? { medic: true } : {}), basis: h.basis || null, herkenning: h.herkenning,
       callsign: String(ac.flight || "").trim() || null, registratie: ac.r || null, type: ac.t || null, hex: ac.hex || null,
-      lat: ac.lat, lon: ac.lon,
+      lat: p.lat, lon: p.lon,
       koers: typeof ac.track === "number" ? Math.round(ac.track) : (typeof ac.true_heading === "number" ? Math.round(ac.true_heading) : null),
       hoogte_ft: typeof ac.alt_baro === "number" ? Math.round(ac.alt_baro) : null,
       op_grond: ac.alt_baro === "ground",
@@ -170,6 +173,10 @@ export async function helikopters(env) {
       await luchtLeer(env, lucht, geleerd);
     } catch (e) { console.warn("[lucht]", e.message || e); }
     // "Now above …": the nearest Dutch place, or null above sea or abroad.
+    // What this answer left out (weak reception): taken from the answer before it, at most three minutes old.
+    vulAan([...list, ...lucht], laatste);
+    for (const h of [...list, ...lucht]) laatste.set(h.id, { ...h });
+    for (const [id, v] of laatste) if (Date.now() - Date.parse(v.gezien) > 600_000) laatste.delete(id);
     for (const h of [...list, ...lucht]) h.boven = h.op_grond ? null : plaatsBij(h.lat, h.lon)?.tekst || null;
     data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht };
   } catch (e) {

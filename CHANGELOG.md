@@ -4,6 +4,7 @@
 - **Nieuwe tekening van het regeringstoestel PH-GOV** naar de echte beschildering: zilvergrijze neus, oranje zwaai, donkerblauwe staart en achterbuik, oranje winglet. App, Android, de kaart op de website, de homepage en de luchtvaartpagina (`tools/lucht/phgov.svg`; op de website als `lucht_phgov2.png`, omdat afbeeldingen 30 dagen in de cache blijven). Zonder rijkswapen, tekst en registratie.
 - **Kaart "Meer apps van de ontwikkelaar"** in Instellingen: de regel `lrvdlinden.app` onder de knop is weg (app); op Android heet de knop nu "Bekijk".
 - **Kustwachtvliegtuig niet op de kaart:** de bron geeft de Dash 8 met toestelcode `c005e9` nog onder zijn eerdere Canadese registratie (`C-FCGE`), waardoor de Nederlandse registratie nooit paste. De server zet die om naar `PH-CGE` en herkent de Kustwacht nu ook aan de roepnaam `NCG…`. Alleen de server.
+- **Zwakke ontvangst (ver op zee):** de bron laat dan soms de positie, de koers, de snelheid, de hoogte of de roepnaam weg. De server gebruikt nu de laatste positie van de bron (hooguit vijf minuten oud, met de echte leeftijd, dus grijs als hij oud is) en vult ontbrekende waarden aan uit het antwoord ervoor (hooguit drie minuten oud). Geldt voor alle helikopters en vliegtuigen. Alleen de server.
 - De server van build 97 (Medic 01) was niet uitgerold omdat een oude test faalde; die gaat met deze build mee.
 
 ## A-Alerts 2.0.1 (build 97)

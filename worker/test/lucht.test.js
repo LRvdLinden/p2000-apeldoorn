@@ -57,3 +57,19 @@ test("coastguard Dash 8 listed under its earlier Canadian registration, and the 
   assert.equal(luchtSoort({ hex: "abc123", r: "C-FXYZ", t: "DH8A", flight: "NCG02" }).naam, "Kustwacht C-FXYZ");
   assert.equal(luchtSoort({ hex: "abc123", r: "C-FXYZ", t: "DH8A", flight: "JZA123" }), null);
 });
+
+import { positie, vulAan } from "../src/lucht.js";
+test("weak reception: the last position counts for five minutes, missing values come from the answer before", () => {
+  assert.deepEqual(positie({ lat: 53.4, lon: 4.6, seen_pos: 2 }), { lat: 53.4, lon: 4.6, oud: 2 });
+  assert.deepEqual(positie({ lastPosition: { lat: 53.46, lon: 4.73, seen_pos: 90 } }), { lat: 53.46, lon: 4.73, oud: 90 });
+  assert.equal(positie({ lastPosition: { lat: 53.46, lon: 4.73, seen_pos: 400 } }), null);
+  const now = Date.parse("2026-11-14T12:50:00Z");
+  const [l] = luchtLijst([{ hex: "c005e9", r: "C-FCGE", t: "DH8A", gs: 148.5, track: 211.2, lastPosition: { lat: 53.466, lon: 4.73, seen_pos: 90 } }], now);
+  assert.equal(l.lat, 53.466); assert.equal(l.gezien, "2026-11-14T12:48:30.000Z"); assert.equal(l.hoogte_ft, null);
+  const vorige = new Map([[l.id, { gezien: "2026-11-14T12:49:00.000Z", hoogte_ft: 1500, callsign: "NCG01", koers: 200, snelheid_kt: 140 }]]);
+  vulAan([l], vorige, now);
+  assert.equal(l.hoogte_ft, 1500); assert.equal(l.callsign, "NCG01"); assert.equal(l.koers, 211); assert.equal(l.snelheid_kt, 149);
+  const oud = { id: l.id, koers: null };
+  vulAan([oud], new Map([[l.id, { gezien: "2026-11-14T12:40:00.000Z", koers: 200 }]]), now);
+  assert.equal(oud.koers, null);
+});
