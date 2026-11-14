@@ -31,12 +31,12 @@ const verkeerMetAdres = (m) => m.dienst !== "ambulance" && hasStreet(m) && !los(
 
 /**
  * The ambulance for a road accident comes in without an address ("Ambu 06121 HV weg letsel Apeldoorn"), so place and
- * distance say nothing. It joins the road accident of police or fire brigade in the same place within 15 minutes, and
+ * distance say nothing. It joins the road accident of police or fire brigade in the same place within 5 minutes, and
  * only when there is exactly one such incident (two accidents at once: no guess). Works both ways, whichever came first.
  * Returns the incident, or null.
  */
 export function zonderAdres(m, bekend) {
-  const dichtbij = (o) => o.guid !== m.guid && Math.abs(o.datum - m.datum) <= 15 * 60_000 && plaats(o) === plaats(m);
+  const dichtbij = (o) => o.guid !== m.guid && Math.abs(o.datum - m.datum) <= 5 * 60_000 && plaats(o) === plaats(m);
   let kand = [];
   if (ambuZonderAdres(m)) kand = bekend.filter((o) => dichtbij(o) && verkeerMetAdres(o));
   else if (verkeerMetAdres(m)) kand = bekend.filter((o) => dichtbij(o) && ambuZonderAdres(o));

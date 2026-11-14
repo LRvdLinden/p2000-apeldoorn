@@ -17,7 +17,7 @@ test("also when the ambulance came first", () => {
 test("no guess: two accidents, another place, too late, another kind of call", () => {
   assert.equal(kenToe([pol("p1", 0), pol("p2", 1, { locatie: "Zwolseweg", lat: 52.24, lon: 5.96 }), ambu("a1", 2)], [])[2].incident, "a1");
   assert.equal(kenToe([pol("p1", 0, { stad: "Ugchelen" }), ambu("a1", 2)], [])[1].incident, "a1");
-  assert.equal(kenToe([pol("p1", 0), ambu("a1", 20)], [])[1].incident, "a1");
+  assert.equal(kenToe([pol("p1", 0), ambu("a1", 6)], [])[1].incident, "a1");
   assert.equal(kenToe([pol("p1", 0), ambu("a1", 2, { title: "Ambu 06121 Apeldoorn Rit 351103" })], [])[1].incident, "a1");
   assert.equal(kenToe([pol("p1", 0, { title: "Inbraak woning Deventerstraat Apeldoorn" }), ambu("a1", 2)], [])[1].incident, "a1");
   assert.equal(kenToe([pol("p1", 0), ambu("a1", 2, { prioriteit: "B1" })], [])[1].incident, "a1");
