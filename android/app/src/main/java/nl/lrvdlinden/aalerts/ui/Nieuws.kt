@@ -271,7 +271,9 @@ fun NieuwsDetail(id: String, nav: Nav) {
                         "politie" -> d.fotoBron?.let { tr("Bron: politie.nl. Foto: $it.", "Source: politie.nl. Photo: $it.") } ?: tr("Bron: politie.nl. De afbeelding is een stockfoto.", "Source: politie.nl. The image is a stock photo.")
                         "weer" -> tr("Bron: KNMI.", "Source: KNMI.")
                         "regionaal" -> d.fotoBron?.let { tr("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. Foto: $it.", "Source: 112 Nieuws Nederland (112nieuws.net), with permission. Photo: $it.") } ?: tr("Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. De foto is een stockfoto.", "Source: 112 Nieuws Nederland (112nieuws.net), with permission. The photo is a stock photo.")
-                        else -> if (d.bron == "burgernet") tr("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
+                        else -> if (d.bron == "vnog") tr("Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Messages labelled A-Alerts were added by A-Alerts.")
+                            else if (d.bron == "nlalert") tr("Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: NL-Alert (Dutch government). Messages labelled A-Alerts were added by A-Alerts.")
+                            else if (d.bron == "burgernet") tr("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                             else tr("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.", "Source: Police, via Burgernet. Messages labelled A-Alerts were added by A-Alerts.")
                     }, color = Muted, fontSize = 12.sp)
                     d.bronUrl?.takeIf { d.soort != "regionaal" }?.let { u ->

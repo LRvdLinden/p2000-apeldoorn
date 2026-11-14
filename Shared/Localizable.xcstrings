@@ -2670,6 +2670,23 @@
         }
       }
     },
+    "Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: NL-Alert (Dutch government). Messages labelled A-Alerts were added by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
+          }
+        }
+      }
+    },
     "Bron: Politie, via Burgernet.": {
       "extractionState": "manual",
       "localizations": {
@@ -2717,6 +2734,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). A-Alerts is geen onderdeel van VNOG. Bel bij nood altijd 112."
+          }
+        }
+      }
+    },
+    "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Messages labelled A-Alerts were added by A-Alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
           }
         }
       }

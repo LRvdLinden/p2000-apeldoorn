@@ -361,7 +361,9 @@ struct NieuwsDetailView: View {
             } else if d.item.soort == .weer {
                 Text(L("Bron: KNMI.")).font(AppFont.body(12)).foregroundStyle(.secondary)
             } else {
-                Text(d.item.bron == "burgernet" ? L("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.")
+                Text(d.item.bron == "vnog" ? L("Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.")
+                     : d.item.bron == "nlalert" ? L("Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.")
+                     : d.item.bron == "burgernet" ? L("Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.")
                      : L("Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts."))
                     .font(AppFont.body(12)).foregroundStyle(.secondary)
             }

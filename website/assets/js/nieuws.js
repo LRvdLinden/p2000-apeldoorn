@@ -112,6 +112,7 @@ async function toonArtikel(id) {
   }).join("");
   const fotoRegel = x.foto_bron ? `Foto: ${x.foto_bron}.` : null;
   const bron = x.soort === "regionaal" ? `Bron: 112 Nieuws Nederland (112nieuws.net), met toestemming. ${fotoRegel || "De foto is een stockfoto."}` : x.soort === "politie" ? `Bron: politie.nl. ${fotoRegel || "De afbeelding is een stockfoto."}` : x.soort === "weer" ? "Bron: KNMI."
+    : x.bron === "vnog" ? "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts." : x.bron === "nlalert" ? "Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts."
     : x.bron === "burgernet" ? "Bron: Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts." : "Bron: Politie, via Burgernet. Berichten met het label A-Alerts zijn aangevuld door A-Alerts.";
   const bronUrl = veiligUrl(x.bron_url);
   const w = x.weer;

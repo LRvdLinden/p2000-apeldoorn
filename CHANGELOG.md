@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 103)
+- **Bron onder een liveblog klopte niet.** Onder een VNOG-artikel stond "Bron: Politie, via Burgernet". Nu staat er de Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Hetzelfde was fout bij een NL-Alert-liveblog; daar staat nu NL-Alert (Rijksoverheid). Website, iOS en Android.
+
 ## A-Alerts 2.0.1 (build 102)
 - **VNOG-bericht bij de P2000-meldingen.** In de lijst van meldingen op één adres (kaart) staat bovenaan het bericht van VNOG dat bij dat incident hoort. Op de detailpagina van zo'n melding heet het blok nu "Bericht van VNOG over dit incident". iPhone, iPad, Mac en Android.
 
