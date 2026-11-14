@@ -8,7 +8,7 @@ struct GerelateerdeMeldingen: View {
     @Environment(AppSettings.self) private var settings
 
     var body: some View {
-        let list = Verband.gekoppeld(aan: melding, in: store.meldingen)
+        let list = Verband.gekoppeld(aan: melding, in: store.metVerloop)
         if !list.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
                 HStack(spacing: 8) {

@@ -176,7 +176,8 @@ object Kazernes {
 }
 
 /** Possible links between alerts ("verloop"), same rules as the app and website. */
-data class MeldingVerband(val melding: Melding, val redenen: List<String>, val score: Int)
+/** `zeker`: the server put both alerts in the same incident (not a guess of the app). */
+data class MeldingVerband(val melding: Melding, val redenen: List<String>, val score: Int, val zeker: Boolean = false)
 
 /** One unit of an incident with the time of its alarm. */
 data class InzetEenheid(val naam: String, val type: String?, val tijd: java.time.Instant, val melding: Melding) {
@@ -215,6 +216,13 @@ object Verband {
         for (o in list) {
             if (o.guid == m.guid || los(o)) continue
             val dt = o.millis - m.millis
+            // The server gives every alert its incident: the same incident is certain, a different one at most "possible".
+            val zelfde: Boolean? = if (m.incident != null && o.incident != null) m.incident == o.incident else null
+            if (zelfde == true) {
+                val min0 = (abs(dt) / 60_000).toInt()
+                out += MeldingVerband(o, listOf(tr("Zelfde inzet", "Same incident"), when { min0 == 0 -> tr("Zelfde minuut", "Same minute"); dt < 0 -> tr("$min0 min eerder", "$min0 min earlier"); else -> tr("$min0 min later", "$min0 min later") }), 5, zeker = true)
+                continue
+            }
             if (abs(dt) > venster || o.isBesteld || m.isBesteld) continue
             val redenen = mutableListOf<String>()
             var score = 0
@@ -230,6 +238,7 @@ object Verband {
             }
             if (score == 0) continue
             if (o.soort != m.soort) score += 1
+            if (zelfde == false) score = minOf(score, 2)
             val min = (abs(dt) / 60_000).toInt()
             redenen += when {
                 min == 0 -> tr("Zelfde minuut", "Same minute")

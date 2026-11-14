@@ -1,5 +1,15 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 91)
+- **Incident op de server.** Elke nieuwe melding krijgt bij binnenkomst een `incident`: de guid van de eerste melding van die inzet (`worker/src/incident.js`). Zelfde regels als eerst in de apps: zelfde adres in dezelfde plaats, of binnen 350 m met dezelfde eenheid, binnen 45 minuten (120 bij een groot incident); besteld vervoer, herbezetting en proefalarm horen nooit bij een inzet. Meldingen van de laatste zes uur zonder incident krijgen er alsnog een.
+- `GET /v1/meldingen/<guid>/verloop`: alle meldingen van dezelfde inzet, oudste eerst. De app, Android en de pager halen hiermee ook meldingen op die niet (meer) in de lijst staan.
+- Verloop en "Eenheden bij deze inzet" gebruiken de inzet van de server: zelfde inzet is zeker ("Zelfde inzet"), een andere inzet hooguit een mogelijk verband. Oudere meldingen zonder inzet vallen terug op de regels in de app.
+- Pushmeldingen: nog steeds één per P2000-melding, en elke melding staat in de lijst. Meldingen van dezelfde inzet staan bij elkaar in het berichtencentrum (`thread-id` = inzet).
+- Velden uit de bron die we nu bewaren (`vlaggen`): groot, kruising, spam, groep. "groot" telt mee als groot incident; bij "kruising" blijft de coördinaat van de bron staan (niet het midden van de straat). Spam en groep worden alleen bewaard, nog niet gebruikt.
+- Categorieën: de straatnaam wordt uit de tekst gehaald voordat de regels kijken; nieuw zijn Verkeersongeval ("Ongeval wegvervoer"), Assistentie ambulance ("Ass. Ambu", tilassistentie) en herbezetting ook bij "Herbezet./kazerneren". Meldingen van de laatste twee dagen worden opnieuw beoordeeld.
+- Minimale versie: `GET /v1/app` geeft de laagste build die nog werkt (`MIN_BUILD_IOS` en `MIN_BUILD_ANDROID` in `worker/wrangler.toml`, nu 0 = geen minimum). Een oudere build toont "Werk de app bij".
+- De databasekolommen `incident` en `vlaggen` worden bij het uitrollen één keer toegevoegd (`.github/workflows/worker.yml`).
+
 ## Worker (14 november 2026)
 - Categorie: een straatnaam met "dieren" of "paard" erin (Laan van de Dierenriem, Paardenmarkt) maakte van een melding "Dier in problemen". De regel kijkt nu alleen naar hele woorden. Nieuw: "Gebouwbrand" voor "BR gebouw", bedrijf, winkel, kantoor, school en horeca. Meldingen van de laatste week die fout stonden worden rechtgezet.
 

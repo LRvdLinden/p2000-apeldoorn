@@ -64,6 +64,10 @@ object Api {
     private fun enc(s: String) = URLEncoder.encode(s, "UTF-8").replace("+", "%20")
 
     suspend fun meldingen(limit: Int = 300): List<Melding> = AppJson.decodeFromString(getText("${base}v1/meldingen?limit=$limit"))
+    /** Every alert of the incident this alert belongs to, oldest first. */
+    suspend fun verloop(guid: String): List<Melding> = runCatching { AppJson.decodeFromString<VerloopAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/verloop")).meldingen }.getOrDefault(emptyList())
+    /** The lowest build of the app that still works (0 = no minimum). */
+    suspend fun minBuild(): Int = runCatching { AppJson.decodeFromString<AppAntwoord>(getText("${base}v1/app")).minBuild.android }.getOrDefault(0)
     suspend fun melding(guid: String): Melding? = runCatching { AppJson.decodeFromString<Melding>(getText("${base}v1/meldingen/${enc(guid)}")) }.getOrNull()
     suspend fun addView(guid: String) { runCatching { send("POST", "v1/meldingen/${enc(guid)}/view") } }
     suspend fun routes(guid: String): RoutesAntwoord? = runCatching { AppJson.decodeFromString<RoutesAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/routes")) }.getOrNull()

@@ -28,6 +28,12 @@ test("categorie", () => {
   assert.equal(categorie("brandweer", "P2", "P 2 BON-10 Dier te water Baron Sloetkade Apeldoorn 062631"), "Dier in problemen");
   assert.equal(categorie("brandweer", "P2", "P 2 Paard in sloot Zwolseweg Apeldoorn"), "Dier in problemen");
   assert.equal(categorie("brandweer", "P2", "P 2 Dienstverlening Paardenmarkt Apeldoorn"), "Dienstverlening verzoek");
+  // the street is left out of the text
+  assert.equal(categorie("brandweer", "P2", "P 2 BON-02 Liftopsluiting Storm van 's-Gravesandestraat Apeldoorn", "Storm van 's-Gravesandestraat"), "Liftopsluiting");
+  assert.equal(categorie("brandweer", "P2", "P 2 BON-02 Nacontrole Brandweg Apeldoorn", "Brandweg"), "Nacontrole");
+  assert.equal(categorie("brandweer", "P2", "P 2 BON-02 Ass. Ambu (tilassistentie) Mauvestraat Apeldoorn 062631", "Mauvestraat"), "Assistentie ambulance");
+  assert.equal(categorie("brandweer", "P1", "P 1 BON-03 Ongeval wegvervoer (Auto) A1 Li 87,8 Klarenbeek Apeldoorn 042870"), "Verkeersongeval");
+  assert.equal(categorie("brandweer", "P2", "P 2  Herbezet./kazerneren (herbezetting) Kazerne Apeldoorn Centrum Ber. Vosselmanstraat Apeldoorn"), "Herbezetting brandweer");
 });
 
 test("fromFeed keeps Apeldoorn only and parses units", () => {

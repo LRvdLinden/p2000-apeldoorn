@@ -7,9 +7,9 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=67";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=68";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -18,6 +18,7 @@ const WINDOW_MS = 24 * 3600_000; // the timeline shows the last 24 hours, like t
 
 const params = new URLSearchParams(location.search);
 const state = {
+  extra: new Map(),
   list: [],
   known: new Set(),
   online: false,
@@ -515,8 +516,8 @@ function renderDetail(m) {
     </section>
     <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
-    ${verloopHTML(m)}
-    ${inzetHTML(m)}
+    <div id="verbandBlok">${verloopHTML(m)}
+    ${inzetHTML(m)}</div>
     <section class="card story"><h2>Beschrijving</h2>${story(m, t, y).map((p) => `<p>${esc(p)}</p>`).join("")}</section>
     <section class="card"><h2>METEO-gegevens</h2><div class="meteo" id="meteo"><div class="skeleton" style="height:180px"></div></div></section>
     ${units.length ? `<section class="card"><h2>Capcodes (${units.length})</h2><div class="units">${units.map((u) => `
@@ -586,14 +587,34 @@ function renderDetail(m) {
   loadKazernes(m, mapReady);
   if (heliRelevant(m)) loadHeli(m, mapReady);
   loadPand(m);
-  $("detail").querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
+  loadVerloop(m);
+  bindVerband();
+}
+
+/** Links inside the detail: to another alert, and from a Lifeliner or Zulu to the map. */
+function bindVerband(root = $("detail")) {
+  root.querySelectorAll("[data-goto]").forEach((b) => b.addEventListener("click", (e) => { e.preventDefault(); select(b.dataset.goto); }));
   // A Lifeliner or Zulu in "Eenheden bij deze inzet": to the map, following that helicopter.
-  $("detail").querySelectorAll("[data-volg-heli]").forEach((b) => b.addEventListener("click", () => { state.volgHeli = b.dataset.volgHeli; if (innerWidth <= 900) closeDetail(); setTab("kaart"); }));
+  root.querySelectorAll("[data-volg-heli]").forEach((b) => b.addEventListener("click", () => { state.volgHeli = b.dataset.volgHeli; if (innerWidth <= 900) closeDetail(); setTab("kaart"); }));
 }
 
 /** Every unit alarmed for this incident with the time of its alarm (only when more than one alert belongs to it). */
+/** The list plus alerts of this incident that the server knows but the list does not hold (any more). */
+const metExtra = () => (state.extra.size ? [...state.list, ...[...state.extra.values()].filter((x) => !state.list.some((l) => l.guid === x.guid))] : state.list);
+
+/** Asks the server for every alert of this incident; alerts that are not in the list are added to the timeline. */
+async function loadVerloop(m) {
+  if (!m.incident) return;
+  const alle = await fetchVerloop(m.guid);
+  let nieuw = false;
+  for (const x of alle) if (!state.list.some((l) => l.guid === x.guid) && !state.extra.has(x.guid)) { state.extra.set(x.guid, x); nieuw = true; }
+  if (!nieuw || state.selected !== m.guid || !$("verbandBlok")) return;
+  $("verbandBlok").innerHTML = `${verloopHTML(m)}${inzetHTML(m)}`;
+  bindVerband($("verbandBlok"));
+}
+
 function inzetHTML(m) {
-  const { eenheden, meldingen } = inzetEenheden(m, state.list);
+  const { eenheden, meldingen } = inzetEenheden(m, metExtra());
   if (meldingen < 2 || eenheden.length < 2) return "";
   return `<section class="card"><h2>Eenheden bij deze inzet (${eenheden.length})</h2><p class="hint">Alle eenheden uit de ${meldingen} meldingen die bij deze inzet horen, met de tijd van alarmering.</p>
     <ol class="inzet">${eenheden.map((u) => u.heli
@@ -611,11 +632,12 @@ async function loadPand(m) {
 
 /** Alerts that may belong to the same incident, as a timeline. Always a possible link, never a fact. */
 function verloopHTML(m) {
-  const links = verband(m, state.list, 8);
+  const links = verband(m, metExtra(), 8);
   if (!links.length) return "";
+  const zeker = links.every((l) => l.zeker);
   const lijst = [m, ...links.map((l) => l.melding)].sort((a, b) => date(a) - date(b));
   const t0 = date(lijst[0]);
-  return `<section class="card"><h2>Verloop</h2><p class="hint">Meldingen die mogelijk bij dezelfde inzet horen. Een mogelijk verband, geen zekerheid.</p>
+  return `<section class="card"><h2>Verloop (${lijst.length} meldingen)</h2><p class="hint">${zeker ? "Meldingen van dezelfde inzet." : "Meldingen van dezelfde inzet, en meldingen die er mogelijk bij horen (geen zekerheid)."}</p>
     <ol class="verloop">${lijst.map((x) => {
       const plus = Math.round((date(x) - t0) / 60_000);
       const reden = links.find((l) => l.melding.guid === x.guid)?.redenen.join(" · ") || "";

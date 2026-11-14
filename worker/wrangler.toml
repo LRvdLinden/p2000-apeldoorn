@@ -18,6 +18,9 @@ database_id = "__D1_DATABASE_ID__"
 RETENTION_DAYS = "3"
 POLLS_PER_RUN = "5"
 APN_TOPIC = "nl.lrvdlinden.p2000apeldoorn"
+# Lowest build of the apps that still works; an older build shows "Werk de app bij". 0 = no minimum.
+MIN_BUILD_IOS = "0"
+MIN_BUILD_ANDROID = "0"
 WEB_WEATHERKIT_SERVICE_ID = "nl.lrvdlinden.p2000apeldoorn.weatherkit"
 
 [observability]

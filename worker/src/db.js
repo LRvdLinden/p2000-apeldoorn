@@ -11,22 +11,25 @@ export function toAPI(row) {
     lat: row.lat, lon: row.lon, stad: row.stad, regio: row.regio, provincie: "Gelderland", capcode: row.capcode,
     categorie: row.categorie, grip: row.grip, opschaling: row.opschaling, eenheden: parse(row.eenheden),
     voertuigen: parse(row.voertuigen), link: row.link, views: row.views,
+    // The incident this alert belongs to (guid of its first alert); null for alerts from before this existed.
+    incident: row.incident ?? null,
+    ...(String(row.vlaggen || "").includes("groot") ? { groot: true } : {}),
     ...(row.hidden !== undefined ? { hidden: Boolean(row.hidden), edited: Boolean(row.edited) } : {}),
   };
 }
 
 export const insertStmt = (env, m) => env.DB.prepare(`
   INSERT INTO meldingen (guid, title, full_melding, dienst, prioriteit, datum, locatie, lat, lon, stad, regio, capcode,
-                         categorie, grip, opschaling, eenheden, voertuigen, link, created_at)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(guid) DO NOTHING`)
+                         categorie, grip, opschaling, eenheden, voertuigen, link, created_at, incident, vlaggen)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(guid) DO NOTHING`)
   .bind(m.guid, m.title || "", m.full_melding ?? null, m.dienst || "onbekend", m.prioriteit ?? null, m.datum, m.locatie ?? null,
     m.lat ?? null, m.lon ?? null, m.stad ?? null, m.regio ?? null, m.capcode ?? null, m.categorie ?? null,
-    m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now());
+    m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now(), m.incident ?? null, m.vlaggen || null);
 
 /** Alerts with the corrections from beheer applied. */
 export const SELECT = `SELECT m.guid, COALESCE(o.title, m.title) AS title, m.full_melding, m.dienst, m.prioriteit, m.datum,
   COALESCE(o.locatie, m.locatie) AS locatie, COALESCE(o.lat, m.lat) AS lat, COALESCE(o.lon, m.lon) AS lon, m.stad, m.regio,
-  m.capcode, COALESCE(o.categorie, m.categorie) AS categorie, m.grip, m.opschaling, m.eenheden, m.voertuigen, m.link, m.views,
+  m.capcode, COALESCE(o.categorie, m.categorie) AS categorie, m.grip, m.opschaling, m.eenheden, m.voertuigen, m.link, m.views, m.incident, m.vlaggen,
   COALESCE(o.hidden, 0) AS hidden, (o.guid IS NOT NULL) AS edited
   FROM meldingen m LEFT JOIN overrides o ON o.guid = m.guid`;
 
@@ -49,6 +52,12 @@ export async function getMelding(env, guid, { includeHidden = false } = {}) {
   const row = await env.DB.prepare(`${SELECT} WHERE m.guid = ?`).bind(guid).first();
   if (!row || (row.hidden && !includeHidden)) return null;
   return toAPI(row);
+}
+
+/** Every alert of one incident, oldest first (hidden ones left out). */
+export async function incidentMeldingen(env, incident) {
+  const { results } = await env.DB.prepare(`${SELECT} WHERE m.incident = ? AND COALESCE(o.hidden, 0) = 0 ORDER BY m.datum ASC LIMIT 40`).bind(incident).all();
+  return results.map(toAPI);
 }
 
 export async function addView(env, guid) {

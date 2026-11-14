@@ -100,6 +100,7 @@ struct MeldingDetailView: View {
             settings.markRead(melding)
         }
         .task(id: melding.guid) { await loadLookAround() }
+        .task(id: melding.guid) { await store.laadVerloop(melding) }
         .task(id: melding.guid) {
             // Year built and use of the building (BAG), at a fire alert with a house number.
             pand = nil

@@ -25,6 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.delay
 import nl.lrvdlinden.aalerts.Bestemming
+import nl.lrvdlinden.aalerts.BuildConfig
+import nl.lrvdlinden.aalerts.data.Api
 import nl.lrvdlinden.aalerts.MainActivity
 import nl.lrvdlinden.aalerts.R
 import nl.lrvdlinden.aalerts.data.Settings
@@ -61,6 +63,20 @@ fun AAlertsRoot(activity: MainActivity) {
         LaunchedEffect(activity.startTab) {
             when (activity.startTab) { "kaart" -> nav.tab = Tab.KAART; "statistieken" -> nav.tab = Tab.STATISTIEKEN; "instellingen" -> nav.tab = Tab.INSTELLINGEN; "pager" -> nav.tab = Tab.PAGER; "nieuws" -> nav.tab = Tab.NIEUWS }
             if (activity.startTab == "waarschuwingen") nav.open("waarschuwingen")
+        }
+
+        // The lowest build that still works, asked once at start-up: an older build is asked to update.
+        var verouderd by remember { mutableStateOf(false) }
+        LaunchedEffect(Unit) { val min = Api.minBuild(); verouderd = min > 0 && BuildConfig.VERSION_CODE < min }
+        if (verouderd) {
+            val ctx = androidx.compose.ui.platform.LocalContext.current
+            androidx.compose.material3.AlertDialog(
+                onDismissRequest = { verouderd = false },
+                title = { androidx.compose.material3.Text(tr("Werk de app bij", "Update the app")) },
+                text = { androidx.compose.material3.Text(tr("Deze versie van A-Alerts is te oud en werkt niet meer goed. Installeer de nieuwste versie via a-alerts.nl.", "This version of A-Alerts is too old and no longer works properly. Install the latest version from a-alerts.nl.")) },
+                confirmButton = { androidx.compose.material3.TextButton(onClick = { ctx.startActivity(android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse("${BuildConfig.WEBSITE}/android/"))) }) { androidx.compose.material3.Text(tr("Bijwerken", "Update")) } },
+                dismissButton = { androidx.compose.material3.TextButton(onClick = { verouderd = false }) { androidx.compose.material3.Text(tr("Later", "Later")) } },
+            )
         }
 
         // Refresh alerts and warnings every 15 seconds while the app is open.

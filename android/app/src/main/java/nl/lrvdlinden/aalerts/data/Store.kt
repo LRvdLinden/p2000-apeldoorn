@@ -12,6 +12,16 @@ import java.time.LocalDate
 /** Alerts, warnings and helicopters in memory, refreshed by the screens (15 s for alerts, 10 s for helicopters). */
 object Store {
     var meldingen by mutableStateOf<List<Melding>>(emptyList()); private set
+    /** Alerts of an opened incident that the server knows but the list does not hold (any more). */
+    var incidentExtra by mutableStateOf<List<Melding>>(emptyList()); private set
+    /** The list plus those extra alerts: what the timeline of an alert is built from. */
+    val metVerloop: List<Melding> get() = if (incidentExtra.isEmpty()) meldingen else meldingen + incidentExtra.filter { e -> meldingen.none { it.guid == e.guid } }
+    /** Asks the server for every alert of the incident of this alert. */
+    suspend fun laadVerloop(m: Melding) {
+        if (m.incident == null) return
+        val nieuw = Api.verloop(m.guid).filter { a -> meldingen.none { it.guid == a.guid } && incidentExtra.none { it.guid == a.guid } }
+        if (nieuw.isNotEmpty()) incidentExtra = (incidentExtra + nieuw).takeLast(80)
+    }
     var waarschuwingen by mutableStateOf<List<Waarschuwing>>(emptyList()); private set
     var alleWaarschuwingen by mutableStateOf<List<Waarschuwing>>(emptyList()); private set
     var helikopters by mutableStateOf<List<Helikopter>>(emptyList()); private set

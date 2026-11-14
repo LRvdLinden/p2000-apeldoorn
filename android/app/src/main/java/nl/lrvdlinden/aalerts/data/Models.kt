@@ -75,6 +75,8 @@ data class Melding(
     val eenheden: List<Eenheid> = emptyList(),
     val voertuigen: List<Voertuig> = emptyList(),
     val views: Int = 0,
+    /** The incident this alert belongs to: the guid of its first alert, worked out by the server. Null for older alerts. */
+    val incident: String? = null,
 ) {
     val datum: Instant get() = parseInstant(datumTijd) ?: Instant.EPOCH
     val millis: Long get() = datum.toEpochMilli()
@@ -547,6 +549,15 @@ data class ApiRoute(
 )
 
 /** Latest APK on a-alerts.nl (downloads/android.json), for the update check. */
+@Serializable
+/** GET /v1/meldingen/<guid>/verloop and GET /v1/app. */
+@Serializable
+data class VerloopAntwoord(val meldingen: List<Melding> = emptyList())
+@Serializable
+data class MinBuild(val ios: Int = 0, val android: Int = 0)
+@Serializable
+data class AppAntwoord(@SerialName("min_build") val minBuild: MinBuild = MinBuild())
+
 @Serializable
 data class ApkInfo(val version: String = "", val build: Int = 0, val url: String = "", val notes: String? = null, val size: Long? = null)
 

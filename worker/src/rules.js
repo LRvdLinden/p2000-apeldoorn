@@ -37,25 +37,32 @@ const RULES = [
   [/STANK|HIND\.? ?LUCHT|GEURHINDER/, "Stank (geurhinder)"],
   [/LIFT ?OPSLUITING|OPSLUITING LIFT/, "Liftopsluiting"],
   [/WATEROVERLAST/, "Wateroverlast"],
-  [/STORMSCHADE|STORM\b/, "Stormschade"],
+  [/STORMSCHADE|\bSTORM\b/, "Stormschade"],
   [/VOERTUIG TE WATER|\bVTW\b/, "Voertuig te water"],
   [/PERSOON TE WATER|\bPTW\b/, "Persoon te water"],
   // Whole words only: "Laan van de Dierenriem" and "Paardenmarkt" are streets, not animals.
   [/\bDIER(EN)?\b|\bPAARD(EN)?\b|\bKOE(IEN)?\b|\bHOND(EN)?\b/, "Dier in problemen"],
   [/AFHIJSEN/, "Assistentie afhijsen patient"],
+  [/\bASS\.? ?AMBU|TILASSISTENTIE|ASSISTENTIE AMBU/, "Assistentie ambulance"],
   [/BUITENGESLOTEN/, "Persoon buitengesloten"],
   [/(AANRIJDING|AANR\.?).*LETSEL/, "Aanrijding met letsel"],
   [/ONGEVAL.*LETSEL|OVL\b/, "Ongeval met letsel"],
-  [/VERKEERSONGEVAL/, "Verkeersongeval"],
+  [/VERKEERSONGEVAL|ONGEVAL WEGVERVOER/, "Verkeersongeval"],
   [/ONGEVAL|AANRIJDING/, "Ongeval melding"],
-  [/HERBEZETTING|HERBEZ\b/, "Herbezetting brandweer"],
+  [/HERBEZET|KAZERNEREN/, "Herbezetting brandweer"],
   [/NACONTROLE/, "Nacontrole"],
   [/OEFENING|PROEFALARM|TESTOPROEP/, "Oefening"],
   [/DIENSTVERLENING/, "Dienstverlening verzoek"],
 ];
 
-export function categorie(dienst, prio, text) {
-  const t = text.toUpperCase();
+/**
+ * The category of an alert. The street (`locatie`) is taken out of the text first: a street name is not a subject
+ * ("Laan van de Dierenriem" is no animal, "Stormstraat" no storm).
+ */
+export function categorie(dienst, prio, text, locatie = null) {
+  const straat = String(locatie || "").trim();
+  const kern = straat.length >= 4 ? String(text).split(new RegExp(straat.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i")).join(" ") : String(text);
+  const t = kern.toUpperCase();
   if (/REANIM/.test(t)) return dienst === "ambulance" ? "Hartstilstand (reanimatie)" : "Assistentie bij reanimatie";
   if (dienst === "traumaheli") return "Traumaheli persoon in levensgevaar";
   if (dienst === "ambulance") {
@@ -117,12 +124,15 @@ export function fromFeed(r) {
     stad: r.plaats,
     regio: r.vr || r.regio || null,
     capcode: units[0]?.code ?? null,
-    categorie: categorie(dienst, prio, text),
+    categorie: categorie(dienst, prio, text, r.locatie),
     grip: r.grip && r.grip !== "0" ? r.grip : null,
     opschaling: r.soortopschaling || null,
     eenheden: units,
     voertuigen: parseJSON(r.voertuigen_json, "voertuig"),
     link: r.link || null,
+    // Flags of the source: a large incident, a crossing (the coordinate is the crossing itself), spam, group message.
+    vlaggen: [["groot", r.groot], ["kruising", r.kruising], ["spam", r.antiespam], ["groep", r.groep]]
+      .filter(([, v]) => v != null && String(v) !== "0" && String(v) !== "").map(([k]) => k).join(",") || null,
   };
 }
 
@@ -190,7 +200,8 @@ export function payloadFor(m, lang = "nl") {
     aps: {
       alert: { title: [L[m.dienst] || L.onbekend, prio].filter(Boolean).join(" • "), body: tijd && !/Invalid/.test(tijd) ? `${tekst} (${tijd})` : tekst },
       sound: "default",
-      "thread-id": m.dienst,
+      // Notifications of one incident stay together in Notification Centre.
+      "thread-id": m.incident || m.dienst,
       "interruption-level": urgent ? "time-sensitive" : "active",
       "relevance-score": urgent ? 1 : 0.5,
       // A-Alerts: the notification service extension adds a map of the spot; buttons "Bewaar" and "Toon op kaart".

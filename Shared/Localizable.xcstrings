@@ -3486,6 +3486,23 @@
         }
       }
     },
+    "Deze versie van A-Alerts is te oud en werkt niet meer goed. Installeer de nieuwste versie via de App Store of TestFlight.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "This version of A-Alerts is too old and no longer works properly. Install the latest version from the App Store or TestFlight."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deze versie van A-Alerts is te oud en werkt niet meer goed. Installeer de nieuwste versie via de App Store of TestFlight."
+          }
+        }
+      }
+    },
     "Deze vlucht": {
       "extractionState": "manual",
       "localizations": {
@@ -6784,6 +6801,23 @@
         }
       }
     },
+    "Later": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Later"
+          }
+        }
+      }
+    },
     "Lees op politie.nl": {
       "extractionState": "manual",
       "localizations": {
@@ -7311,23 +7345,6 @@
         }
       }
     },
-    "Meldingen die volgens tijd, plaats en eenheid mogelijk bij dezelfde inzet horen. Dit is een mogelijk verband, geen bevestiging.": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Alerts that, by time, place and unit, may belong to the same call-out. This is a possible link, not a confirmation."
-          }
-        },
-        "nl": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Meldingen die volgens tijd, plaats en eenheid mogelijk bij dezelfde inzet horen. Dit is een mogelijk verband, geen bevestiging."
-          }
-        }
-      }
-    },
     "Meldingen en alerts": {
       "extractionState": "manual",
       "localizations": {
@@ -7409,6 +7426,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldingen staan uit voor A-Alerts in de instellingen van je toestel."
+          }
+        }
+      }
+    },
+    "Meldingen van dezelfde inzet, en meldingen die er volgens tijd, plaats en eenheid mogelijk bij horen (geen zekerheid).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts of the same incident, and alerts that may belong to it by time, place and unit (not certain)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen van dezelfde inzet, en meldingen die er volgens tijd, plaats en eenheid mogelijk bij horen (geen zekerheid)."
+          }
+        }
+      }
+    },
+    "Meldingen van dezelfde inzet.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts of the same incident."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen van dezelfde inzet."
           }
         }
       }
@@ -7783,6 +7834,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Naam"
+          }
+        }
+      }
+    },
+    "Naar de App Store": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "To the App Store"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Naar de App Store"
           }
         }
       }
@@ -12785,6 +12853,23 @@
         }
       }
     },
+    "Werk de app bij": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Update the app"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Werk de app bij"
+          }
+        }
+      }
+    },
     "Werkt": {
       "extractionState": "manual",
       "localizations": {
@@ -13053,6 +13138,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zelfde eenheid opgeroepen"
+          }
+        }
+      }
+    },
+    "Zelfde inzet": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Same incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zelfde inzet"
           }
         }
       }

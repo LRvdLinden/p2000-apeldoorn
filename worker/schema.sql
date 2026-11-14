@@ -19,9 +19,13 @@ CREATE TABLE IF NOT EXISTS meldingen (
   voertuigen TEXT,                 -- JSON
   link TEXT,
   views INTEGER NOT NULL DEFAULT 0,
-  created_at INTEGER NOT NULL
+  created_at INTEGER NOT NULL,
+  incident TEXT,                   -- guid of the first alert of the incident this alert belongs to
+  vlaggen TEXT                     -- flags of the source, comma separated: groot, kruising, spam, groep
 );
 CREATE INDEX IF NOT EXISTS meldingen_datum ON meldingen(datum DESC);
+-- All alerts of one incident (GET /v1/meldingen/<guid>/verloop) read only their own rows.
+CREATE INDEX IF NOT EXISTS meldingen_incident ON meldingen(incident);
 -- "What is new since my last check?" (Homey changes, several times a minute) reads only the new rows with this index.
 CREATE INDEX IF NOT EXISTS meldingen_created ON meldingen(created_at);
 

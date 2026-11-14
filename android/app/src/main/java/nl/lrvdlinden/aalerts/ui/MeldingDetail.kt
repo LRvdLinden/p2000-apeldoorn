@@ -94,9 +94,11 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
     if (heli != null) LaunchedEffect(Unit) { while (true) { delay(2_000); nu = System.currentTimeMillis() } }
     val heliPos = heli?.geschat(nu)
     val heliNaam = remember(m.guid) { HeliKoppeling.genoemd(m)?.let { id -> id.replace("lifeliner", "Lifeliner ").replace("zulu", "Zulu ") } }
-    val verband = remember(m.guid, Store.meldingen) { Verband.gekoppeld(m, Store.meldingen) }
+    // Every alert of this incident, also the ones the list does not hold any more (asked from the server).
+    LaunchedEffect(m.guid) { Store.laadVerloop(m) }
+    val verband = remember(m.guid, Store.meldingen, Store.incidentExtra) { Verband.gekoppeld(m, Store.metVerloop) }
     // Every unit of this incident with the time of its alarm, and the building (BAG) at a fire alert with a house number.
-    val inzet = remember(m.guid, Store.meldingen) { Verband.inzet(m, Store.meldingen) }
+    val inzet = remember(m.guid, Store.meldingen, Store.incidentExtra) { Verband.inzet(m, Store.metVerloop) }
     var pand by remember(m.guid) { mutableStateOf<nl.lrvdlinden.aalerts.data.Pand?>(null) }
     LaunchedEffect(m.guid) { if (m.soort == Dienst.BRANDWEER && m.hasStreet && m.locatie?.any { it.isDigit() } == true) pand = Api.pand(m.guid) }
     val waarschuwingen = remember(m.guid, Store.waarschuwingen) { Store.waarschuwingen.filter { it.bron != "knmi" && it.relates(m) } }
@@ -284,7 +286,8 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     }
                 }
                 if (verband.isNotEmpty()) SectionCard(tr("Verloop", "Timeline"), Icons.Outlined.Timeline) {
-                    Text(tr("Meldingen die mogelijk bij dit incident horen.", "Alerts that may belong to this incident."), color = Muted, fontSize = 12.sp)
+                    Text(if (verband.all { it.zeker }) tr("Meldingen van dezelfde inzet.", "Alerts of the same incident.")
+                        else tr("Meldingen van dezelfde inzet, en meldingen die er mogelijk bij horen (geen zekerheid).", "Alerts of the same incident, and alerts that may belong to it (not certain)."), color = Muted, fontSize = 12.sp)
                     verband.forEach { v ->
                         Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(10.dp)).clickable { nav.melding(v.melding.guid) }.padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                             DienstIcon(v.melding.soort, 28.dp); Spacer(Modifier.width(10.dp))

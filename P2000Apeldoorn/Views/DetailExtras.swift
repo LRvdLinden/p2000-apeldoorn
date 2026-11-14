@@ -392,7 +392,7 @@ struct VerloopKaart: View {
     @Environment(MeldingStore.self) private var store
 
     var body: some View {
-        let verbanden = Verband.gekoppeld(aan: melding, in: store.meldingen, max: 8)
+        let verbanden = Verband.gekoppeld(aan: melding, in: store.metVerloop, max: 8)
         if !verbanden.isEmpty {
             let lijst = ([melding] + verbanden.map(\.melding)).sorted { $0.datum < $1.datum }
             let eerste = lijst.first?.datum ?? melding.datum
@@ -413,7 +413,7 @@ struct VerloopKaart: View {
                 }
                 .padding(.vertical, 8)
                 .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-                Text(L("Meldingen die volgens tijd, plaats en eenheid mogelijk bij dezelfde inzet horen. Dit is een mogelijk verband, geen bevestiging."))
+                Text(verbanden.allSatisfy(\.zeker) ? L("Meldingen van dezelfde inzet.") : L("Meldingen van dezelfde inzet, en meldingen die er volgens tijd, plaats en eenheid mogelijk bij horen (geen zekerheid)."))
                     .font(.footnote).foregroundStyle(.secondary)
                     .padding(.horizontal, 4)
             }
@@ -549,7 +549,7 @@ struct InzetKaart: View {
     @Environment(MeldingStore.self) private var store
 
     var body: some View {
-        let inzet = Verband.inzet(van: melding, in: store.meldingen)
+        let inzet = Verband.inzet(van: melding, in: store.metVerloop)
         if inzet.meldingen >= 2, inzet.eenheden.count >= 2 {
             VStack(alignment: .leading, spacing: 10) {
                 Text(Lf("Eenheden bij deze inzet (%lld)", inzet.eenheden.count)).font(AppFont.heading(18)).padding(.horizontal, 4)
@@ -594,5 +594,30 @@ struct InzetKaart: View {
                     .font(.footnote).foregroundStyle(.secondary).padding(.horizontal, 4)
             }
         }
+    }
+}
+
+// MARK: - Minimum version
+
+/// Asks the server once at start-up for the lowest build that still works; an older build is asked to update.
+struct MinVersieWacht: ViewModifier {
+    @State private var verouderd = false
+    @Environment(\.openURL) private var openURL
+
+    func body(content: Content) -> some View {
+        content
+            .task {
+                let min = await P2000API.shared.minBuild()
+                let build = Int(Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") ?? 0
+                verouderd = min > 0 && build > 0 && build < min
+            }
+            .alert(L("Werk de app bij"), isPresented: $verouderd) {
+                if !Config.appStoreID.isEmpty, let url = URL(string: "https://apps.apple.com/app/id\(Config.appStoreID)") {
+                    Button(L("Naar de App Store")) { openURL(url) }
+                }
+                Button(L("Later"), role: .cancel) {}
+            } message: {
+                Text(L("Deze versie van A-Alerts is te oud en werkt niet meer goed. Installeer de nieuwste versie via de App Store of TestFlight."))
+            }
     }
 }

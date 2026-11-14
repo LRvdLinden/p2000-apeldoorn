@@ -83,6 +83,18 @@ struct P2000API: Sendable {
         try? await get(url("v1/meldingen/\(guid)"), as: Melding.self)
     }
 
+    /// Every alert of the incident this alert belongs to, oldest first.
+    func verloop(guid: String) async -> [Melding] {
+        struct Antwoord: Decodable { let meldingen: [Melding] }
+        return (try? await get(url("v1/meldingen/\(guid)/verloop"), as: Antwoord.self).meldingen) ?? []
+    }
+
+    /// The lowest build of the app that still works (0 = no minimum).
+    func minBuild() async -> Int {
+        struct Antwoord: Decodable { struct Min: Decodable { let ios: Int? }; let min_build: Min? }
+        return (try? await get(url("v1/app"), as: Antwoord.self).min_build?.ios) ?? 0
+    }
+
     /// View counter ("1x", "4x" in the list). Best effort.
     func incrementViews(guid: String) async {
         _ = try? await send("POST", url("v1/meldingen/\(guid)/view"))

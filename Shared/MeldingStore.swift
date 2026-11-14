@@ -12,6 +12,19 @@ final class MeldingStore {
     static let shared = MeldingStore()
 
     private(set) var meldingen: [Melding] = []
+    /// Alerts of an opened incident that the server knows but the list does not hold (any more).
+    private(set) var incidentExtra: [Melding] = []
+    /// The list plus those extra alerts: what the timeline of an alert is built from.
+    var metVerloop: [Melding] {
+        incidentExtra.isEmpty ? meldingen : meldingen + incidentExtra.filter { e in !meldingen.contains { $0.guid == e.guid } }
+    }
+    /// Asks the server for every alert of the incident of this alert.
+    func laadVerloop(_ m: Melding) async {
+        guard m.incident != nil else { return }
+        let alle = await P2000API.shared.verloop(guid: m.guid)
+        let nieuw = alle.filter { a in !meldingen.contains { $0.guid == a.guid } && !incidentExtra.contains { $0.guid == a.guid } }
+        if !nieuw.isEmpty { incidentExtra = Array((incidentExtra + nieuw).suffix(80)) }
+    }
     private(set) var lastUpdated: Date?
     private(set) var isLoading = false
     private(set) var isOnline = true

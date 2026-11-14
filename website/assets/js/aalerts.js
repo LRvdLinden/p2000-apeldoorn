@@ -215,6 +215,13 @@ export function verband(m, list, max = 6) {
   for (const o of list) {
     if (o.guid === m.guid) continue;
     const dt = date(o) - date(m);
+    // The server gives every alert the incident it belongs to: the same incident is certain, a different one at most "possible".
+    const zelfde = m.incident && o.incident ? m.incident === o.incident : null;
+    if (zelfde) {
+      const min0 = Math.round(Math.abs(dt) / 60_000);
+      out.push({ melding: o, redenen: ["Zelfde inzet", min0 === 0 ? "Zelfde minuut" : dt < 0 ? `${min0} min eerder` : `${min0} min later`], score: 5, zeker: true });
+      continue;
+    }
     if (Math.abs(dt) > venster || besteld(o) || besteld(m)) continue;
     const redenen = [];
     let score = 0;
@@ -230,11 +237,20 @@ export function verband(m, list, max = 6) {
     }
     if (!score) continue;
     if (o.dienst !== m.dienst) score += 1;
+    if (zelfde === false) score = Math.min(score, 2);
     const min = Math.round(Math.abs(dt) / 60_000);
     redenen.push(min === 0 ? "Zelfde minuut" : dt < 0 ? `${min} min eerder` : `${min} min later`);
     out.push({ melding: o, redenen, score });
   }
   return out.sort((a, b) => b.score - a.score || Math.abs(date(a.melding) - date(m)) - Math.abs(date(b.melding) - date(m))).slice(0, max);
+}
+
+/** Every alert of the incident this alert belongs to (also the ones that are not in the list any more). */
+export async function fetchVerloop(guid) {
+  try {
+    const r = await fetch(`${API}/v1/meldingen/${encodeURIComponent(guid)}/verloop`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? (await r.json()).meldingen || [] : [];
+  } catch { return []; }
 }
 
 /**

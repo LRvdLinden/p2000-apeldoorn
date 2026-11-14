@@ -104,7 +104,7 @@ export async function straatPunt(env, budget, locatie, stad) {
 /** Alerts of the last 6 hours with only a street name that are not on the middle of that street yet (at most `max`). */
 export async function straatHerstel(env, budget, max = 6) {
   const { results } = await env.DB.prepare(
-    "SELECT guid, title, locatie, stad, lat, lon FROM meldingen WHERE datum > ? AND locatie IS NOT NULL AND locatie != '' AND locatie NOT GLOB '*[0-9]*' ORDER BY datum DESC LIMIT 30",
+    "SELECT guid, title, locatie, stad, lat, lon FROM meldingen WHERE datum > ? AND locatie IS NOT NULL AND locatie != '' AND locatie NOT GLOB '*[0-9]*' AND (vlaggen IS NULL OR vlaggen NOT LIKE '%kruising%') ORDER BY datum DESC LIMIT 30",
   ).bind(Date.now() - 6 * 3600_000).all();
   let n = 0;
   for (const r of results || []) {

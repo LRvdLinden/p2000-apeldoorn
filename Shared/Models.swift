@@ -125,6 +125,8 @@ struct Melding: Identifiable, Hashable, Codable {
     var voertuigen: [Voertuig]
     var views: Int
     var weather: Weer?
+    /// The incident this alert belongs to: the guid of its first alert, worked out by the server. Nil for older alerts.
+    var incident: String?
 
     var id: String { guid }
     var dienst: Dienst { Dienst(raw: dienstRaw) }
@@ -182,7 +184,7 @@ struct Melding: Identifiable, Hashable, Codable {
     enum CodingKeys: String, CodingKey {
         case recordID = "id", guid, title, fullMelding = "full_melding", dienstRaw = "dienst", prioriteit
         case datum = "datum_tijd", locatie, lat, lon, link, stad, regio, provincie, capcode, categorie, grip, opschaling
-        case eenheden, voertuigen, views, weather
+        case eenheden, voertuigen, views, weather, incident
     }
 
     init(from decoder: Decoder) throws {
@@ -215,6 +217,7 @@ struct Melding: Identifiable, Hashable, Codable {
         voertuigen = (try? c.decodeIfPresent([Voertuig].self, forKey: .voertuigen)) ?? []
         views = Int(c.flexibleDouble(.views) ?? 0)
         weather = try? c.decodeIfPresent(Weer.self, forKey: .weather)
+        incident = try? c.decodeIfPresent(String.self, forKey: .incident)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -241,6 +244,7 @@ struct Melding: Identifiable, Hashable, Codable {
         try c.encode(voertuigen, forKey: .voertuigen)
         try c.encode(views, forKey: .views)
         try c.encodeIfPresent(weather, forKey: .weather)
+        try c.encodeIfPresent(incident, forKey: .incident)
     }
 }
 

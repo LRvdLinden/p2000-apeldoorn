@@ -79,7 +79,7 @@ const GROOT = /\bGRIP\s*[1-5]\b|zeer\s+grote\s+brand|\bgrote\s+brand\b|middel\s*
 /** A large incident: GRIP, a (very) large or medium fire, scaling up, or ten units or more on one call. */
 export function isGrootIncident(m) {
   // opschaling is the size of the fire from P2000 ("klein", "middel", "groot", "zeer groot"): only middel and up count.
-  if (Number(m.grip) > 0 || /middel|groot|grip/i.test(m.opschaling || "")) return true;
+  if (Number(m.grip) > 0 || m.groot === true || String(m.vlaggen || "").includes("groot") || /middel|groot|grip/i.test(m.opschaling || "")) return true;
   const tekst = [m.title, m.full_melding, m.categorie].filter(Boolean).join(" ");
   if (GROOT.test(tekst)) return true;
   return Array.isArray(m.eenheden) && m.eenheden.length >= 10;

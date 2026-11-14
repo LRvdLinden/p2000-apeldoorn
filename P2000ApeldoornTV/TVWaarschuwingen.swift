@@ -213,7 +213,7 @@ struct TVInzetBlok: View {
     @State private var routes: [KazerneRoute] = []
 
     var body: some View {
-        let verbanden = Verband.gekoppeld(aan: melding, in: store.meldingen, max: 6)
+        let verbanden = Verband.gekoppeld(aan: melding, in: store.metVerloop, max: 6)
         VStack(alignment: .leading, spacing: 14) {
             if !routes.isEmpty {
                 Text(L("Gealarmeerde kazernes")).font(AppFont.heading(24)).padding(.top, 6)

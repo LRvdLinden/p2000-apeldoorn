@@ -24,6 +24,7 @@ struct P2000ApeldoornApp: App {
     var body: some Scene {
         WindowGroup {
             RootView()
+                .modifier(MinVersieWacht())
                 .environment(store)
                 .environment(settings)
                 .environment(account)

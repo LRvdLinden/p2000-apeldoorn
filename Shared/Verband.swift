@@ -6,6 +6,8 @@ struct MeldingVerband: Identifiable, Hashable {
     let melding: Melding
     let redenen: [String]
     let score: Int
+    /// The server put both alerts in the same incident (not a guess of the app).
+    var zeker = false
     var id: String { melding.guid }
 }
 
@@ -22,6 +24,13 @@ enum Verband {
 
         for o in list where o.guid != m.guid {
             let dt = o.datum.timeIntervalSince(m.datum)
+            // The server gives every alert its incident: the same incident is certain, a different one at most "possible".
+            let zelfde: Bool? = (m.incident != nil && o.incident != nil) ? m.incident == o.incident : nil
+            if zelfde == true {
+                let min0 = Int((abs(dt) / 60).rounded())
+                out.append(MeldingVerband(melding: o, redenen: [L("Zelfde inzet"), min0 == 0 ? L("Zelfde minuut") : dt < 0 ? Lf("%lld min eerder", min0) : Lf("%lld min later", min0)], score: 5, zeker: true))
+                continue
+            }
             guard abs(dt) <= window else { continue }
             // Planned patient transport (B1–B3) is never part of an incident.
             if isBesteld(o) || isBesteld(m) { continue }
@@ -50,6 +59,7 @@ enum Verband {
             }
             guard score > 0 else { continue }
             if o.dienst != m.dienst { score += 1 }
+            if zelfde == false { score = Swift.min(score, 2) }
             let min = Int((abs(dt) / 60).rounded())
             redenen.append(min == 0 ? L("Zelfde minuut") : dt < 0 ? Lf("%lld min eerder", min) : Lf("%lld min later", min))
             out.append(MeldingVerband(melding: o, redenen: redenen, score: score))

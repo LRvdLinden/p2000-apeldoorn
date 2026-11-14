@@ -6,7 +6,7 @@ import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
 import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError, categorie } from "./rules.js";
 import {
-  insertStmt, knownGuids, listMeldingen, getMelding, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
+  insertStmt, knownGuids, listMeldingen, getMelding, incidentMeldingen, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
   activeDevices, deviceCount, housekeeping,
 } from "./db.js";
 import {
@@ -48,6 +48,7 @@ import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronn
 import { kvWrite } from "./kv.js";
 import { hmPaal, hmPunt, hmHerstel, straatPunt, straatHerstel } from "./hm.js";
 import { pandVoor } from "./pand.js";
+import { kenToe, recenteVoorIncident, incidentHerstel } from "./incident.js";
 
 /** Last run of the hectometre-post repair in this isolate (it reads the alerts of 48 hours, so not every round). */
 let hmLaatst = 0;
@@ -137,6 +138,14 @@ async function handle(req, env, ctx) {
     if (!item) return reply(404, { error: "Not found" });
     if (!String(item.locatie || "").trim() || item.lat == null) return reply(200, { guid: item.guid, kazernes: [] });
     return reply(200, await routesVoor(env, item), { "cache-control": "public, max-age=3600" });
+  }
+  // Every alert of the incident this alert belongs to, oldest first.
+  m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/verloop$/);
+  if (method === "GET" && m) {
+    const item = await getMelding(env, m[1]);
+    if (!item) return reply(404, { error: "Not found" });
+    const meldingen = item.incident ? await incidentMeldingen(env, item.incident) : [item];
+    return reply(200, { guid: item.guid, incident: item.incident, meldingen }, { "cache-control": "public, max-age=20" });
   }
   // Building facts (year built, use) from the BAG, for an alert at an address with a house number.
   m = path.match(/^\/v1\/meldingen\/([\w-]{8,64})\/pand$/);
@@ -242,6 +251,11 @@ async function handle(req, env, ctx) {
 
   m = path.match(/^\/v1\/content\/(privacy|cookies|terms|disclaimer|hulp)$/);
   if (method === "GET" && m) return reply(200, await contentFor(env, m[1], CONTENT), { "cache-control": "public, max-age=300" });
+  // What the apps need at start-up: the lowest build that still works (below it the app asks to update). No database.
+  if (method === "GET" && path === "/v1/app") {
+    const n = (v) => Math.max(0, Number.parseInt(v || "0", 10) || 0);
+    return reply(200, { min_build: { ios: n(env.MIN_BUILD_IOS), android: n(env.MIN_BUILD_ANDROID) } }, { "cache-control": "public, max-age=3600" });
+  }
   if (method === "GET" && path === "/v1/changelog") return reply(200, await contentFor(env, "changelog", CONTENT), { "cache-control": "public, max-age=300" });
 
   // Anonymous counters for the beheer statistics.
@@ -471,12 +485,20 @@ async function poll(env, budget) {
       if (hp) { [m.lat, m.lon] = hp; continue; }
       // Precise coordinates for the street (keep a few requests over for the pushes).
       // Only a street name: the middle of that street from the road register (PDOK), so the marker is on the street.
+      // Not when the source says it is a crossing: then its own coordinate is the crossing itself.
+      const kruising = String(m.vlaggen || "").includes("kruising") && m.lat != null;
+      if (kruising) continue;
       const sp = m.locatie && budget.left > 20 ? await straatPunt(env, budget, m.locatie, m.stad) : null;
       if (sp) { [m.lat, m.lon] = sp; continue; }
       if (m.locatie && budget.left > 20 && budget.take()) {
         const c = await geocode(env, m.locatie, m.stad);
         if (c) [m.lat, m.lon] = c;
       }
+    }
+    // Which incident does each new alert belong to? (guid of the first alert of that incident)
+    if (fresh.length) {
+      try { kenToe(fresh, (await recenteVoorIncident(env)).filter((r) => r.incident)); }
+      catch (e) { console.warn("[incident]", e.message || e); for (const m of fresh) m.incident ||= m.guid; }
     }
     if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
     // Earlier messages on a motorway that are not on their post yet.
@@ -486,6 +508,7 @@ async function poll(env, budget) {
         try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
         try { await straatHerstel(env, budget); } catch (e) { console.warn("[straat herstel]", e.message || e); }
         try { await categorieHerstel(env); } catch (e) { console.warn("[categorie herstel]", e.message || e); }
+        try { await incidentHerstel(env); } catch (e) { console.warn("[incident herstel]", e.message || e); }
     }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
@@ -671,15 +694,15 @@ async function nieuwsRun(env, budget) {
 
 /** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */
 /**
- * Alerts of the last week filed as "Dier in problemen" get their category worked out again with the current rules
- * (a street such as "Laan van de Dierenriem" used to count as an animal). Only rows that really change are written.
+ * Alerts of the last two days (not the ambulance: those go by priority) get their category worked out again with the
+ * current rules, so a fix of a rule also reaches alerts that are in already. Only rows that really change are written.
  */
 async function categorieHerstel(env) {
   const { results } = await env.DB.prepare(
-    "SELECT guid, title, full_melding, dienst, prioriteit, categorie FROM meldingen WHERE datum > ? AND categorie = 'Dier in problemen' LIMIT 40",
-  ).bind(Date.now() - 7 * 86400_000).all();
+    "SELECT guid, title, full_melding, dienst, prioriteit, categorie, locatie FROM meldingen WHERE datum > ? AND dienst != 'ambulance' ORDER BY datum DESC LIMIT 150",
+  ).bind(Date.now() - 2 * 86400_000).all();
   for (const r of results || []) {
-    const nieuw = categorie(r.dienst, r.prioriteit, r.full_melding || r.title || "");
+    const nieuw = categorie(r.dienst, r.prioriteit, r.full_melding || r.title || "", r.locatie);
     if (nieuw && nieuw !== r.categorie) await env.DB.prepare("UPDATE meldingen SET categorie = ? WHERE guid = ?").bind(nieuw, r.guid).run();
   }
 }

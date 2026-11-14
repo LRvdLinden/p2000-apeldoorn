@@ -51,7 +51,12 @@ jobs:
             ID=$(find_id)
           fi
           sed -i "s/__D1_DATABASE_ID__/$ID/" wrangler.toml
+          # Columns added later: ALTER fails when they exist already (and on a new database, where schema.sql creates them).
+          npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN incident TEXT" > /dev/null 2>&1 || true
+          npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN vlaggen TEXT" > /dev/null 2>&1 || true
           npx wrangler d1 execute p2000-apeldoorn --remote --file schema.sql
+          # The worker reads these columns in every alert query: never deploy without them.
+          npx wrangler d1 execute p2000-apeldoorn --remote --command "SELECT incident, vlaggen FROM meldingen LIMIT 1" > /dev/null
 
       - name: workers.dev-subdomein (eenmalig)
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
