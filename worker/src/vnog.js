@@ -83,6 +83,12 @@ export function inStraat(locatie, straat) {
 export const vnogGrip = (g) => { const n = Number(g); return Number.isInteger(n) && n >= 1 && n <= 5 ? n : null; };
 const afgesloten = (s) => s === false || s === 0 || s === "0" || s === "false";
 
+/** Whether the newest update says the reporting has ended ("Einde berichtgeving", "Einde bericht", "Einde persbericht"). */
+export function vnogEinde(inc) {
+  const u = (inc?.updates || [])[0];
+  return Boolean(u) && /einde\s+(berichtgeving|bericht|persbericht)(?![\p{L}])/iu.test(`${u.title || ""} ${platTekst(u.description)}`);
+}
+
 /** The street of an incident: named in the title, else in the text. */
 export function vnogStraat(inc) {
   for (const tekst of [String(inc?.title || ""), (inc?.updates || []).map((u) => platTekst(u.description)).join(" ")]) {
@@ -124,9 +130,14 @@ export function vnogWarning(inc, prev, now = Date.now()) {
     lijst.push({ id, soort: lijst.length ? "update" : "start", plaats: plaats.naam, at: new Date(at).toISOString(), tekst, ...(link ? { link } : {}) });
     nieuw.push(id);
   });
-  const klaar = afgesloten(inc.status);
+  // VNOG ends its reporting with "Einde berichtgeving" in the newest update; the status of the API often stays "running"
+  // for hours after that (seen on 14 November 2026: 195 of 295 incidents end this way). Both count as closed.
+  const klaar = afgesloten(inc.status) || vnogEinde(inc);
   const wasKlaar = prev?.row?.status === "beeindigd";
-  const eind = klaar ? (wasKlaar && prev.row.end_at ? prev.row.end_at : prev ? now : Math.max(updated, created)) : null;
+  // Closed by its text long after the last change of VNOG (we were not following then, or the rule is newer than the
+  // incident): the end is that last change, and no closing push hours afterwards.
+  const laat = klaar && Boolean(prev) && !wasKlaar && !afgesloten(inc.status) && now - Math.max(updated, created) > 30 * 60_000;
+  const eind = klaar ? (wasKlaar && prev.row.end_at ? prev.row.end_at : prev && !laat ? now : Math.max(updated, created)) : null;
   if (klaar) lijst.push({ id: "afloop", soort: "afloop", plaats: plaats.naam, at: new Date(eind).toISOString(), tekst: VNOG_AFGESLOTEN });
   const grip = vnogGrip(inc.grip);
   const laatste = [...lijst].reverse().find((b) => b.soort !== "afloop");
@@ -140,7 +151,7 @@ export function vnogWarning(inc, prev, now = Date.now()) {
       straat: extra.straat || vnogStraat(inc) || null, incident: extra.incident || null, plek: extra.plek || null },
     _nieuw: Boolean(prev) && nieuw.length > 0,
     _gripHoger: Boolean(prev) && (grip || 0) > (extra.grip || 0),
-    _afgesloten: klaar && Boolean(prev) && !wasKlaar,
+    _afgesloten: klaar && Boolean(prev) && !wasKlaar && !laat,
     _vers: now - created <= VNOG_VERS_MS,
   };
 }

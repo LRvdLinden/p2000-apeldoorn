@@ -305,7 +305,7 @@ struct WaarschuwingDetailView: View {
             HStack(alignment: .top, spacing: 12) {
                 WaarschuwingIcon(waarschuwing: w, size: 32)
                 VStack(alignment: .leading, spacing: 3) {
-                    Text(verbatim: w.kop).font(AppFont.body(12, .bold)).foregroundStyle(w.bron == .nlalert ? Color.orange : w.color)
+                    Text(verbatim: w.kop).font(AppFont.body(12, .bold)).foregroundStyle(w.bron == .nlalert ? Color.orange : w.isVnog ? Color(hex: 0x8B6BE0) : w.color)
                     Text(w.titel).font(AppFont.body(16, .medium)).fixedSize(horizontal: false, vertical: true).textSelection(.enabled)
                 }
                 Spacer(minLength: 8)
@@ -322,7 +322,9 @@ struct WaarschuwingDetailView: View {
                 .accessibilityLabel(L("Kopieer waarschuwing"))
             }
             infoRow("location.fill", Color(hex: 0x3B82F6), w.plaats ?? L("Gemeente Apeldoorn"),
-                    w.bron == .knmi || w.bron == .nlalert ? L("Gebied staat op de kaart") : L("Plaats van de oproep"))
+                    w.bron == .knmi || w.bron == .nlalert ? L("Gebied staat op de kaart")
+                    : w.isVnog ? (w.coordinate == nil ? L("Geen exacte plek bekend") : w.incident != nil ? Lf("%@ · plek van het P2000-incident", w.straat ?? L("Straat")) : Lf("%@ · de straat die VNOG noemt", w.straat ?? L("Straat")))
+                    : L("Plaats van de oproep"))
             infoRow(w.isBeeindigd ? "checkmark.circle.fill" : "exclamationmark.triangle.fill", w.isBeeindigd ? .gray : Color(hex: 0xDC2626),
                     w.statusLabel, w.soort ?? MeldingDetailView.bronNaam(w.bron))
             TimelineView(.periodic(from: .now, by: 30)) { ctx in

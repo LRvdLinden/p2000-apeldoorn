@@ -171,6 +171,40 @@
         }
       }
     },
+    "%@ · de straat die VNOG noemt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · the street VNOG names"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · de straat die VNOG noemt"
+          }
+        }
+      }
+    },
+    "%@ · plek van het P2000-incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · spot of the P2000 incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · plek van het P2000-incident"
+          }
+        }
+      }
+    },
     "%@ – nog in de lucht": {
       "extractionState": "manual",
       "localizations": {
@@ -4655,6 +4689,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen exacte locatie bekend"
+          }
+        }
+      }
+    },
+    "Geen exacte plek bekend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No exact spot known"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen exacte plek bekend"
           }
         }
       }
@@ -11472,6 +11523,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Straaljager"
+          }
+        }
+      }
+    },
+    "Straat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Street"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Straat"
           }
         }
       }

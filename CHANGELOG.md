@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 101)
+- **VNOG-incident bleef op "Actief" staan** terwijl VNOG klaar was. VNOG sluit af met "Einde berichtgeving" in de laatste update; de status in de API blijft daarna vaak nog uren op lopend staan (195 van de 295 incidenten eindigen zo). Staat dat in de nieuwste update, dan is het incident nu afgesloten. Zien we het pas later dan een half uur na die update, dan geldt het tijdstip van die update als einde en komt er geen pushmelding meer. Komt er daarna toch een nieuwe update, dan loopt het incident weer. Alleen de server.
+- App: bij een VNOG-incident staat onder de plaats nu waar de marker vandaan komt (plek van het P2000-incident, de straat die VNOG noemt, of geen exacte plek) in plaats van "Plaats van de oproep", en de regel "VNOG · Incident" is lichter paars zodat hij in de donkere weergave leesbaar is.
+
 ## A-Alerts 2.0.1 (build 100)
 - **Nieuwe bron: VNOG-incidenten.** De incidentpagina's van de Veiligheidsregio Noord- en Oost-Gelderland (open API van vnog.nl), alleen voor de gemeente Apeldoorn en voor Teuge (gemeente Voorst, alleen als Teuge in de tekst staat). Per incident: de berichten als tijdlijn, de officiële GRIP, en de afsluiting. Alleen tekst; foto's van VNOG worden niet overgenomen.
 - **Plek:** VNOG geeft geen adres of coördinaten. Noemt VNOG een straat, dan zoekt de server het P2000-incident in die straat (4 uur voor tot 1 uur na het begin; "Laan van Dierenriem" en "Laan van de Dierenriem" tellen als dezelfde straat), neemt die plek en koppelt het incident. Anders het midden van de straat (PDOK). Zonder straat geen marker.

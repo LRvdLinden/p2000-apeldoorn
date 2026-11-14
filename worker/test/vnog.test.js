@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { vnogDatum, platTekst, vnogPlaats, vnogWarning, vnogStraat, vnogLijst, vnogGrip, inStraat, straatKey } from "../src/vnog.js";
+import { vnogDatum, platTekst, vnogPlaats, vnogWarning, vnogStraat, vnogLijst, vnogGrip, inStraat, straatKey, vnogEinde } from "../src/vnog.js";
 import { payloadForWarning, wantsPush, prefsFrom } from "../src/alerts.js";
 
 // Shapes as the API of VNOG returned them on 14 November 2026 (https://www.vnog.nl/api/v1/incidents).
@@ -163,4 +163,27 @@ test("the street of VNOG against the address of P2000 (seen live on 14 November 
   assert.equal(inStraat("Bergweg 3", "Lage Bergweg"), false);
   assert.equal(inStraat("Deventerstraat", "Stationsstraat"), false);
   assert.equal(inStraat("", "Stationsweg"), false);
+});
+
+test("\"Einde berichtgeving\" in the newest update closes the incident, also while the API still says running", () => {
+  const einde = { ...dierenriem, updates: [{ title: "Werkplaats onder de rook", description: "<p>De brand is uit. Einde berichtgeving.</p>" }] };
+  assert.equal(vnogEinde(einde), true);
+  assert.equal(vnogEinde(dierenriem), false);
+  // Only the newest update counts: an older "Einde berichtgeving" with a newer update after it is running again.
+  assert.equal(vnogEinde({ ...einde, updates: [{ title: "Opnieuw brand", description: "<p>De brand is weer opgelaaid.</p>" }, ...einde.updates] }), false);
+  const eerste = vnogWarning(einde, null, Date.parse("2026-11-14T16:00:00Z"));
+  assert.equal(eerste.status, "beeindigd");
+  assert.equal(new Date(eerste.end_at).toISOString(), "2026-11-14T11:16:00.000Z"); // first sight: the last change of VNOG
+  // Followed live: closed at the moment we saw it, with one closing push.
+  const w1 = vnogWarning(dierenriem, null, Date.parse("2026-11-14T07:20:00Z"));
+  const t = Date.parse("2026-11-14T11:18:00Z");
+  const w2 = vnogWarning(einde, { row: { titel: w1.titel, plaats: w1.plaats, status: "actief", start_at: w1.start_at, notified: "1" }, extra: w1.extra }, t);
+  assert.equal(w2.status, "beeindigd");
+  assert.equal(w2._afgesloten, true);
+  assert.equal(w2.end_at, t);
+  // Seen hours after VNOG wrote it (the live case of 14 November): closed at the last change of VNOG, without a push.
+  const w3 = vnogWarning(einde, { row: { titel: w1.titel, plaats: w1.plaats, status: "actief", start_at: w1.start_at, notified: "1" }, extra: w1.extra }, Date.parse("2026-11-14T17:15:00Z"));
+  assert.equal(w3.status, "beeindigd");
+  assert.equal(w3._afgesloten, false);
+  assert.equal(new Date(w3.end_at).toISOString(), "2026-11-14T11:16:00.000Z");
 });

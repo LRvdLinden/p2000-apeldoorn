@@ -971,5 +971,9 @@
   "Geen P2000-incident gevonden bij dit bericht van VNOG.": "No P2000 incident found for this message from VNOG.",
   "De P2000-meldingen van het incident in de straat die VNOG noemt, rond het begin. De plek op de kaart komt van dit incident.": "The P2000 alerts of the incident in the street VNOG names, around the start. The spot on the map comes from this incident.",
   "P2000-meldingen in de straat die VNOG noemt, rond het begin van het incident. Dit is een mogelijk verband, geen bevestiging.": "P2000 alerts in the street VNOG names, around the start of the incident. This is a possible link, not a confirmation.",
-  "Grote incidenten met updates van de veiligheidsregio": "Major incidents with updates from the safety region"
+  "Grote incidenten met updates van de veiligheidsregio": "Major incidents with updates from the safety region",
+  "Geen exacte plek bekend": "No exact spot known",
+  "%@ · plek van het P2000-incident": "%@ · spot of the P2000 incident",
+  "%@ · de straat die VNOG noemt": "%@ · the street VNOG names",
+  "Straat": "Street"
 }
