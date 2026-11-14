@@ -953,5 +953,9 @@
   "Bijvoorbeeld een verkeerde naam, of een toestel dat ontbreekt.": "For example a wrong name, or an aircraft that is missing.",
   "Nog niet gezien": "Not seen yet",
   "Ook als de roepnaam wijzigt": "Also when the callsign changes",
-  "Meerdere helikopters op één plek": "Several helicopters at one spot"
+  "Meerdere helikopters op één plek": "Several helicopters at one spot",
+  "Meer over deze vlucht": "More about this flight",
+  "Minder": "Less",
+  "koers": "heading",
+  "hoogte": "altitude"
 }

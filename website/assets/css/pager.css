@@ -532,3 +532,10 @@ button.amaps { width: 100%; border: 0; font: inherit; font-weight: 700; cursor: 
 .heli-meld summary { cursor: pointer; color: var(--muted); font-size: .85rem; }
 .heli-meld textarea { width: 100%; margin: 8px 0; border-radius: 10px; border: 1px solid var(--line, #8884); background: var(--surface-2); color: inherit; padding: 8px; font: inherit; font-size: .9rem; box-sizing: border-box; }
 .heli-meld .hint { display: block; margin: 6px 0 0; }
+
+/* Aircraft popup: opens small, "Meer" unfolds the rest. */
+.heli-kort { margin: 0; font-size: .9rem; color: var(--muted); }
+.heli-kort b { color: var(--text, inherit); }
+.heli-vouw { border: 0; background: none; color: var(--accent, #C0141F); font: inherit; font-weight: 700; font-size: .9rem; padding: 4px 0; cursor: pointer; justify-self: center; }
+.heli-meer { display: grid; gap: 10px; }
+.heli-meer[hidden] { display: none; }

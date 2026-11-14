@@ -7515,6 +7515,23 @@
         }
       }
     },
+    "Meer over deze vlucht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "More about this flight"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meer over deze vlucht"
+          }
+        }
+      }
+    },
     "Meerdere helikopters op één plek": {
       "extractionState": "manual",
       "localizations": {
@@ -7936,6 +7953,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mijn locatie"
+          }
+        }
+      }
+    },
+    "Minder": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Less"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Minder"
           }
         }
       }
@@ -14536,6 +14570,23 @@
         }
       }
     },
+    "hoogte": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "altitude"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "hoogte"
+          }
+        }
+      }
+    },
     "iOS laat kort een melding zien als het icoon is gewijzigd.": {
       "extractionState": "manual",
       "localizations": {
@@ -14583,6 +14634,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "inzetten"
+          }
+        }
+      }
+    },
+    "koers": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "heading"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "koers"
           }
         }
       }

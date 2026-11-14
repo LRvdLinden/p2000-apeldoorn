@@ -23,6 +23,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.filled.Notifications
@@ -254,7 +256,7 @@ fun MapScreen(nav: Nav) {
     }
     if (KaartLaag.HELIKOPTERS.key in lagen) vliegend.forEach { h ->
         val (la, lo) = h.geschat(nu)
-        points += MapPoint("h:${h.id}", la, lo, h.afbeelding, Settings.heliBreedte, label = h.naam, flip = h.vliegtWest, anchorBottom = false)
+        points += MapPoint("h:${h.id}", la, lo, h.afbeelding, Settings.heliBreedte, label = h.naam.takeIf { h.id == selHeli }, flip = h.vliegtWest, anchorBottom = false)
         val spoor = if (h.id == selHeli && selSpoor.isNotEmpty()) selSpoor else sporen[h.id].orEmpty()
         val afspelen = h.id == selHeli && afspeelPunt != null
         if (spoor.isNotEmpty()) lines += MapLine("spoor:${h.id}", spoor.lijn() + listOfNotNull((la to lo).takeIf { !afspelen }),
@@ -533,6 +535,18 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                 val code = when (w.niveau) { "red" -> tr("code rood", "code red"); "orange" -> tr("code oranje", "code orange"); else -> tr("code geel", "code yellow") }
                 Text(tr("Weinig helikopterinzet te verwachten: ${w.reden} ($code).", "Few helicopter flights expected: ${w.redenEn ?: w.reden} ($code)."), color = Muted, fontSize = 12.sp)
             }
+            // Opens small, so the aircraft and its trail stay in sight; "Meer" unfolds the rest.
+            var uit by remember(h.id) { mutableStateOf(false) }
+            if (!uit) {
+                Text(listOfNotNull(h.koersTekst?.takeIf { !h.opGrond }?.let { "$it " + tr("koers", "heading") }, h.hoogteTekst, h.snelheidTekst.takeIf { !h.opGrond }).joinToString("  ·  "), fontSize = 13.sp, fontWeight = FontWeight.SemiBold)
+                h.voorspelling?.let { Text(it.tekst, fontWeight = FontWeight.Medium, fontSize = 13.sp) }
+                Store.annuleringVan(h.id)?.let { HeliInzetRegel(it) }
+            }
+            TextButton(onClick = { uit = !uit }, modifier = Modifier.fillMaxWidth()) {
+                Icon(if (uit) Icons.Filled.KeyboardArrowDown else Icons.Filled.KeyboardArrowUp, null); Spacer(Modifier.width(4.dp))
+                Text(if (uit) tr("Minder", "Less") else tr("Meer over deze vlucht", "More about this flight"), fontWeight = FontWeight.SemiBold)
+            }
+            if (uit) {
             InfoRow(tr("Hoogte", "Altitude"), listOfNotNull(h.hoogteTekst, h.hoogteTweede).joinToString(" · "))
             InfoRow(tr("Snelheid", "Speed"), listOfNotNull(h.snelheidTekst, h.snelheidTweede).joinToString(" · "))
             if (!h.opGrond && h.koers != null) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -593,6 +607,7 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                         Spacer(Modifier.width(8.dp)); Text(v.tekst, fontSize = 12.sp)
                     }
                 }
+            }
             }
         }
     }

@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=71";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=72";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -1090,7 +1090,7 @@ async function renderMap() {
   if (!mk) { renderStaticMarkers(pins, clusters); return; }
   bigMap.removeAnnotations(bigMap.annotations.filter((a) => !a._heli));
   bigMap.removeOverlays(bigMap.overlays);
-  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); } });
+  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
   const actief = state.warnings.filter((w) => isActief(w));
   const extra = [];
   if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
@@ -1113,7 +1113,7 @@ async function renderMap() {
     if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
   }
   heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
-  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openHeli(t); } });
+  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openHeli(t); }, gekozen: () => heliSpoor.id });
   luchtMarkers.update(state.lagen.has("helikopters") ? state.lucht : []);
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
@@ -1342,8 +1342,11 @@ function selectSpoor(id) {
 /** Helicopter tapped: heading, altitude and speed (like the app's info card). */
 /** Helicopters plus the chosen defence and government aircraft (the route trail and flights work for all of them). */
 const vliegend = () => [...state.helis, ...state.lucht];
+const heliVouw = { id: null, uit: false };
 function openHeli(h) {
   const box = $("clusterPanel");
+  if (heliVouw.id !== h.id) Object.assign(heliVouw, { id: h.id, uit: false });
+  const uit = heliVouw.uit;
   const koers = h.koers != null && !h.op_grond ? `${h.koers}° ${["N", "NO", "O", "ZO", "Z", "ZW", "W", "NW"][Math.round(h.koers / 45) % 8]}` : "–";
   // Both units at once: metres with feet, km/h with knots.
   const hoogte = h.op_grond ? "Op de grond" : h.hoogte_ft != null ? `${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m <small>${Math.round(h.hoogte_ft / 25) * 25} ft</small>` : "–";
@@ -1359,9 +1362,12 @@ function openHeli(h) {
     ${h.op_grond && h.plek ? `<p class="heli-boven">${h.plek_soort === "basis" ? "Op de basis: " : "Op de grond bij "}<b>${esc(h.plek)}</b></p>` : ""}
     ${h.samen ? `<p class="heli-samen"><b>Samen met ${esc(h.samen.met.join(", "))}</b> op één plek${h.samen.plaats ? ` in ${esc(h.samen.plaats)}` : ""}. Mogelijk een groot incident.</p>` : ""}
     <p class="heli-weer" id="heliWeer" hidden></p>
-    <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
     ${inzetVan(h.id) ? `<div class="inzet-status geannuleerd"><b>${esc(inzetTekst(inzetVan(h.id))[0])}</b><small>${esc(inzetTekst(inzetVan(h.id))[1])}</small></div>` : ""}
+    <p class="heli-kort" id="heliKort"${uit ? " hidden" : ""}>${h.op_grond ? "Op de grond" : [h.koers != null ? `<b>${koers}</b> koers` : "", h.hoogte_ft != null ? `<b>${Math.round((h.hoogte_ft * 0.3048) / 10) * 10} m</b> hoogte` : "", h.snelheid_kt != null ? `<b>${Math.round(h.snelheid_kt * 1.852)} km/u</b>` : ""].filter(Boolean).join(" · ")}</p>
+    <button class="heli-vouw" id="heliVouw" aria-expanded="${uit}">${uit ? "Minder ⌄" : "Meer over deze vlucht ⌃"}</button>
+    <div class="heli-meer" id="heliMeer"${uit ? "" : " hidden"}>
+    <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     <div class="seg" id="spoorScope">${[["vlucht", "Deze vlucht"], ["kort", "30 min"], ["lang", "2 uur"]].map(([k, l]) => `<button data-scope="${k}" class="${heliSpoor.scope === k ? "on" : ""}">${l}</button>`).join("")}</div>
     <div class="afspeel"><button id="afspeelKnop" class="icon-btn" aria-label="Vlucht terugspelen">▶</button>
       <input type="range" id="afspeelSlider" min="0" max="1" step="0.001" value="${afspelen.f ?? 1}" aria-label="Afspeelpositie">
@@ -1374,8 +1380,17 @@ function openHeli(h) {
     <details class="heli-meld"><summary>Klopt dit toestel niet?</summary>
       <textarea id="heliMeldTekst" rows="2" maxlength="500" placeholder="Wat klopt er niet? Bijvoorbeeld: verkeerde naam, of een toestel dat ontbreekt."></textarea>
       <button id="heliMeldKnop" class="btn">Verstuur</button><small class="hint" id="heliMeldUit"></small></details>
+    </div>
     </div>`;
   box.hidden = false;
+  // Opens small (the aircraft and its trail stay in sight); "Meer" unfolds the rest. Stays as chosen while this aircraft is open.
+  $("heliVouw")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    heliVouw.uit = !heliVouw.uit;
+    $("heliMeer").hidden = !heliVouw.uit; $("heliKort").hidden = heliVouw.uit;
+    e.currentTarget.textContent = heliVouw.uit ? "Minder ⌄" : "Meer over deze vlucht ⌃";
+    e.currentTarget.setAttribute("aria-expanded", String(heliVouw.uit));
+  });
   // Weather that limits flying (a KNMI code for fog, wind, thunderstorms, snow or ice).
   fetchHeliStatus().then((st) => {
     const el = $("heliWeer");

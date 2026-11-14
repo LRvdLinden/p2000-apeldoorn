@@ -346,7 +346,7 @@ export function heliInfo(h) {
 }
 
 /** MapKit JS annotation for a helicopter (side view, mirrored when flying west). */
-export function heliAnnotation(mk, h) {
+export function heliAnnotation(mk, h, { naam = true } = {}) {
   const factory = () => {
     const el = document.createElement("div");
     el.className = "heli-marker";
@@ -354,7 +354,7 @@ export function heliAnnotation(mk, h) {
     const b = heliBreedte();
     el.style.cssText = `display:grid;justify-items:center;gap:2px;width:${b + 12}px;transform:translateY(-50%)${Date.now() - new Date(h.gezien).getTime() > 60_000 ? ";opacity:.5;filter:grayscale(.8)" : ""}`;
     el.innerHTML = `<img src="${heliImg(h)}" alt="" width="${b}" style="width:${b}px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
-      + `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>`;
+      + (naam ? `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>` : "");
     el.title = `${h.naam} · ${heliInfo(h)}`;
     return el;
   };
@@ -524,7 +524,8 @@ export function vluchtTekst(v) {
  * Keeps one MapKit annotation per helicopter and moves it smoothly (dead reckoning every second) instead of
  * redrawing all markers. update(list) after every fetch; stop() when the map goes away.
  */
-export function heliLaag(mk, map, { onSelect } = {}) {
+// `gekozen` (optional) gives the id of the chosen aircraft: then only that one shows its name under the drawing.
+export function heliLaag(mk, map, { onSelect, gekozen } = {}) {
   const anns = new Map();
   let list = [];
   const timer = setInterval(() => {
@@ -540,10 +541,12 @@ export function heliLaag(mk, map, { onSelect } = {}) {
       for (const h of list) {
         const old = anns.get(h.id);
         // Flip direction / name changes: replace the marker; otherwise only move it.
-        if (old && old._west === vliegtWest(h)) { const g = geschat(h); old.coordinate = new mk.Coordinate(g.lat, g.lon); continue; }
+        const metNaam = gekozen ? gekozen() === h.id : true;
+        if (old && old._west === vliegtWest(h) && old._naam === metNaam) { const g = geschat(h); old.coordinate = new mk.Coordinate(g.lat, g.lon); continue; }
         if (old) map.removeAnnotation(old);
-        const a = heliAnnotation(mk, { ...h, ...geschat(h) });
+        const a = heliAnnotation(mk, { ...h, ...geschat(h) }, { naam: metNaam });
         a._west = vliegtWest(h);
+        a._naam = metNaam;
         a._heli = true;
         if (onSelect) a.addEventListener("select", () => onSelect(h.id));
         anns.set(h.id, a);

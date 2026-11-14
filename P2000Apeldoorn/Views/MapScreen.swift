@@ -434,7 +434,7 @@ struct MapScreen: View {
             }
             ForEach(heliLijst) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
-                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
+                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id, toonNaam: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
                         .accessibilityAddTraits(.isButton)
                 }
@@ -448,7 +448,7 @@ struct MapScreen: View {
         if settings.laag(.helikopters) {
             ForEach(luchtLijst) { h in
                 Annotation(h.naam, coordinate: h.geschat(op: nu), anchor: .center) {
-                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id)
+                    HeliMarker(heli: h, size: settings.heliIcoonGrootte, selected: selectedHeli == h.id, toonNaam: selectedHeli == h.id)
                         .onTapGesture { withAnimation { selectedHeli = h.id; selected = nil; selectedKazerne = nil; selectedLocatie = nil } }
                         .accessibilityAddTraits(.isButton)
                 }
@@ -462,7 +462,8 @@ struct MapScreen: View {
             if let selected {
                 MapPreviewCard(melding: selected) { self.selected = nil }
             } else if let heli {
-                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor) { selectedHeli = nil }
+                HeliInfoKaart(heli: heli, afstandKm: afstand(heli.lat, heli.lon), spoor: spoor, inklapbaar: true) { selectedHeli = nil }
+                    .id(heli.id)
             } else if let k = selectedKazerne {
                 KazerneKaart(kazerne: k) { selectedKazerne = nil }
             } else if let l = selectedLocatie {

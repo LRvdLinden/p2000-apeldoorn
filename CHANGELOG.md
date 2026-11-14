@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 96)
+- **Kaartje van een toestel opent klein** (app, Android en pager): naam, boven welke plaats, hoe lang in de lucht en één regel met koers, hoogte en snelheid. "Meer over deze vlucht" (in de app ook omhoog vegen) vouwt de rest uit: de drie vakken, het spoor, terugspelen, waar geweest, de vluchten en "Klopt dit toestel niet?". Zo blijven het toestel en zijn vliegspoor in beeld. De bel is ongewijzigd.
+- **Naam onder een toestel alleen nog bij het gekozen toestel** op de kaart (app, Android en pager). De meldkamer, de widget en de kaart bij een melding tonen de naam nog wel.
+
 ## A-Alerts 2.0.1 (build 95)
 - **Tekening van de politiehelikopter AW139 (Zulu 24, 25, 26) hersteld.** In het bestand stond een deel van de onderdelen verschoven (hoofdrotor, achterwiel, lichtblauwe lijn, staartlicht, ruit op de neus) en het kader sneed de staartrotor, de buik en de wielen af. De tekening zelf is niet veranderd. App, Android en website (kaart, pager, meldkamer).
 

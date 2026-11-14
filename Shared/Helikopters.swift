@@ -315,6 +315,8 @@ struct HeliMarker: View {
     /// Height of the helicopter drawing in points (it is about 2.8× as wide).
     var size: CGFloat = 38
     var selected = false
+    /// The name under the drawing. On the map only the chosen aircraft shows it.
+    var toonNaam = true
     /// Turn the drawing with the direction of flight (side view: nose left when flying west).
     var volgtKoers = true
 
@@ -327,10 +329,12 @@ struct HeliMarker: View {
                 .scaleEffect(x: volgtKoers && heli.vliegtWest ? -1 : 1, y: 1)
                 .shadow(color: .black.opacity(0.35), radius: 3, y: 2)
                 .padding(4)
-            Text(heli.naam)
-                .font(AppFont.body(10, .bold, relativeTo: .caption2))
-                .padding(.horizontal, 6).padding(.vertical, 2)
-                .background(.regularMaterial, in: Capsule())
+            if toonNaam {
+                Text(heli.naam)
+                    .font(AppFont.body(10, .bold, relativeTo: .caption2))
+                    .padding(.horizontal, 6).padding(.vertical, 2)
+                    .background(.regularMaterial, in: Capsule())
+            }
         }
         .opacity(heli.isVerouderd ? 0.55 : 1)
         .scaleEffect(selected ? 1.12 : 1)
@@ -347,10 +351,20 @@ struct HeliInfoKaart: View {
     var afstandKm: Double?
     /// Route trail and flight history (map screen); nil hides that part.
     var spoor: HeliSpoorStore?
+    /// On the map: the card opens small (the aircraft and its trail stay in sight) and unfolds on "Meer" or a swipe up.
+    var inklapbaar = false
     var onClose: (() -> Void)?
+    @State private var uitgevouwen = false
+
+    private var klein: Bool { inklapbaar && !uitgevouwen }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            if inklapbaar {
+                Capsule().fill(Color.secondary.opacity(0.4)).frame(width: 38, height: 5)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, -4)
+            }
             HStack(spacing: 12) {
                 Image(heli.afbeelding)
                     .resizable()
@@ -387,6 +401,54 @@ struct HeliInfoKaart: View {
                 }
             }
             HeliExtraRegels(heli: heli)
+            if klein {
+                // The basics on one line; everything else behind "Meer".
+                HStack(spacing: 14) {
+                    if !heli.opGrond, let k = heli.koersTekst { kort(k, L("koers")) }
+                    kort(heli.hoogteTekst, heli.opGrond ? nil : L("hoogte"))
+                    if !heli.opGrond { kort(heli.snelheidTekst, nil) }
+                    Spacer(minLength: 0)
+                }
+                if let v = heli.voorspelling { VoorspellingRegel(voorspelling: v) }
+                if let a = HeliStore.shared.annulering(van: heli.id) { HeliInzetRegel(inzet: a) }
+                vouwKnop
+            } else {
+                uitgebreid
+                if inklapbaar { vouwKnop }
+            }
+        }
+        .padding(14)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
+        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
+        #if !os(tvOS)
+        .gesture(DragGesture(minimumDistance: 24).onEnded { g in
+            guard inklapbaar, abs(g.translation.height) > abs(g.translation.width) else { return }
+            withAnimation(.snappy) { uitgevouwen = g.translation.height < 0 }
+        })
+        #endif
+    }
+
+    private var vouwKnop: some View {
+        Button {
+            withAnimation(.snappy) { uitgevouwen.toggle() }
+        } label: {
+            Label(uitgevouwen ? L("Minder") : L("Meer over deze vlucht"), systemImage: uitgevouwen ? "chevron.down" : "chevron.up")
+                .font(AppFont.body(14, .semibold, relativeTo: .subheadline))
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(.plain)
+        .foregroundStyle(Color.accentColor)
+    }
+
+    private func kort(_ waarde: String, _ naam: String?) -> some View {
+        HStack(spacing: 4) {
+            Text(waarde).font(AppFont.body(13, .semibold, relativeTo: .footnote))
+            if let naam { Text(naam).font(AppFont.body(13, .regular, relativeTo: .footnote)).foregroundStyle(.secondary) }
+        }
+    }
+
+    /// Everything of the full card below the header.
+    @ViewBuilder private var uitgebreid: some View {
             HStack(spacing: 8) {
                 waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill", koers: heli.opGrond ? nil : heli.koers)
                 waarde(L("Hoogte"), heli.hoogteTekst, "arrow.up.and.down", tweede: heli.hoogteTweede)
@@ -425,10 +487,6 @@ struct HeliInfoKaart: View {
             #if !os(watchOS) && !os(tvOS)
             HeliMeldKnop(heli: heli)
             #endif
-        }
-        .padding(14)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))
-        .shadow(color: .black.opacity(0.15), radius: 10, y: 4)
     }
 
     /// One value; `tweede` is the same value in the other unit (feet next to metres), `koers` draws a small compass.
