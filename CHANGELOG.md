@@ -10,6 +10,7 @@ Alles wat vliegt. Server: `worker/src/vliegend.js`.
 - **Oude positie:** na een minuut grijs en "(verouderd)" (was twee minuten, en alleen in de app).
 - **Eigen geluid** bij helikoptermeldingen (`heli.wav`, zelf gemaakt; iOS via `aps.sound`, Android via het nieuwe kanaal `heli2`). Een oudere app-versie zonder dat bestand speelt het gewone geluid.
 - **Klopt dit toestel niet?** `POST /v1/helikopters/<id>/melden`; komt in beheer bij Gemelde fouten (geen wijziging in de beheer-apps nodig).
+- **Ambulance zonder adres bij een verkeersongeval** ("Ambu 06121 HV weg letsel Apeldoorn") hoort nu op de server bij de aanrijding van politie of brandweer in dezelfde plaats binnen 15 minuten, alleen als er precies één zo'n incident is (`zonderAdres` in `worker/src/incident.js`). De app koppelde dit al zelf vanuit de ambulancemelding; nu ziet ook de politiemelding de ambulance.
 - Bestond al en is niet opnieuw gebouwd: zones, de verwachte bestemming met aankomsttijd, de vluchtgeschiedenis en de eigen tekeningen per type toestel.
 
 ## A-Alerts 2.0.1 (build 92)

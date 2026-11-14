@@ -24,6 +24,26 @@ export function score(m, o) {
   return s + (o.dienst !== m.dienst ? 1 : 0);
 }
 
+const HV_WEG = /\bHV\s+weg\b|\bVKO\b|aanrijding|ongeval/i;
+const VERKEER = /aanrijding|ongeval|\bVKO\b|\bHV\s+weg\b|beknel|voertuig/i;
+const ambuZonderAdres = (m) => m.dienst === "ambulance" && !hasStreet(m) && !los(m) && HV_WEG.test(m.title || "");
+const verkeerMetAdres = (m) => m.dienst !== "ambulance" && hasStreet(m) && !los(m) && VERKEER.test(m.title || "");
+
+/**
+ * The ambulance for a road accident comes in without an address ("Ambu 06121 HV weg letsel Apeldoorn"), so place and
+ * distance say nothing. It joins the road accident of police or fire brigade in the same place within 15 minutes, and
+ * only when there is exactly one such incident (two accidents at once: no guess). Works both ways, whichever came first.
+ * Returns the incident, or null.
+ */
+export function zonderAdres(m, bekend) {
+  const dichtbij = (o) => o.guid !== m.guid && Math.abs(o.datum - m.datum) <= 15 * 60_000 && plaats(o) === plaats(m);
+  let kand = [];
+  if (ambuZonderAdres(m)) kand = bekend.filter((o) => dichtbij(o) && verkeerMetAdres(o));
+  else if (verkeerMetAdres(m)) kand = bekend.filter((o) => dichtbij(o) && ambuZonderAdres(o));
+  const incidenten = new Set(kand.map((o) => o.incident || o.guid));
+  return incidenten.size === 1 ? [...incidenten][0] : null;
+}
+
 /**
  * Gives every new alert its incident: that of the best matching earlier alert (score 3 or more), else its own guid.
  * `eerder` are alerts that have an incident already; new alerts of the same batch can join each other too.
@@ -37,7 +57,7 @@ export function kenToe(nieuw, eerder) {
       const s = score(m, o);
       if (s > bs || (s === bs && s > 0 && best && Math.abs(o.datum - m.datum) < Math.abs(best.datum - m.datum))) { best = o; bs = s; }
     }
-    m.incident = bs >= 3 && best ? (best.incident || best.guid) : m.guid;
+    m.incident = bs >= 3 && best ? (best.incident || best.guid) : (zonderAdres(m, bekend) || m.guid);
     bekend.push(m);
   }
   return nieuw;
@@ -59,6 +79,13 @@ export async function incidentHerstel(env) {
     "SELECT guid, title, dienst, prioriteit, datum, locatie, lat, lon, stad, grip, opschaling, eenheden, incident FROM meldingen WHERE datum > ? ORDER BY datum ASC LIMIT 400",
   ).bind(Date.now() - 6 * 3600_000).all();
   const alle = (results || []).map(rij);
+  // An ambulance without an address that stands alone, while its road accident is known by now: join it.
+  for (const m of alle) {
+    if (m.incident !== m.guid || alle.some((o) => o.guid !== m.guid && o.incident === m.guid)) continue;
+    if (m.dienst !== "ambulance" || hasStreet(m)) continue;
+    const inc = zonderAdres(m, alle.filter((o) => o.incident));
+    if (inc && inc !== m.guid) { m.incident = inc; await env.DB.prepare("UPDATE meldingen SET incident = ? WHERE guid = ?").bind(inc, m.guid).run(); }
+  }
   const zonder = alle.filter((r) => !r.incident);
   if (!zonder.length) return 0;
   kenToe(zonder, alle.filter((r) => r.incident));
