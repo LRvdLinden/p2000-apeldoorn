@@ -29,3 +29,32 @@ test("the joined ambulance stands at the address of the accident", () => {
   const los = kenToe([pol("p1", 0), ambu("a1", 9)], []);
   assert.equal(los[1].locatie, null);
 });
+
+// Seen live on 14 November 2026, 21:18 to 21:20, Lieren: three ambulances without an address, the fire brigade and a
+// fourth ambulance with "Kanaal Zuid" ended up as four incidents.
+const lieren = (guid, sec, title, dienst = "ambulance", straat = null) => ({ guid, dienst, prioriteit: dienst === "brandweer" ? "P1" : "A0", title, locatie: straat, stad: "Lieren",
+  lat: straat ? 52.1574 : 52.16016, lon: straat ? 6.01796 : 6.00097, datum: t0 + sec * 1000, eenheden: [] });
+const reeks = () => [lieren("a1", 0, "Reanimatie Lieren"), lieren("b1", 17, "BON-02 Reanimatie Kanaal Zuid Lieren 063441", "brandweer", "Kanaal Zuid"),
+  lieren("a2", 37, "Ambu 06126 06122 Reanimatie Lieren Rit 351699 3"), lieren("a3", 122, "Ambu 06812 Reanimatie Lieren Rit 351702"),
+  lieren("a4", 137, "Ambu 08993 Reanimatie Kanaal zuid  Lieren Rit 351703 regio 6", "ambulance", "Kanaal Zuid")];
+
+test("resuscitation: every alert of the Lieren call is one incident, at the address", () => {
+  const r = kenToe(reeks(), []);
+  assert.deepEqual(r.map((m) => m.incident), ["a1", "a1", "a1", "a1", "a1"]);
+  assert.deepEqual([r[2].locatie, r[2].lat, r[2].lon], ["Kanaal Zuid", 52.1574, 6.01796]);
+  assert.equal(r[3].locatie, "Kanaal Zuid");
+});
+test("resuscitation: ambulances without an address join each other when no address is known", () => {
+  const r = kenToe([lieren("a1", 0, "Reanimatie Lieren"), lieren("a2", 37, "Ambu 06126 Reanimatie Lieren Rit 351699")], []);
+  assert.deepEqual(r.map((m) => m.incident), ["a1", "a1"]);
+});
+test("resuscitation: no guess with two addresses, another place, too late or another kind of call", () => {
+  const twee = kenToe([lieren("b1", 0, "Reanimatie Kanaal Zuid Lieren", "brandweer", "Kanaal Zuid"), { ...lieren("b2", 20, "Reanimatie Dorpstraat Lieren", "brandweer", "Dorpstraat"), lat: 52.17, lon: 6.03 },
+    lieren("a1", 60, "Ambu 06126 Reanimatie Lieren Rit 1")], []);
+  assert.equal(twee[2].incident, "a1");
+  assert.equal(kenToe([lieren("a1", 0, "Reanimatie Lieren"), { ...lieren("a2", 30, "Reanimatie Beekbergen"), stad: "Beekbergen" }], [])[1].incident, "a2");
+  assert.equal(kenToe([lieren("a1", 0, "Reanimatie Lieren"), lieren("a2", 360, "Ambu 06126 Reanimatie Lieren Rit 2")], [])[1].incident, "a2");
+  assert.equal(kenToe([lieren("a1", 0, "Reanimatie Lieren"), lieren("a2", 30, "Ambu 06126 HV weg letsel Lieren Rit 2")], [])[1].incident, "a2");
+  // A road accident still needs police or fire brigade with the address: two ambulances without one do not join.
+  assert.equal(kenToe([lieren("a1", 0, "Ambu 06121 HV weg letsel Lieren Rit 1"), lieren("a2", 30, "Ambu 06126 HV weg letsel Lieren Rit 2")], [])[1].incident, "a2");
+});

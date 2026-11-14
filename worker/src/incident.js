@@ -26,8 +26,14 @@ export function score(m, o) {
 
 const HV_WEG = /\bHV\s+weg\b|\bVKO\b|aanrijding|ongeval/i;
 const VERKEER = /aanrijding|ongeval|\bVKO\b|\bHV\s+weg\b|beknel|voertuig/i;
-const ambuZonderAdres = (m) => m.dienst === "ambulance" && !hasStreet(m) && !los(m) && HV_WEG.test(m.title || "");
-const verkeerMetAdres = (m) => m.dienst !== "ambulance" && hasStreet(m) && !los(m) && VERKEER.test(m.title || "");
+const REANIMATIE = /reanimatie/i;
+/** The kind of call an ambulance without an address can be joined on: a road accident or a resuscitation. */
+const soortAmbu = (m) => (REANIMATIE.test(m.title || "") ? "reanimatie" : HV_WEG.test(m.title || "") ? "verkeer" : null);
+const ambuZonderAdres = (m) => m.dienst === "ambulance" && !hasStreet(m) && !los(m) && soortAmbu(m) != null;
+// The alert that carries the address: for a road accident police or fire brigade, for a resuscitation any service
+// (fire brigade, police, or a second ambulance that does name the street).
+const metAdres = (m, soort) => hasStreet(m) && !los(m)
+  && (soort === "reanimatie" ? REANIMATIE.test(m.title || "") : m.dienst !== "ambulance" && VERKEER.test(m.title || ""));
 
 /**
  * The ambulance for a road accident comes in without an address ("Ambu 06121 HV weg letsel Apeldoorn"), so place and
@@ -37,11 +43,19 @@ const verkeerMetAdres = (m) => m.dienst !== "ambulance" && hasStreet(m) && !los(
  */
 export function zonderAdres(m, bekend) {
   const dichtbij = (o) => o.guid !== m.guid && Math.abs(o.datum - m.datum) <= 5 * 60_000 && plaats(o) === plaats(m);
-  let kand = [];
-  if (ambuZonderAdres(m)) kand = bekend.filter((o) => dichtbij(o) && verkeerMetAdres(o));
-  else if (verkeerMetAdres(m)) kand = bekend.filter((o) => dichtbij(o) && ambuZonderAdres(o));
-  const incidenten = new Set(kand.map((o) => o.incident || o.guid));
-  return incidenten.size === 1 ? [...incidenten][0] : null;
+  const een = (kand) => { const i = new Set(kand.map((o) => o.incident || o.guid)); return i.size === 1 ? [...i][0] : null; };
+  if (ambuZonderAdres(m)) {
+    const soort = soortAmbu(m);
+    // First the incident that has the address. Only when there is none (yet): for a resuscitation the other ambulances
+    // without an address in the same place ("Reanimatie Lieren" three times within two minutes is one call).
+    const adres = bekend.filter((o) => dichtbij(o) && metAdres(o, soort));
+    if (adres.length) return een(adres);
+    return soort === "reanimatie" ? een(bekend.filter((o) => dichtbij(o) && ambuZonderAdres(o) && soortAmbu(o) === soort)) : null;
+  }
+  for (const soort of ["reanimatie", "verkeer"]) {
+    if (metAdres(m, soort)) return een(bekend.filter((o) => dichtbij(o) && ambuZonderAdres(o) && soortAmbu(o) === soort));
+  }
+  return null;
 }
 
 /** The first alert of an incident that has a street and a spot on the map. */
@@ -96,8 +110,8 @@ export async function incidentHerstel(env) {
   }
   // And on the map it stands at the address of that accident (also when the ambulance came in first).
   for (const m of alle) {
-    if (m.dienst !== "ambulance" || hasStreet(m) || !m.incident || !HV_WEG.test(m.title || "")) continue;
-    const bron = adresVan(m.incident, alle.filter((o) => o.guid !== m.guid && o.dienst !== "ambulance"));
+    if (!ambuZonderAdres(m) || !m.incident) continue;
+    const bron = adresVan(m.incident, alle.filter((o) => o.guid !== m.guid && metAdres(o, soortAmbu(m))));
     if (!bron) continue;
     Object.assign(m, { lat: bron.lat, lon: bron.lon, locatie: bron.locatie });
     await env.DB.prepare("UPDATE meldingen SET lat = ?, lon = ?, locatie = ? WHERE guid = ?").bind(bron.lat, bron.lon, bron.locatie, m.guid).run();

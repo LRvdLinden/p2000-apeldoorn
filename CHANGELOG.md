@@ -1,5 +1,8 @@
 # Changelog
 
+## Server (14-11-2026, geen nieuwe build)
+- **Reanimatie: alle meldingen in één incident.** Bij een reanimatie komen de ambulances vaak zonder adres binnen ("Reanimatie Lieren") en alleen de brandweer of een latere ambulance noemt de straat. Die ambulances sluiten nu aan bij het ene reanimatie-incident met adres in dezelfde plaats binnen 5 minuten, en staan dan op dat adres op de kaart. Is er nog geen adres, dan horen de ambulances zonder adres in dezelfde plaats binnen 5 minuten bij elkaar. Twee adressen tegelijk: geen gok. Voor verkeersongevallen blijft de regel zoals hij was.
+
 ## A-Alerts 2.0.1 (build 101)
 - **VNOG-incident bleef op "Actief" staan** terwijl VNOG klaar was. VNOG sluit af met "Einde berichtgeving" in de laatste update; de status in de API blijft daarna vaak nog uren op lopend staan (195 van de 295 incidenten eindigen zo). Staat dat in de nieuwste update, dan is het incident nu afgesloten. Zien we het pas later dan een half uur na die update, dan geldt het tijdstip van die update als einde en komt er geen pushmelding meer. Komt er daarna toch een nieuwe update, dan loopt het incident weer. Alleen de server.
 - App: bij een VNOG-incident staat onder de plaats nu waar de marker vandaan komt (plek van het P2000-incident, de straat die VNOG noemt, of geen exacte plek) in plaats van "Plaats van de oproep", en de regel "VNOG · Incident" is lichter paars zodat hij in de donkere weergave leesbaar is.
