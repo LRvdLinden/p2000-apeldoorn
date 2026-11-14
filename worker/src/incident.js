@@ -44,6 +44,9 @@ export function zonderAdres(m, bekend) {
   return incidenten.size === 1 ? [...incidenten][0] : null;
 }
 
+/** The first alert of an incident that has a street and a spot on the map. */
+export const adresVan = (incident, lijst) => lijst.filter((o) => (o.incident || o.guid) === incident && hasStreet(o) && o.lat != null).sort((a, b) => a.datum - b.datum)[0] || null;
+
 /**
  * Gives every new alert its incident: that of the best matching earlier alert (score 3 or more), else its own guid.
  * `eerder` are alerts that have an incident already; new alerts of the same batch can join each other too.
@@ -58,6 +61,11 @@ export function kenToe(nieuw, eerder) {
       if (s > bs || (s === bs && s > 0 && best && Math.abs(o.datum - m.datum) < Math.abs(best.datum - m.datum))) { best = o; bs = s; }
     }
     m.incident = bs >= 3 && best ? (best.incident || best.guid) : (zonderAdres(m, bekend) || m.guid);
+    // An ambulance without an address that joined a road accident: on the map at the address of that accident.
+    if (m.incident !== m.guid && ambuZonderAdres(m)) {
+      const bron = adresVan(m.incident, bekend);
+      if (bron) { m.lat = bron.lat; m.lon = bron.lon; m.locatie = bron.locatie; }
+    }
     bekend.push(m);
   }
   return nieuw;
@@ -85,6 +93,14 @@ export async function incidentHerstel(env) {
     if (m.dienst !== "ambulance" || hasStreet(m)) continue;
     const inc = zonderAdres(m, alle.filter((o) => o.incident));
     if (inc && inc !== m.guid) { m.incident = inc; await env.DB.prepare("UPDATE meldingen SET incident = ? WHERE guid = ?").bind(inc, m.guid).run(); }
+  }
+  // And on the map it stands at the address of that accident (also when the ambulance came in first).
+  for (const m of alle) {
+    if (m.dienst !== "ambulance" || hasStreet(m) || !m.incident || !HV_WEG.test(m.title || "")) continue;
+    const bron = adresVan(m.incident, alle.filter((o) => o.guid !== m.guid && o.dienst !== "ambulance"));
+    if (!bron) continue;
+    Object.assign(m, { lat: bron.lat, lon: bron.lon, locatie: bron.locatie });
+    await env.DB.prepare("UPDATE meldingen SET lat = ?, lon = ?, locatie = ? WHERE guid = ?").bind(bron.lat, bron.lon, bron.locatie, m.guid).run();
   }
   const zonder = alle.filter((r) => !r.incident);
   if (!zonder.length) return 0;

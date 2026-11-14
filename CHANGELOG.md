@@ -3,6 +3,7 @@
 ## A-Alerts 2.0.1 (build 94)
 - **Verloop: de nieuwste melding staat bovenaan** (app, Android en pager); de regel "Opgeschaald naar …" staat nog steeds bij de melding waarmee de inzet groter werd.
 - Ambulance zonder adres bij een verkeersongeval: het venster is 5 minuten (was 15).
+- Die ambulance staat op de kaart nu op het adres van het ongeval (straat en plek overgenomen van de eerste melding met een adres), ook als de ambulance als eerste binnenkwam. Alleen de server; geen nieuwe build nodig.
 
 ## A-Alerts 2.0.1 (build 93)
 Alles wat vliegt. Server: `worker/src/vliegend.js`.

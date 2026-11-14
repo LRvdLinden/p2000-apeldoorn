@@ -22,3 +22,10 @@ test("no guess: two accidents, another place, too late, another kind of call", (
   assert.equal(kenToe([pol("p1", 0, { title: "Inbraak woning Deventerstraat Apeldoorn" }), ambu("a1", 2)], [])[1].incident, "a1");
   assert.equal(kenToe([pol("p1", 0), ambu("a1", 2, { prioriteit: "B1" })], [])[1].incident, "a1");
 });
+
+test("the joined ambulance stands at the address of the accident", () => {
+  const r = kenToe([pol("p1", 0), ambu("a1", 2.5)], []);
+  assert.deepEqual([r[1].lat, r[1].lon, r[1].locatie], [52.22017, 6.00016, "Deventerstraat"]);
+  const los = kenToe([pol("p1", 0), ambu("a1", 9)], []);
+  assert.equal(los[1].locatie, null);
+});
