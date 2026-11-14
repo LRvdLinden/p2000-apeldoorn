@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Er is een actieve AMBER Alert",
+    "nl": "Er is een actieve AMBER Alert"
+  },
+  "hint": {
+    "en": "Een AMBER Alert-actie die nog loopt.",
+    "nl": "Een AMBER Alert-actie die nog loopt."
+  },
+  "titleFormatted": {
+    "en": "Er !{{is|is geen}} actieve AMBER Alert",
+    "nl": "Er !{{is|is geen}} actieve AMBER Alert"
+  }
+}

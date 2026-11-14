@@ -1,0 +1,90 @@
+{
+  "id": "app.lrvdlinden.aalerts",
+  "version": "0.1.15",
+  "compatibility": ">=12.3.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "A-Alerts",
+    "nl": "A-Alerts"
+  },
+  "description": {
+    "en": "Live P2000, NL-Alert, Burgernet en KNMI in je Flows",
+    "nl": "Live P2000, NL-Alert, Burgernet en KNMI in je Flows"
+  },
+  "category": [
+    "security"
+  ],
+  "tags": {
+    "en": [
+      "p2000",
+      "a-alerts",
+      "nl-alert",
+      "burgernet",
+      "knmi",
+      "apeldoorn",
+      "brandweer",
+      "ambulance",
+      "politie",
+      "lifeliner"
+    ],
+    "nl": [
+      "p2000",
+      "a-alerts",
+      "nl-alert",
+      "burgernet",
+      "knmi",
+      "apeldoorn",
+      "brandweer",
+      "ambulance",
+      "politie",
+      "lifeliner"
+    ]
+  },
+  "brandColor": "#CF0A1E",
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Léon van der Linden",
+    "email": "homey@vdlinden.xyz"
+  },
+  "homepage": "https://lrvdlinden.app",
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "lrvdlinden"
+      },
+      "bunq": {
+        "username": "lrvdlinden"
+      }
+    }
+  },
+  "api": {
+    "getInfo": {
+      "method": "GET",
+      "path": "/info"
+    },
+    "getRecent": {
+      "method": "GET",
+      "path": "/recent"
+    },
+    "getLaatste": {
+      "method": "GET",
+      "path": "/laatste"
+    },
+    "postTestMelding": {
+      "method": "POST",
+      "path": "/test-melding"
+    },
+    "getAfbeelding": {
+      "method": "GET",
+      "path": "/afbeelding"
+    }
+  }
+}

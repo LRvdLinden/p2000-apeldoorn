@@ -1,0 +1,137 @@
+{
+  "title": {
+    "en": "Er is een nieuwe NL-Alert",
+    "nl": "Er is een nieuwe NL-Alert"
+  },
+  "hint": {
+    "nl": "Een NL-Alert van de overheid in de gemeente Apeldoorn. Bericht = kant-en-klaar bericht met de tekst van het NL-Alert. NL-Alert-tekst = alleen de tekst van de overheid.",
+    "en": "Message = ready-made message with the NL-Alert text. NL-Alert text = only the government text."
+  },
+  "titleFormatted": {
+    "en": "Er is een nieuwe NL-Alert voor [[plaats]]",
+    "nl": "Er is een nieuwe NL-Alert voor [[plaats]]"
+  },
+  "args": [
+    {
+      "name": "plaats",
+      "type": "autocomplete",
+      "title": {
+        "en": "Plaats",
+        "nl": "Plaats"
+      },
+      "placeholder": {
+        "en": "Alle plaatsen",
+        "nl": "Alle plaatsen"
+      }
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "nl": "NL-Alert-afbeelding (kaart met het gebied)",
+        "en": "NL-Alert image (map with the area)"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+        "en": "Image (URL, map without watermark or banner)"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "nl": "NL-Alert-bericht (kant-en-klaar)",
+        "en": "NL-Alert message (ready-made)"
+      },
+      "example": "Burgernet melding in APELDOORN gesloten! …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "nl": "NL-Alert-titel",
+        "en": "NL-Alert title"
+      },
+      "example": "Vermissing"
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "nl": "NL-Alert-tekst",
+        "en": "NL-Alert text"
+      },
+      "example": "De politie zoekt naar …"
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Plaats",
+        "en": "Place"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "nl": "Status",
+        "en": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "nl": "Begin (datum en tijd)",
+        "en": "Start (date and time)"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "nl": "Einde (datum en tijd)",
+        "en": "End (date and time)"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar de melding op a-alerts.nl",
+        "en": "Link to the alert on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar nl-alert.nl",
+        "en": "Link to nl-alert.nl"
+      },
+      "example": "https://www.burgernet.nl/burgernet/3967274"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    }
+  ]
+}

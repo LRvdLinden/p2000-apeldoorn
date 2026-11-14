@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script type="text/javascript" src="/homey.js" data-origin="settings"></script>
+<style>
+  /* Homey sets --homey-* for its light or dark mode (they switch by themselves); the values after the comma are
+     only a fallback for a browser preview. */
+  :root {
+    --accent: #2747E8; --red: #CF0A1E; --ok: #16A34A;
+    --ink: var(--homey-text-color, #121726);
+    --muted: var(--homey-text-color-light, #5D6578);
+    --bg: var(--homey-background-color, #F4F6FA);
+    --line: var(--homey-line-color, #DDE2EC);
+    --surface: color-mix(in srgb, var(--ink) 5%, var(--bg));
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --ink: var(--homey-text-color, #E9ECF4); --muted: var(--homey-text-color-light, #98A0B3); --bg: var(--homey-background-color, #0F131C); --line: var(--homey-line-color, #262D3D); }
+  }
+  html, body { background: var(--bg); }
+  body { margin: 0; padding: 16px; color: var(--ink); font-family: system-ui, -apple-system, sans-serif; }
+  .melding { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; padding: 10px 0; border-top: 1px solid var(--line); text-decoration: none; color: inherit; }
+  .melding:first-of-type { border-top: 0; }
+  .melding .stip { width: 10px; height: 10px; border-radius: 50%; margin-top: 5px; grid-row: span 2; }
+  .melding .t { font-size: 14px; font-weight: 600; line-height: 1.3; }
+  .melding .m { font-size: 12px; color: var(--muted); }
+  .stip.brandweer { background: #CF0A1E; } .stip.ambulance { background: #E7B416; } .stip.politie { background: #15428B; }
+  .stip.traumaheli { background: #9333EA; } .stip.overig { background: var(--muted); } .stip.ok { background: var(--ok); }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p { margin: 0 0 12px; color: var(--muted); font-size: 14px; line-height: 1.4; }
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 16px; margin: 0 0 8px; }
+  .row { display: flex; justify-content: space-between; gap: 12px; font-size: 14px; padding: 6px 0; }
+  .row span:last-child { text-align: end; color: var(--muted); }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-inline-end: 6px; background: var(--muted); }
+  .dot.on { background: var(--ok); }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
+  input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--ink); }
+  button.save { margin-top: 14px; width: 100%; padding: 11px; border: 0; border-radius: 999px; background: var(--red); color: #fff; font-weight: 700; font-size: 15px; }
+  #saved { text-align: center; font-size: 13px; color: var(--ok); margin-top: 8px; min-height: 18px; }
+  /* More apps (same design as MoreAppsCard in the Apple apps) */
+  .more { display: flex; gap: 14px; align-items: center; border-radius: 22px; }
+  .more .logo { flex: none; width: 56px; height: 56px; border-radius: 14px; background: #121726; position: relative; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 18px; letter-spacing: -.5px; }
+  .more .logo::after { content: ""; position: absolute; inset-inline-end: 9px; bottom: 9px; width: 8px; height: 8px; border-radius: 50%; background: #2747E8; }
+  .more .sec { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .more .tt { font-size: 16px; font-weight: 700; margin: 2px 0; }
+  .more .st { font-size: 13px; color: var(--muted); margin: 0 0 10px; }
+  .more .pill { display: inline-block; padding: 7px 14px; border-radius: 999px; background: var(--accent); color: #fff; font-weight: 700; font-size: 13px; border: 0; }
+  .more .pill:focus-visible, .more:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .more .site { display: block; margin-top: 8px; font-size: 11px; color: var(--muted); }
+  footer { text-align: center; color: var(--muted); font-size: 12px; padding: 12px 0 24px; }
+  footer img { width: 48px; height: 48px; border-radius: 12px; display: block; margin: 0 auto 8px; }
+</style>
+</head>
+<body>
+  <h1 data-i18n="settings.titel">A-Alerts</h1>
+  <p data-i18n="settings.intro"></p>
+
+  <div class="card">
+    <h2 data-i18n="settings.status"></h2>
+    <div class="row"><span data-i18n="settings.verbinding"></span><span id="hook">–</span></div>
+    <div class="row"><span data-i18n="settings.laatste"></span><span id="last">–</span></div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="settings.laatste_meldingen"></h2>
+    <p data-i18n="settings.laatste_hint"></p>
+    <div id="meldingen"><p data-i18n="settings.geen_meldingen"></p></div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="settings.flows"></h2>
+    <p data-i18n="settings.flows_hint"></p>
+    <div id="flowlog"><p data-i18n="settings.geen_flows"></p></div>
+    <div id="filterlog"></div>
+    <button class="save" id="testBtn" data-i18n="settings.test"></button>
+    <div id="testRes" role="status" style="text-align:center;font-size:13px;color:var(--muted);margin-top:8px;min-height:18px"></div>
+    <div id="beeld" hidden style="margin-top:12px">
+      <p style="margin:0 0 6px" data-i18n="settings.afbeelding"></p>
+      <img id="beeldImg" alt="" style="width:100%;border-radius:12px;border:1px solid var(--line)">
+      <p id="beeldInfo" style="font-size:12px;color:var(--muted);margin:6px 0 0"></p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2 data-i18n="settings.whatsapp_titel"></h2>
+    <p data-i18n="settings.whatsapp_hint"></p>
+    <label for="wa_p2000" data-i18n="settings.wa_p2000"></label><input id="wa_p2000" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_burgernet" data-i18n="settings.wa_burgernet"></label><input id="wa_burgernet" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_nlalert" data-i18n="settings.wa_nlalert"></label><input id="wa_nlalert" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_knmi" data-i18n="settings.wa_knmi"></label><input id="wa_knmi" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_amber" data-i18n="settings.wa_amber"></label><input id="wa_amber" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_vermistkind" data-i18n="settings.wa_vermistkind"></label><input id="wa_vermistkind" type="url" inputmode="url" placeholder="https://…">
+    <label for="wa_nieuws" data-i18n="settings.wa_nieuws"></label><input id="wa_nieuws" type="url" inputmode="url" placeholder="https://…">
+    <button class="save" id="save" data-i18n="settings.opslaan"></button>
+    <div id="saved" role="status"></div>
+  </div>
+
+  <div class="card more" role="link" tabindex="0" id="more" data-i18n-aria="more_apps.a11y">
+    <div class="logo" aria-hidden="true">LR</div>
+    <div>
+      <div class="sec" data-i18n="more_apps.section"></div>
+      <div class="tt" data-i18n="more_apps.title"></div>
+      <p class="st" data-i18n="more_apps.subtitle"></p>
+      <button class="pill" type="button" id="moreBtn" data-i18n="more_apps.action"></button>
+      <span class="site">lrvdlinden.app</span>
+    </div>
+  </div>
+
+  <footer>
+    <img src="icon.png" alt="">
+    <div><span data-i18n="settings.versie"></span>: <span id="version">–</span></div>
+    <div>© <span id="year"></span> A-Alerts</div>
+  </footer>
+
+<script>
+  const KEYS = ['wa_p2000', 'wa_burgernet', 'wa_nlalert', 'wa_knmi', 'wa_amber', 'wa_vermistkind', 'wa_nieuws'];
+  function onHomeyReady(Homey) {
+    document.querySelectorAll('[data-i18n]').forEach((el) => { el.textContent = Homey.__(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', Homey.__(el.dataset.i18nAria)));
+    document.getElementById('year').textContent = new Date().getFullYear();
+    KEYS.forEach((k) => Homey.get(k, (err, v) => { if (!err && v) document.getElementById(k).value = v; }));
+    document.getElementById('save').addEventListener('click', () => {
+      KEYS.forEach((k) => Homey.set(k, document.getElementById(k).value.trim()));
+      const s = document.getElementById('saved');
+      s.textContent = Homey.__('settings.opgeslagen');
+      setTimeout(() => { s.textContent = ''; }, 2500);
+    });
+    const open = () => Homey.openURL('https://lrvdlinden.app');
+    document.getElementById('moreBtn').addEventListener('click', (e) => { e.stopPropagation(); open(); });
+    const more = document.getElementById('more');
+    more.addEventListener('click', open);
+    more.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); } });
+    const flows = (log) => {
+      const box = document.getElementById('flowlog');
+      if (!Array.isArray(log) || !log.length) return;
+      box.innerHTML = log.map((f) => `<div class="melding"><span class="stip ${f.fout ? 'brandweer' : 'ok'}"></span><span class="t">${esc(Homey.__('settings.kaart_' + f.kaart) || f.kaart)}</span>
+        <span class="m">${esc(f.titel)} · ${new Date(f.at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}${f.afbeelding ? ` · ${esc(Homey.__('settings.beeld_' + f.afbeelding))}` : ''}${f.fout ? ` · <b style="color:var(--red)">${esc(f.fout)}</b>` : ''}</span></div>`).join('');
+    };
+    // The last image a Flow got (map or banner), to check what WhatsApp will send.
+    const beeld = () => Homey.api('GET', '/afbeelding', (err, b) => {
+      if (err || !b || !b.data) return;
+      document.getElementById('beeld').hidden = false;
+      document.getElementById('beeldImg').src = b.data;
+      document.getElementById('beeldInfo').textContent = `${Homey.__('settings.beeld_' + b.soort)} · ${new Date(b.at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`;
+    });
+    // Flows that did not start because of a filter on the card (plaats, discipline, prioriteit, capcode).
+    const filters = (log) => {
+      const box = document.getElementById('filterlog');
+      box.innerHTML = Array.isArray(log) && log.length ? `<p style="margin:10px 0 4px;font-weight:600">${esc(Homey.__('settings.filters'))}</p>` + log.map((f) => `<div class="melding"><span class="stip brandweer"></span>
+        <span class="m">${esc(f.reden)} · ${new Date(f.at).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}</span></div>`).join('') : '';
+    };
+    const info = () => Homey.api('GET', '/info', (err, i) => { if (!err && i) { flows(i.flowlog); filters(i.filterlog); } });
+    document.getElementById('testBtn').addEventListener('click', () => {
+      const res = document.getElementById('testRes'); res.textContent = '…';
+      Homey.api('POST', '/test-melding', {}, (err, r) => {
+        res.textContent = err ? String(err.message || err) : `${Homey.__('settings.test_ok')} ${r.titel}`;
+        setTimeout(() => { info(); beeld(); }, 1500);
+      });
+    });
+    setInterval(info, 30000);
+    beeld();
+    Homey.api('GET', '/info', (err, info) => {
+      if (err || !info) return;
+      flows(info.flowlog);
+      filters(info.filterlog);
+      document.getElementById('version').textContent = info.version;
+      document.getElementById('hook').innerHTML = `<span class="dot${info.webhook ? ' on' : ''}"></span>${Homey.__(info.webhook ? 'settings.verbonden' : 'settings.niet_verbonden')}`;
+      document.getElementById('last').textContent = info.lastReceived
+        ? new Date(info.lastReceived).toLocaleString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })
+        : Homey.__('settings.nooit');
+    });
+    const esc = (t) => String(t || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+    const geleden = (at) => {
+      const min = Math.max(0, Math.round((Date.now() - at) / 60000));
+      return min < 60 ? `${min} min ${Homey.__('settings.geleden')}` : min < 1440 ? `${Math.round(min / 60)} uur ${Homey.__('settings.geleden')}` : '';
+    };
+    const laatste = () => Homey.api('GET', '/laatste', (err, list) => {
+      const box = document.getElementById('meldingen');
+      if (err || !Array.isArray(list) || !list.length) { box.innerHTML = `<p>${esc(Homey.__('settings.geen_meldingen'))}</p>`; return; }
+      box.innerHTML = list.map((m) => `<a class="melding" href="#" data-link="${esc(m.link)}">
+        <span class="stip ${esc(m.dienst)}"></span><span class="t">${esc(m.titel)}</span>
+        <span class="m">${esc(m.discipline)}${m.prio ? ` · ${esc(m.prio)}` : ''} · ${esc(m.plaats)} · ${esc(m.datum)} ${esc(m.tijd)}${geleden(m.at) ? ` (${geleden(m.at)})` : ''}</span></a>`).join('');
+      box.querySelectorAll('[data-link]').forEach((a) => a.addEventListener('click', (e) => { e.preventDefault(); Homey.openURL(a.dataset.link); }));
+    });
+    laatste();
+    setInterval(laatste, 30000);
+    Homey.ready();
+  }
+</script>
+</body>
+</html>

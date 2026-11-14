@@ -1,0 +1,3 @@
+Krijg elke P2000-melding van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn direct in je Flows, net als NL-Alerts, Burgernet-acties en KNMI-weercodes. Per melding krijg je een kant-en-klaar bericht, de juiste afbeelding en alle losse gegevens als tags, ideaal om door te sturen naar WhatsApp, Telegram of je telefoon. Nieuw: ook elk artikel uit A-Alerts Nieuws (politie, 112 Nieuws, weer, Burgernet), met de afbeelding en een bericht met de titel en een link 'Lees verder'.
+
+Filter op plaats, dorp of wijk, discipline, prioriteit en capcode. Gebruik condities zoals een actieve NL-Alert of een Lifeliner in de lucht, haal de laatste melding op met een actie en zie de nieuwste meldingen in de dashboard-widget.

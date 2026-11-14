@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root { --red: #CF0A1E; }
+  body { margin: 0; font-family: var(--homey-font-family, system-ui, sans-serif); color: var(--homey-text-color, #111); background: var(--homey-background-color, transparent); }
+  .list { display: flex; flex-direction: column; gap: 2px; padding: var(--homey-su-2, 8px); }
+  .row { display: flex; align-items: center; gap: 10px; padding: 6px 4px; border-radius: 10px; text-decoration: none; color: inherit; cursor: pointer; }
+  .row:active { background: var(--homey-background-color-light, rgba(0,0,0,.05)); }
+  .row img { width: 30px; height: 30px; object-fit: contain; flex: none; }
+  .txt { min-width: 0; flex: 1; }
+  .t { font-size: 14px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .s { font-size: 12px; color: var(--homey-text-color-light, #6b7280); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tijd { font-size: 12px; color: var(--homey-text-color-light, #6b7280); flex: none; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 800; color: #fff; background: var(--red); border-radius: 5px; padding: 0 5px; margin-inline-start: 4px; vertical-align: 1px; }
+  .ended { opacity: .55; }
+  @media (prefers-color-scheme: dark) { .row img { background: #fff; border-radius: 8px; padding: 2px; box-sizing: border-box; } }
+  .state { padding: 24px 12px; text-align: center; font-size: 14px; color: var(--homey-text-color-light, #6b7280); }
+  .skeleton { height: 42px; margin: 6px 8px; border-radius: 10px; background: var(--homey-background-color-light, rgba(0,0,0,.06)); }
+</style>
+</head>
+<body>
+<div class="list" id="list"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+<script>
+  const ICON = { brandweer: 'icon_brandweer', ambulance: 'icon_ambulance', politie: 'icon_politie', traumaheli: 'icon_traumaheli', overig: 'icon_brandweer', nlalert: 'icon_nlalert', burgernet: 'icon_burgernet', knmi: 'icon_knmi', amber: 'icon_amber', vermistkind: 'icon_vermistkind' };
+  const esc = (s) => String(s || '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  async function load(Homey) {
+    const box = document.getElementById('list');
+    try {
+      const n = Number((Homey.getSettings() || {}).aantal || 6);
+      const items = (await Homey.api('GET', '/recent')).slice(0, n);
+      if (!items.length) { box.innerHTML = `<div class="state">${esc(Homey.__('widget.leeg'))}</div>`; return; }
+      box.innerHTML = items.map((x) => {
+        const icon = ICON[x.type === 'melding' ? x.dienst : x.bron] || 'icon_brandweer';
+        const urgent = ['A0', 'A1', 'P1'].includes(String(x.prio).toUpperCase());
+        return `<a class="row${x.status === 'beeindigd' ? ' ended' : ''}" data-link="${esc(x.link)}">
+          <img src="img/${icon}.png" alt="">
+          <div class="txt"><div class="t">${esc(x.titel)}${urgent ? `<span class="tag">${esc(x.prio)}</span>` : ''}</div><div class="s">${esc(x.plaats)}</div></div>
+          <div class="tijd">${esc(x.tijd)}</div></a>`;
+      }).join('');
+      box.querySelectorAll('[data-link]').forEach((a) => a.addEventListener('click', () => Homey.openURL(a.dataset.link)));
+    } catch (e) {
+      box.innerHTML = `<div class="state">${esc(Homey.__('widget.fout'))}</div>`;
+    }
+  }
+  function onHomeyReady(Homey) {
+    load(Homey).finally(() => Homey.ready());
+    setInterval(() => load(Homey), 30000);
+  }
+</script>
+</body>
+</html>

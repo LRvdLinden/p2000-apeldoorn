@@ -1,0 +1,3954 @@
+{
+  "_comment": "This file is generated. Please edit .homeycompose/app.json instead.",
+  "id": "app.lrvdlinden.aalerts",
+  "version": "0.1.15",
+  "compatibility": ">=12.3.0",
+  "sdk": 3,
+  "platforms": [
+    "local"
+  ],
+  "name": {
+    "en": "A-Alerts",
+    "nl": "A-Alerts"
+  },
+  "description": {
+    "en": "Live P2000, NL-Alert, Burgernet en KNMI in je Flows",
+    "nl": "Live P2000, NL-Alert, Burgernet en KNMI in je Flows"
+  },
+  "category": [
+    "security"
+  ],
+  "tags": {
+    "en": [
+      "p2000",
+      "a-alerts",
+      "nl-alert",
+      "burgernet",
+      "knmi",
+      "apeldoorn",
+      "brandweer",
+      "ambulance",
+      "politie",
+      "lifeliner"
+    ],
+    "nl": [
+      "p2000",
+      "a-alerts",
+      "nl-alert",
+      "burgernet",
+      "knmi",
+      "apeldoorn",
+      "brandweer",
+      "ambulance",
+      "politie",
+      "lifeliner"
+    ]
+  },
+  "brandColor": "#CF0A1E",
+  "permissions": [],
+  "images": {
+    "small": "/assets/images/small.png",
+    "large": "/assets/images/large.png",
+    "xlarge": "/assets/images/xlarge.png"
+  },
+  "author": {
+    "name": "Léon van der Linden",
+    "email": "homey@vdlinden.xyz"
+  },
+  "homepage": "https://lrvdlinden.app",
+  "contributing": {
+    "donate": {
+      "paypal": {
+        "username": "lrvdlinden"
+      },
+      "bunq": {
+        "username": "lrvdlinden"
+      }
+    }
+  },
+  "api": {
+    "getInfo": {
+      "method": "GET",
+      "path": "/info"
+    },
+    "getRecent": {
+      "method": "GET",
+      "path": "/recent"
+    },
+    "getLaatste": {
+      "method": "GET",
+      "path": "/laatste"
+    },
+    "postTestMelding": {
+      "method": "POST",
+      "path": "/test-melding"
+    },
+    "getAfbeelding": {
+      "method": "GET",
+      "path": "/afbeelding"
+    }
+  },
+  "flow": {
+    "triggers": [
+      {
+        "title": {
+          "nl": "Een AMBER Alert is beëindigd",
+          "en": "An AMBER Alert has ended"
+        },
+        "hint": {
+          "nl": "Bericht = kant-en-klaar afsluitbericht. Afloopbericht = alleen de afsluittekst van de politie. Na afloop staan foto en signalement er niet meer in.",
+          "en": "Message = ready-made closing message. Closing message = only the closing text from the police. After the end there is no photo or description any more."
+        },
+        "titleFormatted": {
+          "nl": "Een AMBER Alert is beëindigd",
+          "en": "An AMBER Alert has ended"
+        },
+        "args": [],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "AMBER Alert-afbeelding (banner)",
+              "en": "AMBER Alert image (banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "AMBER Alert-afsluitbericht (kant-en-klaar)",
+              "en": "AMBER Alert closing message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "afloop",
+            "type": "string",
+            "title": {
+              "nl": "Afloopbericht",
+              "en": "Closing message"
+            },
+            "example": {
+              "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+              "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+            }
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Laatste update",
+              "en": "Latest update"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied (Nederland)",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "amber_beeindigd"
+      },
+      {
+        "title": {
+          "nl": "Er is een AMBER Alert",
+          "en": "There is an AMBER Alert"
+        },
+        "hint": {
+          "nl": "Een nieuwe AMBER Alert van de politie voor heel Nederland. Bericht = kant-en-klaar bericht met de oproep. Startbericht = alleen de tekst van de politie.",
+          "en": "A new AMBER Alert from the police for all of the Netherlands. Message = ready-made message with the call. Start message = only the police text."
+        },
+        "titleFormatted": {
+          "nl": "Er is een AMBER Alert",
+          "en": "There is an AMBER Alert"
+        },
+        "args": [],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "AMBER Alert-afbeelding (banner)",
+              "en": "AMBER Alert image (banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "AMBER Alert-bericht (kant-en-klaar)",
+              "en": "AMBER Alert message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "foto_url",
+            "type": "string",
+            "title": {
+              "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+              "en": "Photo of the child (URL, only during the call)"
+            },
+            "example": "https://services.burgernet.nl/foto/1234.jpg"
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied (Nederland)",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "amber_nieuw"
+      },
+      {
+        "title": {
+          "nl": "Een AMBER Alert heeft een update",
+          "en": "An AMBER Alert has an update"
+        },
+        "hint": {
+          "nl": "Bericht = kant-en-klaar bericht met de update en de eerdere berichten, elk met tijd. Update = alleen de nieuwste update.",
+          "en": "Message = ready-made message with the update and the earlier messages, each with its time. Update = only the newest update."
+        },
+        "titleFormatted": {
+          "nl": "Een AMBER Alert heeft een update",
+          "en": "An AMBER Alert has an update"
+        },
+        "args": [],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "AMBER Alert-afbeelding (banner)",
+              "en": "AMBER Alert image (banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "AMBER Alert-bericht bij update (kant-en-klaar)",
+              "en": "AMBER Alert message on update (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Update (nieuwste)",
+              "en": "Update (newest)"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "foto_url",
+            "type": "string",
+            "title": {
+              "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+              "en": "Photo of the child (URL, only during the call)"
+            },
+            "example": "https://services.burgernet.nl/foto/1234.jpg"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied (Nederland)",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "amber_update"
+      },
+      {
+        "title": {
+          "en": "Er is een nieuwe Burgernet-melding",
+          "nl": "Er is een nieuwe Burgernet-melding"
+        },
+        "hint": {
+          "nl": "Een nieuwe Burgernet-actie (zoekactie of vermissing). Bericht = kant-en-klaar bericht met het startbericht. Startbericht = alleen de tekst van Burgernet.",
+          "en": "Message = ready-made message with the start message. Start message = only the Burgernet text."
+        },
+        "titleFormatted": {
+          "en": "Er is een nieuwe Burgernet-melding in [[plaats]]",
+          "nl": "Er is een nieuwe Burgernet-melding in [[plaats]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Burgernet-afbeelding (kaart met de plek)",
+              "en": "Burgernet image (map with the spot)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-bericht bij openen (kant-en-klaar)",
+              "en": "Burgernet message on opening (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-titel",
+              "en": "Burgernet title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort oproep (bijv. vermissing)",
+              "en": "Type of call (e.g. missing person)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar burgernet.nl",
+              "en": "Link to burgernet.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "burgernet_geopend"
+      },
+      {
+        "title": {
+          "en": "Een Burgernet-melding is gesloten",
+          "nl": "Een Burgernet-melding is gesloten"
+        },
+        "hint": {
+          "nl": "De Burgernet-actie is beëindigd. Bericht = kant-en-klaar afsluitbericht: afloopbericht, eventuele updates en het startbericht, elk met tijd. Afloopbericht = alleen de afsluittekst van Burgernet.",
+          "en": "Message = ready-made closing message: closing message, any updates and the start message, each with its time. Closing message = only the closing text from Burgernet."
+        },
+        "titleFormatted": {
+          "en": "Een Burgernet-melding in [[plaats]] is gesloten",
+          "nl": "Een Burgernet-melding in [[plaats]] is gesloten"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Burgernet-afbeelding (kaart met de plek)",
+              "en": "Burgernet image (map with the spot)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-afsluitbericht (kant-en-klaar)",
+              "en": "Burgernet closing message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-titel",
+              "en": "Burgernet title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "afloop",
+            "type": "string",
+            "title": {
+              "nl": "Afloopbericht",
+              "en": "Closing message"
+            },
+            "example": {
+              "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+              "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+            }
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Laatste update",
+              "en": "Latest update"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort oproep (bijv. vermissing)",
+              "en": "Type of call (e.g. missing person)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar burgernet.nl",
+              "en": "Link to burgernet.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "burgernet_gesloten"
+      },
+      {
+        "title": {
+          "en": "Een Burgernet-melding heeft een update",
+          "nl": "Een Burgernet-melding heeft een update"
+        },
+        "hint": {
+          "nl": "Burgernet heeft een vervolgbericht geplaatst bij een lopende actie. Bericht = kant-en-klaar bericht met de update en het startbericht, elk met tijd. Update = alleen de nieuwste update.",
+          "en": "Message = ready-made message with the update and the start message, each with its time. Update = only the newest update."
+        },
+        "titleFormatted": {
+          "en": "Een Burgernet-melding in [[plaats]] heeft een update",
+          "nl": "Een Burgernet-melding in [[plaats]] heeft een update"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Burgernet-afbeelding (kaart met de plek)",
+              "en": "Burgernet image (map with the spot)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-bericht bij update (kant-en-klaar)",
+              "en": "Burgernet message on update (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Burgernet-titel",
+              "en": "Burgernet title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Update (nieuwste)",
+              "en": "Update (newest)"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort oproep (bijv. vermissing)",
+              "en": "Type of call (e.g. missing person)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar burgernet.nl",
+              "en": "Link to burgernet.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "burgernet_update"
+      },
+      {
+        "title": {
+          "en": "Er is een GRIP of opschaling",
+          "nl": "Er is een GRIP of opschaling"
+        },
+        "hint": {
+          "en": "Een melding met GRIP of opschaling (bijvoorbeeld middelbrand of grote inzet).",
+          "nl": "Een melding met GRIP of opschaling (bijvoorbeeld middelbrand of grote inzet)."
+        },
+        "titleFormatted": {
+          "en": "Er is een GRIP of opschaling in [[plaats]]",
+          "nl": "Er is een GRIP of opschaling in [[plaats]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "P2000-afbeelding (kaart met de plek, anders banner)",
+              "en": "P2000 image (map with the spot, otherwise banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-life-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "P2000-bericht (kant-en-klaar)",
+              "en": "P2000 message (ready-made)"
+            },
+            "example": "🚨🚁: Traumaheli (Gelderland Zuid) met Prio 1 naar melding …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "P2000-titel",
+              "en": "P2000 title"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn"
+          },
+          {
+            "name": "p2000_tekst",
+            "type": "string",
+            "title": {
+              "en": "P2000-tekst",
+              "nl": "P2000-tekst"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn Rit 342706 reg6"
+          },
+          {
+            "name": "discipline",
+            "type": "string",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "example": "Traumaheli"
+          },
+          {
+            "name": "prioriteit",
+            "type": "string",
+            "title": {
+              "en": "Prioriteit",
+              "nl": "Prioriteit"
+            },
+            "example": "A0"
+          },
+          {
+            "name": "categorie",
+            "type": "string",
+            "title": {
+              "en": "Categorie",
+              "nl": "Categorie"
+            },
+            "example": "Assistentie bij reanimatie"
+          },
+          {
+            "name": "woonplaats",
+            "type": "string",
+            "title": {
+              "en": "Woonplaats",
+              "nl": "Woonplaats"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "plaatsen",
+            "type": "string",
+            "title": {
+              "en": "Plaatsen en wijken",
+              "nl": "Plaatsen en wijken"
+            },
+            "example": "Apeldoorn, Zevenhuizen"
+          },
+          {
+            "name": "straat",
+            "type": "string",
+            "title": {
+              "en": "Straat",
+              "nl": "Straat"
+            },
+            "example": "Europaweg"
+          },
+          {
+            "name": "regio",
+            "type": "string",
+            "title": {
+              "en": "Regio",
+              "nl": "Regio"
+            },
+            "example": "Gelderland-Zuid"
+          },
+          {
+            "name": "tijd",
+            "type": "string",
+            "title": {
+              "en": "Tijd",
+              "nl": "Tijd"
+            },
+            "example": "22:05"
+          },
+          {
+            "name": "datum",
+            "type": "string",
+            "title": {
+              "en": "Datum",
+              "nl": "Datum"
+            },
+            "example": "06/11/2026"
+          },
+          {
+            "name": "capcodes",
+            "type": "string",
+            "title": {
+              "en": "Capcodes",
+              "nl": "Capcodes"
+            },
+            "example": "0923993"
+          },
+          {
+            "name": "eenheden",
+            "type": "string",
+            "title": {
+              "en": "Eenheden",
+              "nl": "Eenheden"
+            },
+            "example": "Traumaheli LifeLiner 3"
+          },
+          {
+            "name": "voertuigen",
+            "type": "string",
+            "title": {
+              "en": "Voertuigen",
+              "nl": "Voertuigen"
+            },
+            "example": "Nijmegen - Lifeliner 3"
+          },
+          {
+            "name": "helikopter",
+            "type": "string",
+            "title": {
+              "en": "Helikopter",
+              "nl": "Helikopter"
+            },
+            "example": "Lifeliner 3"
+          },
+          {
+            "name": "grip",
+            "type": "string",
+            "title": {
+              "en": "GRIP / opschaling",
+              "nl": "GRIP / opschaling"
+            },
+            "example": "GRIP 1"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "en": "Link naar a-alerts.nl",
+              "nl": "Link naar a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/melding/7b9acb9c-…"
+          },
+          {
+            "name": "latitude",
+            "type": "number",
+            "title": {
+              "en": "Breedtegraad",
+              "nl": "Breedtegraad"
+            },
+            "example": 52.21
+          },
+          {
+            "name": "longitude",
+            "type": "number",
+            "title": {
+              "en": "Lengtegraad",
+              "nl": "Lengtegraad"
+            },
+            "example": 5.97
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "en": "WhatsApp-groeplink",
+              "nl": "WhatsApp-groeplink"
+            },
+            "example": "https://korturl.nl/?r=wa-p2000"
+          }
+        ],
+        "id": "grip_melding"
+      },
+      {
+        "title": {
+          "en": "Er is een nieuwe KNMI-code",
+          "nl": "Er is een nieuwe KNMI-code"
+        },
+        "hint": {
+          "nl": "Een nieuwe of verhoogde weerwaarschuwing van het KNMI voor de gemeente Apeldoorn. Bericht = kant-en-klaar bericht met code, verschijnsel, verwachting en tijden.",
+          "en": "Message = ready-made message with code, phenomenon, forecast and times."
+        },
+        "titleFormatted": {
+          "en": "Er is een nieuwe KNMI-code [[code]]",
+          "nl": "Er is een nieuwe KNMI-code [[code]]"
+        },
+        "args": [
+          {
+            "name": "code",
+            "type": "dropdown",
+            "title": {
+              "en": "Code",
+              "nl": "Code"
+            },
+            "values": [
+              {
+                "id": "1",
+                "label": {
+                  "en": "geel of hoger",
+                  "nl": "geel of hoger"
+                }
+              },
+              {
+                "id": "2",
+                "label": {
+                  "en": "oranje of hoger",
+                  "nl": "oranje of hoger"
+                }
+              },
+              {
+                "id": "3",
+                "label": {
+                  "en": "rood",
+                  "nl": "rood"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "KNMI-afbeelding (kaart met de code)",
+              "en": "KNMI image (map with the code)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-bericht (kant-en-klaar)",
+              "en": "KNMI message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-titel",
+              "en": "KNMI title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-code (geel, oranje, rood)",
+              "en": "KNMI code (yellow, orange, red)"
+            },
+            "example": "Code oranje"
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Weersverschijnsel",
+              "en": "Weather phenomenon"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-verwachting",
+              "en": "KNMI forecast"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar knmi.nl",
+              "en": "Link to knmi.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "knmi_nieuw"
+      },
+      {
+        "title": {
+          "en": "Een KNMI-code is vervallen",
+          "nl": "Een KNMI-code is vervallen"
+        },
+        "hint": {
+          "nl": "De weerwaarschuwing is afgelopen. Bericht = kant-en-klaar bericht dat de code vervallen is.",
+          "en": "Message = ready-made message that the code has expired."
+        },
+        "titleFormatted": {
+          "en": "Een KNMI-code [[code]] is vervallen",
+          "nl": "Een KNMI-code [[code]] is vervallen"
+        },
+        "args": [
+          {
+            "name": "code",
+            "type": "dropdown",
+            "title": {
+              "en": "Code",
+              "nl": "Code"
+            },
+            "values": [
+              {
+                "id": "1",
+                "label": {
+                  "en": "geel of hoger",
+                  "nl": "geel of hoger"
+                }
+              },
+              {
+                "id": "2",
+                "label": {
+                  "en": "oranje of hoger",
+                  "nl": "oranje of hoger"
+                }
+              },
+              {
+                "id": "3",
+                "label": {
+                  "en": "rood",
+                  "nl": "rood"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "KNMI-afbeelding (kaart met de code)",
+              "en": "KNMI image (map with the code)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-afsluitbericht (kant-en-klaar)",
+              "en": "KNMI closing message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-titel",
+              "en": "KNMI title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "title": {
+              "nl": "KNMI-code (geel, oranje, rood)",
+              "en": "KNMI code (yellow, orange, red)"
+            },
+            "example": "Code oranje"
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Weersverschijnsel",
+              "en": "Weather phenomenon"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar knmi.nl",
+              "en": "Link to knmi.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "knmi_vervallen"
+      },
+      {
+        "title": {
+          "en": "Er is een nieuwe P2000-melding",
+          "nl": "Er is een nieuwe P2000-melding"
+        },
+        "hint": {
+          "en": "Elke nieuwe melding van brandweer, ambulance, politie of traumaheli in de gemeente Apeldoorn. Laat prioriteit en capcode leeg voor alle.",
+          "nl": "Elke nieuwe melding van brandweer, ambulance, politie of traumaheli in de gemeente Apeldoorn. Laat prioriteit en capcode leeg voor alle."
+        },
+        "titleFormatted": {
+          "en": "Er is een nieuwe P2000-melding in [[plaats]] voor [[dienst]] met prioriteit [[prioriteit]] en capcode [[capcode]]",
+          "nl": "Er is een nieuwe P2000-melding in [[plaats]] voor [[dienst]] met prioriteit [[prioriteit]] en capcode [[capcode]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          },
+          {
+            "name": "dienst",
+            "type": "dropdown",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "values": [
+              {
+                "id": "alle",
+                "label": {
+                  "en": "Alle disciplines",
+                  "nl": "Alle disciplines"
+                }
+              },
+              {
+                "id": "brandweer",
+                "label": {
+                  "en": "Brandweer",
+                  "nl": "Brandweer"
+                }
+              },
+              {
+                "id": "ambulance",
+                "label": {
+                  "en": "Ambulance",
+                  "nl": "Ambulance"
+                }
+              },
+              {
+                "id": "politie",
+                "label": {
+                  "en": "Politie",
+                  "nl": "Politie"
+                }
+              },
+              {
+                "id": "traumaheli",
+                "label": {
+                  "en": "Traumaheli",
+                  "nl": "Traumaheli"
+                }
+              }
+            ]
+          },
+          {
+            "name": "prioriteit",
+            "type": "text",
+            "required": false,
+            "title": {
+              "en": "Prioriteit",
+              "nl": "Prioriteit"
+            },
+            "placeholder": {
+              "nl": "Leeg = alle (of bv. A1, P1)",
+              "en": "Empty = all (or e.g. A1, P1)"
+            }
+          },
+          {
+            "name": "capcode",
+            "type": "text",
+            "required": false,
+            "title": {
+              "en": "Capcode",
+              "nl": "Capcode"
+            },
+            "placeholder": {
+              "nl": "Leeg = alle (of bv. 0623108)",
+              "en": "Empty = all (or e.g. 0623108)"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "P2000-afbeelding (kaart met de plek, anders banner)",
+              "en": "P2000 image (map with the spot, otherwise banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-life-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "P2000-bericht (kant-en-klaar)",
+              "en": "P2000 message (ready-made)"
+            },
+            "example": "🚨🚁: Traumaheli (Gelderland Zuid) met Prio 1 naar melding …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "P2000-titel",
+              "en": "P2000 title"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn"
+          },
+          {
+            "name": "p2000_tekst",
+            "type": "string",
+            "title": {
+              "en": "P2000-tekst",
+              "nl": "P2000-tekst"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn Rit 342706 reg6"
+          },
+          {
+            "name": "discipline",
+            "type": "string",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "example": "Traumaheli"
+          },
+          {
+            "name": "prioriteit",
+            "type": "string",
+            "title": {
+              "en": "Prioriteit",
+              "nl": "Prioriteit"
+            },
+            "example": "A0"
+          },
+          {
+            "name": "categorie",
+            "type": "string",
+            "title": {
+              "en": "Categorie",
+              "nl": "Categorie"
+            },
+            "example": "Assistentie bij reanimatie"
+          },
+          {
+            "name": "woonplaats",
+            "type": "string",
+            "title": {
+              "en": "Woonplaats",
+              "nl": "Woonplaats"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "plaatsen",
+            "type": "string",
+            "title": {
+              "en": "Plaatsen en wijken",
+              "nl": "Plaatsen en wijken"
+            },
+            "example": "Apeldoorn, Zevenhuizen"
+          },
+          {
+            "name": "straat",
+            "type": "string",
+            "title": {
+              "en": "Straat",
+              "nl": "Straat"
+            },
+            "example": "Europaweg"
+          },
+          {
+            "name": "regio",
+            "type": "string",
+            "title": {
+              "en": "Regio",
+              "nl": "Regio"
+            },
+            "example": "Gelderland-Zuid"
+          },
+          {
+            "name": "tijd",
+            "type": "string",
+            "title": {
+              "en": "Tijd",
+              "nl": "Tijd"
+            },
+            "example": "22:05"
+          },
+          {
+            "name": "datum",
+            "type": "string",
+            "title": {
+              "en": "Datum",
+              "nl": "Datum"
+            },
+            "example": "06/11/2026"
+          },
+          {
+            "name": "capcodes",
+            "type": "string",
+            "title": {
+              "en": "Capcodes",
+              "nl": "Capcodes"
+            },
+            "example": "0923993"
+          },
+          {
+            "name": "eenheden",
+            "type": "string",
+            "title": {
+              "en": "Eenheden",
+              "nl": "Eenheden"
+            },
+            "example": "Traumaheli LifeLiner 3"
+          },
+          {
+            "name": "voertuigen",
+            "type": "string",
+            "title": {
+              "en": "Voertuigen",
+              "nl": "Voertuigen"
+            },
+            "example": "Nijmegen - Lifeliner 3"
+          },
+          {
+            "name": "helikopter",
+            "type": "string",
+            "title": {
+              "en": "Helikopter",
+              "nl": "Helikopter"
+            },
+            "example": "Lifeliner 3"
+          },
+          {
+            "name": "grip",
+            "type": "string",
+            "title": {
+              "en": "GRIP / opschaling",
+              "nl": "GRIP / opschaling"
+            },
+            "example": "GRIP 1"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "en": "Link naar a-alerts.nl",
+              "nl": "Link naar a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/melding/7b9acb9c-…"
+          },
+          {
+            "name": "latitude",
+            "type": "number",
+            "title": {
+              "en": "Breedtegraad",
+              "nl": "Breedtegraad"
+            },
+            "example": 52.21
+          },
+          {
+            "name": "longitude",
+            "type": "number",
+            "title": {
+              "en": "Lengtegraad",
+              "nl": "Lengtegraad"
+            },
+            "example": 5.97
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "en": "WhatsApp-groeplink",
+              "nl": "WhatsApp-groeplink"
+            },
+            "example": "https://korturl.nl/?r=wa-p2000"
+          }
+        ],
+        "id": "melding_nieuw"
+      },
+      {
+        "title": {
+          "en": "Een NL-Alert is beëindigd",
+          "nl": "Een NL-Alert is beëindigd"
+        },
+        "hint": {
+          "nl": "De NL-Alert is ingetrokken of afgelopen. Bericht = kant-en-klaar bericht dat het NL-Alert voorbij is.",
+          "en": "Message = ready-made message that the NL-Alert has ended."
+        },
+        "titleFormatted": {
+          "en": "Een NL-Alert voor [[plaats]] is beëindigd",
+          "nl": "Een NL-Alert voor [[plaats]] is beëindigd"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "NL-Alert-afbeelding (kaart met het gebied)",
+              "en": "NL-Alert image (map with the area)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-afsluitbericht (kant-en-klaar)",
+              "en": "NL-Alert closing message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-titel",
+              "en": "NL-Alert title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-tekst",
+              "en": "NL-Alert text"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar nl-alert.nl",
+              "en": "Link to nl-alert.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "nlalert_beeindigd"
+      },
+      {
+        "title": {
+          "en": "Er is een nieuwe NL-Alert",
+          "nl": "Er is een nieuwe NL-Alert"
+        },
+        "hint": {
+          "nl": "Een NL-Alert van de overheid in de gemeente Apeldoorn. Bericht = kant-en-klaar bericht met de tekst van het NL-Alert. NL-Alert-tekst = alleen de tekst van de overheid.",
+          "en": "Message = ready-made message with the NL-Alert text. NL-Alert text = only the government text."
+        },
+        "titleFormatted": {
+          "en": "Er is een nieuwe NL-Alert voor [[plaats]]",
+          "nl": "Er is een nieuwe NL-Alert voor [[plaats]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "NL-Alert-afbeelding (kaart met het gebied)",
+              "en": "NL-Alert image (map with the area)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-bericht (kant-en-klaar)",
+              "en": "NL-Alert message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-titel",
+              "en": "NL-Alert title"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "NL-Alert-tekst",
+              "en": "NL-Alert text"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar nl-alert.nl",
+              "en": "Link to nl-alert.nl"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "nlalert_nieuw"
+      },
+      {
+        "title": {
+          "en": "De traumaheli (Lifeliner) is opgeroepen",
+          "nl": "De traumaheli (Lifeliner) is opgeroepen"
+        },
+        "hint": {
+          "en": "Een melding voor de traumaheli of een Lifeliner.",
+          "nl": "Een melding voor de traumaheli of een Lifeliner."
+        },
+        "titleFormatted": {
+          "en": "De traumaheli is opgeroepen in [[plaats]]",
+          "nl": "De traumaheli is opgeroepen in [[plaats]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "P2000-afbeelding (kaart met de plek, anders banner)",
+              "en": "P2000 image (map with the spot, otherwise banner)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-life-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "P2000-bericht (kant-en-klaar)",
+              "en": "P2000 message (ready-made)"
+            },
+            "example": "🚨🚁: Traumaheli (Gelderland Zuid) met Prio 1 naar melding …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "P2000-titel",
+              "en": "P2000 title"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn"
+          },
+          {
+            "name": "p2000_tekst",
+            "type": "string",
+            "title": {
+              "en": "P2000-tekst",
+              "nl": "P2000-tekst"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn Rit 342706 reg6"
+          },
+          {
+            "name": "discipline",
+            "type": "string",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "example": "Traumaheli"
+          },
+          {
+            "name": "prioriteit",
+            "type": "string",
+            "title": {
+              "en": "Prioriteit",
+              "nl": "Prioriteit"
+            },
+            "example": "A0"
+          },
+          {
+            "name": "categorie",
+            "type": "string",
+            "title": {
+              "en": "Categorie",
+              "nl": "Categorie"
+            },
+            "example": "Assistentie bij reanimatie"
+          },
+          {
+            "name": "woonplaats",
+            "type": "string",
+            "title": {
+              "en": "Woonplaats",
+              "nl": "Woonplaats"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "plaatsen",
+            "type": "string",
+            "title": {
+              "en": "Plaatsen en wijken",
+              "nl": "Plaatsen en wijken"
+            },
+            "example": "Apeldoorn, Zevenhuizen"
+          },
+          {
+            "name": "straat",
+            "type": "string",
+            "title": {
+              "en": "Straat",
+              "nl": "Straat"
+            },
+            "example": "Europaweg"
+          },
+          {
+            "name": "regio",
+            "type": "string",
+            "title": {
+              "en": "Regio",
+              "nl": "Regio"
+            },
+            "example": "Gelderland-Zuid"
+          },
+          {
+            "name": "tijd",
+            "type": "string",
+            "title": {
+              "en": "Tijd",
+              "nl": "Tijd"
+            },
+            "example": "22:05"
+          },
+          {
+            "name": "datum",
+            "type": "string",
+            "title": {
+              "en": "Datum",
+              "nl": "Datum"
+            },
+            "example": "06/11/2026"
+          },
+          {
+            "name": "capcodes",
+            "type": "string",
+            "title": {
+              "en": "Capcodes",
+              "nl": "Capcodes"
+            },
+            "example": "0923993"
+          },
+          {
+            "name": "eenheden",
+            "type": "string",
+            "title": {
+              "en": "Eenheden",
+              "nl": "Eenheden"
+            },
+            "example": "Traumaheli LifeLiner 3"
+          },
+          {
+            "name": "voertuigen",
+            "type": "string",
+            "title": {
+              "en": "Voertuigen",
+              "nl": "Voertuigen"
+            },
+            "example": "Nijmegen - Lifeliner 3"
+          },
+          {
+            "name": "helikopter",
+            "type": "string",
+            "title": {
+              "en": "Helikopter",
+              "nl": "Helikopter"
+            },
+            "example": "Lifeliner 3"
+          },
+          {
+            "name": "grip",
+            "type": "string",
+            "title": {
+              "en": "GRIP / opschaling",
+              "nl": "GRIP / opschaling"
+            },
+            "example": "GRIP 1"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "en": "Link naar a-alerts.nl",
+              "nl": "Link naar a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/melding/7b9acb9c-…"
+          },
+          {
+            "name": "latitude",
+            "type": "number",
+            "title": {
+              "en": "Breedtegraad",
+              "nl": "Breedtegraad"
+            },
+            "example": 52.21
+          },
+          {
+            "name": "longitude",
+            "type": "number",
+            "title": {
+              "en": "Lengtegraad",
+              "nl": "Lengtegraad"
+            },
+            "example": 5.97
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "en": "WhatsApp-groeplink",
+              "nl": "WhatsApp-groeplink"
+            },
+            "example": "https://korturl.nl/?r=wa-p2000"
+          }
+        ],
+        "id": "traumaheli_nieuw"
+      },
+      {
+        "title": {
+          "nl": "Een Vermist Kind Alert is beëindigd",
+          "en": "A Missing Child Alert has ended"
+        },
+        "hint": {
+          "nl": "Bericht = kant-en-klaar afsluitbericht. Afloopbericht = alleen de afsluittekst van de politie. Na afloop staan foto en signalement er niet meer in. Geen plaats om te kiezen: de kaart start voor elke Vermist Kind Alert in het werkgebied.",
+          "en": "Message = ready-made closing message. Closing message = only the closing text from the police. After the end there is no photo or description any more. No place to choose: the card starts for every Missing Child Alert in the working area."
+        },
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Vermist Kind-afbeelding (kaart met zoekgebied)",
+              "en": "Missing Child image (map with search area)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Vermist Kind Alert-afsluitbericht (kant-en-klaar)",
+              "en": "Missing Child Alert closing message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "afloop",
+            "type": "string",
+            "title": {
+              "nl": "Afloopbericht",
+              "en": "Closing message"
+            },
+            "example": {
+              "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+              "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+            }
+          },
+          {
+            "name": "zoekgebied_km",
+            "type": "number",
+            "title": {
+              "nl": "Zoekgebied (km)",
+              "en": "Search area (km)"
+            },
+            "example": 3
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Laatste update",
+              "en": "Latest update"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "vermistkind_beeindigd"
+      },
+      {
+        "title": {
+          "nl": "Er is een Vermist Kind Alert",
+          "en": "There is a Missing Child Alert"
+        },
+        "hint": {
+          "nl": "Een nieuwe Vermist Kind Alert van de politie waarvan het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge). Bericht = kant-en-klaar bericht met de oproep. Startbericht = alleen de tekst van de politie. Geen plaats om te kiezen: de kaart start voor elke Vermist Kind Alert in het werkgebied.",
+          "en": "A new Missing Child Alert from the police whose search area lies in the working area (Apeldoorn, all villages and hamlets, and Teuge). Message = ready-made message with the call. Start message = only the police text. No place to choose: the card starts for every Missing Child Alert in the working area."
+        },
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Vermist Kind-afbeelding (kaart met zoekgebied)",
+              "en": "Missing Child image (map with search area)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Vermist Kind Alert-bericht (kant-en-klaar)",
+              "en": "Missing Child Alert message (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "foto_url",
+            "type": "string",
+            "title": {
+              "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+              "en": "Photo of the child (URL, only during the call)"
+            },
+            "example": "https://services.burgernet.nl/foto/1234.jpg"
+          },
+          {
+            "name": "zoekgebied_km",
+            "type": "number",
+            "title": {
+              "nl": "Zoekgebied (km)",
+              "en": "Search area (km)"
+            },
+            "example": 3
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "vermistkind_nieuw"
+      },
+      {
+        "title": {
+          "nl": "Een Vermist Kind Alert heeft een update",
+          "en": "A Missing Child Alert has an update"
+        },
+        "hint": {
+          "nl": "Bericht = kant-en-klaar bericht met de update en de eerdere berichten, elk met tijd. Update = alleen de nieuwste update. Geen plaats om te kiezen: de kaart start voor elke Vermist Kind Alert in het werkgebied.",
+          "en": "Message = ready-made message with the update and the earlier messages, each with its time. Update = only the newest update. No place to choose: the card starts for every Missing Child Alert in the working area."
+        },
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Vermist Kind-afbeelding (kaart met zoekgebied)",
+              "en": "Missing Child image (map with search area)"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+              "en": "Image (URL, map without watermark or banner)"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Vermist Kind Alert-bericht bij update (kant-en-klaar)",
+              "en": "Missing Child Alert message on update (ready-made)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Naam en leeftijd",
+              "en": "Name and age"
+            },
+            "example": {
+              "nl": "Voornaam (8)",
+              "en": "First name (8)"
+            }
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "nl": "Update (nieuwste)",
+              "en": "Update (newest)"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "foto_url",
+            "type": "string",
+            "title": {
+              "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+              "en": "Photo of the child (URL, only during the call)"
+            },
+            "example": "https://services.burgernet.nl/foto/1234.jpg"
+          },
+          {
+            "name": "zoekgebied_km",
+            "type": "number",
+            "title": {
+              "nl": "Zoekgebied (km)",
+              "en": "Search area (km)"
+            },
+            "example": 3
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "nl": "Startbericht",
+              "en": "Start message"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+              "en": "All Burgernet messages (newest first)"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "nl": "Aantal updates",
+              "en": "Number of updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort (bijv. vermist)",
+              "en": "Kind (e.g. missing)"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Gebied",
+              "en": "Area"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "nl": "Status",
+              "en": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "nl": "Begin (datum en tijd)",
+              "en": "Start (date and time)"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "nl": "Einde (datum en tijd)",
+              "en": "End (date and time)"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar de melding op a-alerts.nl",
+              "en": "Link to the alert on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar politie.nl",
+              "en": "Link to politie.nl"
+            },
+            "example": "https://www.politie.nl/amberalert"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          }
+        ],
+        "id": "vermistkind_update"
+      },
+      {
+        "id": "nieuws_nieuw",
+        "title": {
+          "nl": "Er is een nieuw nieuwsartikel",
+          "en": "There is a new news article"
+        },
+        "titleFormatted": {
+          "nl": "Er is een nieuw nieuwsartikel: [[soort]]",
+          "en": "There is a new news article: [[soort]]"
+        },
+        "hint": {
+          "nl": "Een nieuw artikel in A-Alerts Nieuws (a-alerts.nl/nieuws): politieberichten, 112 Nieuws, weerartikelen en artikelen bij Burgernet, AMBER Alert, Vermist Kind en NL-Alert. Bericht = kant-en-klaar: titel, de link 'Lees verder' naar het artikel en de copyright-regel. Afbeelding = de afbeelding van het artikel.",
+          "en": "A new article in A-Alerts News (a-alerts.nl/nieuws): police news, 112 Nieuws, weather articles and articles about Burgernet, AMBER Alert, Missing Child and NL-Alert. Message = ready-made: title, the 'Read more' link to the article and the copyright line. Image = the article's image."
+        },
+        "args": [
+          {
+            "name": "soort",
+            "type": "dropdown",
+            "title": {
+              "nl": "Soort",
+              "en": "Kind"
+            },
+            "values": [
+              {
+                "id": "alle",
+                "label": {
+                  "nl": "alle artikelen",
+                  "en": "all articles"
+                }
+              },
+              {
+                "id": "politie",
+                "label": {
+                  "nl": "politieberichten",
+                  "en": "police news"
+                }
+              },
+              {
+                "id": "regionaal",
+                "label": {
+                  "nl": "112 Nieuws",
+                  "en": "112 Nieuws"
+                }
+              },
+              {
+                "id": "weer",
+                "label": {
+                  "nl": "weerartikelen (KNMI)",
+                  "en": "weather articles (KNMI)"
+                }
+              },
+              {
+                "id": "liveblog",
+                "label": {
+                  "nl": "Burgernet, AMBER Alert, Vermist Kind en NL-Alert",
+                  "en": "Burgernet, AMBER Alert, Missing Child and NL-Alert"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding",
+            "type": "image",
+            "title": {
+              "nl": "Nieuws-afbeelding",
+              "en": "News image"
+            }
+          },
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "nl": "Afbeelding (URL, JPG)",
+              "en": "Image (URL, JPG)"
+            },
+            "example": "https://a-alerts.nl/assets/img/nieuws/og/js-brand-1.jpg"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "nl": "Nieuwsbericht (kant-en-klaar)",
+              "en": "News message (ready-made)"
+            },
+            "example": "*Brand in woning aan de Loolaan*\n\nLees verder: https://a-alerts.nl/nieuws/r-1a2b3c4d5e6f\n\n© A-Alerts …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "nl": "Titel",
+              "en": "Title"
+            },
+            "example": "Brand in woning aan de Loolaan"
+          },
+          {
+            "name": "intro",
+            "type": "string",
+            "title": {
+              "nl": "Intro",
+              "en": "Intro"
+            },
+            "example": "In een woning aan de Loolaan in Apeldoorn is brand uitgebroken."
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "nl": "Soort",
+              "en": "Kind"
+            },
+            "example": "112 Nieuws"
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "nl": "Plaats",
+              "en": "Place"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "nl": "Link naar het artikel op a-alerts.nl",
+              "en": "Link to the article on a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/nieuws/r-1a2b3c4d5e6f"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "nl": "WhatsApp-groeplink",
+              "en": "WhatsApp group link"
+            },
+            "example": "https://chat.whatsapp.com/…"
+          }
+        ]
+      }
+    ],
+    "conditions": [
+      {
+        "title": {
+          "en": "Er is een actieve AMBER Alert",
+          "nl": "Er is een actieve AMBER Alert"
+        },
+        "hint": {
+          "en": "Een AMBER Alert-actie die nog loopt.",
+          "nl": "Een AMBER Alert-actie die nog loopt."
+        },
+        "titleFormatted": {
+          "en": "Er !{{is|is geen}} actieve AMBER Alert",
+          "nl": "Er !{{is|is geen}} actieve AMBER Alert"
+        },
+        "id": "amber_actief"
+      },
+      {
+        "title": {
+          "en": "Er is een actieve Burgernet-melding",
+          "nl": "Er is een actieve Burgernet-melding"
+        },
+        "hint": {
+          "en": "Een Burgernet-actie die nog loopt.",
+          "nl": "Een Burgernet-actie die nog loopt."
+        },
+        "titleFormatted": {
+          "en": "Er !{{is|is geen}} actieve Burgernet-melding",
+          "nl": "Er !{{is|is geen}} actieve Burgernet-melding"
+        },
+        "id": "burgernet_actief"
+      },
+      {
+        "title": {
+          "en": "Er geldt een KNMI-code",
+          "nl": "Er geldt een KNMI-code"
+        },
+        "hint": {
+          "en": "Een KNMI-weerwaarschuwing die nu geldt.",
+          "nl": "Een KNMI-weerwaarschuwing die nu geldt."
+        },
+        "titleFormatted": {
+          "en": "Er !{{geldt|geldt geen}} KNMI-code [[code]]",
+          "nl": "Er !{{geldt|geldt geen}} KNMI-code [[code]]"
+        },
+        "args": [
+          {
+            "name": "code",
+            "type": "dropdown",
+            "title": {
+              "en": "Code",
+              "nl": "Code"
+            },
+            "values": [
+              {
+                "id": "1",
+                "label": {
+                  "en": "geel of hoger",
+                  "nl": "geel of hoger"
+                }
+              },
+              {
+                "id": "2",
+                "label": {
+                  "en": "oranje of hoger",
+                  "nl": "oranje of hoger"
+                }
+              },
+              {
+                "id": "3",
+                "label": {
+                  "en": "rood",
+                  "nl": "rood"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "knmi_actief"
+      },
+      {
+        "title": {
+          "en": "Een Lifeliner is in de lucht",
+          "nl": "Een Lifeliner is in de lucht"
+        },
+        "hint": {
+          "en": "Live positie via adsb.lol. Laag vliegend of aan de grond ontbreekt de positie soms.",
+          "nl": "Live positie via adsb.lol. Laag vliegend of aan de grond ontbreekt de positie soms."
+        },
+        "titleFormatted": {
+          "en": "[[heli]] !{{is|is niet}} in de lucht",
+          "nl": "[[heli]] !{{is|is niet}} in de lucht"
+        },
+        "args": [
+          {
+            "name": "heli",
+            "type": "dropdown",
+            "title": {
+              "en": "Helikopter",
+              "nl": "Helikopter"
+            },
+            "values": [
+              {
+                "id": "alle",
+                "label": {
+                  "en": "Een Lifeliner",
+                  "nl": "Een Lifeliner"
+                }
+              },
+              {
+                "id": "lifeliner1",
+                "label": {
+                  "en": "Lifeliner 1",
+                  "nl": "Lifeliner 1"
+                }
+              },
+              {
+                "id": "lifeliner2",
+                "label": {
+                  "en": "Lifeliner 2",
+                  "nl": "Lifeliner 2"
+                }
+              },
+              {
+                "id": "lifeliner3",
+                "label": {
+                  "en": "Lifeliner 3",
+                  "nl": "Lifeliner 3"
+                }
+              },
+              {
+                "id": "lifeliner4",
+                "label": {
+                  "en": "Lifeliner 4",
+                  "nl": "Lifeliner 4"
+                }
+              }
+            ]
+          }
+        ],
+        "id": "lifeliner_in_lucht"
+      },
+      {
+        "title": {
+          "en": "Er is een actieve NL-Alert",
+          "nl": "Er is een actieve NL-Alert"
+        },
+        "hint": {
+          "en": "Een NL-Alert voor de gemeente Apeldoorn die nog niet is beëindigd.",
+          "nl": "Een NL-Alert voor de gemeente Apeldoorn die nog niet is beëindigd."
+        },
+        "titleFormatted": {
+          "en": "Er !{{is|is geen}} actieve NL-Alert",
+          "nl": "Er !{{is|is geen}} actieve NL-Alert"
+        },
+        "id": "nlalert_actief"
+      },
+      {
+        "title": {
+          "en": "Er is een actieve Vermist Kind Alert",
+          "nl": "Er is een actieve Vermist Kind Alert"
+        },
+        "hint": {
+          "en": "Een Vermist Kind Alert-actie die nog loopt.",
+          "nl": "Een Vermist Kind Alert-actie die nog loopt."
+        },
+        "titleFormatted": {
+          "en": "Er !{{is|is geen}} actieve Vermist Kind Alert",
+          "nl": "Er !{{is|is geen}} actieve Vermist Kind Alert"
+        },
+        "id": "vermistkind_actief"
+      }
+    ],
+    "actions": [
+      {
+        "title": {
+          "en": "Haal de laatste melding op",
+          "nl": "Haal de laatste melding op"
+        },
+        "hint": {
+          "en": "Geeft de gegevens van de laatste P2000-melding als tags.",
+          "nl": "Geeft de gegevens van de laatste P2000-melding als tags."
+        },
+        "titleFormatted": {
+          "en": "Haal de laatste melding op in [[plaats]] voor [[dienst]]",
+          "nl": "Haal de laatste melding op in [[plaats]] voor [[dienst]]"
+        },
+        "args": [
+          {
+            "name": "plaats",
+            "type": "autocomplete",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "placeholder": {
+              "en": "Alle plaatsen",
+              "nl": "Alle plaatsen"
+            }
+          },
+          {
+            "name": "dienst",
+            "type": "dropdown",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "values": [
+              {
+                "id": "alle",
+                "label": {
+                  "en": "Alle disciplines",
+                  "nl": "Alle disciplines"
+                }
+              },
+              {
+                "id": "brandweer",
+                "label": {
+                  "en": "Brandweer",
+                  "nl": "Brandweer"
+                }
+              },
+              {
+                "id": "ambulance",
+                "label": {
+                  "en": "Ambulance",
+                  "nl": "Ambulance"
+                }
+              },
+              {
+                "id": "politie",
+                "label": {
+                  "en": "Politie",
+                  "nl": "Politie"
+                }
+              },
+              {
+                "id": "traumaheli",
+                "label": {
+                  "en": "Traumaheli",
+                  "nl": "Traumaheli"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "en": "Afbeelding-URL",
+              "nl": "Afbeelding-URL"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-life-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "en": "Bericht (kant-en-klaar)",
+              "nl": "Bericht (kant-en-klaar)"
+            },
+            "example": "🚨🚁: Traumaheli (Gelderland Zuid) met Prio 1 naar melding …"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "en": "Titel",
+              "nl": "Titel"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn"
+          },
+          {
+            "name": "p2000_tekst",
+            "type": "string",
+            "title": {
+              "en": "P2000-tekst",
+              "nl": "P2000-tekst"
+            },
+            "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn Rit 342706 reg6"
+          },
+          {
+            "name": "discipline",
+            "type": "string",
+            "title": {
+              "en": "Discipline",
+              "nl": "Discipline"
+            },
+            "example": "Traumaheli"
+          },
+          {
+            "name": "prioriteit",
+            "type": "string",
+            "title": {
+              "en": "Prioriteit",
+              "nl": "Prioriteit"
+            },
+            "example": "A0"
+          },
+          {
+            "name": "categorie",
+            "type": "string",
+            "title": {
+              "en": "Categorie",
+              "nl": "Categorie"
+            },
+            "example": "Assistentie bij reanimatie"
+          },
+          {
+            "name": "woonplaats",
+            "type": "string",
+            "title": {
+              "en": "Woonplaats",
+              "nl": "Woonplaats"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "plaatsen",
+            "type": "string",
+            "title": {
+              "en": "Plaatsen en wijken",
+              "nl": "Plaatsen en wijken"
+            },
+            "example": "Apeldoorn, Zevenhuizen"
+          },
+          {
+            "name": "straat",
+            "type": "string",
+            "title": {
+              "en": "Straat",
+              "nl": "Straat"
+            },
+            "example": "Europaweg"
+          },
+          {
+            "name": "regio",
+            "type": "string",
+            "title": {
+              "en": "Regio",
+              "nl": "Regio"
+            },
+            "example": "Gelderland-Zuid"
+          },
+          {
+            "name": "tijd",
+            "type": "string",
+            "title": {
+              "en": "Tijd",
+              "nl": "Tijd"
+            },
+            "example": "22:05"
+          },
+          {
+            "name": "datum",
+            "type": "string",
+            "title": {
+              "en": "Datum",
+              "nl": "Datum"
+            },
+            "example": "06/11/2026"
+          },
+          {
+            "name": "capcodes",
+            "type": "string",
+            "title": {
+              "en": "Capcodes",
+              "nl": "Capcodes"
+            },
+            "example": "0923993"
+          },
+          {
+            "name": "eenheden",
+            "type": "string",
+            "title": {
+              "en": "Eenheden",
+              "nl": "Eenheden"
+            },
+            "example": "Traumaheli LifeLiner 3"
+          },
+          {
+            "name": "voertuigen",
+            "type": "string",
+            "title": {
+              "en": "Voertuigen",
+              "nl": "Voertuigen"
+            },
+            "example": "Nijmegen - Lifeliner 3"
+          },
+          {
+            "name": "helikopter",
+            "type": "string",
+            "title": {
+              "en": "Helikopter",
+              "nl": "Helikopter"
+            },
+            "example": "Lifeliner 3"
+          },
+          {
+            "name": "grip",
+            "type": "string",
+            "title": {
+              "en": "GRIP / opschaling",
+              "nl": "GRIP / opschaling"
+            },
+            "example": "GRIP 1"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "en": "Link naar a-alerts.nl",
+              "nl": "Link naar a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/melding/7b9acb9c-…"
+          },
+          {
+            "name": "latitude",
+            "type": "number",
+            "title": {
+              "en": "Breedtegraad",
+              "nl": "Breedtegraad"
+            },
+            "example": 52.21
+          },
+          {
+            "name": "longitude",
+            "type": "number",
+            "title": {
+              "en": "Lengtegraad",
+              "nl": "Lengtegraad"
+            },
+            "example": 5.97
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "en": "WhatsApp-groeplink",
+              "nl": "WhatsApp-groeplink"
+            },
+            "example": "https://korturl.nl/?r=wa-p2000"
+          }
+        ],
+        "id": "laatste_melding"
+      },
+      {
+        "title": {
+          "en": "Haal de laatste waarschuwing op",
+          "nl": "Haal de laatste waarschuwing op"
+        },
+        "hint": {
+          "en": "Geeft de gegevens van de laatste NL-Alert, Burgernet-melding of KNMI-code als tags.",
+          "nl": "Geeft de gegevens van de laatste NL-Alert, Burgernet-melding of KNMI-code als tags."
+        },
+        "titleFormatted": {
+          "en": "Haal de laatste [[bron]] op",
+          "nl": "Haal de laatste [[bron]] op"
+        },
+        "args": [
+          {
+            "name": "bron",
+            "type": "dropdown",
+            "title": {
+              "en": "Bron",
+              "nl": "Bron"
+            },
+            "values": [
+              {
+                "id": "nlalert",
+                "label": {
+                  "en": "NL-Alert",
+                  "nl": "NL-Alert"
+                }
+              },
+              {
+                "id": "burgernet",
+                "label": {
+                  "en": "Burgernet-melding",
+                  "nl": "Burgernet-melding"
+                }
+              },
+              {
+                "id": "knmi",
+                "label": {
+                  "en": "KNMI-code",
+                  "nl": "KNMI-code"
+                }
+              },
+              {
+                "id": "amber",
+                "label": {
+                  "nl": "AMBER Alert",
+                  "en": "AMBER Alert"
+                }
+              },
+              {
+                "id": "vermistkind",
+                "label": {
+                  "nl": "Vermist Kind Alert",
+                  "en": "Missing Child Alert"
+                }
+              }
+            ]
+          }
+        ],
+        "tokens": [
+          {
+            "name": "afbeelding_url",
+            "type": "string",
+            "title": {
+              "en": "Afbeelding-URL",
+              "nl": "Afbeelding-URL"
+            },
+            "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+          },
+          {
+            "name": "bericht",
+            "type": "string",
+            "title": {
+              "en": "Bericht (kant-en-klaar)",
+              "nl": "Bericht (kant-en-klaar)"
+            },
+            "example": "Burgernet melding in APELDOORN gesloten! …"
+          },
+          {
+            "name": "bron",
+            "type": "string",
+            "title": {
+              "en": "Bron",
+              "nl": "Bron"
+            },
+            "example": "Burgernet"
+          },
+          {
+            "name": "titel",
+            "type": "string",
+            "title": {
+              "en": "Titel",
+              "nl": "Titel"
+            },
+            "example": "Vermissing"
+          },
+          {
+            "name": "tekst",
+            "type": "string",
+            "title": {
+              "en": "Tekst",
+              "nl": "Tekst"
+            },
+            "example": "De politie zoekt naar …"
+          },
+          {
+            "name": "afloop",
+            "type": "string",
+            "title": {
+              "en": "Afloopbericht",
+              "nl": "Afloopbericht"
+            },
+            "example": {
+              "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+              "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+            }
+          },
+          {
+            "name": "update",
+            "type": "string",
+            "title": {
+              "en": "Update",
+              "nl": "Update"
+            },
+            "example": {
+              "en": "Een van de mannen draagt een rode pet.",
+              "nl": "Een van de mannen draagt een rode pet."
+            }
+          },
+          {
+            "name": "laatste_bericht",
+            "type": "string",
+            "title": {
+              "en": "Laatste bericht",
+              "nl": "Laatste bericht"
+            },
+            "example": {
+              "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+              "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+            }
+          },
+          {
+            "name": "tijdlijn",
+            "type": "string",
+            "title": {
+              "en": "Alle berichten",
+              "nl": "Alle berichten"
+            },
+            "example": {
+              "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+              "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+            }
+          },
+          {
+            "name": "aantal_updates",
+            "type": "number",
+            "title": {
+              "en": "Aantal updates",
+              "nl": "Aantal updates"
+            },
+            "example": 1
+          },
+          {
+            "name": "plaats",
+            "type": "string",
+            "title": {
+              "en": "Plaats",
+              "nl": "Plaats"
+            },
+            "example": "Apeldoorn"
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "title": {
+              "en": "Status",
+              "nl": "Status"
+            },
+            "example": "Actief"
+          },
+          {
+            "name": "code",
+            "type": "string",
+            "title": {
+              "en": "KNMI-code",
+              "nl": "KNMI-code"
+            },
+            "example": "Code oranje"
+          },
+          {
+            "name": "soort",
+            "type": "string",
+            "title": {
+              "en": "Soort",
+              "nl": "Soort"
+            },
+            "example": "Zware windstoten"
+          },
+          {
+            "name": "begin",
+            "type": "string",
+            "title": {
+              "en": "Begin",
+              "nl": "Begin"
+            },
+            "example": "06/11/2026 13:05"
+          },
+          {
+            "name": "einde",
+            "type": "string",
+            "title": {
+              "en": "Einde",
+              "nl": "Einde"
+            },
+            "example": "06/11/2026 13:19"
+          },
+          {
+            "name": "link",
+            "type": "string",
+            "title": {
+              "en": "Link naar a-alerts.nl",
+              "nl": "Link naar a-alerts.nl"
+            },
+            "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+          },
+          {
+            "name": "bron_link",
+            "type": "string",
+            "title": {
+              "en": "Link naar de bron",
+              "nl": "Link naar de bron"
+            },
+            "example": "https://www.burgernet.nl/burgernet/3967274"
+          },
+          {
+            "name": "whatsapp_link",
+            "type": "string",
+            "title": {
+              "en": "WhatsApp-groeplink",
+              "nl": "WhatsApp-groeplink"
+            },
+            "example": "https://korturl.nl/?r=wa-burgernet"
+          },
+          {
+            "name": "foto_url",
+            "type": "string",
+            "title": {
+              "nl": "Foto van het kind (URL)",
+              "en": "Photo of the child (URL)"
+            },
+            "example": "https://services.burgernet.nl/foto/1234.jpg"
+          },
+          {
+            "name": "zoekgebied_km",
+            "type": "number",
+            "title": {
+              "nl": "Zoekgebied (km)",
+              "en": "Search area (km)"
+            },
+            "example": 3
+          }
+        ],
+        "id": "laatste_waarschuwing"
+      }
+    ]
+  },
+  "widgets": {
+    "meldingen": {
+      "name": {
+        "en": "A-Alerts meldingen",
+        "nl": "A-Alerts meldingen"
+      },
+      "height": 360,
+      "transparent": false,
+      "settings": [
+        {
+          "id": "aantal",
+          "type": "dropdown",
+          "title": {
+            "en": "Aantal meldingen",
+            "nl": "Aantal meldingen"
+          },
+          "value": "6",
+          "values": [
+            {
+              "id": "4",
+              "title": {
+                "en": "4",
+                "nl": "4"
+              }
+            },
+            {
+              "id": "6",
+              "title": {
+                "en": "6",
+                "nl": "6"
+              }
+            },
+            {
+              "id": "8",
+              "title": {
+                "en": "8",
+                "nl": "8"
+              }
+            },
+            {
+              "id": "12",
+              "title": {
+                "en": "12",
+                "nl": "12"
+              }
+            }
+          ]
+        }
+      ],
+      "api": {
+        "getRecent": {
+          "method": "GET",
+          "path": "/recent"
+        }
+      },
+      "id": "meldingen"
+    }
+  }
+}

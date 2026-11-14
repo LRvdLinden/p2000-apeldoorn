@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Er is een actieve Burgernet-melding",
+    "nl": "Er is een actieve Burgernet-melding"
+  },
+  "hint": {
+    "en": "Een Burgernet-actie die nog loopt.",
+    "nl": "Een Burgernet-actie die nog loopt."
+  },
+  "titleFormatted": {
+    "en": "Er !{{is|is geen}} actieve Burgernet-melding",
+    "nl": "Er !{{is|is geen}} actieve Burgernet-melding"
+  }
+}

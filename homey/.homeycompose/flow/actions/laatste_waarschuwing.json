@@ -1,0 +1,264 @@
+{
+  "title": {
+    "en": "Haal de laatste waarschuwing op",
+    "nl": "Haal de laatste waarschuwing op"
+  },
+  "hint": {
+    "en": "Geeft de gegevens van de laatste NL-Alert, Burgernet-melding of KNMI-code als tags.",
+    "nl": "Geeft de gegevens van de laatste NL-Alert, Burgernet-melding of KNMI-code als tags."
+  },
+  "titleFormatted": {
+    "en": "Haal de laatste [[bron]] op",
+    "nl": "Haal de laatste [[bron]] op"
+  },
+  "args": [
+    {
+      "name": "bron",
+      "type": "dropdown",
+      "title": {
+        "en": "Bron",
+        "nl": "Bron"
+      },
+      "values": [
+        {
+          "id": "nlalert",
+          "label": {
+            "en": "NL-Alert",
+            "nl": "NL-Alert"
+          }
+        },
+        {
+          "id": "burgernet",
+          "label": {
+            "en": "Burgernet-melding",
+            "nl": "Burgernet-melding"
+          }
+        },
+        {
+          "id": "knmi",
+          "label": {
+            "en": "KNMI-code",
+            "nl": "KNMI-code"
+          }
+        },
+        {
+          "id": "amber",
+          "label": {
+            "nl": "AMBER Alert",
+            "en": "AMBER Alert"
+          }
+        },
+        {
+          "id": "vermistkind",
+          "label": {
+            "nl": "Vermist Kind Alert",
+            "en": "Missing Child Alert"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "en": "Afbeelding-URL",
+        "nl": "Afbeelding-URL"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "en": "Bericht (kant-en-klaar)",
+        "nl": "Bericht (kant-en-klaar)"
+      },
+      "example": "Burgernet melding in APELDOORN gesloten! …"
+    },
+    {
+      "name": "bron",
+      "type": "string",
+      "title": {
+        "en": "Bron",
+        "nl": "Bron"
+      },
+      "example": "Burgernet"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "en": "Titel",
+        "nl": "Titel"
+      },
+      "example": "Vermissing"
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "en": "Tekst",
+        "nl": "Tekst"
+      },
+      "example": "De politie zoekt naar …"
+    },
+    {
+      "name": "afloop",
+      "type": "string",
+      "title": {
+        "en": "Afloopbericht",
+        "nl": "Afloopbericht"
+      },
+      "example": {
+        "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+        "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+      }
+    },
+    {
+      "name": "update",
+      "type": "string",
+      "title": {
+        "en": "Update",
+        "nl": "Update"
+      },
+      "example": {
+        "en": "Een van de mannen draagt een rode pet.",
+        "nl": "Een van de mannen draagt een rode pet."
+      }
+    },
+    {
+      "name": "laatste_bericht",
+      "type": "string",
+      "title": {
+        "en": "Laatste bericht",
+        "nl": "Laatste bericht"
+      },
+      "example": {
+        "en": "De politie Apeldoorn dankt u voor het uitkijken.",
+        "nl": "De politie Apeldoorn dankt u voor het uitkijken."
+      }
+    },
+    {
+      "name": "tijdlijn",
+      "type": "string",
+      "title": {
+        "en": "Alle berichten",
+        "nl": "Alle berichten"
+      },
+      "example": {
+        "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+        "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+      }
+    },
+    {
+      "name": "aantal_updates",
+      "type": "number",
+      "title": {
+        "en": "Aantal updates",
+        "nl": "Aantal updates"
+      },
+      "example": 1
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "en": "Plaats",
+        "nl": "Plaats"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "en": "Status",
+        "nl": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "code",
+      "type": "string",
+      "title": {
+        "en": "KNMI-code",
+        "nl": "KNMI-code"
+      },
+      "example": "Code oranje"
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "en": "Soort",
+        "nl": "Soort"
+      },
+      "example": "Zware windstoten"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "en": "Begin",
+        "nl": "Begin"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "en": "Einde",
+        "nl": "Einde"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "en": "Link naar a-alerts.nl",
+        "nl": "Link naar a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "en": "Link naar de bron",
+        "nl": "Link naar de bron"
+      },
+      "example": "https://www.burgernet.nl/burgernet/3967274"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "en": "WhatsApp-groeplink",
+        "nl": "WhatsApp-groeplink"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    },
+    {
+      "name": "foto_url",
+      "type": "string",
+      "title": {
+        "nl": "Foto van het kind (URL)",
+        "en": "Photo of the child (URL)"
+      },
+      "example": "https://services.burgernet.nl/foto/1234.jpg"
+    },
+    {
+      "name": "zoekgebied_km",
+      "type": "number",
+      "title": {
+        "nl": "Zoekgebied (km)",
+        "en": "Search area (km)"
+      },
+      "example": 3
+    }
+  ]
+}

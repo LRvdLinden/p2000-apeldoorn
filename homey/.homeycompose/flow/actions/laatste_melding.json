@@ -1,0 +1,273 @@
+{
+  "title": {
+    "en": "Haal de laatste melding op",
+    "nl": "Haal de laatste melding op"
+  },
+  "hint": {
+    "en": "Geeft de gegevens van de laatste P2000-melding als tags.",
+    "nl": "Geeft de gegevens van de laatste P2000-melding als tags."
+  },
+  "titleFormatted": {
+    "en": "Haal de laatste melding op in [[plaats]] voor [[dienst]]",
+    "nl": "Haal de laatste melding op in [[plaats]] voor [[dienst]]"
+  },
+  "args": [
+    {
+      "name": "plaats",
+      "type": "autocomplete",
+      "title": {
+        "en": "Plaats",
+        "nl": "Plaats"
+      },
+      "placeholder": {
+        "en": "Alle plaatsen",
+        "nl": "Alle plaatsen"
+      }
+    },
+    {
+      "name": "dienst",
+      "type": "dropdown",
+      "title": {
+        "en": "Discipline",
+        "nl": "Discipline"
+      },
+      "values": [
+        {
+          "id": "alle",
+          "label": {
+            "en": "Alle disciplines",
+            "nl": "Alle disciplines"
+          }
+        },
+        {
+          "id": "brandweer",
+          "label": {
+            "en": "Brandweer",
+            "nl": "Brandweer"
+          }
+        },
+        {
+          "id": "ambulance",
+          "label": {
+            "en": "Ambulance",
+            "nl": "Ambulance"
+          }
+        },
+        {
+          "id": "politie",
+          "label": {
+            "en": "Politie",
+            "nl": "Politie"
+          }
+        },
+        {
+          "id": "traumaheli",
+          "label": {
+            "en": "Traumaheli",
+            "nl": "Traumaheli"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "en": "Afbeelding-URL",
+        "nl": "Afbeelding-URL"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-life-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "en": "Bericht (kant-en-klaar)",
+        "nl": "Bericht (kant-en-klaar)"
+      },
+      "example": "🚨🚁: Traumaheli (Gelderland Zuid) met Prio 1 naar melding …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "en": "Titel",
+        "nl": "Titel"
+      },
+      "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn"
+    },
+    {
+      "name": "p2000_tekst",
+      "type": "string",
+      "title": {
+        "en": "P2000-tekst",
+        "nl": "P2000-tekst"
+      },
+      "example": "A0 Ambu 08993 Reanimatie Europaweg Apeldoorn Rit 342706 reg6"
+    },
+    {
+      "name": "discipline",
+      "type": "string",
+      "title": {
+        "en": "Discipline",
+        "nl": "Discipline"
+      },
+      "example": "Traumaheli"
+    },
+    {
+      "name": "prioriteit",
+      "type": "string",
+      "title": {
+        "en": "Prioriteit",
+        "nl": "Prioriteit"
+      },
+      "example": "A0"
+    },
+    {
+      "name": "categorie",
+      "type": "string",
+      "title": {
+        "en": "Categorie",
+        "nl": "Categorie"
+      },
+      "example": "Assistentie bij reanimatie"
+    },
+    {
+      "name": "woonplaats",
+      "type": "string",
+      "title": {
+        "en": "Woonplaats",
+        "nl": "Woonplaats"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "plaatsen",
+      "type": "string",
+      "title": {
+        "en": "Plaatsen en wijken",
+        "nl": "Plaatsen en wijken"
+      },
+      "example": "Apeldoorn, Zevenhuizen"
+    },
+    {
+      "name": "straat",
+      "type": "string",
+      "title": {
+        "en": "Straat",
+        "nl": "Straat"
+      },
+      "example": "Europaweg"
+    },
+    {
+      "name": "regio",
+      "type": "string",
+      "title": {
+        "en": "Regio",
+        "nl": "Regio"
+      },
+      "example": "Gelderland-Zuid"
+    },
+    {
+      "name": "tijd",
+      "type": "string",
+      "title": {
+        "en": "Tijd",
+        "nl": "Tijd"
+      },
+      "example": "22:05"
+    },
+    {
+      "name": "datum",
+      "type": "string",
+      "title": {
+        "en": "Datum",
+        "nl": "Datum"
+      },
+      "example": "06/11/2026"
+    },
+    {
+      "name": "capcodes",
+      "type": "string",
+      "title": {
+        "en": "Capcodes",
+        "nl": "Capcodes"
+      },
+      "example": "0923993"
+    },
+    {
+      "name": "eenheden",
+      "type": "string",
+      "title": {
+        "en": "Eenheden",
+        "nl": "Eenheden"
+      },
+      "example": "Traumaheli LifeLiner 3"
+    },
+    {
+      "name": "voertuigen",
+      "type": "string",
+      "title": {
+        "en": "Voertuigen",
+        "nl": "Voertuigen"
+      },
+      "example": "Nijmegen - Lifeliner 3"
+    },
+    {
+      "name": "helikopter",
+      "type": "string",
+      "title": {
+        "en": "Helikopter",
+        "nl": "Helikopter"
+      },
+      "example": "Lifeliner 3"
+    },
+    {
+      "name": "grip",
+      "type": "string",
+      "title": {
+        "en": "GRIP / opschaling",
+        "nl": "GRIP / opschaling"
+      },
+      "example": "GRIP 1"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "en": "Link naar a-alerts.nl",
+        "nl": "Link naar a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/melding/7b9acb9c-…"
+    },
+    {
+      "name": "latitude",
+      "type": "number",
+      "title": {
+        "en": "Breedtegraad",
+        "nl": "Breedtegraad"
+      },
+      "example": 52.21
+    },
+    {
+      "name": "longitude",
+      "type": "number",
+      "title": {
+        "en": "Lengtegraad",
+        "nl": "Lengtegraad"
+      },
+      "example": 5.97
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "en": "WhatsApp-groeplink",
+        "nl": "WhatsApp-groeplink"
+      },
+      "example": "https://korturl.nl/?r=wa-p2000"
+    }
+  ]
+}

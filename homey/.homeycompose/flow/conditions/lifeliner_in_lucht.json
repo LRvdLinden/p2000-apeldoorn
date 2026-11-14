@@ -1,0 +1,61 @@
+{
+  "title": {
+    "en": "Een Lifeliner is in de lucht",
+    "nl": "Een Lifeliner is in de lucht"
+  },
+  "hint": {
+    "en": "Live positie via adsb.lol. Laag vliegend of aan de grond ontbreekt de positie soms.",
+    "nl": "Live positie via adsb.lol. Laag vliegend of aan de grond ontbreekt de positie soms."
+  },
+  "titleFormatted": {
+    "en": "[[heli]] !{{is|is niet}} in de lucht",
+    "nl": "[[heli]] !{{is|is niet}} in de lucht"
+  },
+  "args": [
+    {
+      "name": "heli",
+      "type": "dropdown",
+      "title": {
+        "en": "Helikopter",
+        "nl": "Helikopter"
+      },
+      "values": [
+        {
+          "id": "alle",
+          "label": {
+            "en": "Een Lifeliner",
+            "nl": "Een Lifeliner"
+          }
+        },
+        {
+          "id": "lifeliner1",
+          "label": {
+            "en": "Lifeliner 1",
+            "nl": "Lifeliner 1"
+          }
+        },
+        {
+          "id": "lifeliner2",
+          "label": {
+            "en": "Lifeliner 2",
+            "nl": "Lifeliner 2"
+          }
+        },
+        {
+          "id": "lifeliner3",
+          "label": {
+            "en": "Lifeliner 3",
+            "nl": "Lifeliner 3"
+          }
+        },
+        {
+          "id": "lifeliner4",
+          "label": {
+            "en": "Lifeliner 4",
+            "nl": "Lifeliner 4"
+          }
+        }
+      ]
+    }
+  ]
+}

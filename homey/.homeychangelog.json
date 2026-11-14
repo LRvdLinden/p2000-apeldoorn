@@ -1,0 +1,54 @@
+{
+  "0.1.9": {
+    "en": "When a Burgernet action, AMBER Alert, Vermist Kind Alert or NL-Alert ends, the image tag is the square \"ended\" banner of that source.",
+    "nl": "Als een Burgernet-actie, AMBER Alert, Vermist Kind Alert of NL-Alert afloopt, is de afbeelding-tag de vierkante afgeronde banner van die bron."
+  },
+  "0.1.8": {
+    "en": "New square banners (1200×1200) in the image tag when there is no map (no street, Burgernet, AMBER Alert). KNMI code green (lifted): the green banner of the kind of weather instead of a map.",
+    "nl": "Nieuwe vierkante banners (1200×1200) in de afbeelding-tag als er geen kaart is (geen straat, Burgernet, AMBER Alert). KNMI code groen (opgeheven): de groene banner van het soort weer in plaats van een kaart."
+  },
+  "0.1.7": {
+    "en": "KNMI: the image shows every area of the Netherlands in its code, and the time window like knmi.nl (\"Monday 23:30 to Tuesday 12:00\").",
+    "nl": "KNMI: de afbeelding toont alle gebieden van Nederland in hun code, en het tijdvenster zoals op knmi.nl (\"maandag 23:30 tot dinsdag 12:00\")."
+  },
+  "0.1.6": {
+    "en": "KNMI: the map in the image tag now shows all of the Netherlands.",
+    "nl": "KNMI: de kaart in de afbeelding-tag laat nu heel Nederland zien."
+  },
+  "0.1.5": {
+    "en": "Burgernet: the image tag is always the Burgernet banner (no map with a marker).",
+    "nl": "Burgernet: de afbeelding-tag is altijd de Burgernet-banner (geen kaart met marker)."
+  },
+  "0.1.4": {
+    "en": "WhatsApp group links for AMBER Alert and Missing Child Alert in the settings.",
+    "nl": "WhatsApp-groeplinks voor AMBER Alert en Vermist Kind Alert in de instellingen."
+  },
+  "0.1.0": {
+    "en": "Eerste versie: P2000, NL-Alert, Burgernet en KNMI live in je Flows, met kant-en-klare berichten, afbeeldingen, filters en een widget.",
+    "nl": "Eerste versie: P2000, NL-Alert, Burgernet en KNMI live in je Flows, met kant-en-klare berichten, afbeeldingen, filters en een widget."
+  },
+  "0.1.1": {
+    "en": "Instellingen volgen nu de lichte of donkere modus van Homey en tonen de laatste 2 meldingen, zodat je ziet dat de app werkt.",
+    "nl": "Instellingen volgen nu de lichte of donkere modus van Homey en tonen de laatste 2 meldingen, zodat je ziet dat de app werkt."
+  },
+  "0.1.2": {
+    "nl": "Burgernet als tijdlijn: startbericht, updates en afloopbericht elk met tijd in het kant-en-klare bericht, nieuwe kaart 'Een Burgernet-melding heeft een update' en de tags Update, Laatste bericht, Alle berichten en Aantal updates. Links openen de melding op a-alerts.nl, of in de A-Alerts-app als je die hebt, met de juiste banner bij delen. P2000-Flows starten betrouwbaarder. In de instellingen zie je de laatste meldingen en welke Flows de app heeft gestart, met een testknop. Nieuw: de afbeelding bij elke melding is een kaart met de plek (P2000 met straat, Burgernet), het gebied (NL-Alert) of de KNMI-code over Gelderland, met het A-Alerts-watermerk. In de instellingen zie je de afbeelding van de laatste Flow. Opgelost: P2000-Flows startten niet als bij prioriteit of capcode 'Alle' was ingevuld; leeg of 'Alle' betekent nu altijd alles. In de instellingen zie je waarom een Flow niet startte. Nieuw: AMBER Alert en Vermist Kind Alert, met eigen kaarten (nieuw, update, beëindigd), condities, tags (o.a. foto en zoekgebied) en afbeelding.",
+    "en": "Burgernet as a timeline: start message, updates and closing message each with their time in the ready-made message, a new card 'A Burgernet alert has an update' and the tags Update, Latest message, All messages and Number of updates. Links open the alert on a-alerts.nl, or in the A-Alerts app if you have it, with the right banner when shared. P2000 Flows start more reliably. The settings show the latest alerts and which Flows the app started, with a test button. New: the image of each alert is a map with the spot (P2000 with a street, Burgernet), the area (NL-Alert) or the KNMI code over Gelderland, with the A-Alerts watermark. The settings show the image of the last Flow. Fixed: P2000 Flows did not start when 'Alle' was entered for priority or capcode; empty or 'Alle' now always means everything. The settings show why a Flow did not start. New: AMBER Alert and Missing Child Alert, with their own cards (new, update, ended), conditions, tags (including photo and search area) and image."
+  },
+  "0.1.3": {
+    "nl": "Burgernet als tijdlijn: startbericht, updates en afloopbericht elk met tijd in het kant-en-klare bericht, nieuwe kaart 'Een Burgernet-melding heeft een update' en de tags Update, Laatste bericht, Alle berichten en Aantal updates. Links openen de melding op a-alerts.nl, of in de A-Alerts-app als je die hebt, met de juiste banner bij delen. P2000-Flows starten betrouwbaarder. In de instellingen zie je de laatste meldingen en welke Flows de app heeft gestart, met een testknop. Nieuw: de afbeelding bij elke melding is een kaart met de plek (P2000 met straat, Burgernet), het gebied (NL-Alert) of de KNMI-code over Gelderland, met het A-Alerts-watermerk. In de instellingen zie je de afbeelding van de laatste Flow. Opgelost: P2000-Flows startten niet als bij prioriteit of capcode 'Alle' was ingevuld; leeg of 'Alle' betekent nu altijd alles. In de instellingen zie je waarom een Flow niet startte. Nieuw: AMBER Alert en Vermist Kind Alert, met eigen kaarten (nieuw, update, beëindigd), condities, tags (o.a. foto en zoekgebied) en afbeelding.",
+    "en": "Burgernet as a timeline: start message, updates and closing message each with their time in the ready-made message, a new card 'A Burgernet alert has an update' and the tags Update, Latest message, All messages and Number of updates. Links open the alert on a-alerts.nl, or in the A-Alerts app if you have it, with the right banner when shared. P2000 Flows start more reliably. The settings show the latest alerts and which Flows the app started, with a test button. New: the image of each alert is a map with the spot (P2000 with a street, Burgernet), the area (NL-Alert) or the KNMI code over Gelderland, with the A-Alerts watermark. The settings show the image of the last Flow. Fixed: P2000 Flows did not start when 'Alle' was entered for priority or capcode; empty or 'Alle' now always means everything. The settings show why a Flow did not start. New: AMBER Alert and Missing Child Alert, with their own cards (new, update, ended), conditions, tags (including photo and search area) and image."
+  },
+  "0.1.13": {
+    "nl": "Nieuw: kaart \"Er is een nieuw nieuwsartikel\" met de afbeelding van het artikel, een kant-en-klaar bericht (titel, Lees verder met de link en copyright) en tags; kies alle artikelen of alleen politie, 112 Nieuws, weer of Burgernet/AMBER/Vermist Kind/NL-Alert. Vermist Kind-kaarten zonder plaatskeuze. De WhatsApp-groeplink staat niet meer in de kant-en-klare berichten (alleen als tag). Burgernet: kaart met marker als het bericht een straat noemt.",
+    "en": "New: card \"There is a new news article\" with the article image, a ready-made message (title, Read more with the link and copyright) and tags; choose all articles or only police, 112 Nieuws, weather or Burgernet/AMBER/Missing Child/NL-Alert. Missing Child cards without place choice. The WhatsApp group link is no longer in the ready-made messages (tag only). Burgernet: map with marker when the message names a street."
+  },
+  "0.1.14": {
+    "nl": "Burgernet: de eerste zin staat niet meer dubbel in het kant-en-klare bericht.",
+    "en": "Burgernet: the first sentence is no longer repeated in the ready-made message."
+  },
+  "0.1.15": {
+    "nl": "Nieuws over het weer, Burgernet, AMBER Alert, Vermist Kind en NL-Alert stuurt nu dezelfde vierkante afbeelding mee als de waarschuwing zelf, in plaats van de brede banner.",
+    "en": "News about the weather, Burgernet, AMBER Alert, Vermist Kind and NL-Alert now sends the same square image as the warning itself, instead of the wide banner."
+  }
+}

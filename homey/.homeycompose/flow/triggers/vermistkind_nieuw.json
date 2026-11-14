@@ -1,0 +1,149 @@
+{
+  "title": {
+    "nl": "Er is een Vermist Kind Alert",
+    "en": "There is a Missing Child Alert"
+  },
+  "hint": {
+    "nl": "Een nieuwe Vermist Kind Alert van de politie waarvan het zoekgebied in het werkgebied valt (Apeldoorn, alle dorpen en buurtschappen, en Teuge). Bericht = kant-en-klaar bericht met de oproep. Startbericht = alleen de tekst van de politie. Geen plaats om te kiezen: de kaart start voor elke Vermist Kind Alert in het werkgebied.",
+    "en": "A new Missing Child Alert from the police whose search area lies in the working area (Apeldoorn, all villages and hamlets, and Teuge). Message = ready-made message with the call. Start message = only the police text. No place to choose: the card starts for every Missing Child Alert in the working area."
+  },
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "nl": "Vermist Kind-afbeelding (kaart met zoekgebied)",
+        "en": "Missing Child image (map with search area)"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+        "en": "Image (URL, map without watermark or banner)"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "nl": "Vermist Kind Alert-bericht (kant-en-klaar)",
+        "en": "Missing Child Alert message (ready-made)"
+      },
+      "example": "Burgernet melding in APELDOORN gesloten! …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "nl": "Naam en leeftijd",
+        "en": "Name and age"
+      },
+      "example": {
+        "nl": "Voornaam (8)",
+        "en": "First name (8)"
+      }
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "nl": "Startbericht",
+        "en": "Start message"
+      },
+      "example": "De politie zoekt naar …"
+    },
+    {
+      "name": "foto_url",
+      "type": "string",
+      "title": {
+        "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+        "en": "Photo of the child (URL, only during the call)"
+      },
+      "example": "https://services.burgernet.nl/foto/1234.jpg"
+    },
+    {
+      "name": "zoekgebied_km",
+      "type": "number",
+      "title": {
+        "nl": "Zoekgebied (km)",
+        "en": "Search area (km)"
+      },
+      "example": 3
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "nl": "Soort (bijv. vermist)",
+        "en": "Kind (e.g. missing)"
+      },
+      "example": "Zware windstoten"
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Gebied",
+        "en": "Area"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "nl": "Status",
+        "en": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "nl": "Begin (datum en tijd)",
+        "en": "Start (date and time)"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "nl": "Einde (datum en tijd)",
+        "en": "End (date and time)"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar de melding op a-alerts.nl",
+        "en": "Link to the alert on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar politie.nl",
+        "en": "Link to politie.nl"
+      },
+      "example": "https://www.politie.nl/amberalert"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    }
+  ]
+}

@@ -1,0 +1,174 @@
+{
+  "title": {
+    "en": "Er is een nieuwe KNMI-code",
+    "nl": "Er is een nieuwe KNMI-code"
+  },
+  "hint": {
+    "nl": "Een nieuwe of verhoogde weerwaarschuwing van het KNMI voor de gemeente Apeldoorn. Bericht = kant-en-klaar bericht met code, verschijnsel, verwachting en tijden.",
+    "en": "Message = ready-made message with code, phenomenon, forecast and times."
+  },
+  "titleFormatted": {
+    "en": "Er is een nieuwe KNMI-code [[code]]",
+    "nl": "Er is een nieuwe KNMI-code [[code]]"
+  },
+  "args": [
+    {
+      "name": "code",
+      "type": "dropdown",
+      "title": {
+        "en": "Code",
+        "nl": "Code"
+      },
+      "values": [
+        {
+          "id": "1",
+          "label": {
+            "en": "geel of hoger",
+            "nl": "geel of hoger"
+          }
+        },
+        {
+          "id": "2",
+          "label": {
+            "en": "oranje of hoger",
+            "nl": "oranje of hoger"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "rood",
+            "nl": "rood"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "nl": "KNMI-afbeelding (kaart met de code)",
+        "en": "KNMI image (map with the code)"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+        "en": "Image (URL, map without watermark or banner)"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "nl": "KNMI-bericht (kant-en-klaar)",
+        "en": "KNMI message (ready-made)"
+      },
+      "example": "Burgernet melding in APELDOORN gesloten! …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "nl": "KNMI-titel",
+        "en": "KNMI title"
+      },
+      "example": "Vermissing"
+    },
+    {
+      "name": "code",
+      "type": "string",
+      "title": {
+        "nl": "KNMI-code (geel, oranje, rood)",
+        "en": "KNMI code (yellow, orange, red)"
+      },
+      "example": "Code oranje"
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "nl": "Weersverschijnsel",
+        "en": "Weather phenomenon"
+      },
+      "example": "Zware windstoten"
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "nl": "KNMI-verwachting",
+        "en": "KNMI forecast"
+      },
+      "example": "De politie zoekt naar …"
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Plaats",
+        "en": "Place"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "nl": "Status",
+        "en": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "nl": "Begin (datum en tijd)",
+        "en": "Start (date and time)"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "nl": "Einde (datum en tijd)",
+        "en": "End (date and time)"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar de melding op a-alerts.nl",
+        "en": "Link to the alert on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar knmi.nl",
+        "en": "Link to knmi.nl"
+      },
+      "example": "https://www.burgernet.nl/burgernet/3967274"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    }
+  ]
+}

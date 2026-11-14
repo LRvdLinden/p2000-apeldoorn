@@ -1,0 +1,303 @@
+{
+ "watermerk": [
+  260,
+  68
+ ],
+ "marker_nlalert": [
+  78,
+  96
+ ],
+ "marker_vermistkind": [
+  78,
+  96
+ ],
+ "knmi_label": [
+  297,
+  32
+ ],
+ "knmi_vanaf": [
+  92,
+  40
+ ],
+ "code_yellow": [
+  174,
+  40
+ ],
+ "code_orange": [
+  203,
+  40
+ ],
+ "code_red": [
+  178,
+  40
+ ],
+ "code_green": [
+  196,
+  40
+ ],
+ "soort_0": [
+  66,
+  40
+ ],
+ "soort_1": [
+  167,
+  40
+ ],
+ "soort_2": [
+  79,
+  40
+ ],
+ "soort_3": [
+  266,
+  40
+ ],
+ "soort_4": [
+  172,
+  40
+ ],
+ "soort_5": [
+  117,
+  40
+ ],
+ "soort_6": [
+  95,
+  40
+ ],
+ "soort_7": [
+  186,
+  40
+ ],
+ "soort_8": [
+  121,
+  40
+ ],
+ "soort_9": [
+  298,
+  40
+ ],
+ "soort_10": [
+  133,
+  40
+ ],
+ "soort_11": [
+  71,
+  40
+ ],
+ "soort_12": [
+  71,
+  40
+ ],
+ "soort_13": [
+  59,
+  40
+ ],
+ "soort_14": [
+  200,
+  40
+ ],
+ "soort_15": [
+  87,
+  40
+ ],
+ "soort_16": [
+  124,
+  40
+ ],
+ "soort_17": [
+  285,
+  40
+ ],
+ "soort_18": [
+  295,
+  40
+ ],
+ "soorten": [
+  "Mist",
+  "Dichte mist",
+  "Wind",
+  "Zware windstoten",
+  "Windstoten",
+  "Onweer",
+  "Regen",
+  "Zware regen",
+  "Sneeuw",
+  "Sneeuw en gladheid",
+  "Gladheid",
+  "IJzel",
+  "Hitte",
+  "Kou",
+  "Strenge vorst",
+  "Hagel",
+  "Tornado",
+  "Kustwaarschuwing",
+  "Weerwaarschuwing"
+ ],
+ "teken_0": [
+  22,
+  40
+ ],
+ "teken_1": [
+  15,
+  40
+ ],
+ "teken_2": [
+  21,
+  40
+ ],
+ "teken_3": [
+  21,
+  40
+ ],
+ "teken_4": [
+  22,
+  40
+ ],
+ "teken_5": [
+  21,
+  40
+ ],
+ "teken_6": [
+  21,
+  40
+ ],
+ "teken_7": [
+  19,
+  40
+ ],
+ "teken_8": [
+  22,
+  40
+ ],
+ "teken_9": [
+  21,
+  40
+ ],
+ "teken_colon": [
+  12,
+  40
+ ],
+ "teken_slash": [
+  14,
+  40
+ ],
+ "teken_dash": [
+  31,
+  40
+ ],
+ "teken_space": [
+  9,
+  40
+ ],
+ "icon_wind_d": [
+  40,
+  40
+ ],
+ "icon_wind_w": [
+  40,
+  40
+ ],
+ "icon_thunderstorm_d": [
+  40,
+  40
+ ],
+ "icon_thunderstorm_w": [
+  40,
+  40
+ ],
+ "icon_rain_d": [
+  40,
+  40
+ ],
+ "icon_rain_w": [
+  40,
+  40
+ ],
+ "icon_snow_d": [
+  40,
+  40
+ ],
+ "icon_snow_w": [
+  40,
+  40
+ ],
+ "icon_ice_d": [
+  40,
+  40
+ ],
+ "icon_ice_w": [
+  40,
+  40
+ ],
+ "icon_fog_d": [
+  40,
+  40
+ ],
+ "icon_fog_w": [
+  40,
+  40
+ ],
+ "icon_heat_d": [
+  40,
+  40
+ ],
+ "icon_heat_w": [
+  40,
+  40
+ ],
+ "icon_cold_d": [
+  40,
+  40
+ ],
+ "icon_cold_w": [
+  40,
+  40
+ ],
+ "icon_waterspout_d": [
+  40,
+  40
+ ],
+ "icon_waterspout_w": [
+  40,
+  40
+ ],
+ "icon_warning_d": [
+  40,
+  40
+ ],
+ "icon_warning_w": [
+  40,
+  40
+ ],
+ "dag_0": [
+  138,
+  40
+ ],
+ "dag_1": [
+  120,
+  40
+ ],
+ "dag_2": [
+  154,
+  40
+ ],
+ "dag_3": [
+  162,
+  40
+ ],
+ "dag_4": [
+  104,
+  40
+ ],
+ "dag_5": [
+  132,
+  40
+ ],
+ "dag_6": [
+  111,
+  40
+ ],
+ "woord_tot": [
+  42,
+  40
+ ]
+}

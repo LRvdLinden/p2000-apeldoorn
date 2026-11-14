@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Er is een actieve Vermist Kind Alert",
+    "nl": "Er is een actieve Vermist Kind Alert"
+  },
+  "hint": {
+    "en": "Een Vermist Kind Alert-actie die nog loopt.",
+    "nl": "Een Vermist Kind Alert-actie die nog loopt."
+  },
+  "titleFormatted": {
+    "en": "Er !{{is|is geen}} actieve Vermist Kind Alert",
+    "nl": "Er !{{is|is geen}} actieve Vermist Kind Alert"
+  }
+}

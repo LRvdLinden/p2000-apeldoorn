@@ -1,0 +1,143 @@
+{
+  "title": {
+    "nl": "Er is een nieuw nieuwsartikel",
+    "en": "There is a new news article"
+  },
+  "titleFormatted": {
+    "nl": "Er is een nieuw nieuwsartikel: [[soort]]",
+    "en": "There is a new news article: [[soort]]"
+  },
+  "hint": {
+    "nl": "Een nieuw artikel in A-Alerts Nieuws (a-alerts.nl/nieuws): politieberichten, 112 Nieuws, weerartikelen en artikelen bij Burgernet, AMBER Alert, Vermist Kind en NL-Alert. Bericht = kant-en-klaar: titel, de link 'Lees verder' naar het artikel en de copyright-regel. Afbeelding = de afbeelding van het artikel.",
+    "en": "A new article in A-Alerts News (a-alerts.nl/nieuws): police news, 112 Nieuws, weather articles and articles about Burgernet, AMBER Alert, Missing Child and NL-Alert. Message = ready-made: title, the 'Read more' link to the article and the copyright line. Image = the article's image."
+  },
+  "args": [
+    {
+      "name": "soort",
+      "type": "dropdown",
+      "title": {
+        "nl": "Soort",
+        "en": "Kind"
+      },
+      "values": [
+        {
+          "id": "alle",
+          "label": {
+            "nl": "alle artikelen",
+            "en": "all articles"
+          }
+        },
+        {
+          "id": "politie",
+          "label": {
+            "nl": "politieberichten",
+            "en": "police news"
+          }
+        },
+        {
+          "id": "regionaal",
+          "label": {
+            "nl": "112 Nieuws",
+            "en": "112 Nieuws"
+          }
+        },
+        {
+          "id": "weer",
+          "label": {
+            "nl": "weerartikelen (KNMI)",
+            "en": "weather articles (KNMI)"
+          }
+        },
+        {
+          "id": "liveblog",
+          "label": {
+            "nl": "Burgernet, AMBER Alert, Vermist Kind en NL-Alert",
+            "en": "Burgernet, AMBER Alert, Missing Child and NL-Alert"
+          }
+        }
+      ]
+    }
+  ],
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "nl": "Nieuws-afbeelding",
+        "en": "News image"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, JPG)",
+        "en": "Image (URL, JPG)"
+      },
+      "example": "https://a-alerts.nl/assets/img/nieuws/og/js-brand-1.jpg"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "nl": "Nieuwsbericht (kant-en-klaar)",
+        "en": "News message (ready-made)"
+      },
+      "example": "*Brand in woning aan de Loolaan*\n\nLees verder: https://a-alerts.nl/nieuws/r-1a2b3c4d5e6f\n\n© A-Alerts …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "nl": "Titel",
+        "en": "Title"
+      },
+      "example": "Brand in woning aan de Loolaan"
+    },
+    {
+      "name": "intro",
+      "type": "string",
+      "title": {
+        "nl": "Intro",
+        "en": "Intro"
+      },
+      "example": "In een woning aan de Loolaan in Apeldoorn is brand uitgebroken."
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "nl": "Soort",
+        "en": "Kind"
+      },
+      "example": "112 Nieuws"
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Plaats",
+        "en": "Place"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar het artikel op a-alerts.nl",
+        "en": "Link to the article on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/nieuws/r-1a2b3c4d5e6f"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://chat.whatsapp.com/…"
+    }
+  ]
+}

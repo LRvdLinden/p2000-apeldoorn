@@ -1,0 +1,47 @@
+{
+  "title": {
+    "en": "Er geldt een KNMI-code",
+    "nl": "Er geldt een KNMI-code"
+  },
+  "hint": {
+    "en": "Een KNMI-weerwaarschuwing die nu geldt.",
+    "nl": "Een KNMI-weerwaarschuwing die nu geldt."
+  },
+  "titleFormatted": {
+    "en": "Er !{{geldt|geldt geen}} KNMI-code [[code]]",
+    "nl": "Er !{{geldt|geldt geen}} KNMI-code [[code]]"
+  },
+  "args": [
+    {
+      "name": "code",
+      "type": "dropdown",
+      "title": {
+        "en": "Code",
+        "nl": "Code"
+      },
+      "values": [
+        {
+          "id": "1",
+          "label": {
+            "en": "geel of hoger",
+            "nl": "geel of hoger"
+          }
+        },
+        {
+          "id": "2",
+          "label": {
+            "en": "oranje of hoger",
+            "nl": "oranje of hoger"
+          }
+        },
+        {
+          "id": "3",
+          "label": {
+            "en": "rood",
+            "nl": "rood"
+          }
+        }
+      ]
+    }
+  ]
+}

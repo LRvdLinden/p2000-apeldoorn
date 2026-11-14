@@ -1,0 +1,6 @@
+node_modules/
+env.json
+/app.json.bak
+/build/
+.homeybuild/
+.DS_Store

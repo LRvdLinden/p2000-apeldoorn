@@ -1,0 +1,22 @@
+{
+  "name": { "en": "A-Alerts meldingen", "nl": "A-Alerts meldingen" },
+  "height": 360,
+  "transparent": false,
+  "settings": [
+    {
+      "id": "aantal",
+      "type": "dropdown",
+      "title": { "en": "Aantal meldingen", "nl": "Aantal meldingen" },
+      "value": "6",
+      "values": [
+        { "id": "4", "title": { "en": "4", "nl": "4" } },
+        { "id": "6", "title": { "en": "6", "nl": "6" } },
+        { "id": "8", "title": { "en": "8", "nl": "8" } },
+        { "id": "12", "title": { "en": "12", "nl": "12" } }
+      ]
+    }
+  ],
+  "api": {
+    "getRecent": { "method": "GET", "path": "/recent" }
+  }
+}

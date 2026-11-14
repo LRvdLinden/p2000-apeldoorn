@@ -1,0 +1,178 @@
+{
+  "title": {
+    "nl": "Een AMBER Alert heeft een update",
+    "en": "An AMBER Alert has an update"
+  },
+  "hint": {
+    "nl": "Bericht = kant-en-klaar bericht met de update en de eerdere berichten, elk met tijd. Update = alleen de nieuwste update.",
+    "en": "Message = ready-made message with the update and the earlier messages, each with its time. Update = only the newest update."
+  },
+  "titleFormatted": {
+    "nl": "Een AMBER Alert heeft een update",
+    "en": "An AMBER Alert has an update"
+  },
+  "args": [],
+  "tokens": [
+    {
+      "name": "afbeelding",
+      "type": "image",
+      "title": {
+        "nl": "AMBER Alert-afbeelding (banner)",
+        "en": "AMBER Alert image (banner)"
+      }
+    },
+    {
+      "name": "afbeelding_url",
+      "type": "string",
+      "title": {
+        "nl": "Afbeelding (URL, kaart zonder watermerk of banner)",
+        "en": "Image (URL, map without watermark or banner)"
+      },
+      "example": "https://raw.githubusercontent.com/LRvdLinden/P2000-brand/main/banners/banner-burgernet-apeldoorn.png"
+    },
+    {
+      "name": "bericht",
+      "type": "string",
+      "title": {
+        "nl": "AMBER Alert-bericht bij update (kant-en-klaar)",
+        "en": "AMBER Alert message on update (ready-made)"
+      },
+      "example": "Burgernet melding in APELDOORN gesloten! …"
+    },
+    {
+      "name": "titel",
+      "type": "string",
+      "title": {
+        "nl": "Naam en leeftijd",
+        "en": "Name and age"
+      },
+      "example": {
+        "nl": "Voornaam (8)",
+        "en": "First name (8)"
+      }
+    },
+    {
+      "name": "update",
+      "type": "string",
+      "title": {
+        "nl": "Update (nieuwste)",
+        "en": "Update (newest)"
+      },
+      "example": {
+        "en": "Een van de mannen draagt een rode pet.",
+        "nl": "Een van de mannen draagt een rode pet."
+      }
+    },
+    {
+      "name": "foto_url",
+      "type": "string",
+      "title": {
+        "nl": "Foto van het kind (URL, alleen tijdens de oproep)",
+        "en": "Photo of the child (URL, only during the call)"
+      },
+      "example": "https://services.burgernet.nl/foto/1234.jpg"
+    },
+    {
+      "name": "tekst",
+      "type": "string",
+      "title": {
+        "nl": "Startbericht",
+        "en": "Start message"
+      },
+      "example": "De politie zoekt naar …"
+    },
+    {
+      "name": "tijdlijn",
+      "type": "string",
+      "title": {
+        "nl": "Alle Burgernet-berichten (nieuwste eerst)",
+        "en": "All Burgernet messages (newest first)"
+      },
+      "example": {
+        "en": "Afloopbericht (10:41): … Startbericht (09:06): …",
+        "nl": "Afloopbericht (10:41): … Startbericht (09:06): …"
+      }
+    },
+    {
+      "name": "aantal_updates",
+      "type": "number",
+      "title": {
+        "nl": "Aantal updates",
+        "en": "Number of updates"
+      },
+      "example": 1
+    },
+    {
+      "name": "soort",
+      "type": "string",
+      "title": {
+        "nl": "Soort (bijv. vermist)",
+        "en": "Kind (e.g. missing)"
+      },
+      "example": "Zware windstoten"
+    },
+    {
+      "name": "plaats",
+      "type": "string",
+      "title": {
+        "nl": "Gebied (Nederland)",
+        "en": "Area"
+      },
+      "example": "Apeldoorn"
+    },
+    {
+      "name": "status",
+      "type": "string",
+      "title": {
+        "nl": "Status",
+        "en": "Status"
+      },
+      "example": "Actief"
+    },
+    {
+      "name": "begin",
+      "type": "string",
+      "title": {
+        "nl": "Begin (datum en tijd)",
+        "en": "Start (date and time)"
+      },
+      "example": "06/11/2026 13:05"
+    },
+    {
+      "name": "einde",
+      "type": "string",
+      "title": {
+        "nl": "Einde (datum en tijd)",
+        "en": "End (date and time)"
+      },
+      "example": "06/11/2026 13:19"
+    },
+    {
+      "name": "link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar de melding op a-alerts.nl",
+        "en": "Link to the alert on a-alerts.nl"
+      },
+      "example": "https://a-alerts.nl/waarschuwing/burgernet:3967274"
+    },
+    {
+      "name": "bron_link",
+      "type": "string",
+      "title": {
+        "nl": "Link naar politie.nl",
+        "en": "Link to politie.nl"
+      },
+      "example": "https://www.politie.nl/amberalert"
+    },
+    {
+      "name": "whatsapp_link",
+      "type": "string",
+      "title": {
+        "nl": "WhatsApp-groeplink",
+        "en": "WhatsApp group link"
+      },
+      "example": "https://korturl.nl/?r=wa-burgernet"
+    }
+  ]
+}

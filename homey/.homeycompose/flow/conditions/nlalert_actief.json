@@ -1,0 +1,14 @@
+{
+  "title": {
+    "en": "Er is een actieve NL-Alert",
+    "nl": "Er is een actieve NL-Alert"
+  },
+  "hint": {
+    "en": "Een NL-Alert voor de gemeente Apeldoorn die nog niet is beëindigd.",
+    "nl": "Een NL-Alert voor de gemeente Apeldoorn die nog niet is beëindigd."
+  },
+  "titleFormatted": {
+    "en": "Er !{{is|is geen}} actieve NL-Alert",
+    "nl": "Er !{{is|is geen}} actieve NL-Alert"
+  }
+}
