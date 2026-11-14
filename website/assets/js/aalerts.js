@@ -278,7 +278,7 @@ export function inzetEenheden(m, list) {
 export function heliImg(h) {
   if (h.icoon) return asset(`assets/img/lucht_${h.icoon}.png`);
   if (h.soort === "trauma") return asset("assets/img/heli_lifeliner.png");
-  return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") : asset("assets/img/heli_politie.png");
+  return h.type === "A139" || ["zulu24", "zulu25", "zulu26"].includes(h.id) ? asset("assets/img/heli_politie_aw139.png") + "?v=2" : asset("assets/img/heli_politie.png");
 }
 export const vliegtWest = (h) => h.koers != null && !h.op_grond && ((h.koers % 360) + 360) % 360 > 180;
 // "Kaart en helikopters" (same choices as the apps), kept in this browser.

@@ -1,5 +1,8 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 95)
+- **Tekening van de politiehelikopter AW139 (Zulu 24, 25, 26) hersteld.** In het bestand stond een deel van de onderdelen verschoven (hoofdrotor, achterwiel, lichtblauwe lijn, staartlicht, ruit op de neus) en het kader sneed de staartrotor, de buik en de wielen af. De tekening zelf is niet veranderd. App, Android en website (kaart, pager, meldkamer).
+
 ## A-Alerts 2.0.1 (build 94)
 - **Verloop: de nieuwste melding staat bovenaan** (app, Android en pager); de regel "Opgeschaald naar …" staat nog steeds bij de melding waarmee de inzet groter werd.
 - Ambulance zonder adres bij een verkeersongeval: het venster is 5 minuten (was 15).
