@@ -746,10 +746,11 @@ async function categorieHerstel(env) {
 async function heliRun(env) {
   const data = await helikopters(env);
   await noteHeli(env, !data.fout);
-  const { prev } = await recordPositions(env, data);
+  // No trauma or police helicopter in sight gives no list of earlier positions; the aircraft of the other layer still count.
+  const prev = (await recordPositions(env, data))?.prev || new Map();
   let luchtPrev = new Map();
   try { luchtPrev = (await recordLucht(env, data.lucht)).prev; } catch (e) { console.warn("[lucht spoor]", e.message || e); }
-  if (!prev || data.fout) return;
+  if (data.fout) return;
   let devices = null, prefs = null;
   // The bell on one aircraft: a push when a followed helicopter or aircraft takes off.
   try {
