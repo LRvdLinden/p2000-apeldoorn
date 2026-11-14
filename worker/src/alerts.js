@@ -4,6 +4,7 @@
 import { polygonOverlaps, inWerkgebied, inRing, distanceKm, PLAATSEN_ALL, plaatsKey, matchesPlaatsen } from "./werkgebied.js";
 import { KIND_API, KIND_BRONNEN, groepeer, kindWarning } from "./kind.js";
 import { kvWrite } from "./kv.js";
+import { VNOG_API, vnogLijst, vnogWarning } from "./vnog.js";
 
 export const SOURCES = {
   nlalert: "https://api.public-warning.app/api/v1/providers/nl-alert/alerts",
@@ -402,6 +403,8 @@ export function prefsFrom(s) {
   return { nlalert: s.nlalert !== false, burgernet: s.burgernet === true, knmi: [...new Set(knmi)],
     // AMBER Alert and Vermist Kind Alert (app 2.0.1+): only when the app sends them, so older apps never get a kind they cannot show.
     amber: s.amber === true, vermistkind: s.vermistkind === true,
+    // VNOG incidents (app 2.0.1 build 100+): one switch per device, off until the user turns it on.
+    vnog: s.vnog === true,
     // Tab Nieuws (app 2.0.1 build 67+): liveblog messages from the beheer and new police news.
     nieuwsLiveblog: s.nieuwsLiveblog === true, nieuwsPolitie: s.nieuwsPolitie === true, nieuwsRegio: s.nieuwsRegio === true,
     // KNMI extras (default on): a push one hour before the code starts, and one when it is lifted (code green).
@@ -427,11 +430,12 @@ export function wantsPush(device, prefs, w) {
   // AMBER Alert: all of the Netherlands. Vermist Kind Alert: only kept when its search area reaches the working area.
   if (w.bron === "amber") return Boolean(prefs.amber);
   if (w.bron === "vermistkind") return Boolean(prefs.vermistkind);
+  if (w.bron === "vnog" && !prefs.vnog) return false;
   // "Mijn buurt": only warnings that reach the radius around the device (same rule as the list in the app).
   if (device.radius_km > 0 && device.lat != null && device.lon != null && !withinRadius(device, w)) return false;
   const chosen = device.plaatsen || [];
   if (!chosen.length) return true;
-  if (w.bron === "burgernet") return matchesPlaatsen(chosen, { stad: w.plaats, locatie: "", lat: null, lon: null });
+  if (w.bron === "burgernet" || w.bron === "vnog") return matchesPlaatsen(chosen, { stad: w.plaats, locatie: "", lat: null, lon: null });
   // Area warnings: one of the chosen places lies in (or within 2 km of) the area.
   const places = PLAATSEN_ALL.filter((p) => chosen.some((c) => plaatsKey(c) === plaatsKey(p.naam)));
   if (!w.gebied) return true;
@@ -439,9 +443,9 @@ export function wantsPush(device, prefs, w) {
 }
 
 const LABELS = {
-  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert", kindUpdate: "Update", kindEinde: "Beëindigd", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" }, update: "Update", upgrade: "Opgeschaald naar",
+  nl: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Vermist Kind Alert", kindUpdate: "Update", kindEinde: "Beëindigd", vnog: "VNOG", vnogEinde: "Afgesloten", vnogGrip: "Opgeschaald naar", knmi: { yellow: "Code geel", orange: "Code oranje", red: "Code rood", green: "Code groen" }, update: "Update", upgrade: "Opgeschaald naar",
     vooraf: (code, tijd) => `Om ${tijd} gaat ${code.toLowerCase()} in`, opgeheven: (soort) => `De waarschuwing${soort ? ` voor ${soort.toLowerCase()}` : ""} is opgeheven. Er geldt nu code groen.` },
-  en: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Missing Child Alert", kindUpdate: "Update", kindEinde: "Ended", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red", green: "Code green" }, update: "Update", upgrade: "Raised to",
+  en: { nlalert: "NL-Alert", burgernet: "Burgernet", amber: "AMBER Alert", vermistkind: "Missing Child Alert", kindUpdate: "Update", kindEinde: "Ended", vnog: "VNOG", vnogEinde: "Closed", vnogGrip: "Raised to", knmi: { yellow: "Code yellow", orange: "Code orange", red: "Code red", green: "Code green" }, update: "Update", upgrade: "Raised to",
     vooraf: (code, tijd) => `${code} starts at ${tijd}`, opgeheven: (soort) => `The warning${soort ? ` for ${soort.toLowerCase()}` : ""} has been lifted. Code green applies now.` },
 };
 
@@ -460,7 +464,13 @@ export function payloadForWarning(w, lang = "nl", { upgrade = false, kind = upgr
     head = `${L[w.bron]}${kind === "u" ? ` · ${L.kindUpdate}` : kind === "a" ? ` · ${L.kindEinde}` : ""}${w.bron === "vermistkind" && w.plaats ? ` · ${w.plaats}` : ""}`;
     body = kind === "a" ? w.tekst : [w.titel, w.tekst].filter(Boolean).join(" – ");
   }
-  const urgent = KIND_BRONNEN.includes(w.bron) ? kind !== "a" : kind !== "g" && (w.bron === "nlalert" || w.niveau === "red");
+  if (w.bron === "vnog") {
+    // kind: "n" new incident, "u" new update, "s" higher GRIP, "a" closed. GRIP is the official one of VNOG.
+    const grip = w.grip ? `GRIP ${w.grip}` : null;
+    head = [L.vnog, kind === "u" ? L.kindUpdate : kind === "a" ? L.vnogEinde : kind === "s" && grip ? `${L.vnogGrip} ${grip}` : grip, w.plaats].filter(Boolean).join(" · ");
+    body = kind === "a" ? `${w.titel} – ${w.afloop || "Het incident is afgesloten."}` : kind === "s" ? w.titel : [w.titel, w.tekst].filter(Boolean).join(" – ");
+  }
+  const urgent = w.bron === "vnog" ? kind !== "a" && Number(w.grip) >= 1 : KIND_BRONNEN.includes(w.bron) ? kind !== "a" : kind !== "g" && (w.bron === "nlalert" || w.niveau === "red");
   return {
     aps: {
       alert: { title: head, body: String(body || w.titel || "").slice(0, 400) },
@@ -474,6 +484,7 @@ export function payloadForWarning(w, lang = "nl", { upgrade = false, kind = upgr
     waarschuwing: w.id,
     bron: w.bron,
     ...(w.niveau ? { niveau: w.niveau } : {}),
+    ...(w.bron === "vnog" && w.grip ? { grip: w.grip } : {}),
     ...(w.lat != null && w.lon != null ? { lat: w.lat, lon: w.lon } : {}),
   };
 }
@@ -502,6 +513,13 @@ export function toAPI(row, { withArea = true, metLandelijk = false } = {}) {
       return { berichten: Array.isArray(k.berichten) && k.berichten.length ? k.berichten : null, foto: k.foto || null, foto_klein: k.foto_klein || null,
         straal_km: k.cirkel?.km ?? null };
     })() : {}),
+    ...(row.bron === "vnog" ? (() => {
+      const v = parse(row.knmi_data) || {};
+      // grip: the official GRIP of VNOG now; grip_hoogste: the highest it has been. incident: the linked P2000 incident.
+      return { berichten: Array.isArray(v.berichten) && v.berichten.length ? v.berichten : null, grip: v.grip ?? null, grip_hoogste: v.grip_hoogste ?? null,
+        straat: v.straat ?? null, incident: v.incident ?? null, plek: v.plek ?? null,
+        afloop: row.status === "beeindigd" ? "Het incident is afgesloten." : null };
+    })() : {}),
     ...(row.bron === "burgernet" ? (() => {
       const b = parse(row.knmi_data) || {};
       return { startbericht: b.startbericht ?? null, afloop: b.afloop ?? null, berichten: Array.isArray(b.berichten) && b.berichten.length ? b.berichten : null, straat: b.straat ?? null };
@@ -515,16 +533,18 @@ const PUBLIC_SELECT = `SELECT w.*, wo.ended_at AS ov_ended, wk.data AS knmi_data
 const withOverride = (row) => (row?.ov_ended && row.status !== "beeindigd" ? { ...row, status: "beeindigd", end_at: Math.min(row.end_at || row.ov_ended, row.ov_ended) } : row);
 
 /** kind = true: also AMBER Alert and Vermist Kind Alert (apps from 2.0.1, website, Homey); older apps cannot decode them. */
-export async function listWarnings(env, days = 7, { kind = false } = {}) {
+export async function listWarnings(env, days = 7, { kind = false, vnog = false } = {}) {
   const since = Date.now() - Math.min(Number(days) || 7, 30) * DAY;
   const { results } = await env.DB.prepare(
     `${PUBLIC_SELECT} AND (COALESCE(w.end_at, w.start_at) >= ? OR w.status != 'beeindigd') ORDER BY w.start_at DESC LIMIT 200`,
   ).bind(since).all();
-  return results.filter((r) => kind || !KIND_BRONNEN.includes(r.bron)).map((r) => toAPI(withOverride(r)));
+  // vnog = true: also the incidents of VNOG (apps from build 100, website, Homey from 0.1.16).
+  return results.filter((r) => (kind || !KIND_BRONNEN.includes(r.bron)) && (vnog || r.bron !== "vnog")).map((r) => toAPI(withOverride(r)));
 }
 
 /** Warnings changed after a moment (for the Homey app): new ones, status changes and hand-ended ones. */
 export async function warningsSince(env, since) {
+  // VNOG incidents are in this list too (bron "vnog"); the Homey webhook sends them apart, so an older Homey app never gets them.
   const { results } = await env.DB.prepare(
     `${PUBLIC_SELECT} AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?) ORDER BY w.start_at DESC LIMIT 40`,
   ).bind(since, since, since).all();
@@ -554,6 +574,7 @@ export function knmiOpgeheven(id) {
 
 /** P2000 alerts in the warning's area (or place) around its time. Never presented as a confirmed link. */
 export async function linkedMeldingen(env, w, toAPIMelding, SELECT) {
+  if (w.bron === "vnog") return vnogMeldingen(env, w, toAPIMelding, SELECT);
   const start = Date.parse(w.start) - 2 * 3_600_000;
   const end = (w.einde ? Date.parse(w.einde) : Date.parse(w.start) + 6 * 3_600_000) + 3_600_000;
   const { results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? ORDER BY m.datum DESC LIMIT 400`)
@@ -570,6 +591,42 @@ export async function linkedMeldingen(env, w, toAPIMelding, SELECT) {
   }));
 }
 
+/** VNOG: the alerts of the linked P2000 incident, else the alerts in the named street around the start. */
+async function vnogMeldingen(env, w, toAPIMelding, SELECT) {
+  let results = [];
+  if (w.incident) {
+    ({ results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND (m.incident = ? OR m.guid = ?) ORDER BY m.datum DESC LIMIT 40`).bind(w.incident, w.incident).all());
+  } else if (w.straat) {
+    const start = Date.parse(w.start);
+    ({ results } = await env.DB.prepare(`${SELECT} WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? AND COALESCE(o.locatie, m.locatie) LIKE ? ORDER BY m.datum DESC LIMIT 40`)
+      .bind(start - VNOG_VOOR_MS, start + VNOG_NA_MS, `%${w.straat}%`).all());
+  }
+  return results.map(toAPIMelding).map((m) => ({ ...m, relatie: w.incident ? "zelfde-incident" : "zelfde-straat-rond-tijdstip" }));
+}
+
+// A VNOG page appears after the first alarm: the P2000 incident is looked for from 4 hours before the page to 1 hour after.
+const VNOG_VOOR_MS = 4 * 3_600_000, VNOG_NA_MS = 3_600_000;
+
+/**
+ * The spot of a VNOG incident (the API has no address or coordinates). Only when its street is named:
+ * 1. the P2000 incident in that street around the start: its exact spot, and the incident is linked;
+ * 2. else the middle of the street from PDOK. Without a street there is no marker (never a made-up spot).
+ */
+export async function vnogLocatie(env, budget, w) {
+  const straat = w.extra?.straat;
+  // A spot set in the beheer always stays.
+  if (!straat || w.extra?.plek === "beheer" || (w.lat != null && w.extra?.incident)) return w;
+  const { results } = await env.DB.prepare(`SELECT m.guid, m.incident, m.dienst, COALESCE(o.lat, m.lat) AS lat, COALESCE(o.lon, m.lon) AS lon FROM meldingen m
+    LEFT JOIN overrides o ON o.guid = m.guid WHERE COALESCE(o.hidden, 0) = 0 AND m.datum BETWEEN ? AND ? AND COALESCE(o.locatie, m.locatie) LIKE ?
+    AND COALESCE(o.lat, m.lat) IS NOT NULL ORDER BY m.datum LIMIT 20`).bind(w.start_at - VNOG_VOOR_MS, w.start_at + VNOG_NA_MS, `%${straat}%`).all();
+  const m = results.find((r) => r.dienst === "brandweer") || results[0];
+  if (m) return { ...w, lat: m.lat, lon: m.lon, extra: { ...w.extra, incident: m.incident || m.guid, plek: "p2000" } };
+  if (w.lat != null) return w;
+  const plaats = PLAATSEN_ALL.find((p) => p.naam === w.plaats) || PLAATSEN_ALL.find((p) => p.naam === "Apeldoorn");
+  const punt = await straatPunt(env, budget, straat, plaats);
+  return punt ? { ...w, lat: punt[0], lon: punt[1], extra: { ...w.extra, plek: "straat" } } : w;
+}
+
 /**
  * Stores a warning, but only writes when something changed: every source is read every minute, and D1 counts every
  * written row (free plan: 100,000 a day). updated_at only moves on a real change, so the news sync follows real changes too.
@@ -581,7 +638,7 @@ async function upsert(env, w, now) {
   if (w.bron === "knmi") {
     extra = JSON.stringify({ verwachting: w.verwachting, advies: w.advies, kop: w.kop, omschrijving: w.omschrijving, details: w.details, uitgifte: w.uitgifte,
       tijdvakken: w.tijdvakken || null, landelijk: w.landelijk || null });
-  } else if (KIND_BRONNEN.includes(w.bron) && w.extra) extra = JSON.stringify(w.extra);
+  } else if ((KIND_BRONNEN.includes(w.bron) || w.bron === "vnog") && w.extra) extra = JSON.stringify(w.extra);
   // Burgernet start and closing message (table waarschuwing_knmi holds the extra data of every source).
   else if (w.bron === "burgernet" && (w.afloop || w.berichten?.length || w.straat)) {
     extra = JSON.stringify({ startbericht: w.startbericht || null, afloop: w.afloop || null, berichten: w.berichten || null, ...(w.straat ? { straat: w.straat } : {}) });
@@ -767,6 +824,50 @@ export async function ingestWarnings(env, budget, kv) {
     }
     status.kind = `ok ${actief}`;
   } catch (e) { status.kind = `fout: ${e.message}`; }
+
+  // VNOG: the running incidents every two minutes; the whole list once when a running incident left it (its closing state).
+  // Pushes: a new incident, every new update, a higher GRIP and the closing. A first sight long after the start gives none.
+  if ((await kv.get("vnog_uit"))?.value === "1") status.vnog = "uit";
+  else if (Math.floor(now / 60_000) % 2 === 0) {
+    try {
+      const rijVan = (id) => env.DB.prepare("SELECT w.*, wk.data AS extra FROM waarschuwingen w LEFT JOIN waarschuwing_knmi wk ON wk.id = w.id WHERE w.id = ?").bind(id).first();
+      const verwerk = async (inc) => {
+        const row = await rijVan(`vnog:${inc?.id}`);
+        let w = vnogWarning(inc, row ? { row, extra: parse(row.extra) || {} } : null, now);
+        if (!w) return null;
+        // The spot is looked for while the incident is young, and again when a new update may name the street.
+        if (w.extra.plek !== "beheer" && (w.lat == null || !w.extra.incident)) {
+          if (!row || w._nieuw || now - w.start_at < 2 * 3_600_000) { try { w = await vnogLocatie(env, budget, w); } catch (e) { console.warn("[vnog plek]", e.message || e); } }
+        }
+        const { _nieuw, _gripHoger, _afgesloten, _vers, ...opslag } = w;
+        await upsert(env, opslag, now);
+        if (firstRun || !row?.notified) {
+          if (!firstRun && w.status === "actief" && _vers) toPush.push({ id: w.id, kind: "n" });
+          await markNotified(env, w.id, "1");
+        } else if (_afgesloten) toPush.push({ id: w.id, kind: "a" });
+        else if (_gripHoger) toPush.push({ id: w.id, kind: "s" });
+        else if (_nieuw && w.status === "actief") toPush.push({ id: w.id, kind: "u" });
+        return w;
+      };
+      const lijst = vnogLijst(await fetchJSON(VNOG_API.actief, budget));
+      const gezien = new Set();
+      let actief = 0;
+      for (const inc of lijst) { const w = await verwerk(inc); if (w) { gezien.add(w.id); if (w.status === "actief") actief++; } }
+      const { results: open } = await env.DB.prepare("SELECT id FROM waarschuwingen WHERE bron = 'vnog' AND status = 'actief'").all();
+      const weg = open.filter((r) => !gezien.has(r.id));
+      if (weg.length) {
+        const alles = vnogLijst(await fetchJSON(VNOG_API.alles, budget));
+        for (const r of weg) {
+          const inc = alles.find((i) => `vnog:${i.id}` === r.id);
+          if (inc) { await verwerk(inc); continue; }
+          // Not on the list any more at all (page removed): closed now, with what was stored.
+          const oud = await rijVan(r.id);
+          await verwerk({ id: r.id.slice(5), title: oud?.titel || "", url: oud?.link || "", updates: [], status: false });
+        }
+      }
+      status.vnog = `ok ${actief}`;
+    } catch (e) { status.vnog = `fout: ${e.message}`; }
+  } else status.vnog = "ongewijzigd";
 
   try {
     // Only download the full set when KNMI's revision changed.

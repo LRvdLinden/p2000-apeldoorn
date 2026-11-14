@@ -41,7 +41,7 @@ ErrorDocument 404 /404.html
   # die meteen doorstuurt naar de live pager. Met de app geïnstalleerd opent de link in de app (universal links / app links).
   RewriteRule ^melding/(brandweer|ambulance|politie|traumaheli)/[A-Za-z0-9_-]+/?$ /deel/$1.html [L]
   RewriteRule ^melding/[a-z]+/[A-Za-z0-9_-]+/?$ /deel/melding.html [L]
-  RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind):.+$ /deel/$1.html [L]
+  RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind|vnog):.+$ /deel/$1.html [L]
 
   # Nieuws: /nieuws/<id> is dezelfde pagina; de JavaScript toont het artikel of liveblog.
   # Bestaat de deelpagina (met de afbeelding van het artikel) al, dan die; anders de gewone pagina.

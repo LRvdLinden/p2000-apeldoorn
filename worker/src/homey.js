@@ -23,7 +23,8 @@ export async function homeyChanges(env, since) {
     // New news articles: only their ids; the Homey app then reads GET /v1/nieuws (image, title, kind).
     env.DB.prepare("SELECT id FROM nieuws WHERE hidden = 0 AND created_at > ? ORDER BY created_at ASC LIMIT 20").bind(since).all(),
   ]);
-  return { meldingen: m.results.map(toAPI), waarschuwingen: w, nieuws: n.results.map((r) => r.id) };
+  // VNOG incidents go in their own list: a Homey app from before 0.1.16 does not know them and so never sees them.
+  return { meldingen: m.results.map(toAPI), waarschuwingen: w.filter((x) => x.bron !== "vnog"), vnog: w.filter((x) => x.bron === "vnog"), nieuws: n.results.map((r) => r.id) };
 }
 
 export async function notifyHomey(env, budget) {
@@ -33,7 +34,7 @@ export async function notifyHomey(env, budget) {
   if (!raw) { await kvSet(env, CURSOR, now); return { sent: false, reason: "cursor set" }; }
   const since = Math.max(Number(raw) || now, now - 30 * 60_000); // never resend more than 30 minutes
   const changes = await homeyChanges(env, since);
-  if (!changes.meldingen.length && !changes.waarschuwingen.length && !changes.nieuws.length) { await kvSet(env, CURSOR, now); return { sent: false, reason: "nothing new" }; }
+  if (!changes.meldingen.length && !changes.waarschuwingen.length && !changes.vnog.length && !changes.nieuws.length) { await kvSet(env, CURSOR, now); return { sent: false, reason: "nothing new" }; }
   if (budget && !budget.take()) return { sent: false, reason: "budget" };
   const res = await fetch(`https://webhooks.athom.com/webhook/${env.HOMEY_WEBHOOK_ID}`, {
     method: "POST",

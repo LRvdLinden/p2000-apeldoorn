@@ -38,7 +38,7 @@ def og_image(url):
 def label(x):
     live = x.get("liveblog", x["soort"] == "liveblog")
     if x["soort"] == "liveblog":
-        naam = {"burgernet": "Burgernet", "amber": "AMBER Alert", "vermistkind": "Vermist Kind Alert", "nlalert": "NL-Alert"}.get(x["bron"], "Melding")
+        naam = {"burgernet": "Burgernet", "amber": "AMBER Alert", "vermistkind": "Vermist Kind Alert", "nlalert": "NL-Alert", "vnog": "VNOG-incident"}.get(x["bron"], "Melding")
         return f"Liveblog {naam}" if live else naam
     if x["soort"] == "regionaal":
         return "112 Nieuws" + (f" · {x['plaats']}" if x.get("plaats") else "")

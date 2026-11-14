@@ -9,6 +9,7 @@ export const MARKERS = {
   politie: ["marker_politie.png", 48, 48, 1.5], traumaheli: ["marker_traumaheli.png", 48, 48, 1.5],
   burgernet: ["marker_burgernet.png", 39, 48, 0], nlalert: ["marker_nlalert.png", 39, 48, 0],
   amber: ["marker_amber.png", 39, 48, 0], vermistkind: ["marker_vermistkind.png", 39, 48, 0],
+  vnog: ["marker_vnog.png", 39, 48, 0],
 };
 const ASSETS = "https://a-alerts.nl/assets/img/";
 export const KAART = { size: 600, scale: 2 };

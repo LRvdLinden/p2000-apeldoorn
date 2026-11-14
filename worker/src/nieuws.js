@@ -9,12 +9,12 @@ import { getWarning } from "./alerts.js";
 
 export const POLITIE_API = "https://api.politie.nl/v4/nieuws";
 export const NIEUWS_SOORTEN = ["politie", "weer", "liveblog", "regionaal"];
-const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind", "nlalert"];
+const LIVE_BRONNEN = ["burgernet", "amber", "vermistkind", "nlalert", "vnog"];
 const KIND = ["amber", "vermistkind"];
 const IMG = "https://a-alerts.nl/assets/img/nieuws/";
 // New version of the images (browsers keep them 30 days): raise when an image is replaced under the same name.
 // Raise when images change or are added: the site caches images 30 days, also a 404 seen before a new file was live.
-const IMG_V = "?v=5";
+const IMG_V = "?v=6";
 const SITE = "https://a-alerts.nl/nieuws/";
 const DAY = 86_400_000;
 const CENTRUM = { lat: 52.2112, lon: 5.9699 };
@@ -383,7 +383,7 @@ export async function syncWaarschuwingen(env, kv, now = Date.now(), { alleWeer =
   const { results } = alleWeer
     ? await env.DB.prepare("SELECT ref AS id FROM nieuws WHERE soort = 'weer' AND ref IS NOT NULL").all()
     : await env.DB.prepare(`SELECT w.id FROM waarschuwingen w LEFT JOIN waarschuwing_overrides wo ON wo.id = w.id
-    WHERE w.bron IN ('knmi','burgernet','amber','vermistkind','nlalert') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
+    WHERE w.bron IN ('knmi','burgernet','amber','vermistkind','nlalert','vnog') AND (w.updated_at > ? OR w.first_seen > ? OR COALESCE(wo.updated_at, 0) > ?)
     ORDER BY w.updated_at LIMIT 60`).bind(since, since, since).all();
   for (const { id } of results) {
     const w = await getWarning(env, id);
@@ -505,7 +505,7 @@ export async function getNieuws(env, origin, id, { beheer = false } = {}) {
   return {
     ...samenvatting({ ...row, aantal: tijdlijn.length, laatste_update: laatste, start: d.start || null }, origin, stock, { beheer }),
     alineas: d.alineas || [], plaatsen: d.plaatsen || null, tijdlijn, weer: d.weer || null,
-    bron_naam: row.soort === "regionaal" ? "112 Nieuws" : row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : "Politie (AMBER Alert)",
+    bron_naam: row.soort === "regionaal" ? "112 Nieuws" : row.soort === "politie" ? "politie.nl" : row.soort === "weer" ? "KNMI" : row.bron === "burgernet" ? "Burgernet" : row.bron === "vnog" ? "VNOG" : "Politie (AMBER Alert)",
   };
 }
 
@@ -631,8 +631,8 @@ export async function zetStock(env, body) {
 // ------------------------------------------------------------------ push
 
 const L = {
-  nl: { live: { burgernet: "Liveblog · Burgernet", amber: "Liveblog · AMBER Alert", vermistkind: "Liveblog · Vermist Kind" }, politie: "Politienieuws", weer: "Weer", regio: "112 Nieuws" },
-  en: { live: { burgernet: "Live blog · Burgernet", amber: "Live blog · AMBER Alert", vermistkind: "Live blog · Missing Child" }, politie: "Police news", weer: "Weather", regio: "112 Nieuws" },
+  nl: { live: { burgernet: "Liveblog · Burgernet", amber: "Liveblog · AMBER Alert", vermistkind: "Liveblog · Vermist Kind", vnog: "Liveblog · VNOG" }, politie: "Politienieuws", weer: "Weer", regio: "112 Nieuws" },
+  en: { live: { burgernet: "Live blog · Burgernet", amber: "Live blog · AMBER Alert", vermistkind: "Live blog · Missing Child", vnog: "Live blog · VNOG" }, politie: "Police news", weer: "Weather", regio: "112 Nieuws" },
 };
 
 /** kind "p": new police article, "a": message added by the beheer. */

@@ -4,7 +4,7 @@
 //  - HTTP: the same REST API the app, the widgets and the website use.
 import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
-import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError, categorie } from "./rules.js";
+import { fromFeed, matches, payloadFor, isUrgent, isQuiet, deviceFrom, HttpError, categorie } from "./rules.js";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, incidentMeldingen, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
   activeDevices, deviceCount, housekeeping,
@@ -45,7 +45,7 @@ import { notifyHomey, homeyConfigured } from "./homey.js";
 import { kaartImage } from "./kaart.js";
 import { kiesStockFotos, listNieuws, getNieuws, fotoResponse, wijzigNieuws, voegToe, wijzigUpdate, verwijderUpdate, stockLijst, zetStock, syncPolitie,
   syncWaarschuwingen, sync112, payloadVoorNieuws, nieuwsOntvangers, nieuwsHousekeeping } from "./nieuws.js";
-import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, checkBronnen, recordBronnen } from "./admin-alerts.js";
+import { adminWarnings, updateWarning, alertsOverview, setAdminPrefs, setBron, checkBronnen, recordBronnen } from "./admin-alerts.js";
 import { kvWrite } from "./kv.js";
 import { hmPaal, hmPunt, hmHerstel, straatPunt, straatHerstel } from "./hm.js";
 import { pandVoor } from "./pand.js";
@@ -168,7 +168,7 @@ async function handle(req, env, ctx) {
 
   // A-Alerts: NL-Alert, Burgernet and KNMI for the working area.
   if (method === "GET" && path === "/v1/waarschuwingen") {
-    return reply(200, await listWarnings(env, url.searchParams.get("days"), { kind: url.searchParams.get("kind") === "1" }), { "cache-control": "public, max-age=30" });
+    return reply(200, await listWarnings(env, url.searchParams.get("days"), { kind: url.searchParams.get("kind") === "1", vnog: url.searchParams.get("vnog") === "1" }), { "cache-control": "public, max-age=30" });
   }
   // Weather at the place and time of a warning (same WeatherKit data as for an alert).
   m = path.match(/^\/v1\/waarschuwingen\/([\w:.\-%+]{4,160})\/weather$/);
@@ -392,6 +392,12 @@ async function handleBeheer(req, env, url, path, method) {
   if (method === "GET" && path === "/v1/beheer/downloads") return reply(200, await downloadStats(env));
   // A-Alerts: NL-Alert, Burgernet and KNMI in the beheer.
   if (method === "GET" && path === "/v1/beheer/waarschuwingen") return reply(200, await adminWarnings(env, url));
+  // A source on or off (VNOG): { aan: true | false }.
+  let br = path.match(/^\/v1\/beheer\/bronnen\/([a-z]{3,12})$/);
+  if (br && (method === "PATCH" || method === "PUT" || method === "POST")) {
+    const r = await setBron(env, br[1], (await readJSON(req))?.aan);
+    return r ? reply(200, r) : reply(400, { error: "Onbekende bron" });
+  }
   let w = path.match(/^\/v1\/beheer\/waarschuwingen\/([\w:.\-%+]{4,160})$/);
   if (w && (method === "PATCH" || method === "PUT")) {
     const item = await updateWarning(env, decodeURIComponent(w[1]), await readJSON(req));
@@ -618,7 +624,7 @@ async function drain(env, budget) {
       ? await sendPush(env, row, payloadVoorNieuws(item.nieuws, row.language, item.kind, item.update), { collapseId: row.guid.slice(-64) })
       : item.warning
       ? await sendPush(env, row, payloadForWarning(item.warning, row.language, { kind: item.kind }),
-        { urgent: ["amber", "vermistkind"].includes(item.warning.bron) ? item.kind !== "a" : item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"),
+        { urgent: item.warning.bron === "vnog" ? item.kind !== "a" && Number(item.warning.grip) >= 1 : ["amber", "vermistkind"].includes(item.warning.bron) ? item.kind !== "a" : item.kind !== "g" && (item.warning.bron === "nlalert" || item.warning.niveau === "red"),
           collapseId: item.warning.id.slice(0, 64) })
       : item.melding
       ? await sendPush(env, row, meldingPayload(item.melding, row.language), { urgent: isUrgent(item.melding), collapseId: row.guid })
@@ -674,6 +680,8 @@ async function warnings(env, budget) {
     const tokens = devices.filter((d) => {
       const p = prefs.get(d.token);
       if (!extra(p)) return false;
+      // VNOG follows the quiet hours of the device; from GRIP 1 it comes through for who allows urgent alerts in quiet hours.
+      if (w.bron === "vnog" && isQuiet(d) && !(d.critical && Number(w.grip) >= 1)) return false;
       return kind === "g" ? (levels || [w.niveau]).some((niveau) => warningWanted(d, p, { ...wr, niveau, status: "actief" })) : warningWanted(d, p, wr);
     }).map((d) => d.token);
     if (tokens.length) await queue(env, `w:${kind}:${id}`, tokens);
