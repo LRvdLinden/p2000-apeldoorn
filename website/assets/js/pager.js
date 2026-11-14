@@ -7,9 +7,9 @@ import {
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
-  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
+  heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=69";
+  CODES, isOpgeheven, isKind, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=70";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -1350,11 +1350,15 @@ function openHeli(h) {
   const snelheid = h.snelheid_kt != null ? `${Math.round(h.snelheid_kt * 1.852)} km/u <small>${Math.round(h.snelheid_kt)} kn</small>` : "–";
   const kompas = h.koers != null && !h.op_grond ? `<svg class="kompas" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="10.5" fill="none" stroke="currentColor" stroke-opacity=".3" stroke-width="1.5"/><path d="M12 3.5l4 9.5h-8z" fill="#DC2626" transform="rotate(${Math.round(h.koers)} 12 12)"/><path d="M12 20.5l-4-7.5h8z" fill="currentColor" fill-opacity=".35" transform="rotate(${Math.round(h.koers)} 12 12)"/></svg>` : "";
   const herkenning = h.icoon ? `Herkend aan het toestel zelf${h.callsign ? `; vliegt nu als ${esc(h.callsign)}` : ""}` : h.herkenning === "toestel" ? `Herkend aan het toestel; vliegt nu als ${esc(h.callsign || "–")}` : h.herkenning === "operator" ? "Herkend aan de eigenaar van het toestel" : "";
+  const oud = Math.max(0, Math.round((Date.now() - new Date(h.gezien).getTime()) / 1000));
   const afstand = state.here ? ` · ${distanceKm(state.here, h).toFixed(1).replace(".", ",")} km van je af` : "";
   box.innerHTML = `<header><b>${esc(h.naam)}</b><button class="icon-btn" data-close aria-label="Sluit">✕</button></header>
     <div class="heli-body">
     <p>${esc([h.icoon ? (LUCHT_SOORT[h.soort] || "Defensie") : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter", h.icoon ? h.type : h.registratie, h.basis ? `basis ${h.basis}` : null].filter(Boolean).join(" · "))}</p>
     ${!h.op_grond ? `<p class="heli-boven">${h.boven ? `Nu boven <b>${esc(h.boven)}</b>` : "Nu boven zee of over de grens"}<span id="heliDuur" hidden></span></p>` : ""}
+    ${h.op_grond && h.plek ? `<p class="heli-boven">${h.plek_soort === "basis" ? "Op de basis: " : "Op de grond bij "}<b>${esc(h.plek)}</b></p>` : ""}
+    ${h.samen ? `<p class="heli-samen"><b>Samen met ${esc(h.samen.met.join(", "))}</b> op één plek${h.samen.plaats ? ` in ${esc(h.samen.plaats)}` : ""}. Mogelijk een groot incident.</p>` : ""}
+    <p class="heli-weer" id="heliWeer" hidden></p>
     <div class="heli-vals"><div><small>Koers</small><b class="met-kompas">${kompas}${koers}</b></div><div><small>Hoogte</small><b>${hoogte}</b></div><div><small>Snelheid</small><b>${snelheid}</b></div></div>
     ${h.voorspelling ? `<p class="voorspelling">${esc(voorspellingTekst(h.voorspelling))}</p>` : ""}
     ${inzetVan(h.id) ? `<div class="inzet-status geannuleerd"><b>${esc(inzetTekst(inzetVan(h.id))[0])}</b><small>${esc(inzetTekst(inzetVan(h.id))[1])}</small></div>` : ""}
@@ -1366,9 +1370,28 @@ function openHeli(h) {
     <small class="hint" id="afspeelTijd"></small>
     <h4 class="vl-head" id="heliPlaatsenKop" hidden>Waar geweest</h4><ol class="plaatsen" id="heliPlaatsen" hidden></ol>
     <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
-    <p class="hint">${herkenning ? `${herkenning}. ` : ""}Positie van ${esc(fmtTime(new Date(h.gezien)))}${afstand} · data: adsb.lol (ODbL)</p>
+    <p class="hint${oud > 60 ? " oud" : ""}">${herkenning ? `${herkenning}. ` : ""}Positie van ${esc(fmtTime(new Date(h.gezien)))}${oud > 60 ? ` (${oud < 120 ? `${oud} seconden` : `${Math.round(oud / 60)} minuten`} oud)` : ""}${afstand} · data: adsb.lol (ODbL)</p>
+    <details class="heli-meld"><summary>Klopt dit toestel niet?</summary>
+      <textarea id="heliMeldTekst" rows="2" maxlength="500" placeholder="Wat klopt er niet? Bijvoorbeeld: verkeerde naam, of een toestel dat ontbreekt."></textarea>
+      <button id="heliMeldKnop" class="btn">Verstuur</button><small class="hint" id="heliMeldUit"></small></details>
     </div>`;
   box.hidden = false;
+  // Weather that limits flying (a KNMI code for fog, wind, thunderstorms, snow or ice).
+  fetchHeliStatus().then((st) => {
+    const el = $("heliWeer");
+    if (!el || !st?.weer) return;
+    el.textContent = `Weinig helikopterinzet te verwachten: ${st.weer.reden} (code ${{ yellow: "geel", orange: "oranje", red: "rood" }[st.weer.niveau] || ""}).`;
+    el.hidden = false;
+  });
+  $("heliMeldKnop")?.addEventListener("click", async (e) => {
+    e.stopPropagation();
+    const t = $("heliMeldTekst").value.trim(), uit = $("heliMeldUit");
+    if (t.length < 3) { uit.textContent = "Schrijf kort wat er niet klopt."; return; }
+    e.currentTarget.disabled = true;
+    const ok = await meldToestel(h.id, `${h.naam}${h.registratie ? ` (${h.registratie})` : ""}: ${t}`);
+    uit.textContent = ok ? "Bedankt, je melding is verstuurd." : "Versturen lukte niet. Probeer het later opnieuw.";
+    if (!ok) e.currentTarget.disabled = false;
+  });
   box.querySelectorAll("[data-scope]").forEach((b) => b.addEventListener("click", (e) => {
     e.stopPropagation();
     heliSpoor.scope = b.dataset.scope; prefs.set("p2000.spoorScope", heliSpoor.scope);

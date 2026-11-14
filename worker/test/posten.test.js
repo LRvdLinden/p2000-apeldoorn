@@ -31,7 +31,7 @@ test("volgPushes: landing only when asked, flight back can be switched off", () 
   const lucht = { ...grond, op_grond: false, boven: "Apeldoorn" };
   // landed: only the device that asked for it
   let g = volgPushes(dev, prefs, [grond], new Map([["lifeliner3", { at: now - 30_000, grond: 0 }]]), now);
-  assert.equal(g.length, 1); assert.deepEqual(g[0].tokens, ["a"]); assert.equal(g[0].texts.nl.title, "Lifeliner 3 is geland"); assert.equal(g[0].texts.nl.body, "In Apeldoorn");
+  assert.equal(g.length, 1); assert.deepEqual(g[0].tokens, ["a"]); assert.equal(g[0].texts.nl.title, "Lifeliner 3 is geland"); assert.equal(g[0].texts.nl.body, "Op locatie in Apeldoorn");
   // takes off again 20 minutes after the landing: the flight back, not for the device that switched it off
   g = volgPushes(dev, prefs, [lucht], new Map([["lifeliner3", { at: now - 30_000, grond: 1 }]]), now, new Map([["lifeliner3", now - 20 * 60_000]]));
   assert.deepEqual(g[0].tokens, ["b"]);

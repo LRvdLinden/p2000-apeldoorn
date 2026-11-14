@@ -27,9 +27,15 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     let icoon: String?
     /// "Now above …": the nearest Dutch place ("Teuge, Voorst"); nil on the ground, above sea or abroad.
     let boven: String?
+    /// On the ground: the hospital or base it stands at, and which of the two ("ziekenhuis", "basis").
+    let plek: String?
+    let plekSoort: String?
+    /// Other helicopters at the same spot.
+    let samen: HeliSamen?
 
     enum CodingKeys: String, CodingKey {
-        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon, boven
+        case id, naam, soort, basis, callsign, registratie, type, lat, lon, koers, gezien, herkenning, voorspelling, icoon, boven, plek, samen
+        case plekSoort = "plek_soort"
         case hoogteFt = "hoogte_ft", opGrond = "op_grond", snelheidKt = "snelheid_kt"
     }
 
@@ -54,6 +60,9 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
         voorspelling = try? c.decodeIfPresent(HeliVoorspelling.self, forKey: .voorspelling)
         icoon = try? c.decodeIfPresent(String.self, forKey: .icoon)
         boven = try? c.decodeIfPresent(String.self, forKey: .boven)
+        plek = try? c.decodeIfPresent(String.self, forKey: .plek)
+        plekSoort = try? c.decodeIfPresent(String.self, forKey: .plekSoort)
+        samen = try? c.decodeIfPresent(HeliSamen.self, forKey: .samen)
     }
 
     var coordinate: CLLocationCoordinate2D { CLLocationCoordinate2D(latitude: lat, longitude: lon) }
@@ -112,7 +121,7 @@ struct Helikopter: Decodable, Identifiable, Hashable, Sendable {
     }
 
     /// Not seen for more than two minutes.
-    var isVerouderd: Bool { Date.now.timeIntervalSince(gezien) > 120 }
+    var isVerouderd: Bool { Date.now.timeIntervalSince(gezien) > 60 }
 }
 
 /// A Lifeliner that was probably cancelled on its way to an alert, or did not take off. P2000 sends no cancellation:
@@ -377,6 +386,7 @@ struct HeliInfoKaart: View {
                     Spacer(minLength: 0)
                 }
             }
+            HeliExtraRegels(heli: heli)
             HStack(spacing: 8) {
                 waarde(L("Koers"), heli.opGrond ? "–" : (heli.koersTekst ?? "–"), "location.north.line.fill", koers: heli.opGrond ? nil : heli.koers)
                 waarde(L("Hoogte"), heli.hoogteTekst, "arrow.up.and.down", tweede: heli.hoogteTweede)
@@ -411,7 +421,10 @@ struct HeliInfoKaart: View {
                 if heli.isVerouderd { Text(L("(verouderd)")) }
             }
             .font(AppFont.body(11, .regular, relativeTo: .caption2))
-            .foregroundStyle(.secondary)
+            .foregroundStyle(heli.isVerouderd ? Color.orange : Color.secondary)
+            #if !os(watchOS) && !os(tvOS)
+            HeliMeldKnop(heli: heli)
+            #endif
         }
         .padding(14)
         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 20, style: .continuous))

@@ -276,6 +276,19 @@ data class Tijdvak(val niveau: String = "yellow", val start: String? = null, val
 }
 
 @Serializable
+data class HeliSamen(val plaats: String? = null, val met: List<String> = emptyList())
+
+/** GET /v1/helikopters/status: when every known aircraft was last seen, and weather that limits flying. */
+@Serializable
+data class HeliStatusAntwoord(val toestellen: List<HeliStatusRegel> = emptyList(), val weer: HeliWeer? = null)
+
+@Serializable
+data class HeliStatusRegel(val id: String, val naam: String = "", val status: String = "uit_beeld", val gezien: String? = null, val waar: String? = null)
+
+@Serializable
+data class HeliWeer(val reden: String = "", @SerialName("reden_en") val redenEn: String? = null, val niveau: String = "yellow")
+
+@Serializable
 data class Helikopter(
     val id: String,
     val naam: String,
@@ -296,6 +309,11 @@ data class Helikopter(
     val icoon: String? = null,
     /** "Now above …": the nearest Dutch place ("Teuge, Voorst"); null on the ground, above sea or abroad. */
     val boven: String? = null,
+    /** On the ground: the hospital or base it stands at, and which of the two ("ziekenhuis", "basis"). */
+    val plek: String? = null,
+    @SerialName("plek_soort") val plekSoort: String? = null,
+    /** Other helicopters at the same spot (not a hospital or a base). */
+    val samen: HeliSamen? = null,
 ) {
     /** The same altitude and speed in the other unit (feet next to metres, knots next to km/h). */
     val hoogteTweede: String? get() = if (opGrond) null else hoogteFt?.let { if (Settings.eenheden == "luchtvaart") "${Math.round(it * 0.3048 / 10) * 10} m" else "${Math.round(it / 25) * 25} ft" }

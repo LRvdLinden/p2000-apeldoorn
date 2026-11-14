@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import nl.lrvdlinden.aalerts.Fmt
 import nl.lrvdlinden.aalerts.R
+import kotlinx.coroutines.launch
 import nl.lrvdlinden.aalerts.data.*
 import nl.lrvdlinden.aalerts.tr
 
@@ -518,6 +519,20 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                 Text(h.boven?.let { tr("Nu boven $it", "Now above $it") } ?: tr("Nu boven zee of over de grens", "Now above sea or across the border"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp, modifier = Modifier.weight(1f))
                 if (vlucht?.onderweg == true) Text(vlucht.inDeLucht, color = androidx.compose.ui.graphics.Color(0xFF16A34A), fontWeight = FontWeight.SemiBold, fontSize = 12.sp)
             }
+            if (h.opGrond && h.plek != null) Text(if (h.plekSoort == "basis") tr("Op de basis: ${h.plek}", "At the base: ${h.plek}") else tr("Op de grond bij ${h.plek}", "On the ground at ${h.plek}"), fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+            h.samen?.takeIf { it.met.isNotEmpty() }?.let { s ->
+                val met = s.met.joinToString(", ")
+                Text(if (s.plaats != null) tr("Samen met $met op één plek in ${s.plaats}. Mogelijk een groot incident.", "Together with $met at one spot in ${s.plaats}. Possibly a large incident.")
+                    else tr("Samen met $met op één plek. Mogelijk een groot incident.", "Together with $met at one spot. Possibly a large incident."),
+                    color = androidx.compose.ui.graphics.Color(0xFFDC2626), fontWeight = FontWeight.SemiBold, fontSize = 13.sp)
+            }
+            // Weather that limits flying (a KNMI code for fog, wind, thunderstorms, snow or ice).
+            var weer by remember { mutableStateOf<HeliWeer?>(null) }
+            LaunchedEffect(Unit) { weer = Api.heliStatus()?.weer }
+            weer?.let { w ->
+                val code = when (w.niveau) { "red" -> tr("code rood", "code red"); "orange" -> tr("code oranje", "code orange"); else -> tr("code geel", "code yellow") }
+                Text(tr("Weinig helikopterinzet te verwachten: ${w.reden} ($code).", "Few helicopter flights expected: ${w.redenEn ?: w.reden} ($code)."), color = Muted, fontSize = 12.sp)
+            }
             InfoRow(tr("Hoogte", "Altitude"), listOfNotNull(h.hoogteTekst, h.hoogteTweede).joinToString(" · "))
             InfoRow(tr("Snelheid", "Speed"), listOfNotNull(h.snelheidTekst, h.snelheidTweede).joinToString(" · "))
             if (!h.opGrond && h.koers != null) Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -527,7 +542,24 @@ private fun HeliCard(h: Helikopter, bereik: SpoorBereik, onBereik: (SpoorBereik)
                     modifier = Modifier.size(16.dp).graphicsLayer { rotationZ = h.koers.toFloat() })
                 Spacer(Modifier.width(6.dp)); Text(h.koersTekst ?: "–", fontSize = 14.sp, fontWeight = FontWeight.Medium)
             }
-            InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) })
+            InfoRow(tr("Laatst gezien", "Last seen"), parseInstant(h.gezien)?.let { Fmt.ago(it) + if (java.time.Duration.between(it, java.time.Instant.now()).seconds > 60) tr(" (verouderd)", " (outdated)") else "" })
+            // "Klopt dit toestel niet?": a short note that arrives with the makers.
+            var meldOpen by remember(h.id) { mutableStateOf(false) }
+            var meldTekst by remember(h.id) { mutableStateOf("") }
+            var meldKlaar by remember(h.id) { mutableStateOf<Boolean?>(null) }
+            val meldScope = rememberCoroutineScope()
+            TextButton(onClick = { meldOpen = true }, enabled = meldKlaar != true) {
+                Text(if (meldKlaar == true) tr("Bedankt, je melding is verstuurd", "Thanks, your report has been sent") else tr("Klopt dit toestel niet?", "Is this aircraft wrong?"), fontSize = 12.sp)
+            }
+            if (meldOpen) AlertDialog(onDismissRequest = { meldOpen = false },
+                title = { Text(tr("Klopt dit toestel niet?", "Is this aircraft wrong?")) },
+                text = { OutlinedTextField(value = meldTekst, onValueChange = { meldTekst = it.take(500) }, placeholder = { Text(tr("Bijvoorbeeld een verkeerde naam, of een toestel dat ontbreekt.", "For example a wrong name, or an aircraft that is missing.")) }) },
+                confirmButton = { TextButton(enabled = meldTekst.trim().length >= 3, onClick = {
+                    meldOpen = false
+                    val naam = h.naam + (h.registratie?.let { " ($it)" } ?: "")
+                    meldScope.launch { meldKlaar = Api.meldToestel(h.id, "$naam: ${meldTekst.trim()}") }
+                }) { Text(tr("Verstuur", "Send")) } },
+                dismissButton = { TextButton(onClick = { meldOpen = false }) { Text(tr("Annuleer", "Cancel")) } })
             h.voorspelling?.let { Text(it.tekst, fontWeight = FontWeight.Medium, fontSize = 13.sp) }
             Store.annuleringVan(h.id)?.let { HeliInzetRegel(it) }
             // Route on the map: this flight, the last 30 minutes or the whole day.

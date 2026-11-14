@@ -352,7 +352,7 @@ export function heliAnnotation(mk, h) {
     el.className = "heli-marker";
     // Sizes inline so the drawing never shows at its full size (also with an old stylesheet in the cache).
     const b = heliBreedte();
-    el.style.cssText = `display:grid;justify-items:center;gap:2px;width:${b + 12}px;transform:translateY(-50%)`;
+    el.style.cssText = `display:grid;justify-items:center;gap:2px;width:${b + 12}px;transform:translateY(-50%)${Date.now() - new Date(h.gezien).getTime() > 60_000 ? ";opacity:.5;filter:grayscale(.8)" : ""}`;
     el.innerHTML = `<img src="${heliImg(h)}" alt="" width="${b}" style="width:${b}px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
       + `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>`;
     el.title = `${h.naam} · ${heliInfo(h)}`;
@@ -463,6 +463,21 @@ export function pandTekst(p) {
 export function inDeLucht(min) {
   if (!(min >= 1)) return "Net opgestegen";
   return `${min < 60 ? `${Math.round(min)} min` : `${Math.floor(min / 60)} u ${String(Math.round(min % 60)).padStart(2, "0")} min`} in de lucht`;
+}
+/** Status of all known aircraft and weather that limits flying: { toestellen, weer } or null. */
+export async function fetchHeliStatus() {
+  try {
+    const r = await fetch(`${API}/v1/helikopters/status`, { signal: AbortSignal.timeout(10_000) });
+    return r.ok ? await r.json() : null;
+  } catch { return null; }
+}
+/** "Klopt dit toestel niet?": sends a note about an aircraft to the makers. True when it arrived. */
+export async function meldToestel(id, toelichting) {
+  try {
+    const r = await fetch(`${API}/v1/helikopters/${encodeURIComponent(id)}/melden`, { method: "POST", headers: { "content-type": "application/json" },
+      body: JSON.stringify({ toelichting, platform: "web" }), signal: AbortSignal.timeout(10_000) });
+    return r.ok;
+  } catch { return false; }
 }
 export async function fetchVluchten(id) {
   try {

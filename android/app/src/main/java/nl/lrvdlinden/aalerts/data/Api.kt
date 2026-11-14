@@ -68,6 +68,10 @@ object Api {
     suspend fun verloop(guid: String): List<Melding> = runCatching { AppJson.decodeFromString<VerloopAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/verloop")).meldingen }.getOrDefault(emptyList())
     /** The lowest build of the app that still works (0 = no minimum). */
     suspend fun appInfo(): AppAntwoord? = runCatching { AppJson.decodeFromString<AppAntwoord>(getText("${base}v1/app")) }.getOrNull()
+    suspend fun heliStatus(): HeliStatusAntwoord? = runCatching { AppJson.decodeFromString<HeliStatusAntwoord>(getText("${base}v1/helikopters/status")) }.getOrNull()
+    /** "Klopt dit toestel niet?": a note about an aircraft for the makers. True when it arrived. */
+    suspend fun meldToestel(id: String, toelichting: String): Boolean =
+        runCatching { send("POST", "v1/helikopters/${enc(id)}/melden", mapOf("toelichting" to toelichting, "platform" to "android")) }.isSuccess
     suspend fun post(id: String): PostCijfers? = runCatching { AppJson.decodeFromString<PostCijfers>(getText("${base}v1/posten/${enc(id)}")) }.getOrNull()
     suspend fun regio(): List<List<List<Double>>> = runCatching { AppJson.decodeFromString<RegioAntwoord>(getText("${base}v1/veiligheidsregio")).ringen }.getOrDefault(emptyList())
     suspend fun melding(guid: String): Melding? = runCatching { AppJson.decodeFromString<Melding>(getText("${base}v1/meldingen/${enc(guid)}")) }.getOrNull()

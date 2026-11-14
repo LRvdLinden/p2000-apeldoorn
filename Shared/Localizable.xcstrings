@@ -1837,6 +1837,23 @@
         }
       }
     },
+    "Bedankt, je melding is verstuurd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Thanks, your report has been sent"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bedankt, je melding is verstuurd"
+          }
+        }
+      }
+    },
     "Bekijk bij %@": {
       "extractionState": "manual",
       "localizations": {
@@ -2241,6 +2258,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bijeenkomst"
+          }
+        }
+      }
+    },
+    "Bijvoorbeeld een verkeerde naam, of een toestel dat ontbreekt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For example a wrong name, or an aircraft that is missing."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijvoorbeeld een verkeerde naam, of een toestel dat ontbreekt."
           }
         }
       }
@@ -5696,6 +5730,40 @@
         }
       }
     },
+    "In de lucht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the air"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In de lucht"
+          }
+        }
+      }
+    },
+    "In de lucht boven %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In the air above %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In de lucht boven %@"
+          }
+        }
+      }
+    },
     "Incident %@": {
       "extractionState": "manual",
       "localizations": {
@@ -5985,19 +6053,19 @@
         }
       }
     },
-    "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing.": {
+    "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing. Bij meerdere helikopters op één plek krijg je een melding als je een van die toestellen volgt of er een zone omheen hebt.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "You follow %lld aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing."
+            "value": "You follow %lld aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing. With several helicopters at one spot you get a notification when you follow one of them or have a zone around it."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing."
+            "value": "Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing. Bij meerdere helikopters op één plek krijg je een melding als je een van die toestellen volgt of er een zone omheen hebt."
           }
         }
       }
@@ -6593,6 +6661,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Klopt deze melding niet?"
+          }
+        }
+      }
+    },
+    "Klopt dit toestel niet?": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Is this aircraft wrong?"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Klopt dit toestel niet?"
           }
         }
       }
@@ -7426,6 +7511,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meer informatie bij de politie"
+          }
+        }
+      }
+    },
+    "Meerdere helikopters op één plek": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Several helicopters at one spot"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meerdere helikopters op één plek"
           }
         }
       }
@@ -8365,6 +8467,23 @@
         }
       }
     },
+    "Nog niet gezien": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Not seen yet"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nog niet gezien"
+          }
+        }
+      }
+    },
     "Nog niets bewaard": {
       "extractionState": "manual",
       "localizations": {
@@ -8858,6 +8977,23 @@
         }
       }
     },
+    "Ook als de roepnaam wijzigt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Also when the callsign changes"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ook als de roepnaam wijzigt"
+          }
+        }
+      }
+    },
     "Ook als het toestel landt": {
       "extractionState": "manual",
       "localizations": {
@@ -8960,6 +9096,40 @@
         }
       }
     },
+    "Op de basis": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At the base"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op de basis"
+          }
+        }
+      }
+    },
+    "Op de basis: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "At the base: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op de basis: %@"
+          }
+        }
+      }
+    },
     "Op de grond": {
       "extractionState": "manual",
       "localizations": {
@@ -8973,6 +9143,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Op de grond"
+          }
+        }
+      }
+    },
+    "Op de grond bij %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "On the ground at %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Op de grond bij %@"
           }
         }
       }
@@ -10439,6 +10626,40 @@
         }
       }
     },
+    "Samen met %@ op één plek in %@. Mogelijk een groot incident.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together with %@ at one spot in %@. Possibly a large incident."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samen met %@ op één plek in %@. Mogelijk een groot incident."
+          }
+        }
+      }
+    },
+    "Samen met %@ op één plek. Mogelijk een groot incident.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Together with %@ at one spot. Possibly a large incident."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Samen met %@ op één plek. Mogelijk een groot incident."
+          }
+        }
+      }
+    },
     "Satelliet": {
       "extractionState": "manual",
       "localizations": {
@@ -11744,6 +11965,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Uit"
+          }
+        }
+      }
+    },
+    "Uit beeld": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Out of sight"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uit beeld"
+          }
+        }
+      }
+    },
+    "Uit beeld sinds %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Out of sight since %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Uit beeld sinds %@"
           }
         }
       }
@@ -13159,6 +13414,23 @@
         }
       }
     },
+    "Weinig helikopterinzet te verwachten: %@ (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Few helicopter flights expected: %@ (%@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weinig helikopterinzet te verwachten: %@ (%@)."
+          }
+        }
+      }
+    },
     "Welke helikopters": {
       "extractionState": "manual",
       "localizations": {
@@ -14073,6 +14345,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "bijgewerkt %@"
+          }
+        }
+      }
+    },
+    "code geel": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code yellow"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code geel"
+          }
+        }
+      }
+    },
+    "code oranje": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code orange"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code oranje"
+          }
+        }
+      }
+    },
+    "code rood": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code red"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "code rood"
           }
         }
       }

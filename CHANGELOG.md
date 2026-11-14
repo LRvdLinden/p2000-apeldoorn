@@ -1,5 +1,17 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 93)
+Alles wat vliegt. Server: `worker/src/vliegend.js`.
+- **Waar een toestel op de grond staat:** ziekenhuis, basis of op locatie (`plek`, `plek_soort` in `GET /v1/helikopters` en `/v1/lucht`); de pushmelding bij landen zegt "Bij Radboudumc", "Terug op de basis: …" of "Op locatie in …".
+- **Meerdere helikopters op één plek** (binnen 1,5 km, op de grond of laag en langzaam, geen ziekenhuis of basis): `samen` bij het toestel en een pushmelding voor wie een van die toestellen volgt of er een zone omheen heeft (`heli.meerdere`, standaard aan).
+- **Roepnaam gewijzigd:** pushmelding bij een gevolgd toestel (`heli.volg_roepnaam`, standaard aan).
+- **Status per toestel:** `GET /v1/helikopters/status` (in de lucht, op de basis, op de grond, uit beeld; één kv-rij, hooguit één keer per minuut geschreven). In de app en op Android bij Instellingen › Helikopters onder de bel.
+- **Weer:** dezelfde aanroep geeft `weer` als er een KNMI-code geldt voor mist, harde wind, onweer, sneeuw of ijzel; het kaartje van een toestel meldt dan dat er weinig inzet te verwachten is.
+- **Oude positie:** na een minuut grijs en "(verouderd)" (was twee minuten, en alleen in de app).
+- **Eigen geluid** bij helikoptermeldingen (`heli.wav`, zelf gemaakt; iOS via `aps.sound`, Android via het nieuwe kanaal `heli2`). Een oudere app-versie zonder dat bestand speelt het gewone geluid.
+- **Klopt dit toestel niet?** `POST /v1/helikopters/<id>/melden`; komt in beheer bij Gemelde fouten (geen wijziging in de beheer-apps nodig).
+- Bestond al en is niet opnieuw gebouwd: zones, de verwachte bestemming met aankomsttijd, de vluchtgeschiedenis en de eigen tekeningen per type toestel.
+
 ## A-Alerts 2.0.1 (build 92)
 - **Cijfers per kazerne.** Tik op de kaart op een post: aantal inzetten (een herhaling of opschaling van hetzelfde incident telt als één), per uur van de dag en per dag van de week, en de voertuigen en capcodes van die post. Server: tabel `post_inzet` (één rij per post per inzet), `GET /v1/posten/<id>`; de meldingen die er al stonden zijn één keer meegeteld. App, Android en pager.
 - **Bel bij een toestel:** ook een pushmelding bij landen (standaard uit) en bij de terugvlucht (standaard aan; een start binnen 90 minuten na een landing). Instellingen › Helikopters, app en Android (`heli.volg_landen`, `heli.volg_terug`).

@@ -38,6 +38,7 @@ import { radarInfo, radarImage, radarTile, radarConfigured } from "./radar.js";
 import { locatiesData, metVoorspelling, checkOpstijgen, heliPlusHousekeeping } from "./heliplus.js";
 import { heliPrefsFrom, grootPrefsFrom, isGrootIncident, grootWanted, heliEvents, heliZonePushes, volgPushes, volgInzetten, heliInzetten, inzetPush, recenteHeliMeldingen, meldingVoorspelling,
   noteerTerPlaatse, terPlaatseSet, saveFeedback, feedbackLijst, updateFeedback, deleteFeedback } from "./extra.js";
+import { verrijk, luchtIncidenten, grootLuchtPushes, roepnaamPushes, statusBijwerken, statusLijst, weerBeperking } from "./vliegend.js";
 import { statusOverzicht, statusTick, statusHousekeeping, notePushes, noteWeer, noteHeli, checkWebsite, maakIncident, updateIncident, verwijderIncident } from "./status.js";
 import { fcmConfigured } from "./fcm.js";
 import { notifyHomey, homeyConfigured } from "./homey.js";
@@ -213,16 +214,31 @@ async function handle(req, env, ctx) {
     const scope = ["vlucht", "kort", "vandaag"].includes(url.searchParams.get("scope")) ? url.searchParams.get("scope") : "vlucht";
     return reply(200, await spoor(env, m[1], scope), { "cache-control": "public, max-age=10" });
   }
+  // Status of every known aircraft (in the air, at the base, out of sight) and weather that limits flying.
+  if (method === "GET" && path === "/v1/helikopters/status") {
+    const rij = await kvGet(env, "heli_status");
+    let s = {}; try { s = JSON.parse(rij?.value || "{}"); } catch {}
+    return reply(200, { bijgewerkt: new Date(rij?.at || Date.now()).toISOString(), toestellen: statusLijst(s.toestellen), weer: s.weer || null }, { "cache-control": "public, max-age=30" });
+  }
+  // "Klopt dit toestel niet?": a report about an aircraft; it arrives in the beheer under Gemelde fouten.
+  m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/melden$/);
+  if (method === "POST" && m) {
+    const r = await saveFeedback(env, req, `toestel:${m[1]}`, { ...(await readJSON(req)), reden: "anders" });
+    try { await pushAdmins(env, "Toestel gemeld", "Bekijk het in het beheer onder Gemelde fouten."); } catch {}
+    return reply(200, r);
+  }
   m = path.match(/^\/v1\/helikopters\/([a-z0-9-]{3,40})\/vluchten$/);
   if (method === "GET" && m) return reply(200, await vluchten(env, m[1]), { "cache-control": "public, max-age=30" });
   // Map layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft.
   if (method === "GET" && path === "/v1/lucht") {
     const d = await helikopters(env);
-    return reply(200, { bijgewerkt: d.bijgewerkt, bron: d.bron, toestellen: d.lucht || [], ...(d.fout ? { fout: true } : {}) }, { "cache-control": "public, max-age=10" });
+    return reply(200, { bijgewerkt: d.bijgewerkt, bron: d.bron, toestellen: verrijk(d.lucht || [], [...(d.helikopters || []), ...(d.lucht || [])]), ...(d.fout ? { fout: true } : {}) }, { "cache-control": "public, max-age=10" });
   }
   if (method === "GET" && path === "/v1/helikopters") {
     const { lucht: _lucht, ...alleenHelis } = await helikopters(env);
     const data = metVoorspelling(alleenHelis);
+    // Where it stands on the ground (hospital, base) and which helicopters are together at one spot.
+    data.helikopters = verrijk(data.helikopters, [...(data.helikopters || []), ...(_lucht || [])]);
     // A Lifeliner on its way to a recent alert: that alert is the destination, then the hospital.
     try {
       const lucht = (data.helikopters || []).filter((h) => h.soort === "trauma" && !h.op_grond);
@@ -550,7 +566,7 @@ async function poll(env, budget) {
 function broadcastPayload(b, lang) {
   const t = b.en && !String(lang || "nl").startsWith("nl") ? b.en : b;
   return {
-    aps: { alert: { title: t.title, body: t.body }, sound: "default", ...(b.heli ? { "thread-id": "lifeliner", "interruption-level": "time-sensitive" } : {}) },
+    aps: { alert: { title: t.title, body: t.body }, sound: b.heli ? "heli.wav" : "default", ...(b.heli ? { "thread-id": "lifeliner", "interruption-level": "time-sensitive" } : {}) },
     ...(b.guid ? { guid: b.guid } : {}),
     ...(b.heli ? { heli: b.heli } : {}),
   };
@@ -763,6 +779,31 @@ async function heliRun(env) {
       }
     }
   } catch (e) { console.error("[heli-volg]", e.message || e); }
+  // Last seen per aircraft (one kv row, written at most once a minute), a changed callsign of a followed aircraft,
+  // several helicopters at one spot, and weather that limits flying.
+  try {
+    const alle = [...(data.helikopters || []), ...(data.lucht || [])];
+    const nu = Date.now();
+    const rij = await kvGet(env, "heli_status");
+    let oud = {}; try { oud = JSON.parse(rij?.value || "{}"); } catch {}
+    const incidenten = luchtIncidenten(alle);
+    const wissel = alle.some((h) => h.callsign && oud.toestellen?.[h.id]?.cs && oud.toestellen[h.id].cs !== h.callsign);
+    if (wissel || incidenten.length) {
+      devices ||= await activeDevices(env);
+      prefs ||= await devicePrefs(env);
+      for (const g of [...roepnaamPushes(devices, prefs, alle, oud.toestellen, nu), ...grootLuchtPushes(devices, prefs, incidenten, nu)]) {
+        if (await kvGet(env, `broadcast:${g.key}`)) continue;
+        await kvSet(env, `broadcast:${g.key}`, JSON.stringify({ ...g.texts.nl, en: g.texts.en, heli: g.heli }));
+        await queue(env, `broadcast:${g.key}`, g.tokens);
+      }
+    }
+    if (!rij || wissel || nu - (rij.at || 0) > 55_000) {
+      let weer = oud.weer || null;
+      // The weather changes slowly: read the warnings once in ten minutes.
+      if (!oud.weer_at || nu - oud.weer_at > 600_000) { try { weer = weerBeperking(await listWarnings(env, 2), nu); } catch {} }
+      await kvSet(env, "heli_status", JSON.stringify({ toestellen: statusBijwerken(oud.toestellen, alle, nu), weer, weer_at: !oud.weer_at || nu - oud.weer_at > 600_000 ? nu : oud.weer_at }));
+    }
+  } catch (e) { console.error("[heli-status]", e.message || e); }
   // Helicopter zones: take-off, landing or entering a zone of a device.
   try {
     const events = heliEvents(data.helikopters || [], prev);
@@ -852,7 +893,7 @@ async function cron(env, event) {
     try { await nieuwsHousekeeping(env); } catch (e) { console.error("[nieuws]", e.message || e); }
     await env.DB.prepare("DELETE FROM melding_routes WHERE at < ?").bind(Date.now() - 14 * 86_400_000).run().catch(() => {});
     await env.DB.prepare("DELETE FROM melding_feedback WHERE at < ?").bind(Date.now() - 90 * 86_400_000).run().catch(() => {});
-    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'heli_inzet:%' OR key LIKE 'heli_land:%' OR key LIKE 'broadcast:hz:%' OR key LIKE 'broadcast:hx:%' OR key LIKE 'broadcast:hl:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
+    await env.DB.prepare("DELETE FROM kv WHERE (key LIKE 'heli_scene:%' OR key LIKE 'heli_inzet:%' OR key LIKE 'heli_land:%' OR key LIKE 'broadcast:hz:%' OR key LIKE 'broadcast:hx:%' OR key LIKE 'broadcast:hl:%' OR key LIKE 'broadcast:hc:%' OR key LIKE 'broadcast:hg:%') AND at < ?").bind(Date.now() - 86_400_000).run().catch(() => {});
     try { await spoorHousekeeping(env); await heliPlusHousekeeping(env); } catch (e) { console.error("[spoor]", e.message || e); }
     await adminHousekeeping(env);
     try { await statusHousekeeping(env); } catch (e) { console.error("[status]", e.message || e); }

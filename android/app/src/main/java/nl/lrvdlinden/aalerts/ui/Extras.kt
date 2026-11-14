@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
+import nl.lrvdlinden.aalerts.Fmt
 import nl.lrvdlinden.aalerts.data.*
 import nl.lrvdlinden.aalerts.push.Push
 import nl.lrvdlinden.aalerts.tr
@@ -73,8 +74,30 @@ fun HeliZonesScreen(nav: Nav) {
             SectionCard(tr("Toestellen met de bel", "Aircraft with the bell"), Icons.Outlined.NotificationsActive) {
                 SwitchRow(tr("Ook als het toestel landt", "Also when the aircraft lands"), checked = Settings.heliVolgLanden) { Settings.heliVolgLanden = it }
                 SwitchRow(tr("Ook bij de terugvlucht", "Also on the flight back"), checked = Settings.heliVolgTerug) { Settings.heliVolgTerug = it }
+                SwitchRow(tr("Ook als de roepnaam wijzigt", "Also when the callsign changes"), checked = Settings.heliVolgRoepnaam) { Settings.heliVolgRoepnaam = it }
+                SwitchRow(tr("Meerdere helikopters op één plek", "Several helicopters at one spot"), checked = Settings.heliMeerdere) { Settings.heliMeerdere = it }
+                // The followed aircraft with where they are now.
+                var regels by remember { mutableStateOf<List<HeliStatusRegel>>(emptyList()) }
+                LaunchedEffect(Unit) { regels = Api.heliStatus()?.toestellen ?: emptyList() }
+                for (id in Settings.heliVolg.sorted()) {
+                    val r = regels.firstOrNull { it.id == id }
+                    val tekst = when (r?.status) {
+                        "lucht" -> r.waar?.let { tr("In de lucht boven $it", "In the air above $it") } ?: tr("In de lucht", "In the air")
+                        "basis" -> r.waar?.let { tr("Op de basis: $it", "At the base: $it") } ?: tr("Op de basis", "At the base")
+                        "grond" -> r.waar?.let { tr("Op de grond bij $it", "On the ground at $it") } ?: tr("Op de grond", "On the ground")
+                        null -> tr("Nog niet gezien", "Not seen yet")
+                        else -> parseInstant(r.gezien)?.let { tr("Uit beeld, laatst gezien ${Fmt.ago(it)}", "Out of sight, last seen ${Fmt.ago(it)}") } ?: tr("Uit beeld", "Out of sight")
+                    }
+                    Row(Modifier.fillMaxWidth().padding(vertical = 4.dp), verticalAlignment = Alignment.CenterVertically) {
+                        Column(Modifier.weight(1f)) {
+                            Text(r?.naam?.ifBlank { id } ?: id, fontWeight = FontWeight.SemiBold, fontSize = 15.sp)
+                            Text(tekst, color = if (r?.status == "lucht") androidx.compose.ui.graphics.Color(0xFF16A34A) else Muted, fontSize = 12.sp)
+                        }
+                        TextButton(onClick = { Settings.heliVolg = Settings.heliVolg - id }) { Text(tr("Stop", "Stop")) }
+                    }
+                }
                 Text(if (Settings.heliVolg.isEmpty()) tr("Tik op de kaart op een helikopter of vliegtuig en dan op de bel: je krijgt een pushmelding als dat toestel opstijgt.", "Tap a helicopter or aircraft on the map and then the bell: you get a notification when that aircraft takes off.")
-                    else tr("Je volgt ${Settings.heliVolg.size} toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing.", "You follow ${Settings.heliVolg.size} aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing."), color = Muted, fontSize = 12.sp)
+                    else tr("Je volgt ${Settings.heliVolg.size} toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing. Bij meerdere helikopters op één plek krijg je een melding als je een van die toestellen volgt of er een zone omheen hebt.", "You follow ${Settings.heliVolg.size} aircraft with the bell. The flight back is a new take-off within an hour and a half after a landing. With several helicopters at one spot you get a notification when you follow one of them or have a zone around it."), color = Muted, fontSize = 12.sp)
             }
             SectionCard(tr("Welke helikopters", "Which helicopters"), Icons.Outlined.FlightTakeoff) {
                 fun zet(s: String, on: Boolean) { val v = if (on) Settings.heliSoorten + s else Settings.heliSoorten - s; if (v.isNotEmpty()) Settings.heliSoorten = v }

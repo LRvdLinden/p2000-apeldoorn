@@ -55,6 +55,8 @@ final class AppSettings {
     /// With the bell: also a push when the aircraft lands, and when it takes off again shortly after a landing.
     var heliVolgLanden: Bool = false { didSet { save(.heliVolgLanden, heliVolgLanden); notificationsChanged() } }
     var heliVolgTerug: Bool = true { didSet { save(.heliVolgTerug, heliVolgTerug); notificationsChanged() } }
+    var heliVolgRoepnaam: Bool = true { didSet { save(.heliVolgRoepnaam, heliVolgRoepnaam); notificationsChanged() } }
+    var heliMeerdere: Bool = true { didSet { save(.heliMeerdere, heliMeerdere); notificationsChanged() } }
     var heliOpstijgen: Bool = true { didSet { save(.heliOpstijgen, heliOpstijgen); notificationsChanged() } }
     var heliLanden: Bool = true { didSet { save(.heliLanden, heliLanden); notificationsChanged() } }
     var heliBinnen: Bool = true { didSet { save(.heliBinnen, heliBinnen); notificationsChanged() } }
@@ -132,7 +134,7 @@ final class AppSettings {
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
         case volgCapcodes, waarschuwingFilter, pushNLAlert, pushBurgernet, pushKnmi, pushKnmiVooraf, pushKnmiOpgeheven, profielen, kaartLagen, luchtSoorten, pushAmber, pushVermistKind, pushNieuwsLiveblog, pushNieuwsPolitie, pushNieuwsRegio
-        case heliVolg, heliVolgLanden, heliVolgTerug, heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
+        case heliVolg, heliVolgLanden, heliVolgTerug, heliVolgRoepnaam, heliMeerdere, heliZones, heliOpstijgen, heliLanden, heliBinnen, heliSoorten, heliPauzeTot, grootIncident, grootPlaatsen
         case spoorStandaard, heliKleurPerToestel, heliIcoon, eenheden, donkereKaart, kaartThema, gedemptKaart, prestatieModus
 
         var synced: Bool {
@@ -292,6 +294,8 @@ final class AppSettings {
         if let v = set(.heliVolg) { heliVolg = v }
         if let v = source(Key.heliVolgLanden.storageKey) as? Bool { heliVolgLanden = v }
         if let v = source(Key.heliVolgTerug.storageKey) as? Bool { heliVolgTerug = v }
+        if let v = source(Key.heliVolgRoepnaam.storageKey) as? Bool { heliVolgRoepnaam = v }
+        if let v = source(Key.heliMeerdere.storageKey) as? Bool { heliMeerdere = v }
         if let v = source(Key.heliOpstijgen.storageKey) as? Bool { heliOpstijgen = v }
         if let v = source(Key.heliLanden.storageKey) as? Bool { heliLanden = v }
         if let v = source(Key.heliBinnen.storageKey) as? Bool { heliBinnen = v }
@@ -344,7 +348,7 @@ final class AppSettings {
         profielen = [MeldingProfiel(naam: L("Standaard"))]
         kaartLagen = KaartLaag.standaard
         luchtSoorten = LuchtSoort.standaard
-        heliVolg = []; heliVolgLanden = false; heliVolgTerug = true; heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
+        heliVolg = []; heliVolgLanden = false; heliVolgTerug = true; heliVolgRoepnaam = true; heliMeerdere = true; heliZones = []; heliOpstijgen = true; heliLanden = true; heliBinnen = true; heliSoorten = ["trauma"]; heliPauzeTot = 0
         grootIncident = false; grootPlaatsen = []
         spoorStandaard = "vlucht"; heliKleurPerToestel = false; heliIcoon = "normaal"; eenheden = "metrisch"; kaartThema = "licht"; gedemptKaart = false
         isLoading = false
@@ -364,6 +368,8 @@ final class AppSettings {
             "volg": Array(heliVolg).sorted(),
             "volg_landen": heliVolgLanden,
             "volg_terug": heliVolgTerug,
+            "volg_roepnaam": heliVolgRoepnaam,
+            "meerdere": heliMeerdere,
         ]
         if heliGepauzeerd { out["pauze_tot"] = heliPauzeTot * 1000 }
         return out

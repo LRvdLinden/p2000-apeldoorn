@@ -24,6 +24,8 @@ object Notifier {
     const val CH_NLALERT = "nlalert"
     const val CH_ALGEMEEN = "algemeen"
     const val CH_LIFELINER = "lifeliner"
+    /** Helicopter pushes with the own sound (a channel keeps its sound for ever, so this is a new one). */
+    const val CH_HELI = "heli2"
     const val CH_KIND = "kind"
     const val CH_NIEUWS = "nieuws"
 
@@ -42,10 +44,18 @@ object Notifier {
             enableLights(true)
             lightColor = 0xFFCF0A1E.toInt()
         }
+        // Helicopters: the own rotor sound instead of the default one.
+        val heliGeluid = android.net.Uri.parse("android.resource://${ctx.packageName}/${R.raw.heli}")
+        nm.createNotificationChannel(NotificationChannel(CH_HELI, tr("Helikopters en vliegtuigen", "Helicopters and aircraft"), NotificationManager.IMPORTANCE_HIGH).apply {
+            description = tr("Opstijgen, landen, je zones, de bel en een Lifeliner voor een melding", "Take-off, landing, your zones, the bell and a Lifeliner for an alert")
+            group = "p2000"
+            setSound(heliGeluid, attrs)
+            enableVibration(true)
+        })
+        nm.deleteNotificationChannel(CH_LIFELINER)
         nm.createNotificationChannels(listOf(
             ch(CH_MELDINGEN, tr("Meldingen", "Alerts"), tr("Nieuwe P2000-meldingen die bij je profielen passen", "New P2000 alerts that match your profiles"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_URGENT, tr("Spoedmeldingen (A0, A1, P1)", "Urgent alerts (A0, A1, P1)"), tr("Meldingen met de hoogste prioriteit", "Alerts with the highest priority"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
-            ch(CH_LIFELINER, tr("Lifeliner opgestegen", "Lifeliner took off"), tr("Een Lifeliner stijgt op voor een melding in de gemeente Apeldoorn", "A Lifeliner takes off for an alert in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "p2000"),
             ch(CH_NLALERT, "NL-Alert", tr("NL-Alerts in de gemeente Apeldoorn", "NL-Alerts in the municipality of Apeldoorn"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_KIND, tr("AMBER Alert en Vermist Kind Alert", "AMBER Alert and Missing Child Alert"), tr("Oproepen van de politie bij een vermist kind", "Police calls for a missing child"), NotificationManager.IMPORTANCE_HIGH, "warn"),
             ch(CH_WAARSCHUWINGEN, tr("Burgernet en KNMI", "Burgernet and KNMI"), tr("Burgernet-acties en KNMI-weercodes", "Burgernet calls and KNMI weather codes"), NotificationManager.IMPORTANCE_DEFAULT, "warn"),
@@ -73,7 +83,7 @@ object Notifier {
         val soort = if (heli != null) "traumaheli" else data["dienst"] ?: bron ?: data["thread"]?.takeUnless { it.startsWith("nieuws") }
         val urgent = data["urgent"] == "1"
         val channel = when {
-            heli != null -> CH_LIFELINER
+            heli != null -> CH_HELI
             nieuws != null -> CH_NIEUWS
             bron == "nlalert" -> CH_NLALERT
             bron == "amber" || bron == "vermistkind" -> CH_KIND

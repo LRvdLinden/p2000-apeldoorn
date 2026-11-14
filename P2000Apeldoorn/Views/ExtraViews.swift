@@ -60,12 +60,15 @@ struct HeliZonesView: View {
             Section {
                 Toggle(L("Ook als het toestel landt"), isOn: $settings.heliVolgLanden)
                 Toggle(L("Ook bij de terugvlucht"), isOn: $settings.heliVolgTerug)
+                Toggle(L("Ook als de roepnaam wijzigt"), isOn: $settings.heliVolgRoepnaam)
+                Toggle(L("Meerdere helikopters op één plek"), isOn: $settings.heliMeerdere)
+                HeliVolgStatus()
             } header: {
                 Text(L("Toestellen met de bel"))
             } footer: {
                 Text(settings.heliVolg.isEmpty
                      ? L("Tik op de kaart op een helikopter of vliegtuig en dan op de bel: je krijgt een pushmelding als dat toestel opstijgt.")
-                     : Lf("Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing.", settings.heliVolg.count))
+                     : Lf("Je volgt %lld toestellen met de bel. De terugvlucht is een nieuwe start binnen anderhalf uur na een landing. Bij meerdere helikopters op één plek krijg je een melding als je een van die toestellen volgt of er een zone omheen hebt.", settings.heliVolg.count))
             }
 
             Section {

@@ -4,6 +4,7 @@ import locaties from "./locaties.js";
 import { km, genoemd, heliVoorMelding } from "./heliplus.js";
 import { SELECT, toAPI as meldingAPI } from "./db.js";
 import { plaatsBij } from "./plaats.js";
+import { plekVan } from "./vliegend.js";
 import { isQuiet, isUrgent, HttpError } from "./rules.js";
 import { matchesPlaatsen } from "./werkgebied.js";
 
@@ -34,6 +35,9 @@ export function heliPrefsFrom(s) {
     // With the bell: also a push when the aircraft lands, and (on by default) when it takes off again shortly after a landing.
     volg_landen: s.volg_landen === true,
     volg_terug: s.volg_terug !== false,
+    // Also when a followed aircraft changes its callsign, and when several helicopters are at one spot.
+    volg_roepnaam: s.volg_roepnaam !== false,
+    meerdere: s.meerdere !== false,
   };
 }
 
@@ -63,8 +67,11 @@ export function volgPushes(devices, prefs, vliegend, prev, now = Date.now(), gel
       if (!hp.volg.includes(h.id)) continue;
       const key = `hl:${h.id}:${Math.floor(now / (15 * 60_000))}`;
       if (!groups.has(key)) {
-        const plek = plaatsBij(h.lat, h.lon)?.tekst;
-        groups.set(key, { key, heli: h.id, landing: true, texts: { nl: { title: `${h.naam} is geland`, body: plek ? `In ${plek}` : "Op de grond" }, en: { title: `${h.naam} has landed`, body: plek ? `In ${plek}` : "On the ground" } }, tokens: [] });
+        // Where: at a hospital, back at a base, or at a spot in a place.
+        const p = plekVan(h.lat, h.lon), plek = plaatsBij(h.lat, h.lon)?.tekst;
+        const nl = p ? (p.soort === "basis" ? `Terug op de basis: ${p.naam}` : `Bij ${p.naam}`) : plek ? `Op locatie in ${plek}` : "Op de grond";
+        const en = p ? (p.soort === "basis" ? `Back at the base: ${p.naam}` : `At ${p.naam}`) : plek ? `On site in ${plek}` : "On the ground";
+        groups.set(key, { key, heli: h.id, landing: true, texts: { nl: { title: `${h.naam} is geland`, body: nl }, en: { title: `${h.naam} has landed`, body: en } }, tokens: [] });
       }
       groups.get(key).tokens.push(d.token);
     }
@@ -355,8 +362,11 @@ export const REDENEN = ["locatie", "dienst", "prioriteit", "dubbel", "test", "an
 export async function saveFeedback(env, req, guid, body) {
   const reden = REDENEN.includes(body?.reden) ? body.reden : null;
   if (!reden) throw new HttpError(400, "Kies een reden");
-  const exists = await env.DB.prepare("SELECT 1 FROM meldingen WHERE guid = ?").bind(guid).first();
-  if (!exists) throw new HttpError(404, "Melding niet gevonden");
+  // "toestel:<id>": a report about an aircraft on the map (missing, wrong name or type) instead of an alert.
+  if (!guid.startsWith("toestel:")) {
+    const exists = await env.DB.prepare("SELECT 1 FROM meldingen WHERE guid = ?").bind(guid).first();
+    if (!exists) throw new HttpError(404, "Melding niet gevonden");
+  } else if (!str(body.toelichting, 500)) throw new HttpError(400, "Schrijf wat er niet klopt");
   const ip = req.headers.get("cf-connecting-ip") || "";
   const hash = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`fb:${ip}`))))
     .slice(0, 8).map((b) => b.toString(16).padStart(2, "0")).join("");
@@ -374,7 +384,7 @@ export async function feedbackLijst(env, url) {
   const status = url.searchParams.get("status");
   const where = status === "open" || status === "afgehandeld" ? "WHERE f.status = ?" : "";
   const stmt = env.DB.prepare(
-    `SELECT f.id, f.guid, f.reden, f.toelichting, f.lat, f.lon, f.platform, f.at, f.status, m.title, m.stad, m.dienst, m.datum
+    `SELECT f.id, f.guid, f.reden, f.toelichting, f.lat, f.lon, f.platform, f.at, f.status, COALESCE(m.title, CASE WHEN f.guid LIKE 'toestel:%' THEN 'Toestel op de kaart: ' || substr(f.guid, 9) END) AS title, m.stad, m.dienst, m.datum
      FROM melding_feedback f LEFT JOIN meldingen m ON m.guid = f.guid ${where} ORDER BY f.at DESC LIMIT 200`,
   );
   const { results } = await (where ? stmt.bind(status) : stmt).all();

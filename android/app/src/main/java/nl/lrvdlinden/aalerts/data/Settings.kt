@@ -145,6 +145,8 @@ object Settings {
     /** With the bell: also a push when the aircraft lands, and when it takes off again shortly after a landing. */
     var heliVolgLanden by bool("heliVolgLanden", false, push = true)
     var heliVolgTerug by bool("heliVolgTerug", true, push = true)
+    var heliVolgRoepnaam by bool("heliVolgRoepnaam", true, push = true)
+    var heliMeerdere by bool("heliMeerdere", true, push = true)
     /** The announcement of the makers that was closed, and searching outside the list filters. */
     var mededelingGesloten by str("mededelingGesloten", "")
     var zoekBuitenFilters by bool("zoekBuitenFilters", false)
@@ -326,6 +328,8 @@ object Settings {
                 "volg" to heliVolg.sorted(),
                 "volg_landen" to heliVolgLanden,
                 "volg_terug" to heliVolgTerug,
+                "volg_roepnaam" to heliVolgRoepnaam,
+                "meerdere" to heliMeerdere,
             ).also { if (heliGepauzeerd) it["pauze_tot"] = heliPauzeTot },
             "groot" to mapOf("aan" to grootIncident, "plaatsen" to grootPlaatsen.sorted()),
             "profielen" to p.map {
