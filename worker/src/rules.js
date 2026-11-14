@@ -29,6 +29,7 @@ const RULES = [
   [/BR (VOERTUIG|AUTO|BUS|VRACHTWAGEN)|VOERTUIGBRAND|AUTOBRAND/, "Voertuigbrand"],
   [/BR (BUITEN|AFVAL|BERM|BOS|NATUUR|HEIDE)|BUITENBRAND|NATUURBRAND/, "Buitenbrand (afval)"],
   [/BR (SCHUUR|BIJGEBOUW|SCHUURTJE|GARAGE)/, "Brand bijgebouw"],
+  [/BR (GEBOUW|BEDRIJF|INDUSTRIE|WINKEL|KANTOOR|SCHOOL|HORECA)|GEBOUWBRAND|BEDRIJFSBRAND/, "Gebouwbrand"],
   [/BRANDGERUCHT/, "Brandgerucht"],
   [/\bOMS\b|AUTOM\.? ?BRAND|AUTOMATISCH BRANDALARM|\bPAC\b|BRANDMELDINSTALLATIE/, "Automatisch brandalarm"],
   [/CO[- ]?MELDER|ROOKMELDER|KOOLMONOXIDE/, "Rookmelder"],
@@ -39,7 +40,8 @@ const RULES = [
   [/STORMSCHADE|STORM\b/, "Stormschade"],
   [/VOERTUIG TE WATER|\bVTW\b/, "Voertuig te water"],
   [/PERSOON TE WATER|\bPTW\b/, "Persoon te water"],
-  [/DIER |DIER$|DIEREN|PAARD|\bKOE\b|HOND /, "Dier in problemen"],
+  // Whole words only: "Laan van de Dierenriem" and "Paardenmarkt" are streets, not animals.
+  [/\bDIER(EN)?\b|\bPAARD(EN)?\b|\bKOE(IEN)?\b|\bHOND(EN)?\b/, "Dier in problemen"],
   [/AFHIJSEN/, "Assistentie afhijsen patient"],
   [/BUITENGESLOTEN/, "Persoon buitengesloten"],
   [/(AANRIJDING|AANR\.?).*LETSEL/, "Aanrijding met letsel"],

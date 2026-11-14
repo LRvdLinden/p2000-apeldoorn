@@ -1,5 +1,8 @@
 # Changelog
 
+## Worker (14 november 2026)
+- Categorie: een straatnaam met "dieren" of "paard" erin (Laan van de Dierenriem, Paardenmarkt) maakte van een melding "Dier in problemen". De regel kijkt nu alleen naar hele woorden. Nieuw: "Gebouwbrand" voor "BR gebouw", bedrijf, winkel, kantoor, school en horeca. Meldingen van de laatste week die fout stonden worden rechtgezet.
+
 ## Worker (13 november 2026, avond)
 - Burgernet: de tekst begon soms twee keer met dezelfde zin(nen), omdat burgernet.nl de openingszin vóór het bericht herhaalt. De herhaling wordt nu weggehaald in de worker (`ontdubbel`), dus ook in het kant-en-klare bericht van de Homey-app, de pushmelding en de app.
 

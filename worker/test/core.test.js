@@ -24,6 +24,10 @@ test("categorie", () => {
   assert.equal(categorie("ambulance", "A2", "A2 Ambu 06121 DIA Apeldoorn Rit 1"), "Directe inzet ambulance");
   assert.equal(categorie("ambulance", "A1", "A1 Ambu 06343 - Apeldoorn Rit 1"), "Ambulance spoedurgentie");
   assert.equal(categorie("politie", null, "Aanrijding letsel Koedijk Loenen"), "Aanrijding met letsel");
+  assert.equal(categorie("brandweer", "P1", "P 1 BON-06 (Middel BR) BR gebouw Herwers Hyundai Laan van de Dierenriem Apeldoorn 079391"), "Gebouwbrand");
+  assert.equal(categorie("brandweer", "P2", "P 2 BON-10 Dier te water Baron Sloetkade Apeldoorn 062631"), "Dier in problemen");
+  assert.equal(categorie("brandweer", "P2", "P 2 Paard in sloot Zwolseweg Apeldoorn"), "Dier in problemen");
+  assert.equal(categorie("brandweer", "P2", "P 2 Dienstverlening Paardenmarkt Apeldoorn"), "Dienstverlening verzoek");
 });
 
 test("fromFeed keeps Apeldoorn only and parses units", () => {

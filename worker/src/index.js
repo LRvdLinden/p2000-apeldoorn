@@ -4,7 +4,7 @@
 //  - HTTP: the same REST API the app, the widgets and the website use.
 import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
-import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError } from "./rules.js";
+import { fromFeed, matches, payloadFor, isUrgent, deviceFrom, HttpError, categorie } from "./rules.js";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
   activeDevices, deviceCount, housekeeping,
@@ -485,6 +485,7 @@ async function poll(env, budget) {
         hmLaatst = Date.now();
         try { await hmHerstel(env, budget); } catch (e) { console.warn("[hm herstel]", e.message || e); }
         try { await straatHerstel(env, budget); } catch (e) { console.warn("[straat herstel]", e.message || e); }
+        try { await categorieHerstel(env); } catch (e) { console.warn("[categorie herstel]", e.message || e); }
     }
     await kvSet(env, "feed_ok", String(Date.now()));
     await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
@@ -669,6 +670,20 @@ async function nieuwsRun(env, budget) {
 }
 
 /** Stores the helicopter positions and queues a push when a Lifeliner takes off for an alert in Apeldoorn. */
+/**
+ * Alerts of the last week filed as "Dier in problemen" get their category worked out again with the current rules
+ * (a street such as "Laan van de Dierenriem" used to count as an animal). Only rows that really change are written.
+ */
+async function categorieHerstel(env) {
+  const { results } = await env.DB.prepare(
+    "SELECT guid, title, full_melding, dienst, prioriteit, categorie FROM meldingen WHERE datum > ? AND categorie = 'Dier in problemen' LIMIT 40",
+  ).bind(Date.now() - 7 * 86400_000).all();
+  for (const r of results || []) {
+    const nieuw = categorie(r.dienst, r.prioriteit, r.full_melding || r.title || "");
+    if (nieuw && nieuw !== r.categorie) await env.DB.prepare("UPDATE meldingen SET categorie = ? WHERE guid = ?").bind(nieuw, r.guid).run();
+  }
+}
+
 async function heliRun(env) {
   const data = await helikopters(env);
   await noteHeli(env, !data.fout);
