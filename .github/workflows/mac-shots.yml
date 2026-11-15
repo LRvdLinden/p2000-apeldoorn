@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   mac:
-    runs-on: macos-15
+    runs-on: macos-26
     timeout-minutes: 60
     env:
       API: https://p2000-apeldoorn-api.lrvdlinden.workers.dev
@@ -82,6 +82,7 @@ jobs:
           for LANG in nl; do
             snap $LANG pager 16
             snap $LANG melding 18 -AAlertsMelding "$GUID"
+            snap $LANG kies 18 -AAlertsKies "$GUID"
             [ -n "$WID" ] && snap $LANG waarschuwing 18 -AAlertsWaarschuwing "$WID"
             snap $LANG statistieken 16 -AAlertsTab statistieken
           done

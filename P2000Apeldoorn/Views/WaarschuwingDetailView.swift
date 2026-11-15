@@ -93,7 +93,7 @@ struct WaarschuwingDetailView: View {
                     .onChange(of: g.frame(in: .global).minY) { _, y in topSafeArea = MeldingDetailView.statusBarInset(g.safeAreaInsets.top, minY: y) }
             }
         )
-        .ignoresSafeArea(edges: .top)
+        .detailRand()
         .background(Color.pageBackground)
         .onAppear { position = startPosition(w) }
         .task(id: w.id) { await loadLookAround(w) }

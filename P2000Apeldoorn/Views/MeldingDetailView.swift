@@ -66,19 +66,11 @@ struct MeldingDetailView: View {
                     .onChange(of: g.frame(in: .global).minY) { _, y in topSafeArea = Self.statusBarInset(g.safeAreaInsets.top, minY: y) }
             }
         )
-        .ignoresSafeArea(edges: .top)
+        .detailRand()
         .background(Color.pageBackground)
         .navigationTitle(melding.dienst.label)
         #if os(iOS)
         .toolbar(.hidden, for: .navigationBar)
-        #endif
-        #if os(macOS)
-        .toolbar {
-            ToolbarItemGroup(placement: .primaryAction) {
-                bookmarkButton
-                Button { toonDelen = true } label: { Label(L("Deel"), systemImage: "square.and.arrow.up") }
-            }
-        }
         #endif
         .sheet(isPresented: $toonRoute) {
             RouteSheet(melding: melding)
@@ -366,7 +358,8 @@ struct MeldingDetailView: View {
             .first(where: \.isKeyWindow)
         return max(measured, (window?.safeAreaInsets.top ?? 0) - max(minY, 0))
         #else
-        return measured
+        // Mac: the map starts below the toolbar (see detailRand), so there is nothing to keep clear.
+        return 0
         #endif
     }
 
@@ -951,5 +944,19 @@ struct GeschatVoertuig: View {
         .overlay(Circle().strokeBorder(dienst.color, style: StrokeStyle(lineWidth: 2, dash: [3, 2])).padding(-3))
         .shadow(color: .black.opacity(0.3), radius: 3, y: 1)
         .accessibilityLabel(L("Geschatte positie van de eenheid"))
+    }
+}
+
+
+extension View {
+    /// The edge of a detail page with a map on top. iPhone and iPad: the map runs up under the status bar. Mac: the map
+    /// starts below the toolbar (its own bar with place, route, save and share was half hidden behind it), and the page
+    /// uses the whole width of its column (macOS 26 hands the width of the app's sidebar on as an empty edge).
+    @ViewBuilder func detailRand() -> some View {
+        #if os(macOS)
+        self.ignoresSafeArea(.container, edges: .horizontal)
+        #else
+        self.ignoresSafeArea(edges: .top)
+        #endif
     }
 }

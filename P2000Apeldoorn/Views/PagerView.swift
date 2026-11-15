@@ -110,6 +110,13 @@ struct PagerView: View {
                         #endif
                 }
                 .navigationSplitViewColumnWidth(min: 340, ideal: 400, max: 520)
+                #if DEBUG
+                // Screenshots (CI): -AAlertsKies <guid> selects that alert, so the detail column is in the picture.
+                .onAppear {
+                    let args = ProcessInfo.processInfo.arguments
+                    if let i = args.firstIndex(of: "-AAlertsKies"), i + 1 < args.count { selection = args[i + 1] }
+                }
+                #endif
         } detail: {
             if let selection, selection.hasPrefix("w:") {
                 NavigationStack {
@@ -356,6 +363,9 @@ struct MeldingRow: View {
     var bewaard = false
     /// Opened before → shown greyed out (like the website).
     var gelezen = false
+    /// Mac: the selected row has the accent colour behind it; then nothing is greyed out and the coloured line turns white.
+    @Environment(\.backgroundProminence) private var prominentie
+    private var gekozen: Bool { prominentie == .increased }
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -395,14 +405,14 @@ struct MeldingRow: View {
                 if !melding.prioriteitText.isEmpty {
                     Text(melding.prioriteitText)
                         .font(AppFont.body(12, .semibold, relativeTo: .caption))
-                        .foregroundStyle(melding.isUrgent ? Theme.red : melding.dienst.textColor)
+                        .foregroundStyle(gekozen ? Color.white : melding.isUrgent ? Theme.red : melding.dienst.textColor)
                         .lineLimit(1)
                 }
             }
         }
         .padding(.vertical, 4)
-        .saturation(gelezen ? 0 : 1)
-        .opacity(gelezen ? 0.5 : 1)
+        .saturation(gelezen && !gekozen ? 0 : 1)
+        .opacity(gelezen && !gekozen ? 0.5 : 1)
         .accessibilityElement(children: .combine)
         .accessibilityValue(gelezen ? L("Gelezen") : "")
     }

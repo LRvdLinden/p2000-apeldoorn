@@ -6,6 +6,8 @@ import MapKit
 /// NL-Alert or Burgernet in the pager, between the P2000 alerts.
 struct WaarschuwingRow: View {
     let waarschuwing: Waarschuwing
+    /// Mac: the selected row has the accent colour behind it; the coloured line turns white there.
+    @Environment(\.backgroundProminence) private var prominentie
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -15,7 +17,7 @@ struct WaarschuwingRow: View {
                 HStack(spacing: 6) {
                     Text(verbatim: waarschuwing.kop)
                         .font(AppFont.body(12, .bold, relativeTo: .caption))
-                        .foregroundStyle(waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.color)
+                        .foregroundStyle(prominentie == .increased ? Color.white : waarschuwing.bron == .nlalert ? Color.orange : waarschuwing.isVnog ? Color(hex: 0x8B6BE0) : waarschuwing.color)
                     StatusChip(waarschuwing: waarschuwing)
                     Spacer(minLength: 4)
                     Text(verbatim: tijdTekst)
