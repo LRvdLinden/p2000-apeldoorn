@@ -109,7 +109,8 @@ object Settings {
     /** Layer Luchtvaart: the kinds of aircraft shown on the map ("trauma", "politie", "chinook", "f35", "kustwacht_dash8" …). */
     var luchtSoorten by set("luchtSoorten", setOf("trauma", "politie"))
     var kaartLagen by set("kaartLagen", setOf("meldingen", "waarschuwingen", "knmi", "verkeer", "helikopters", "werkgebied", "ziekenhuizen"))
-    var kaartPeriode by int("kaartPeriode", 24)
+    /** The map opens on the last 6 hours. */
+    var kaartPeriode by int("kaartPeriode", 6)
 
     // Notifications
     var notificationsEnabled by bool("notificationsEnabled", false, push = true)

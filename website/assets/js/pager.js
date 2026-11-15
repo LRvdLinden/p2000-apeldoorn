@@ -3,13 +3,13 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=61";
+} from "./core.js?v=62";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=76";
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=77";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -32,7 +32,7 @@ const state = {
   radiusKm: Number(prefs.get("p2000.radius", 0)),
   here: null,
   hideRead: prefs.get("p2000.hideRead", false),
-  mapHours: 24,
+  mapHours: 6, // the map opens on the last 6 hours
   mapDiensten: new Set(SELECTABLE),
   mapBronnen: new Set(["nlalert", "burgernet", "amber", "vermistkind", "vnog"]),
   // A-Alerts
@@ -1161,7 +1161,7 @@ function renderStaticMarkers(pins, clusters) {
   box.innerHTML = pins.map((m) => {
     const p = pos(m);
     if (!inside(p)) return "";
-    return `<img class="mk-marker" style="position:absolute;left:${p.x}%;top:${p.y}%;margin:-38px 0 0 -19px" src="${asset(`assets/img/${dienstOf(m).marker}.png`)}" alt="${esc(m.title)}" title="${esc(m.title)}" data-guid="${esc(m.guid)}">`;
+    return `<img class="mk-marker" style="position:absolute;left:${p.x}%;top:${p.y}%;margin:-48px 0 0 -24px;width:48px;height:48px" src="${asset(`assets/img/${dienstOf(m).marker}.png`)}" alt="${esc(m.title)}" title="${esc(m.title)}" data-guid="${esc(m.guid)}">`;
   }).join("");
   for (const c of clusters) {
     const p = pos(c);

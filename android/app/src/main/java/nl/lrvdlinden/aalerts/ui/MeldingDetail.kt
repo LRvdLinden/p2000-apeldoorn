@@ -116,7 +116,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                     val la = m.lat!!; val lo = m.lon!!
                     val pts = mutableListOf<MapPoint>()
                     routes.forEach { r -> pts += MapPoint("k:${r.kazerne.id}", r.kazerne.lat, r.kazerne.lon, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 26, r.kazerne.naam.substringAfter(" ").take(18), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong()) }
-                    m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, 44) }
+                    m.soort.marker?.let { pts += MapPoint(m.guid, la, lo, it, PIN_DIENST) }
                     // Estimated vehicle on its way (an estimate from the times, not a real position).
                     routes.forEach { r -> r.geschattePositie(now, la to lo)?.let { (pla, plo) ->
                         pts += MapPoint("v:${r.kazerne.id}", pla, plo, r.kazerne.dienst.icon ?: R.drawable.icon_brandweer, 22, tr("schatting", "estimate"), anchorBottom = false, kazerne = r.kazerne.dienst.color.toArgb().toLong())

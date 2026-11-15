@@ -136,13 +136,13 @@ struct WaarschuwingMap: View {
             }
             if (waarschuwing.rings.isEmpty || waarschuwing.bron != .knmi), let c = waarschuwing.coordinate {
                 Annotation(waarschuwing.plaats ?? "", coordinate: c, anchor: .bottom) {
-                    WaarschuwingMarker(waarschuwing: waarschuwing, size: 44)
+                    WaarschuwingMarker(waarschuwing: waarschuwing)
                 }
                 .annotationTitles(.hidden)
             }
             ForEach(meldingen.filter(\.hasCoordinate)) { m in
                 Annotation(m.title, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), anchor: .bottom) {
-                    DienstMarker(dienst: m.dienst, size: 30)
+                    DienstMarker(dienst: m.dienst)
                 }
                 .annotationTitles(.hidden)
             }

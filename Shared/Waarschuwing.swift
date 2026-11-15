@@ -465,7 +465,7 @@ struct WaarschuwingIcon: View {
 /// Map pin for a warning: NL-Alert and Burgernet use their own marker artwork, KNMI the icon.
 struct WaarschuwingMarker: View {
     let waarschuwing: Waarschuwing
-    var size: CGFloat = 40
+    var size: CGFloat = KaartMaat.pin
 
     var body: some View {
         if waarschuwing.bron != .knmi {

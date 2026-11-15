@@ -1,6 +1,6 @@
 // A-Alerts on the website: NL-Alert, Burgernet, KNMI, live helicopters, alarmed stations and the "verloop".
 // Same rules as the app (Shared/Waarschuwing.swift, Verband.swift, Kazernes.swift, Helikopters.swift).
-import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=61";
+import { API, asset, esc, date, capPlaats, hasStreet, distanceKm, fmtTime } from "./core.js?v=62";
 
 const TZ = "Europe/Amsterdam";
 
@@ -375,7 +375,7 @@ export function warnAnnotation(mk, w, onSelect) {
     const el = document.createElement("div");
     el.className = "mk-marker warn-marker";
     if (isBeeindigd(w)) el.style.cssText = "opacity:.6;filter:grayscale(1)";
-    el.innerHTML = `<img src="${asset(`assets/img/marker_${w.bron}.png`)}" alt="" style="width:34px;height:auto">`;
+    el.innerHTML = `<img src="${asset(`assets/img/marker_${w.bron === "vnog" ? "vnog2" : w.bron}.png`)}" alt="" style="width:36px;height:auto">`;
     return el;
   };
   const a = new mk.Annotation(new mk.Coordinate(w.lat, w.lon), factory, { calloutEnabled: false, title: w.titel, anchorOffset: new DOMPoint(0, -18) });

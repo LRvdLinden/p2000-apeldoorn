@@ -226,17 +226,17 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.KNMI.key in lagen) warns.filter { it.bron == "knmi" && !it.isBeeindigd }.forEach { areas += MapArea(it.id, it.gebied ?: emptyList(), it.color.toArgb().toLong(), 0.18) }
     if (KaartLaag.WAARSCHUWINGEN.key in lagen) warns.filter { it.bron != "knmi" && it.bron !in verborgen }.forEach { w ->
         if (w.bron == "nlalert") areas += MapArea(w.id, w.gebied ?: emptyList(), w.color.toArgb().toLong(), if (w.isBeeindigd) 0.06 else 0.2)
-        if (w.hasCoordinate) points += MapPoint("w:${w.id}", w.lat!!, w.lon!!, w.marker, 34, dim = w.isBeeindigd)
+        if (w.hasCoordinate) points += MapPoint("w:${w.id}", w.lat!!, w.lon!!, w.marker, PIN_BRON, dim = w.isBeeindigd)
     }
     if (KaartLaag.KAZERNES.key in lagen) Werkgebied.kazernes.forEach { k -> k.dienst.icon?.let { points += MapPoint("k:${k.id}", k.lat, k.lon, it, if (selected == "k:${k.id}") 30 else 24, anchorBottom = false, kazerne = k.dienst.color.toArgb().toLong()) } }
     // Several alerts at one address: one marker with the number on top; trauma helicopter first, then police.
     val adressen = remember(meldingen) { meldingen.groupBy { "%.4f,%.4f".format(java.util.Locale.US, it.lat, it.lon) }.filterValues { it.size > 1 }.mapValues { (_, l) -> l.sortedByDescending { it.millis } } }
     if (KaartLaag.MELDINGEN.key in lagen) {
         val samen = adressen.values.flatten().map { it.guid }.toSet()
-        meldingen.filter { it.guid !in samen }.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) 46 else 34, dim = m.guid in Settings.gelezen && m.guid != selected) } }
+        meldingen.filter { it.guid !in samen }.sortedBy { it.millis }.forEach { m -> m.soort.marker?.let { points += MapPoint(m.guid, m.lat!!, m.lon!!, it, if (m.guid == selected) PIN_DIENST + 8 else PIN_DIENST, dim = m.guid in Settings.gelezen && m.guid != selected) } }
         adressen.forEach { (k, l) ->
             val boven = l.firstOrNull { it.soort == Dienst.TRAUMAHELI } ?: l.firstOrNull { it.soort == Dienst.POLITIE } ?: l.groupBy { it.soort }.maxBy { it.value.size }.value.first()
-            boven.soort.marker?.let { points += MapPoint("a:$k", l[0].lat!!, l[0].lon!!, it, if (selected == "a:$k") 46 else 38, count = l.size) }
+            boven.soort.marker?.let { points += MapPoint("a:$k", l[0].lat!!, l[0].lon!!, it, if (selected == "a:$k") PIN_DIENST + 8 else PIN_DIENST, count = l.size) }
         }
     }
     val lines = mutableListOf<MapLine>()

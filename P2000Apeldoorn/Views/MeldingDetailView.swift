@@ -227,7 +227,7 @@ struct MeldingDetailView: View {
             kazerneLaag
             heliLaag
             Annotation(melding.title, coordinate: coordinate, anchor: .bottom) {
-                DienstMarker(dienst: melding.dienst, size: 52)
+                DienstMarker(dienst: melding.dienst)
             }
             .annotationTitles(.hidden)
             UserAnnotation()

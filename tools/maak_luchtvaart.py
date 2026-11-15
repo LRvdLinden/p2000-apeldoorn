@@ -47,7 +47,7 @@ ANIM = """
 @keyframes lv-puls{0%{box-shadow:0 0 0 0 rgba(34,197,94,.6)}100%{box-shadow:0 0 0 12px rgba(34,197,94,0)}}
 """
 TELLER = """<script type="module">
-import { API } from "/assets/js/core.js?v=61";
+import { API } from "/assets/js/core.js?v=62";
 // Live number: Lifeliners and police helicopters in the air plus defence and government aircraft above the Netherlands.
 const el = document.getElementById("lvAantal");
 async function tel() {
@@ -177,7 +177,7 @@ def detail():
 </main>
 <footer>A-Alerts · Bel bij nood altijd 112 · <a href="/">a-alerts.nl</a> · tekeningen: A-Alerts</footer>
 {TELLER}
-<script type="module">import {{ trackVisit }} from "/assets/js/core.js?v=61"; trackVisit();</script>
+<script type="module">import {{ trackVisit }} from "/assets/js/core.js?v=62"; trackVisit();</script>
 </body>
 </html>
 """
@@ -227,7 +227,7 @@ def home():
       <p class="sub">Lifeliners, Medic 01 en politiehelikopters, en ook Defensie, de Kustwacht en het regeringsvliegtuig. Live op de kaart, elk toestel met zijn eigen tekening.</p>
       <a class="lv-knop" href="luchtvaart/">Welke toestellen zie je? →</a><a class="lv-knop licht" href="pager/#kaart">Open de kaart</a>
     </div>
-    {TELLER.replace('"/assets/js/core.js?v=61"', '"./assets/js/core.js?v=61"')}
+    {TELLER.replace('"/assets/js/core.js?v=62"', '"./assets/js/core.js?v=62"')}
   </section>
   <!-- LUCHT:END -->"""
 

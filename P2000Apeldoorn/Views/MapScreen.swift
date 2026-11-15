@@ -20,7 +20,8 @@ struct MapScreen: View {
         }
     }
 
-    @State private var range: Range = .uur24
+    /// The map opens on the last 6 hours.
+    @State private var range: Range = .uur6
     @State private var selected: Melding?
     @State private var selectedCluster: PlaatsCluster?
     @State private var selectedHeli: Helikopter.ID?
@@ -334,7 +335,7 @@ struct MapScreen: View {
         }
         ForEach(groups.pins) { pin in
             Annotation(pin.melding.title, coordinate: pin.coordinate, anchor: .bottom) {
-                DienstMarker(dienst: pin.melding.dienst, size: 44, selected: selected?.guid == pin.melding.guid)
+                DienstMarker(dienst: pin.melding.dienst, selected: selected?.guid == pin.melding.guid)
                     .onTapGesture { withAnimation { selected = pin.melding; selectedHeli = nil; selectedKazerne = nil } }
                     .accessibilityAddTraits(.isButton)
             }
@@ -345,7 +346,7 @@ struct MapScreen: View {
     @MapContentBuilder private func waarschuwingMarkers(_ ws: [Waarschuwing]) -> some MapContent {
         ForEach(ws.filter { $0.bron != .knmi && $0.coordinate != nil }) { w in
             Annotation(w.kop, coordinate: w.coordinate ?? CLLocationCoordinate2D(latitude: Config.center.lat, longitude: Config.center.lon), anchor: .bottom) {
-                WaarschuwingMarker(waarschuwing: w, size: 44)
+                WaarschuwingMarker(waarschuwing: w)
                     .opacity(w.isBeeindigd ? 0.6 : 1)
                     .onTapGesture { openedWaarschuwing = WaarschuwingRef(id: w.id) }
                     .accessibilityAddTraits(.isButton)

@@ -3,12 +3,12 @@
 // Used in the side column of a-alerts.nl/nieuws and on other websites through /widget/ (iframe, or embed.js).
 // The map: municipal border in the colour of the active KNMI code, traffic (NDW), P2000 alerts of the last 3 hours,
 // helicopters inside the area, hospitals, rain radar and (optional) fixed speed cameras. Light/dark follows the device.
-import { weerKaartHTML, tekenWeerKaart, codeKleur, opKleur, CODE_KLEUR } from "./weerkaart.js?v=1";
-import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, prefs } from "./core.js?v=61";
+import { weerKaartHTML, tekenWeerKaart, codeKleur, opKleur, CODE_KLEUR } from "./weerkaart.js?v=2";
+import { API, asset, esc, loadMapKit, mapsAllowed, markerAnnotation, fmtTime, prefs } from "./core.js?v=62";
 import {
   fetchWaarschuwingen, fetchHelikopters, heliLaag, fetchLocaties, locatieAnnotation, radarLaag, CODES, mShareUrl,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerIcon, verkeerFile, VERKEER_SOORT, verkeerRegels, verkeerTijdvak, verkeerKleur,
-} from "./aalerts.js?v=76";
+} from "./aalerts.js?v=77";
 
 // The area: Apeldoorn, the villages and hamlets, Teuge, with the A1 and A50 around it.
 const GEBIED = { noord: 52.36, zuid: 52.03, oost: 6.20, west: 5.70 };

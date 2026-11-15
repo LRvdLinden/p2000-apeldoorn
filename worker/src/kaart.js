@@ -4,12 +4,13 @@
 // Only places in and around the Netherlands and a fixed set of markers, so the endpoint cannot be used for anything else.
 import { signRaw, hasKey } from "./apple.js";
 
+// One size for every pin: the drawn pin is 44 points high (the service art has an empty edge, so its image is 48).
 export const MARKERS = {
   brandweer: ["marker_brandweer.png", 48, 48, 1.5], ambulance: ["marker_ambulance.png", 48, 48, 1.5],
   politie: ["marker_politie.png", 48, 48, 1.5], traumaheli: ["marker_traumaheli.png", 48, 48, 1.5],
-  burgernet: ["marker_burgernet.png", 39, 48, 0], nlalert: ["marker_nlalert.png", 39, 48, 0],
-  amber: ["marker_amber.png", 39, 48, 0], vermistkind: ["marker_vermistkind.png", 39, 48, 0],
-  vnog: ["marker_vnog.png", 39, 48, 0],
+  burgernet: ["marker_burgernet.png", 36, 44, 0], nlalert: ["marker_nlalert.png", 36, 44, 0],
+  amber: ["marker_amber.png", 36, 44, 0], vermistkind: ["marker_vermistkind.png", 36, 44, 0],
+  vnog: ["marker_vnog2.png", 36, 44, 0],
 };
 const ASSETS = "https://a-alerts.nl/assets/img/";
 export const KAART = { size: 600, scale: 2 };

@@ -106,7 +106,7 @@ struct MeldkamerView: View {
                 }
                 ForEach(groups.clusters) { c in
                     Annotation(c.plaats, coordinate: c.coordinate, anchor: .bottom) {
-                        ClusterMarker(cluster: c, size: 64, selected: c.meldingen.contains { $0.guid == focusGuid })
+                        ClusterMarker(cluster: c, selected: c.meldingen.contains { $0.guid == focusGuid })
                     }
                     .annotationTitles(.hidden)
                 }
@@ -122,7 +122,7 @@ struct MeldkamerView: View {
                         MapPolygon(coordinates: ring).foregroundStyle(w.color.opacity(0.2)).stroke(w.color, lineWidth: 2)
                     }
                     if let c = w.coordinate {
-                        Annotation(w.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: w, size: 56) }
+                        Annotation(w.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: w) }
                             .annotationTitles(.hidden)
                     }
                 }

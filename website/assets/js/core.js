@@ -242,11 +242,17 @@ export function loadMapKit() {
   return mapkitReady;
 }
 
+// One size for every pin on every map: the drawn pin is 44 px high. The service art is square with an empty edge
+// (48 px), the source art (NL-Alert, Burgernet, AMBER, Vermist Kind, VNOG) is a bare pin (36 px wide).
+export const PIN_DIENST = "48px";
+export const PIN_BRON = "36px";
+
 export function markerAnnotation(mk, m, onSelect) {
   const coord = new mk.Coordinate(m.lat, m.lon);
   const factory = () => {
     const el = document.createElement("div");
     el.className = "mk-marker" + (isRecent(m) ? " is-live" : "");
+    el.style.width = el.style.height = PIN_DIENST;
     el.innerHTML = `<img src="${asset(`assets/img/${dienstOf(m).marker}.png`)}" alt="">`;
     return el;
   };
@@ -319,6 +325,7 @@ export function layout(list) {
 export function clusterEl(c, onClick) {
   const el = document.createElement("div");
   el.className = "mk-marker mk-cluster";
+  el.style.width = el.style.height = PIN_DIENST;
   el.title = c.adres ? `${c.meldingen.length} meldingen op ${c.plaats}` : `${c.meldingen.length} meldingen zonder adres in ${c.plaats}`;
   el.innerHTML = `<img src="${asset(`assets/img/${(DIENSTEN[c.main] || DIENSTEN.onbekend).marker}.png`)}" alt=""><b class="mk-count">${c.meldingen.length}</b>`;
   if (onClick) el.addEventListener("click", (e) => { e.stopPropagation(); onClick(c); });

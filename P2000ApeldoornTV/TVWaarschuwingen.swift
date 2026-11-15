@@ -112,12 +112,12 @@ struct TVWaarschuwingDetail: View {
                         .stroke(waarschuwing.color, lineWidth: 3)
                 }
                 if let c = waarschuwing.coordinate {
-                    Annotation(waarschuwing.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: waarschuwing, size: 64) }
+                    Annotation(waarschuwing.titel, coordinate: c, anchor: .bottom) { WaarschuwingMarker(waarschuwing: waarschuwing) }
                         .annotationTitles(.hidden)
                 }
                 ForEach(meldingen.filter(\.hasCoordinate)) { m in
                     Annotation(m.title, coordinate: CLLocationCoordinate2D(latitude: m.lat ?? 0, longitude: m.lon ?? 0), anchor: .bottom) {
-                        DienstMarker(dienst: m.dienst, size: 40)
+                        DienstMarker(dienst: m.dienst)
                     }
                     .annotationTitles(.hidden)
                 }

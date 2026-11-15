@@ -32,6 +32,10 @@ import org.maplibre.geojson.Point
 import org.maplibre.geojson.Polygon
 
 /** A pin on the map. [image] is a drawable; [widthDp] its drawn width. */
+/** Width in dp that draws a pin 44 dp high: the service art is square with an empty edge, the source art is a bare pin. */
+const val PIN_DIENST = 48
+const val PIN_BRON = 36
+
 data class MapPoint(
     val id: String, val lat: Double, val lon: Double, val image: Int, val widthDp: Int = 34,
     val label: String? = null, val flip: Boolean = false, val dim: Boolean = false, val anchorBottom: Boolean = true,

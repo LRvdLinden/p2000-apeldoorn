@@ -85,7 +85,7 @@ fun WaarschuwingDetail(id: String, nav: Nav) {
                 val lo = x.lon ?: fit.map { it.second }.average().takeIf { !it.isNaN() } ?: if (landelijk) 5.3 else 5.9699
                 AMap(
                     Modifier.fillMaxWidth().height(h).alpha(if (ended) 0.85f else 1f),
-                    points = if (x.bron != "knmi" && x.hasCoordinate) listOf(MapPoint(x.id, x.lat!!, x.lon!!, x.marker, 40, dim = ended)) else emptyList(),
+                    points = if (x.bron != "knmi" && x.hasCoordinate) listOf(MapPoint(x.id, x.lat!!, x.lon!!, x.marker, PIN_BRON, dim = ended)) else emptyList(),
                     areas = listOf(MapArea(x.id, rings, (if (ended && !x.isOpgeheven) Color.Gray else x.color).toArgb().toLong(), 0.2)) +
                         listOf(MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.0, width = 1.5)),
                     camera = MapCamera(la, lo, if (landelijk) 6.4 else if (x.bron == "burgernet") 13.5 else 11.0, fit = if (fit.size > 2) fit else emptyList(), key = x.id),

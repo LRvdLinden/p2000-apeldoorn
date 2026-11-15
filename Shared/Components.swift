@@ -77,16 +77,17 @@ struct DienstIcon: View {
     }
 }
 
-/// Map pin artwork from the website (pin tip at the bottom centre).
+/// Map pin artwork from the website (pin tip at the bottom centre). The size is the height of the drawn pin: the artwork
+/// has an empty edge (the pin is 118 of 128 pixels high), so the image is drawn that much larger around the same centre.
 struct DienstMarker: View {
     let dienst: Dienst
-    var size: CGFloat = 44
+    var size: CGFloat = KaartMaat.pin
     var selected = false
 
     var body: some View {
         Group {
             if let name = dienst.markerImage {
-                Image(name).resizable().scaledToFit()
+                Image(name).resizable().scaledToFit().frame(width: size * 128 / 118, height: size * 128 / 118)
             } else {
                 ZStack {
                     Circle().fill(dienst.color)
@@ -106,7 +107,7 @@ struct DienstMarker: View {
 /// the normal pin of the most common service, with a black count badge at the top right.
 struct ClusterMarker: View {
     let cluster: PlaatsCluster
-    var size: CGFloat = 44
+    var size: CGFloat = KaartMaat.pin
     var selected = false
 
     var body: some View {

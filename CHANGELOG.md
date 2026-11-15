@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 104)
+- **Alle markers even groot.** Elke pin op elke kaart is nu 44 punten hoog: de meldingen van brandweer, ambulance, politie en traumaheli, en NL-Alert, Burgernet, AMBER Alert, Vermist Kind Alert en VNOG. Dat geldt voor de kaart, de kaart bij een melding, de kaart bij een waarschuwing en de gekoppelde meldingen daarop (die waren 30, de eigen marker 52). Op Apple TV 64. De marker van VNOG vult zijn afbeelding nu net als de andere. iPhone, iPad, Mac, Apple TV, Android, website (pager, meldkamer, widget, homepage) en de kaartafbeelding voor Homey.
+- **De kaart opent op de laatste 6 uur** in plaats van 24 uur (app, Android en de pager op de website). 24 uur en 7 dagen blijven te kiezen. Op Android geldt dit voor wie de periode nooit zelf heeft gekozen.
+- Website: `core.js` v62, `aalerts.js` v77, `pager.js` v86, `meldkamer.js` v78, `landing.js` v73, `nieuws.js` v78, `widget.js` v22, `weerkaart.js` v2; nieuwe afbeelding `marker_vnog2.png`.
+
 ## A-Alerts 2.0.1 (build 103)
 - **Bron onder een liveblog klopte niet.** Onder een VNOG-artikel stond "Bron: Politie, via Burgernet". Nu staat er de Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Hetzelfde was fout bij een NL-Alert-liveblog; daar staat nu NL-Alert (Rijksoverheid). Website, iOS en Android.
 
