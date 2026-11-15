@@ -110,6 +110,12 @@ struct PagerView: View {
                         #endif
                 }
                 .navigationSplitViewColumnWidth(min: 340, ideal: 400, max: 520)
+                #if os(macOS)
+                // Where the list ends in the window: the detail page starts there (MacDetailRand).
+                .background(GeometryReader { g in
+                    Color.clear.onChange(of: g.frame(in: .global).maxX, initial: true) { _, x in MacIndeling.shared.lijstRand = x }
+                })
+                #endif
                 #if DEBUG
                 // Screenshots (CI): -AAlertsKies <guid> selects that alert, so the detail column is in the picture.
                 .onAppear {

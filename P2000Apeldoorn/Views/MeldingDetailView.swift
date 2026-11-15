@@ -951,12 +951,34 @@ struct GeschatVoertuig: View {
 extension View {
     /// The edge of a detail page with a map on top. iPhone and iPad: the map runs up under the status bar. Mac: the map
     /// starts below the toolbar (its own bar with place, route, save and share was half hidden behind it), and the page
-    /// uses the whole width of its column (macOS 26 hands the width of the app's sidebar on as an empty edge).
+    /// starts right next to the list (see MacDetailRand).
     @ViewBuilder func detailRand() -> some View {
         #if os(macOS)
-        self.ignoresSafeArea(.container, edges: .horizontal)
+        modifier(MacDetailRand())
         #else
         self.ignoresSafeArea(edges: .top)
         #endif
     }
 }
+
+#if os(macOS)
+/// Where the list of the pager ends in the window, so the detail page beside it knows where it may start.
+@Observable final class MacIndeling {
+    static let shared = MacIndeling()
+    var lijstRand: CGFloat = 0
+}
+
+/// macOS 26 lets the columns float over the detail page and tells the page how much room to keep free. With the app's
+/// sidebar beside the list that room comes out one sidebar too wide, which left an empty strip between list and page.
+/// The page is moved back by exactly that surplus: the distance between where it starts and where the list ends.
+private struct MacDetailRand: ViewModifier {
+    private var indeling = MacIndeling.shared
+
+    func body(content: Content) -> some View {
+        GeometryReader { g in
+            let teVeel = g.frame(in: .global).minX - indeling.lijstRand
+            content.padding(.leading, indeling.lijstRand > 0 && teVeel > 1 && teVeel < 400 ? -teVeel : 0)
+        }
+    }
+}
+#endif
