@@ -1,5 +1,11 @@
 # Changelog
 
+## A-Alerts 2.0.1 (build 105)
+- **Mac: indeling van de pager hersteld** (macOS 26). De detailpagina begon een zijbalk-breedte te ver naar rechts, met een lege strook tussen lijst en kaart; hij begint nu direct naast de lijst. De balk met plaats, route, bewaren en delen zat half achter de werkbalk; de kaart begint nu onder de werkbalk. De dubbele knoppen voor bewaren en delen in de werkbalk zijn weg.
+- **Mac: de gekozen rij in de lijst is leesbaar.** Een gelezen melding die gekozen is wordt niet meer grijs gemaakt en de gekleurde regel is daar wit.
+- De regel "VNOG · Incident" in de lijst is lichter paars, zodat hij in de donkere weergave leesbaar is.
+- De Mac-schermafbeeldingen (CI) draaien nu op macOS 26 en maken ook een beeld met een gekozen melding.
+
 ## A-Alerts 2.0.1 (build 104)
 - **Alle markers even groot.** Elke pin op elke kaart is nu 44 punten hoog: de meldingen van brandweer, ambulance, politie en traumaheli, en NL-Alert, Burgernet, AMBER Alert, Vermist Kind Alert en VNOG. Dat geldt voor de kaart, de kaart bij een melding, de kaart bij een waarschuwing en de gekoppelde meldingen daarop (die waren 30, de eigen marker 52). Op Apple TV 64. De marker van VNOG vult zijn afbeelding nu net als de andere. iPhone, iPad, Mac, Apple TV, Android, website (pager, meldkamer, widget, homepage) en de kaartafbeelding voor Homey.
 - **De kaart opent op de laatste 6 uur** in plaats van 24 uur (app, Android en de pager op de website). 24 uur en 7 dagen blijven te kiezen. Op Android geldt dit voor wie de periode nooit zelf heeft gekozen.
