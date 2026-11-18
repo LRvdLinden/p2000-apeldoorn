@@ -144,10 +144,13 @@ export function retainAircraft(current, previous, now = Date.now(), failing = fa
     live.set(h.id, { ...h, ...(failing || now - at > 90_000 ? { verouderd: true } : { verouderd: false }) });
   }
   for (const h of previous || []) {
-    if (!h?.id || live.has(h.id)) continue;
+    if (!h?.id) continue;
     const at = Date.parse(h.gezien);
     if (!Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
-    live.set(h.id, { ...h, verouderd: true });
+    const newer = live.get(h.id);
+    // Never roll a track backwards because a delayed HTTP response has an older fix.
+    if (!newer || Date.parse(newer.gezien) < at)
+      live.set(h.id, { ...h, verouderd: now - at > 90_000 });
   }
   return [...live.values()].sort((a, b) => a.naam.localeCompare(b.naam));
 }
