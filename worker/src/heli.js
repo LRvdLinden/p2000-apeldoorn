@@ -128,7 +128,63 @@ async function learn(env, list, learned) {
   }
 }
 
-let omwegTot = 0; // until when adsb.lol is read via the verkeer service (after a refusal)
+// Keep last RECEIVED positions across Worker isolates, short ADS-B gaps and deployments.
+// This does not fabricate live coordinates: older records carry verouderd=true and their ORIGINAL gezien timestamp.
+const AIRCRAFT_SNAPSHOT_KEY = "lucht:last-known-v1";
+const AIRCRAFT_HOLD_MS = 20 * 60_000;
+let snapshotMemo = null;
+let snapshotReadAt = 0;
+let snapshotWriteAt = 0;
+
+export function retainAircraft(current, previous, now = Date.now(), failing = false) {
+  const live = new Map();
+  for (const h of current || []) {
+    const at = Date.parse(h.gezien);
+    if (!h?.id || !Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
+    live.set(h.id, { ...h, ...(failing || now - at > 90_000 ? { verouderd: true } : { verouderd: false }) });
+  }
+  for (const h of previous || []) {
+    if (!h?.id || live.has(h.id)) continue;
+    const at = Date.parse(h.gezien);
+    if (!Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
+    live.set(h.id, { ...h, verouderd: true });
+  }
+  return [...live.values()].sort((a, b) => a.naam.localeCompare(b.naam));
+}
+async function readAircraftSnapshot(env) {
+  if (snapshotMemo && Date.now() - snapshotReadAt < 25_000) return snapshotMemo;
+  try {
+    const row = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(AIRCRAFT_SNAPSHOT_KEY).first();
+    const saved = row ? JSON.parse(row.value) : null;
+    snapshotMemo = saved && Array.isArray(saved.helikopters) && Array.isArray(saved.lucht) ? saved : { helikopters: [], lucht: [] };
+    snapshotReadAt = Date.now();
+  } catch (e) {
+    console.warn("[lucht snapshot read]", e.message || e);
+    snapshotMemo ||= { helikopters: [], lucht: [] };
+    snapshotReadAt = Date.now();
+  }
+  return snapshotMemo;
+}
+async function preserveAircraft(env, fresh, failing = false) {
+  const now = Date.now();
+  const old = await readAircraftSnapshot(env);
+  const h = retainAircraft(fresh.helikopters || [], old.helikopters, now, failing);
+  const l = retainAircraft(fresh.lucht || [], old.lucht, now, failing);
+  const result = { ...fresh, helikopters: h, lucht: l };
+  // Avoid turning a momentary empty upstream answer into an empty visible map.
+  // A missing flight is only removed when its authentic last-seen age exceeds the grace period.
+  snapshotMemo = { helikopters: h, lucht: l };
+  if (!failing) snapshotReadAt = now;
+  if (!failing && now - snapshotWriteAt > 30_000 && (h.some(x => !x.verouderd) || l.some(x => !x.verouderd))) {
+    try {
+      await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)")
+        .bind(AIRCRAFT_SNAPSHOT_KEY, JSON.stringify(snapshotMemo), now).run();
+      snapshotWriteAt = now;
+    } catch (e) { console.warn("[lucht snapshot write]", e.message || e); }
+  }
+  return result;
+}
+
 export async function helikopters(env) {
   if (memo && Date.now() - memo.at < TTL) return memo.data;
   const cache = typeof caches !== "undefined" ? caches.default : null;
@@ -153,15 +209,13 @@ export async function helikopters(env) {
       headers: { authorization: `Bearer ${env.VERKEER_TOKEN}` }, signal: AbortSignal.timeout(12_000),
     });
     const kanService = Boolean(env?.VERKEER_URL && env?.VERKEER_TOKEN);
-    let res = null;
-    if (!(kanService && Date.now() < omwegTot)) {
-      res = await direct().catch(() => null);
-      if (!res?.ok && kanService) omwegTot = Date.now() + 10 * 60_000;
-    }
+    // Always try the primary source again on the next refresh. The old code forced a
+    // broken proxy route for ten minutes after one temporary 429, despite a recovered primary.
+    let res = await direct().catch(() => null);
     if (!res?.ok && kanService) res = await viaService().catch(() => null);
-    if (!res?.ok && !kanService) { await new Promise((r) => setTimeout(r, 1500)); res = await direct(); }
     if (!res?.ok) throw new Error(`HTTP ${res?.status ?? "geen antwoord"}`);
     const body = await res.json();
+    if (!body || !Array.isArray(body.ac)) throw new Error("Invalid ADS-B payload");
     const learned = await loadLearned(env);
     const list = fromAdsb(body.ac, Number(body.now) || Date.now(), learned);
     await learn(env, list, learned);
@@ -178,16 +232,21 @@ export async function helikopters(env) {
     for (const h of [...list, ...lucht]) laatste.set(h.id, { ...h });
     for (const [id, v] of laatste) if (Date.now() - Date.parse(v.gezien) > 600_000) laatste.delete(id);
     for (const h of [...list, ...lucht]) h.boven = h.op_grond ? null : plaatsBij(h.lat, h.lon)?.tekst || null;
-    data = { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht };
+    data = await preserveAircraft(env, { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht });
   } catch (e) {
     console.warn("[heli]", e.message || e);
-    // Show the last positions for a short while instead of an empty map.
-    if (memo && Date.now() - memo.at < 120_000) return { ...memo.data, verouderd: true };
-    return { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: [], fout: true };
+    // A failed provider request must not erase aircraft on the map. Persisted last-known
+    // positions survive other Worker instances and deployments; never present them as live.
+    const cached = await preserveAircraft(env, {
+      bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)",
+      helikopters: [], lucht: [], fout: true, verouderd: true,
+    }, true);
+    memo = { at: Date.now(), data: cached };
+    return cached;
   }
   memo = { at: Date.now(), data };
   if (cache) {
-    await cache.put(key, new Response(JSON.stringify(data), { headers: { "content-type": "application/json", "cache-control": `max-age=${TTL / 1000}` } }));
+    try { await cache.put(key, new Response(JSON.stringify(data), { headers: { "content-type": "application/json", "cache-control": `max-age=${TTL / 1000}` } })); } catch (e) { console.warn("[adsb edge cache]", e.message || e); }
   }
   return data;
 }

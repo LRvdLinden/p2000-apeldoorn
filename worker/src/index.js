@@ -849,13 +849,20 @@ async function categorieHerstel(env) {
 }
 
 async function heliRun(env) {
-  const data = await helikopters(env);
-  await noteHeli(env, !data.fout);
+  const incoming = await helikopters(env);
+  await noteHeli(env, !incoming.fout);
+  // Historical positions are for DISPLAY only. Never store a replayed point as a
+  // new flight movement or send a new takeoff push during a source outage.
+  if (incoming.fout) return;
+  const data = {
+    ...incoming,
+    helikopters: (incoming.helikopters || []).filter((h) => !h.verouderd),
+    lucht: (incoming.lucht || []).filter((h) => !h.verouderd),
+  };
   // No trauma or police helicopter in sight gives no list of earlier positions; the aircraft of the other layer still count.
   const prev = (await recordPositions(env, data))?.prev || new Map();
   let luchtPrev = new Map();
   try { luchtPrev = (await recordLucht(env, data.lucht)).prev; } catch (e) { console.warn("[lucht spoor]", e.message || e); }
-  if (data.fout) return;
   let devices = null, prefs = null;
   // The bell on one aircraft: a push when a followed helicopter or aircraft takes off.
   try {
