@@ -128,10 +128,11 @@ async function learn(env, list, learned) {
   }
 }
 
-// Keep last RECEIVED positions across Worker isolates, short ADS-B gaps and deployments.
-// This does not fabricate live coordinates: older records carry verouderd=true and their ORIGINAL gezien timestamp.
+// Avoid map flicker during one or two missed ADS-B updates, but never display offline aircraft.
+// Positions older than 90 seconds are removed from the public flight layer.
 const AIRCRAFT_SNAPSHOT_KEY = "lucht:last-known-v1";
-const AIRCRAFT_HOLD_MS = 20 * 60_000;
+export const AIRCRAFT_HOLD_MS = 90_000;
+const AIRCRAFT_STALE_MS = 60_000;
 let snapshotMemo = null;
 let snapshotReadAt = 0;
 let snapshotWriteAt = 0;
@@ -140,17 +141,17 @@ export function retainAircraft(current, previous, now = Date.now(), failing = fa
   const live = new Map();
   for (const h of current || []) {
     const at = Date.parse(h.gezien);
-    if (!h?.id || !Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
-    live.set(h.id, { ...h, verouderd: now - at > 90_000 });
+    if (!h?.id || !Number.isFinite(at) || now - at >= AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
+    live.set(h.id, { ...h, verouderd: now - at > AIRCRAFT_STALE_MS });
   }
   for (const h of previous || []) {
     if (!h?.id) continue;
     const at = Date.parse(h.gezien);
-    if (!Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
+    if (!Number.isFinite(at) || now - at >= AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
     const newer = live.get(h.id);
     // Never roll a track backwards because a delayed HTTP response has an older fix.
     if (!newer || Date.parse(newer.gezien) < at)
-      live.set(h.id, { ...h, verouderd: now - at > 90_000 });
+      live.set(h.id, { ...h, verouderd: now - at > AIRCRAFT_STALE_MS });
   }
   return [...live.values()].sort((a, b) => a.naam.localeCompare(b.naam));
 }
@@ -188,8 +189,14 @@ async function preserveAircraft(env, fresh, failing = false) {
   return result;
 }
 
+function onlyRecent(data) {
+  if (!data) return data;
+  const now = Date.now();
+  return { ...data, helikopters: retainAircraft(data.helikopters, [], now), lucht: retainAircraft(data.lucht, [], now) };
+}
+
 export async function helikopters(env) {
-  if (memo && Date.now() - memo.at < TTL) return memo.data;
+  if (memo && Date.now() - memo.at < TTL) return onlyRecent(memo.data);
   const cache = typeof caches !== "undefined" ? caches.default : null;
   const key = new Request("https://cache.a-alerts.internal/helikopters");
   if (cache) {
@@ -197,7 +204,7 @@ export async function helikopters(env) {
     if (hit) {
       const data = await hit.json();
       memo = { at: Date.now(), data };
-      return data;
+      return onlyRecent(data);
     }
   }
   let data;

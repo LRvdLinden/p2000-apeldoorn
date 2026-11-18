@@ -76,21 +76,21 @@ export function luchtKeuze() {
 export function zetLuchtKeuze(set) { try { localStorage.setItem(LUCHT_KEY, JSON.stringify([...set])); } catch {} }
 /** Everything that flies, limited to the chosen kinds; `alle` is unfiltered (for the numbers in the list of choices). */
 // A single failed 15-second poll or partial ADS-B snapshot must never erase the whole map.
-// Retain last genuine fixes for up to 20 min, label as stale, and NEVER pretend they are live.
+// Keep real fixes through brief reception gaps (90 seconds maximum); offline aircraft disappear.
 const luchtLast = { helis: [], lucht: [] };
 export function behoudLuchtvaart(nieuw, oud, now = Date.now()) {
   const byId = new Map();
   for (const h of nieuw || []) {
     const at = Date.parse(h.gezien);
-    if (h.id && Number.isFinite(at) && now - at < 20 * 60_000)
-      byId.set(h.id, { ...h, verouderd: Boolean(h.verouderd) || now - at > 90_000 });
+    if (h.id && Number.isFinite(at) && now - at < 90_000)
+      byId.set(h.id, { ...h, verouderd: Boolean(h.verouderd) || now - at > 60_000 });
   }
   for (const h of oud || []) {
     const at = Date.parse(h.gezien);
-    if (!h.id || !Number.isFinite(at) || now - at >= 20 * 60_000) continue;
+    if (!h.id || !Number.isFinite(at) || now - at >= 90_000) continue;
     const incoming = byId.get(h.id);
     if (!incoming || Date.parse(incoming.gezien) < at)
-      byId.set(h.id, { ...h, verouderd: now - at > 90_000 });
+      byId.set(h.id, { ...h, verouderd: now - at > 60_000 });
   }
   return [...byId.values()];
 }

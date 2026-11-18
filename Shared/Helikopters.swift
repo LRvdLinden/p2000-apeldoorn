@@ -252,13 +252,14 @@ final class HeliStore {
             let r = try await P2000API.shared.helikoptersMetInzet()
             let now = Date.now
             let seen = Set(r.helikopters.map(\.id))
-            let older = items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
-            items = r.helikopters + older
+            let older = items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 90 }
+            items = r.helikopters.filter { now.timeIntervalSince($0.gezien) < 90 } + older
             inzet = r.inzet
             lastUpdated = .now
             failed = false
         } catch {
             failed = true
+            items.removeAll { Date.now.timeIntervalSince($0.gezien) >= 90 }
         }
     }
 }
@@ -309,13 +310,16 @@ final class LuchtStore {
         guard task == nil else { return }
         task = Task { [weak self] in
             while !Task.isCancelled {
-                if let list = try? await P2000API.shared.lucht(), let self {
-                    // Preserve the last genuine position across brief HTTP 200 + empty-list glitches.
-                    // The existing isVerouderd flag already marks fixes older than 60 seconds.
-                    let now = Date.now
-                    let seen = Set(list.map(\.id))
-                    let old = self.items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
-                    self.items = list + old
+                if let self {
+                    if let list = try? await P2000API.shared.lucht() {
+                        let now = Date.now
+                        let seen = Set(list.map(\.id))
+                        let old = self.items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 90 }
+                        self.items = list.filter { now.timeIntervalSince($0.gezien) < 90 } + old
+                    } else {
+                        // No update is not permission to keep an offline aircraft indefinitely.
+                        self.items.removeAll { Date.now.timeIntervalSince($0.gezien) >= 90 }
+                    }
                 }
                 try? await Task.sleep(for: .seconds(15))
             }
