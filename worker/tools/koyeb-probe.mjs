@@ -2,7 +2,7 @@
 // Never uses the Homey app's identity or the p2000.page REST API key.
 const url = "wss://p2000-martijnpoppen.koyeb.app";
 const controller = new AbortController();
-const ws = new WebSocket(url);
+const ws = new WebSocket(url, "homey-a11ea1eaa11ea1eaa11ea1ea-nl.lrvdlinden.aalerts");
 let completed = false;
 const finish = (status, message) => {
   if (completed) return;
@@ -13,7 +13,7 @@ const finish = (status, message) => {
   if (status !== "OK") process.exitCode = 1;
 };
 const timer = setTimeout(() => finish("FAIL", "no valid message within 45s"), 45000);
-ws.addEventListener("open", () => console.log("connected without Homey subprotocol"));
+ws.addEventListener("open", () => console.log("connected with separate synthetic A-Alerts protocol"));
 ws.addEventListener("message", (event) => {
   try {
     const data = JSON.parse(String(event.data));
