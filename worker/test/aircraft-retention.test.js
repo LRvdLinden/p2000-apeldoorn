@@ -32,13 +32,16 @@ test("Coastguard flights offshore remain visible; unrelated foreign aircraft sta
   assert.equal(luchtLijst([{...sea,hex:"3f12ab",r:"D-123",flight:"",t:"H47",dbFlags:1}],time).length,0);
 });
 
-test("An empty or intermittent ADS-B snapshot retains PH-SAR with a stale label",()=>{
-  const previous=[earlier()];
+test("A brief missing ADS-B update retains PH-SAR but only while genuinely recent",()=>{
+  const previous=[earlier(45_000)];
   const current=retainAircraft([],previous,time);
   assert.equal(current.length,1);
-  assert.equal(current[0].verouderd,true);
+  assert.equal(current[0].verouderd,false);
   assert.equal(current[0].gezien,previous[0].gezien);
   assert.equal(current[0].lat,previous[0].lat);
+  const oldEnough=[earlier(75_000)];
+  const [stale]=retainAircraft([],oldEnough,time);
+  assert.equal(stale.verouderd,true);
 });
 
 test("Real new fix takes precedence over old retained stale one",()=>{
@@ -50,7 +53,9 @@ test("Real new fix takes precedence over old retained stale one",()=>{
   assert.equal(h.gezien,current[0].gezien);
 });
 
-test("No indefinite fake live tracks: last-seen points expire after twenty minutes",()=>{
+test("Offline aircraft are hidden as soon as their last fix reaches 90 seconds",()=>{
+  assert.equal(retainAircraft([], [earlier(89_000)], time).length,1);
+  assert.equal(retainAircraft([], [earlier(90_000)], time).length,0);
+  assert.equal(retainAircraft([earlier(90_000)], [], time).length,0);
   assert.equal(retainAircraft([], [earlier(22*60_000)], time).length,0);
-  assert.equal(retainAircraft([earlier(22*60_000)], [], time).length,0);
 });
