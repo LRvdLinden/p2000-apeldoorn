@@ -17,8 +17,8 @@
 
 1. Merge en deploy **niet** voordat tests slagen en de Cloudflare Wrangler-configuratie is beoordeeld. De reguliere workflow deployt uitsluitend vanaf `main`, niet vanaf `a-alerts`; voorkom dat de verouderde `main`-branch de uitgebreide A-Alerts-backend overschrijft.
 2. Cloudflare ondersteunt de SQLite-backed Durable Object `AAlertsKoyebListener` via de nieuwe binding `KOYEB_LISTENER`. De D1-migratie voegt `meldingen.dedup_key` toe; bestaande rijen blijven ongemoeid.
-3. Test bij de eigenaar van de Koyeb-server of een **eigen A-Alerts-subprotocol** geaccepteerd wordt, zonder dezelfde Homey-identiteit te gebruiken. Zet `KOYEB_SUBPROTOCOL` pas daarna als GitHub Actions-reposecret (en bij handmatige deployments ook als Worker secret). **Gebruik niet** het bestaande `homey-...-nl.lrvdlinden.p2000`-subprotocol van je Homey-app: dat wordt actief geweigerd.
-4. De reguliere `worker.yml` geeft dit secret door tijdens deploy. Zonder dit secret blijft de Koyeb-ontvanger uitgeschakeld; de primaire P2000-feed blijft gewoon werken.
+3. Een afzonderlijke synthetische A-Alerts client-ID is vanaf GitHub Actions bevestigd op 18 november 2026: verbinden en een geldige P2000-melding ontvangen. De ID staat als gewone Wrangler-variabele en is **niet** gelijk aan jouw echte Homey-ID. Het is nog geen garantie op blijvende werking op Cloudflare zelf.
+4. De reguliere `worker.yml` deployt alleen na een push op de `a-alerts`-branch. De aparte Koyeb-verbinding is standaard geconfigureerd met de tijdens de read-only probe geverifieerde synthetische identiteit.
 5. Monitor `/health`: `feed.lastOk`, `feed.lastError`, `koyeb.configured`, `koyeb.lastMessage`, `koyeb.lastAdded`. Controleer in `/v1/meldingen` dat beide bronnen dezelfde gebeurtenis maar **eenmalig** tonen.
 6. Test een Koyeb-melding en dezelfde p2000.page-melding zowel in omgekeerde aankomstvolgorde als met verschillende GUIDs, en controleer D1 en outbox. Bij een storing blijft de algemene P2000-status op **degraded** (niet down) wanneer Koyeb nog nieuwe events ontvangt.
 
@@ -28,6 +28,6 @@ Uitgaande WebSockets in Durable Objects kunnen **niet hibernaten**. De verbindin
 
 ## Controle vóór productie
 
-- De echte Koyeb-handshake met een *afzonderlijke* A-Alerts-identiteit is nog **niet** uitgevoerd.
+- De echte Koyeb-handshake met een *afzonderlijke* synthetische A-Alerts-identiteit is succesvol uitgevoerd via de read-only GitHub Actions-probe.
 - Cloudflare-account, Worker-deployments, secrets en live logs zijn niet rechtstreeks beschikbaar in deze ChatGPT-sessie.
 - De oorspronkelijke p2000.page-toegang is momenteel IP-beperkt. Koyeb kan geen berichten ophalen die zijn verstuurd terwijl **beide** live verbindingen onderbroken waren; daarvoor is een bron met historische replay nodig.
