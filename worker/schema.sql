@@ -21,9 +21,11 @@ CREATE TABLE IF NOT EXISTS meldingen (
   views INTEGER NOT NULL DEFAULT 0,
   created_at INTEGER NOT NULL,
   incident TEXT,                   -- guid of the first alert of the incident this alert belongs to
-  vlaggen TEXT                     -- flags of the source, comma separated: groot, kruising, spam, groep
+  vlaggen TEXT,                    -- flags of the source, comma separated: groot, kruising, spam, groep
+  dedup_key TEXT                   -- same alert from two feeds, different UUIDs
 );
 CREATE INDEX IF NOT EXISTS meldingen_datum ON meldingen(datum DESC);
+CREATE UNIQUE INDEX IF NOT EXISTS meldingen_dedup ON meldingen(dedup_key);
 -- All alerts of one incident (GET /v1/meldingen/<guid>/verloop) read only their own rows.
 CREATE INDEX IF NOT EXISTS meldingen_incident ON meldingen(incident);
 -- "What is new since my last check?" (Homey changes, several times a minute) reads only the new rows with this index.
