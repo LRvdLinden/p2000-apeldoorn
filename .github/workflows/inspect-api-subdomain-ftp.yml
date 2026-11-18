@@ -1,0 +1,31 @@
+name: Inspect API subdomain FTP files (read-only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: ['.github/workflows/inspect-api-subdomain-ftp.yml']
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Inspect API docroot candidates without modifying files
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+        run: |
+          set -euo pipefail
+          source tools/ftp.sh
+          ftp_connect
+          echo "FTP document root target: $FTP_TARGET"
+          echo "FTP top-level names:"
+          ftp_run "cls -1" | head -60 || true
+          for p in "." "public_html" "api" "api.a-alerts.nl" "domains" "domains/a-alerts.nl" "domains/api.a-alerts.nl" "public_html/api"; do
+            echo "LIST_CANDIDATE $p"
+            ftp_run "cls -1 \"$p\"" 2>/dev/null | head -40 || true
+          done
