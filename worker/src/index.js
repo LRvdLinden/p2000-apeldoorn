@@ -637,9 +637,9 @@ export class AAlertsKoyebListener extends DurableObject {
   async fetch(request) {
     if (request.method !== "POST" || new URL(request.url).pathname !== "/start")
       return new Response("Not found", { status: 404 });
-    if (!this.env.KOYEB_SUBPROTOCOL ||
-        /-nl\.lrvdlinden\.p2000$/.test(this.env.KOYEB_SUBPROTOCOL))
-      return new Response("Separate A-Alerts subprotocol required", { status: 503 });
+    // Dedicated, tested synthetic identity: never reuse the real Homey ID or its live connection.
+    if (this.env.KOYEB_SUBPROTOCOL !== "homey-a11ea1eaa11ea1eaa11ea1ea-nl.lrvdlinden.p2000")
+      return new Response("Dedicated A-Alerts Koyeb identity required", { status: 503 });
     await this.ensureConnection();
     return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
   }
