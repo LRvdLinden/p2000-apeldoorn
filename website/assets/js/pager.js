@@ -1028,13 +1028,14 @@ async function pollHelis() {
   try {
     const result = await fetchLuchtvaart();
     if (state.tab !== "kaart") return;
+    const before = [...state.helis, ...state.lucht].map((h) => h.id).sort().join(",");
     state.helis = result.helis;
     state.lucht = result.lucht;
+    const after = [...state.helis, ...state.lucht].map((h) => h.id).sort().join(",");
     await updateAircraftMap();
-    // Refresh aircraft counters only, not the entire map.
-    const num = state.helis.length + state.lucht.length;
-    const badge = document.querySelector('[data-laag="helikopters"] small');
-    if (badge) badge.textContent = num ? String(num) : "";
+    // Only update the independent counters/chips when aircraft actually appear or disappear.
+    // Never trigger a full MapKit redraw for a changing ADS-B coordinate.
+    if (before !== after) renderMapChips();
   } catch (e) {
     console.warn("[luchtvaart poll]", e);
     // Keep last valid markers; the aircraft feed is not a traffic request.
