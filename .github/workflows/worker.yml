@@ -40,6 +40,9 @@ jobs:
 
       - name: Probe dedicated A-Alerts WebSocket (read only)
         if: github.event_name == 'pull_request'
+        # Koyeb may legitimately have no P2000 alerts within the 45s probe window.
+        # The network probe is informational, not a prerequisite for compiling unrelated code changes.
+        continue-on-error: true
         run: node tools/koyeb-probe.mjs
 
 
