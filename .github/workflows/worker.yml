@@ -66,7 +66,7 @@ jobs:
           npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN dedup_key TEXT" > /dev/null 2>&1 || true
           npx wrangler d1 execute p2000-apeldoorn --remote --file schema.sql
           # The worker reads these columns in every alert query: never deploy without them.
-          npx wrangler d1 execute p2000-apeldoorn --remote --command "SELECT incident, vlaggen FROM meldingen LIMIT 1" > /dev/null
+          npx wrangler d1 execute p2000-apeldoorn --remote --command "SELECT incident, vlaggen, dedup_key FROM meldingen LIMIT 1" > /dev/null
 
       - name: workers.dev-subdomein (eenmalig)
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
