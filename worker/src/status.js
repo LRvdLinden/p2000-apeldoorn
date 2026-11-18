@@ -107,6 +107,43 @@ function opLeeftijd(okAt, fout, now, warn, down) {
     : { staat, detail: `Ophalen lukt niet sinds ${tijd(okAt)}`, detail_en: `Reading has failed since ${tijd(okAt)}`, fout };
 }
 
+/**
+ * P2000 is one public service backed by TWO independent feeds.
+ * Do not label it disrupted merely because p2000.page is blocked (e.g. HTTP 403)
+ * while the parallel Koyeb WebSocket is still receiving country-wide dispatches.
+ * Both sources must be stale before the public status becomes warn/down.
+ */
+export function p2000Staat(primaryAt, koyebAt, primaryError = null, now = Date.now()) {
+  const primary = Number(primaryAt) || 0;
+  const backup = Number(koyebAt) || 0;
+  const newest = Math.max(primary, backup);
+  if (!newest) return {
+    staat: "down", detail: "Geen P2000-gegevens van p2000.page of Koyeb",
+    detail_en: "No P2000 data from p2000.page or Koyeb", fout: primaryError,
+  };
+  const age = now - newest;
+  // A source is healthy when it successfully delivered data during the last three minutes.
+  // Both feeds can legitimately be idle briefly; only warn after the shared 3-minute window.
+  const okPrimary = primary > 0 && now - primary <= 3 * MIN;
+  const okBackup = backup > 0 && now - backup <= 3 * MIN;
+  if (okPrimary || okBackup) {
+    const via = okPrimary && okBackup ? "p2000.page en Koyeb" : okPrimary ? "p2000.page" : "Koyeb";
+    const viaEn = okPrimary && okBackup ? "p2000.page and Koyeb" : via;
+    return {
+      staat: "ok",
+      detail: `P2000 actief via ${via} · laatste ontvangst ${ago(age)} geleden`,
+      detail_en: `P2000 active via ${viaEn} · last received ${agoEn(age)} ago`,
+    };
+  }
+  const staat = age > 10 * MIN ? "down" : "warn";
+  return {
+    staat,
+    detail: `Beide P2000-bronnen leveren geen recente gegevens (sinds ${tijd(newest)})`,
+    detail_en: `Neither P2000 source has delivered recent data (since ${tijd(newest)})`,
+    fout: primaryError || null,
+  };
+}
+
 async function pushStaat(env, platform, now) {
   const r = await env.DB.prepare("SELECT SUM(ok) AS ok, SUM(fail) AS fail, SUM(lat_sum) AS ls, SUM(lat_n) AS ln FROM status_push WHERE platform = ? AND bucket >= ?")
     .bind(platform, now - 30 * MIN).first();
@@ -133,15 +170,7 @@ export async function huidigeStaat(env, now = Date.now()) {
   const kv = Object.fromEntries(results.map((r) => [r.key, r.value]));
   const n = (k) => Number(kv[k]) || 0;
   const s = {};
-  s.p2000 = opLeeftijd(n("feed_ok"), kv.feed_error, now, 3 * MIN, 10 * MIN);
-  // Secondary stream can keep the alerts available; the primary outage remains visible as degraded.
-  if (s.p2000.staat === "down" && n("koyeb_last_message") > now - 3 * MIN) {
-    s.p2000 = {
-      staat: "warn", detail: "p2000.page verstoord · Koyeb levert live meldingen",
-      detail_en: "p2000.page degraded · Koyeb provides live alerts",
-      fout: kv.feed_error || null,
-    };
-  }
+  s.p2000 = p2000Staat(n("feed_ok"), n("koyeb_last_message"), kv.feed_error, now);
   for (const b of ["nlalert", "burgernet", "knmi", "kind", "vnog"]) s[b] = opLeeftijd(n(`bron_ok:${b}`), kv[`bron_fout:${b}`], now, 10 * MIN, 30 * MIN);
   // Traffic: the verkeer service on Koyeb (reads the NDW open data); 10 minutes without fresh data = warn, 30 = down.
   s.verkeer = env.VERKEER_URL ? opLeeftijd(n("bron_ok:verkeer"), kv["bron_fout:verkeer"], now, 10 * MIN, 30 * MIN) : { staat: "ok", detail: null, detail_en: null, onbekend: true };
