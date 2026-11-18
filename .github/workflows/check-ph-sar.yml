@@ -1,0 +1,32 @@
+name: Diagnose PH-SAR NCG06 and ADS-B feeds (read only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: [".github/workflows/check-ph-sar.yml"]
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Read aircraft sources, registration and callsign
+        run: |
+          node --input-type=module <<'NODE'
+          const feeds=[
+            ["a-alerts-lucht","https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/lucht"],
+            ["adsb-lol-main","https://api.adsb.lol/v2/point/52.2/5.4/160"],
+            ["adsb-lol-sea","https://api.adsb.lol/v2/point/53.1/3.6/160"],
+            ["adsb-lol-ph-sar","https://api.adsb.lol/v2/hex/486449"],
+            ["adsb-fi","https://opendata.adsb.fi/api/v3/lat/53.1/lon/3.6/dist/160"]
+          ];
+          for (const [name,url] of feeds) {
+            try {
+              const start=Date.now(), r=await fetch(url,{signal:AbortSignal.timeout(14000)});
+              const raw=await r.text(); let j={};try{j=JSON.parse(raw)}catch{}
+              const ac=j.ac||j.toestellen||[];
+              const special=ac.filter(x=>/PH-SAR|NCG0?6|486449|PH-NCG|PH-RSQ/i.test([x.flight,x.callsign,x.r,x.registratie,x.hex].join(" ")))
+                .map(x=>({hex:x.hex,r:x.r||x.registratie,flight:x.flight||x.callsign,t:x.t||x.type,lat:x.lat,lon:x.lon,category:x.category,seen_pos:x.seen_pos,seen:x.seen,locationSource:x.nic}));
+              console.log(JSON.stringify({name,status:r.status,ms:Date.now()-start,size:ac.length,now:j.now,hasError:Boolean(j.fout),matches:special,error:r.ok?null:raw.slice(0,140)}));
+            }catch(e){console.log(JSON.stringify({name,error:String(e.message||e)}))}
+          }
+          NODE
