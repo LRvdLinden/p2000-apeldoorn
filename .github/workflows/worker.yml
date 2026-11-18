@@ -5,7 +5,7 @@ name: Worker
 # existing secrets (P2000_PAGE_API_URL, APN_*, WEB_*, MAPS_SERVER_API_*).
 on:
   push:
-    branches: [main]
+    branches: [a-alerts]
     paths: ["worker/**", ".github/workflows/worker.yml"]
   pull_request:
     paths: ["worker/**"]
@@ -17,6 +17,8 @@ concurrency:
 
 jobs:
   deploy:
+    # Never deploy the outdated main Worker over the live A-Alerts backend.
+    if: github.ref_name == 'a-alerts'
     runs-on: ubuntu-latest
     defaults:
       run:
