@@ -25,7 +25,7 @@ jobs:
               const r=await fetch(url,{headers,signal:AbortSignal.timeout(18000),cache:"no-store"});
               const b=await r.text();
               let d={};try{d=JSON.parse(b)}catch{}
-              return {name,status:r.status,ms:Date.now()-t,d,bodyPreview:r.status>=400?b.slice(0,250):null,server:r.headers.get("server")};
+              return {name,status:r.status,ms:Date.now()-t,d,bodyPreview:r.status>=400?b.slice(0,2000):null,server:r.headers.get("server")};
             } catch(e){return {name,status:0,ms:Date.now()-t,error:String(e.message||e),d:{}}}
           }
           for(let round=1;round<=2;round++){
