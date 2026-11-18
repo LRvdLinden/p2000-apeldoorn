@@ -369,7 +369,12 @@ export async function meldingFeedback(guid, body) {
 export function heliInfo(h) {
   const hoogte = hoogteTekst(h);
   const snelheid = snelheidTekst(h);
-  return `${h.medic ? "Ambulancehelikopter" : h.soort === "trauma" ? "Traumahelikopter" : "Politiehelikopter"} · ${hoogte} · ${snelheid}`;
+  const soort = h.medic ? "Ambulancehelikopter" : h.soort === "trauma" ? "Traumahelikopter"
+    : h.soort === "politie" ? "Politiehelikopter" : h.soort === "kustwacht" ? "Kustwacht"
+    : h.soort === "defensie" ? "Defensie" : h.soort === "kmar" ? "Marechaussee" : "Overheidsluchtvaart";
+  const stale = h.verouderd || Date.now() - new Date(h.gezien).getTime() > 90_000;
+  return stale ? `${soort} · laatst gezien ${fmtTime(new Date(h.gezien))} · geen live positie`
+    : `${soort} · ${hoogte} · ${snelheid}`;
 }
 
 /** MapKit JS annotation for a helicopter (side view, mirrored when flying west). */
@@ -515,7 +520,7 @@ export async function fetchVluchten(id) {
 
 /** Dead reckoning: position now from the last fix, speed and heading (at most 90 s ahead, never on the ground). */
 export function geschat(h, now = Date.now()) {
-  if (h.op_grond || h.verouderd || Date.now() - new Date(h.gezien).getTime() > 90_000 ||
+  if (h.op_grond || h.verouderd || now - new Date(h.gezien).getTime() > 90_000 ||
       !(h.snelheid_kt > 20) || h.koers == null) return { lat: h.lat, lon: h.lon };
   const dt = Math.min(Math.max((now - new Date(h.gezien).getTime()) / 1000, 0), 90);
   const km = (h.snelheid_kt * 1.852 * dt) / 3600;
