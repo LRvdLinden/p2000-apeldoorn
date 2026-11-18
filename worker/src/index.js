@@ -5,6 +5,8 @@
 import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
 import { fromFeed, matches, payloadFor, isUrgent, isQuiet, deviceFrom, HttpError, categorie } from "./rules.js";
+import { fromKoyeb, dedupKey, sameDispatch } from "./koyeb-feed.js";
+import { DurableObject } from "cloudflare:workers";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, incidentMeldingen, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
   activeDevices, deviceCount, housekeeping,
@@ -508,15 +510,24 @@ async function queue(env, guid, tokens) {
   }
 }
 
-async function poll(env, budget) {
-  if (!env.P2000_PAGE_API_URL || !budget.take()) return;
-  try {
-    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const list = await res.json();
-    const parsed = (Array.isArray(list) ? list : []).map(fromFeed).filter(Boolean);
-    const known = await knownGuids(env, parsed.map((m) => m.guid));
-    const fresh = parsed.filter((m) => !known.has(m.guid));
+/** Shared persistence and push pipeline for p2000.page (primary) and Koyeb (parallel).
+ * Never overwrite an existing source's GUID or enqueue another notification.
+ */
+async function ingestParsed(env, budget, parsed) {
+  const known = await knownGuids(env, parsed.map((m) => m.guid));
+  let fresh = parsed.filter((m) => !known.has(m.guid));
+  // Older rows may not yet have a dedup key. Compare content and timestamps as well.
+  const unique = [];
+  for (const m of fresh) {
+    m.dedup_key = dedupKey(m);
+    const candidates = (await env.DB.prepare(
+      "SELECT guid, datum, stad, dienst, full_melding, title, capcode FROM meldingen WHERE datum BETWEEN ? AND ? AND stad = ? AND dienst = ? ORDER BY datum DESC LIMIT 60"
+    ).bind(m.datum - 120_000, m.datum + 120_000, m.stad, m.dienst).all()).results;
+    if (candidates.some((other) => sameDispatch(m, other))) continue;
+    if (unique.some((other) => sameDispatch(m, other))) continue;
+    unique.push(m);
+  }
+  fresh = unique;
     for (const m of fresh) {
       // A hectometre post on a motorway ("A50 Re 211,2"): the spot of that post itself.
       const paal = hmPaal(m.title);
@@ -539,7 +550,12 @@ async function poll(env, budget) {
       try { kenToe(fresh, (await recenteVoorIncident(env)).filter((r) => r.incident)); }
       catch (e) { console.warn("[incident]", e.message || e); for (const m of fresh) m.incident ||= m.guid; }
     }
-    if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+    // D1's unique dedup_key is the final atomic guard against simultaneous sources.
+    // Only rows actually inserted may generate station counts or push notifications.
+    if (fresh.length) {
+      const writes = await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+      fresh = fresh.filter((_, i) => (writes[i]?.meta?.changes || 0) > 0);
+    }
     // Figures per station: one row per station per incident.
     if (fresh.length) { try { await noteerPosten(env, fresh); } catch (e) { console.warn("[posten]", e.message || e); } }
     // Earlier messages on a motorway that are not on their post yet.
@@ -552,9 +568,6 @@ async function poll(env, budget) {
         try { await incidentHerstel(env); } catch (e) { console.warn("[incident herstel]", e.message || e); }
         try { await postenInhalen(env); } catch (e) { console.warn("[posten inhalen]", e.message || e); }
     }
-    await kvSet(env, "feed_ok", String(Date.now()));
-    await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
-
     // Queue pushes for new, recent alerts (oldest first).
     const recent = fresh.filter((m) => Date.now() - m.datum < 15 * 60_000).sort((a, b) => a.datum - b.datum);
     if (recent.length) {
@@ -562,9 +575,30 @@ async function poll(env, budget) {
       const prefs = await devicePrefs(env);
       for (const m of recent) await queue(env, m.guid, devices.filter((d) => meldingWanted(d, prefs.get(d.token), m) || grootWanted(d, prefs.get(d.token), m)).map((d) => d.token));
     }
+  return fresh.length;
+}
+
+async function poll(env, budget) {
+  if (!env.P2000_PAGE_API_URL) return;
+  // When the primary API has blocked the IP quota, avoid hammering it every 12 seconds.
+  const blocked = Number((await kvGet(env, "feed_blocked_until"))?.value || 0);
+  if (Date.now() < blocked || !budget.take()) return;
+  try {
+    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
+    if (res.status === 403 || res.status === 429) await kvSet(env, "feed_blocked_until", String(Date.now() + 300_000));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = await res.json();
+    if (!Array.isArray(list)) throw new Error("Invalid P2000 API response");
+    if (list.some((r) => r?.vr === "Error" || /te veel ip-adressen/i.test(String(r?.melding || "")))) {
+      await kvSet(env, "feed_blocked_until", String(Date.now() + 300_000));
+      throw new Error("P2000 API rejected the request");
+    }
+    await ingestParsed(env, budget, list.map(fromFeed).filter(Boolean));
+    await kvSet(env, "feed_ok", String(Date.now()));
+    await env.DB.prepare("DELETE FROM kv WHERE key IN ('feed_error','feed_blocked_until')").run();
   } catch (e) {
     await kvSet(env, "feed_error", String(e.message || e));
-    console.error("[ingest]", e.message || e);
+    console.error("[ingest-primary]", e.message || e);
   }
 }
 
