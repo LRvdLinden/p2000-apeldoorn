@@ -1,0 +1,24 @@
+name: Check A-Alerts melding location (read-only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: [".github/workflows/check-koyeb-location.yml"]
+  workflow_dispatch:
+jobs:
+  read:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Inspect one public P2000 alert
+        run: |
+          node --input-type=module <<'NODE'
+          const id = "f9c47be5-dd07-75aa-0ffc-9ae2482d0f05";
+          const url = "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/meldingen/" + id;
+          try {
+            const r = await fetch(url, {signal:AbortSignal.timeout(15000), cache:"no-store"});
+            const data = await r.json();
+            const {guid, datum_tijd, stad, locatie, lat, lon, title, full_melding, dienst, capcode, link} = data;
+            console.log(JSON.stringify({http:r.status, guid, datum_tijd, stad, locatie, lat, lon, title, full_melding, dienst, capcode, link}));
+          } catch(e) { console.error(String(e)); process.exitCode = 1; }
+          NODE
