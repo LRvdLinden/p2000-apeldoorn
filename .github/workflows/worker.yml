@@ -31,6 +31,14 @@ jobs:
       - run: npm ci
       - run: npm test
 
+      # Validate DO export, bindings and Worker bundle before any production deployment.
+      - name: Cloudflare Worker dry-run (no deploy)
+        if: github.event_name == 'pull_request'
+        run: |
+          sed -i 's/__D1_DATABASE_ID__/00000000-0000-0000-0000-000000000000/' wrangler.toml
+          npx wrangler deploy --dry-run --outdir /tmp/a-alerts-worker-dryrun
+
+
       - name: Cloudflare-secrets aanwezig?
         id: cf
         run: |
