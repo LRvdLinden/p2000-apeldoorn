@@ -25,7 +25,7 @@ jobs:
               const r=await fetch(url,{headers,signal:AbortSignal.timeout(18000),cache:"no-store"});
               const b=await r.text();
               let d={};try{d=JSON.parse(b)}catch{}
-              return {name,status:r.status,ms:Date.now()-t,d};
+              return {name,status:r.status,ms:Date.now()-t,d,bodyPreview:r.status>=400?b.slice(0,250):null,server:r.headers.get("server")};
             } catch(e){return {name,status:0,ms:Date.now()-t,error:String(e.message||e),d:{}}}
           }
           for(let round=1;round<=2;round++){
@@ -41,7 +41,7 @@ jobs:
               else if(r.name==="lucht")v={fout:d.fout,count:d.toestellen?.length,sample:d.toestellen?.slice(0,3).map(x=>({id:x.id,ageSec:ago(x.gezien)}))};
               else if(r.name==="service")v={ok:d.ok,sinds:d.sinds,opgehaald:d.opgehaald,ageSec:ago(d.opgehaald),fout:d.fout,planFout:d.planFout,filesFout:d.filesFout,herstarts:d.herstarts,laatsteHerstart:d.laatsteHerstart,items:d.items,files:d.files,meetpunten:d.meetpunten,rss:d.rss,duur:d.duur};
               else v={now:d.now,nowKind:Number(d.now)>1e12?"ms":Number(d.now)>1e9?"seconds":"unknown",count:d.ac?.length,msg:d.msg,err:d.fout||d.error};
-              console.log(JSON.stringify({name:r.name,status:r.status,ms:r.ms,error:r.error||null,result:v}));
+              console.log(JSON.stringify({name:r.name,status:r.status,ms:r.ms,error:r.error||null,bodyPreview:r.bodyPreview,server:r.server,result:v}));
             }
             if(round===1)await new Promise(done=>setTimeout(done,20000));
           }
