@@ -129,7 +129,7 @@ export function fromFeed(r) {
     opschaling: r.soortopschaling || null,
     eenheden: units,
     voertuigen: parseJSON(r.voertuigen_json, "voertuig"),
-    link: r.link || null,
+    link: r.link || "https://p2000.page/api",
     // Flags of the source: a large incident, a crossing (the coordinate is the crossing itself), spam, group message.
     vlaggen: [["groot", r.groot], ["kruising", r.kruising], ["spam", r.antiespam], ["groep", r.groep]]
       .filter(([, v]) => v != null && String(v) !== "0" && String(v) !== "").map(([k]) => k).join(",") || null,

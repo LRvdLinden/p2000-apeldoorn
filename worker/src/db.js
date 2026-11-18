@@ -20,11 +20,11 @@ export function toAPI(row) {
 
 export const insertStmt = (env, m) => env.DB.prepare(`
   INSERT INTO meldingen (guid, title, full_melding, dienst, prioriteit, datum, locatie, lat, lon, stad, regio, capcode,
-                         categorie, grip, opschaling, eenheden, voertuigen, link, created_at, incident, vlaggen)
-  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT(guid) DO NOTHING`)
+                         categorie, grip, opschaling, eenheden, voertuigen, link, created_at, incident, vlaggen, dedup_key)
+  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING`)
   .bind(m.guid, m.title || "", m.full_melding ?? null, m.dienst || "onbekend", m.prioriteit ?? null, m.datum, m.locatie ?? null,
     m.lat ?? null, m.lon ?? null, m.stad ?? null, m.regio ?? null, m.capcode ?? null, m.categorie ?? null,
-    m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now(), m.incident ?? null, m.vlaggen || null);
+    m.grip ?? null, m.opschaling ?? null, json(m.eenheden), json(m.voertuigen), m.link ?? null, Date.now(), m.incident ?? null, m.vlaggen || null, m.dedup_key ?? null);
 
 /** Alerts with the corrections from beheer applied. */
 export const SELECT = `SELECT m.guid, COALESCE(o.title, m.title) AS title, m.full_melding, m.dienst, m.prioriteit, m.datum,

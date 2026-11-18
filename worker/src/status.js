@@ -127,13 +127,21 @@ async function pushStaat(env, platform, now) {
 
 /** Current state of every component (and the beheer-only signals). */
 export async function huidigeStaat(env, now = Date.now()) {
-  const keys = ["feed_ok", "feed_error", "bron_ok:nlalert", "bron_ok:burgernet", "bron_ok:knmi", "bron_ok:kind", "bron_fout:nlalert", "bron_fout:burgernet", "bron_fout:knmi", "bron_fout:kind", "bron_ok:vnog", "bron_fout:vnog", "bron_ok:verkeer", "bron_fout:verkeer",
+  const keys = ["feed_ok", "feed_error", "koyeb_last_message", "bron_ok:nlalert", "bron_ok:burgernet", "bron_ok:knmi", "bron_ok:kind", "bron_fout:nlalert", "bron_fout:burgernet", "bron_fout:knmi", "bron_fout:kind", "bron_ok:vnog", "bron_fout:vnog", "bron_ok:verkeer", "bron_fout:verkeer",
     "status_heli_ok", "status_heli_fout", "status_weer_ok", "status_weer_fout", "status_web_ok", "status_web_fout", "cron_run"];
   const { results } = await env.DB.prepare(`SELECT key, value FROM kv WHERE key IN (${keys.map(() => "?").join(",")})`).bind(...keys).all();
   const kv = Object.fromEntries(results.map((r) => [r.key, r.value]));
   const n = (k) => Number(kv[k]) || 0;
   const s = {};
   s.p2000 = opLeeftijd(n("feed_ok"), kv.feed_error, now, 3 * MIN, 10 * MIN);
+  // Secondary stream can keep the alerts available; the primary outage remains visible as degraded.
+  if (s.p2000.staat === "down" && n("koyeb_last_message") > now - 3 * MIN) {
+    s.p2000 = {
+      staat: "warn", detail: "p2000.page verstoord · Koyeb levert live meldingen",
+      detail_en: "p2000.page degraded · Koyeb provides live alerts",
+      fout: kv.feed_error || null,
+    };
+  }
   for (const b of ["nlalert", "burgernet", "knmi", "kind", "vnog"]) s[b] = opLeeftijd(n(`bron_ok:${b}`), kv[`bron_fout:${b}`], now, 10 * MIN, 30 * MIN);
   // Traffic: the verkeer service on Koyeb (reads the NDW open data); 10 minutes without fresh data = warn, 30 = down.
   s.verkeer = env.VERKEER_URL ? opLeeftijd(n("bron_ok:verkeer"), kv["bron_fout:verkeer"], now, 10 * MIN, 30 * MIN) : { staat: "ok", detail: null, detail_en: null, onbekend: true };

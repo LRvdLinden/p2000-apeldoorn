@@ -5,6 +5,8 @@
 import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
 import { fromFeed, matches, payloadFor, isUrgent, isQuiet, deviceFrom, HttpError, categorie } from "./rules.js";
+import { fromKoyeb, dedupKey, sameDispatch } from "./koyeb-feed.js";
+import { DurableObject } from "cloudflare:workers";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, incidentMeldingen, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
   activeDevices, deviceCount, housekeeping,
@@ -98,15 +100,18 @@ async function handle(req, env, ctx) {
   if (method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   if (path === "/" || path === "/health") {
-    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error"), bf = await kvGet(env, "backfill_error");
+    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error");
     const cronRun = await kvGet(env, "cron_run");
     return reply(200, {
       ok: true,
       feed: { configured: Boolean(env.P2000_PAGE_API_URL), lastOk: ok ? new Date(Number(ok.value)).toISOString() : null, lastError: err?.value || null },
+      koyeb: {
+        configured: Boolean(env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL),
+        lastMessage: (await kvGet(env, "koyeb_last_message"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_message")).value)).toISOString() : null,
+        lastAdded: (await kvGet(env, "koyeb_last_added"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_added")).value)).toISOString() : null,
+      },
       cron: cronRun ? new Date(Number(cronRun.value)).toISOString() : null,
       lastTry: (await kvGet(env, "feed_try"))?.value ? new Date(Number((await kvGet(env, "feed_try")).value)).toISOString() : null,
-      backfill: (await kvGet(env, "backfill_status"))?.value || null,
-      backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
       apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env), radar: radarConfigured(env),
       devices: await deviceCount(env),
@@ -508,15 +513,24 @@ async function queue(env, guid, tokens) {
   }
 }
 
-async function poll(env, budget) {
-  if (!env.P2000_PAGE_API_URL || !budget.take()) return;
-  try {
-    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const list = await res.json();
-    const parsed = (Array.isArray(list) ? list : []).map(fromFeed).filter(Boolean);
-    const known = await knownGuids(env, parsed.map((m) => m.guid));
-    const fresh = parsed.filter((m) => !known.has(m.guid));
+/** Shared persistence and push pipeline for p2000.page (primary) and Koyeb (parallel).
+ * Never overwrite an existing source's GUID or enqueue another notification.
+ */
+async function ingestParsed(env, budget, parsed) {
+  const known = await knownGuids(env, parsed.map((m) => m.guid));
+  let fresh = parsed.filter((m) => !known.has(m.guid));
+  // Older rows may not yet have a dedup key. Compare content and timestamps as well.
+  const unique = [];
+  for (const m of fresh) {
+    m.dedup_key = dedupKey(m);
+    const candidates = (await env.DB.prepare(
+      "SELECT guid, datum, stad, dienst, full_melding, title, capcode FROM meldingen WHERE datum BETWEEN ? AND ? AND stad = ? AND dienst = ? ORDER BY datum DESC LIMIT 60"
+    ).bind(m.datum - 120_000, m.datum + 120_000, m.stad, m.dienst).all()).results;
+    if (candidates.some((other) => sameDispatch(m, other))) continue;
+    if (unique.some((other) => sameDispatch(m, other))) continue;
+    unique.push(m);
+  }
+  fresh = unique;
     for (const m of fresh) {
       // A hectometre post on a motorway ("A50 Re 211,2"): the spot of that post itself.
       const paal = hmPaal(m.title);
@@ -539,7 +553,12 @@ async function poll(env, budget) {
       try { kenToe(fresh, (await recenteVoorIncident(env)).filter((r) => r.incident)); }
       catch (e) { console.warn("[incident]", e.message || e); for (const m of fresh) m.incident ||= m.guid; }
     }
-    if (fresh.length) await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+    // D1's unique dedup_key is the final atomic guard against simultaneous sources.
+    // Only rows actually inserted may generate station counts or push notifications.
+    if (fresh.length) {
+      const writes = await env.DB.batch(fresh.map((m) => insertStmt(env, m)));
+      fresh = fresh.filter((_, i) => (writes[i]?.meta?.changes || 0) > 0);
+    }
     // Figures per station: one row per station per incident.
     if (fresh.length) { try { await noteerPosten(env, fresh); } catch (e) { console.warn("[posten]", e.message || e); } }
     // Earlier messages on a motorway that are not on their post yet.
@@ -552,9 +571,6 @@ async function poll(env, budget) {
         try { await incidentHerstel(env); } catch (e) { console.warn("[incident herstel]", e.message || e); }
         try { await postenInhalen(env); } catch (e) { console.warn("[posten inhalen]", e.message || e); }
     }
-    await kvSet(env, "feed_ok", String(Date.now()));
-    await env.DB.prepare("DELETE FROM kv WHERE key = 'feed_error'").run();
-
     // Queue pushes for new, recent alerts (oldest first).
     const recent = fresh.filter((m) => Date.now() - m.datum < 15 * 60_000).sort((a, b) => a.datum - b.datum);
     if (recent.length) {
@@ -562,9 +578,111 @@ async function poll(env, budget) {
       const prefs = await devicePrefs(env);
       for (const m of recent) await queue(env, m.guid, devices.filter((d) => meldingWanted(d, prefs.get(d.token), m) || grootWanted(d, prefs.get(d.token), m)).map((d) => d.token));
     }
+  return fresh.length;
+}
+
+async function poll(env, budget) {
+  if (!env.P2000_PAGE_API_URL) return;
+  // When the primary API has blocked the IP quota, avoid hammering it every 12 seconds.
+  const blocked = Number((await kvGet(env, "feed_blocked_until"))?.value || 0);
+  if (Date.now() < blocked || !budget.take()) return;
+  try {
+    const res = await fetch(env.P2000_PAGE_API_URL, { headers: { accept: "application/json", "user-agent": "A-Alerts/2.0 (+https://a-alerts.nl)" }, signal: AbortSignal.timeout(10_000) });
+    if (res.status === 403 || res.status === 429) await kvSet(env, "feed_blocked_until", String(Date.now() + 300_000));
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const list = await res.json();
+    if (!Array.isArray(list)) throw new Error("Invalid P2000 API response");
+    if (list.some((r) => r?.vr === "Error" || /te veel ip-adressen/i.test(String(r?.melding || "")))) {
+      await kvSet(env, "feed_blocked_until", String(Date.now() + 300_000));
+      throw new Error("P2000 API rejected the request");
+    }
+    await ingestParsed(env, budget, list.map(fromFeed).filter(Boolean));
+    await kvSet(env, "feed_ok", String(Date.now()));
+    await env.DB.prepare("DELETE FROM kv WHERE key IN ('feed_error','feed_blocked_until')").run();
   } catch (e) {
     await kvSet(env, "feed_error", String(e.message || e));
-    console.error("[ingest]", e.message || e);
+    console.error("[ingest-primary]", e.message || e);
+  }
+}
+
+/** Receive the parallel country-wide Koyeb feed; only local dispatches enter D1. */
+async function ingestKoyebMessage(env, raw, heartbeat = false) {
+  const text = typeof raw === "string" ? raw : String(raw || "");
+  if (text.length > 500_000) throw new Error("Oversized Koyeb message");
+  const list = JSON.parse(text);
+  if (!Array.isArray(list)) return;
+  const parsed = list.map(fromKoyeb).filter(Boolean);
+  // Mark a healthy stream even if this particular national dispatch was outside Apeldoorn.
+  if (heartbeat) await kvSet(env, "koyeb_last_message", String(Date.now()));
+  if (!parsed.length) return;
+  const budget = new Budget(45);
+  const added = await ingestParsed(env, budget, parsed);
+  if (added) await kvSet(env, "koyeb_last_added", String(Date.now()));
+  await drain(env, budget); // same APNs/FCM outbox and per-device preferences
+}
+
+/** A single durable outbound WebSocket for A-Alerts, separate from the Homey app.
+ * Enabled only after KOYEB_SUBPROTOCOL is configured with a DIFFERENT client identity.
+ * An outgoing WebSocket cannot hibernate, so monitor Cloudflare Duration usage.
+ */
+export class AAlertsKoyebListener extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.ws = null;
+    this.connecting = false;
+    this.processing = Promise.resolve();
+    this.lastHeartbeat = 0;
+  }
+
+  async fetch(request) {
+    if (request.method !== "POST" || new URL(request.url).pathname !== "/start")
+      return new Response("Not found", { status: 404 });
+    // Dedicated, tested synthetic identity: never reuse the real Homey ID or its live connection.
+    if (this.env.KOYEB_SUBPROTOCOL !== "homey-a11ea1eaa11ea1eaa11ea1ea-nl.lrvdlinden.p2000")
+      return new Response("Dedicated A-Alerts Koyeb identity required", { status: 503 });
+    await this.ensureConnection();
+    return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
+  }
+
+  async ensureConnection() {
+    if (this.connecting || (this.ws && this.ws.readyState <= WebSocket.OPEN)) return;
+    this.connecting = true;
+    try {
+      const url = this.env.KOYEB_WEBSOCKET_URL || "wss://p2000-martijnpoppen.koyeb.app";
+      if (!url.startsWith("wss://")) throw new Error("Koyeb requires wss");
+      const socket = new WebSocket(url, this.env.KOYEB_SUBPROTOCOL);
+      this.ws = socket;
+      socket.addEventListener("open", () => {
+        this.ctx.waitUntil(kvSet(this.env, "koyeb_last_connected", String(Date.now())));
+      });
+      socket.addEventListener("message", (event) => {
+        // Serialize messages from this connection, preventing Koyeb-vs-Koyeb write races.
+        // National alerts are frequent: update health no more than twice per minute.
+        const heartbeat = Date.now() - this.lastHeartbeat > 30_000;
+        if (heartbeat) this.lastHeartbeat = Date.now();
+        this.processing = this.processing.catch(() => {}).then(() => ingestKoyebMessage(this.env, event.data, heartbeat));
+        this.ctx.waitUntil(this.processing.catch((e) => console.error("[ingest-koyeb]", e.message || e)));
+      });
+      socket.addEventListener("close", () => {
+        if (this.ws === socket) this.ws = null;
+        this.ctx.waitUntil(this.ctx.storage.setAlarm(Date.now() + 5_000));
+      });
+      socket.addEventListener("error", () => {
+        this.ctx.waitUntil(kvSet(this.env, "koyeb_last_error", String(Date.now())));
+        // close handler or watchdog reconnects; never log the subprotocol.
+      });
+      await this.ctx.storage.setAlarm(Date.now() + 60_000);
+    } catch (e) {
+      console.error("[koyeb-connect]", e.message || e);
+      await this.ctx.storage.setAlarm(Date.now() + 30_000);
+    } finally {
+      this.connecting = false;
+    }
+  }
+
+  async alarm() {
+    if (this.env.KOYEB_SUBPROTOCOL) await this.ensureConnection();
+    await this.ctx.storage.setAlarm(Date.now() + 60_000);
   }
 }
 
@@ -640,27 +758,6 @@ async function drain(env, budget) {
     await done.run();
   }));
   try { await notePushes(env, verstuurd); } catch (e) { console.error("[status]", e.message || e); }
-}
-
-/** One-time import of the last ~2 days from the old website (set BACKFILL = "1"). */
-async function backfill(env, budget) {
-  if (env.BACKFILL !== "1" || (await meldingCount(env)) >= 100 || !budget.take()) return;
-  const path = `/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`;
-  let res = null;
-  for (const host of ["https://app.base44.com", "https://p2000-apeldoorn.nl"]) {
-    res = await fetch(host + path, { signal: AbortSignal.timeout(15_000) }).catch(() => null);
-    await kvSet(env, "backfill_status", `${host}: ${res ? "HTTP " + res.status : "geen verbinding"}`);
-    if (res?.ok) break;
-  }
-  if (!res?.ok) return;
-  const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd && !Number.isNaN(Date.parse(r.datum_tijd))).map((r) => ({
-    guid: r.guid, title: r.title || r.description || "", full_melding: r.full_melding, dienst: r.dienst,
-    prioriteit: r.prioriteit && r.prioriteit !== "onbekend" ? r.prioriteit : null, datum: Date.parse(r.datum_tijd),
-    locatie: r.locatie, lat: r.lat, lon: r.lon, stad: r.stad, regio: r.regio, capcode: r.capcode, categorie: r.categorie,
-    grip: r.grip, opschaling: r.opschaling, eenheden: r.eenheden, voertuigen: r.voertuigen, link: r.link,
-  }));
-  for (let i = 0; i < rows.length; i += 50) await env.DB.batch(rows.slice(i, i + 50).map((m) => insertStmt(env, m)));
-  console.log(`[backfill] ${rows.length} meldingen`);
 }
 
 /** NL-Alert, Burgernet and KNMI: read once per run, queue pushes for new warnings (and KNMI upgrades). */
@@ -859,7 +956,6 @@ async function catchUp(env) {
     if (last && Date.now() - Number(last.value) < 45_000) return;
     await kvSet(env, "feed_try", String(Date.now()));
     const budget = new Budget(40);
-    try { await backfill(env, budget); } catch (e) { await kvSet(env, "backfill_error", String(e.message || e)); }
     await poll(env, budget);
     await drain(env, budget);
     try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); }
@@ -870,14 +966,16 @@ async function catchUp(env) {
 
 async function cron(env, event) {
   await kvSet(env, "cron_run", String(Date.now()));
+  // Keep exactly one A-Alerts WebSocket listener alive independently from the Homey app.
+  if (env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL) {
+    try {
+      const stub = env.KOYEB_LISTENER.getByName("a-alerts-koyeb");
+      const response = await stub.fetch("https://koyeb.internal/start", { method: "POST" });
+      if (!response.ok) console.warn("[koyeb] Not connected:", response.status);
+    } catch (e) { console.error("[koyeb-start]", e.message || e); }
+  }
   await kvSet(env, "feed_try", String(Date.now()));
   const budget = new Budget(Number(env.SUBREQUEST_BUDGET || 45));
-  try {
-    await backfill(env, budget);
-  } catch (e) {
-    await kvSet(env, "backfill_error", String(e.message || e));
-    console.error("[backfill]", e.message || e);
-  }
   try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
   await nieuwsRun(env, budget);
   try { await verkeerRun(env, budget); } catch (e) { console.error("[verkeer]", e.message || e); }
