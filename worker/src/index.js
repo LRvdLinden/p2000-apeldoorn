@@ -105,6 +105,11 @@ async function handle(req, env, ctx) {
     return reply(200, {
       ok: true,
       feed: { configured: Boolean(env.P2000_PAGE_API_URL), lastOk: ok ? new Date(Number(ok.value)).toISOString() : null, lastError: err?.value || null },
+      koyeb: {
+        configured: Boolean(env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL),
+        lastMessage: (await kvGet(env, "koyeb_last_message"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_message")).value)).toISOString() : null,
+        lastAdded: (await kvGet(env, "koyeb_last_added"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_added")).value)).toISOString() : null,
+      },
       cron: cronRun ? new Date(Number(cronRun.value)).toISOString() : null,
       lastTry: (await kvGet(env, "feed_try"))?.value ? new Date(Number((await kvGet(env, "feed_try")).value)).toISOString() : null,
       backfill: (await kvGet(env, "backfill_status"))?.value || null,
@@ -602,6 +607,83 @@ async function poll(env, budget) {
   }
 }
 
+/** Receive the parallel country-wide Koyeb feed; only local dispatches enter D1. */
+async function ingestKoyebMessage(env, raw) {
+  const text = typeof raw === "string" ? raw : String(raw || "");
+  if (text.length > 500_000) throw new Error("Oversized Koyeb message");
+  const list = JSON.parse(text);
+  if (!Array.isArray(list)) return;
+  const parsed = list.map(fromKoyeb).filter(Boolean);
+  // Mark a healthy stream even if this particular national dispatch was outside Apeldoorn.
+  await kvSet(env, "koyeb_last_message", String(Date.now()));
+  if (!parsed.length) return;
+  const budget = new Budget(45);
+  const added = await ingestParsed(env, budget, parsed);
+  if (added) await kvSet(env, "koyeb_last_added", String(Date.now()));
+  await drain(env, budget); // same APNs/FCM outbox and per-device preferences
+}
+
+/** A single durable outbound WebSocket for A-Alerts, separate from the Homey app.
+ * Enabled only after KOYEB_SUBPROTOCOL is configured with a DIFFERENT client identity.
+ * An outgoing WebSocket cannot hibernate, so monitor Cloudflare Duration usage.
+ */
+export class AAlertsKoyebListener extends DurableObject {
+  constructor(ctx, env) {
+    super(ctx, env);
+    this.ws = null;
+    this.connecting = false;
+    this.processing = Promise.resolve();
+  }
+
+  async fetch(request) {
+    if (request.method !== "POST" || new URL(request.url).pathname !== "/start")
+      return new Response("Not found", { status: 404 });
+    if (!this.env.KOYEB_SUBPROTOCOL ||
+        /-nl\.lrvdlinden\.p2000$/.test(this.env.KOYEB_SUBPROTOCOL))
+      return new Response("Separate A-Alerts subprotocol required", { status: 503 });
+    await this.ensureConnection();
+    return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
+  }
+
+  async ensureConnection() {
+    if (this.connecting || (this.ws && this.ws.readyState <= WebSocket.OPEN)) return;
+    this.connecting = true;
+    try {
+      const url = this.env.KOYEB_WEBSOCKET_URL || "wss://p2000-martijnpoppen.koyeb.app";
+      if (!url.startsWith("wss://")) throw new Error("Koyeb requires wss");
+      const socket = new WebSocket(url, this.env.KOYEB_SUBPROTOCOL);
+      this.ws = socket;
+      socket.addEventListener("open", () => {
+        this.ctx.waitUntil(kvSet(this.env, "koyeb_last_connected", String(Date.now())));
+      });
+      socket.addEventListener("message", (event) => {
+        // Serialize messages from this connection, preventing Koyeb-vs-Koyeb write races.
+        this.processing = this.processing.catch(() => {}).then(() => ingestKoyebMessage(this.env, event.data));
+        this.ctx.waitUntil(this.processing.catch((e) => console.error("[ingest-koyeb]", e.message || e)));
+      });
+      socket.addEventListener("close", () => {
+        if (this.ws === socket) this.ws = null;
+        this.ctx.waitUntil(this.ctx.storage.setAlarm(Date.now() + 5_000));
+      });
+      socket.addEventListener("error", () => {
+        this.ctx.waitUntil(kvSet(this.env, "koyeb_last_error", String(Date.now())));
+        // close handler or watchdog reconnects; never log the subprotocol.
+      });
+      await this.ctx.storage.setAlarm(Date.now() + 60_000);
+    } catch (e) {
+      console.error("[koyeb-connect]", e.message || e);
+      await this.ctx.storage.setAlarm(Date.now() + 30_000);
+    } finally {
+      this.connecting = false;
+    }
+  }
+
+  async alarm() {
+    if (this.env.KOYEB_SUBPROTOCOL) await this.ensureConnection();
+    await this.ctx.storage.setAlarm(Date.now() + 60_000);
+  }
+}
+
 /** Broadcast (beheer) or take-off push; the latter has an English text and the helicopter. */
 function broadcastPayload(b, lang) {
   const t = b.en && !String(lang || "nl").startsWith("nl") ? b.en : b;
@@ -904,6 +986,14 @@ async function catchUp(env) {
 
 async function cron(env, event) {
   await kvSet(env, "cron_run", String(Date.now()));
+  // Keep exactly one A-Alerts WebSocket listener alive independently from the Homey app.
+  if (env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL) {
+    try {
+      const stub = env.KOYEB_LISTENER.getByName("a-alerts-koyeb");
+      const response = await stub.fetch("https://koyeb.internal/start", { method: "POST" });
+      if (!response.ok) console.warn("[koyeb] Not connected:", response.status);
+    } catch (e) { console.error("[koyeb-start]", e.message || e); }
+  }
   await kvSet(env, "feed_try", String(Date.now()));
   const budget = new Budget(Number(env.SUBREQUEST_BUDGET || 45));
   try {
