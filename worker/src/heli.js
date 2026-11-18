@@ -133,6 +133,7 @@ async function learn(env, list, learned) {
 const AIRCRAFT_SNAPSHOT_KEY = "lucht:last-known-v1";
 const AIRCRAFT_HOLD_MS = 20 * 60_000;
 let snapshotMemo = null;
+let snapshotReadAt = 0;
 let snapshotWriteAt = 0;
 
 export function retainAircraft(current, previous, now = Date.now(), failing = false) {
@@ -151,14 +152,16 @@ export function retainAircraft(current, previous, now = Date.now(), failing = fa
   return [...live.values()].sort((a, b) => a.naam.localeCompare(b.naam));
 }
 async function readAircraftSnapshot(env) {
-  if (snapshotMemo) return snapshotMemo;
+  if (snapshotMemo && Date.now() - snapshotReadAt < 25_000) return snapshotMemo;
   try {
     const row = await env.DB.prepare("SELECT value FROM kv WHERE key = ?").bind(AIRCRAFT_SNAPSHOT_KEY).first();
     const saved = row ? JSON.parse(row.value) : null;
     snapshotMemo = saved && Array.isArray(saved.helikopters) && Array.isArray(saved.lucht) ? saved : { helikopters: [], lucht: [] };
+    snapshotReadAt = Date.now();
   } catch (e) {
     console.warn("[lucht snapshot read]", e.message || e);
-    snapshotMemo = { helikopters: [], lucht: [] };
+    snapshotMemo ||= { helikopters: [], lucht: [] };
+    snapshotReadAt = Date.now();
   }
   return snapshotMemo;
 }
@@ -171,6 +174,7 @@ async function preserveAircraft(env, fresh, failing = false) {
   // Avoid turning a momentary empty upstream answer into an empty visible map.
   // A missing flight is only removed when its authentic last-seen age exceeds the grace period.
   snapshotMemo = { helikopters: h, lucht: l };
+  snapshotReadAt = now;
   if (!failing && now - snapshotWriteAt > 30_000 && (h.some(x => !x.verouderd) || l.some(x => !x.verouderd))) {
     try {
       await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)")
@@ -242,7 +246,7 @@ export async function helikopters(env) {
   }
   memo = { at: Date.now(), data };
   if (cache) {
-    await cache.put(key, new Response(JSON.stringify(data), { headers: { "content-type": "application/json", "cache-control": `max-age=${TTL / 1000}` } }));
+    try { await cache.put(key, new Response(JSON.stringify(data), { headers: { "content-type": "application/json", "cache-control": `max-age=${TTL / 1000}` } })); } catch (e) { console.warn("[adsb edge cache]", e.message || e); }
   }
   return data;
 }
