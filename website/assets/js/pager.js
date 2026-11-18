@@ -1005,10 +1005,41 @@ function mapWarnings() {
 }
 
 let heliTimer = null;
+let aircraftPolling = false;
+
+/** Independently updates ONLY the two MapKit aircraft layers.
+ * Never redraws the pager/incident/NDW overlays, restarts the map or waits for traffic.
+ * heliLaag owns stable MapKit annotations and moves them smoothly once per second.
+ */
+async function updateAircraftMap() {
+  if (state.tab !== "kaart" || !bigMapReady) return;
+  const mk = await bigMapReady;
+  if (!mk || !bigMap || state.tab !== "kaart") return;
+  // Aircraft are managed independently; update immediately, before the slow NDW traffic fetch.
+  await updateAircraftMap();
+  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.lucht.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
+  const enabled = state.lagen.has("helikopters");
+  heliMarkers.update(enabled ? state.helis : []);
+  luchtMarkers.update(enabled ? state.lucht : []);
+}
+
 async function pollHelis() {
-  if (state.tab !== "kaart" || document.hidden) return;
-  ({ helis: state.helis, lucht: state.lucht } = await fetchLuchtvaart());
-  renderMap();
+  if (state.tab !== "kaart" || document.hidden || aircraftPolling) return;
+  aircraftPolling = true;
+  try {
+    const result = await fetchLuchtvaart();
+    if (state.tab !== "kaart") return;
+    state.helis = result.helis;
+    state.lucht = result.lucht;
+    await updateAircraftMap();
+    // Refresh aircraft counters only, not the entire map.
+    const num = state.helis.length + state.lucht.length;
+    const badge = document.querySelector('[data-laag="helikopters"] small');
+    if (badge) badge.textContent = num ? String(num) : "";
+  } catch (e) {
+    console.warn("[luchtvaart poll]", e);
+    // Keep last valid markers; the aircraft feed is not a traffic request.
+  } finally { aircraftPolling = false; }
 }
 $("mapChips").addEventListener("click", async (e) => {
   const chip = e.target.closest(".chip");
@@ -1117,9 +1148,7 @@ async function renderMap() {
     });
     if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
   }
-  heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
-  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openHeli(t); }, gekozen: () => heliSpoor.id });
-  luchtMarkers.update(state.lagen.has("helikopters") ? state.lucht : []);
+  // No aircraft teardown here: their own 15-second polling loop owns both layers.
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
     state.helis.filter((h) => !heliSpoor.id || h.id === heliSpoor.id).forEach((h) => { const v = voorspellingOverlay(mk, h); if (v) bigMap.addOverlay(v); });
