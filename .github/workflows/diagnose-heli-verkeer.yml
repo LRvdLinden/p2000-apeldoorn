@@ -1,0 +1,48 @@
+name: Diagnostiek heli en verkeer (alleen lezen)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: [".github/workflows/diagnose-heli-verkeer.yml"]
+  workflow_dispatch:
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Live diagnostics, no deployments and no writes
+        env:
+          VERKEER_TOKEN: ${{ secrets.VERKEER_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          const api="https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          const svc="https://desperate-daisy-p2000-397a756d.apps.mistral.run";
+          const ago=s=>s?Math.round((Date.now()-Date.parse(s))/1000):null;
+          async function req(name,url,headers={}) {
+            const t=Date.now();
+            try {
+              const r=await fetch(url,{headers,signal:AbortSignal.timeout(18000),cache:"no-store"});
+              const b=await r.text();
+              let d={};try{d=JSON.parse(b)}catch{}
+              return {name,status:r.status,ms:Date.now()-t,d};
+            } catch(e){return {name,status:0,ms:Date.now()-t,error:String(e.message||e),d:{}}}
+          }
+          for(let round=1;round<=2;round++){
+            console.log("ROUND",round,new Date().toISOString());
+            const jobs=[req("health",api+"/health"),req("status",api+"/v1/status"),req("verkeer",api+"/v1/verkeer"),req("heli",api+"/v1/helikopters"),req("lucht",api+"/v1/lucht"),req("service",svc+"/health"),req("adsb-direct","https://api.adsb.lol/v2/point/52.2/5.4/160")];
+            if(process.env.VERKEER_TOKEN)jobs.push(req("adsb-service",svc+"/adsb?lat=52.2&lon=5.4&nm=160",{"authorization":"Bearer "+process.env.VERKEER_TOKEN}));
+            for(const r of await Promise.all(jobs)){
+              const d=r.d||{};let v={};
+              if(r.name==="health")v={feed:d.feed,cron:d.cron,koyeb:d.koyeb,apns:d.apns,fcm:d.fcm};
+              else if(r.name==="status")v={components:(d.groepen||[]).flatMap(g=>g.onderdelen||[]).filter(x=>["heli","verkeer","api"].includes(x.id)).map(x=>({id:x.id,staat:x.staat,detail:x.detail}))};
+              else if(r.name==="verkeer")v={beschikbaar:d.beschikbaar,verouderd:d.verouderd,bijgewerkt:d.bijgewerkt,items:d.items?.length,flitsers:d.flitsers?.length,gepland:d.gepland?.length};
+              else if(r.name==="heli")v={fout:d.fout,verouderd:d.verouderd,bijgewerkt:d.bijgewerkt,count:d.helikopters?.length,sample:d.helikopters?.slice(0,5).map(x=>({id:x.id,gezien:x.gezien,ageSec:ago(x.gezien)}))};
+              else if(r.name==="lucht")v={fout:d.fout,count:d.toestellen?.length,sample:d.toestellen?.slice(0,3).map(x=>({id:x.id,ageSec:ago(x.gezien)}))};
+              else if(r.name==="service")v={ok:d.ok,sinds:d.sinds,opgehaald:d.opgehaald,ageSec:ago(d.opgehaald),fout:d.fout,planFout:d.planFout,filesFout:d.filesFout,herstarts:d.herstarts,laatsteHerstart:d.laatsteHerstart,items:d.items,files:d.files,meetpunten:d.meetpunten,rss:d.rss,duur:d.duur};
+              else v={now:d.now,nowKind:Number(d.now)>1e12?"ms":Number(d.now)>1e9?"seconds":"unknown",count:d.ac?.length,msg:d.msg,err:d.fout||d.error};
+              console.log(JSON.stringify({name:r.name,status:r.status,ms:r.ms,error:r.error||null,result:v}));
+            }
+            if(round===1)await new Promise(done=>setTimeout(done,20000));
+          }
+          NODE
