@@ -250,7 +250,10 @@ final class HeliStore {
     func refresh() async {
         do {
             let r = try await P2000API.shared.helikoptersMetInzet()
-            items = r.helikopters
+            let now = Date.now
+            let seen = Set(r.helikopters.map(\.id))
+            let older = items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
+            items = r.helikopters + older
             inzet = r.inzet
             lastUpdated = .now
             failed = false
