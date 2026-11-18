@@ -500,7 +500,7 @@ function renderDetail(m) {
       ${m.lat != null ? `<img class="static-pin" src="${asset(`assets/img/${dienst.marker}.png`)}" alt="">` : ""}
       <div class="lookaround" id="lookAround" title="Look Around"></div>
     </div>
-    ${m.plaatscentrum ? `<div class="notice"><b>Exacte incidentlocatie onbekend.</b> De marker staat op het woonplaatscentrum van ${esc(stad)}, niet op de plaats van het incident.</div>` : hasStreet(m) ? "" : `<div class="notice"><b>Let op:</b> De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen.</div>`}
+    ${!hasStreet(m) ? `<div class="notice"><b>Let op:</b> De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen.</div>` : m.plaatscentrum ? `<div class="notice"><b>Exacte incidentlocatie onbekend.</b> De marker staat op het woonplaatscentrum van ${esc(stad)}, niet op de plaats van het incident.</div>` : ""}
     ${isGrootIncident(m) ? `<div class="groot-badge">🔥 <b>Groot incident</b>${Number(m.grip) > 0 ? `<span>GRIP ${esc(m.grip)}</span>` : ""}</div>` : ""}
     <div class="incident"><span>Incident ${esc((m.guid || "").slice(-7).replace(/-/g, ""))}</span><span>${m.views ? `👁 ${m.views}x` : ""}</span></div>
     <section class="card">
