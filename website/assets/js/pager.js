@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=79";
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=80";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
