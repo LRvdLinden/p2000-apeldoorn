@@ -1,7 +1,7 @@
 name: Check ordinary A-Alerts FTP login (read-only)
 on:
   push:
-    branches: [fix/ftp-instead-of-ftps-20261118]
+    branches: [fix/ftp-session-retry-20261118]
     paths: ["tools/ftp.sh", "tools/ftps.sh", ".github/workflows/website-deploy.yml", ".github/workflows/website-aircraft-hotfix.yml", ".github/workflows/test-plain-ftp.yml"]
   workflow_dispatch:
 permissions:
