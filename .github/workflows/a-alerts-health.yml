@@ -1,0 +1,45 @@
+name: A-Alerts live health check
+
+on:
+  push:
+    branches: [a-alerts]
+    paths: [".github/workflows/a-alerts-health.yml"]
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Verify deployed Worker, D1 and parallel Koyeb (read only)
+        run: |
+          node --input-type=module <<'NODE'
+          const base = "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          let last = null;
+          for (let n = 0; n < 10; n++) {
+            try {
+              const response = await fetch(base + "/health", { signal: AbortSignal.timeout(18000), headers: { "cache-control": "no-cache" } });
+              if (!response.ok) throw new Error("health HTTP " + response.status);
+              last = await response.json();
+              console.log(JSON.stringify({
+                attempt: n + 1, ok: last.ok, primaryLastOk: last.feed?.lastOk,
+                primaryError: last.feed?.lastError, koyeb: last.koyeb,
+                alerts: last.meldingen, warningServices: Boolean(last.waarschuwingen),
+                fcm: last.fcm, radar: last.radar
+              }));
+              if (last.ok && last.koyeb?.configured && last.koyeb?.lastMessage &&
+                  typeof last.meldingen === "number" && last.fcm && last.radar) {
+                const list = await (await fetch(base + "/v1/meldingen?limit=2", { signal: AbortSignal.timeout(18000) })).json();
+                if (!Array.isArray(list)) throw new Error("meldingen endpoint invalid");
+                console.log("PASS: Koyeb and the existing A-Alerts API are live, sample alerts:", list.length);
+                process.exit(0);
+              }
+            } catch (e) {
+              console.error("Attempt", n + 1, "failed:", e.message);
+            }
+            await new Promise(resolve => setTimeout(resolve, 15000));
+          }
+          console.error("FAIL: no independent Koyeb events observed. Worker may still be online.");
+          process.exit(1);
+          NODE
