@@ -32,6 +32,17 @@ jobs:
                   typeof last.meldingen === "number" && last.fcm && last.radar) {
                 const list = await (await fetch(base + "/v1/meldingen?limit=2", { signal: AbortSignal.timeout(18000) })).json();
                 if (!Array.isArray(list)) throw new Error("meldingen endpoint invalid");
+                // The public P2000 status must be green if EITHER source is currently healthy.
+                const statusRes = await fetch(base + "/v1/status", { signal: AbortSignal.timeout(18000), headers: { "cache-control": "no-cache" } });
+                if (!statusRes.ok) throw new Error("status HTTP " + statusRes.status);
+                const status = await statusRes.json();
+                const p2000 = status.groepen?.flatMap(g => g.onderdelen || []).find(x => x.id === "p2000");
+                const active = status.incidenten?.actief?.filter(x => x.onderdelen?.includes("p2000")) || [];
+                const newest = Math.max(Date.parse(last.feed?.lastOk || 0) || 0, Date.parse(last.koyeb?.lastMessage || 0) || 0);
+                console.log("PUBLIC P2000 STATUS:", JSON.stringify({ state: p2000?.staat, detail: p2000?.detail, freshestSourceSeconds: Math.round((Date.now()-newest)/1000), manuallyOpenP2000Incidents: active.map(x => x.titel) }));
+                if (!p2000) throw new Error("P2000 component missing from status page");
+                if (newest > Date.now() - 180_000 && p2000.staat !== "ok")
+                  throw new Error("P2000 status is not green despite a healthy source");
                 console.log("PASS: Koyeb and the existing A-Alerts API are live, sample alerts:", list.length);
                 process.exit(0);
               }
