@@ -1,0 +1,46 @@
+name: Inspect api.a-alerts.nl mapping (read-only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: ['.github/workflows/inspect-api-a-alerts-domain.yml']
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    env:
+      CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CF_ACCOUNT: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: DNS + Cloudflare read-only diagnostic
+        run: |
+          python3 - <<'PY'
+          import os, json, urllib.request, urllib.error, socket
+          domain="api.a-alerts.nl"; root="a-alerts.nl"
+          for d in [domain,root]:
+            try:
+              ips=sorted({r[4][0] for r in socket.getaddrinfo(d,443)})
+              print("DNS",d,"addresses",ips[:10])
+            except Exception as e: print("DNS",d,"ERROR",str(e))
+          token=os.getenv("CF_TOKEN",""); account=os.getenv("CF_ACCOUNT","")
+          print("cloudflare_credentials_present", bool(token and account))
+          if not token or not account: exit(0)
+          def get(path):
+            req=urllib.request.Request("https://api.cloudflare.com/client/v4/"+path,headers={"Authorization":"Bearer "+token,"Accept":"application/json"})
+            try:
+              with urllib.request.urlopen(req,timeout=12) as r: return json.load(r)
+            except urllib.error.HTTPError as e: return {"http":e.code,"errors":json.loads(e.read().decode("utf8","replace")).get("errors",[])}
+            except Exception as e: return {"error":str(e)}
+          zones=get("zones?name="+root)
+          zone_list=zones.get("result",[]) if isinstance(zones.get("result"),list) else []
+          print("zones",[{k:z.get(k) for k in ("id","name","status","paused")} for z in zone_list],"errors",zones.get("errors"))
+          for z in zone_list:
+            zid=z["id"]
+            dns=get("zones/"+zid+"/dns_records?name="+domain)
+            print("domain_dns_records",[{k:r.get(k) for k in ("id","type","name","content","proxied")} for r in dns.get("result",[])],"errors",dns.get("errors"))
+            routes=get("zones/"+zid+"/workers/routes")
+            print("worker_routes",[{k:r.get(k) for k in ("id","pattern","script","enabled")} for r in routes.get("result",[]) if "api.a-alerts" in str(r.get("pattern",""))],"errors",routes.get("errors"))
+          custom=get("accounts/"+account+"/workers/domains")
+          print("worker_custom_domains",[{k:c.get(k) for k in ("id","hostname","service","zone_id","environment")} for c in custom.get("result",[]) if "a-alerts.nl" in str(c.get("hostname",""))],"errors",custom.get("errors"))
+          workers=get("accounts/"+account+"/workers/scripts")
+          print("worker_exists",any(r.get("id")=="p2000-apeldoorn-api" for r in workers.get("result",[])),"errors",workers.get("errors"))
+          PY
