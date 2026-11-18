@@ -1,0 +1,30 @@
+name: Current A-Alerts helicopter-status diagnosis (read-only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: [".github/workflows/check-current-heli-status.yml"]
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - name: Read status and live ADS-B endpoint
+        run: |
+          node --input-type=module <<'NODE'
+          const base="https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          for(let n=0;n<2;n++){
+            const [s,h,l,health]=await Promise.all(["/v1/status","/v1/helikopters","/v1/lucht","/health"].map(async path=>{
+              try {const r=await fetch(base+path+"?nonce="+n,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}});return {http:r.status,body:await r.json()};}
+              catch(e){return {error:String(e)}}
+            }));
+            const comp=s.body?.groepen?.flatMap(g=>g.onderdelen||[]).find(x=>x.id==="heli");
+            const airborne=(h.body?.helikopters||[]).concat(l.body?.toestellen||[]);
+            console.log(JSON.stringify({at:new Date().toISOString(),status:comp,
+              heli:{http:h.http,fout:!!h.body?.fout,n:h.body?.helikopters?.length,last:h.body?.bijgewerkt},
+              lucht:{http:l.http,fout:!!l.body?.fout,n:l.body?.toestellen?.length},
+              aircraft:airborne.slice(0,5).map(x=>({id:x.id,seen:x.gezien,age:Math.round((Date.now()-Date.parse(x.gezien))/1000)})),
+              cron:health.body?.cron,serverTime:health.body?.now}));
+            if(n===0)await new Promise(r=>setTimeout(r,8000));
+          }
+          NODE
