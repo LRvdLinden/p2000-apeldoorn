@@ -1611,12 +1611,22 @@ function renderStats() {
 
 // ------------------------------------------------------------------ loading
 
-function render(newGuids) {
+function render(newGuids, { mapChanged = true } = {}) {
   renderActiveFilters();
   renderTiles();
   renderList(newGuids);
-  if (state.tab === "kaart") renderMap();
+  // Ordinary 15-second pager refreshes must not tear down the MapKit overlays.
+  // Aircraft position updates have their own, completely independent loop.
+  if (state.tab === "kaart" && mapChanged) renderMap();
   if (state.tab === "stats") renderStats();
+}
+
+let lastMapContentKey = null;
+function mapContentKey() {
+  // Track actual map content, not the normal "time ago" text in the pager.
+  const alerts = state.list.map((m) => [m.guid, m.lat, m.lon, m.dienst, m.plaatscentrum]);
+  const warnings = state.warnings.map((w) => [w.id, w.lat, w.lon, w.niveau, w.start, w.einde, isActief(w)]);
+  return JSON.stringify([alerts, warnings]);
 }
 
 async function refresh() {
@@ -1628,7 +1638,10 @@ async function refresh() {
   const fresh = state.known.size ? list.filter((m) => !state.known.has(m.guid)) : [];
   list.forEach((m) => state.known.add(m.guid));
   state.list = list;
-  render(new Set(fresh.map((m) => m.guid)));
+  const nextMapContentKey = mapContentKey();
+  const mapChanged = nextMapContentKey !== lastMapContentKey;
+  lastMapContentKey = nextMapContentKey;
+  render(new Set(fresh.map((m) => m.guid)), { mapChanged });
   if (fresh.length && document.hidden) document.title = `(${fresh.length}) Live pager – A-Alerts`;
   tick();
 }
