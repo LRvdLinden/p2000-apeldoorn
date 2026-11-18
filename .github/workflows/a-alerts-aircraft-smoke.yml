@@ -1,0 +1,40 @@
+name: A-Alerts live aircraft smoke check
+on:
+  push:
+    branches: [a-alerts]
+    paths: [".github/workflows/a-alerts-aircraft-smoke.yml"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Confirm PH-SAR/NCG06 and resilient live map feeds
+        run: |
+          node --input-type=module <<'NODE'
+          const base="https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          let found=false, website=false;
+          for (let i=0; i<12; i++) {
+            const out={attempt:i+1, at:new Date().toISOString()};
+            try {
+              const [a,b,w,script] = await Promise.all([
+                fetch(base+"/v1/lucht?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
+                fetch(base+"/v1/helikopters?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
+                fetch("https://a-alerts.nl/pager/?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
+                fetch("https://a-alerts.nl/assets/js/aalerts.js?v=79",{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}})
+              ]);
+              const l=await a.json(), h=await b.json(), html=await w.text(), js=await script.text();
+              const matches=(l.toestellen||[]).filter(x=>/PH-SAR|NCG06|486449/i.test([x.naam,x.registratie,x.callsign,x.hex].join(" ")));
+              website = html.includes("pager.js?v=88") && js.includes("behoudLuchtvaart");
+              found=matches.length>0;
+              Object.assign(out,{http:[a.status,b.status,w.status,script.status],luchtCount:l.toestellen?.length,helis:h.helikopters?.length,
+                error:!!l.fout,stale:!!l.verouderd,website,PH_SAR:matches.map(x=>({id:x.id,naam:x.naam,callsign:x.callsign,verouderd:x.verouderd,gezien:x.gezien}))});
+            } catch(e) {out.error=String(e.message||e)}
+            console.log(JSON.stringify(out));
+            if(found&&website) {console.log("PASS: PH-SAR exists in A-Alerts and website map code is deployed");process.exit(0)}
+            await new Promise(r=>setTimeout(r,12000));
+          }
+          console.log("FAIL: expected PH-SAR to show in current or last-known feed and website assets to be updated");
+          process.exit(1);
+          NODE
