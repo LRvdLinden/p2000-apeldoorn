@@ -22,11 +22,11 @@ jobs:
                 fetch(base+"/v1/lucht?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
                 fetch(base+"/v1/helikopters?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
                 fetch("https://a-alerts.nl/pager/?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
-                fetch("https://a-alerts.nl/assets/js/aalerts.js?v=80",{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}})
+                fetch("https://a-alerts.nl/assets/js/aalerts.js?v=81",{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}})
               ]);
               const l=await a.json(), h=await b.json(), html=await w.text(), js=await script.text();
               const matches=(l.toestellen||[]).filter(x=>/PH-SAR|NCG06|486449/i.test([x.naam,x.registratie,x.callsign,x.hex].join(" ")));
-              website = html.includes("pager.js?v=89") && js.includes("90_000");
+              website = html.includes("pager.js?v=91") && js.includes("90_000");
               const all=[...(l.toestellen||[]), ...(h.helikopters||[])];
               const tooOld=all.filter(x=> !Number.isFinite(Date.parse(x.gezien)) || Date.now() - Date.parse(x.gezien) >= 95_000);
               if(tooOld.length) throw new Error("Offline aircraft returned by live API: "+tooOld.map(x=>x.id).join(","));
