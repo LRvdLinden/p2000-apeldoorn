@@ -5,7 +5,7 @@ name: Worker
 # existing secrets (P2000_PAGE_API_URL, APN_*, WEB_*, MAPS_SERVER_API_*, KNMI_WMS_KEY for the rain radar).
 on:
   push:
-    branches: [main]
+    branches: [a-alerts]
     paths: ["worker/**", ".github/workflows/worker.yml"]
   pull_request:
     paths: ["worker/**"]
@@ -31,7 +31,7 @@ jobs:
       - run: npm ci
       - run: npm test
 
-      - name: Probe separate no-protocol Koyeb WebSocket (read only)
+      - name: Probe dedicated A-Alerts WebSocket (read only)
         if: github.event_name == 'pull_request'
         run: node tools/koyeb-probe.mjs
 
@@ -99,7 +99,6 @@ jobs:
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
         env:
           P2000_PAGE_API_URL: ${{ secrets.P2000_PAGE_API_URL }}
-          KOYEB_SUBPROTOCOL: ${{ secrets.KOYEB_SUBPROTOCOL }}
           APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
           APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
           APN_P8_CERT: ${{ secrets.APN_P8_CERT }}
@@ -121,7 +120,7 @@ jobs:
           VERKEER_TOKEN: ${{ secrets.VERKEER_TOKEN }}
         run: |
           node -e '
-            const keys = ["P2000_PAGE_API_URL","KOYEB_SUBPROTOCOL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
+            const keys = ["P2000_PAGE_API_URL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
               "WEB_MAPKIT_JS_P8","WEB_WEATHERKIT_KEY_ID","WEB_WEATHERKIT_TEAM_ID","WEB_WEATHERKIT_P8","MAPS_SERVER_API_KEY_ID",
               "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","BEHEER_USER","BEHEER_PASSWORD","FCM_SERVICE_ACCOUNT","HOMEY_WEBHOOK_ID","KNMI_WMS_KEY","VERKEER_URL","VERKEER_TOKEN"];
             const out = {}; for (const k of keys) if (process.env[k]) out[k] = process.env[k];
