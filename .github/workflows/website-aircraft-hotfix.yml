@@ -12,7 +12,7 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
-      - name: FTPS uploader
+      - name: FTP uploader (passive, port 21)
         run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
       - name: Upload only live aircraft map assets
         env:
@@ -23,11 +23,11 @@ jobs:
           FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
         run: |
           set -euo pipefail
-          source tools/ftps.sh
-          ftps_connect
-          T="$FTPS_TARGET"
-          ftps_run "mkdir -p -f \"$T/assets/js\"; mkdir -p -f \"$T/pager\"; put website/assets/js/aalerts.js -o \"$T/assets/js/aalerts.js\"; put website/assets/js/pager.js -o \"$T/assets/js/pager.js\"; put website/pager/index.html -o \"$T/pager/index.html\""
-          echo "::notice::Luchtvaart-pager assets geüpload via FTPS"
+          source tools/ftp.sh
+          ftp_connect
+          T="$FTP_TARGET"
+          ftp_run "mkdir -p -f \"$T/assets/js\"; mkdir -p -f \"$T/pager\"; put website/assets/js/aalerts.js -o \"$T/assets/js/aalerts.js\"; put website/assets/js/pager.js -o \"$T/assets/js/pager.js\"; put website/pager/index.html -o \"$T/pager/index.html\""
+          echo "::notice::Luchtvaart-pager assets geüpload via FTP"
       - name: Assert aircraft map version is visible
         run: |
           sleep 4
