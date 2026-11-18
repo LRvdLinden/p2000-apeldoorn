@@ -213,17 +213,11 @@ export async function helikopters(env) {
       headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" },
       signal: AbortSignal.timeout(8_000),
     });
-    // adsb.lol sometimes refuses Cloudflare's shared addresses (HTTP 429). Then the same request goes via the A-Alerts
-    // verkeer service (own address, VERKEER_URL/VERKEER_TOKEN), and for 10 minutes straight there.
-    const viaService = () => fetch(`${String(env.VERKEER_URL).replace(/\/+$/, "")}/adsb?lat=${POINT.lat}&lon=${POINT.lon}&nm=${POINT.nm}`, {
-      headers: { authorization: `Bearer ${env.VERKEER_TOKEN}` }, signal: AbortSignal.timeout(12_000),
-    });
-    const kanService = Boolean(env?.VERKEER_URL && env?.VERKEER_TOKEN);
-    // Always try the primary source again on the next refresh. The old code forced a
-    // broken proxy route for ten minutes after one temporary 429, despite a recovered primary.
-    let res = await direct().catch(() => null);
-    if (!res?.ok && kanService) res = await viaService().catch(() => null);
-    if (!res?.ok) throw new Error(`HTTP ${res?.status ?? "geen antwoord"}`);
+    // Aircraft positions must NEVER depend on the unrelated NDW/traffic service.
+    // Cloudflare requests ADS-B directly and retains only authentic recent fixes
+    // across transient errors. Do not route aircraft through VERKEER_URL.
+    const res = await direct();
+    if (!res.ok) throw new Error(`ADS-B HTTP ${res.status}`);
     const body = await res.json();
     if (!body || !Array.isArray(body.ac)) throw new Error("Invalid ADS-B payload");
     const learned = await loadLearned(env);

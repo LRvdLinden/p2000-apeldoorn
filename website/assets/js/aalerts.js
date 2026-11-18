@@ -97,7 +97,7 @@ export function behoudLuchtvaart(nieuw, oud, now = Date.now()) {
 export async function fetchLuchtvaart({ alles = false } = {}) {
   const keuze = luchtKeuze();
   const metLucht = alles || [...keuze].some((k) => k !== "trauma" && k !== "politie");
-  const [h, l] = await Promise.all([fetchHelikopters(), metLucht ? fetchLucht() : []]);
+  const [h, l] = await Promise.all([fetchHelikopters(), metLucht ? fetchLucht() : Promise.resolve([])]);
   luchtLast.helis = behoudLuchtvaart(h, luchtLast.helis);
   if (metLucht) luchtLast.lucht = behoudLuchtvaart(l, luchtLast.lucht);
   return { helis: luchtLast.helis.filter((x) => keuze.has(x.soort)), lucht: luchtLast.lucht.filter((x) => keuze.has(x.icoon)), alle: [...luchtLast.helis, ...luchtLast.lucht] };

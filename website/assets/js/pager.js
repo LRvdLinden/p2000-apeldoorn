@@ -9,7 +9,7 @@ import {
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=80";
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=81";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -1005,10 +1005,40 @@ function mapWarnings() {
 }
 
 let heliTimer = null;
+let aircraftPolling = false;
+
+/** Independently updates ONLY the two MapKit aircraft layers.
+ * Never redraws the pager/incident/NDW overlays, restarts the map or waits for traffic.
+ * heliLaag owns stable MapKit annotations and moves them smoothly once per second.
+ */
+async function updateAircraftMap() {
+  if (state.tab !== "kaart" || !bigMapReady) return;
+  const mk = await bigMapReady;
+  if (!mk || !bigMap || state.tab !== "kaart") return;
+  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
+  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.lucht.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
+  const enabled = state.lagen.has("helikopters");
+  heliMarkers.update(enabled ? state.helis : []);
+  luchtMarkers.update(enabled ? state.lucht : []);
+}
+
 async function pollHelis() {
-  if (state.tab !== "kaart" || document.hidden) return;
-  ({ helis: state.helis, lucht: state.lucht } = await fetchLuchtvaart());
-  renderMap();
+  if (state.tab !== "kaart" || document.hidden || aircraftPolling) return;
+  aircraftPolling = true;
+  try {
+    const result = await fetchLuchtvaart();
+    if (state.tab !== "kaart") return;
+    state.helis = result.helis;
+    state.lucht = result.lucht;
+    await updateAircraftMap();
+    // Refresh aircraft counters only, not the entire map.
+    const num = state.helis.length + state.lucht.length;
+    const badge = document.querySelector('[data-laag="helikopters"] small');
+    if (badge) badge.textContent = num ? String(num) : "";
+  } catch (e) {
+    console.warn("[luchtvaart poll]", e);
+    // Keep last valid markers; the aircraft feed is not a traffic request.
+  } finally { aircraftPolling = false; }
 }
 $("mapChips").addEventListener("click", async (e) => {
   const chip = e.target.closest(".chip");
@@ -1095,7 +1125,8 @@ async function renderMap() {
   if (!mk) { renderStaticMarkers(pins, clusters); return; }
   bigMap.removeAnnotations(bigMap.annotations.filter((a) => !a._heli));
   bigMap.removeOverlays(bigMap.overlays);
-  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
+  // Keep the stable aircraft markers alive independently from NDW and radar.
+  await updateAircraftMap();
   const actief = state.warnings.filter((w) => isActief(w));
   const extra = [];
   if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
@@ -1117,9 +1148,7 @@ async function renderMap() {
     });
     if (state.lagen.has("flitsers")) (vk.flitsers || []).forEach((f) => extra.push(flitserAnnotation(mk, f, openFlitser)));
   }
-  heliMarkers.update(state.lagen.has("helikopters") ? state.helis : []);
-  luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const t = state.lucht.find((x) => x.id === id); if (t) openHeli(t); }, gekozen: () => heliSpoor.id });
-  luchtMarkers.update(state.lagen.has("helikopters") ? state.lucht : []);
+  // No aircraft teardown here: their own 15-second polling loop owns both layers.
   if (state.lagen.has("helikopters")) {
     // Probable destination of every helicopter (or only the selected one).
     state.helis.filter((h) => !heliSpoor.id || h.id === heliSpoor.id).forEach((h) => { const v = voorspellingOverlay(mk, h); if (v) bigMap.addOverlay(v); });
@@ -1582,12 +1611,22 @@ function renderStats() {
 
 // ------------------------------------------------------------------ loading
 
-function render(newGuids) {
+function render(newGuids, { mapChanged = true } = {}) {
   renderActiveFilters();
   renderTiles();
   renderList(newGuids);
-  if (state.tab === "kaart") renderMap();
+  // Ordinary 15-second pager refreshes must not tear down the MapKit overlays.
+  // Aircraft position updates have their own, completely independent loop.
+  if (state.tab === "kaart" && mapChanged) renderMap();
   if (state.tab === "stats") renderStats();
+}
+
+let lastMapContentKey = null;
+function mapContentKey() {
+  // Track actual map content, not the normal "time ago" text in the pager.
+  const alerts = state.list.map((m) => [m.guid, m.lat, m.lon, m.dienst, m.plaatscentrum]);
+  const warnings = state.warnings.map((w) => [w.id, w.lat, w.lon, w.niveau, w.start, w.einde, isActief(w)]);
+  return JSON.stringify([alerts, warnings]);
 }
 
 async function refresh() {
@@ -1599,7 +1638,10 @@ async function refresh() {
   const fresh = state.known.size ? list.filter((m) => !state.known.has(m.guid)) : [];
   list.forEach((m) => state.known.add(m.guid));
   state.list = list;
-  render(new Set(fresh.map((m) => m.guid)));
+  const nextMapContentKey = mapContentKey();
+  const mapChanged = nextMapContentKey !== lastMapContentKey;
+  lastMapContentKey = nextMapContentKey;
+  render(new Set(fresh.map((m) => m.guid)), { mapChanged });
   if (fresh.length && document.hidden) document.title = `(${fresh.length}) Live pager – A-Alerts`;
   tick();
 }
