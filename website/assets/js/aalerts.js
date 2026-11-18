@@ -87,8 +87,10 @@ export function behoudLuchtvaart(nieuw, oud, now = Date.now()) {
   }
   for (const h of oud || []) {
     const at = Date.parse(h.gezien);
-    if (h.id && !byId.has(h.id) && Number.isFinite(at) && now - at < 20 * 60_000)
-      byId.set(h.id, { ...h, verouderd: true });
+    if (!h.id || !Number.isFinite(at) || now - at >= 20 * 60_000) continue;
+    const incoming = byId.get(h.id);
+    if (!incoming || Date.parse(incoming.gezien) < at)
+      byId.set(h.id, { ...h, verouderd: now - at > 90_000 });
   }
   return [...byId.values()];
 }
