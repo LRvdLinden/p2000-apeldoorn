@@ -252,8 +252,8 @@ final class HeliStore {
             let r = try await P2000API.shared.helikoptersMetInzet()
             let now = Date.now
             let seen = Set(r.helikopters.map(\.id))
-            let older = items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
-            items = r.helikopters + older
+            let older = items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 90 }
+            items = r.helikopters.filter { now.timeIntervalSince($0.gezien) < 90 } + older
             inzet = r.inzet
             lastUpdated = .now
             failed = false
@@ -314,8 +314,8 @@ final class LuchtStore {
                     // The existing isVerouderd flag already marks fixes older than 60 seconds.
                     let now = Date.now
                     let seen = Set(list.map(\.id))
-                    let old = self.items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
-                    self.items = list + old
+                    let old = self.items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 90 }
+                    self.items = list.filter { now.timeIntervalSince($0.gezien) < 90 } + old
                 }
                 try? await Task.sleep(for: .seconds(15))
             }
