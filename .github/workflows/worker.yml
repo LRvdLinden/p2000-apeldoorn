@@ -31,6 +31,11 @@ jobs:
       - run: npm ci
       - run: npm test
 
+      - name: Probe separate no-protocol Koyeb WebSocket (read only)
+        if: github.event_name == 'pull_request'
+        run: node tools/koyeb-probe.mjs
+
+
       # Validate DO export, bindings and Worker bundle before any production deployment.
       - name: Cloudflare Worker dry-run (no deploy)
         if: github.event_name == 'pull_request'
