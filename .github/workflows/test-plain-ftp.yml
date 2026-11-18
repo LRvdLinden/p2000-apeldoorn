@@ -1,0 +1,42 @@
+name: Check ordinary A-Alerts FTP login (read-only)
+on:
+  push:
+    branches: [fix/ftp-instead-of-ftps-20261118]
+    paths: ["tools/ftp.sh", "tools/ftps.sh", ".github/workflows/website-deploy.yml", ".github/workflows/website-aircraft-hotfix.yml", ".github/workflows/test-plain-ftp.yml"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate FTP upload scripts
+        run: |
+          bash -n tools/ftp.sh
+          bash -n tools/ftps.sh
+          python3 - <<'PY'
+          from pathlib import Path
+          s=Path("tools/ftp.sh").read_text()
+          assert "set ftp:ssl-allow no" in s and "set ftp:ssl-force no" in s
+          for p in [".github/workflows/website-deploy.yml",".github/workflows/website-aircraft-hotfix.yml"]:
+            t=Path(p).read_text()
+            assert "source tools/ftp.sh" in t and "ftp_connect" in t and "ftp_run" in t
+          print("FTP-only configuration and shell syntax are valid")
+          PY
+      - name: Install FTP client
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Check ordinary passive FTP login without uploading
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+        run: |
+          set -euo pipefail
+          source tools/ftp.sh
+          ftp_connect
+          ftp_run "pwd" >/dev/null 2>&1
+          echo "::notice::Plain passive FTP login and read-only command confirmed"
