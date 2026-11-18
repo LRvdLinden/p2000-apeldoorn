@@ -1,0 +1,31 @@
+name: Check api.a-alerts.nl HTTP endpoints (read only)
+on:
+  push:
+    branches: [diagnose/heli-verkeer-20261118]
+    paths: ['.github/workflows/check-api-a-alerts-http.yml']
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with: {node-version: 24}
+      - name: Probe public API hostname and existing worker
+        run: |
+          node --input-type=module <<'NODE'
+          const urls=[
+            "https://api.a-alerts.nl/",
+            "https://api.a-alerts.nl/health",
+            "https://api.a-alerts.nl/v1/helikopters",
+            "https://api.a-alerts.nl/v1/meldingen?limit=1",
+            "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/health",
+            "https://p2000-apeldoorn-api.lrvdlinden.workers.dev/v1/helikopters"
+          ];
+          for(const url of urls){
+            try {
+              const start=Date.now();
+              const r=await fetch(url,{signal:AbortSignal.timeout(9000),redirect:"manual",headers:{"cache-control":"no-cache"}});
+              const body=(await r.text()).slice(0,500);
+              console.log(JSON.stringify({url,status:r.status,ms:Date.now()-start,contentType:r.headers.get("content-type"),server:r.headers.get("server"),location:r.headers.get("location"),body:body.replace(/\s+/g," ")}));
+            }catch(e){console.log(JSON.stringify({url,error:String(e) }))}
+          }
+          NODE
