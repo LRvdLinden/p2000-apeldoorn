@@ -100,7 +100,7 @@ async function handle(req, env, ctx) {
   if (method === "OPTIONS") return new Response(null, { status: 204, headers: CORS });
 
   if (path === "/" || path === "/health") {
-    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error"), bf = await kvGet(env, "backfill_error");
+    const ok = await kvGet(env, "feed_ok"), err = await kvGet(env, "feed_error");
     const cronRun = await kvGet(env, "cron_run");
     return reply(200, {
       ok: true,
@@ -112,8 +112,6 @@ async function handle(req, env, ctx) {
       },
       cron: cronRun ? new Date(Number(cronRun.value)).toISOString() : null,
       lastTry: (await kvGet(env, "feed_try"))?.value ? new Date(Number((await kvGet(env, "feed_try")).value)).toISOString() : null,
-      backfill: (await kvGet(env, "backfill_status"))?.value || null,
-      backfillError: bf?.value || null,
       meldingen: await meldingCount(env),
       apns: apnsConfigured(env), fcm: fcmConfigured(env), mapkit: mapkitConfigured(env), weatherkit: weatherConfigured(env), mapsServer: mapsServerConfigured(env), radar: radarConfigured(env),
       devices: await deviceCount(env),
@@ -758,27 +756,6 @@ async function drain(env, budget) {
   try { await notePushes(env, verstuurd); } catch (e) { console.error("[status]", e.message || e); }
 }
 
-/** One-time import of the last ~2 days from the old website (set BACKFILL = "1"). */
-async function backfill(env, budget) {
-  if (env.BACKFILL !== "1" || (await meldingCount(env)) >= 100 || !budget.take()) return;
-  const path = `/api/apps/69b6661a41c2b1b46f95682e/entities/P2000Melding?sort=-datum_tijd&limit=${Number(env.BACKFILL_LIMIT || 400)}`;
-  let res = null;
-  for (const host of ["https://app.base44.com", "https://p2000-apeldoorn.nl"]) {
-    res = await fetch(host + path, { signal: AbortSignal.timeout(15_000) }).catch(() => null);
-    await kvSet(env, "backfill_status", `${host}: ${res ? "HTTP " + res.status : "geen verbinding"}`);
-    if (res?.ok) break;
-  }
-  if (!res?.ok) return;
-  const rows = (await res.json()).filter((r) => r.guid && r.datum_tijd && !Number.isNaN(Date.parse(r.datum_tijd))).map((r) => ({
-    guid: r.guid, title: r.title || r.description || "", full_melding: r.full_melding, dienst: r.dienst,
-    prioriteit: r.prioriteit && r.prioriteit !== "onbekend" ? r.prioriteit : null, datum: Date.parse(r.datum_tijd),
-    locatie: r.locatie, lat: r.lat, lon: r.lon, stad: r.stad, regio: r.regio, capcode: r.capcode, categorie: r.categorie,
-    grip: r.grip, opschaling: r.opschaling, eenheden: r.eenheden, voertuigen: r.voertuigen, link: r.link,
-  }));
-  for (let i = 0; i < rows.length; i += 50) await env.DB.batch(rows.slice(i, i + 50).map((m) => insertStmt(env, m)));
-  console.log(`[backfill] ${rows.length} meldingen`);
-}
-
 /** NL-Alert, Burgernet and KNMI: read once per run, queue pushes for new warnings (and KNMI upgrades). */
 async function warnings(env, budget) {
   const kv = { get: (k) => kvGet(env, k), set: (k, v) => kvSet(env, k, v) };
@@ -975,7 +952,6 @@ async function catchUp(env) {
     if (last && Date.now() - Number(last.value) < 45_000) return;
     await kvSet(env, "feed_try", String(Date.now()));
     const budget = new Budget(40);
-    try { await backfill(env, budget); } catch (e) { await kvSet(env, "backfill_error", String(e.message || e)); }
     await poll(env, budget);
     await drain(env, budget);
     try { await notifyHomey(env, budget); } catch (e) { console.error("[homey]", e.message || e); }
@@ -996,12 +972,6 @@ async function cron(env, event) {
   }
   await kvSet(env, "feed_try", String(Date.now()));
   const budget = new Budget(Number(env.SUBREQUEST_BUDGET || 45));
-  try {
-    await backfill(env, budget);
-  } catch (e) {
-    await kvSet(env, "backfill_error", String(e.message || e));
-    console.error("[backfill]", e.message || e);
-  }
   try { await warnings(env, budget); } catch (e) { console.error("[waarschuwingen]", e.message || e); }
   await nieuwsRun(env, budget);
   try { await verkeerRun(env, budget); } catch (e) { console.error("[verkeer]", e.message || e); }
