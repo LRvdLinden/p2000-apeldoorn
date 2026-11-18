@@ -12,9 +12,9 @@ on:
     paths: ['.github/workflows/website-deploy.yml', 'website/**', 'worker/content/**', 'tools/ftp.sh', 'tools/ftps.sh']
 
 concurrency:
-  group: website-deploy
-  # Never let an old queued full-site sync overwrite a newer pager release.
-  cancel-in-progress: true
+  # Shared with the aircraft FTP hotfix: hosting may reject parallel FTP sessions.
+  group: a-alerts-ftp-upload
+  cancel-in-progress: false
 
 permissions:
   contents: read

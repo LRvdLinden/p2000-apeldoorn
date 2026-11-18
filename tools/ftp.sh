@@ -30,16 +30,23 @@ ftp_connect() {
 
   export LFTP_PASSWORD="$FTP_PASSWORD"
   FTP_LOGIN_USER=""
-  for user in "$FTP_USERNAME" "${FTP_USERNAME_ALT:-}"; do
-    [ -n "$user" ] || continue
-    if lftp -e "$_ftp_common; open --env-password -p $FTP_PORT -u \"$user\" \"$FTP_SERVER\"; cls -1 > \"$FTP_TMP/root.txt\"; bye" \
-        >/dev/null 2>"$FTP_TMP/login-error.txt"; then
-      FTP_LOGIN_USER="$user"
-      break
+  local attempt
+  for attempt in 1 2 3; do
+    for user in "$FTP_USERNAME" "${FTP_USERNAME_ALT:-}"; do
+      [ -n "$user" ] || continue
+      if lftp -e "$_ftp_common; open --env-password -p $FTP_PORT -u \"$user\" \"$FTP_SERVER\"; cls -1 > \"$FTP_TMP/root.txt\"; bye" \
+          >/dev/null 2>"$FTP_TMP/login-error.txt"; then
+        FTP_LOGIN_USER="$user"
+        break 2
+      fi
+    done
+    if [ "$attempt" -lt 3 ]; then
+      echo "::warning::FTP-login is tijdelijk niet gelukt (poging $attempt/3); opnieuw proberen."
+      sleep 10
     fi
   done
   rm -f "$FTP_TMP/login-error.txt"
-  [ -n "$FTP_LOGIN_USER" ] || { echo "::error::FTP-verbinding of inloggen mislukt."; return 1; }
+  [ -n "$FTP_LOGIN_USER" ] || { echo "::error::FTP-verbinding of inloggen na 3 pogingen mislukt."; return 1; }
 
   FTP_TARGET="${FTP_DIR:-}"
   FTP_TARGET="${FTP_TARGET%/}"

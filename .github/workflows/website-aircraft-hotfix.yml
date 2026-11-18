@@ -6,6 +6,10 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  # Shared with full website upload to prevent hosting FTP-session conflicts.
+  group: a-alerts-ftp-upload
+  cancel-in-progress: false
 jobs:
   sync-aircraft:
     runs-on: ubuntu-24.04
