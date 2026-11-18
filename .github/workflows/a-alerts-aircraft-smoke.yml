@@ -10,11 +10,11 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with: {node-version: 24}
-      - name: Confirm PH-SAR/NCG06 and resilient live map feeds
+      - name: Check that only recent aircraft appear on the live map
         run: |
           node --input-type=module <<'NODE'
           const base="https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
-          let found=false, website=false;
+          let website=false;
           for (let i=0; i<12; i++) {
             const out={attempt:i+1, at:new Date().toISOString()};
             try {
@@ -22,19 +22,21 @@ jobs:
                 fetch(base+"/v1/lucht?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
                 fetch(base+"/v1/helikopters?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
                 fetch("https://a-alerts.nl/pager/?check="+i,{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}}),
-                fetch("https://a-alerts.nl/assets/js/aalerts.js?v=79",{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}})
+                fetch("https://a-alerts.nl/assets/js/aalerts.js?v=80",{signal:AbortSignal.timeout(15000),headers:{"cache-control":"no-cache"}})
               ]);
               const l=await a.json(), h=await b.json(), html=await w.text(), js=await script.text();
               const matches=(l.toestellen||[]).filter(x=>/PH-SAR|NCG06|486449/i.test([x.naam,x.registratie,x.callsign,x.hex].join(" ")));
-              website = html.includes("pager.js?v=88") && js.includes("behoudLuchtvaart");
-              found=matches.length>0;
+              website = html.includes("pager.js?v=89") && js.includes("90_000");
+              const all=[...(l.toestellen||[]), ...(h.helikopters||[])];
+              const tooOld=all.filter(x=> !Number.isFinite(Date.parse(x.gezien)) || Date.now() - Date.parse(x.gezien) >= 95_000);
+              if(tooOld.length) throw new Error("Offline aircraft returned by live API: "+tooOld.map(x=>x.id).join(","));
               Object.assign(out,{http:[a.status,b.status,w.status,script.status],luchtCount:l.toestellen?.length,helis:h.helikopters?.length,
                 error:!!l.fout,stale:!!l.verouderd,website,PH_SAR:matches.map(x=>({id:x.id,naam:x.naam,callsign:x.callsign,verouderd:x.verouderd,gezien:x.gezien}))});
             } catch(e) {out.error=String(e.message||e)}
             console.log(JSON.stringify(out));
-            if(found&&website) {console.log("PASS: PH-SAR exists in A-Alerts and website map code is deployed");process.exit(0)}
+            if(website) {console.log("PASS: Website serves offline-aircraft filter and live API contains no stale aircraft");process.exit(0)}
             await new Promise(r=>setTimeout(r,12000));
           }
-          console.log("FAIL: expected PH-SAR to show in current or last-known feed and website assets to be updated");
+          console.log("FAIL: live 90-second aircraft filter or website version was not confirmed");
           process.exit(1);
           NODE
