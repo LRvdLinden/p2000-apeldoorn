@@ -10,6 +10,15 @@ const keysOf = (p) => [p.naam, ...(p.aliassen || [])].map(plaatsKey);
 /** Town names P2000 can send (woonplaatsen incl. aliases). */
 export const WOONPLAATS_KEYS = new Set(data.plaatsen.filter((p) => p.woonplaats).flatMap(keysOf));
 
+// Grounded town centre coordinates from the same authoritative A-Alerts area file.
+// Presentation only: these are NOT coordinates of the emergency incident.
+const WOONPLAATS_CENTRA = new Map(
+  data.plaatsen.filter((p) => p.woonplaats && Number.isFinite(p.lat) && Number.isFinite(p.lon))
+    .flatMap((p) => keysOf(p).map((key) => [key, { naam: p.naam, lat: p.lat, lon: p.lon }]))
+);
+export const woonplaatsCentrum = (stad) => WOONPLAATS_CENTRA.get(plaatsKey(stad)) || null;
+
+
 const R = Math.PI / 180;
 export function distanceKm(lat1, lon1, lat2, lon2) {
   const dLat = (lat2 - lat1) * R, dLon = (lon2 - lon1) * R;
