@@ -52,6 +52,11 @@ const KUSTWACHT = {
 const EERDER = {};
 /** The callsign of the Netherlands Coastguard: NCG01, NCG02 … (kept as a second way in, next to the registration). */
 const NCG = /^NCG\d{1,3}$/;
+// Airframe IDs remain stable even if the public ADS-B database omits the registration or the flight uses another callsign.
+const KUSTWACHT_HEX = new Map([
+  ["486449", "PH-SAR"],
+  ["48644b", "PH-NCG"],
+]);
 /** Koninklijke Marechaussee: two Diamond DA62 MPP patrol aircraft (German registrations, flown via QinetiQ). */
 const KMAR = new Set(["D-IAMT", "D-IBMT"]);
 
@@ -71,9 +76,9 @@ const HELI = new Set(["H47", "H64", "AS32", "AS3B", "NH90", "H60", "EC25", "H225
  */
 export function luchtSoort(ac, learned = new Map()) {
   const bron = String(ac.r || "").trim().toUpperCase();
-  const reg = EERDER[bron] || bron;
-  const type = String(ac.t || "").trim().toUpperCase();
   const hex = String(ac.hex || "").trim().toLowerCase();
+  const reg = EERDER[bron] || bron || KUSTWACHT_HEX.get(hex) || "";
+  const type = String(ac.t || "").trim().toUpperCase();
   const owner = `${ac.ownOp || ""} ${ac.desc || ""}`;
   const isHeli = HELI.has(type) || ac.category === "A7";
   const anders = reg !== bron ? { registratie: reg } : {};
@@ -106,9 +111,13 @@ export function luchtLijst(list, now = Date.now(), overslaan = new Set(), learne
     const hex = String(ac.hex || "").trim().toLowerCase();
     const p = positie(ac);
     if (!hex || overslaan.has(hex) || !p) continue;
-    if (p.lat < NL.zuid || p.lat > NL.noord || p.lon < NL.west || p.lon > NL.oost) continue;
     const s = luchtSoort(ac, learned);
     if (!s) continue;
+    // The coastguard also operates west/north of the Dutch coastline, outside the land bounding box.
+    // Keep this offshore corridor only for identified coastguard aircraft, not arbitrary foreign military traffic.
+    const offshore = s.soort === "kustwacht";
+    if (p.lat < (offshore ? 50.3 : NL.zuid) || p.lat > (offshore ? 56.2 : NL.noord) ||
+        p.lon < (offshore ? -0.5 : NL.west) || p.lon > (offshore ? 8.3 : NL.oost)) continue;
     const seen = p.oud;
     out.set(hex, {
       id: `lucht-${hex}`, ...s, callsign: String(ac.flight || "").trim() || null, registratie: s.registratie || ac.r || null, type: ac.t || null, hex,
