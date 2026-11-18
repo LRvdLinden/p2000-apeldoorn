@@ -31,6 +31,13 @@ jobs:
       - run: npm ci
       - run: npm test
 
+      - name: Check pager JavaScript modules
+        if: github.event_name == 'pull_request'
+        run: |
+          node --check ../website/assets/js/core.js
+          node --check ../website/assets/js/aalerts.js
+          node --check ../website/assets/js/pager.js
+
       - name: Probe dedicated A-Alerts WebSocket (read only)
         if: github.event_name == 'pull_request'
         run: node tools/koyeb-probe.mjs

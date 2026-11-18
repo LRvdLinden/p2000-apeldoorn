@@ -3,13 +3,13 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=62";
+} from "./core.js?v=63";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
   fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=77";
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=78";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -88,7 +88,7 @@ function matches(m, { ignoreSearch = false } = {}) {
     if (state.prio === "urgent" ? !isUrgent(m) : state.prio === "B" ? !/^B/.test(p) : p !== state.prio) return false;
   }
   if (state.radiusKm && state.here) {
-    if (m.lat == null || distanceKm(state.here, m) > state.radiusKm) return false;
+    if (m.plaatscentrum || m.lat == null || distanceKm(state.here, m) > state.radiusKm) return false;
   }
   if (state.hideRead && isRead(m) && m.guid !== state.selected) return false;
   if (!ignoreSearch && state.search) {
@@ -216,7 +216,7 @@ function renderTiles() {
 
 function rowHTML(m, isNew) {
   const d = date(m);
-  const dist = state.here && m.lat != null ? ` · ${distanceKm(state.here, m).toFixed(1).replace(".", ",")} km` : "";
+  const dist = state.here && m.lat != null && !m.plaatscentrum ? ` · ${distanceKm(state.here, m).toFixed(1).replace(".", ",")} km` : "";
   return `
   <a class="row${isRead(m) ? " read" : ""}${m.guid === state.selected ? " sel" : ""}${isNew ? " is-new" : ""}" href="?melding=${encodeURIComponent(m.guid)}" data-guid="${esc(m.guid)}" style="--tc:${dienstOf(m).text}">
     <img src="${icon(m)}" alt="${esc(dienstOf(m).label)}">
@@ -410,7 +410,7 @@ function kindHTML(w) {
 /** "Route naar incident": the same choices as in the apps — Google Maps, Apple Kaarten or copy the address. */
 function routePopup(m) {
   document.querySelector(".route-pop")?.remove();
-  const adres = hasStreet(m) ? `${m.locatie}, ${plaatsText(m)}` : plaatsText(m);
+  const adres = m.plaatscentrum ? (capPlaats(m.stad) || "Apeldoorn") : hasStreet(m) ? plaatsText(m) : plaatsText(m);
   const r = routeLinks(m, adres);
   const el = document.createElement("div");
   el.className = "route-pop";
@@ -418,7 +418,7 @@ function routePopup(m) {
     <button class="route-x" type="button" aria-label="Sluiten">×</button>
     <h2 id="routeTitel">Route naar incident</h2>
     <p class="route-adres">${esc(adres)}</p>
-    ${hasStreet(m) ? "" : `<p class="hint">De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.</p>`}
+    ${m.plaatscentrum ? `<p class="hint">Exacte incidentlocatie onbekend. De route gaat naar het woonplaatscentrum, niet naar het incident.</p>` : hasStreet(m) ? "" : `<p class="hint">De meldkamer gaf geen straat door: de route gaat naar het midden van de plaats.</p>`}
     <a class="route-opt" href="${r.google}" target="_blank" rel="noopener"><img src="${asset("assets/img/route_googlemaps.png")}" alt=""><span><b>Google Maps</b><small>Route met de auto in Google Maps</small></span><i>›</i></a>
     <a class="route-opt" href="${r.apple}" target="_blank" rel="noopener"><img src="${asset("assets/img/route_applemaps.png")}" alt=""><span><b>Apple Kaarten</b><small>Route met de auto in Kaarten</small></span><i>›</i></a>
     <button class="route-opt" type="button" data-kopieer><span class="route-copy">⧉</span><span><b>Kopieer adres</b><small>Om zelf in een andere app te plakken</small></span></button>
@@ -500,7 +500,7 @@ function renderDetail(m) {
       ${m.lat != null ? `<img class="static-pin" src="${asset(`assets/img/${dienst.marker}.png`)}" alt="">` : ""}
       <div class="lookaround" id="lookAround" title="Look Around"></div>
     </div>
-    ${hasStreet(m) ? "" : `<div class="notice"><b>Let op:</b> De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen.</div>`}
+    ${m.plaatscentrum ? `<div class="notice"><b>Exacte incidentlocatie onbekend.</b> De marker staat op het woonplaatscentrum van ${esc(stad)}, niet op de plaats van het incident.</div>` : hasStreet(m) ? "" : `<div class="notice"><b>Let op:</b> De meldkamer heeft geen straatnaam doorgegeven, hierdoor kunnen we geen exacte locatie tonen.</div>`}
     ${isGrootIncident(m) ? `<div class="groot-badge">🔥 <b>Groot incident</b>${Number(m.grip) > 0 ? `<span>GRIP ${esc(m.grip)}</span>` : ""}</div>` : ""}
     <div class="incident"><span>Incident ${esc((m.guid || "").slice(-7).replace(/-/g, ""))}</span><span>${m.views ? `👁 ${m.views}x` : ""}</span></div>
     <section class="card">
@@ -509,11 +509,11 @@ function renderDetail(m) {
         <h1>${esc(m.title)}</h1>
         <button class="share" id="shareBtn" aria-label="Delen">${ICO.share}</button>
       </div>
-      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(paal ? paal.tekst : hasStreet(m) ? m.locatie : stad)}</b><small>${paal || hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div>${paal ? hmBord(paal) : ""}</div>
+      <div class="info"><span class="ico" style="background:#3b82f6">${ICO.pin}</span><div><b>${esc(paal ? paal.tekst : hasStreet(m) ? m.locatie : stad)}</b><small>${m.plaatscentrum ? "Marker: woonplaatscentrum · incidentlocatie onbekend" : paal || hasStreet(m) ? esc(stad) : "Specifieke locatie niet bekend"}</small></div>${paal ? hmBord(paal) : ""}</div>
       <div class="info"><span class="ico" style="background:${isUrgent(m) ? "#DC2626" : "#f59e0b"}">${ICO.warn}</span><div><b>${esc(m.categorie || dienst.label)}</b><small>${m.prioriteit ? `Prioriteit ${esc(m.prioriteit)}` : "Prioriteit onbekend"}</small></div></div>
       <div class="info"><span class="ico" style="background:#ec4899">${ICO.clock}</span><div><b>${esc(fmtDateTime(d))}</b><small>${esc(ago(d))}</small></div></div>
       <div class="info" id="pandRij" hidden><span class="ico" style="background:#64748B">${ICO.pin}</span><div><b id="pandTekst"></b><small>Gebouw volgens de BAG (Kadaster)</small></div></div>
-      ${m.lat != null || hasStreet(m) ? `<button class="amaps" id="routeBtn" type="button">${ICO.maps} Route naar incident</button>` : ""}
+      ${m.lat != null || hasStreet(m) ? `<button class="amaps" id="routeBtn" type="button">${ICO.maps} ${m.plaatscentrum ? "Route naar woonplaatscentrum" : "Route naar incident"}</button>` : ""}
     </section>
     <section class="card" id="heliCard" hidden></section>
     <section class="card" id="kazernesCard" hidden></section>
@@ -867,7 +867,7 @@ async function drawDetailMap(m) {
   const coord = new mk.Coordinate(m.lat, m.lon);
   detailMap = new mk.Map(div, {
     center: coord,
-    cameraDistance: hasStreet(m) ? 900 : 4500,
+    cameraDistance: hasStreet(m) && !m.plaatscentrum ? 900 : 4500,
     showsCompass: mk.FeatureVisibility.Hidden,
     showsMapTypeControl: false,
     colorScheme: kaartKleur(mk),

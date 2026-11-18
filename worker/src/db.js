@@ -1,14 +1,24 @@
 // D1 helpers.
+import { woonplaatsCentrum } from "./werkgebied.js";
 const json = (v) => JSON.stringify(v ?? []);
 const parse = (s) => { try { return JSON.parse(s || "[]"); } catch { return []; } };
 
 /** Same JSON shape the app decodes. */
 export function toAPI(row) {
   if (!row) return null;
+  // Read-time display fallback for BOTH new and historical Koyeb alerts.
+  // Never persist a guessed town coordinate: D1 keeps the true unknown location,
+  // so radius-based push filtering and background incident routing remain accurate.
+  const hasPosition = row.lat != null && row.lon != null &&
+    Number.isFinite(Number(row.lat)) && Number.isFinite(Number(row.lon)) &&
+    Number(row.lat) !== 0 && Number(row.lon) !== 0;
+  const town = !hasPosition ? woonplaatsCentrum(row.stad) : null;
   return {
     id: row.guid, guid: row.guid, title: row.title, full_melding: row.full_melding, dienst: row.dienst,
     prioriteit: row.prioriteit, datum_tijd: new Date(row.datum).toISOString(), locatie: row.locatie,
-    lat: row.lat, lon: row.lon, stad: row.stad, regio: row.regio, provincie: "Gelderland", capcode: row.capcode,
+    lat: town?.lat ?? row.lat, lon: town?.lon ?? row.lon,
+    ...(town ? { plaatscentrum: true } : {}),
+    stad: row.stad, regio: row.regio, provincie: "Gelderland", capcode: row.capcode,
     categorie: row.categorie, grip: row.grip, opschaling: row.opschaling, eenheden: parse(row.eenheden),
     voertuigen: parse(row.voertuigen), link: row.link, views: row.views,
     // The incident this alert belongs to (guid of its first alert); null for alerts from before this existed.

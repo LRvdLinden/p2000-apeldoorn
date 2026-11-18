@@ -187,10 +187,11 @@ export function distanceKm(a, b) {
 }
 
 export function appleMapsURL(m) {
+  const label = m.plaatscentrum ? capPlaats(m.stad) : plaatsText(m);
   if (m.lat != null && m.lon != null) {
-    return `https://maps.apple.com/?ll=${m.lat},${m.lon}&q=${encodeURIComponent(plaatsText(m))}`;
+    return `https://maps.apple.com/?ll=${m.lat},${m.lon}&q=${encodeURIComponent(label)}`;
   }
-  return `https://maps.apple.com/?q=${encodeURIComponent(plaatsText(m))}`;
+  return `https://maps.apple.com/?q=${encodeURIComponent(label)}`;
 }
 
 // ------------------------------------------------------------------ MapKit JS
@@ -259,7 +260,7 @@ export function markerAnnotation(mk, m, onSelect) {
   const a = new mk.Annotation(coord, factory, {
     anchorOffset: new DOMPoint(0, -18),
     calloutEnabled: false,
-    title: m.title,
+    title: m.plaatscentrum ? `${m.stad} · woonplaatscentrum (exacte locatie onbekend)` : m.title,
     data: { guid: m.guid },
   });
   if (onSelect) a.addEventListener("select", () => onSelect(m));
@@ -300,7 +301,7 @@ export function layout(list) {
   };
   // Several alerts at one address: one marker with the number on top (no ring of pins).
   const plekken = new Map();
-  for (const m of withCoord.filter(hasStreet)) {
+  for (const m of withCoord.filter((x) => hasStreet(x) && !x.plaatscentrum)) {
     const k = `${m.lat.toFixed(4)},${m.lon.toFixed(4)}`;
     if (!plekken.has(k)) plekken.set(k, []);
     plekken.get(k).push(m);
@@ -311,7 +312,7 @@ export function layout(list) {
     adressen.push(maak(`adres-${k}`, plaatsText(items[0]), items, { adres: true, lat: items[0].lat, lon: items[0].lon }));
   }
   const towns = new Map();
-  for (const m of withCoord.filter((x) => !hasStreet(x))) {
+  for (const m of withCoord.filter((x) => !hasStreet(x) || x.plaatscentrum)) {
     const k = capPlaats(m.stad || "") || "Apeldoorn";
     if (!towns.has(k)) towns.set(k, []);
     towns.get(k).push(m);
