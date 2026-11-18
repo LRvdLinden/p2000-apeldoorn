@@ -306,7 +306,14 @@ final class LuchtStore {
         guard task == nil else { return }
         task = Task { [weak self] in
             while !Task.isCancelled {
-                if let list = try? await P2000API.shared.lucht() { self?.items = list }
+                if let list = try? await P2000API.shared.lucht(), let self {
+                    // Preserve the last genuine position across brief HTTP 200 + empty-list glitches.
+                    // The existing isVerouderd flag already marks fixes older than 60 seconds.
+                    let now = Date.now
+                    let seen = Set(list.map(\.id))
+                    let old = self.items.filter { !seen.contains($0.id) && now.timeIntervalSince($0.gezien) < 20 * 60 }
+                    self.items = list + old
+                }
                 try? await Task.sleep(for: .seconds(15))
             }
         }
