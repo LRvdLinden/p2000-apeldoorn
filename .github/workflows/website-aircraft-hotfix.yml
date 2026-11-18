@@ -1,0 +1,36 @@
+name: Website luchtvaart snel publiceren
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/website-aircraft-hotfix.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  sync-aircraft:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: FTPS uploader
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Upload only live aircraft map assets
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+        run: |
+          set -euo pipefail
+          source tools/ftps.sh
+          ftps_connect
+          T="$FTPS_TARGET"
+          ftps_run "mkdir -p -f \"$T/assets/js\"; mkdir -p -f \"$T/pager\"; put website/assets/js/aalerts.js -o \"$T/assets/js/aalerts.js\"; put website/assets/js/pager.js -o \"$T/assets/js/pager.js\"; put website/pager/index.html -o \"$T/pager/index.html\""
+          echo "::notice::Luchtvaart-pager assets geüpload via FTPS"
+      - name: Assert aircraft map version is visible
+        run: |
+          sleep 4
+          curl -fsSL --max-time 20 "https://a-alerts.nl/pager/?v=luchtvaart-20261118" | grep -q 'pager.js?v=88'
+          curl -fsSL --max-time 20 "https://a-alerts.nl/assets/js/aalerts.js?v=79" | grep -q 'behoudLuchtvaart'
+          echo "::notice::Nieuwe live luchtvaartkaart bevestigd"
