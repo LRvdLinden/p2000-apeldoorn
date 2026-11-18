@@ -1,0 +1,29 @@
+name: A-Alerts website origin and cache diagnostics
+on:
+  push:
+    branches: [a-alerts]
+    paths: [".github/workflows/check-website-version.yml"]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check current public pager JS with and without cache bypass
+        run: |
+          python3 - <<'PY'
+          import urllib.request, re, time
+          base="https://a-alerts.nl"
+          targets=["/pager/", "/pager/?v=woonplaatskaart-20261118-"+str(int(time.time())), "/assets/js/pager.js?v=87"]
+          for target in targets:
+            req=urllib.request.Request(base+target,headers={"Cache-Control":"no-cache","Pragma":"no-cache","User-Agent":"A-Alerts-Health/1.0"})
+            try:
+              with urllib.request.urlopen(req,timeout=20) as r:
+                body=r.read().decode("utf-8","replace")
+                print(target, "status",r.status,"url",r.url,"size",len(body),
+                  "mod",r.headers.get("Last-Modified"),"etag",r.headers.get("ETag"),
+                  "cache",r.headers.get("CF-Cache-Status"),"age",r.headers.get("Age"),
+                  "server",r.headers.get("Server"),
+                  "pagerVersion",re.findall(r'pager[.]js[?]v=([0-9]+)',body),
+                  "coreVersion",re.findall(r'core[.]js[?]v=([0-9]+)',body),
+                  "containsLocationNote", "Exacte incidentlocatie onbekend." in body)
+            except Exception as e: print(target,"ERROR",str(e))
+          PY
