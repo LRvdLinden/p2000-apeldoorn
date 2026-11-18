@@ -13,7 +13,8 @@ on:
 
 concurrency:
   group: website-deploy
-  cancel-in-progress: false
+  # Never let an old queued full-site sync overwrite a newer pager release.
+  cancel-in-progress: true
 
 permissions:
   contents: read
