@@ -68,18 +68,37 @@ export const LUCHT_SOORTEN = [
 export const luchtSoort = (h) => h.icoon || h.soort;
 const NIEUWE_TEKENING = new Set(["phgov", "kustwacht_dash8", "les", "hercules"]);
 const LUCHT_KEY = "p2000.luchtSoorten";
-/** The chosen kinds (kept in this browser); Lifeliner and Zulu until someone chooses more. */
+/** Existing custom choices stay intact; new installations also show coastguard SAR helicopters. */
 export function luchtKeuze() {
   try { const v = JSON.parse(localStorage.getItem(LUCHT_KEY)); if (Array.isArray(v)) return new Set(v); } catch {}
-  return new Set(["trauma", "politie"]);
+  return new Set(["trauma", "politie", "kustwacht_aw189"]);
 }
 export function zetLuchtKeuze(set) { try { localStorage.setItem(LUCHT_KEY, JSON.stringify([...set])); } catch {} }
 /** Everything that flies, limited to the chosen kinds; `alle` is unfiltered (for the numbers in the list of choices). */
+// A single failed 15-second poll or partial ADS-B snapshot must never erase the whole map.
+// Retain last genuine fixes for up to 20 min, label as stale, and NEVER pretend they are live.
+const luchtLast = { helis: [], lucht: [] };
+export function behoudLuchtvaart(nieuw, oud, now = Date.now()) {
+  const byId = new Map();
+  for (const h of nieuw || []) {
+    const at = Date.parse(h.gezien);
+    if (h.id && Number.isFinite(at) && now - at < 20 * 60_000)
+      byId.set(h.id, { ...h, verouderd: Boolean(h.verouderd) || now - at > 90_000 });
+  }
+  for (const h of oud || []) {
+    const at = Date.parse(h.gezien);
+    if (h.id && !byId.has(h.id) && Number.isFinite(at) && now - at < 20 * 60_000)
+      byId.set(h.id, { ...h, verouderd: true });
+  }
+  return [...byId.values()];
+}
 export async function fetchLuchtvaart({ alles = false } = {}) {
   const keuze = luchtKeuze();
   const metLucht = alles || [...keuze].some((k) => k !== "trauma" && k !== "politie");
   const [h, l] = await Promise.all([fetchHelikopters(), metLucht ? fetchLucht() : []]);
-  return { helis: h.filter((x) => keuze.has(x.soort)), lucht: l.filter((x) => keuze.has(x.icoon)), alle: [...h, ...l] };
+  luchtLast.helis = behoudLuchtvaart(h, luchtLast.helis);
+  if (metLucht) luchtLast.lucht = behoudLuchtvaart(l, luchtLast.lucht);
+  return { helis: luchtLast.helis.filter((x) => keuze.has(x.soort)), lucht: luchtLast.lucht.filter((x) => keuze.has(x.icoon)), alle: [...luchtLast.helis, ...luchtLast.lucht] };
 }
 export const LUCHT_SOORT = { defensie: "Defensie", kustwacht: "Kustwacht", kmar: "Koninklijke Marechaussee", regering: "Regering" };
 
@@ -363,7 +382,7 @@ export function heliAnnotation(mk, h, { naam = true } = {}) {
     el.style.cssText = `display:grid;justify-items:center;gap:2px;width:${b + 12}px;transform:translateY(-50%)${Date.now() - new Date(h.gezien).getTime() > 60_000 ? ";opacity:.5;filter:grayscale(.8)" : ""}`;
     el.innerHTML = `<img src="${heliImg(h)}" alt="" width="${b}" style="width:${b}px;height:auto;display:block;filter:drop-shadow(0 3px 4px rgba(0,0,0,.35));${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">`
       + (naam ? `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:8px;background:rgba(255,255,255,.9);color:#111;white-space:nowrap">${esc(h.naam)}</span>` : "");
-    el.title = `${h.naam} · ${heliInfo(h)}`;
+    el.title = h.verouderd ? `${h.naam} · Laatst gezien om ${fmtTime(new Date(h.gezien))} (geen live positie)` : `${h.naam} · ${heliInfo(h)}`;
     return el;
   };
   return new mk.Annotation(new mk.Coordinate(h.lat, h.lon), factory, { calloutEnabled: false, title: h.naam, anchorOffset: new DOMPoint(0, 0) });
@@ -496,7 +515,8 @@ export async function fetchVluchten(id) {
 
 /** Dead reckoning: position now from the last fix, speed and heading (at most 90 s ahead, never on the ground). */
 export function geschat(h, now = Date.now()) {
-  if (h.op_grond || !(h.snelheid_kt > 20) || h.koers == null) return { lat: h.lat, lon: h.lon };
+  if (h.op_grond || h.verouderd || Date.now() - new Date(h.gezien).getTime() > 90_000 ||
+      !(h.snelheid_kt > 20) || h.koers == null) return { lat: h.lat, lon: h.lon };
   const dt = Math.min(Math.max((now - new Date(h.gezien).getTime()) / 1000, 0), 90);
   const km = (h.snelheid_kt * 1.852 * dt) / 3600;
   const rad = (h.koers * Math.PI) / 180;
