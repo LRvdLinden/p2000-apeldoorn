@@ -59,14 +59,18 @@ jobs:
           ftp_connect
           T="$FTP_TARGET"
           [ "$T" != "." ] && { ftp_run "mkdir -p -f \"$T\"" >/dev/null 2>&1 || true; }
-          ftp_run "mirror -R --parallel=4 --exclude-glob .DS_Store --exclude-glob .git* ./website/ \"$T\"" >/dev/null 2>&1 \
+          ftp_run "mirror -R --parallel=2 --exclude-glob .DS_Store --exclude-glob .git* ./website/ \"$T\"" >/dev/null 2>&1 \
             || { echo "::error::Uploaden naar de FTP-server mislukt."; exit 1; }
           echo "::notice::Website geüpload."
       - name: Controleren of a-alerts.nl de nieuwe versie toont
         if: steps.check.outputs.skip != '1' && success()
         run: |
           sleep 5
-          v=$(grep -o 'v=[0-9]*' website/pager/index.html | head -1)
-          curl -sL --max-time 20 https://a-alerts.nl/pager/ | grep -q "$v" && echo "::notice::a-alerts.nl/pager toont $v" || echo "::warning::a-alerts.nl/pager toont $v nog niet (cache?)"
+          expected=$(grep -o 'pager.js?v=[0-9]*' website/pager/index.html | head -1)
+          curl -fsSL --max-time 25 "https://a-alerts.nl/pager/?deploy=${GITHUB_SHA}" | grep -Fq "$expected" \
+            || { echo "::error::Website levert nog niet de nieuwe kaartversie ($expected)."; exit 1; }
+          curl -fsSL --max-time 25 "https://a-alerts.nl/assets/js/pager.js?deploy=${GITHUB_SHA}" | grep -Fq 'async function updateAircraftMap()' \
+            || { echo "::error::Vlieglaag-update ontbreekt op de live website."; exit 1; }
+          echo "::notice::a-alerts.nl/pager levert $expected en de onafhankelijke luchtvaartlaag"
           code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 30 -I https://a-alerts.nl/downloads/A-Alerts.apk || true)
           echo "::notice::APK: HTTP $code"
