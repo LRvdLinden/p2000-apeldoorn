@@ -174,7 +174,7 @@ async function preserveAircraft(env, fresh, failing = false) {
   // Avoid turning a momentary empty upstream answer into an empty visible map.
   // A missing flight is only removed when its authentic last-seen age exceeds the grace period.
   snapshotMemo = { helikopters: h, lucht: l };
-  snapshotReadAt = now;
+  if (!failing) snapshotReadAt = now;
   if (!failing && now - snapshotWriteAt > 30_000 && (h.some(x => !x.verouderd) || l.some(x => !x.verouderd))) {
     try {
       await env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)")
