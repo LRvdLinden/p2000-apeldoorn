@@ -43,6 +43,22 @@ jobs:
                 if (!p2000) throw new Error("P2000 component missing from status page");
                 if (newest > Date.now() - 180_000 && p2000.staat !== "ok")
                   throw new Error("P2000 status is not green despite a healthy source");
+                // The previously missing Koyeb alert must now be plotted at Apeldoorn's
+                // known town centre without claiming that the incident itself is there.
+                const guid = "f9c47be5-dd07-75aa-0ffc-9ae2482d0f05";
+                const alertRes = await fetch(base + "/v1/meldingen/" + guid, { signal: AbortSignal.timeout(18000), cache: "no-store" });
+                if (!alertRes.ok) throw new Error("Old Koyeb alert HTTP " + alertRes.status);
+                const old = await alertRes.json();
+                console.log("OLD KOYEB MAP:", JSON.stringify({guid:old.guid, stad:old.stad, lat:old.lat, lon:old.lon, plaatscentrum:old.plaatscentrum, locatie:old.locatie}));
+                if (old.plaatscentrum !== true || Math.abs(old.lat - 52.21084) > 0.00001 || Math.abs(old.lon - 5.97373) > 0.00001)
+                  throw new Error("Historic Koyeb alert lacks the town centre fallback marker");
+                // Check that users receive the actual new pager assets, not only the new backend.
+                const page = await (await fetch("https://a-alerts.nl/pager/?smoke=woonplaatskaart", { signal: AbortSignal.timeout(18000), cache: "no-store" })).text();
+                if (!page.includes("pager.js?v=87")) throw new Error("Website has not deployed the new pager module yet");
+                const js = await (await fetch("https://a-alerts.nl/assets/js/pager.js?smoke=woonplaatskaart", { signal: AbortSignal.timeout(18000), cache: "no-store" })).text();
+                if (!js.includes("Exacte incidentlocatie onbekend.") || !js.includes("Route naar woonplaatscentrum"))
+                  throw new Error("Website is still serving old map code");
+                console.log("PASS: historic Koyeb message has an Apple Maps town marker and live pager assets deployed.");
                 console.log("PASS: Koyeb and the existing A-Alerts API are live, sample alerts:", list.length);
                 process.exit(0);
               }
