@@ -23,5 +23,15 @@ MIN_BUILD_IOS = "0"
 MIN_BUILD_ANDROID = "0"
 WEB_WEATHERKIT_SERVICE_ID = "nl.lrvdlinden.p2000apeldoorn.weatherkit"
 
+# Koyeb is enabled only after KOYEB_SUBPROTOCOL is set as a Worker secret.
+# Never reuse the Homey P2000 app's exact WebSocket subprotocol.
+[[durable_objects.bindings]]
+name = "KOYEB_LISTENER"
+class_name = "AAlertsKoyebListener"
+
+[[migrations]]
+tag = "a-alerts-koyeb-v1"
+new_sqlite_classes = ["AAlertsKoyebListener"]
+
 [observability]
 enabled = true
