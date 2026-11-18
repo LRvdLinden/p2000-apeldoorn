@@ -1015,8 +1015,7 @@ async function updateAircraftMap() {
   if (state.tab !== "kaart" || !bigMapReady) return;
   const mk = await bigMapReady;
   if (!mk || !bigMap || state.tab !== "kaart") return;
-  // Aircraft are managed independently; update immediately, before the slow NDW traffic fetch.
-  await updateAircraftMap();
+  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
   luchtMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.lucht.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
   const enabled = state.lagen.has("helikopters");
   heliMarkers.update(enabled ? state.helis : []);
@@ -1126,7 +1125,8 @@ async function renderMap() {
   if (!mk) { renderStaticMarkers(pins, clusters); return; }
   bigMap.removeAnnotations(bigMap.annotations.filter((a) => !a._heli));
   bigMap.removeOverlays(bigMap.overlays);
-  heliMarkers ||= heliLaag(mk, bigMap, { onSelect: (id) => { const h = state.helis.find((x) => x.id === id); if (h) openHeli(h); }, gekozen: () => heliSpoor.id });
+  // Keep the stable aircraft markers alive independently from NDW and radar.
+  await updateAircraftMap();
   const actief = state.warnings.filter((w) => isActief(w));
   const extra = [];
   if (state.lagen.has("knmi")) actief.filter((w) => w.bron === "knmi").forEach((w) => bigMap.addOverlays(warnOverlays(mk, w)));
