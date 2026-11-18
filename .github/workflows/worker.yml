@@ -54,6 +54,8 @@ jobs:
           # Columns added later: ALTER fails when they exist already (and on a new database, where schema.sql creates them).
           npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN incident TEXT" > /dev/null 2>&1 || true
           npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN vlaggen TEXT" > /dev/null 2>&1 || true
+          # Atomic cross-source deduplication (older rows remain with a NULL key).
+          npx wrangler d1 execute p2000-apeldoorn --remote --command "ALTER TABLE meldingen ADD COLUMN dedup_key TEXT" > /dev/null 2>&1 || true
           npx wrangler d1 execute p2000-apeldoorn --remote --file schema.sql
           # The worker reads these columns in every alert query: never deploy without them.
           npx wrangler d1 execute p2000-apeldoorn --remote --command "SELECT incident, vlaggen FROM meldingen LIMIT 1" > /dev/null
@@ -84,6 +86,7 @@ jobs:
         if: steps.cf.outputs.ok == 'true' && github.event_name != 'pull_request'
         env:
           P2000_PAGE_API_URL: ${{ secrets.P2000_PAGE_API_URL }}
+          KOYEB_SUBPROTOCOL: ${{ secrets.KOYEB_SUBPROTOCOL }}
           APN_KEY_ID: ${{ secrets.APN_KEY_ID }}
           APN_TEAM_ID: ${{ secrets.APN_TEAM_ID }}
           APN_P8_CERT: ${{ secrets.APN_P8_CERT }}
@@ -103,12 +106,11 @@ jobs:
           KNMI_WMS_KEY: ${{ secrets.KNMI_WMS_KEY }}
           VERKEER_URL: ${{ secrets.VERKEER_URL }}
           VERKEER_TOKEN: ${{ secrets.VERKEER_TOKEN }}
-          BACKFILL: "1"
         run: |
           node -e '
-            const keys = ["P2000_PAGE_API_URL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
+            const keys = ["P2000_PAGE_API_URL","KOYEB_SUBPROTOCOL","APN_KEY_ID","APN_TEAM_ID","APN_P8_CERT","WEB_MAPKIT_JS_KEY_ID","WEB_MAPKIT_JS_TEAM_ID",
               "WEB_MAPKIT_JS_P8","WEB_WEATHERKIT_KEY_ID","WEB_WEATHERKIT_TEAM_ID","WEB_WEATHERKIT_P8","MAPS_SERVER_API_KEY_ID",
-              "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","BEHEER_USER","BEHEER_PASSWORD","FCM_SERVICE_ACCOUNT","HOMEY_WEBHOOK_ID","KNMI_WMS_KEY","VERKEER_URL","VERKEER_TOKEN","BACKFILL"];
+              "MAPS_SERVER_API_TEAM_ID","MAPS_SERVER_API_P8","BEHEER_USER","BEHEER_PASSWORD","FCM_SERVICE_ACCOUNT","HOMEY_WEBHOOK_ID","KNMI_WMS_KEY","VERKEER_URL","VERKEER_TOKEN"];
             const out = {}; for (const k of keys) if (process.env[k]) out[k] = process.env[k];
             require("fs").writeFileSync("secrets.json", JSON.stringify(out));
             console.log("Secrets:", Object.keys(out).join(", "));'
