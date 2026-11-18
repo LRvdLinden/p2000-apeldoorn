@@ -31,6 +31,6 @@ jobs:
       - name: Assert aircraft map version is visible
         run: |
           sleep 4
-          curl -fsSL --max-time 20 "https://a-alerts.nl/pager/?v=luchtvaart-20261118" | grep -q 'pager.js?v=88'
-          curl -fsSL --max-time 20 "https://a-alerts.nl/assets/js/aalerts.js?v=79" | grep -q 'behoudLuchtvaart'
+          curl -fsSL --max-time 20 "https://a-alerts.nl/pager/?v=luchtvaart-20261118" | grep -q 'pager.js?v=89'
+          curl -fsSL --max-time 20 "https://a-alerts.nl/assets/js/aalerts.js?v=80" | grep -q '90_000'
           echo "::notice::Nieuwe live luchtvaartkaart bevestigd"
