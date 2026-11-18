@@ -141,7 +141,7 @@ export function retainAircraft(current, previous, now = Date.now(), failing = fa
   for (const h of current || []) {
     const at = Date.parse(h.gezien);
     if (!h?.id || !Number.isFinite(at) || now - at > AIRCRAFT_HOLD_MS || at > now + 10_000) continue;
-    live.set(h.id, { ...h, ...(failing || now - at > 90_000 ? { verouderd: true } : { verouderd: false }) });
+    live.set(h.id, { ...h, verouderd: now - at > 90_000 });
   }
   for (const h of previous || []) {
     if (!h?.id) continue;
