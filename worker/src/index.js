@@ -606,14 +606,14 @@ async function poll(env, budget) {
 }
 
 /** Receive the parallel country-wide Koyeb feed; only local dispatches enter D1. */
-async function ingestKoyebMessage(env, raw) {
+async function ingestKoyebMessage(env, raw, heartbeat = false) {
   const text = typeof raw === "string" ? raw : String(raw || "");
   if (text.length > 500_000) throw new Error("Oversized Koyeb message");
   const list = JSON.parse(text);
   if (!Array.isArray(list)) return;
   const parsed = list.map(fromKoyeb).filter(Boolean);
   // Mark a healthy stream even if this particular national dispatch was outside Apeldoorn.
-  await kvSet(env, "koyeb_last_message", String(Date.now()));
+  if (heartbeat) await kvSet(env, "koyeb_last_message", String(Date.now()));
   if (!parsed.length) return;
   const budget = new Budget(45);
   const added = await ingestParsed(env, budget, parsed);
@@ -631,6 +631,7 @@ export class AAlertsKoyebListener extends DurableObject {
     this.ws = null;
     this.connecting = false;
     this.processing = Promise.resolve();
+    this.lastHeartbeat = 0;
   }
 
   async fetch(request) {
@@ -656,7 +657,10 @@ export class AAlertsKoyebListener extends DurableObject {
       });
       socket.addEventListener("message", (event) => {
         // Serialize messages from this connection, preventing Koyeb-vs-Koyeb write races.
-        this.processing = this.processing.catch(() => {}).then(() => ingestKoyebMessage(this.env, event.data));
+        // National alerts are frequent: update health no more than twice per minute.
+        const heartbeat = Date.now() - this.lastHeartbeat > 30_000;
+        if (heartbeat) this.lastHeartbeat = Date.now();
+        this.processing = this.processing.catch(() => {}).then(() => ingestKoyebMessage(this.env, event.data, heartbeat));
         this.ctx.waitUntil(this.processing.catch((e) => console.error("[ingest-koyeb]", e.message || e)));
       });
       socket.addEventListener("close", () => {
