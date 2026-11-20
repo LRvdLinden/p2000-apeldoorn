@@ -2,5 +2,5 @@
 window.P2000_CONFIG = {
   api: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev",
   mapkitToken: "",
-  appStoreURL: "",
+  appStoreURL: "https://apps.apple.com/nl/app/a-alerts/id6829732272",
 };

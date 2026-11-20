@@ -1,5 +1,8 @@
 # Changelog
 
+## Website (20-11-2026)
+- **A-Alerts staat in de App Store.** De knoppen naar TestFlight op de homepage (bovenaan en onderaan) en op de Android-pagina zijn vervangen door de officiële badge "Download in de App Store" met de link naar de app (id 6829732272). De homepage toont in Safari op iPhone en iPad ook de balk van Apple om de app te openen of te downloaden.
+
 ## A-Alerts 2.0.1 (build 105)
 - **Mac: indeling van de pager hersteld** (macOS 26). De detailpagina begon een zijbalk-breedte te ver naar rechts, met een lege strook tussen lijst en kaart; hij begint nu direct naast de lijst. De balk met plaats, route, bewaren en delen zat half achter de werkbalk; de kaart begint nu onder de werkbalk. De dubbele knoppen voor bewaren en delen in de werkbalk zijn weg.
 - **Mac: de gekozen rij in de lijst is leesbaar.** Een gelezen melding die gekozen is wordt niet meer grijs gemaakt en de gekleurde regel is daar wit.
