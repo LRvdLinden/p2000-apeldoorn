@@ -39,6 +39,15 @@
 .cta { display: flex; flex-wrap: wrap; gap: 12px; }
 .cta.center { justify-content: center; }
 
+/* Keep the live pager above the two equal-sized download badges. */
+.cta-downloads { flex-direction: column; align-items: flex-start; gap: 12px; }
+.cta-downloads.center { align-items: center; }
+.store-badges { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: min(100%, 324px); }
+.store-badges .store-badge { display: block; line-height: 0; border-radius: 8px; transition: transform .2s ease; }
+.store-badges .store-badge:hover { transform: translateY(-2px); }
+.store-badges .store-badge img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 1; object-fit: contain; }
+@media (max-width: 380px) { .store-badges { gap: 8px; } }
+
 .today { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 2.4rem 0 0; max-width: 560px; }
 .today div { background: rgba(0,0,0,.24); backdrop-filter: blur(10px); border-radius: 16px; padding: 12px 10px 10px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); position: relative; overflow: hidden; }
 .today div::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c, #fff); }
