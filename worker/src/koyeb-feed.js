@@ -72,3 +72,22 @@ export function fromKoyeb(r) {
   m.dedup_key = dedupKey(m);
   return m;
 }
+
+export const KOYEB_STANDAARD_URL = "wss://p2000-martijnpoppen.koyeb.app";
+const HOMEY_IDENTITEIT = "homey-a11ea1eaa11ea1eaa11ea1ea-nl.lrvdlinden.p2000";
+/** The code of the website login: letters and digits only, so it can never break the subprotocol header. */
+const geldigeCode = (c) => typeof c === "string" && /^[A-Za-z0-9]{8,128}$/.test(c.trim());
+
+/**
+ * How to connect to the Koyeb P2000 stream. With P2000_CODE (given by the operator of the stream) the website login
+ * `website-<unix seconds>-<code>`, made fresh for every connection; without it the dedicated Homey identity as before,
+ * so there is never a gap. Returns { url, protocol, soort } or null when neither is configured.
+ * The protocol holds the code: never log it.
+ */
+export function koyebVerbinding(env, now = Date.now()) {
+  const url = String(env?.P2000_URL || env?.KOYEB_WEBSOCKET_URL || KOYEB_STANDAARD_URL).trim();
+  if (!url.startsWith("wss://")) return null;
+  if (geldigeCode(env?.P2000_CODE)) return { url, protocol: `website-${Math.floor(now / 1000)}-${env.P2000_CODE.trim()}`, soort: "website" };
+  if (env?.KOYEB_SUBPROTOCOL === HOMEY_IDENTITEIT) return { url: String(env?.KOYEB_WEBSOCKET_URL || KOYEB_STANDAARD_URL), protocol: HOMEY_IDENTITEIT, soort: "homey" };
+  return null;
+}

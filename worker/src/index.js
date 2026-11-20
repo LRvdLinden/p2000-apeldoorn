@@ -5,7 +5,7 @@
 import { verkeer, verkeerRun } from "./verkeer.js";
 import { widgetPing, widgetSites, widgetBlok, widgetHousekeeping } from "./widget.js";
 import { fromFeed, matches, payloadFor, isUrgent, isQuiet, deviceFrom, HttpError, categorie } from "./rules.js";
-import { fromKoyeb, dedupKey, sameDispatch } from "./koyeb-feed.js";
+import { fromKoyeb, dedupKey, sameDispatch, koyebVerbinding } from "./koyeb-feed.js";
 import { DurableObject } from "cloudflare:workers";
 import {
   insertStmt, knownGuids, listMeldingen, getMelding, incidentMeldingen, addView, meldingCount, upsertDevice, deleteDevice, getDevice,
@@ -106,7 +106,8 @@ async function handle(req, env, ctx) {
       ok: true,
       feed: { configured: Boolean(env.P2000_PAGE_API_URL), lastOk: ok ? new Date(Number(ok.value)).toISOString() : null, lastError: err?.value || null },
       koyeb: {
-        configured: Boolean(env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL),
+        configured: Boolean(env.KOYEB_LISTENER && koyebVerbinding(env)),
+        login: koyebVerbinding(env)?.soort || null,
         lastMessage: (await kvGet(env, "koyeb_last_message"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_message")).value)).toISOString() : null,
         lastAdded: (await kvGet(env, "koyeb_last_added"))?.value ? new Date(Number((await kvGet(env, "koyeb_last_added")).value)).toISOString() : null,
       },
@@ -637,20 +638,25 @@ export class AAlertsKoyebListener extends DurableObject {
   async fetch(request) {
     if (request.method !== "POST" || new URL(request.url).pathname !== "/start")
       return new Response("Not found", { status: 404 });
-    // Dedicated, tested synthetic identity: never reuse the real Homey ID or its live connection.
-    if (this.env.KOYEB_SUBPROTOCOL !== "homey-a11ea1eaa11ea1eaa11ea1ea-nl.lrvdlinden.p2000")
-      return new Response("Dedicated A-Alerts Koyeb identity required", { status: 503 });
+    // The website login (P2000_CODE) or the dedicated synthetic Homey identity; never the real Homey ID.
+    if (!koyebVerbinding(this.env)) return new Response("A-Alerts Koyeb login required", { status: 503 });
     await this.ensureConnection();
     return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
   }
 
   async ensureConnection() {
+    const soort = koyebVerbinding(this.env)?.soort || null;
+    // The login changed (the website code was set): close the old connection, the next round connects the new way.
+    if (this.ws && this.ws.readyState <= WebSocket.OPEN && this.soort && soort && this.soort !== soort) { try { this.ws.close(1000, "login"); } catch {} this.ws = null; }
     if (this.connecting || (this.ws && this.ws.readyState <= WebSocket.OPEN)) return;
     this.connecting = true;
     try {
-      const url = this.env.KOYEB_WEBSOCKET_URL || "wss://p2000-martijnpoppen.koyeb.app";
-      if (!url.startsWith("wss://")) throw new Error("Koyeb requires wss");
-      const socket = new WebSocket(url, this.env.KOYEB_SUBPROTOCOL);
+      // A fresh login for every connection: the website login carries the time of connecting.
+      const v = koyebVerbinding(this.env);
+      if (!v) throw new Error("Koyeb login not configured");
+      const socket = new WebSocket(v.url, v.protocol);
+      this.soort = v.soort;
+      this.ctx.waitUntil(kvSet(this.env, "koyeb_login", v.soort));
       this.ws = socket;
       socket.addEventListener("open", () => {
         this.ctx.waitUntil(kvSet(this.env, "koyeb_last_connected", String(Date.now())));
@@ -681,7 +687,7 @@ export class AAlertsKoyebListener extends DurableObject {
   }
 
   async alarm() {
-    if (this.env.KOYEB_SUBPROTOCOL) await this.ensureConnection();
+    if (koyebVerbinding(this.env)) await this.ensureConnection();
     await this.ctx.storage.setAlarm(Date.now() + 60_000);
   }
 }
@@ -974,7 +980,7 @@ async function catchUp(env) {
 async function cron(env, event) {
   await kvSet(env, "cron_run", String(Date.now()));
   // Keep exactly one A-Alerts WebSocket listener alive independently from the Homey app.
-  if (env.KOYEB_LISTENER && env.KOYEB_SUBPROTOCOL) {
+  if (env.KOYEB_LISTENER && koyebVerbinding(env)) {
     try {
       const stub = env.KOYEB_LISTENER.getByName("a-alerts-koyeb");
       const response = await stub.fetch("https://koyeb.internal/start", { method: "POST" });
