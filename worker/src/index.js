@@ -643,6 +643,7 @@ export class AAlertsKoyebListener extends DurableObject {
     if (request.method !== "POST" || new URL(request.url).pathname !== "/start")
       return new Response("Not found", { status: 404 });
     // The website login (P2000_CODE) or the dedicated synthetic Homey identity; never the real Homey ID.
+    if (this.env.PROXY_API) return new Response("A-Alerts runs on api.a-alerts.nl", { status: 410 });
     if (!koyebVerbinding(this.env)) return new Response("A-Alerts Koyeb login required", { status: 503 });
     await this.ensureConnection();
     return new Response(JSON.stringify({ ok: true }), { headers: { "content-type": "application/json" } });
@@ -691,6 +692,8 @@ export class AAlertsKoyebListener extends DurableObject {
   }
 
   async alarm() {
+    // Proxy mode: api.a-alerts.nl has its own Koyeb connection; this one closes and does not come back.
+    if (this.env.PROXY_API) { if (this.ws) { try { this.ws.close(1000, "proxy"); } catch {} this.ws = null; } await this.ctx.storage.deleteAlarm(); return; }
     if (koyebVerbinding(this.env)) await this.ensureConnection();
     await this.ctx.storage.setAlarm(Date.now() + 60_000);
   }
@@ -1025,8 +1028,32 @@ async function cron(env, event) {
   }
 }
 
+/**
+ * Proxy mode (PROXY_API, since the switch of 21-11-2026): everything runs on api.a-alerts.nl. This Worker only passes
+ * requests of old app versions on to it, unchanged, and does no work of its own (no cron, pushes or Koyeb connection).
+ */
+const PROXY_SKIP = new Set(["host", "cf-connecting-ip", "cf-ipcountry", "cf-ray", "cf-visitor", "x-forwarded-proto", "x-real-ip", "content-length"]);
+async function proxy(req, env) {
+  const url = new URL(req.url);
+  if (url.pathname === "/health" || url.pathname === "/") return reply(200, { ok: true, proxy: env.PROXY_API });
+  const headers = new Headers();
+  for (const [k, v] of req.headers) if (!PROXY_SKIP.has(k.toLowerCase())) headers.set(k, v);
+  const ip = req.headers.get("cf-connecting-ip");
+  if (ip) headers.set("x-forwarded-for", ip);
+  const body = req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer();
+  try {
+    const r = await fetch(env.PROXY_API.replace(/\/+$/, "") + url.pathname + url.search, { method: req.method, headers, body, redirect: "manual" });
+    const out = new Headers(r.headers);
+    for (const [k, v] of Object.entries(CORS)) if (!out.has(k)) out.set(k, v);
+    return new Response(r.body, { status: r.status, statusText: r.statusText, headers: out });
+  } catch (e) {
+    return reply(502, { error: "api.a-alerts.nl is niet bereikbaar" });
+  }
+}
+
 export default {
   async fetch(req, env, ctx) {
+    if (env.PROXY_API) return proxy(req, env);
     try {
       // Backup for the cron: an API call also reads the feed when the last read is over 45 s old.
       if (req.method === "GET" && new URL(req.url).pathname.startsWith("/v1/meldingen")) ctx.waitUntil(catchUp(env));
@@ -1038,6 +1065,7 @@ export default {
     }
   },
   async scheduled(event, env, ctx) {
+    if (env.PROXY_API) return; // all background work runs on api.a-alerts.nl
     ctx.waitUntil(cron(env, event));
   },
 };

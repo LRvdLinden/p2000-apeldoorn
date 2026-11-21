@@ -7,7 +7,8 @@ compatibility_date = "2026-10-01"
 workers_dev = true
 
 [triggers]
-crons = ["* * * * *"]
+# Proxy mode: no cron work here any more (api.a-alerts.nl runs it).
+crons = []
 
 [[d1_databases]]
 binding = "DB"
@@ -15,6 +16,9 @@ database_name = "p2000-apeldoorn"
 database_id = "__D1_DATABASE_ID__"
 
 [vars]
+# Since 21-11-2026 everything runs on api.a-alerts.nl: this Worker only passes requests of old apps on to it.
+# Empty = the Worker works on its own again (cron, pushes, Koyeb).
+PROXY_API = "https://api.a-alerts.nl"
 # Homey webhooks come from api.a-alerts.nl (aa/homey.php) since 21-11-2026; "0" makes this Worker send them again.
 HOMEY_VIA_API = "1"
 RETENTION_DAYS = "3"
