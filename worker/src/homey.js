@@ -29,6 +29,8 @@ export async function homeyChanges(env, since) {
 
 export async function notifyHomey(env, budget) {
   if (!homeyConfigured(env)) return { sent: false, reason: "not configured" };
+  // api.a-alerts.nl sends the Homey webhooks now (HOMEY_VIA_API): this Worker no longer does, else everything arrives twice.
+  if (env.HOMEY_VIA_API === "1") return { sent: false, reason: "via api.a-alerts.nl" };
   const now = Date.now();
   const raw = await kvGet(env, CURSOR);
   if (!raw) { await kvSet(env, CURSOR, now); return { sent: false, reason: "cursor set" }; }

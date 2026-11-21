@@ -1,5 +1,9 @@
 # Changelog
 
+## Homey en beheer naar api.a-alerts.nl (21-11-2026)
+- **Homey-app:** de realtime webhooks (meldingen, waarschuwingen, VNOG, nieuws) komen nu van api.a-alerts.nl; de Worker stuurt ze niet meer (HOMEY_VIA_API). De Homey-app leest bij het starten ook api.a-alerts.nl (versie 0.1.17).
+- **P2000Beheer (build 20) en het web-beheer** praten met api.a-alerts.nl. Elke wijziging in het beheer gaat tot de overstap ook naar de Worker, zodat de oude apps hetzelfde laten zien.
+
 ## Website en controles naar api.a-alerts.nl (21-11-2026)
 - **De hele website** (a-alerts.nl) haalt alles bij api.a-alerts.nl, niet meer bij de Worker op workers.dev.
 - **PH-GOV wereldwijd** op de kaart (api.a-alerts.nl), ook buiten Nederland. PH-UTL staat nergens in A-Alerts.

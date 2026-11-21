@@ -2,7 +2,7 @@
 
 const https = require('https');
 
-const BASE = 'https://p2000-apeldoorn-api.lrvdlinden.workers.dev';
+const BASE = 'https://api.a-alerts.nl';
 
 /** GET JSON from the A-Alerts API, with a timeout and a few retries (exponential backoff). */
 function getJSON(path, { timeout = 15000, retries = 2 } = {}) {

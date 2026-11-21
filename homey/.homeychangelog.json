@@ -1,4 +1,8 @@
 {
+  "0.1.17": {
+    "en": "The app now reads all data from the new A-Alerts server (api.a-alerts.nl). Faster and more reliable; nothing changes in your Flows.",
+    "nl": "De app haalt alles nu bij de nieuwe A-Alerts-server (api.a-alerts.nl). Sneller en betrouwbaarder; aan je Flows verandert niets."
+  },
   "0.1.16": {
     "en": "New: incidents of the safety region VNOG (Apeldoorn and Teuge). Four trigger cards (new incident, update, higher GRIP, closed), a condition, the tags GRIP and street, a ready-made message and the square VNOG banner or a map with marker.",
     "nl": "Nieuw: incidenten van de veiligheidsregio VNOG (Apeldoorn en Teuge). Vier triggerkaarten (nieuw incident, update, hogere GRIP, afgesloten), een voorwaarde, de tags GRIP en straat, een kant-en-klaar bericht en de vierkante VNOG-banner of een kaart met marker."

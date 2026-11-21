@@ -16,7 +16,7 @@ const path = require('path');
 const https = require('https');
 const { PNG } = require('pngjs');
 
-const API = 'https://p2000-apeldoorn-api.lrvdlinden.workers.dev';
+const API = 'https://api.a-alerts.nl';
 const DIR = path.join(__dirname, '..', 'assets', 'kaart');
 const META = JSON.parse(fs.readFileSync(path.join(DIR, 'kaart.json'), 'utf8'));
 const SIZE = 600; // points; the image is 1200 x 1200 pixels (scale 2)

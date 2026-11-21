@@ -1,6 +1,6 @@
 // A-Alerts-beheer (P2000Beheer) web dashboard – talks to the beheer part of the A-Alerts API.
 const API = (/^(localhost|127\.)/.test(location.hostname) && new URLSearchParams(location.search).get("api"))
-  || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+  || "https://api.a-alerts.nl";
 // The 26 A-Alerts places (same list as Shared/Werkgebied.json).
 const PLAATSEN = ["Apeldoorn", "Beekbergen", "Beemte-Broekland", "Hoenderloo", "Hoog Soeren", "Klarenbeek", "Loenen", "Uddel", "Ugchelen", "Wenum-Wiesel", "Teuge", "Assel", "Engeland", "Gerritsflesch", "Groenendaal", "De Haere", "Hoog Buurlo", "Hooilanden", "De Jonas", "De Krim", "Lieren", "Meerveld", "Nieuw-Milligen", "Oosterhuizen", "Radio Kootwijk", "Woeste Hoeve"];
 // Same pager icons as the A-Alerts app (img/icon_*.png).
