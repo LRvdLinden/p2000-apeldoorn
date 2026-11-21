@@ -119,6 +119,10 @@ async function handle(req, env, ctx) {
       waarschuwingen: JSON.parse((await kvGet(env, "warnings_status"))?.value || "null"),
       nieuws: JSON.parse((await kvGet(env, "nieuws_politie_status"))?.value || "null"),
       nieuws112: JSON.parse((await kvGet(env, "n112_status"))?.value || "null"),
+      // Helicopters read by the cron: last good read, last failure and why (no secrets in it).
+      heli: { lastOk: (await kvGet(env, "status_heli_ok"))?.value ? new Date(Number((await kvGet(env, "status_heli_ok")).value)).toISOString() : null,
+        lastError: (await kvGet(env, "status_heli_fout"))?.value ? new Date(Number((await kvGet(env, "status_heli_fout")).value)).toISOString() : null,
+        reden: (await kvGet(env, "status_heli_fout_tekst"))?.value || null },
     });
   }
 
