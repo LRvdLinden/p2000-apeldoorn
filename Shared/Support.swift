@@ -19,14 +19,16 @@ func Lf(_ key: String, _ args: CVarArg...) -> String {
 }
 
 enum Config {
-    /// Own backend (Cloudflare Worker, worker/ in this repo). The app does not use the website.
+    /// Own backend: api.a-alerts.nl (replaces the Cloudflare Worker of worker/). The app does not use the website.
     static let apiBase: URL = {
         if let raw = Bundle.main.object(forInfoDictionaryKey: "P2000APIURL") as? String,
            raw.hasPrefix("http"), !raw.contains("$("), let url = URL(string: raw) {
             return url
         }
-        return URL(string: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev")!
+        return URL(string: "https://api.a-alerts.nl")!
     }()
+    /// The former backend. Only used once, to sign this device off there, so it never gets a push twice.
+    static let oudeApiBase = URL(string: "https://p2000-apeldoorn-api.lrvdlinden.workers.dev")!
     static let website = URL(string: "https://a-alerts.nl")!
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!
     static let pixelForges = URL(string: "https://pixelforges.nl")!

@@ -84,6 +84,7 @@ Er is geen server om te beheren: de API draait als **Cloudflare Worker** (`worke
 4. Start in GitHub **Actions → Worker → Run workflow**. De workflow maakt de D1-database, zet alle secrets over en deployt. In de samenvatting staat het adres (`https://p2000-apeldoorn-api.<jouw-naam>.workers.dev`).
 5. Controleer `<adres>/health`: `"feed"` moet een recente `lastOk` hebben.
 6. Eigen adres (optioneel): niet nodig: de API blijft bewust op het workers.dev-adres, ook na de overstap naar a-alerts.nl.
+7. Vanaf app-versie 2.0.2 (build 106, TestFlight) gebruikt de Apple-app de eigen server **api.a-alerts.nl** (repo LRvdLinden/app.lrvdlinden.a-alerts.api). De Worker blijft draaien voor de website, Android en de App Store-versie tot de volledige overstap.
 
 Bij elke push naar `worker/` test en deployt de workflow opnieuw.
 

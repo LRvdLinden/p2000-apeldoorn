@@ -187,7 +187,21 @@ enum PushManager {
                 return
             }
             try? await P2000API.shared.registerDevice(registrationBody(token: token, s: s))
+            await afmeldenBijOudeServer(token: token)
         }
+    }
+
+    /// Once per device token: sign off at the former backend (the Cloudflare Worker), now that this app gets its pushes
+    /// from api.a-alerts.nl. Otherwise both servers would send every alert. Retried on the next start when it fails.
+    static func afmeldenBijOudeServer(token: String) async {
+        let key = "oudeServerAfgemeld"
+        guard UserDefaults.standard.string(forKey: key) != token, Config.apiBase.host != Config.oudeApiBase.host else { return }
+        var req = URLRequest(url: Config.oudeApiBase.appendingPathComponent("v1/devices/\(token)"))
+        req.httpMethod = "DELETE"
+        req.timeoutInterval = 15
+        guard let result = try? await URLSession.shared.data(for: req), let http = result.1 as? HTTPURLResponse,
+              (200..<300).contains(http.statusCode) || http.statusCode == 404 else { return }
+        UserDefaults.standard.set(token, forKey: key)
     }
 
     static func registrationBody(token: String, s: AppSettings) -> [String: Any] {

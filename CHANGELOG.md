@@ -1,5 +1,9 @@
 # Changelog
 
+## A-Alerts 2.0.2 (build 106) – TestFlight
+- **Eigen server.** De app haalt alles op bij api.a-alerts.nl (eigen PHP/MySQL-server) in plaats van de Cloudflare Worker: meldingen, waarschuwingen, nieuws, helikopters, verkeer, radar, weer, routes, kazernes en de registratie voor pushmeldingen. De antwoorden zijn route voor route vergeleken met de Worker.
+- **Pushmeldingen via de eigen server.** Na de eerste aanmelding meldt de app dit toestel eenmalig af bij de oude server, zodat een melding nooit dubbel binnenkomt. Zolang de rest van de gebruikers nog op de Worker zit, verstuurt api.a-alerts.nl alleen naar toestellen die zich daar zelf hebben aangemeld.
+
 ## Website (20-11-2026)
 - **A-Alerts staat in de App Store.** De knoppen naar TestFlight op de homepage (bovenaan en onderaan) en op de Android-pagina zijn vervangen door de officiële badge "Download in de App Store" met de link naar de app (id 6829732272). De homepage toont in Safari op iPhone en iPad ook de balk van Apple om de app te openen of te downloaden.
 
