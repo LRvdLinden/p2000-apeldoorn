@@ -5832,19 +5832,19 @@
         }
       }
     },
-    "Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap.": {
+    "Helikopterposities komen van open ADS-B-bronnen (adsb.lol, adsb.fi, OpenSky Network). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helicopter positions come from adsb.lol (open data). A helicopter flying low or standing on the ground is sometimes not visible. Stations (fire, ambulance and police) come from OpenStreetMap."
+            "value": "Helicopter positions come from open ADS-B sources (adsb.lol, adsb.fi, OpenSky Network). A helicopter flying low or standing on the ground is sometimes not visible. Stations (fire, ambulance and police) come from OpenStreetMap."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap."
+            "value": "Helikopterposities komen van open ADS-B-bronnen (adsb.lol, adsb.fi, OpenSky Network). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap."
           }
         }
       }
@@ -10592,19 +10592,19 @@
         }
       }
     },
-    "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.": {
+    "Positie via open ADS-B (adsb.lol ODbL, adsb.fi, OpenSky), kan enkele seconden achterlopen.": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Position via adsb.lol (ODbL), may lag a few seconds."
+            "value": "Position via open ADS-B (adsb.lol ODbL, adsb.fi, OpenSky), may lag a few seconds."
           }
         },
         "nl": {
           "stringUnit": {
             "state": "translated",
-            "value": "Positie via adsb.lol (ODbL), kan enkele seconden achterlopen."
+            "value": "Positie via open ADS-B (adsb.lol ODbL, adsb.fi, OpenSky), kan enkele seconden achterlopen."
           }
         }
       }

@@ -1,5 +1,10 @@
 # Changelog
 
+## ADS-B uit meer open bronnen, 2.0.2 (110) (21-11-2026)
+- **api.a-alerts.nl:** de helikopters, de laag Defensie en overheid en de jets komen om de beurt van adsb.fi, airplanes.live en adsb.lol. adsb.lol krijgt hoogstens 400 van zijn 500 opvragen per dag, verspreid over de dag, zodat hij niet na een paar uur op is. Een bron die weigert, rust even (tot 15 minuten). Reserve: OpenSky Network en de Koyeb-relay; die twee krijgen elk half uur een testopvraag. Staat per bron in `/v1/eigen` en op /docs.
+- Bronvermelding in app (iOS, Android), website, hulp en disclaimer: adsb.lol (ODbL), adsb.fi en OpenSky Network.
+- api.a-alerts.nl toonde nog een oudere Wat is nieuw en hulp (eigen kopie in `aa/data`); nu gelijk met `worker/content`.
+
 ## Alles via api.a-alerts.nl (21-11-2026)
 - **api.a-alerts.nl is de enige server.** Daar draaien alle pushmeldingen (P2000, waarschuwingen, nieuws, helikopters, Homey en beheer) voor alle toestellen (`PUSH_ACTIEF=1`). De kopie van de Worker-database (D1) en het doorsturen van beheerwijzigingen naar de Worker zijn uit (`WORKER_SPIEGEL=0`).
 - **De Cloudflare Worker geeft alleen nog door** (`PROXY_API`): elk verzoek van een oude appversie op het workers.dev-adres gaat ongewijzigd naar api.a-alerts.nl. Geen cron, geen pushes en geen Koyeb-verbinding meer in de Worker. `/health` toont `{ ok, proxy }`. Leeg maken van `PROXY_API` (en de cron terugzetten) zet de Worker weer zelfstandig aan.

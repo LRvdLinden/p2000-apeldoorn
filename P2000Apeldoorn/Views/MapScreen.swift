@@ -683,7 +683,7 @@ struct KaartLagenView: View {
                 Section {
                 } footer: {
                     VStack(alignment: .leading, spacing: 6) {
-                        Text(L("Helikopterposities komen van adsb.lol (open data). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap."))
+                        Text(L("Helikopterposities komen van open ADS-B-bronnen (adsb.lol, adsb.fi, OpenSky Network). Een helikopter die laag vliegt of op de grond staat, is soms niet te zien. Kazernes en posten (brandweer, ambulance en politie) komen uit OpenStreetMap."))
                         if settings.laag(.buienradar) {
                             if RadarStore.shared.info?.beschikbaar == false {
                                 Text(L("De buienradar is nog niet beschikbaar.")).foregroundStyle(.orange)

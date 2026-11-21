@@ -517,7 +517,7 @@ fun HeliLiveCard(m: Melding, h: Helikopter?, naam: String?, onFollow: (String) -
         Button(onClick = { onFollow(h.id) }, modifier = Modifier.fillMaxWidth()) {
             Icon(Icons.Outlined.MyLocation, null); Spacer(Modifier.width(8.dp)); Text(tr("Volg ${h.naam} op de kaart", "Follow ${h.naam} on the map"))
         }
-        Text(tr("Positie via adsb.lol, kan enkele seconden achterlopen.", "Position via adsb.lol, may lag a few seconds."), color = Muted, fontSize = 11.sp)
+        Text(tr("Positie via open ADS-B (adsb.lol, adsb.fi, OpenSky), kan enkele seconden achterlopen.", "Position via open ADS-B (adsb.lol, adsb.fi, OpenSky), may lag a few seconds."), color = Muted, fontSize = 11.sp)
     }
 }
 

@@ -707,7 +707,7 @@ async function loadHeli(m, mapReady) {
         <div class="kz heli-live"><img src="${heliImg(h)}" alt="" style="width:84px;height:auto;${vliegtWest(h) ? "transform:scaleX(-1)" : ""}">
         <div><b>${esc(heliInfo(h))}</b>${km != null ? `<small>${km.toFixed(1).replace(".", ",")} km van de melding${eta ? ` · ± ${eta} min` : ""}</small>` : ""}${h.voorspelling ? `<small>${esc(voorspellingTekst(h.voorspelling))}</small>` : ""}</div></div>
         <button class="btn btn-red" id="volgHeli" style="width:100%;margin-top:10px">Volg ${esc(h.naam)} op de kaart</button>
-        <p class="hint">Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.</p>`;
+        <p class="hint">Positie via open ADS-B (adsb.lol ODbL, adsb.fi, OpenSky), kan enkele seconden achterlopen.</p>`;
       $("volgHeli").onclick = () => { state.volgHeli = h.id; if (innerWidth <= 900) closeDetail(); setTab("kaart"); };
     }
     const mk = detailMap && window.mapkit;
@@ -1436,7 +1436,7 @@ function openHeli(h) {
     <small class="hint" id="afspeelTijd"></small>
     <h4 class="vl-head" id="heliPlaatsenKop" hidden>Waar geweest</h4><ol class="plaatsen" id="heliPlaatsen" hidden></ol>
     <h4 class="vl-head">Vluchten</h4><ul class="vluchten" id="heliVluchten"><li class="hint">Laden…</li></ul>
-    <p class="hint${oud > 60 ? " oud" : ""}">${herkenning ? `${herkenning}. ` : ""}Positie van ${esc(fmtTime(new Date(h.gezien)))}${oud > 60 ? ` (${oud < 120 ? `${oud} seconden` : `${Math.round(oud / 60)} minuten`} oud)` : ""}${afstand} · data: adsb.lol (ODbL)</p>
+    <p class="hint${oud > 60 ? " oud" : ""}">${herkenning ? `${herkenning}. ` : ""}Positie van ${esc(fmtTime(new Date(h.gezien)))}${oud > 60 ? ` (${oud < 120 ? `${oud} seconden` : `${Math.round(oud / 60)} minuten`} oud)` : ""}${afstand} · data: adsb.lol (ODbL), adsb.fi, OpenSky</p>
     <details class="heli-meld"><summary>Klopt dit toestel niet?</summary>
       <textarea id="heliMeldTekst" rows="2" maxlength="500" placeholder="Wat klopt er niet? Bijvoorbeeld: verkeerde naam, of een toestel dat ontbreekt."></textarea>
       <button id="heliMeldKnop" class="btn">Verstuur</button><small class="hint" id="heliMeldUit"></small></details>

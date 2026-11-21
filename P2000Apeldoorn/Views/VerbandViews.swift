@@ -221,7 +221,7 @@ struct HeliLiveKaart: View {
             .padding(16)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
-            Text(L("Positie via adsb.lol (ODbL), kan enkele seconden achterlopen.")).font(.footnote).foregroundStyle(.secondary).padding(.horizontal, 4)
+            Text(L("Positie via open ADS-B (adsb.lol ODbL, adsb.fi, OpenSky), kan enkele seconden achterlopen.")).font(.footnote).foregroundStyle(.secondary).padding(.horizontal, 4)
         }
     }
 }
