@@ -308,23 +308,25 @@ export async function statusTick(env, pushAdmins, now = Date.now()) {
   if (now - buf.since >= 10 * MIN) { await flush(buf); buf = { dag, since: now, n: {} }; }
   await kvSet(env, "status_buf", JSON.stringify(buf));
 
-  // Beheer push: a component that stays off normal for 3 minutes, and again when it is fine.
+  // Beheer push: only a real outage ("storing" for 10 minutes), and "werkt weer" once it has been fine for 5 minutes.
+  // "Wijkt af" (warn) and short dips are on the status page only: they made the beheer phones buzz all day.
   const meldingen = [];
   const vorige = parse(await kvGet(env, "status_alerts"), {});
   const sinds = parse(await kvGet(env, "status_sinds"), {});
   for (const o of ONDERDELEN) {
     const st = s[o.id]?.staat || "ok";
-    const slecht = st === "warn" || st === "down";
-    if (!slecht) { delete sinds[o.id]; } else if (!sinds[o.id] || sinds[o.id].staat !== st) sinds[o.id] = { staat: st, at: now };
+    const fase = st === "down" ? "down" : st === "warn" ? "warn" : "ok";
+    if (!sinds[o.id] || sinds[o.id].staat !== fase) sinds[o.id] = { staat: fase, at: now };
     const gemeld = vorige[o.id];
-    if (slecht && now - sinds[o.id].at >= 3 * MIN && gemeld !== st) {
+    if (fase === "down" && now - sinds[o.id].at >= 10 * MIN && !gemeld) {
       const extra = [s[o.id].detail, s[o.id].fout].filter(Boolean).join(" · ");
-      meldingen.push([`${st === "down" ? "🔴" : "🟠"} ${o.naam}: ${st === "down" ? "storing" : "wijkt af"}`, extra || "Wijkt al 3 minuten af van normaal."]);
-      vorige[o.id] = st;
-    } else if (!slecht && gemeld) {
+      meldingen.push([`🔴 ${o.naam}: storing`, extra || "Al 10 minuten een storing."]);
+      vorige[o.id] = "down";
+    } else if (fase === "ok" && gemeld && now - sinds[o.id].at >= 5 * MIN) {
       meldingen.push([`✅ ${o.naam} werkt weer`, "Weer normaal."]);
       delete vorige[o.id];
     }
+    if (fase === "ok" && !gemeld) delete sinds[o.id];
   }
   for (const a of await afwijkingen(env, now)) {
     if (!vorige[`x:${a.id}`]) { meldingen.push(["🟠 A-Alerts wijkt af", a.tekst]); vorige[`x:${a.id}`] = "warn"; }

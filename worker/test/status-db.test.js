@@ -22,14 +22,16 @@ test("status: tick, history, beheer push and incidents", async () => {
   const now = Date.now();
   const set = (k, v) => env.DB.prepare("INSERT OR REPLACE INTO kv (key, value, at) VALUES (?, ?, ?)").bind(k, String(v), now).run();
   await set("cron_run", now);
-  await set("feed_ok", now - 20 * 60_000); // P2000 read failing for 20 min
+  await set("feed_ok", now - 40 * 60_000); // P2000 read failing for 40 min
   await set("feed_error", "HTTP 502");
   for (const b of ["nlalert", "burgernet", "knmi"]) await set(`bron_ok:${b}`, now - 30_000);
   await noteHeli(env, true);
   await notePushes(env, Array.from({ length: 20 }, (_, i) => ({ platform: "android", ok: i > 5, dead: false, latency: 4000 })));
   const pushes = [];
   const pushAdmins = async (_env, t, b) => { pushes.push(`${t} ${b}`); return { sent: 1 }; };
+  await statusTick(env, pushAdmins, now - 11 * 60_000);
   await statusTick(env, pushAdmins, now - 4 * 60_000);
+  assert.equal(pushes.length, 0, "no push before 10 minutes of outage");
   await statusTick(env, pushAdmins, now);
   assert.ok(pushes.some((t) => t.includes("P2000")), pushes.join(" | "));
   const o = await statusOverzicht(env, { beheer: true }, now);
@@ -51,7 +53,10 @@ test("status: tick, history, beheer push and incidents", async () => {
   assert.equal(l.incidenten.recent[0].updates[0].fase, "opgelost");
 
   // Recovery push
-  await set("feed_ok", now);
+  await set("feed_ok", now + 60_000);
   await statusTick(env, pushAdmins, now + 60_000);
+  assert.ok(!pushes.some((t) => t.includes("werkt weer")), "no recovery push before 5 minutes ok");
+  await set("feed_ok", now + 7 * 60_000);
+  await statusTick(env, pushAdmins, now + 7 * 60_000);
   assert.ok(pushes.some((t) => t.includes("werkt weer")), pushes.join(" | "));
 });

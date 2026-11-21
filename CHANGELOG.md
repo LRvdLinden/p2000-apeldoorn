@@ -1,5 +1,9 @@
 # Changelog
 
+## Worker en API (21-11-2026)
+- **Helikopters weer zichtbaar.** adsb.lol geeft per adres nog maar 500 opvragen per dag; de Worker en api.a-alerts.nl liepen daar elke dag op vast ("Ophalen lukt niet"). Is de teller op (HTTP 429), dan wachten ze tot hij terugspringt en halen ze de posities bij adsb.fi (dezelfde ADS-B-gegevens). Nooit via de NDW-verkeersdienst.
+- **Minder beheer-pushes.** LRbeheer en P2000Beheer krijgen alleen nog een push bij een echte storing (10 minuten) en "werkt weer" als het 5 minuten goed gaat. "Wijkt af" en korte haperingen staan alleen op de statuspagina.
+
 ## Android 2.0.2 en website (21-11-2026)
 - **Android gebruikt api.a-alerts.nl** (eigen server) voor alles, ook de registratie voor pushmeldingen. Na de eerste aanmelding meldt de app het toestel eenmalig af bij de oude Worker, zodat een melding nooit dubbel komt (zelfde aanpak als de Apple-apps in build 106).
 - **Pushmeldingen via de eigen server voor alle soorten**: P2000, NL-Alert, Burgernet, KNMI (ook een uur vooraf en opgeheven), AMBER Alert, Vermist Kind Alert, VNOG en politienieuws, voor elk toestel dat zich bij api.a-alerts.nl heeft aangemeld.

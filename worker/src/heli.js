@@ -27,6 +27,8 @@ export const HELIS = [
 /** Netherlands: one circle around the centre of the country (radius in nautical miles). */
 const POINT = { lat: 52.2, lon: 5.4, nm: 160 };
 const TTL = 12_000;
+/** adsb.lol answered 429 (out of requests): until then the reserve adsb.fi is asked directly. */
+let adsbLolPauzeTot = 0;
 let memo = null;
 /** The last item of every aircraft in this isolate, to fill what a later answer leaves out. */
 const laatste = new Map();
@@ -209,16 +211,36 @@ export async function helikopters(env) {
   }
   let data;
   try {
-    const direct = () => fetch(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, {
-      headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)" },
+    // adsb.lol now allows 500 requests a day per address (x-ratelimit-limit "500;w=86400"); the shared Cloudflare
+    // addresses run out of that quickly. Then adsb.fi (same readsb format, "aircraft" instead of "ac") is the reserve.
+    // Aircraft positions must NEVER depend on the unrelated NDW/traffic service: do not route them through VERKEER_URL.
+    const haal = (url, extra = {}) => fetch(url, {
+      headers: { accept: "application/json", "user-agent": "A-Alerts/1.0 (+https://a-alerts.nl)", ...extra },
       signal: AbortSignal.timeout(8_000),
     });
-    // Aircraft positions must NEVER depend on the unrelated NDW/traffic service.
-    // Cloudflare requests ADS-B directly and retains only authentic recent fixes
-    // across transient errors. Do not route aircraft through VERKEER_URL.
-    const res = await direct();
-    if (!res.ok) throw new Error(`ADS-B HTTP ${res.status}`);
-    const body = await res.json();
+    let body = null, fout = null;
+    if (Date.now() >= adsbLolPauzeTot) {
+      try {
+        const res = await haal(`https://api.adsb.lol/v2/point/${POINT.lat}/${POINT.lon}/${POINT.nm}`, env.ADSB_LOL_API_KEY ? { "api-auth": env.ADSB_LOL_API_KEY } : {});
+        if (res.ok) body = await res.json();
+        else {
+          fout = `adsb.lol HTTP ${res.status}`;
+          // Out of requests: rest until the reset it names (at most an hour), otherwise one minute.
+          const reset = Number(res.headers.get("x-ratelimit-reset"));
+          if (res.status === 429) adsbLolPauzeTot = Date.now() + (reset > 0 ? Math.min(reset, 3600) * 1000 : 60_000);
+        }
+      } catch (e) { fout = `adsb.lol ${e.message || e}`; }
+    }
+    let bron = "adsb.lol (ODbL)";
+    if (!body || !Array.isArray(body.ac)) {
+      const res = await haal(`https://opendata.adsb.fi/api/v2/lat/${POINT.lat}/lon/${POINT.lon}/dist/${POINT.nm}`);
+      if (!res.ok) throw new Error(`ADS-B HTTP ${res.status} (adsb.fi${fout ? `, ${fout}` : ""})`);
+      const fi = await res.json();
+      // "now" is in seconds at some readsb services, in milliseconds at adsb.lol.
+      const n = Number(fi?.now) || 0;
+      body = { ac: fi?.ac || fi?.aircraft, now: n > 0 && n < 1e11 ? n * 1000 : n };
+      bron = "adsb.fi";
+    }
     if (!body || !Array.isArray(body.ac)) throw new Error("Invalid ADS-B payload");
     const learned = await loadLearned(env);
     const list = fromAdsb(body.ac, Number(body.now) || Date.now(), learned);
@@ -236,7 +258,7 @@ export async function helikopters(env) {
     for (const h of [...list, ...lucht]) laatste.set(h.id, { ...h });
     for (const [id, v] of laatste) if (Date.now() - Date.parse(v.gezien) > 600_000) laatste.delete(id);
     for (const h of [...list, ...lucht]) h.boven = h.op_grond ? null : plaatsBij(h.lat, h.lon)?.tekst || null;
-    data = await preserveAircraft(env, { bijgewerkt: new Date().toISOString(), bron: "adsb.lol (ODbL)", helikopters: list, lucht });
+    data = await preserveAircraft(env, { bijgewerkt: new Date().toISOString(), bron, helikopters: list, lucht });
   } catch (e) {
     console.warn("[heli]", e.message || e);
     // A failed provider request must not erase aircraft on the map. Persisted last-known
