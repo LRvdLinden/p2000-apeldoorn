@@ -80,3 +80,11 @@ test("Medic 01 is on the map but never counts as a Lifeliner", () => {
   assert.equal(heliVoorMelding(m, [h]), null);
   assert.equal(fromAdsb([{ flight: "LIFELN3", lat: 52, lon: 5, alt_baro: 900 }])[0].medic, undefined);
 });
+
+test("PH-UTL (4867e6) is never shown, also not as a helicopter or in the air layer", async () => {
+  const { fromAdsb } = await import("../src/heli.js");
+  const { luchtLijst } = await import("../src/lucht.js");
+  const ac = { hex: "4867e6", r: "PH-UTL", t: "F900", flight: "PHUTL", lat: 52.2, lon: 5.9, alt_baro: 30000, gs: 420, seen_pos: 1, dbFlags: 0 };
+  assert.equal(fromAdsb([ac]).length, 0);
+  assert.equal(luchtLijst([ac]).length, 0);
+});

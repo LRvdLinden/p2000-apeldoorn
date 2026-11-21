@@ -105,10 +105,14 @@ export function luchtSoort(ac, learned = new Map()) {
 }
 
 /** The layer: every defence or government aircraft above the Netherlands, id fixed per airframe. */
+/** Aircraft that are only recorded on the own server (api.a-alerts.nl), never shown on a map or in a list: PH-UTL. */
+export const NOOIT_TONEN = new Set(["4867e6"]);
+
 export function luchtLijst(list, now = Date.now(), overslaan = new Set(), learned = new Map()) {
   const out = new Map();
   for (const ac of Array.isArray(list) ? list : []) {
     const hex = String(ac.hex || "").trim().toLowerCase();
+    if (NOOIT_TONEN.has(hex)) continue;
     const p = positie(ac);
     if (!hex || overslaan.has(hex) || !p) continue;
     const s = luchtSoort(ac, learned);

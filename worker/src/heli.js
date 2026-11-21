@@ -2,7 +2,7 @@
 // Data: adsb.lol, Open Database License (ODbL). One request for the whole of the Netherlands, cached briefly
 // so many apps polling at the same time cost one upstream call.
 
-import { luchtLijst, luchtGeleerd, luchtLeer, positie, vulAan } from "./lucht.js";
+import { NOOIT_TONEN, luchtLijst, luchtGeleerd, luchtLeer, positie, vulAan } from "./lucht.js";
 import { plaatsBij } from "./plaats.js";
 
 export const HELIS = [
@@ -80,6 +80,7 @@ export function identify(ac, learned = new Map()) {
 export function fromAdsb(list, now = Date.now(), learned = new Map()) {
   const out = new Map();
   for (const ac of Array.isArray(list) ? list : []) {
+    if (NOOIT_TONEN.has(String(ac?.hex || "").trim().toLowerCase())) continue;
     const h = identify(ac, learned);
     const p = positie(ac);
     if (!h || !p) continue;
