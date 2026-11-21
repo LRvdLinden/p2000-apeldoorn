@@ -607,13 +607,46 @@ export async function werkgebiedLijnen(mk, kleur = "#DC2626") {
 
 const VERKEER_KLEUR = { ongeval: "#E3001B", afsluiting: "#C4001A", file: "#B0002E", pech: "#F08C00", werk: "#F5B400" };
 export const VERKEER_SOORT = { ongeval: "Ongeval", afsluiting: "Afsluiting", file: "File", pech: "Pech of obstakel", werk: "Werkzaamheden" };
-let verkeerCache = null;
-/** GET /v1/verkeer, at most once a minute. */
-export async function fetchVerkeer() {
-  if (verkeerCache && Date.now() - verkeerCache.at < 60_000) return verkeerCache.data;
-  const data = await fetch(`${API}/v1/verkeer`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json()).catch(() => null);
-  if (data) verkeerCache = { at: Date.now(), data };
-  return data || verkeerCache?.data || { items: [], gepland: [], flitsers: [] };
+const verkeerCache = {};
+/** GET /v1/verkeer, at most once a minute. landelijk: all of the Netherlands (layer "Verkeer NL"), else the region. */
+export async function fetchVerkeer(landelijk = false) {
+  const k = landelijk ? "nl" : "regio", c = verkeerCache[k];
+  if (c && Date.now() - c.at < 60_000) return c.data;
+  const data = await fetch(`${API}/v1/verkeer${landelijk ? "?landelijk=1" : ""}`, { signal: AbortSignal.timeout(15_000) }).then((r) => r.json()).catch(() => null);
+  if (data) verkeerCache[k] = { at: Date.now(), data };
+  return data || c?.data || { items: [], gepland: [], flitsers: [] };
+}
+
+// ------------------------------------------------------------------ KNMI codes in all of the Netherlands (map layer only)
+
+let weerNLCache = null;
+/** GET /v1/weer/landelijk, at most every 5 minutes: every KNMI warning area of the Netherlands. */
+export async function fetchWeerNL() {
+  if (weerNLCache && Date.now() - weerNLCache.at < 300_000) return weerNLCache.items;
+  const d = await fetch(`${API}/v1/weer/landelijk`, { signal: AbortSignal.timeout(10_000) }).then((r) => r.json()).catch(() => null);
+  if (d?.items) weerNLCache = { at: Date.now(), items: d.items };
+  return d?.items || weerNLCache?.items || [];
+}
+/** The area in its code colour (dashed while it is still to come) and a label "Code oranje · Wind" in the middle. */
+export function weerNLOverlays(mk, g) {
+  const kleur = (CODES[g.niveau] || CODES.yellow)[1], verwacht = g.status === "verwacht";
+  return (Array.isArray(g.gebied) ? g.gebied : []).map((r) => new mk.PolygonOverlay(r.map(([lon, lat]) => new mk.Coordinate(lat, lon)), {
+    style: new mk.Style({ fillColor: kleur, fillOpacity: verwacht ? 0.08 : 0.16, strokeColor: kleur, lineWidth: 1.5, ...(verwacht ? { lineDash: [6, 4] } : {}) }),
+  }));
+}
+export function weerNLLabel(mk, g) {
+  const ring = (g.gebied || []).slice().sort((a, b) => b.length - a.length)[0];
+  if (!ring?.length) return null;
+  const lat = ring.reduce((s, p) => s + p[1], 0) / ring.length, lon = ring.reduce((s, p) => s + p[0], 0) / ring.length;
+  const [code, kleur, op] = CODES[g.niveau] || CODES.yellow;
+  const titel = `${code} · ${g.soort}${g.gebied_naam ? ` · ${g.gebied_naam}` : ""}${g.status === "verwacht" ? " (verwacht)" : ""}`;
+  return new mk.Annotation(new mk.Coordinate(lat, lon), () => {
+    const el = document.createElement("div");
+    el.textContent = `${code} · ${g.soort}`;
+    el.title = titel;
+    el.style.cssText = `background:${kleur};color:${op};font:600 11px/1.2 system-ui,sans-serif;padding:3px 7px;border-radius:99px;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.3)`;
+    return el;
+  }, { calloutEnabled: false, title: titel, anchorOffset: new DOMPoint(0, 10) });
 }
 export const verkeerKleur = (v) => VERKEER_KLEUR[v.soort] || VERKEER_KLEUR.werk;
 // ?v=2: the site caches images 30 days; raise when the icons change.

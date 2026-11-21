@@ -31,7 +31,8 @@ struct TVSettingsView: View {
                 }
                 ForEach(KaartLaagGroep.allCases) { groep in
                     Section {
-                        ForEach(groep.lagen) { l in
+                        // The TV map shows the region only: no layers for all of the Netherlands.
+                        ForEach(groep.lagen.filter { ![.verkeerNL, .knmiNL].contains($0) }) { l in
                             Toggle(isOn: Binding(get: { settings.laag(l) }, set: { settings.setLaag(l, $0) })) {
                                 Label(l.titel, systemImage: l.systemImage)
                             }

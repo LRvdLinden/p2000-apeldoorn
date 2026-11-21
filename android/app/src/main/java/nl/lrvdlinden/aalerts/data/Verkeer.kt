@@ -85,3 +85,14 @@ data class Flitser(val id: String, val lat: Double, val lon: Double, val max: In
 
 @Serializable
 data class VerkeerResponse(val items: List<VerkeerItem> = emptyList(), val flitsers: List<Flitser> = emptyList(), val bijgewerkt: String? = null)
+
+/** One KNMI warning area anywhere in the Netherlands (GET /v1/weer/landelijk). */
+@Serializable
+data class WeerGebied(
+    val id: String, val soort: String = "", val niveau: String = "yellow", val gebied_naam: String? = null,
+    val start: String = "", val einde: String = "", val status: String = "actief", val verwachting: String? = null,
+    val gebied: List<List<List<Double>>>? = null,
+)
+@Serializable
+data class WeerLandelijk(val items: List<WeerGebied> = emptyList())
+

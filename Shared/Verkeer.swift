@@ -191,8 +191,9 @@ final class VerkeerStore {
     private(set) var flitsers: [Flitser] = []
     private(set) var bijgewerkt: Date?
 
-    func vernieuw() async {
-        guard let r = try? await P2000API.shared.getJSON("/v1/verkeer", as: VerkeerResponse.self) else { return }
+    /// `landelijk`: all of the Netherlands (layer "Verkeer in heel Nederland"); otherwise the region of A-Alerts.
+    func vernieuw(landelijk: Bool = false) async {
+        guard let r = try? await P2000API.shared.getJSON("/v1/verkeer", query: landelijk ? ["landelijk": "1"] : [:], as: VerkeerResponse.self) else { return }
         items = r.items
         flitsers = r.flitsers
         bijgewerkt = r.bijgewerkt.flatMap { ISO8601DateFormatter.verkeer.date(from: $0) ?? ISO8601DateFormatter().date(from: $0) }

@@ -3,12 +3,12 @@ import CoreLocation
 
 /// Map layers that can each be switched on or off (phase 5).
 enum KaartLaag: String, CaseIterable, Identifiable {
-    case p2000, nlalert, burgernet, kind, vnog, knmi, verkeer, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar, regio
+    case p2000, nlalert, burgernet, kind, vnog, knmi, knmiNL, verkeer, verkeerNL, flitsers, werkgebied, kazernes, ziekenhuizen, helikopters, buienradar, regio
 
     var id: String { rawValue }
 
     /// On by default: everything except the stations, the rain radar and the speed cameras (they make the map busy).
-    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers, .regio].contains($0) }.map(\.rawValue))
+    static let standaard: Set<String> = Set(allCases.filter { ![.kazernes, .buienradar, .flitsers, .regio, .verkeerNL, .knmiNL].contains($0) }.map(\.rawValue))
 
     var titel: String {
         switch self {
@@ -18,7 +18,9 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .kind: return L("AMBER Alert en Vermist Kind Alert")
         case .vnog: return L("VNOG-incidenten")
         case .knmi: return L("KNMI-waarschuwingsgebieden")
+        case .knmiNL: return L("Weercodes in heel Nederland")
         case .verkeer: return L("Verkeer (NDW)")
+        case .verkeerNL: return L("Verkeer in heel Nederland")
         case .flitsers: return L("Flitsers (vast)")
         case .werkgebied: return L("Grens werkgebied")
         case .kazernes: return L("Kazernes en posten")
@@ -37,7 +39,9 @@ enum KaartLaag: String, CaseIterable, Identifiable {
         case .kind: return "figure.child"
         case .vnog: return "exclamationmark.shield.fill"
         case .knmi: return "cloud.sun.rain.fill"
+        case .knmiNL: return "cloud.bolt.rain.fill"
         case .verkeer: return "car.side.fill"
+        case .verkeerNL: return "road.lanes"
         case .flitsers: return "camera.fill"
         case .werkgebied: return "skew"
         case .kazernes: return "building.2.fill"
@@ -65,9 +69,9 @@ enum KaartLaagGroep: String, CaseIterable, Identifiable {
     }
     var lagen: [KaartLaag] {
         switch self {
-        case .meldingen: return [.p2000, .nlalert, .burgernet, .kind, .vnog, .knmi]
+        case .meldingen: return [.p2000, .nlalert, .burgernet, .kind, .vnog, .knmi, .knmiNL]
         case .lucht: return [.helikopters]
-        case .verkeer: return [.verkeer, .flitsers]
+        case .verkeer: return [.verkeer, .verkeerNL, .flitsers]
         case .posten: return [.kazernes, .ziekenhuizen]
         case .kaart: return [.werkgebied, .regio, .buienradar]
         }
@@ -100,3 +104,50 @@ final class RegioStore {
         ringen = a.ringen.map { $0.compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[0], longitude: $0[1]) : nil } }
     }
 }
+
+// MARK: - KNMI codes in all of the Netherlands
+
+/// One KNMI warning area anywhere in the Netherlands (GET /v1/weer/landelijk). Only a map layer: never a push.
+struct WeerGebied: Decodable, Identifiable, Sendable {
+    let id: String
+    let soort: String
+    let niveau: String
+    let gebied_naam: String?
+    let start: String
+    let einde: String
+    let status: String
+    let verwachting: String?
+    let gebied: [[[Double]]]?
+    /// Rings as coordinates ([lon, lat] pairs from the server, like GeoJSON).
+    var ringen: [[CLLocationCoordinate2D]] {
+        (gebied ?? []).map { $0.compactMap { $0.count == 2 ? CLLocationCoordinate2D(latitude: $0[1], longitude: $0[0]) : nil } }.filter { $0.count >= 3 }
+    }
+    var kleur: Color { Waarschuwing.codeColor(niveau) }
+    var codeTekst: String {
+        switch niveau {
+        case "red": return L("Code rood")
+        case "orange": return L("Code oranje")
+        default: return L("Code geel")
+        }
+    }
+    /// Middle of the biggest ring, for the label on the map.
+    var midden: CLLocationCoordinate2D? {
+        guard let r = ringen.max(by: { $0.count < $1.count }), !r.isEmpty else { return nil }
+        return CLLocationCoordinate2D(latitude: r.map(\.latitude).reduce(0, +) / Double(r.count), longitude: r.map(\.longitude).reduce(0, +) / Double(r.count))
+    }
+}
+
+/// Loaded every 5 minutes while the layer "Weercodes in heel Nederland" is on.
+@MainActor
+@Observable
+final class WeerNLStore {
+    static let shared = WeerNLStore()
+    private(set) var gebieden: [WeerGebied] = []
+
+    func vernieuw() async {
+        struct Antwoord: Decodable { let items: [WeerGebied] }
+        guard let a = try? await P2000API.shared.getJSON("v1/weer/landelijk", as: Antwoord.self) else { return }
+        gebieden = a.items
+    }
+}
+

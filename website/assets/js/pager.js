@@ -8,8 +8,8 @@ import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
   heliGenoemd, heliNaam, heliRelevant, heliVoor, heliImg, vliegtWest, fetchSpoor, fetchSpoorVol, inzetVoor, inzetVan, inzetTekst, fetchVerloop, fetchPost, fetchApp, fetchPand, pandTekst, inDeLucht, inzetEenheden, fetchVluchten, fetchHeliStatus, meldToestel, spoorOverlay, vluchtTekst, heliLaag, geschat, fetchLocaties, locatieAnnotation, locatieSoort, locatieIcon, voorspellingTekst, voorspellingOverlay, afspeelPunt,
-  fetchVerkeer, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
-  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=81";
+  fetchVerkeer, fetchWeerNL, weerNLOverlays, weerNLLabel, verkeerOverlay, verkeerAnnotation, flitserAnnotation, verkeerHTML,
+  CODES, isOpgeheven, isKind, isVnog, wShareUrl, mShareUrl, routeLinks, weergave, zetWeergave, kaartKleur, volgKaartKleur, isGrootIncident, radarLaag, meldingFeedback } from "./aalerts.js?v=82";
 
 const $ = (id) => document.getElementById(id);
 trackVisit();
@@ -957,8 +957,10 @@ let bigMap = null, bigMapReady = null;
 const LAGEN = [
   ["waarschuwingen", "Alerts", "icon_nlalert", "#FFC800", "Alerts"],
   ["knmi", "KNMI", "icon_knmi", "#3E9FDB", "Alerts"],
+  ["knmiNL", "KNMI NL", "icon_knmi", "#F28C28", "Alerts"],
   ["helikopters", "Luchtvaart", "icon_traumaheli", "#9333EA", "Lucht"],
   ["verkeer", "Verkeer", "verkeer_ongeval", "#E3001B", "Verkeer"],
+  ["verkeerNL", "Verkeer NL", "verkeer_file", "#B0002E", "Verkeer"],
   ["flitsers", "Flitsers", "verkeer_flitser", "#1A8CE8", "Verkeer"],
   ["kazernes", "Kazernes", "icon_brandweer", "#E30613", "Posten"],
   ["ziekenhuizen", "Ziekenhuizen", "locatie_trauma", "#DC2626", "Posten"],
@@ -998,7 +1000,7 @@ function renderMapChips() {
   const laagChip = ([k, label, img, c]) => {
     const n = k === "helikopters" ? state.helis.length + state.lucht.length : k === "waarschuwingen" ? mapWarnings().length
       : k === "knmi" ? state.warnings.filter((w) => w.bron === "knmi" && isActief(w)).length : "";
-    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", regio: "De grens van de veiligheidsregio Noord- en Oost-Gelderland", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus; tik op een post voor zijn cijfers", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
+    return `<button class="chip${state.lagen.has(k) ? "" : " off"}" data-laag="${k}" title="${({ waarschuwingen: "NL-Alert en Burgernet", knmi: "KNMI-weerwaarschuwingen", helikopters: "Luchtvaart: Lifeliners, politiehelikopters en de toestellen die je kiest bij Weergave (Defensie, Kustwacht, Marechaussee, regering)", regio: "De grens van de veiligheidsregio Noord- en Oost-Gelderland", kazernes: "Brandweerkazernes, ambulanceposten en politiebureaus; tik op een post voor zijn cijfers", ziekenhuizen: "Ziekenhuizen en helikopterbases", verkeer: "Verkeer (NDW): afsluitingen, werk, ongevallen, pech en files", verkeerNL: "Verkeer in heel Nederland (met de laag Verkeer aan)", knmiNL: "Weercodes van het KNMI in heel Nederland", flitsers: "Vaste flitsers en trajectcontroles (OpenStreetMap)", werkgebied: "Grens van het werkgebied (gemeente Apeldoorn en Teuge)", buienradar: "Buienradar (KNMI), elke 5 minuten nieuw" })[k]}" aria-pressed="${state.lagen.has(k)}" style="--c:${c}"><img src="${asset(`assets/img/${img}.png${img.startsWith("verkeer_") ? "?v=2" : ""}`)}" alt="">${label}${n ? ` <small>${n}</small>` : ""}</button>`;
   };
   const cats = [...new Set(LAGEN.map((l) => l[4]))];
   $("mapLagen").innerHTML = `<div class="lg-paneel">` + cats.map((cat) => `<div class="lg-rij"><span class="lg-kop">${cat}</span><div class="lg-chips">${LAGEN.filter((l) => l[4] === cat).map(laagChip).join("")}${cat === "Kaart" ? `<button class="chip" data-weergave title="Kaart en helikopters" style="--c:#64748B">⚙︎ Weergave</button>` : ""}</div></div>`).join("") + `</div>`;
@@ -1153,9 +1155,19 @@ async function renderMap() {
   }
   if (state.lagen.has("kazernes")) (await kazernes()).forEach((k) => extra.push(kazerneAnnotation(mk, k, DIENSTEN[k.soort]?.color || "#E30613", openPost)));
   if (state.lagen.has("ziekenhuizen")) (await fetchLocaties()).forEach((l) => extra.push(locatieAnnotation(mk, l, openLocatie)));
+  if (state.lagen.has("knmiNL")) (await fetchWeerNL()).forEach((g) => { bigMap.addOverlays(weerNLOverlays(mk, g)); const l = weerNLLabel(mk, g); if (l) extra.push(l); });
   if (state.lagen.has("verkeer") || state.lagen.has("flitsers")) {
-    const vk = await fetchVerkeer();
-    if (state.lagen.has("verkeer")) (vk.items || []).forEach((v) => {
+    const nl = state.lagen.has("verkeer") && state.lagen.has("verkeerNL");
+    const vk = await fetchVerkeer(nl);
+    // All of the Netherlands: every line, but icons only for the region and the 300 nearest to the middle of the map.
+    let items = vk.items || [];
+    if (nl && items.length > 300) {
+      const c = bigMap.center, d = (v) => (v.lat - c.latitude) ** 2 + ((v.lon - c.longitude) * 0.6) ** 2;
+      const dichtbij = new Set(items.filter((v) => !v.regio).sort((a, b) => d(a) - d(b)).slice(0, 300).map((v) => v.id));
+      items.forEach((v) => { const ov = verkeerOverlay(mk, v); if (ov) bigMap.addOverlay(ov); });
+      items = items.filter((v) => v.regio || dichtbij.has(v.id));
+      items.forEach((v) => extra.push(verkeerAnnotation(mk, v, openVerkeer)));
+    } else if (state.lagen.has("verkeer")) items.forEach((v) => {
       const ov = verkeerOverlay(mk, v);
       if (ov) bigMap.addOverlay(ov);
       extra.push(verkeerAnnotation(mk, v, openVerkeer));

@@ -95,7 +95,10 @@ object Api {
     suspend fun pand(guid: String): Pand? = runCatching { AppJson.decodeFromString<PandAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/pand")).pand }.getOrNull()
     suspend fun heliVluchten(id: String): List<HeliVlucht> = runCatching { AppJson.decodeFromString<HeliVluchten>(getText("${base}v1/helikopters/${enc(id)}/vluchten")).vluchten }.getOrDefault(emptyList())
     suspend fun status(): AppStatus? = runCatching { AppJson.decodeFromString<AppStatus>(getText("${base}v1/status")) }.getOrNull()
-    suspend fun verkeer(): VerkeerResponse? = runCatching { AppJson.decodeFromString<VerkeerResponse>(getText("${base}v1/verkeer")) }.getOrNull()
+    /** landelijk: all of the Netherlands (layer "Verkeer in heel Nederland"); otherwise the region of A-Alerts. */
+    suspend fun verkeer(landelijk: Boolean = false): VerkeerResponse? = runCatching { AppJson.decodeFromString<VerkeerResponse>(getText("${base}v1/verkeer" + if (landelijk) "?landelijk=1" else "")) }.getOrNull()
+    /** KNMI warning areas of all of the Netherlands (map layer only, never a push). */
+    suspend fun weerLandelijk(): List<WeerGebied>? = runCatching { AppJson.decodeFromString<WeerLandelijk>(getText("${base}v1/weer/landelijk")).items }.getOrNull()
     suspend fun locaties(): List<Locatie> = runCatching { AppJson.decodeFromString<Locaties>(getText("${base}v1/locaties")).let { it.bases + it.ziekenhuizen } }.getOrDefault(emptyList())
     /** Layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft. */
     suspend fun lucht(): List<Helikopter> = runCatching { AppJson.decodeFromString<LuchtResponse>(getText("${base}v1/lucht")).toestellen }.getOrDefault(emptyList())

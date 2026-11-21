@@ -61,7 +61,11 @@ object Store {
 
     /** Traffic (NDW) and fixed speed cameras: refreshed every minute while the map shows one of the two layers. */
     var verkeer by mutableStateOf<VerkeerResponse?>(null); private set
-    suspend fun refreshVerkeer() { Api.verkeer()?.let { verkeer = it } }
+    suspend fun refreshVerkeer(landelijk: Boolean = false) { Api.verkeer(landelijk)?.let { verkeer = it } }
+
+    /** KNMI codes in all of the Netherlands: refreshed every 5 minutes while that map layer is on. */
+    var weerNL by mutableStateOf<List<WeerGebied>>(emptyList()); private set
+    suspend fun refreshWeerNL() { Api.weerLandelijk()?.let { weerNL = it } }
 
     /** Hospitals and bases: loaded once. */
     var locaties by mutableStateOf<List<Locatie>>(emptyList()); private set

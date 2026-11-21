@@ -92,15 +92,15 @@ private fun PostCijfersBlok(id: String) {
 
 /** The layers per category, as they are listed under "Kaartlagen". */
 private val LAAG_GROEPEN get() = listOf(
-    tr("Meldingen en alerts", "Alerts") to listOf(KaartLaag.MELDINGEN, KaartLaag.WAARSCHUWINGEN, KaartLaag.KNMI),
+    tr("Meldingen en alerts", "Alerts") to listOf(KaartLaag.MELDINGEN, KaartLaag.WAARSCHUWINGEN, KaartLaag.KNMI, KaartLaag.KNMI_NL),
     tr("Lucht", "Air") to listOf(KaartLaag.HELIKOPTERS),
-    tr("Verkeer", "Traffic") to listOf(KaartLaag.VERKEER, KaartLaag.FLITSERS),
+    tr("Verkeer", "Traffic") to listOf(KaartLaag.VERKEER, KaartLaag.VERKEER_NL, KaartLaag.FLITSERS),
     tr("Posten en ziekenhuizen", "Stations and hospitals") to listOf(KaartLaag.KAZERNES, KaartLaag.ZIEKENHUIZEN),
     tr("Kaart", "Map") to listOf(KaartLaag.WERKGEBIED, KaartLaag.REGIO, KaartLaag.BUIENRADAR),
 )
 
 enum class KaartLaag(val key: String) {
-    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar"), REGIO("regio");
+    MELDINGEN("meldingen"), WAARSCHUWINGEN("waarschuwingen"), KNMI("knmi"), HELIKOPTERS("helikopters"), KAZERNES("kazernes"), ZIEKENHUIZEN("ziekenhuizen"), VERKEER("verkeer"), FLITSERS("flitsers"), WERKGEBIED("werkgebied"), BUIENRADAR("buienradar"), REGIO("regio"), KNMI_NL("knmiNL"), VERKEER_NL("verkeerNL");
     val label get() = when (this) {
         MELDINGEN -> tr("Meldingen", "Alerts"); WAARSCHUWINGEN -> "NL-Alert & Burgernet"; KNMI -> tr("KNMI-codes", "KNMI codes")
         HELIKOPTERS -> tr("Luchtvaart (live)", "Aviation (live)"); KAZERNES -> tr("Kazernes en posten (brandweer, ambulance, politie)", "Stations (fire, ambulance, police)")
@@ -108,6 +108,7 @@ enum class KaartLaag(val key: String) {
         BUIENRADAR -> tr("Buienradar (KNMI)", "Rain radar (KNMI)")
         REGIO -> tr("Grens veiligheidsregio", "Border of the safety region")
         VERKEER -> tr("Verkeer (NDW)", "Traffic (NDW)"); FLITSERS -> tr("Flitsers (vast)", "Speed cameras (fixed)")
+        KNMI_NL -> tr("Weercodes in heel Nederland", "Weather codes in all of the Netherlands"); VERKEER_NL -> tr("Verkeer in heel Nederland", "Traffic in all of the Netherlands")
     }
 }
 
@@ -126,8 +127,14 @@ fun MapScreen(nav: Nav) {
 
     // Traffic and speed cameras: every minute while one of the two layers is on.
     val verkeerAan = KaartLaag.VERKEER.key in lagen || KaartLaag.FLITSERS.key in lagen
-    LaunchedEffect(verkeerAan) {
-        while (verkeerAan) { Store.refreshVerkeer(); delay(60_000) }
+    val verkeerNL = KaartLaag.VERKEER.key in lagen && KaartLaag.VERKEER_NL.key in lagen
+    LaunchedEffect(verkeerAan, verkeerNL) {
+        while (verkeerAan) { Store.refreshVerkeer(verkeerNL); delay(60_000) }
+    }
+    // KNMI codes in all of the Netherlands: every 5 minutes while that layer is on.
+    val weerNLAan = KaartLaag.KNMI_NL.key in lagen
+    LaunchedEffect(weerNLAan) {
+        while (weerNLAan) { Store.refreshWeerNL(); delay(300_000) }
     }
     // Defence and government aircraft: only loaded while that layer is on.
     val defensieAan = KaartLaag.HELIKOPTERS.key in Settings.kaartLagen && Settings.luchtSoorten.any { it != "trauma" && it != "politie" }
@@ -223,6 +230,9 @@ fun MapScreen(nav: Nav) {
     if (KaartLaag.WERKGEBIED.key in lagen) areas += MapArea("werkgebied", Werkgebied.gemeenteGebied, 0xFFCF0A1E, 0.03, width = 1.5)
     // The border of the safety region (CBS, via PDOK): a solid teal line, hardly any fill.
     if (KaartLaag.REGIO.key in lagen && Store.regio.isNotEmpty()) areas += MapArea("regio", Store.regio, 0xFF0F766E, 0.0, width = 2.5)
+    if (KaartLaag.KNMI_NL.key in lagen) Store.weerNL.forEach { g ->
+        areas += MapArea("nl:${g.id}", g.gebied ?: emptyList(), Waarschuwing.codeColor(g.niveau).toArgb().toLong(), if (g.status == "verwacht") 0.08 else 0.16, dashed = g.status == "verwacht", width = 1.5)
+    }
     if (KaartLaag.KNMI.key in lagen) warns.filter { it.bron == "knmi" && !it.isBeeindigd }.forEach { areas += MapArea(it.id, it.gebied ?: emptyList(), it.color.toArgb().toLong(), 0.18) }
     if (KaartLaag.WAARSCHUWINGEN.key in lagen) warns.filter { it.bron != "knmi" && it.bron !in verborgen }.forEach { w ->
         if (w.bron == "nlalert") areas += MapArea(w.id, w.gebied ?: emptyList(), w.color.toArgb().toLong(), if (w.isBeeindigd) 0.06 else 0.2)

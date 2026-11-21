@@ -13278,6 +13278,23 @@
         }
       }
     },
+    "Verkeer in heel Nederland": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traffic in all of the Netherlands"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verkeer in heel Nederland"
+          }
+        }
+      }
+    },
     "Verkeerde hulpdienst": {
       "extractionState": "manual",
       "localizations": {
@@ -14090,6 +14107,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Weer"
+          }
+        }
+      }
+    },
+    "Weercodes in heel Nederland": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weather codes in all of the Netherlands"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Weercodes in heel Nederland"
           }
         }
       }
@@ -15858,6 +15892,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "vertrek over %lld min"
+          }
+        }
+      }
+    },
+    "verwacht": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "expected"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "verwacht"
           }
         }
       }

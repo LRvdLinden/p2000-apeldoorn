@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 (109), Android en website: verkeer en weer in heel Nederland (21-11-2026)
+- **Kaartlaag Verkeer in heel Nederland** (iOS, Android, website "Verkeer NL"): `GET /v1/verkeer?landelijk=1` (api.a-alerts.nl) met alle NDW-situaties van Nederland, items met `regio`. De verkeersdienst levert `/verkeer?landelijk=1` (gzip); `/verkeer` en `/v1/verkeer` zonder parameter blijven de regio. Planning, files uit meetlussen en flitsers blijven regionaal. iOS tekent bij landelijk alleen de iconen in beeld (max. 250), de website de regio plus de 300 dichtstbij het midden; lijnen overal.
+- **Kaartlaag Weercodes in heel Nederland** (iOS, Android, website "KNMI NL"): `GET /v1/weer/landelijk` met alle KNMI-waarschuwingsgebieden; gebied in de codekleur, gestippeld als hij later ingaat, met een label (iOS, website). Geen pushmeldingen en niet in de lijst met waarschuwingen.
+- Apple TV en de meldkamer-website tonen alleen de regio (geen landelijke lagen).
+
 ## Beheer en status (21-11-2026)
 - **Status (api.a-alerts.nl):** P2000 alleen via de Koyeb-stream (p2000.page weigert ons met HTTP 403 en wordt niet meer gelezen); nieuwe onderdelen Database (MySQL) en Homey-app; Server toont de eigen achtergrondtaken.
 - **Beheer (P2000Beheer build 21, LRbeheer build 55, web-beheer):** nieuw tabblad **Bronnen** (`GET /v1/beheer/bronnen`): elke bron met staat en laatste ophaalronde, de database met tabellen en de dekking van de P2000-velden van de laatste 24 uur. Dashboard: "P2000 (Koyeb-stream)" in plaats van "P2000-feed" met HTTP 403.

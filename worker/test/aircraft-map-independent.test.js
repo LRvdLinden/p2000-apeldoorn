@@ -39,5 +39,5 @@ test("routine 15 second pager refreshes redraw the map only on alert changes", (
 
 test("web output keeps 90 second offline aircraft threshold", () => {
   assert.match(marker, /now - at < 90_000/);
-  assert.match(pager, /from "\.\/aalerts\.js\?v=81"/);
+  assert.match(pager, /from "\.\/aalerts\.js\?v=82"/);
 });

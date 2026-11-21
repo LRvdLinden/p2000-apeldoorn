@@ -42,6 +42,9 @@ struct MapScreen: View {
     @Environment(\.colorScheme) private var colorScheme
     @State private var radar = RadarStore.shared
     @State private var verkeer = VerkeerStore.shared
+    @State private var weerNL = WeerNLStore.shared
+    /// The visible part of the map: with all of the Netherlands only the traffic icons in view are drawn (lines everywhere).
+    @State private var zicht: MKCoordinateRegion?
     @State private var selectedVerkeer: VerkeerItem?
     @State private var selectedFlitser: Flitser?
     /// Bumped on every camera move while the rain radar is on, so its image follows the map.
@@ -112,6 +115,7 @@ struct MapScreen: View {
             Map(position: $position) {
                 werkgebiedLaag
                 regioLaag
+                weerNLLaag
                 gebiedenLaag(ws)
                 kazernesLaag
                 verkeerLaag
@@ -136,6 +140,7 @@ struct MapScreen: View {
             .onMapCameraChange(frequency: .continuous) { _ in
                 if settings.laag(.buienradar) { cameraTeller &+= 1 }
             }
+            .onMapCameraChange(frequency: .onEnd) { ctx in zicht = ctx.region }
             #if !os(tvOS)
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.6)
@@ -170,10 +175,17 @@ struct MapScreen: View {
                 }
             }
             // Traffic and speed cameras: every minute while one of the two layers is on.
-            .task(id: settings.laag(.verkeer) || settings.laag(.flitsers)) {
+            .task(id: "\(settings.laag(.verkeer) || settings.laag(.flitsers))\(settings.laag(.verkeerNL))") {
                 while settings.laag(.verkeer) || settings.laag(.flitsers), !Task.isCancelled {
-                    await verkeer.vernieuw()
+                    await verkeer.vernieuw(landelijk: settings.laag(.verkeer) && settings.laag(.verkeerNL))
                     try? await Task.sleep(for: .seconds(60))
+                }
+            }
+            // KNMI codes in all of the Netherlands: every 5 minutes while that layer is on.
+            .task(id: settings.laag(.knmiNL)) {
+                while settings.laag(.knmiNL), !Task.isCancelled {
+                    await weerNL.vernieuw()
+                    try? await Task.sleep(for: .seconds(300))
                 }
             }
             .sheet(item: $selectedVerkeer) { item in
@@ -363,6 +375,37 @@ struct MapScreen: View {
         }
     }
 
+    /// With "Verkeer in heel Nederland" (hundreds of items) only the icons in view are drawn, at most 250.
+    private var zichtbaarVerkeer: [VerkeerItem] {
+        guard settings.laag(.verkeerNL), verkeer.items.count > 150, let z = zicht else { return verkeer.items }
+        let la = z.span.latitudeDelta / 2 * 1.2, lo = z.span.longitudeDelta / 2 * 1.2
+        return Array(verkeer.items.filter { abs($0.lat - z.center.latitude) <= la && abs($0.lon - z.center.longitude) <= lo }.prefix(250))
+    }
+
+    /// KNMI codes in all of the Netherlands: the areas in their code colour with a label "Code oranje · Wind".
+    @MapContentBuilder private var weerNLLaag: some MapContent {
+        if settings.laag(.knmiNL) {
+            ForEach(weerNL.gebieden) { g in
+                ForEach(Array(g.ringen.enumerated()), id: \.offset) { _, ring in
+                    MapPolygon(coordinates: ring)
+                        .foregroundStyle(g.kleur.opacity(g.status == "verwacht" ? 0.08 : 0.18))
+                        .stroke(g.kleur, style: StrokeStyle(lineWidth: 1.5, dash: g.status == "verwacht" ? [6, 4] : []))
+                }
+                if let m = g.midden {
+                    Annotation("\(g.codeTekst) · \(g.soort)", coordinate: m) {
+                        Text("\(g.codeTekst) · \(g.soort)")
+                            .font(AppFont.body(11, .semibold))
+                            .padding(.horizontal, 7).padding(.vertical, 3)
+                            .background(g.kleur, in: Capsule())
+                            .foregroundStyle(g.niveau == "yellow" ? Color.black : Color.white)
+                            .accessibilityLabel([g.codeTekst, g.soort, g.gebied_naam, g.status == "verwacht" ? L("verwacht") : nil].compactMap { $0 }.joined(separator: ", "))
+                    }
+                    .annotationTitles(.hidden)
+                }
+            }
+        }
+    }
+
     /// Traffic from the NDW: the route of closures, roadworks and jams as a line, every item as an icon; fixed speed cameras.
     @MapContentBuilder private var verkeerLaag: some MapContent {
         if settings.laag(.verkeer) {
@@ -371,7 +414,7 @@ struct MapScreen: View {
                     .stroke(v.soort.kleur, style: StrokeStyle(lineWidth: v.soort == .file ? 6 : 4, lineCap: .round, lineJoin: .round,
                                                                dash: v.soort == .afsluiting ? [6, 5] : []))
             }
-            ForEach(verkeer.items) { v in
+            ForEach(zichtbaarVerkeer) { v in
                 Annotation(v.kopTekst, coordinate: v.coordinate, anchor: v.soort.isMarker ? .bottom : .center) {
                     VerkeerIcon(soort: v.soort, size: selectedVerkeer?.id == v.id ? 32 : 26)
                         .onTapGesture { selectedVerkeer = v }
