@@ -1040,6 +1040,9 @@ async function proxy(req, env) {
   for (const [k, v] of req.headers) if (!PROXY_SKIP.has(k.toLowerCase())) headers.set(k, v);
   const ip = req.headers.get("cf-connecting-ip");
   if (ip) headers.set("x-forwarded-for", ip);
+  // Tells api.a-alerts.nl the request came through the old address: the one-time sign-off of app 2.0.2+ "at the old
+  // server" then leaves its new registration alone.
+  headers.set("x-aalerts-via-worker", "1");
   const body = req.method === "GET" || req.method === "HEAD" ? undefined : await req.arrayBuffer();
   try {
     const r = await fetch(env.PROXY_API.replace(/\/+$/, "") + url.pathname + url.search, { method: req.method, headers, body, redirect: "manual" });
