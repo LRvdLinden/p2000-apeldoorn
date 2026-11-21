@@ -163,6 +163,21 @@ struct Melding: Identifiable, Hashable, Codable {
     /// Less than 10 minutes old ("LIVE" badge).
     var isRecent: Bool { Date.now.timeIntervalSince(datum) < 10 * 60 }
 
+    /// "Graag contact OC/meldkamer": a unit is asked to call the control room; no incident of its own.
+    var isContactMeldkamer: Bool { Self.isContactMeldkamer(fullMelding ?? title, categorie: categorie) }
+    /// A test call of the P2000 network ("TESTOPROEP", "proefalarm"); no real incident.
+    var isTestOproep: Bool { Self.isTestOproep(fullMelding ?? title) }
+
+    nonisolated static func isContactMeldkamer(_ text: String, categorie: String? = nil) -> Bool {
+        if categorie == "Graag contact meldkamer" { return true }
+        return text.range(of: #"\bcontact\b.{0,25}\b(oc|meldkamer|mka|mkb|mkp|mk|gms|mka\s*nog)\b|\b(graag|svp|s\.v\.p\.?|verzoeke?)\b.{0,12}\b(opnieuw\s+)?contact\b"#,
+                          options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
+    nonisolated static func isTestOproep(_ text: String) -> Bool {
+        text.range(of: #"\btest(oproep|bericht|melding|alarm|page|paging)?\b|\bproef(alarm|oproep)\b"#, options: [.regularExpression, .caseInsensitive]) != nil
+    }
+
     var isUrgent: Bool {
         guard let p = prioriteit?.uppercased() else { return false }
         return ["A0", "A1", "P1"].contains(p)

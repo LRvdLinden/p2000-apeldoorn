@@ -993,5 +993,11 @@
   "In de buurt": "Nearby",
   "Tijd": "Time",
   "Toon op kaart": "Show on map",
-  "Zet Huidige locatie aan in de app om meldingen in de buurt te zien": "Turn on Current location in the app to see alerts nearby"
+  "Zet Huidige locatie aan in de app om meldingen in de buurt te zien": "Turn on Current location in the app to see alerts nearby",
+  "Verberg \"Graag contact meldkamer\"": "Hide \"Graag contact meldkamer\"",
+  "Verberg testoproepen": "Hide test calls",
+  "Meldingen filteren": "Filter alerts",
+  "Geldt overal: in de lijst, op de kaart, in widgets, op Apple Watch, Apple TV en CarPlay, en voor je pushmeldingen. Ook bij capcodes die je volgt.": "Applies everywhere: in the list, on the map, in widgets, on Apple Watch, Apple TV and CarPlay, and for your notifications. Also for capcodes you follow.",
+  "Je verbergt \"Graag contact meldkamer\" in Instellingen › Meldingen filteren.": "You hide \"Graag contact meldkamer\" in Settings › Filter alerts.",
+  "Je verbergt testoproepen in Instellingen › Meldingen filteren.": "You hide test calls in Settings › Filter alerts."
 }

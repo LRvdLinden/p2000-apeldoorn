@@ -117,7 +117,7 @@ final class MeldingStore {
             guard m.datum >= cutoff else { return false }
             // A followed capcode is always shown, also outside the list filters.
             let alles = buitenFilters && !q.isEmpty
-            guard alles || settings.matchesList(m) || settings.volgtCapcode(m) else { return false }
+            guard alles || ((settings.matchesList(m) || settings.volgtCapcode(m)) && !settings.isVerborgenSoort(m)) else { return false }
             if !alles && settings.hideRead && settings.isRead(m) { return false }
             guard !q.isEmpty else { return true }
             return ([m.title, m.stad ?? "", m.locatie ?? "", m.categorie ?? "", m.capcode ?? "", m.fullMelding ?? ""] + m.eenheden.flatMap { [$0.code ?? "", $0.naam ?? ""] })

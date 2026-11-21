@@ -229,7 +229,7 @@ final class CarPlaySceneDelegate: UIResponder, CPTemplateApplicationSceneDelegat
         bekend.formUnion(nieuw.map(\.guid))
         guard !alertOpen, let ic = interfaceController else { return }
         let kandidaat = nieuw
-            .filter { AppSettings.shared.matchesList($0) || AppSettings.shared.volgtCapcode($0) }
+            .filter { (AppSettings.shared.matchesList($0) || AppSettings.shared.volgtCapcode($0)) && !AppSettings.shared.isVerborgenSoort($0) }
             .compactMap { m in afstandKm(m).map { (m, $0) } }
             .filter { $0.1 <= buurtKm }
             .sorted { $0.1 < $1.1 }

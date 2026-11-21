@@ -5186,6 +5186,23 @@
         }
       }
     },
+    "Geldt overal: in de lijst, op de kaart, in widgets, op Apple Watch, Apple TV en CarPlay, en voor je pushmeldingen. Ook bij capcodes die je volgt.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Applies everywhere: in the list, on the map, in widgets, on Apple Watch, Apple TV and CarPlay, and for your notifications. Also for capcodes you follow."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geldt overal: in de lijst, op de kaart, in widgets, op Apple Watch, Apple TV en CarPlay, en voor je pushmeldingen. Ook bij capcodes die je volgt."
+          }
+        }
+      }
+    },
     "Geldt voor al je profielen; per profiel aanpassen kan bij Notificaties › Profielen. Je krijgt een waarschuwing als die de plaatsen van een profiel raakt (geen plaatsen gekozen = het hele werkgebied) en, als Mijn buurt aan staat, ook binnen je straal valt.": {
       "extractionState": "manual",
       "localizations": {
@@ -6508,6 +6525,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Je profiel staat klaar"
+          }
+        }
+      }
+    },
+    "Je verbergt \"Graag contact meldkamer\" in Instellingen › Meldingen filteren.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You hide \"Graag contact meldkamer\" in Settings › Filter alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je verbergt \"Graag contact meldkamer\" in Instellingen › Meldingen filteren."
+          }
+        }
+      }
+    },
+    "Je verbergt testoproepen in Instellingen › Meldingen filteren.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "You hide test calls in Settings › Filter alerts."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Je verbergt testoproepen in Instellingen › Meldingen filteren."
           }
         }
       }
@@ -8123,6 +8174,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldingen en alerts"
+          }
+        }
+      }
+    },
+    "Meldingen filteren": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Filter alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen filteren"
           }
         }
       }
@@ -13057,6 +13125,23 @@
         }
       }
     },
+    "Verberg \"Graag contact meldkamer\"": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide \"Graag contact meldkamer\""
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verberg \"Graag contact meldkamer\""
+          }
+        }
+      }
+    },
     "Verberg bekeken meldingen": {
       "extractionState": "manual",
       "localizations": {
@@ -13070,6 +13155,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Verberg bekeken meldingen"
+          }
+        }
+      }
+    },
+    "Verberg testoproepen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hide test calls"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Verberg testoproepen"
           }
         }
       }

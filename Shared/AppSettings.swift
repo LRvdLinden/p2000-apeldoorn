@@ -20,6 +20,9 @@ final class AppSettings {
     var gelezen: [String] = [] { didSet { save(.gelezen, gelezen) } }
     /// "Verberg bekeken meldingen" (same option as the website).
     var hideRead: Bool = false { didSet { save(.hideRead, hideRead) } }
+    /// Hide "Graag contact OC/meldkamer" and test calls everywhere: lists, map, widgets, Watch, TV, CarPlay and pushes.
+    var verbergContact: Bool = false { didSet { save(.verbergContact, verbergContact); notificationsChanged() } }
+    var verbergTest: Bool = false { didSet { save(.verbergTest, verbergTest); notificationsChanged() } }
 
     // MARK: Warnings (A-Alerts)
     /// List filter for NL-Alert, Burgernet and KNMI ("nlalert", "burgernet", "knmi:yellow" …). Empty = all.
@@ -131,7 +134,7 @@ final class AppSettings {
     @ObservationIgnored var onNotificationSettingsChanged: (() -> Void)?
 
     enum Key: String, CaseIterable {
-        case diensten, plaatsen, prioriteiten, groupByDay, bewaard, gelezen, hideRead, appearance, mapType
+        case diensten, plaatsen, prioriteiten, groupByDay, bewaard, gelezen, hideRead, appearance, mapType, verbergContact, verbergTest
         case notificationsEnabled, notifDiensten, notifPlaatsen, notifPrioriteiten, quietMode, quietFrom, quietTo, criticalAlerts
         case radiusEnabled, radiusKm, radiusMode, fixedLat, fixedLon, fixedName
         case useLocation, appLock, onboardingDone, currentLat, currentLon
@@ -250,6 +253,8 @@ final class AppSettings {
         if let v = set(.bewaard) { bewaard = v }
         if let v = source(Key.gelezen.storageKey) as? [String] { gelezen = v }
         if let v = source(Key.hideRead.storageKey) as? Bool { hideRead = v }
+        if let v = source(Key.verbergContact.storageKey) as? Bool { verbergContact = v }
+        if let v = source(Key.verbergTest.storageKey) as? Bool { verbergTest = v }
         if let v = source(Key.appearance.storageKey) as? String { appearance = v }
         if let v = source(Key.mapType.storageKey) as? String { mapType = v }
         if let v = source(Key.notificationsEnabled.storageKey) as? Bool { notificationsEnabled = v }
@@ -345,7 +350,7 @@ final class AppSettings {
         }
         cloud.synchronize()
         isLoading = true
-        diensten = []; plaatsen = []; prioriteiten = []; groupByDay = true; bewaard = []; gelezen = []; hideRead = false
+        diensten = []; plaatsen = []; prioriteiten = []; groupByDay = true; bewaard = []; gelezen = []; hideRead = false; verbergContact = false; verbergTest = false
         appearance = "systeem"; mapType = "standard"
         notificationsEnabled = false; notifDiensten = []; notifPlaatsen = []; notifPrioriteiten = []
         quietMode = false; quietFrom = 23 * 60; quietTo = 7 * 60; criticalAlerts = true
@@ -411,7 +416,13 @@ final class AppSettings {
         return 6371 * 2 * atan2(sqrt(a), sqrt(1 - a))
     }
 
+    /// A kind of alert the user hides everywhere ("Graag contact meldkamer", test calls); also a followed capcode.
+    func isVerborgenSoort(_ m: Melding) -> Bool {
+        (verbergContact && m.isContactMeldkamer) || (verbergTest && m.isTestOproep)
+    }
+
     func matchesList(_ m: Melding) -> Bool {
+        if isVerborgenSoort(m) { return false }
         if !withinRadius(m) { return false }
         if !diensten.isEmpty, !diensten.contains(m.dienst.rawValue) { return false }
         if !Werkgebied.shared.matches(m, selected: plaatsen) { return false }
@@ -439,7 +450,7 @@ final class AppSettings {
 
     /// Whether this alert should produce a notification right now.
     func matchesNotification(_ m: Melding, at date: Date = .now) -> Bool {
-        guard notificationsEnabled else { return false }
+        guard notificationsEnabled, !isVerborgenSoort(m) else { return false }
         if grootIncident, m.isGrootIncident, grootPlaatsen.isEmpty || Werkgebied.shared.matches(m, selected: grootPlaatsen),
            !(isQuiet(at: date) && !(criticalAlerts && m.isUrgent)) { return true }
         guard withinRadius(m) else { return false }
@@ -483,6 +494,8 @@ final class AppSettings {
     /// Why this device got no push for an alert (same rules as the server), or nil when it would have got one.
     func geenPushReden(_ m: Melding) -> String? {
         guard notificationsEnabled else { return L("Pushmeldingen staan uit in Instellingen.") }
+        if verbergContact && m.isContactMeldkamer { return L("Je verbergt \"Graag contact meldkamer\" in Instellingen › Meldingen filteren.") }
+        if verbergTest && m.isTestOproep { return L("Je verbergt testoproepen in Instellingen › Meldingen filteren.") }
         if volgtCapcode(m) { return nil }
         let urgent = m.isUrgent
         if grootIncident, m.isGrootIncident, grootPlaatsen.isEmpty || Werkgebied.shared.matches(m, selected: grootPlaatsen),

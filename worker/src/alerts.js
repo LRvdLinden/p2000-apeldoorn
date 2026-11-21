@@ -408,7 +408,9 @@ export function prefsFrom(s) {
     // Tab Nieuws (app 2.0.1 build 67+): liveblog messages from the beheer and new police news.
     nieuwsLiveblog: s.nieuwsLiveblog === true, nieuwsPolitie: s.nieuwsPolitie === true, nieuwsRegio: s.nieuwsRegio === true,
     // KNMI extras (default on): a push one hour before the code starts, and one when it is lifted (code green).
-    knmiVooraf: s.knmiVooraf !== false, knmiOpgeheven: s.knmiOpgeheven !== false };
+    knmiVooraf: s.knmiVooraf !== false, knmiOpgeheven: s.knmiOpgeheven !== false,
+    // App 2.0.2+: hide "Graag contact meldkamer" and test calls everywhere, also as push (default off).
+    verbergContact: s.verbergContact === true, verbergTest: s.verbergTest === true };
 }
 
 /** Whether a warning reaches the device's radius: its area covers the centre or comes within the radius. */

@@ -1,6 +1,6 @@
 // A-Alerts notification profiles (max 5 per device): own places, services, priorities, warnings and times.
 // The device row keeps the global parts (on/off, radius, quiet hours, critical); profiles decide the rest.
-import { matches, TIME_ZONE, isQuiet, isUrgent } from "./rules.js";
+import { matches, TIME_ZONE, isQuiet, isUrgent, isContactMeldkamer, isTestOproep } from "./rules.js";
 import { wantsPush } from "./alerts.js";
 
 export const MAX_PROFIELEN = 5;
@@ -75,6 +75,8 @@ export function volgtCapcode(prefs, m) {
  * A followed capcode always counts, also outside the radius, places, services or profiles (quiet hours still apply).
  */
 export function meldingWanted(device, prefs, m, date = new Date()) {
+  // Hidden kinds ("Graag contact meldkamer", test calls): never a push, also not for a followed capcode.
+  if ((prefs?.verbergContact && isContactMeldkamer(m)) || (prefs?.verbergTest && isTestOproep(m))) return false;
   if (device.enabled && volgtCapcode(prefs, m) && !(isQuiet(device, date) && !(device.critical && isUrgent(m)))) return true;
   const profielen = prefs?.profielen;
   if (!Array.isArray(profielen) || !profielen.length) return matches(device, m, date);

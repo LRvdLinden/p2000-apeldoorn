@@ -99,6 +99,10 @@ object Settings {
     var waarschuwingFilter by set("waarschuwingFilter", emptySet())
     var groupByDay by bool("groupByDay", true)
     var hideRead by bool("hideRead", false)
+    /** Hide "Graag contact meldkamer" and test calls everywhere: lists, map, widget, in-app alarm and pushes. */
+    var verbergContact by bool("verbergContact", false, push = true)
+    var verbergTest by bool("verbergTest", false, push = true)
+    fun isVerborgenSoort(m: Melding): Boolean = (verbergContact && m.isContactMeldkamer) || (verbergTest && m.isTestOproep)
     var bewaard by set("bewaard", emptySet())
     /** Followed capcodes ("code|naam"): push and list also outside places, radius and profiles (as on iOS). */
     var volgCapcodes by set("volgCapcodes", emptySet(), push = true)
@@ -206,6 +210,8 @@ object Settings {
     /** Why this device got no push for an alert (same rules as the server and iOS), or null when it would have got one. */
     fun geenPushReden(m: Melding): String? {
         if (!notificationsEnabled) return tr("Pushmeldingen staan uit in Instellingen.", "Notifications are off in Settings.")
+        if (verbergContact && m.isContactMeldkamer) return tr("Je verbergt \"Graag contact meldkamer\" in de filters.", "You hide \"Graag contact meldkamer\" in the filters.")
+        if (verbergTest && m.isTestOproep) return tr("Je verbergt testoproepen in de filters.", "You hide test calls in the filters.")
         if (volgtCapcode(m)) return null
         if (grootWanted(m)) return null
         val km = if (radiusKm % 1.0 == 0.0) radiusKm.toInt().toString() else radiusKm.toString()
@@ -279,6 +285,8 @@ object Settings {
     }
 
     fun matchesList(m: Melding): Boolean {
+        // Hidden kinds stay hidden everywhere, also for a followed capcode.
+        if (isVerborgenSoort(m)) return false
         // A followed capcode is always shown, also outside the list filters.
         if (volgtCapcode(m)) return true
         if (!withinRadius(m)) return false
@@ -326,6 +334,8 @@ object Settings {
                 "nieuwsLiveblog" to pushNieuwsLiveblog,
                 "nieuwsPolitie" to pushNieuwsPolitie,
                 "nieuwsRegio" to pushNieuwsRegio,
+                "verbergContact" to verbergContact,
+                "verbergTest" to verbergTest,
             ),
             "capcodes" to gevolgd.keys.sorted(),
             "heli" to mutableMapOf<String, Any?>(

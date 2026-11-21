@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.0.2 (108), Android 2.0.2 en website (21-11-2026)
+- **Nieuw filter: "Graag contact meldkamer" en testoproepen verbergen.** Overal: lijst, kaart, widgets, Apple Watch, Apple TV, CarPlay, in-app alarm en pushmeldingen (ook bij gevolgde capcodes). iOS: Instellingen › Meldingen filteren; Android: filters in de pager; website: Filters in de pager. De servers (Worker en api.a-alerts.nl) slaan de push over met `verbergContact` / `verbergTest`.
+- **Schrijf een recensie** opent https://apps.apple.com/nl/app/id6829732272?action=write-review (App Store-ID ingevuld).
+- **p2000.page** staat niet meer in de voettekst van Instellingen (iOS en Android) en de website; de bron staat in de disclaimer en bij elke P2000-melding.
+
 ## Homey en beheer naar api.a-alerts.nl (21-11-2026)
 - **Homey-app:** de realtime webhooks (meldingen, waarschuwingen, VNOG, nieuws) komen nu van api.a-alerts.nl; de Worker stuurt ze niet meer (HOMEY_VIA_API). De Homey-app leest bij het starten ook api.a-alerts.nl (versie 0.1.17).
 - **P2000Beheer (build 20) en het web-beheer** praten met api.a-alerts.nl. Elke wijziging in het beheer gaat tot de overstap ook naar de Worker, zodat de oude apps hetzelfde laten zien.

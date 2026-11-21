@@ -256,3 +256,15 @@ export function deviceFrom(body) {
   };
 }
 
+
+/** "Graag contact OC/meldkamer": a unit is asked to call the control room (no incident of its own). Same rule as the apps. */
+export function isContactMeldkamer(m) {
+  if (m?.categorie === "Graag contact meldkamer") return true;
+  const t = String(m?.full_melding || m?.title || "");
+  return /\bcontact\b.{0,25}\b(oc|meldkamer|mka|mkb|mkp|mk|gms|mka\s*nog)\b|\b(graag|svp|s\.v\.p\.?|verzoeke?)\b.{0,12}\b(opnieuw\s+)?contact\b/i.test(t);
+}
+
+/** A test call of the P2000 network ("TESTOPROEP", "proefalarm"). Same rule as the apps. */
+export function isTestOproep(m) {
+  return /\btest(oproep|bericht|melding|alarm|page|paging)?\b|\bproef(alarm|oproep)\b/i.test(String(m?.full_melding || m?.title || ""));
+}

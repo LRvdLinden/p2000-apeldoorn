@@ -42,7 +42,7 @@ fun PagerScreen(nav: Nav) {
 
     val gelezen = Settings.gelezen
     val items: List<TimelineItem> = remember(Store.meldingen, Store.waarschuwingen, Settings.diensten, Settings.plaatsen, Settings.prioriteiten,
-        Settings.waarschuwingFilter, Settings.radiusEnabled, Settings.radiusKm, Settings.hideRead, query, gelezen.size, Settings.zoekBuitenFilters) {
+        Settings.waarschuwingFilter, Settings.radiusEnabled, Settings.radiusKm, Settings.hideRead, Settings.verbergContact, Settings.verbergTest, query, gelezen.size, Settings.zoekBuitenFilters) {
         val q = query.trim().lowercase()
         // While searching, "also outside my filters" finds alerts that the list filters would hide.
         val alles = q.isNotEmpty() && Settings.zoekBuitenFilters
@@ -183,6 +183,8 @@ fun FilterSheet(onDismiss: () -> Unit) {
             SectionCard(tr("Weergave", "Display")) {
                 SwitchRow(tr("Groeperen per dag", "Group by day"), checked = Settings.groupByDay) { Settings.groupByDay = it }
                 SwitchRow(tr("Verberg bekeken meldingen", "Hide viewed alerts"), checked = Settings.hideRead) { Settings.hideRead = it }
+                SwitchRow(tr("Verberg \"Graag contact meldkamer\"", "Hide \"Graag contact meldkamer\""), tr("Overal, ook voor pushmeldingen", "Everywhere, also for notifications"), checked = Settings.verbergContact) { Settings.verbergContact = it }
+                SwitchRow(tr("Verberg testoproepen", "Hide test calls"), tr("Overal, ook voor pushmeldingen", "Everywhere, also for notifications"), checked = Settings.verbergTest) { Settings.verbergTest = it }
                 SwitchRow(tr("Alleen mijn buurt", "Only my area"), tr("Straal van ${Settings.radiusKm.toInt()} km", "Radius of ${Settings.radiusKm.toInt()} km"), checked = Settings.radiusEnabled) { Settings.radiusEnabled = it }
             }
             TextButton(onClick = { Settings.diensten = emptySet(); Settings.plaatsen = emptySet(); Settings.prioriteiten = emptySet(); Settings.waarschuwingFilter = emptySet(); Settings.radiusEnabled = false }) {

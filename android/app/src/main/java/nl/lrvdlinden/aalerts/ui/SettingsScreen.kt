@@ -185,9 +185,6 @@ fun SettingsScreen(nav: Nav) {
                 Text("© ${java.time.Year.now().value} A-Alerts. All rights reserved.", color = Muted, fontSize = 12.sp)
                 Text(tr("Made & Powered by PixelForges", "Made & Powered by PixelForges"), color = Muted, fontSize = 12.sp,
                     modifier = Modifier.clickable { ctx.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://pixelforges.nl"))) })
-                Spacer(Modifier.height(6.dp))
-                Text(tr("P2000-gegevens via p2000.page", "P2000 data via p2000.page"), color = Muted, fontSize = 11.sp, textAlign = TextAlign.Center,
-                    modifier = Modifier.clip(RoundedCornerShape(6.dp)).padding(4.dp))
             }
         }
     }

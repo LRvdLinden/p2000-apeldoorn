@@ -138,6 +138,19 @@ struct SettingsView: View {
                 Text(L("Uiterlijk"))
             }
 
+            Section {
+                Toggle(isOn: $settings.verbergContact) {
+                    SettingsRow(icon: "phone.down.fill", color: .indigo, title: L("Verberg \"Graag contact meldkamer\""))
+                }
+                Toggle(isOn: $settings.verbergTest) {
+                    SettingsRow(icon: "testtube.2", color: .gray, title: L("Verberg testoproepen"))
+                }
+            } header: {
+                Text(L("Meldingen filteren"))
+            } footer: {
+                Text(L("Geldt overal: in de lijst, op de kaart, in widgets, op Apple Watch, Apple TV en CarPlay, en voor je pushmeldingen. Ook bij capcodes die je volgt."))
+            }
+
             if lock.isAvailable {
                 Section {
                     Toggle(isOn: Binding(get: { settings.appLock }, set: { on in
@@ -289,7 +302,7 @@ struct SettingsView: View {
 
     private func writeReview() {
         if !Config.appStoreID.isEmpty,
-           let url = URL(string: "https://apps.apple.com/app/id\(Config.appStoreID)?action=write-review") {
+           let url = URL(string: "https://apps.apple.com/nl/app/id\(Config.appStoreID)?action=write-review") {
             openURL(url)
         } else {
             requestReview()
@@ -305,7 +318,6 @@ struct SettingsView: View {
                 Link("PixelForges", destination: Config.pixelForges)
             }
             Text(Lf("Versie %@ (%@)", Config.version, Config.build))
-            Link(L("Bron: p2000.page"), destination: Config.source)
         }
         .font(AppFont.body(12, .regular, relativeTo: .caption))
         .foregroundStyle(.secondary)

@@ -34,6 +34,14 @@ async function demoData() {
   return demoCache;
 }
 
+/** "Graag contact OC/meldkamer" and test calls: same rules as the apps and the server. */
+export const isContactMeldkamer = (m) => m?.categorie === "Graag contact meldkamer"
+  || /\bcontact\b.{0,25}\b(oc|meldkamer|mka|mkb|mkp|mk|gms|mka\s*nog)\b|\b(graag|svp|s\.v\.p\.?|verzoeke?)\b.{0,12}\b(opnieuw\s+)?contact\b/i.test(String(m?.full_melding || m?.title || ""));
+export const isTestOproep = (m) => /\btest(oproep|bericht|melding|alarm|page|paging)?\b|\bproef(alarm|oproep)\b/i.test(String(m?.full_melding || m?.title || ""));
+const leesVlag = (k) => { try { return JSON.parse(localStorage.getItem(k) || "false") === true; } catch { return false; } };
+/** The kinds this visitor hides everywhere on the site (filters in the pager). */
+export const verborgenSoort = (m) => (leesVlag("p2000.verbergContact") && isContactMeldkamer(m)) || (leesVlag("p2000.verbergTest") && isTestOproep(m));
+
 export async function fetchMeldingen(limit = 500) {
   // One retry after 2 seconds: a single hiccup of the network or the API should not switch to example alerts.
   const lees = async () => {
@@ -45,7 +53,7 @@ export async function fetchMeldingen(limit = 500) {
     let list;
     try { list = await lees(); } catch { await new Promise((r) => setTimeout(r, 2000)); list = await lees(); }
     demoMode = false;
-    return { list, online: true };
+    return { list: Array.isArray(list) ? list.filter((m) => !verborgenSoort(m)) : list, online: true };
   } catch {
     demoMode = true;
     return { list: await demoData(), online: false };

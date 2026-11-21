@@ -33,8 +33,8 @@ enum Config {
     static let whatsapp = URL(string: "https://chat.whatsapp.com/IgZ5zvVTD25Getrk91nIMf")!
     static let pixelForges = URL(string: "https://pixelforges.nl")!
     static let source = URL(string: "https://p2000.page")!
-    /// Fill in once the app has an App Store ID; until then "Schrijf een recensie" uses the in-app prompt.
-    static let appStoreID = ""
+    /// App Store ID of A-Alerts ("Schrijf een recensie" opens the review page of the Dutch App Store).
+    static let appStoreID = "6829732272"
 
     /// Language the UI is shown in (only languages the app ships).
     static var uiLanguage: String { Bundle.main.preferredLocalizations.first ?? "nl" }

@@ -229,6 +229,9 @@ enum PushManager {
                 "nieuwsLiveblog": s.pushNieuwsLiveblog,
                 "nieuwsPolitie": s.pushNieuwsPolitie,
                 "nieuwsRegio": s.pushNieuwsRegio,
+                // 2.0.2: hide "Graag contact meldkamer" and test calls, also as push.
+                "verbergContact": s.verbergContact,
+                "verbergTest": s.verbergTest,
             ] as [String: Any],
             // Followed capcodes: push also outside places, radius and profiles.
             "capcodes": Array(s.volgCapcodes.keys).sorted(),

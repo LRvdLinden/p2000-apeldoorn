@@ -103,6 +103,10 @@ data class Melding(
     }
     val isRecent: Boolean get() = System.currentTimeMillis() - millis < 10 * 60_000
     val isUrgent: Boolean get() = (prioriteit ?: "").uppercase() in setOf("A0", "A1", "P1")
+    /** "Graag contact OC/meldkamer": a unit is asked to call the control room; no incident of its own. Same rule as iOS and the server. */
+    val isContactMeldkamer: Boolean get() = categorie == "Graag contact meldkamer" || CONTACT_RE.containsMatchIn(fullMelding ?: title)
+    /** A test call of the P2000 network ("TESTOPROEP", "proefalarm"). */
+    val isTestOproep: Boolean get() = TEST_RE.containsMatchIn(fullMelding ?: title)
     /** A large incident (same rule as the server and iOS): GRIP, scaling up, a (very) large or medium fire, or 10+ units. */
     val isGrootIncident: Boolean get() {
         if ((grip?.toIntOrNull() ?: 0) > 0) return true
@@ -673,3 +677,6 @@ data class Hectometerpaal(val weg: String, val zijde: String, val km: String) {
         }
     }
 }
+
+private val CONTACT_RE = Regex("""\bcontact\b.{0,25}\b(oc|meldkamer|mka|mkb|mkp|mk|gms|mka\s*nog)\b|\b(graag|svp|s\.v\.p\.?|verzoeke?)\b.{0,12}\b(opnieuw\s+)?contact\b""", RegexOption.IGNORE_CASE)
+private val TEST_RE = Regex("""\btest(oproep|bericht|melding|alarm|page|paging)?\b|\bproef(alarm|oproep)\b""", RegexOption.IGNORE_CASE)

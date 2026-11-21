@@ -3,7 +3,7 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=64";
+} from "./core.js?v=65";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,
@@ -32,6 +32,9 @@ const state = {
   radiusKm: Number(prefs.get("p2000.radius", 0)),
   here: null,
   hideRead: prefs.get("p2000.hideRead", false),
+  // Hidden everywhere on the site (core.js fetchMeldingen): "Graag contact meldkamer" and test calls.
+  verbergContact: prefs.get("p2000.verbergContact", false),
+  verbergTest: prefs.get("p2000.verbergTest", false),
   mapHours: 6, // the map opens on the last 6 hours
   mapDiensten: new Set(SELECTABLE),
   mapBronnen: new Set(["nlalert", "burgernet", "amber", "vermistkind", "vnog"]),
@@ -105,6 +108,8 @@ function saveFilters() {
   prefs.set("p2000.prio", state.prio);
   prefs.set("p2000.radius", state.radiusKm);
   prefs.set("p2000.hideRead", state.hideRead);
+  prefs.set("p2000.verbergContact", state.verbergContact);
+  prefs.set("p2000.verbergTest", state.verbergTest);
 }
 
 function renderActiveFilters() {
@@ -114,6 +119,8 @@ function renderActiveFilters() {
   if (state.prio) chips.push(["prio", state.prio === "urgent" ? "Alleen spoed" : state.prio === "B" ? "B1 / B2" : state.prio]);
   if (state.radiusKm) chips.push(["radius", `Binnen ${state.radiusKm} km`]);
   if (state.hideRead) chips.push(["read", "Bekeken verborgen"]);
+  if (state.verbergContact) chips.push(["contact", "Zonder contact meldkamer"]);
+  if (state.verbergTest) chips.push(["test", "Zonder testoproepen"]);
   if (state.bron) chips.push(["bron", `Alleen ${BRONNEN[state.bron].label}`]);
   $("activeFilters").innerHTML = chips.map(([k, t]) => `<button class="afilter" data-k="${k}">${esc(t)} ✕</button>`).join("");
   const n = chips.length;
@@ -129,6 +136,8 @@ $("activeFilters").addEventListener("click", (e) => {
   if (k === "prio") state.prio = "";
   if (k === "radius") state.radiusKm = 0;
   if (k === "read") state.hideRead = false;
+  if (k === "contact") { state.verbergContact = false; saveFilters(); refresh(); }
+  if (k === "test") { state.verbergTest = false; saveFilters(); refresh(); }
   if (k === "bron") { state.bron = ""; history.replaceState(history.state, "", location.pathname + location.hash); }
   syncFilterInputs(); saveFilters(); render();
 });
@@ -138,6 +147,8 @@ function syncFilterInputs() {
   $("fPrio").value = state.prio;
   $("fRadius").value = String(state.radiusKm);
   $("fHideRead").checked = state.hideRead;
+  $("fContact").checked = state.verbergContact;
+  $("fTest").checked = state.verbergTest;
   $("fBron").value = state.bron || "";
 }
 
@@ -152,6 +163,8 @@ $("fPlaats").addEventListener("change", (e) => { state.plaats = e.target.value; 
 $("fPrio").addEventListener("change", (e) => { state.prio = e.target.value; saveFilters(); render(); });
 $("fBron").addEventListener("change", (e) => { state.bron = e.target.value; saveFilters(); render(); });
 $("fHideRead").addEventListener("change", (e) => { state.hideRead = e.target.checked; saveFilters(); render(); });
+$("fContact").addEventListener("change", (e) => { state.verbergContact = e.target.checked; saveFilters(); refresh(); });
+$("fTest").addEventListener("change", (e) => { state.verbergTest = e.target.checked; saveFilters(); refresh(); });
 $("list").addEventListener("click", (e) => {
   if (!e.target.closest("[data-toonbekeken]")) return;
   e.preventDefault(); state.hideRead = false; $("fHideRead").checked = false; saveFilters(); render();
@@ -166,8 +179,8 @@ $("fRadius").addEventListener("change", (e) => {
   });
 });
 $("resetFilters").addEventListener("click", () => {
-  state.diensten.clear(); state.plaats = ""; state.prio = ""; state.radiusKm = 0; state.hideRead = false;
-  syncFilterInputs(); saveFilters(); render();
+  state.diensten.clear(); state.plaats = ""; state.prio = ""; state.radiusKm = 0; state.hideRead = false; state.verbergContact = false; state.verbergTest = false;
+  syncFilterInputs(); saveFilters(); refresh();
 });
 let searchTimer;
 $("search").addEventListener("input", (e) => {
@@ -1605,7 +1618,7 @@ function renderStats() {
       <section class="card"><h2>Meest voorkomend</h2>${catHTML}</section>
       <section class="card"><h2>Waarschuwingen</h2>${warnStatsHTML()}<p class="source" style="text-align:left;margin:.6rem 0 0">Vandaag / gisteren · gemeente Apeldoorn en Teuge</p></section>
     </div>
-    <p class="source">Statistieken van vandaag en gisteren · Bron: <a href="https://p2000.page" rel="noopener">p2000.page</a></p>
+    <p class="source">Statistieken van vandaag en gisteren</p>
   </div>`;
   requestAnimationFrame(() => $("stats").querySelectorAll("[data-w]").forEach((el) => { el.style.width = `${Math.max(Number(el.dataset.w), Number(el.dataset.w) > 0 ? 2 : 0)}%`; }));
 }
