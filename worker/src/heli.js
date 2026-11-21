@@ -269,7 +269,8 @@ export async function helikopters(env) {
       helikopters: [], lucht: [], fout: true, verouderd: true,
     }, true);
     memo = { at: Date.now(), data: cached };
-    return cached;
+    // Why it failed (for the status page and the beheer), never shown in the apps.
+    return { ...cached, fout_tekst: String(e.message || e).slice(0, 160) };
   }
   memo = { at: Date.now(), data };
   if (cache) {

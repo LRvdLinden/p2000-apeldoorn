@@ -71,7 +71,10 @@ export async function notePushes(env, list) {
 
 /** Weather asked by an app: worked or not (only when the alert has a place). */
 export const noteWeer = (env, ok) => kvSet(env, ok ? "status_weer_ok" : "status_weer_fout", Date.now());
-export const noteHeli = (env, ok) => kvSet(env, ok ? "status_heli_ok" : "status_heli_fout", Date.now());
+export const noteHeli = async (env, ok, tekst = null) => {
+  await kvSet(env, ok ? "status_heli_ok" : "status_heli_fout", Date.now());
+  if (!ok && tekst) await kvSet(env, "status_heli_fout_tekst", tekst);
+};
 
 /** A light check of the website, at most every five minutes. */
 export async function checkWebsite(env, budget) {
@@ -165,7 +168,7 @@ async function pushStaat(env, platform, now) {
 /** Current state of every component (and the beheer-only signals). */
 export async function huidigeStaat(env, now = Date.now()) {
   const keys = ["feed_ok", "feed_error", "koyeb_last_message", "bron_ok:nlalert", "bron_ok:burgernet", "bron_ok:knmi", "bron_ok:kind", "bron_fout:nlalert", "bron_fout:burgernet", "bron_fout:knmi", "bron_fout:kind", "bron_ok:vnog", "bron_fout:vnog", "bron_ok:verkeer", "bron_fout:verkeer",
-    "status_heli_ok", "status_heli_fout", "status_weer_ok", "status_weer_fout", "status_web_ok", "status_web_fout", "cron_run"];
+    "status_heli_ok", "status_heli_fout", "status_heli_fout_tekst", "status_weer_ok", "status_weer_fout", "status_web_ok", "status_web_fout", "cron_run"];
   const { results } = await env.DB.prepare(`SELECT key, value FROM kv WHERE key IN (${keys.map(() => "?").join(",")})`).bind(...keys).all();
   const kv = Object.fromEntries(results.map((r) => [r.key, r.value]));
   const n = (k) => Number(kv[k]) || 0;
@@ -174,7 +177,7 @@ export async function huidigeStaat(env, now = Date.now()) {
   for (const b of ["nlalert", "burgernet", "knmi", "kind", "vnog"]) s[b] = opLeeftijd(n(`bron_ok:${b}`), kv[`bron_fout:${b}`], now, 10 * MIN, 30 * MIN);
   // Traffic: the verkeer service on Koyeb (reads the NDW open data); 10 minutes without fresh data = warn, 30 = down.
   s.verkeer = env.VERKEER_URL ? opLeeftijd(n("bron_ok:verkeer"), kv["bron_fout:verkeer"], now, 10 * MIN, 30 * MIN) : { staat: "ok", detail: null, detail_en: null, onbekend: true };
-  s.heli = opLeeftijd(n("status_heli_ok"), null, now, 5 * MIN, 15 * MIN);
+  s.heli = opLeeftijd(n("status_heli_ok"), kv.status_heli_fout_tekst || null, now, 5 * MIN, 15 * MIN);
   if (s.heli.staat === "ok" && !s.heli.onbekend) { s.heli.detail = s.heli.detail.replace("Laatste ophaalronde", "Laatste positie"); s.heli.detail_en = s.heli.detail_en.replace("Last read", "Last position"); }
   s.push_apple = await pushStaat(env, "apple", now);
   s.push_android = await pushStaat(env, "android", now);

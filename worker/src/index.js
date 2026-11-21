@@ -856,7 +856,7 @@ async function categorieHerstel(env) {
 
 async function heliRun(env) {
   const incoming = await helikopters(env);
-  await noteHeli(env, !incoming.fout);
+  await noteHeli(env, !incoming.fout, incoming.fout_tekst);
   // Historical positions are for DISPLAY only. Never store a replayed point as a
   // new flight movement or send a new takeoff push during a source outage.
   if (incoming.fout) return;
