@@ -12,10 +12,10 @@ jobs:
     steps:
       - uses: actions/setup-node@v4
         with: { node-version: 24 }
-      - name: Verify deployed Worker, D1 and parallel Koyeb (read only)
+      - name: Verify api.a-alerts.nl, Koyeb and the sources (read only)
         run: |
           node --input-type=module <<'NODE'
-          const base = "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          const base = "https://api.a-alerts.nl";
           let last = null;
           for (let n = 0; n < 10; n++) {
             try {

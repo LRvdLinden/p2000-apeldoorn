@@ -1,5 +1,10 @@
 # Changelog
 
+## Website en controles naar api.a-alerts.nl (21-11-2026)
+- **De hele website** (a-alerts.nl) haalt alles bij api.a-alerts.nl, niet meer bij de Worker op workers.dev.
+- **PH-GOV wereldwijd** op de kaart (api.a-alerts.nl), ook buiten Nederland. PH-UTL staat nergens in A-Alerts.
+- De live-controles, screenshot-workflows, de Android-rooktest en tools/nieuws_deel.py gebruiken api.a-alerts.nl.
+
 ## Worker en API (21-11-2026)
 - **Helikopters weer zichtbaar.** adsb.lol geeft per adres nog maar 500 opvragen per dag; de Worker en api.a-alerts.nl liepen daar elke dag op vast ("Ophalen lukt niet"). Is de teller op (HTTP 429), dan wachten ze tot hij terugspringt en halen ze de posities bij adsb.fi (dezelfde ADS-B-gegevens). Nooit via de NDW-verkeersdienst.
 - **Minder beheer-pushes.** LRbeheer en P2000Beheer krijgen alleen nog een push bij een echte storing (10 minuten) en "werkt weer" als het 5 minuten goed gaat. "Wijkt af" en korte haperingen staan alleen op de statuspagina.

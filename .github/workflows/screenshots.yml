@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-15
     timeout-minutes: 90
     env:
-      API: https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+      API: https://api.a-alerts.nl
       BUNDLE: nl.lrvdlinden.p2000apeldoorn
     steps:
       - uses: actions/checkout@v4

@@ -13,7 +13,7 @@ jobs:
       - name: Check that only recent aircraft appear on the live map
         run: |
           node --input-type=module <<'NODE'
-          const base="https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+          const base="https://api.a-alerts.nl";
           let website=false;
           for (let i=0; i<12; i++) {
             const out={attempt:i+1, at:new Date().toISOString()};

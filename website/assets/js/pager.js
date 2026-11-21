@@ -3,7 +3,7 @@ import {
   fmtTime, fmtTimeSec, fmtDay, fmtDateTime, ago, esc, dayKey, isRecent, isUrgent, prioText, plaatsText, hasStreet,
   capPlaats, story, today as todayStats, yesterday as yesterdayStats, isRead, markRead, prefs, distanceKm, appleMapsURL,
   API, loadMapKit, mapsAllowed, markerAnnotation, spread, layout, clusterAnnotation, clusterEl, CONDITIONS, compass, demoMode, countUp,
-} from "./core.js?v=63";
+} from "./core.js?v=64";
 import {
   BRONNEN, fetchWaarschuwingen, fetchHelikopters, fetchLuchtvaart, LUCHT_SOORT, LUCHT_SOORTEN, luchtSoort, luchtKeuze, zetLuchtKeuze, wKop, wTijd, wKleur, wOpKleur, wStatus, wIcon, wStart, isActief, isBeeindigd,
   wRings, kazerneRoutes, routeFase, geschattePositie, verband, heliAnnotation, heliInfo, warnAnnotation, warnOverlays, kazerneAnnotation, kazernes,

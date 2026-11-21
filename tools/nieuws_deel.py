@@ -13,7 +13,7 @@ import sys
 import urllib.request
 from datetime import datetime, timezone
 
-API = os.environ.get("API", "https://p2000-apeldoorn-api.lrvdlinden.workers.dev")
+API = os.environ.get("API", "https://api.a-alerts.nl")
 SITE = "https://a-alerts.nl"
 IMG = SITE + "/assets/img/nieuws/"
 ID = re.compile(r"^[pwlr]-[0-9a-f]{12}$")

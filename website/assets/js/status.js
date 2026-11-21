@@ -1,5 +1,5 @@
 // a-alerts.nl/status: reads /v1/status from the A-Alerts API every minute.
-const API = (window.P2000_CONFIG && window.P2000_CONFIG.api) || "https://p2000-apeldoorn-api.lrvdlinden.workers.dev";
+const API = (window.P2000_CONFIG && window.P2000_CONFIG.api) || "https://api.a-alerts.nl";
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const tijd = (iso) => new Date(iso).toLocaleTimeString("nl-NL", { hour: "2-digit", minute: "2-digit" });

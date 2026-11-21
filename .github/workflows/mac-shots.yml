@@ -17,7 +17,7 @@ jobs:
     runs-on: macos-26
     timeout-minutes: 60
     env:
-      API: https://p2000-apeldoorn-api.lrvdlinden.workers.dev
+      API: https://api.a-alerts.nl
     steps:
       - uses: actions/checkout@v4
       - name: Select newest Xcode
