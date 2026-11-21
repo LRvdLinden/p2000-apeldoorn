@@ -1,5 +1,10 @@
 # Changelog
 
+## Alles via api.a-alerts.nl (21-11-2026)
+- **api.a-alerts.nl is de enige server.** Daar draaien alle pushmeldingen (P2000, waarschuwingen, nieuws, helikopters, Homey en beheer) voor alle toestellen (`PUSH_ACTIEF=1`). De kopie van de Worker-database (D1) en het doorsturen van beheerwijzigingen naar de Worker zijn uit (`WORKER_SPIEGEL=0`).
+- **De Cloudflare Worker geeft alleen nog door** (`PROXY_API`): elk verzoek van een oude appversie op het workers.dev-adres gaat ongewijzigd naar api.a-alerts.nl. Geen cron, geen pushes en geen Koyeb-verbinding meer in de Worker. `/health` toont `{ ok, proxy }`. Leeg maken van `PROXY_API` (en de cron terugzetten) zet de Worker weer zelfstandig aan.
+- App 2.0.2+ meldt zich eenmalig af "bij de oude server". Dat verzoek komt nu via de Worker bij api.a-alerts.nl binnen (header `x-aalerts-via-worker`) en laat een registratie die rechtstreeks bij api.a-alerts.nl is gedaan staan.
+
 ## Helikopters in de Worker-cron (21-11-2026)
 - De cron van de Worker kreeg sinds 12:06 geen posities meer: adsb.lol HTTP 429 (de 500 opvragen per dag waren op) en adsb.fi HTTP 403 (weigert het adres van de cron). De kaart via het web werkte wel. Laatste reserve nu `GET /v1/adsb` van api.a-alerts.nl (dezelfde ruwe ADS-B, ander adres). `/health` toont `heli` met de laatste goede ronde en de reden van een fout; de status (beheer) ook.
 
