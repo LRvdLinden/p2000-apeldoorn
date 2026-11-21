@@ -1,5 +1,9 @@
 # Changelog
 
+## Beheer en status (21-11-2026)
+- **Status (api.a-alerts.nl):** P2000 alleen via de Koyeb-stream (p2000.page weigert ons met HTTP 403 en wordt niet meer gelezen); nieuwe onderdelen Database (MySQL) en Homey-app; Server toont de eigen achtergrondtaken.
+- **Beheer (P2000Beheer build 21, LRbeheer build 55, web-beheer):** nieuw tabblad **Bronnen** (`GET /v1/beheer/bronnen`): elke bron met staat en laatste ophaalronde, de database met tabellen en de dekking van de P2000-velden van de laatste 24 uur. Dashboard: "P2000 (Koyeb-stream)" in plaats van "P2000-feed" met HTTP 403.
+
 ## 2.0.2 (108), Android 2.0.2 en website (21-11-2026)
 - **Nieuw filter: "Graag contact meldkamer" en testoproepen verbergen.** Overal: lijst, kaart, widgets, Apple Watch, Apple TV, CarPlay, in-app alarm en pushmeldingen (ook bij gevolgde capcodes). iOS: Instellingen › Meldingen filteren; Android: filters in de pager; website: Filters in de pager. De servers (Worker en api.a-alerts.nl) slaan de push over met `verbergContact` / `verbergTest`.
 - **Schrijf een recensie** opent https://apps.apple.com/nl/app/id6829732272?action=write-review (App Store-ID ingevuld).

@@ -78,7 +78,7 @@ $("logout").addEventListener("click", logout);
 
 // ------------------------------------------------------------------ routing
 
-const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], nieuws: ["Nieuws", nieuws], widgets: ["Widgets", widgets], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
+const VIEWS = { dashboard: ["Dashboard", dashboard], status: ["Status", statusView], bronnen: ["Bronnen", bronnenView], meldingen: ["Meldingen", meldingen], waarschuwingen: ["Waarschuwingen", waarschuwingen], nieuws: ["Nieuws", nieuws], widgets: ["Widgets", widgets], fouten: ["Gemelde fouten", fouten], toestel: ["Toestel zoeken", toestel], push: ["Push", push], teksten: ["Teksten", teksten], instellingen: ["Instellingen", instellingen] };
 let current = null, timer = null;
 
 function route() {
@@ -91,7 +91,7 @@ function route() {
   $("updated").textContent = "";
   clearInterval(timer);
   run();
-  if (fn === dashboard || fn === statusView) timer = setInterval(run, 60_000);
+  if (fn === dashboard || fn === statusView || fn === bronnenView) timer = setInterval(run, 60_000);
 }
 async function run() {
   try { await current($("view")); $("error").hidden = true; }
@@ -170,8 +170,8 @@ async function dashboard(el) {
   </div>
   <div class="grid">
     <div class="card"><h2>Status</h2>
-      ${status(fresh(s.feed.lastOk), "P2000-feed", s.feed.lastError || `laatst gelezen ${ago(s.feed.lastOk)}`)}
-      ${status(fresh(s.cron), "Cron (elke minuut)", ago(s.cron))}
+      ${status(fresh(s.feed.lastOk), "P2000 (Koyeb-stream)", s.feed.lastError || `laatste bericht ${ago(s.feed.lastOk)}`)}
+      ${status(fresh(s.cron), "Achtergrondtaken (api.a-alerts.nl)", ago(s.cron))}
       ${status(s.apns, "Pushmeldingen (APNs)", s.apns ? "sleutel actief" : "sleutel ontbreekt")}
       ${s.fcm === undefined ? "" : status(s.fcm, "Android-push (Firebase)", s.fcm ? "serviceaccount actief" : "FCM_SERVICE_ACCOUNT ontbreekt")}
       ${status(s.weatherkit, "WeatherKit", s.weatherkit ? "actief" : "niet ingesteld")}
@@ -571,6 +571,32 @@ const ST = { ok: ["Werkt", "#16A34A"], warn: ["Verstoord", "#F59E0B"], down: ["S
 const SOORT = { storing: "Storing", vertraagd: "Verstoord", onderhoud: "Onderhoud" };
 const FASEN = { onderzoek: "Onderzoek", oorzaak: "Oorzaak gevonden", herstel: "Herstel", monitoren: "Monitoren", opgelost: "Opgelost", gepland: "Gepland", bezig: "Bezig", afgerond: "Afgerond" };
 const stDot = (s) => `<i style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${(ST[s] || ST.geen)[1]}"></i>`;
+
+// Sources of api.a-alerts.nl: state per source, the database and how complete the P2000 alerts of the last 24 hours are.
+async function bronnenView(el) {
+  const d = await api("GET", "/v1/beheer/bronnen");
+  const k = d.p2000.dekking;
+  const velden = [["Capcodes", k.capcodes], ["Prioriteit", k.prioriteit], ["Dienst", k.dienst], ["Plaats", k.plaats], ["Regio", k.regio], ["Straat", k.straat], ["Plek op kaart", k.locatie], ["Opschaling", k.opschaling]];
+  const max = Math.max(1, ...d.p2000.perUur);
+  const kleur = { live: "ok", ok: "ok", overname: "blue", gepland: "blue", uit: "muted" };
+  el.innerHTML = `
+    <div class="card" style="margin-bottom:16px"><h2>P2000 · ${esc(d.p2000.bron)}</h2>
+      <p><b style="font-size:2rem">${k.meldingen}</b> <span class="muted">meldingen in de laatste 24 uur</span></p>
+      <div style="display:flex;align-items:flex-end;gap:3px;height:90px" aria-label="Meldingen per uur">${d.p2000.perUur.map((n, i) => `<div title="${23 - i === 0 ? "nu" : `${23 - i} uur geleden`}: ${n}" style="flex:1;background:#DC2626;border-radius:3px 3px 0 0;height:${Math.max(2, Math.round(n / max * 90))}px"></div>`).join("")}</div>
+      <small class="muted">24 uur geleden → nu${d.p2000.perBron ? " · " + Object.entries(d.p2000.perBron).map(([b, n]) => `${esc(b)}: ${n}`).join(" · ") : ""}</small>
+    </div>
+    <div class="card" style="margin-bottom:16px"><h2>Dekking van de velden</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px">${velden.map(([n, p]) => `<div style="text-align:center;padding:12px;border-radius:10px;background:rgba(37,99,235,${(0.15 + 0.85 * p / 100).toFixed(2)});color:${p >= 50 ? "#fff" : "inherit"}"><b style="font-size:1.2rem">${p}%</b><br><small>${n}</small></div>`).join("")}</div>
+      <p class="muted"><small>Aandeel van de meldingen van de laatste 24 uur waarin het veld is ingevuld. Opschaling staat alleen bij meldingen met GRIP of opschaling, dus een laag percentage is normaal.</small></p>
+    </div>
+    <div class="card" style="margin-bottom:16px"><h2>Bronnen</h2>
+      ${d.bronnen.map((b) => `<div class="row" style="align-items:flex-start"><span class="${kleur[b.staat] || "warn"}">●</span><div class="grow"><b>${esc(b.naam)}</b>${b.laatst ? ` <small class="muted">· ${ago(b.laatst)}</small>` : ""}<br><small>${esc(b.detail || "")}</small></div></div>`).join("")}
+    </div>
+    <div class="card"><h2>Database (MySQL)</h2>
+      <div class="row"><span class="${d.database ? "ok" : "warn"}">●</span><div class="grow"><b>Verbinding</b><br><small>${d.database ? "bereikbaar" : "niet bereikbaar"}</small></div></div>
+      ${d.tabellen.map((t) => `<div class="row"><div class="grow">${esc(t.label)}</div><b>${t.aantal == null ? "—" : t.aantal.toLocaleString("nl-NL")}</b></div>`).join("")}
+    </div>`;
+}
 
 async function statusView(el) {
   const d = await api("GET", "/v1/beheer/status");
