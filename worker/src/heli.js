@@ -234,13 +234,23 @@ export async function helikopters(env) {
     }
     let bron = "adsb.lol (ODbL)";
     if (!body || !Array.isArray(body.ac)) {
-      const res = await haal(`https://opendata.adsb.fi/api/v2/lat/${POINT.lat}/lon/${POINT.lon}/dist/${POINT.nm}`);
-      if (!res.ok) throw new Error(`ADS-B HTTP ${res.status} (adsb.fi${fout ? `, ${fout}` : ""})`);
-      const fi = await res.json();
-      // "now" is in seconds at some readsb services, in milliseconds at adsb.lol.
-      const n = Number(fi?.now) || 0;
-      body = { ac: fi?.ac || fi?.aircraft, now: n > 0 && n < 1e11 ? n * 1000 : n };
-      bron = "adsb.fi";
+      const res = await haal(`https://opendata.adsb.fi/api/v2/lat/${POINT.lat}/lon/${POINT.lon}/dist/${POINT.nm}`).catch(() => null);
+      if (res?.ok) {
+        const fi = await res.json();
+        // "now" is in seconds at some readsb services, in milliseconds at adsb.lol.
+        const n = Number(fi?.now) || 0;
+        body = { ac: fi?.ac || fi?.aircraft, now: n > 0 && n < 1e11 ? n * 1000 : n };
+        bron = "adsb.fi";
+      } else fout = `adsb.fi HTTP ${res?.status ?? "geen antwoord"}${fout ? `, ${fout}` : ""}`;
+    }
+    // Last reserve: the raw read of the own server api.a-alerts.nl (same adsb.lol/adsb.fi data, other address). adsb.lol
+    // runs out of requests on the shared Cloudflare addresses and adsb.fi refuses some of them (HTTP 403), e.g. the cron.
+    if (!body || !Array.isArray(body.ac)) {
+      const res = await haal(`${env.AALERTS_API_EIGEN || "https://api.a-alerts.nl"}/v1/adsb`).catch(() => null);
+      const ruw = res?.ok ? await res.json().catch(() => null) : null;
+      if (!Array.isArray(ruw?.ac)) throw new Error(`ADS-B HTTP ${res?.status ?? "geen antwoord"} (api.a-alerts.nl; ${fout})`);
+      body = { ac: ruw.ac, now: Number(ruw.now) || Date.now() };
+      bron = ruw.bron === "adsb.fi" ? "adsb.fi" : "adsb.lol (ODbL)";
     }
     if (!body || !Array.isArray(body.ac)) throw new Error("Invalid ADS-B payload");
     const learned = await loadLearned(env);

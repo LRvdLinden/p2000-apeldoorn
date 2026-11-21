@@ -1,5 +1,8 @@
 # Changelog
 
+## Helikopters in de Worker-cron (21-11-2026)
+- De cron van de Worker kreeg sinds 12:06 geen posities meer: adsb.lol HTTP 429 (de 500 opvragen per dag waren op) en adsb.fi HTTP 403 (weigert het adres van de cron). De kaart via het web werkte wel. Laatste reserve nu `GET /v1/adsb` van api.a-alerts.nl (dezelfde ruwe ADS-B, ander adres). `/health` toont `heli` met de laatste goede ronde en de reden van een fout; de status (beheer) ook.
+
 ## Incidenten koppelen op rit- en GMS-nummer (21-11-2026)
 - Worker (`worker/src/incident.js`) en api.a-alerts.nl (`aa/meldingen.php`): hetzelfde ritnummer ("Rit 356390") of GMS-nummer ("GMS 888026", of de zes cijfers aan het eind van een politiemelding of contactverzoek) binnen 2 uur is één incident, ook zonder straat of later dan 45 minuten ("Einde VWS"). Ritnummers 1 tot 3 uit elkaar binnen 5 minuten tellen mee bij dezelfde soort oproep in dezelfde plaats (reanimatie met twee ambulances). Een ander nummer zegt niets (één incident kan meer ritten hebben); besteld vervoer blijft los. Op de laatste 214 meldingen: 5 extra koppelingen, geen enkele bestaande koppeling verdwenen.
 
