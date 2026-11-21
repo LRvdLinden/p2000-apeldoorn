@@ -171,6 +171,40 @@
         }
       }
     },
+    "%@ op %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ %2$@ away"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ op %@"
+          }
+        }
+      }
+    },
+    "%@ · %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%1$@ · %2$@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ · %@"
+          }
+        }
+      }
+    },
     "%@ · de straat die VNOG noemt": {
       "extractionState": "manual",
       "localizations": {
@@ -371,6 +405,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld km/u"
+          }
+        }
+      }
+    },
+    "%lld meldingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld alerts"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld meldingen"
           }
         }
       }
@@ -1242,6 +1293,23 @@
         }
       }
     },
+    "Afstand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Distance"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afstand"
+          }
+        }
+      }
+    },
     "Afstand tonen": {
       "extractionState": "manual",
       "localizations": {
@@ -1918,6 +1986,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Bedankt, je melding is verstuurd"
+          }
+        }
+      }
+    },
+    "Bekijk": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "View"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bekijk"
           }
         }
       }
@@ -3894,6 +3979,23 @@
         }
       }
     },
+    "Dienst": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Service"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Dienst"
+          }
+        }
+      }
+    },
     "Discipline": {
       "extractionState": "manual",
       "localizations": {
@@ -4353,6 +4455,23 @@
         }
       }
     },
+    "Even geduld…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One moment…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Even geduld…"
+          }
+        }
+      }
+    },
     "Even rust?": {
       "extractionState": "manual",
       "localizations": {
@@ -4727,6 +4846,23 @@
         }
       }
     },
+    "Geen actieve waarschuwingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No active warnings"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen actieve waarschuwingen"
+          }
+        }
+      }
+    },
     "Geen exacte locatie bekend": {
       "extractionState": "manual",
       "localizations": {
@@ -4791,6 +4927,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen"
+          }
+        }
+      }
+    },
+    "Geen meldingen in de buurt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts nearby"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen meldingen in de buurt"
           }
         }
       }
@@ -5611,6 +5764,23 @@
         }
       }
     },
+    "Hele incident": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Whole incident"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Hele incident"
+          }
+        }
+      }
+    },
     "Hele werkgebied": {
       "extractionState": "manual",
       "localizations": {
@@ -5981,6 +6151,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iets anders"
+          }
+        }
+      }
+    },
+    "In de buurt": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nearby"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "In de buurt"
           }
         }
       }
@@ -11816,6 +12003,23 @@
         }
       }
     },
+    "Tijd": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Time"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Tijd"
+          }
+        }
+      }
+    },
     "Tijden": {
       "extractionState": "manual",
       "localizations": {
@@ -12135,6 +12339,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Toon mij en de waarschuwing"
+          }
+        }
+      }
+    },
+    "Toon op kaart": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Show on map"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toon op kaart"
           }
         }
       }
@@ -14260,6 +14481,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zelfde plaats (%@)"
+          }
+        }
+      }
+    },
+    "Zet Huidige locatie aan in de app om meldingen in de buurt te zien": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Turn on Current location in the app to see alerts nearby"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zet Huidige locatie aan in de app om meldingen in de buurt te zien"
           }
         }
       }

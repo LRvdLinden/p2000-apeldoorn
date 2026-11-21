@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  CarPlay (category Public Safety) - NOT active yet.
+  Apple must grant the CarPlay entitlement first (developer.apple.com/carplay -> "Request entitlement",
+  category Public Safety). Only then add the key below to Config/P2000Apeldoorn-iOS.entitlements and
+  enable it for the App ID nl.lrvdlinden.p2000apeldoorn (Certificates, Identifiers & Profiles). Adding it
+  before it is granted makes signing, TestFlight and the CI build fail.
+  Check the exact key in Xcode (Signing & Capabilities -> + Capability -> CarPlay) once it is granted.
+-->
+<plist version="1.0">
+<dict>
+	<key>com.apple.developer.carplay-public-safety</key>
+	<true/>
+</dict>
+</plist>

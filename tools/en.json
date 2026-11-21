@@ -979,5 +979,19 @@
   "Bericht van VNOG over dit incident": "Message from VNOG about this incident",
   "VNOG noemt de straat van dit incident. Daarom is het bericht eraan gekoppeld.": "VNOG names the street of this incident. That is why the message is linked to it.",
   "Bron: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": "Source: Veiligheidsregio Noord- en Oost-Gelderland (vnog.nl). Messages labelled A-Alerts were added by A-Alerts.",
-  "Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": "Source: NL-Alert (Dutch government). Messages labelled A-Alerts were added by A-Alerts."
+  "Bron: NL-Alert (Rijksoverheid). Berichten met het label A-Alerts zijn aangevuld door A-Alerts.": "Source: NL-Alert (Dutch government). Messages labelled A-Alerts were added by A-Alerts.",
+  "%@ op %@": "%1$@ %2$@ away",
+  "%@ · %@": "%1$@ · %2$@",
+  "%lld meldingen": "%lld alerts",
+  "Afstand": "Distance",
+  "Bekijk": "View",
+  "Dienst": "Service",
+  "Even geduld…": "One moment…",
+  "Geen actieve waarschuwingen": "No active warnings",
+  "Geen meldingen in de buurt": "No alerts nearby",
+  "Hele incident": "Whole incident",
+  "In de buurt": "Nearby",
+  "Tijd": "Time",
+  "Toon op kaart": "Show on map",
+  "Zet Huidige locatie aan in de app om meldingen in de buurt te zien": "Turn on Current location in the app to see alerts nearby"
 }

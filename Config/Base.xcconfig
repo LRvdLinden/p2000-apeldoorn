@@ -1,6 +1,6 @@
 // Shared build settings.
 MARKETING_VERSION = 2.0.2
-CURRENT_PROJECT_VERSION = 106
+CURRENT_PROJECT_VERSION = 107
 DEVELOPMENT_TEAM = EU3UY476T6
 
 // The app's own API: api.a-alerts.nl (own PHP/MySQL server, LRvdLinden/app.lrvdlinden.a-alerts.api), which replaces

@@ -130,6 +130,22 @@ Bij Instellingen → **Mijn buurt** kies je een straal van 0,5 tot 25 km rond **
 - De Pager toont alleen de meldingen van de laatste **24 uur**.
 - Meldingen die je al hebt geopend worden **grijs**. Met *Verberg bekeken meldingen* zie je ze niet meer.
 
+## CarPlay (build 107, wacht op Apple)
+A-Alerts heeft een CarPlay-scherm in de categorie **Public Safety** (`P2000Apeldoorn/CarPlay/CarPlaySceneDelegate.swift`, alleen iOS):
+- Drie tabbladen met lijsten: **Meldingen** (de lijstfilters van de app), **In de buurt** (binnen 10 km, alleen met *Huidige locatie* aan) en **Waarschuwingen** (actieve NL-Alert, Burgernet, KNMI, AMBER, VNOG). Elke rij heeft het icoon in de kleur van de dienst, de prioriteit, plaats, tijd en afstand.
+- Tik op een melding: dienst, tijd, plaats, afstand, eenheden en het aantal meldingen van het incident, met **Toon op kaart** (opent Apple Maps op de plek, zonder route ernaartoe) en **Hele incident**.
+- Komt er tijdens het rijden een nieuwe melding binnen binnen je straal van *Mijn buurt* (of 5 km), dan verschijnt een pop-up met **Bekijk** en **Sluiten**.
+
+De scène staat al in `Config/P2000Apeldoorn-Info.plist` (`CPTemplateApplicationSceneSessionRoleApplication`). CarPlay toont de app pas als het entitlement erin zit:
+1. Vraag het CarPlay-entitlement aan op developer.apple.com/carplay (categorie Public Safety).
+2. Na goedkeuring: zet CarPlay aan bij de App ID `nl.lrvdlinden.p2000apeldoorn` en neem de sleutel uit `Config/CarPlay.entitlements.example` over in `Config/P2000Apeldoorn-iOS.entitlements` (controleer de sleutel in Xcode via *Signing & Capabilities*).
+3. Testen kan in de CarPlay Simulator (Xcode → Open Developer Tool → *Additional Tools*) of in de simulator via I/O → External Displays → CarPlay.
+
+Voeg het entitlement **niet** eerder toe: dan mislukken signing, TestFlight en de CI-build.
+
+## iPhone Duo
+De app past zich aan aan de breedte, niet aan het toestel: dicht (compact) zie je de tabbladen en één kolom, open (regular) de zijbalk en de Pager met lijst en melding naast elkaar (`NavigationSplitView`). Alle vier de oriëntaties mogen, er is een launch screen en geen `UIRequiresFullScreen`. Code die alleen met Xcode 27.1 bestaat (scharnier, gereserveerde gebieden) komt alleen achter `DUO_SDK` in `SWIFT_ACTIVE_COMPILATION_CONDITIONS`, zodat de CI met de huidige Xcode blijft bouwen. Apple raadt aan eerst de standaardonderdelen te gebruiken; dat doet de app al, dus er staat nu nog niets achter `DUO_SDK`.
+
 ## Bouwen
 
 1. Open `P2000Apeldoorn.xcodeproj` in Xcode 16 of nieuwer. De mappen zijn gesynchroniseerd, dus nieuwe bestanden komen er vanzelf in.

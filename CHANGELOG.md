@@ -1,5 +1,10 @@
 # Changelog
 
+## A-Alerts 2.0.2 (build 107) – TestFlight
+- **CarPlay (Public Safety), klaar maar nog niet zichtbaar.** Drie tabbladen met lijsten: Meldingen (met de lijstfilters van de app), In de buurt (binnen 10 km, met Huidige locatie aan) en Waarschuwingen (actief). Elke rij heeft het icoon in de kleur van de dienst, de prioriteit, plaats, tijd en afstand. Een melding opent een informatiescherm met dienst, tijd, plaats, afstand, eenheden en het aantal meldingen van het incident, met de knoppen Toon op kaart (Apple Maps op de plek, geen route) en Hele incident. Een nieuwe melding binnen de straal van Mijn buurt (anders 5 km) geeft tijdens het rijden een venster met Bekijk en Sluiten. De scène staat in de Info.plist; het entitlement staat alleen in `Config/CarPlay.entitlements.example` tot Apple het toekent (zie README).
+- **iPhone Duo.** De iPhone-app mag nu ook ondersteboven draaien (alle vier de oriëntaties). De indeling volgt de breedte: dicht tabbladen en één kolom, open de zijbalk en de Pager met lijst en melding naast elkaar. Geen vaste schermmaten of toestelchecks. Code voor de Duo-API's van Xcode 27.1 komt alleen achter `DUO_SDK`.
+- Wat is nieuw (2.0.2) en Hulp (CarPlay, iPhone Duo) bijgewerkt.
+
 ## A-Alerts 2.0.2 (build 106) – TestFlight
 - **Eigen server.** De app haalt alles op bij api.a-alerts.nl (eigen PHP/MySQL-server) in plaats van de Cloudflare Worker: meldingen, waarschuwingen, nieuws, helikopters, verkeer, radar, weer, routes, kazernes en de registratie voor pushmeldingen. De antwoorden zijn route voor route vergeleken met de Worker.
 - **Pushmeldingen via de eigen server.** Na de eerste aanmelding meldt de app dit toestel eenmalig af bij de oude server, zodat een melding nooit dubbel binnenkomt. Zolang de rest van de gebruikers nog op de Worker zit, verstuurt api.a-alerts.nl alleen naar toestellen die zich daar zelf hebben aangemeld.
