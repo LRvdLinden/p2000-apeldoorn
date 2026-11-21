@@ -1,5 +1,8 @@
 # Changelog
 
+## Incidenten koppelen op rit- en GMS-nummer (21-11-2026)
+- Worker (`worker/src/incident.js`) en api.a-alerts.nl (`aa/meldingen.php`): hetzelfde ritnummer ("Rit 356390") of GMS-nummer ("GMS 888026", of de zes cijfers aan het eind van een politiemelding of contactverzoek) binnen 2 uur is één incident, ook zonder straat of later dan 45 minuten ("Einde VWS"). Ritnummers 1 tot 3 uit elkaar binnen 5 minuten tellen mee bij dezelfde soort oproep in dezelfde plaats (reanimatie met twee ambulances). Een ander nummer zegt niets (één incident kan meer ritten hebben); besteld vervoer blijft los. Op de laatste 214 meldingen: 5 extra koppelingen, geen enkele bestaande koppeling verdwenen.
+
 ## 2.0.2 (109), Android en website: verkeer en weer in heel Nederland (21-11-2026)
 - **Kaartlaag Verkeer in heel Nederland** (iOS, Android, website "Verkeer NL"): `GET /v1/verkeer?landelijk=1` (api.a-alerts.nl) met alle NDW-situaties van Nederland, items met `regio`. De verkeersdienst levert `/verkeer?landelijk=1` (gzip); `/verkeer` en `/v1/verkeer` zonder parameter blijven de regio. Planning, files uit meetlussen en flitsers blijven regionaal. iOS tekent bij landelijk alleen de iconen in beeld (max. 250), de website de regio plus de 300 dichtstbij het midden; lijnen overal.
 - **Kaartlaag Weercodes in heel Nederland** (iOS, Android, website "KNMI NL"): `GET /v1/weer/landelijk` met alle KNMI-waarschuwingsgebieden; gebied in de codekleur, gestippeld als hij later ingaat, met een label (iOS, website). Geen pushmeldingen en niet in de lijst met waarschuwingen.

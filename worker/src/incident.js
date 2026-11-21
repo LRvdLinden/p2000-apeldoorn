@@ -9,12 +9,47 @@ const plaats = (m) => norm(m.stad) || "apeldoorn";
 export const los = (m) => ["B1", "B2", "B3"].includes(String(m.prioriteit || "").toUpperCase()) || /herbezet|kazerneren|proefalarm/i.test(m.title || "");
 
 /**
- * How sure is it that two alerts are one incident? 3 and up counts as the same incident: the same address in the same
- * place, or within 350 m with the same unit, each a point stronger when two services are involved.
+ * The incident numbers in the text: the ride number of the ambulance ("Rit 356390") and the GMS number of the control
+ * room ("GMS 888026", "GMS:888026", and the six digits at the end of a police call or of "Graag contact OC Apeldoorn
+ * 889629"). The same number is the strongest proof that two alerts are one incident (like 112radar links on it).
+ */
+export function nummers(m) {
+  const t = String(m.title || m.full_melding || "");
+  const uit = {};
+  const rit = t.match(/\bRit\s*:?\s*(\d{5,7})\b/i);
+  if (rit) uit.rit = Number(rit[1]);
+  const gms = t.match(/\bGMS\s*:?\s*(\d{5,7})\b/i)
+    || ((m.dienst === "politie" || /\bcontact\s+(oc|meldkamer)\b/i.test(t)) && !rit ? t.match(/\b(\d{6})\s*$/) : null);
+  if (gms) uit.gms = Number(gms[1]);
+  return uit;
+}
+
+/**
+ * Score from the numbers: the same ride or GMS number within two hours (also "Einde VWS" an hour later) counts as the
+ * same incident. Ride numbers 1 to 3 apart within 5 minutes, in the same place and for the same kind of call (a
+ * resuscitation with two ambulances gets 358289 and 358290), too. A different number says nothing: one incident can
+ * have several rides.
+ */
+function nummerScore(m, o) {
+  const a = nummers(m), b = nummers(o), dt = Math.abs(o.datum - m.datum);
+  if (dt > 120 * 60_000) return 0;
+  if ((a.rit && a.rit === b.rit) || (a.gms && a.gms === b.gms)) return 4;
+  if (a.rit && b.rit && Math.abs(a.rit - b.rit) <= 3 && dt <= 5 * 60_000 && plaats(m) === plaats(o)
+    && soortAmbu(m) != null && soortAmbu(m) === soortAmbu(o)) return 3;
+  return 0;
+}
+
+/**
+ * How sure is it that two alerts are one incident? 3 and up counts as the same incident: the same ride or GMS number,
+ * the same address in the same place, or within 350 m with the same unit, each a point stronger when two services are
+ * involved.
  */
 export function score(m, o) {
+  if (los(m) || los(o)) return 0;
+  const n = nummerScore(m, o);
+  if (n) return n + (o.dienst !== m.dienst ? 1 : 0);
   const groot = m.grip || m.opschaling || o.grip || o.opschaling;
-  if (Math.abs(o.datum - m.datum) > (groot ? 120 : 45) * 60_000 || los(m) || los(o)) return 0;
+  if (Math.abs(o.datum - m.datum) > (groot ? 120 : 45) * 60_000) return 0;
   let s = 0;
   if (hasStreet(m) && hasStreet(o) && plaats(m) === plaats(o) && norm(m.locatie) === norm(o.locatie)) s += 3;
   else if (hasStreet(m) && hasStreet(o) && m.lat != null && o.lat != null && distanceKm(m.lat, m.lon, o.lat, o.lon) <= 0.35) s += 2;
