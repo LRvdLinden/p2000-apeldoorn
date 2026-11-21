@@ -1,5 +1,11 @@
 # Changelog
 
+## Android 2.0.2 en website (21-11-2026)
+- **Android gebruikt api.a-alerts.nl** (eigen server) voor alles, ook de registratie voor pushmeldingen. Na de eerste aanmelding meldt de app het toestel eenmalig af bij de oude Worker, zodat een melding nooit dubbel komt (zelfde aanpak als de Apple-apps in build 106).
+- **Pushmeldingen via de eigen server voor alle soorten**: P2000, NL-Alert, Burgernet, KNMI (ook een uur vooraf en opgeheven), AMBER Alert, Vermist Kind Alert, VNOG en politienieuws, voor elk toestel dat zich bij api.a-alerts.nl heeft aangemeld.
+- **Website: de pager en de meldkamer halen hun gegevens bij api.a-alerts.nl.** De rest van de site blijft voorlopig op de Worker.
+- **Website: CarPlay en iPhone Duo** op de homepage en in de hulp (CarPlay verschijnt zodra Apple het heeft vrijgegeven).
+
 ## A-Alerts 2.0.2 (build 107) – TestFlight
 - **CarPlay (Public Safety), klaar maar nog niet zichtbaar.** Drie tabbladen met lijsten: Meldingen (met de lijstfilters van de app), In de buurt (binnen 10 km, met Huidige locatie aan) en Waarschuwingen (actief). Elke rij heeft het icoon in de kleur van de dienst, de prioriteit, plaats, tijd en afstand. Een melding opent een informatiescherm met dienst, tijd, plaats, afstand, eenheden en het aantal meldingen van het incident, met de knoppen Toon op kaart (Apple Maps op de plek, geen route) en Hele incident. Een nieuwe melding binnen de straal van Mijn buurt (anders 5 km) geeft tijdens het rijden een venster met Bekijk en Sluiten. De scène staat in de Info.plist; het entitlement staat alleen in `Config/CarPlay.entitlements.example` tot Apple het toekent (zie README).
 - **iPhone Duo.** De iPhone-app mag nu ook ondersteboven draaien (alle vier de oriëntaties). De indeling volgt de breedte: dicht tabbladen en één kolom, open de zijbalk en de Pager met lijst en melding naast elkaar. Geen vaste schermmaten of toestelchecks. Code voor de Duo-API's van Xcode 27.1 komt alleen achter `DUO_SDK`.

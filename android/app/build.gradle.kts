@@ -33,8 +33,10 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "2.0.1"
-        buildConfigField("String", "API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
+        versionName = "2.0.2"
+        buildConfigField("String", "API_BASE", "\"https://api.a-alerts.nl/\"")
+        // The old server: a device signs off there once, so pushes never arrive twice.
+        buildConfigField("String", "OLD_API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
         buildConfigField("String", "WEBSITE", "\"https://a-alerts.nl\"")
         buildConfigField("boolean", "HAS_FIREBASE", hasFirebase.toString())
         // Phones only (arm64 + armv7) keeps the APK small; the emulator test sets ANDROID_ALL_ABIS=1.

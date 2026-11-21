@@ -68,7 +68,16 @@ object Push {
             lastError = runCatching { Api.registerDevice(body(token)) }.exceptionOrNull()?.let {
                 Log.w("Push", "Registratie mislukt", it); it.message ?: it.toString()
             }
+            if (lastError == null) signOffOldServer(token)
         }
+    }
+
+    /** Once per token: remove this device at the old server, so a push never arrives twice. */
+    private suspend fun signOffOldServer(token: String) {
+        if (BuildConfig.OLD_API_BASE == BuildConfig.API_BASE) return
+        val prefs = app.getSharedPreferences("push", android.content.Context.MODE_PRIVATE)
+        if (prefs.getString("oudeServerAfgemeld", null) == token) return
+        if (Api.unregisterAtOldServer(token)) prefs.edit().putString("oudeServerAfgemeld", token).apply()
     }
 
     /** "Stuur een testmelding": null when the server sent it, otherwise what went wrong. */

@@ -115,6 +115,13 @@ object Api {
     suspend fun unregisterDevice(token: String) = send("DELETE", "v1/devices/${enc("fcm:$token")}")
     suspend fun testPush(token: String) = send("POST", "v1/devices/${enc("fcm:$token")}/test")
 
+    /** Signs this device off at the old server (once), so only the new server sends pushes. True when gone there. */
+    suspend fun unregisterAtOldServer(token: String): Boolean = withContext(Dispatchers.IO) {
+        runCatching {
+            client.newCall(Request.Builder().url(BuildConfig.OLD_API_BASE + "v1/devices/${enc("fcm:$token")}").delete().build()).execute().use { it.isSuccessful || it.code == 404 }
+        }.getOrDefault(false)
+    }
+
     /** Latest APK on the website (for "Er is een nieuwe versie"). */
     suspend fun apkInfo(): ApkInfo? = runCatching { AppJson.decodeFromString<ApkInfo>(getText("${BuildConfig.WEBSITE}/downloads/android.json")) }.getOrNull()
 }
