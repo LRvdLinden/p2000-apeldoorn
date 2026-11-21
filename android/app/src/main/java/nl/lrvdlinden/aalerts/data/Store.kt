@@ -64,7 +64,7 @@ object Store {
     suspend fun refreshVerkeer(landelijk: Boolean = false) { Api.verkeer(landelijk)?.let { verkeer = it } }
 
     /** KNMI codes in all of the Netherlands: refreshed every 5 minutes while that map layer is on. */
-    var weerNL by mutableStateOf<List<WeerGebied>>(emptyList()); private set
+    var weerNL by mutableStateOf<List<WeerCodeGebied>>(emptyList()); private set
     suspend fun refreshWeerNL() { Api.weerLandelijk()?.let { weerNL = it } }
 
     /** Hospitals and bases: loaded once. */

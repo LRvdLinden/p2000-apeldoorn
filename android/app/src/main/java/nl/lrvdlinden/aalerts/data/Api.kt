@@ -98,7 +98,7 @@ object Api {
     /** landelijk: all of the Netherlands (layer "Verkeer in heel Nederland"); otherwise the region of A-Alerts. */
     suspend fun verkeer(landelijk: Boolean = false): VerkeerResponse? = runCatching { AppJson.decodeFromString<VerkeerResponse>(getText("${base}v1/verkeer" + if (landelijk) "?landelijk=1" else "")) }.getOrNull()
     /** KNMI warning areas of all of the Netherlands (map layer only, never a push). */
-    suspend fun weerLandelijk(): List<WeerGebied>? = runCatching { AppJson.decodeFromString<WeerLandelijk>(getText("${base}v1/weer/landelijk")).items }.getOrNull()
+    suspend fun weerLandelijk(): List<WeerCodeGebied>? = runCatching { AppJson.decodeFromString<WeerLandelijk>(getText("${base}v1/weer/landelijk")).items }.getOrNull()
     suspend fun locaties(): List<Locatie> = runCatching { AppJson.decodeFromString<Locaties>(getText("${base}v1/locaties")).let { it.bases + it.ziekenhuizen } }.getOrDefault(emptyList())
     /** Layer "Defensie en overheid": defence, coastguard, Marechaussee and the government aircraft. */
     suspend fun lucht(): List<Helikopter> = runCatching { AppJson.decodeFromString<LuchtResponse>(getText("${base}v1/lucht")).toestellen }.getOrDefault(emptyList())

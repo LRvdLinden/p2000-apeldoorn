@@ -88,11 +88,11 @@ data class VerkeerResponse(val items: List<VerkeerItem> = emptyList(), val flits
 
 /** One KNMI warning area anywhere in the Netherlands (GET /v1/weer/landelijk). */
 @Serializable
-data class WeerGebied(
+data class WeerCodeGebied(
     val id: String, val soort: String = "", val niveau: String = "yellow", val gebied_naam: String? = null,
     val start: String = "", val einde: String = "", val status: String = "actief", val verwachting: String? = null,
     val gebied: List<List<List<Double>>>? = null,
 )
 @Serializable
-data class WeerLandelijk(val items: List<WeerGebied> = emptyList())
+data class WeerLandelijk(val items: List<WeerCodeGebied> = emptyList())
 
