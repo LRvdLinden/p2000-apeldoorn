@@ -47,6 +47,12 @@ ErrorDocument 404 /404.html
   # api.a-alerts.nl voor de link-preview. Met de app geïnstalleerd opent de link in de app (universal links / app links).
   # Ambulancemeldingen: noindex (zie website/p/melding.php). Een tekst achter de guid (/slug) mag, wordt genegeerd.
   RewriteRule ^melding/([a-z]+)/([A-Za-z0-9_-]{8,64})(/[a-z0-9-]*)?/?$ /p/melding.php?d=$1&g=$2 [L]
+  # Een gedeeld adres van de live pager zelf (/pager/?melding=<guid>, bv. via de deelknop van de browser): link-previews
+  # (WhatsApp, Telegram, Facebook, X, Slack, Discord, LinkedIn, iMessage) krijgen dezelfde pagina met afbeelding als
+  # de deellink; mensen zien gewoon de live pager.
+  RewriteCond %{HTTP_USER_AGENT} (WhatsApp|TelegramBot|facebookexternalhit|Facebot|Twitterbot|Slackbot|Discordbot|LinkedInBot|SkypeUriPreview|Applebot|redditbot|Pinterest|Signal) [NC]
+  RewriteCond %{QUERY_STRING} (^|&)melding=([A-Za-z0-9_-]{8,64})(&|$)
+  RewriteRule ^pager/?$ /p/melding.php?d=onbekend&g=%2 [L]
   RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind|vnog):.+$ /deel/$1.html [L]
 
   # Nieuws: /nieuws/<id> is dezelfde pagina; de JavaScript toont het artikel of liveblog.

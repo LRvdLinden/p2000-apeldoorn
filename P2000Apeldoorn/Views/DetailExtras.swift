@@ -132,9 +132,13 @@ extension Melding {
         Config.website.appendingPathComponent("melding").appendingPathComponent(dienst.rawValue).appendingPathComponent(guid)
     }
 
-    var deelTekst: String {
-        "\(fullMelding ?? title)\n\(plaatsText) · \(Fmt.dayTime(datum))\n\(webLink.absoluteString)"
+    /// Text that goes with the link when sharing (the share sheet adds the link itself; WhatsApp would show it twice).
+    var deelBericht: String {
+        "\(fullMelding ?? title)\n\(plaatsText) · \(Fmt.dayTime(datum))"
     }
+
+    /// The same with the link, for copying.
+    var deelTekst: String { "\(deelBericht)\n\(webLink.absoluteString)" }
 }
 
 enum Klembord {
@@ -356,7 +360,7 @@ struct DeelSheet: View {
                 .background(Color.detailCard, in: RoundedRectangle(cornerRadius: 18, style: .continuous))
 
                 VStack(spacing: 12) {
-                    ShareLink(item: melding.webLink, subject: Text(melding.title), message: Text(melding.deelTekst)) {
+                    ShareLink(item: melding.webLink, subject: Text(melding.title), message: Text(melding.deelBericht)) {
                         SheetOptie(titel: L("Deel via…"), subtitel: L("Berichten, WhatsApp, Mail en meer")) {
                             Image(systemName: "square.and.arrow.up").font(.title3).foregroundStyle(Theme.red)
                         }

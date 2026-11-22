@@ -28,6 +28,9 @@ object Fmt {
             else -> shortDay(i) + " " + time(i)
         }
     }
+    /** "zondag 22 november om 12:04", as in the share text of iOS and the live pager. */
+    fun dayTimeLang(i: Instant): String =
+        DateTimeFormatter.ofPattern(if (isDutch) "EEEE d MMMM 'om' HH:mm" else "EEEE d MMMM 'at' HH:mm", locale).format(i.atZone(ZONE))
     fun dayHeader(d: LocalDate): String {
         val today = LocalDate.now(ZONE)
         return when (d) {

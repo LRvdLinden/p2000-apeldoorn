@@ -595,8 +595,11 @@ function renderDetail(m) {
   $("shareBtn").addEventListener("click", async () => {
     const url = mShareUrl(m);
     try {
-      if (navigator.share) await navigator.share({ title: m.title, text: `${m.title} – ${plaatsText(m)}`, url });
-      else { await navigator.clipboard.writeText(url); toast("Link gekopieerd"); }
+      // Same as the apps: the full alert, place · day and time, and the link (the preview shows the image of the alert).
+      const wanneer = new Date(m.datum_tijd).toLocaleString("nl-NL", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit", timeZone: "Europe/Amsterdam" }).replace(" om ", " om ").replace(/,? (\d{2}:\d{2})$/, " om $1");
+      const text = `${m.full_melding || m.title}\n${plaatsText(m)} · ${wanneer}`;
+      if (navigator.share) await navigator.share({ title: m.title, text, url });
+      else { await navigator.clipboard.writeText(`${text}\n${url}`); toast("Melding gekopieerd"); }
     } catch {}
   });
 

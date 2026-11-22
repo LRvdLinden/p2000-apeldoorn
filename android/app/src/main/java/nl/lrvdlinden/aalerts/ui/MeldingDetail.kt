@@ -436,7 +436,8 @@ fun conditie(c: String): String {
 }
 
 fun share(ctx: Context, m: Melding) {
-    val text = "${m.title}\n${m.plaatsText} · ${Fmt.dayTime(m.datum)}\n${m.prioriteitText}\n\nA-Alerts – ${m.shareUrl}"
+    // Same as iOS and the live pager: the full alert, place · day and time, and the link.
+    val text = "${m.fullMelding ?: m.title}\n${m.plaatsText} · ${Fmt.dayTimeLang(m.datum)}\n${m.shareUrl}"
     ctx.startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text), tr("Delen", "Share")))
 }
 
