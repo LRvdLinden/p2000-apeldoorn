@@ -33,6 +33,9 @@ struct MeldingDetailView: View {
     @State private var toonRoute = false
     @State private var toonFeedback = false
     @State private var toonDelen = false
+    /// The alerts of a place or unit (tap on the place or the list button of a unit).
+    @State private var lijstFilter: MeldingFilter?
+    @State private var afkortingen = AfkortingenStore.shared
     @State private var kazerneRoutes: [KazerneRoute] = []
     @State private var helis = HeliStore.shared
     /// Route of the alert's helicopter this flight (worker trail), drawn behind the live marker.
@@ -86,6 +89,16 @@ struct MeldingDetailView: View {
                 .presentationDetents([.medium, .large])
                 .presentationDragIndicator(.visible)
         }
+        .sheet(item: $lijstFilter) { f in
+            NavigationStack {
+                MeldingenLijstView(filter: f)
+                    .toolbar {
+                        ToolbarItem(placement: .cancellationAction) { Button(L("Sluit")) { lijstFilter = nil } }
+                    }
+            }
+            .presentationDetents([.large])
+        }
+        .task { await afkortingen.laad() }
         .onAppear {
             position = .region(startRegion)
             store.registerView(melding)
@@ -134,6 +147,7 @@ struct MeldingDetailView: View {
                     incidentLine
                     mainCard
                     descriptionCard
+                    if heeftAfkortingen { AfkortingenInMelding(melding: melding).detailCard() }
                     if let meteo { meteoCard(meteo).id("meteo") }
                     if heliRelevant {
                         HeliLiveKaart(melding: melding, heli: liveHeli) { id in Router.shared.volg(heli: id); dismiss() }
@@ -439,10 +453,7 @@ struct MeldingDetailView: View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top, spacing: 12) {
                 DienstIcon(dienst: melding.dienst, size: 32)
-                Text(melding.title)
-                    .font(AppFont.body(16, .medium))
-                    .fixedSize(horizontal: false, vertical: true)
-                    .textSelection(.enabled)
+                AfkortingTekst(tekst: melding.title)
                 Spacer(minLength: 8)
                 Button {
                     copyToClipboard(melding.fullMelding ?? melding.title)
@@ -457,10 +468,14 @@ struct MeldingDetailView: View {
                 .accessibilityLabel(L("Kopieer melding"))
             }
 
-            infoRow(symbol: "location.fill", color: Color(hex: 0x3B82F6),
-                    title: melding.stad?.capitalizedPlaats ?? "Apeldoorn",
-                    subtitle: melding.hectometerpaal?.tekst ?? (hasStreet ? (melding.locatie ?? "") : L("Specifieke locatie niet bekend")),
-                    paal: melding.hectometerpaal)
+            Button { lijstFilter = .plaats(melding.plaatsNaam) } label: {
+                infoRow(symbol: "location.fill", color: Color(hex: 0x3B82F6),
+                        title: melding.stad?.capitalizedPlaats ?? "Apeldoorn",
+                        subtitle: melding.hectometerpaal?.tekst ?? (hasStreet ? (melding.locatie ?? "") : L("Specifieke locatie niet bekend")),
+                        paal: melding.hectometerpaal, chevron: true)
+            }
+            .buttonStyle(.plain)
+            .accessibilityHint(Lf("Toont alle meldingen in %@", melding.plaatsNaam))
             infoRow(symbol: "exclamationmark.triangle.fill", color: Color(hex: 0xDC2626),
                     title: melding.categorie ?? melding.dienst.label,
                     subtitle: priorityLine)
@@ -492,12 +507,16 @@ struct MeldingDetailView: View {
         .detailCard()
     }
 
+    private var heeftAfkortingen: Bool {
+        !afkortingen.gevonden(in: [melding.title, melding.fullMelding ?? ""].joined(separator: " ")).isEmpty
+    }
+
     private var priorityLine: String {
         if let p = melding.prioriteit, !p.isEmpty, p.lowercased() != "onbekend" { return Lf("Prioriteit %@", p) }
         return melding.dienst.label
     }
 
-    private func infoRow(symbol: String, color: Color, title: String, subtitle: String, paal: Hectometerpaal? = nil) -> some View {
+    private func infoRow(symbol: String, color: Color, title: String, subtitle: String, paal: Hectometerpaal? = nil, chevron: Bool = false) -> some View {
         HStack(spacing: 14) {
             Image(systemName: symbol)
                 .font(.system(size: 15, weight: .semibold))
@@ -512,7 +531,9 @@ struct MeldingDetailView: View {
             }
             Spacer(minLength: 0)
             if let paal { HectometerBord(paal: paal) }
+            if chevron { Image(systemName: "chevron.right").font(.footnote.weight(.semibold)).foregroundStyle(.tertiary) }
         }
+        .contentShape(Rectangle())
         .accessibilityElement(children: .combine)
     }
 
@@ -615,6 +636,15 @@ struct MeldingDetailView: View {
                         }
                     }
                     Spacer(minLength: 8)
+                    // Every alert of this unit, with its figures.
+                    if let code = e.code {
+                        Button { lijstFilter = .eenheid(code: code, naam: e.naam) } label: {
+                            Image(systemName: "list.bullet.rectangle").font(.system(size: 17, weight: .semibold))
+                                .foregroundStyle(.secondary).frame(width: 40, height: 40)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(Lf("Meldingen van %@", e.naam ?? code))
+                    }
                     // Star: follow this unit, also outside your places and radius.
                     if let code = e.code {
                         let volgt = settings.volgt(capcode: code)

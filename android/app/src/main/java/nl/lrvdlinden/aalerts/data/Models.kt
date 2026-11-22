@@ -77,6 +77,8 @@ data class Melding(
     val views: Int = 0,
     /** The incident this alert belongs to: the guid of its first alert, worked out by the server. Null for older alerts. */
     val incident: String? = null,
+    /** The hectometre post the server found and placed on the map ("A50 Re hm 123,4"), also from the full text. */
+    val hm: HmInfo? = null,
 ) {
     val datum: Instant get() = parseInstant(datumTijd) ?: Instant.EPOCH
     val millis: Long get() = datum.toEpochMilli()
@@ -85,7 +87,7 @@ data class Melding(
     val shareUrl: String get() = "https://a-alerts.nl/melding/${soort.key}/$guid"
     val hasCoordinate: Boolean get() = lat != null && lon != null && lat != 0.0 && lon != 0.0
     /** A hectometre post in the title ("A50 Re 211,2"). */
-    val hectometerpaal: Hectometerpaal? get() = Hectometerpaal.uit(title)
+    val hectometerpaal: Hectometerpaal? get() = hm?.let { Hectometerpaal.vanServer(it) } ?: Hectometerpaal.uit(title)
     val hasStreet: Boolean get() = !locatie.isNullOrBlank() && locatie.trim().lowercase() != "onbekend"
     val plaatsNaam: String get() = stad?.trim()?.takeIf { it.isNotEmpty() && it.lowercase() != "onbekend" }?.capPlaats() ?: "Apeldoorn"
     val plaatsText: String get() {
@@ -669,6 +671,13 @@ data class Hectometerpaal(val weg: String, val zijde: String, val km: String) {
     val tekst: String get() = listOf(weg, zijde, km).filter { it.isNotEmpty() }.joinToString(" ")
     companion object {
         private val RE = Regex("""(?<![\p{L}\d])([ANan])\s?(\d{1,3})\s+(?:([Rr][Ee]?|[Ll][Ii]?)\s+)?(\d{1,3})[,.](\d)(?!\d)""")
+        /** From the post the server found: hm 1234 on the A50, right side → "A50 Re 123,4". */
+        fun vanServer(h: HmInfo): Hectometerpaal? {
+            val weg = h.weg?.uppercase()?.takeIf { it.isNotBlank() } ?: return null
+            val n = h.hm?.takeIf { it >= 0 } ?: return null
+            val z = (h.zijde ?: "").lowercase()
+            return Hectometerpaal(weg, if (z.startsWith("r")) "Re" else if (z.startsWith("l")) "Li" else "", "${n / 10},${n % 10}")
+        }
         fun uit(titel: String?): Hectometerpaal? {
             val m = RE.find(titel ?: return null) ?: return null
             val z = m.groupValues[3].lowercase()

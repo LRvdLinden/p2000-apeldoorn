@@ -187,6 +187,11 @@ struct SettingsView: View {
                     SettingsRow(icon: "questionmark.circle.fill", color: .teal, title: L("Hulp en veelgestelde vragen"))
                 }
                 NavigationLink {
+                    AfkortingenView()
+                } label: {
+                    SettingsRow(icon: "character.book.closed.fill", color: .indigo, title: L("Afkortingen"))
+                }
+                NavigationLink {
                     ChangelogView()
                 } label: {
                     SettingsRow(icon: "sparkles", color: .purple, title: L("Changelog"))

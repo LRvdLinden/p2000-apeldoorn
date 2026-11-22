@@ -22,6 +22,7 @@ struct StatsView: View {
                         categoryCard(today, yesterday)
                         waarschuwingCard
                     }
+                    Laatste28DagenSectie()
                 }
                 .padding()
                 .frame(maxWidth: 1100)
@@ -30,6 +31,7 @@ struct StatsView: View {
             .background(Color.groupedBackground)
             .navigationTitle(L("Statistieken"))
             .refreshable {
+                await StatistiekStore.shared.laad(force: true)
                 await store.refresh()
                 await WaarschuwingStore.shared.refresh()
             }

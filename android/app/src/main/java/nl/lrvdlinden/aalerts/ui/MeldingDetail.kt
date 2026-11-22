@@ -74,6 +74,8 @@ fun MeldingDetail(guid: String, nav: Nav) {
 private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, nav: Nav) {
     val ctx = LocalContext.current
     var toonFeedback by remember(m.guid) { mutableStateOf(false) }
+    var toonAfbeelding by remember(m.guid) { mutableStateOf(false) }
+    LaunchedEffect(Unit) { Afkortingen.laad(ctx) }
     var now by remember { mutableStateOf(Instant.now()) }
     LaunchedEffect(Unit) { while (true) { delay(5_000); now = Instant.now() } }
     // Road route and estimate from the A-Alerts API (same as iOS and the website); until then the local estimate.
@@ -155,11 +157,15 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                         }
                     }
                     if (m.isGrootIncident) GrootIncidentBadge(m)
-                    Text(m.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    AfkortingTekst(m.title, MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold))
+                    // Tap the place: every alert there, with its figures.
+                    Row(Modifier.fillMaxWidth().clip(RoundedCornerShape(8.dp)).clickable { nav.open(MeldingFilter.Plaats(m.plaatsNaam).route) }.padding(vertical = 2.dp)
+                        .semantics(mergeDescendants = true) { contentDescription = tr("Alle meldingen in ${m.plaatsNaam}", "All alerts in ${m.plaatsNaam}") },
+                        verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Outlined.Place, null, tint = Muted, modifier = Modifier.size(16.dp)); Spacer(Modifier.width(4.dp))
                         Text(m.hectometerpaal?.let { "${it.tekst}, ${m.plaatsNaam}" } ?: m.plaatsText, color = Muted, modifier = Modifier.weight(1f))
                         m.hectometerpaal?.let { HectometerBord(it) }
+                        Icon(Icons.Filled.ChevronRight, null, tint = Muted, modifier = Modifier.size(18.dp))
                     }
                     pand?.tekst?.takeIf { it.isNotBlank() }?.let { t ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -195,6 +201,7 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                         Text(it, fontFamily = FontFamily.Monospace, fontSize = 13.sp)
                     }
                 }
+                AfkortingenInMelding(m, nav)
                 if (routes.isNotEmpty()) SectionCard(tr("Kazernes en aanrijtijd", "Stations and arrival"), Icons.Outlined.LocalFireDepartment) {
                     routes.forEach { r ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -227,6 +234,11 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
                             Column(Modifier.weight(1f)) {
                                 Text(e.naam ?: e.code ?: "–", fontSize = 14.sp)
                                 e.code?.let { Text(it, color = Muted, fontSize = 12.sp, fontFamily = FontFamily.Monospace) }
+                            }
+                            e.code?.let { code ->
+                                IconButton(onClick = { nav.open(MeldingFilter.Eenheid(code, e.naam).route) }) {
+                                    Icon(Icons.Outlined.ListAlt, tr("Meldingen van ${e.naam ?: code}", "Alerts of ${e.naam ?: code}"), tint = Muted)
+                                }
                             }
                             e.code?.let { code ->
                                 val volgt = Settings.volgt(code)
@@ -325,12 +337,15 @@ private fun MeldingContent(m: Melding, weer: AlertWeather?, weerKlaar: Boolean, 
             }
         }
         if (toonFeedback) MeldingFeedbackDialog(m) { toonFeedback = false }
+        if (toonAfbeelding) DeelAfbeeldingDialog(m) { toonAfbeelding = false }
         // Floating top bar over the map
         // Bar behind the status bar once the content scrolls over the map.
         if (scroll.value > 200) Box(Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background.copy(alpha = 0.96f)).statusBarsPadding().height(52.dp))
         Row(Modifier.fillMaxWidth().statusBarsPadding().padding(horizontal = 12.dp, vertical = 6.dp)) {
             RoundIcon(Icons.AutoMirrored.Filled.ArrowBack, tr("Terug", "Back")) { nav.back() }
             Spacer(Modifier.weight(1f))
+            RoundIcon(Icons.Outlined.Image, tr("Deel als afbeelding", "Share as image")) { toonAfbeelding = true }
+            Spacer(Modifier.width(8.dp))
             RoundIcon(Icons.Outlined.Share, tr("Delen", "Share")) { share(ctx, m) }
         }
     }

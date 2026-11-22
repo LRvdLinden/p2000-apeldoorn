@@ -65,6 +65,12 @@
             <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info" />
         </receiver>
 
+        <!-- Share images of alerts (Deel als afbeelding): only the folder cache/deel is shared, read-only. -->
+        <provider android:name="androidx.core.content.FileProvider" android:authorities="${applicationId}.bestanden"
+            android:exported="false" android:grantUriPermissions="true">
+            <meta-data android:name="android.support.FILE_PROVIDER_PATHS" android:resource="@xml/bestanden" />
+        </provider>
+
         <meta-data android:name="com.google.firebase.messaging.default_notification_icon" android:resource="@drawable/ic_notification" />
         <meta-data android:name="com.google.firebase.messaging.default_notification_color" android:resource="@color/brand_red" />
         <meta-data android:name="com.google.firebase.messaging.default_notification_channel_id" android:value="algemeen" />

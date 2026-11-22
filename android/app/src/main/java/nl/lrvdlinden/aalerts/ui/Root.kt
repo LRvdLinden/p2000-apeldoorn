@@ -31,6 +31,7 @@ import nl.lrvdlinden.aalerts.MainActivity
 import nl.lrvdlinden.aalerts.R
 import nl.lrvdlinden.aalerts.data.Settings
 import nl.lrvdlinden.aalerts.data.Store
+import nl.lrvdlinden.aalerts.data.MeldingFilter
 import nl.lrvdlinden.aalerts.tr
 import java.net.URLDecoder
 import java.net.URLEncoder
@@ -130,6 +131,12 @@ fun AAlertsRoot(activity: MainActivity) {
                     composable("profiel/{id}") { ProfielScreen(dec(it.arguments?.getString("id") ?: ""), nav) }
                     composable("content/{name}") { ContentScreen(it.arguments?.getString("name") ?: "privacy", nav) }
                     composable("changelog") { ChangelogScreen(nav) }
+                    composable("afkortingen") { AfkortingenScreen(nav) }
+                    composable("lijst/{soort}/{waarde}/{naam}") {
+                        val waarde = dec(it.arguments?.getString("waarde") ?: "")
+                        val naam = dec(it.arguments?.getString("naam") ?: "-").takeIf { n -> n != "-" }
+                        MeldingenLijstScreen(if (it.arguments?.getString("soort") == "eenheid") MeldingFilter.Eenheid(waarde, naam) else MeldingFilter.Plaats(waarde), nav)
+                    }
                     composable("status") { StatusScreen(nav) }
                     composable("buurt") { RadiusScreen(nav) }
                 }

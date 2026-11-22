@@ -41,7 +41,7 @@ fun StatsScreen(nav: Nav) {
 
     Scaffold(containerColor = MaterialTheme.colorScheme.background, contentWindowInsets = WindowInsets.statusBars,
         topBar = { TopAppBar(title = { Text(tr("Statistieken", "Statistics"), fontWeight = FontWeight.Bold) }, colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)) }) { pad ->
-        PullToRefreshBox(isRefreshing = false, onRefresh = { scope.launch { Store.refresh(); Store.refreshAlleWaarschuwingen() } }, modifier = Modifier.padding(pad)) {
+        PullToRefreshBox(isRefreshing = false, onRefresh = { scope.launch { StatistiekStore.laad(force = true); Store.refresh(); Store.refreshAlleWaarschuwingen() } }, modifier = Modifier.padding(pad)) {
             Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(14.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 SectionCard(tr("Vandaag vs. gisteren", "Today vs. yesterday"), Icons.Outlined.CalendarToday) {
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
@@ -93,6 +93,7 @@ fun StatsScreen(nav: Nav) {
                     t.perCategorie.entries.sortedByDescending { it.value }.take(8).forEach { InfoRow(it.key, "${it.value}") }
                 }
                 WaarschuwingStats(nav)
+                Laatste28Dagen(nav)
                 Text(tr("Statistieken worden berekend uit de meldingen van vandaag en gisteren.", "Statistics are calculated from today's and yesterday's alerts."), color = Muted, fontSize = 11.sp)
             }
         }

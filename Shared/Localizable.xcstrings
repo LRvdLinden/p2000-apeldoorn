@@ -324,6 +324,23 @@
         }
       }
     },
+    "%lld dagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld days"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld dagen"
+          }
+        }
+      }
+    },
     "%lld dagen geleden": {
       "extractionState": "manual",
       "localizations": {
@@ -388,6 +405,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld in 7 dagen"
+          }
+        }
+      }
+    },
+    "%lld inzetten": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld missions"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%lld inzetten"
           }
         }
       }
@@ -1123,6 +1157,23 @@
         }
       }
     },
+    "Afbeelding maken…": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Making image…"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afbeelding maken…"
+          }
+        }
+      }
+    },
     "Afgeleid uit de vlucht; P2000 meldt geen annulering.": {
       "extractionState": "manual",
       "localizations": {
@@ -1221,6 +1272,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "Afgesloten voor werkzaamheden"
+          }
+        }
+      }
+    },
+    "Afkortingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbreviations"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afkortingen"
+          }
+        }
+      }
+    },
+    "Afkortingen in deze melding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbreviations in this alert"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afkortingen in deze melding"
+          }
+        }
+      }
+    },
+    "Afkortingen niet geladen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Abbreviations not loaded"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Afkortingen niet geladen"
           }
         }
       }
@@ -1459,6 +1561,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Alle P2000-meldingen van brandweer, ambulance, politie en traumaheli in de gemeente Apeldoorn en Teuge – live, op de kaart en met statistieken."
+          }
+        }
+      }
+    },
+    "Alle afkortingen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "All abbreviations"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alle afkortingen"
           }
         }
       }
@@ -2466,6 +2585,23 @@
         }
       }
     },
+    "Bijgewerkt %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Updated %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bijgewerkt %@"
+          }
+        }
+      }
+    },
     "Bijvoorbeeld een verkeerde naam, of een toestel dat ontbreekt.": {
       "extractionState": "manual",
       "localizations": {
@@ -3078,6 +3214,23 @@
         }
       }
     },
+    "Cijfers konden niet worden geladen (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Figures could not be loaded (%@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Cijfers konden niet worden geladen (%@)."
+          }
+        }
+      }
+    },
     "Code": {
       "extractionState": "manual",
       "localizations": {
@@ -3295,6 +3448,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "De P2000-tekst met de link eronder"
+          }
+        }
+      }
+    },
+    "De afbeelding kon niet worden gemaakt (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The image could not be made (%@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "De afbeelding kon niet worden gemaakt (%@)."
           }
         }
       }
@@ -3703,6 +3873,40 @@
           "stringUnit": {
             "state": "translated",
             "value": "Deel"
+          }
+        }
+      }
+    },
+    "Deel afbeelding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share image"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel afbeelding"
+          }
+        }
+      }
+    },
+    "Deel als afbeelding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Share as image"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Deel als afbeelding"
           }
         }
       }
@@ -4166,6 +4370,23 @@
         }
       }
     },
+    "Drukste plaatsen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busiest places"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drukste plaatsen"
+          }
+        }
+      }
+    },
     "Drukste uur vandaag: %@ (%lld meldingen)": {
       "extractionState": "manual",
       "localizations": {
@@ -4179,6 +4400,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Drukste uur vandaag: %@ (%lld meldingen)"
+          }
+        }
+      }
+    },
+    "Drukste uur: %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Busiest hour: %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Drukste uur: %@"
           }
         }
       }
@@ -4608,6 +4846,23 @@
         }
       }
     },
+    "Formaat": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Format"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Formaat"
+          }
+        }
+      }
+    },
     "Foto van het vermiste kind": {
       "extractionState": "manual",
       "localizations": {
@@ -4927,6 +5182,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Geen meldingen"
+          }
+        }
+      }
+    },
+    "Geen meldingen gevonden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No alerts found"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Geen meldingen gevonden"
           }
         }
       }
@@ -5522,6 +5794,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Gisteren"
+          }
+        }
+      }
+    },
+    "Gisteren %lld, gemiddeld %@ per dag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Yesterday %lld, on average %@ a day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gisteren %lld, gemiddeld %@ per dag"
           }
         }
       }
@@ -7464,6 +7753,23 @@
         }
       }
     },
+    "Laatste 28 dagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Last 28 days"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Laatste 28 dagen"
+          }
+        }
+      }
+    },
     "Laatste melding": {
       "extractionState": "manual",
       "localizations": {
@@ -7715,6 +8021,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Lifeliner"
+          }
+        }
+      }
+    },
+    "Liggend": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Landscape"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Liggend"
           }
         }
       }
@@ -8059,6 +8382,23 @@
         }
       }
     },
+    "Meest ingezette eenheden": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Most deployed units"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meest ingezette eenheden"
+          }
+        }
+      }
+    },
     "Meest voorkomend": {
       "extractionState": "manual",
       "localizations": {
@@ -8229,6 +8569,23 @@
         }
       }
     },
+    "Meldingen konden niet worden geladen (%@).": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts could not be loaded (%@)."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen konden niet worden geladen (%@)."
+          }
+        }
+      }
+    },
     "Meldingen laden...": {
       "extractionState": "manual",
       "localizations": {
@@ -8259,6 +8616,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meldingen staan uit voor A-Alerts in de instellingen van je toestel."
+          }
+        }
+      }
+    },
+    "Meldingen van %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Alerts of %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meldingen van %@"
           }
         }
       }
@@ -9895,6 +10269,23 @@
         }
       }
     },
+    "Opnieuw proberen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Try again"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opnieuw proberen"
+          }
+        }
+      }
+    },
     "Oprit dicht": {
       "extractionState": "manual",
       "localizations": {
@@ -10248,6 +10639,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pech of obstakel"
+          }
+        }
+      }
+    },
+    "Per dag": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per day"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Per dag"
           }
         }
       }
@@ -11595,6 +12003,23 @@
         }
       }
     },
+    "Staand": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Portrait"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Staand"
+          }
+        }
+      }
+    },
     "Standaard": {
       "extractionState": "manual",
       "localizations": {
@@ -12428,6 +12853,23 @@
         }
       }
     },
+    "Toont alle meldingen in %@": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Shows all alerts in %@"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Toont alle meldingen in %@"
+          }
+        }
+      }
+    },
     "Toont de laatste P2000-meldingen in gem. Apeldoorn.": {
       "extractionState": "manual",
       "localizations": {
@@ -12594,6 +13036,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Traumahelikopter · toon op de kaart"
+          }
+        }
+      }
+    },
+    "Traumahelikopters": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Air ambulances"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Traumahelikopters"
           }
         }
       }
@@ -13618,6 +14077,23 @@
         }
       }
     },
+    "Vierkant": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Square"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Vierkant"
+          }
+        }
+      }
+    },
     "Vlucht terugspelen": {
       "extractionState": "manual",
       "localizations": {
@@ -13852,6 +14328,74 @@
           "stringUnit": {
             "state": "translated",
             "value": "Voor Apple TV: de live meldkamer op een groot scherm. Nieuwe meldingen verschijnen direct met een alarmscherm en op de kaart."
+          }
+        }
+      }
+    },
+    "Voor berichten en X (1200 × 630)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For messages and X (1200 × 630)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor berichten en X (1200 × 630)"
+          }
+        }
+      }
+    },
+    "Voor een Instagram-bericht (1080 × 1350)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For an Instagram post (1080 × 1350)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor een Instagram-bericht (1080 × 1350)"
+          }
+        }
+      }
+    },
+    "Voor een story (1080 × 1920)": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "For a story (1080 × 1920)"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voor een story (1080 × 1920)"
+          }
+        }
+      }
+    },
+    "Voorbeeld van de afbeelding": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Preview of the image"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voorbeeld van de afbeelding"
           }
         }
       }
@@ -14791,6 +15335,23 @@
         }
       }
     },
+    "Zoek een afkorting": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Search an abbreviation"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zoek een afkorting"
+          }
+        }
+      }
+    },
     "Zoek in de vragen": {
       "extractionState": "manual",
       "localizations": {
@@ -14855,6 +15416,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "Zojuist"
+          }
+        }
+      }
+    },
+    "Zonder testoproepen en proefalarmen.": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Without test calls and test alarms."
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Zonder testoproepen en proefalarmen."
           }
         }
       }
@@ -15484,6 +16062,23 @@
           "stringUnit": {
             "state": "translated",
             "value": "meldingen"
+          }
+        }
+      }
+    },
+    "meldingen in %lld dagen": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "alerts in %lld days"
+          }
+        },
+        "nl": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "meldingen in %lld dagen"
           }
         }
       }

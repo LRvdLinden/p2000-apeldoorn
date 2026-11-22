@@ -160,6 +160,7 @@ fun SettingsScreen(nav: Nav) {
             SectionCard(tr("Informatie", "Information"), Icons.Outlined.Info) {
                 StatusNavRow { nav.open("status") }
                 NavRow(tr("Hulp en veelgestelde vragen", "Help and FAQ"), icon = Icons.AutoMirrored.Outlined.HelpOutline) { nav.open("content/hulp") }
+                NavRow(tr("Afkortingen", "Abbreviations"), icon = Icons.Outlined.Abc) { nav.open("afkortingen") }
                 NavRow(tr("Wat is nieuw", "What's new"), icon = Icons.Outlined.NewReleases) { nav.open("changelog") }
                 NavRow(tr("Privacyverklaring", "Privacy policy"), icon = Icons.Outlined.PrivacyTip) { nav.open("content/privacy") }
                 NavRow(tr("Gebruiksvoorwaarden", "Terms of use"), icon = Icons.AutoMirrored.Outlined.Article) { nav.open("content/terms") }

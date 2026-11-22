@@ -127,6 +127,8 @@ struct Melding: Identifiable, Hashable, Codable {
     var weather: Weer?
     /// The incident this alert belongs to: the guid of its first alert, worked out by the server. Nil for older alerts.
     var incident: String?
+    /// The hectometre post the server found and placed on the map ("A50 Re hm 123,4"), also from the full text.
+    var hm: HmInfo?
 
     var id: String { guid }
     var dienst: Dienst { Dienst(raw: dienstRaw) }
@@ -137,7 +139,7 @@ struct Melding: Identifiable, Hashable, Codable {
     }
 
     /// A hectometre post in the title ("A50 Re 211,2"): the road, the side and the number on the sign.
-    var hectometerpaal: Hectometerpaal? { Hectometerpaal(titel: title) }
+    var hectometerpaal: Hectometerpaal? { hm.flatMap(Hectometerpaal.init(server:)) ?? Hectometerpaal(titel: title) }
 
     /// The dispatcher sent a street name. Without one the coordinate is only the town centre.
     var hasStreet: Bool {
@@ -199,7 +201,7 @@ struct Melding: Identifiable, Hashable, Codable {
     enum CodingKeys: String, CodingKey {
         case recordID = "id", guid, title, fullMelding = "full_melding", dienstRaw = "dienst", prioriteit
         case datum = "datum_tijd", locatie, lat, lon, link, stad, regio, provincie, capcode, categorie, grip, opschaling
-        case eenheden, voertuigen, views, weather, incident
+        case eenheden, voertuigen, views, weather, incident, hm
     }
 
     init(from decoder: Decoder) throws {
@@ -233,6 +235,7 @@ struct Melding: Identifiable, Hashable, Codable {
         views = Int(c.flexibleDouble(.views) ?? 0)
         weather = try? c.decodeIfPresent(Weer.self, forKey: .weather)
         incident = try? c.decodeIfPresent(String.self, forKey: .incident)
+        hm = try? c.decodeIfPresent(HmInfo.self, forKey: .hm)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -260,6 +263,7 @@ struct Melding: Identifiable, Hashable, Codable {
         try c.encode(views, forKey: .views)
         try c.encodeIfPresent(weather, forKey: .weather)
         try c.encodeIfPresent(incident, forKey: .incident)
+        try c.encodeIfPresent(hm, forKey: .hm)
     }
 }
 
@@ -353,6 +357,15 @@ struct Hectometerpaal: Equatable {
 
     var isSnelweg: Bool { weg.hasPrefix("A") }
     var tekst: String { [weg, zijde, km].filter { !$0.isEmpty }.joined(separator: " ") }
+
+    /// From the post the server found: hm 1234 on the A50, right side → "A50 Re 123,4".
+    init?(server h: HmInfo) {
+        guard let weg = h.weg?.uppercased(), !weg.isEmpty, let n = h.hm, n >= 0 else { return nil }
+        self.weg = weg
+        let z = (h.zijde ?? "").lowercased()
+        zijde = z.hasPrefix("r") ? "Re" : z.hasPrefix("l") ? "Li" : ""
+        km = "\(n / 10),\(n % 10)"
+    }
 
     init?(titel: String) {
         let patroon = #"(?<![\p{L}\d])([ANan])\s?(\d{1,3})\s+(?:([Rr][Ee]?|[Ll][Ii]?)\s+)?(\d{1,3})[,.](\d)(?!\d)"#

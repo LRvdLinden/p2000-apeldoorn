@@ -373,6 +373,7 @@ struct DeelSheet: View {
                     }
                 }
                 .buttonStyle(.plain)
+                DeelAlsAfbeelding(melding: melding)
             }
             .padding(20)
         }

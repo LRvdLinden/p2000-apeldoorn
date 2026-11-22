@@ -1,5 +1,14 @@
 # Changelog
 
+## Afkortingen, 28 dagen, plaats en eenheid, deel als afbeelding: 2.0.2 (111) (22-11-2026)
+- **Afkortingen (iOS, Android):** de app haalt `GET /v1/afkortingen` op (bewaard op het toestel, werkt ook offline) en zet een stippellijn onder elke afkorting in de meldingstekst; tik voor de uitleg. Onder de beschrijving staat **Afkortingen in deze melding**, en bij Instellingen › Afkortingen een doorzoekbare lijst. Hele woorden; hoofdlettergevoelig als de server `hoofdletters` zet; langste term eerst.
+- **Laatste 28 dagen (iOS, Android):** Statistieken krijgt onder vandaag/gisteren de cijfers van `GET /v1/statistiek?dagen=28`: totaal en per dag, gisteren tegenover het gemiddelde, per dag (per dienst), per dienst, per uur, per weekdag, drukste plaatsen, meest ingezette eenheden en traumahelikopters. Zonder testoproepen en proefalarmen.
+- **Plaats en eenheid (iOS, Android):** tik in een melding op de plaats of op het lijstje naast een eenheid: `GET /v1/meldingen?plaats=` / `?eenheid=` met de cijfers van `/v1/statistiek?plaats=` / `?eenheid=`. Ook vanuit Drukste plaatsen en Meest ingezette eenheden.
+- **Deel als afbeelding (iOS, Android):** in het deelmenu (Android: knop bovenaan de melding) `GET /v1/meldingen/{guid}/afbeelding.png?formaat=og|vierkant|staand`, met voorbeeld en delen als PNG (Android via een FileProvider op `cache/deel`).
+- **Hectometerpaal:** een melding met `hm` van de server (`{"weg","hm","zijde","tekst"}`) toont dat bordje; anders blijft de app het paaltje uit de titel lezen.
+- Alles optioneel gedecodeerd: zolang de server een onderdeel nog niet levert, laat de app dat deel weg (geen verzonnen cijfers).
+- Hulp en Wat is nieuw 2.0.2 bijgewerkt (ook in `aa/data` van api.a-alerts.nl). iOS build 111.
+
 ## ADS-B uit meer open bronnen, 2.0.2 (110) (21-11-2026)
 - **api.a-alerts.nl:** de helikopters, de laag Defensie en overheid en de jets komen om de beurt van adsb.fi, airplanes.live en adsb.lol. adsb.lol krijgt hoogstens 400 van zijn 500 opvragen per dag, verspreid over de dag, zodat hij niet na een paar uur op is. Een bron die weigert, rust even (tot 15 minuten). Reserve: OpenSky Network en de Koyeb-relay; die twee krijgen elk half uur een testopvraag. Staat per bron in `/v1/eigen` en op /docs.
 - Bronvermelding in app (iOS, Android), website, hulp en disclaimer: adsb.lol (ODbL), adsb.fi en OpenSky Network.

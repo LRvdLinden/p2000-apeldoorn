@@ -61,9 +61,26 @@ object Api {
         else -> JsonPrimitive(v.toString())
     }
 
-    private fun enc(s: String) = URLEncoder.encode(s, "UTF-8").replace("+", "%20")
+    internal fun enc(s: String) = URLEncoder.encode(s, "UTF-8").replace("+", "%20")
 
     suspend fun meldingen(limit: Int = 300): List<Melding> = AppJson.decodeFromString(getText("${base}v1/meldingen?limit=$limit"))
+    /** Alerts of one place (?plaats=) or unit (?eenheid=), newest first. */
+    suspend fun meldingen(filter: MeldingFilter, limit: Int = 100): List<Melding> =
+        AppJson.decodeFromString(getText("${base}v1/meldingen?${filter.query}&limit=$limit"))
+    /** GET /v1/afkortingen as it came (kept on the device). */
+    suspend fun afkortingenRaw(): String = getText("${base}v1/afkortingen")
+    /** Figures of the last [dagen] days, optionally of one place or unit. */
+    suspend fun statistiek(dagen: Int = 28, filter: MeldingFilter? = null): Statistiek =
+        AppJson.decodeFromString(getText("${base}v1/statistiek?dagen=$dagen" + (filter?.let { "&" + it.query } ?: "")))
+    /** The share image of an alert as PNG bytes (og 1200×630, vierkant 1080×1350, staand 1080×1920). */
+    suspend fun afbeelding(guid: String, formaat: String): ByteArray = withContext(Dispatchers.IO) {
+        client.newCall(Request.Builder().url("${base}v1/meldingen/${enc(guid)}/afbeelding.png?formaat=${enc(formaat)}").header("Accept", "image/png").build()).execute().use { r ->
+            if (!r.isSuccessful) throw HttpException(r.code)
+            val b = r.body?.bytes() ?: ByteArray(0)
+            if (b.size < 100 || b[0] != 0x89.toByte() || b[1] != 0x50.toByte()) throw HttpException(415)
+            b
+        }
+    }
     /** Every alert of the incident this alert belongs to, oldest first. */
     suspend fun verloop(guid: String): List<Melding> = runCatching { AppJson.decodeFromString<VerloopAntwoord>(getText("${base}v1/meldingen/${enc(guid)}/verloop")).meldingen }.getOrDefault(emptyList())
     /** The lowest build of the app that still works (0 = no minimum). */
