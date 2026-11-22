@@ -1,0 +1,5 @@
+# Helpers and the cache are never pages.
+<FilesMatch "^_">
+  Require all denied
+</FilesMatch>
+RedirectMatch 404 /p/\.cache(/|$)

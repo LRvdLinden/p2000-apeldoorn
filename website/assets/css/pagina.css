@@ -1,0 +1,51 @@
+/* Pages made on the server: /melding, /plaats, /eenheid, /post, /statistieken, /afkortingen (website/p). */
+body { padding: 0 16px 60px; }
+.pk { max-width: 820px; margin: 0 auto; padding: 20px 0; display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.pk-merk { display: flex; align-items: center; gap: 10px; text-decoration: none; font-weight: 700; color: var(--text); }
+.pk-merk .shield { width: 36px; height: 36px; }
+.pk nav { margin-left: auto; display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: .9rem; }
+.pk nav a { font-weight: 500; color: var(--muted); text-decoration: none; }
+.pk nav a[aria-current] { color: var(--red); font-weight: 700; }
+.pm { max-width: 820px; margin: 0 auto; }
+.pa { background: var(--surface); border-radius: 24px; padding: clamp(20px, 4vw, 40px); box-shadow: var(--shadow); }
+.pa h1 { font-family: var(--display); font-weight: 900; font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1.1; margin: .2em 0 .3em; overflow-wrap: anywhere; }
+.pa h2 { margin-top: 1.6em; font-size: 1.15rem; }
+.pa a { color: var(--red); }
+.pa-m, .pg { color: var(--muted); font-size: .92rem; }
+.pa-d { display: inline-flex; align-items: center; gap: 8px; font-weight: 700; margin: 0; }
+.pa-d::before { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--k); }
+.pa-d b { background: var(--k); color: #fff; padding: 1px 8px; border-radius: 6px; font-size: .85rem; }
+.pa-hm { background: var(--surface-2); border-radius: 12px; padding: 10px 14px; }
+.pa-knoppen { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.pk-knop { display: inline-block; background: var(--red); color: #fff !important; text-decoration: none; font-weight: 600; padding: 9px 16px; border-radius: 12px; font-size: .92rem; }
+.pk-knop.pk-licht { background: var(--surface-2); color: var(--text) !important; border: 1px solid var(--line); }
+.pa-beeld { width: 100%; height: auto; border-radius: 16px; border: 1px solid var(--line); display: block; }
+.pe { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; }
+.pe li a, .pe li { text-decoration: none; color: var(--text); }
+.pe-c { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; margin-right: 6px; }
+.pl { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.pl a { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; background: var(--surface-2); text-decoration: none; color: var(--text) !important; }
+.pl-d { font-size: .8rem; font-weight: 700; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.pl-d::before { content: ""; width: 9px; height: 9px; border-radius: 50%; background: var(--k); }
+.pl-t { font-weight: 600; overflow-wrap: anywhere; }
+.pl-m { font-size: .82rem; color: var(--muted); }
+.ps { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin: 16px 0; }
+.ps div { background: var(--surface-2); border-radius: 14px; padding: 12px 14px; display: grid; }
+.ps b { font-size: 1.6rem; font-family: var(--display); font-variant-numeric: tabular-nums; }
+.ps span { font-size: .82rem; color: var(--muted); }
+.pb { display: flex; align-items: flex-end; gap: 3px; height: 150px; padding-bottom: 20px; }
+.pb-k { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; position: relative; min-width: 0; }
+.pb-s { border-radius: 4px 4px 0 0; min-height: 0; }
+.pb-k span { position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%); font-size: .7rem; color: var(--muted); white-space: nowrap; }
+.pt { display: inline-flex; gap: 10px; margin-left: 8px; }
+.pt a[aria-current] { font-weight: 700; text-decoration: none; }
+.pk2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0 24px; }
+.pr { padding-left: 1.2em; margin: 0; display: grid; gap: 6px; }
+.pr li a { margin-right: 8px; }
+.pr b { float: right; font-variant-numeric: tabular-nums; }
+.pd { margin: 0; display: grid; gap: 10px; }
+.pd dt { font-weight: 700; }
+.pd dd { margin: 2px 0 0; color: var(--muted); }
+.pz { width: 100%; box-sizing: border-box; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface-2); color: var(--text); font: inherit; }
+.pv { max-width: 820px; margin: 24px auto 0; color: var(--muted); font-size: .85rem; text-align: center; }
+.pv a { color: inherit; }

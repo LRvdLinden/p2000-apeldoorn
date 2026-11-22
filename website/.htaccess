@@ -34,13 +34,19 @@ ErrorDocument 404 /404.html
   RewriteCond %{QUERY_STRING} (^|&)p=changelog(&|$)
   RewriteRule ^info/?$ /wat-is-nieuw/? [R=301,L]
 
-  # Korte link: /statistieken
-  RewriteRule ^statistieken/?$ /pager/#stats [R=302,L,NE]
+  # Pagina's die de server maakt (website/p, PHP): statistieken, afkortingen, plaats, eenheid, post en de sitemap
+  # daarvan. De inhoud staat meteen in de HTML (voor Google en link-previews).
+  RewriteRule ^statistieken/?$ /p/statistieken.php [L,QSA]
+  RewriteRule ^afkortingen/?$ /p/afkortingen.php [L]
+  RewriteRule ^plaats/([a-z0-9-]{1,60})/?$ /p/plaats.php?s=$1 [L]
+  RewriteRule ^eenheid/([0-9]{5,12})/?$ /p/eenheid.php?c=$1 [L]
+  RewriteRule ^post/([A-Za-z0-9_-]{3,60})/?$ /p/post.php?id=$1 [L]
+  RewriteRule ^sitemap-p2000\.xml$ /p/sitemap.php [L]
 
-  # Deellinks (apps, website, Homey): een kleine pagina met de banner van de dienst of bron voor de link-preview,
-  # die meteen doorstuurt naar de live pager. Met de app geïnstalleerd opent de link in de app (universal links / app links).
-  RewriteRule ^melding/(brandweer|ambulance|politie|traumaheli)/[A-Za-z0-9_-]+/?$ /deel/$1.html [L]
-  RewriteRule ^melding/[a-z]+/[A-Za-z0-9_-]+/?$ /deel/melding.html [L]
+  # Deellinks (apps, website, Homey): de pagina van de melding met de inhoud in de HTML en de deelafbeelding van
+  # api.a-alerts.nl voor de link-preview. Met de app geïnstalleerd opent de link in de app (universal links / app links).
+  # Ambulancemeldingen: noindex (zie website/p/melding.php). Een tekst achter de guid (/slug) mag, wordt genegeerd.
+  RewriteRule ^melding/([a-z]+)/([A-Za-z0-9_-]{8,64})(/[a-z0-9-]*)?/?$ /p/melding.php?d=$1&g=$2 [L]
   RewriteRule ^waarschuwing/(burgernet|nlalert|knmi|amber|vermistkind|vnog):.+$ /deel/$1.html [L]
 
   # Nieuws: /nieuws/<id> is dezelfde pagina; de JavaScript toont het artikel of liveblog.
