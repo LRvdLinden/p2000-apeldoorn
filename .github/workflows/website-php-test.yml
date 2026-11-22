@@ -1,0 +1,37 @@
+name: Website PHP-test (tijdelijk)
+on:
+  push:
+    branches: [a-alerts]
+    paths: ['.github/workflows/website-php-test.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: a-alerts-ftp-upload
+  cancel-in-progress: false
+jobs:
+  php:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp
+      - name: Testbestand plaatsen, opvragen en weer weghalen
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+        run: |
+          set -uo pipefail
+          source tools/ftp.sh
+          ftp_connect
+          T="$FTP_TARGET"
+          N="aa-phptest-$RANDOM$RANDOM.php"
+          printf '%s' '<?php header("Content-Type: text/plain"); echo "PHP ", PHP_VERSION, " gd=", extension_loaded("gd")?"ja":"nee", " curl=", function_exists("curl_init")?"ja":"nee", " pdo_mysql=", extension_loaded("pdo_mysql")?"ja":"nee";' > "$N"
+          ftp_run "put $N -o \"$T/$N\""
+          sleep 3
+          echo "RESULTAAT: $(curl -s --max-time 20 "https://a-alerts.nl/$N" | head -c 200 | tr -d '\n')"
+          ftp_run "rm \"$T/$N\"" || true
+          echo "WEG: HTTP $(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "https://a-alerts.nl/$N")"
