@@ -352,7 +352,19 @@ function nieuwsTokens(n, __, whatsapp) {
   };
 }
 
+/** "Graag contact meldkamer/OC" (same rule as the apps, the website and api.a-alerts.nl). */
+function isContactMeldkamer(m) {
+  if (m && m.categorie === 'Graag contact meldkamer') return true;
+  const t = String((m && (m.full_melding || m.title)) || '');
+  return /\bcontact\b.{0,25}\b(oc|meldkamer|mka|mkb|mkp|mk|gms|mka\s*nog)\b|\b(graag|svp|s\.v\.p\.?|verzoeke?)\b.{0,12}\b(opnieuw\s+)?contact\b/i.test(t);
+}
+/** A test call or test alarm (same rule as the apps, the website and api.a-alerts.nl). */
+function isTestOproep(m) {
+  return /\btest(oproep|bericht|melding|alarm|page|paging)?\b|\bproef(alarm|oproep)\b/i.test(String((m && (m.full_melding || m.title)) || ''));
+}
+
 module.exports = {
+  isContactMeldkamer, isTestOproep,
   nieuwsTokens,
   dienst, meldingLink, waarschuwingLink, bannerKey, bannerUrl, knmiGroenKey, AFGEROND_BRONNEN, plaatsNamen, plaatsenVoor, meldingTokens, waarschuwingTokens, tijdlijn, heliGenoemd, KNMI_RANG, capPlaats, tijd, datum,
 };

@@ -1,4 +1,8 @@
 {
+  "0.1.18": {
+    "en": "New in the settings: choose whether \"Please contact the control room/OC\" alerts and test calls start your Flows (with all tokens) or are skipped. Both are on by default, as before.",
+    "nl": "Nieuw in de instellingen: kies of \"Graag contact meldkamer/OC\"-meldingen en testoproepen je Flows starten (met alle tokens) of worden overgeslagen. Standaard staan beide aan, zoals voorheen."
+  },
   "0.1.17": {
     "en": "The app now reads all data from the new A-Alerts server (api.a-alerts.nl). Faster and more reliable; nothing changes in your Flows.",
     "nl": "De app haalt alles nu bij de nieuwe A-Alerts-server (api.a-alerts.nl). Sneller en betrouwbaarder; aan je Flows verandert niets."

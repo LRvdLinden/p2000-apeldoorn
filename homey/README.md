@@ -14,5 +14,11 @@ Ontwikkelaarsnotities. De app is alleen Nederlandstalig (`en` bevat dezelfde Ned
 
 Zonder webhook werkt de app ook: hij controleert dan elke 30 seconden zelf de A-Alerts-API.
 
+## Contact meldkamer en testoproepen (0.1.18)
+In de app-instellingen staan twee schakelaars onder "Meldingen naar je Flows": "Graag contact meldkamer/OC" doorsturen en
+testoproepen doorsturen. Aan (standaard) = zo'n melding start de Flows met alle tokens, net als elke melding. Uit = de
+melding start geen enkele Flow; de reden staat bij "Gefilterd" in de instellingen. Herkenning: dezelfde regels als de
+apps, de website en api.a-alerts.nl (`lib/format.js`: `isContactMeldkamer`, `isTestOproep`).
+
 ## Flow-kaarten aanpassen
 `python3 scripts/gen_flow.py` maakt alle kaarten in `.homeycompose/flow/`. Controle: `node scripts/check_i18n.js`.

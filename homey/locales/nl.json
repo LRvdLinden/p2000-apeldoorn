@@ -145,7 +145,13 @@
     "kaart_vermistkind_beeindigd": "Een Vermist Kind Alert is beëindigd",
     "wa_amber": "AMBER Alert",
     "wa_vermistkind": "Vermist Kind Alert",
-    "wa_nieuws": "Nieuws"
+    "wa_nieuws": "Nieuws",
+    "filter_titel": "Meldingen naar je Flows",
+    "filter_hint": "Aan: deze meldingen starten je Flows, met alle tokens, net als elke andere melding. Uit: ze starten geen enkele Flow.",
+    "filter_contact": "\"Graag contact meldkamer/OC\" doorsturen",
+    "filter_test": "Testoproepen doorsturen",
+    "filter_contact_reden": "Niet doorgestuurd (contact meldkamer staat uit)",
+    "filter_test_reden": "Niet doorgestuurd (testoproepen staan uit)"
   },
   "more_apps": {
     "section": "Meer apps",

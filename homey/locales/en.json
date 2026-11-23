@@ -145,7 +145,13 @@
     "kaart_vermistkind_beeindigd": "A Missing Child Alert has ended",
     "wa_amber": "AMBER Alert",
     "wa_vermistkind": "Missing Child Alert",
-    "wa_nieuws": "Nieuws"
+    "wa_nieuws": "Nieuws",
+    "filter_titel": "Alerts to your Flows",
+    "filter_hint": "On: these alerts start your Flows, with all tokens, like any other alert. Off: they start no Flow at all.",
+    "filter_contact": "Pass on \"Please contact the control room/OC\"",
+    "filter_test": "Pass on test calls",
+    "filter_contact_reden": "Not passed on (contact control room is off)",
+    "filter_test_reden": "Not passed on (test calls are off)"
   },
   "more_apps": {
     "section": "Meer apps",

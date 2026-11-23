@@ -1,5 +1,8 @@
 # Changelog
 
+## Homey-app 0.1.18 (23-11-2026)
+- Nieuw in de instellingen van de Homey-app: kies per soort of "Graag contact meldkamer/OC" en testoproepen je Flows starten (met alle tokens) of worden overgeslagen. Standaard aan, zoals voorheen. Zelfde herkenning als apps, website en api.a-alerts.nl.
+
 ## Afkortingen, 28 dagen, plaats en eenheid, deel als afbeelding: 2.0.3 (111) (22-11-2026)
 - **Afkortingen (iOS, Android):** de app haalt `GET /v1/afkortingen` op (bewaard op het toestel, werkt ook offline) en zet een stippellijn onder elke afkorting in de meldingstekst; tik voor de uitleg. Onder de beschrijving staat **Afkortingen in deze melding**, en bij Instellingen › Afkortingen een doorzoekbare lijst. Hele woorden; hoofdlettergevoelig als de server `hoofdletters` zet; langste term eerst.
 - **Laatste 28 dagen (iOS, Android):** Statistieken krijgt onder vandaag/gisteren de cijfers van `GET /v1/statistiek?dagen=28`: totaal en per dag, gisteren tegenover het gemiddelde, per dag (per dienst), per dienst, per uur, per weekdag, drukste plaatsen, meest ingezette eenheden en traumahelikopters. Zonder testoproepen en proefalarmen.

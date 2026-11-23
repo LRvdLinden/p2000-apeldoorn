@@ -225,7 +225,19 @@ class AAlertsApp extends Homey.App {
   }
 
 
+  /**
+   * Settings "Graag contact meldkamer/OC" and "Testoproepen": on (default) = they start the Flows like every alert,
+   * off = they start no Flow at all (no tokens). Returns the reason when the alert is held back.
+   */
+  tegengehouden(m) {
+    if (this.homey.settings.get('door_contact') === false && F.isContactMeldkamer(m)) return this.__('settings.filter_contact_reden');
+    if (this.homey.settings.get('door_test') === false && F.isTestOproep(m)) return this.__('settings.filter_test_reden');
+    return null;
+  }
+
   async fireMelding(m) {
+    const reden = this.tegengehouden(m);
+    if (reden) { this.filterLog(null, `${reden}: ${String(m.title || '').slice(0, 80)}`); return; }
     const r = F.meldingTokens(m, this.__.bind(this), this.wa('p2000'));
     const beeld = await this.afbeelding(m, 'melding', 'nieuw', r.banner);
     const tokens = { ...r.tokens, afbeelding: beeld.image, afbeelding_url: beeld.url };

@@ -37,6 +37,11 @@
   .dot.on { background: var(--ok); }
   label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
   input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--ink); }
+  label.schakel { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; font-size: 14px; margin: 12px 0 0; }
+  label.schakel input { appearance: none; -webkit-appearance: none; flex: none; width: 46px; height: 28px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; margin: 0; }
+  label.schakel input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left .15s; }
+  label.schakel input:checked { background: var(--red); }
+  label.schakel input:checked::after { left: 21px; }
   button.save { margin-top: 14px; width: 100%; padding: 11px; border: 0; border-radius: 999px; background: var(--red); color: #fff; font-weight: 700; font-size: 15px; }
   #saved { text-align: center; font-size: 13px; color: var(--ok); margin-top: 8px; min-height: 18px; }
   /* More apps (same design as MoreAppsCard in the Apple apps) */
@@ -84,6 +89,14 @@
   </div>
 
   <div class="card">
+    <h2 data-i18n="settings.filter_titel"></h2>
+    <p data-i18n="settings.filter_hint"></p>
+    <label class="schakel"><span data-i18n="settings.filter_contact"></span><input type="checkbox" id="door_contact" role="switch"></label>
+    <label class="schakel"><span data-i18n="settings.filter_test"></span><input type="checkbox" id="door_test" role="switch"></label>
+    <div id="filterSaved" role="status"></div>
+  </div>
+
+  <div class="card">
     <h2 data-i18n="settings.whatsapp_titel"></h2>
     <p data-i18n="settings.whatsapp_hint"></p>
     <label for="wa_p2000" data-i18n="settings.wa_p2000"></label><input id="wa_p2000" type="url" inputmode="url" placeholder="https://…">
@@ -121,6 +134,16 @@
     document.querySelectorAll('[data-i18n-aria]').forEach((el) => el.setAttribute('aria-label', Homey.__(el.dataset.i18nAria)));
     document.getElementById('year').textContent = new Date().getFullYear();
     KEYS.forEach((k) => Homey.get(k, (err, v) => { if (!err && v) document.getElementById(k).value = v; }));
+    // Filter switches: on = through to the Flows (default), off = no Flow. Saved at once.
+    ['door_contact', 'door_test'].forEach((k) => {
+      const el = document.getElementById(k);
+      Homey.get(k, (err, v) => { el.checked = err ? true : v !== false; });
+      el.addEventListener('change', () => Homey.set(k, el.checked, () => {
+        const s = document.getElementById('filterSaved');
+        s.textContent = Homey.__('settings.opgeslagen');
+        setTimeout(() => { s.textContent = ''; }, 2000);
+      }));
+    });
     document.getElementById('save').addEventListener('click', () => {
       KEYS.forEach((k) => Homey.set(k, document.getElementById(k).value.trim()));
       const s = document.getElementById('saved');
