@@ -37,11 +37,12 @@
   .dot.on { background: var(--ok); }
   label { display: block; font-size: 13px; font-weight: 600; margin: 10px 0 4px; }
   input { width: 100%; box-sizing: border-box; padding: 10px 12px; font-size: 14px; border: 1px solid var(--line); border-radius: 10px; background: transparent; color: var(--ink); }
-  label.schakel { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: 600; font-size: 14px; margin: 12px 0 0; }
-  label.schakel input { appearance: none; -webkit-appearance: none; flex: none; width: 46px; height: 28px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background .15s; margin: 0; }
-  label.schakel input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: left .15s; }
-  label.schakel input:checked { background: var(--red); }
-  label.schakel input:checked::after { left: 21px; }
+  .schakel { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 14px 0 0; }
+  .schakel span { font-size: 15px; font-weight: 500; text-transform: none; letter-spacing: 0; color: var(--ink); }
+  .schakel button { flex: none; width: 50px; height: 30px; border: 0; padding: 0; border-radius: 999px; background: #8e8e93; position: relative; cursor: pointer; transition: background .15s; }
+  .schakel button::after { content: ""; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.3); transition: left .15s; }
+  .schakel button[aria-checked="true"] { background: var(--ok); }
+  .schakel button[aria-checked="true"]::after { left: 23px; }
   button.save { margin-top: 14px; width: 100%; padding: 11px; border: 0; border-radius: 999px; background: var(--red); color: #fff; font-weight: 700; font-size: 15px; }
   #saved { text-align: center; font-size: 13px; color: var(--ok); margin-top: 8px; min-height: 18px; }
   /* More apps (same design as MoreAppsCard in the Apple apps) */
@@ -91,8 +92,8 @@
   <div class="card">
     <h2 data-i18n="settings.filter_titel"></h2>
     <p data-i18n="settings.filter_hint"></p>
-    <label class="schakel"><span data-i18n="settings.filter_contact"></span><input type="checkbox" id="door_contact" role="switch"></label>
-    <label class="schakel"><span data-i18n="settings.filter_test"></span><input type="checkbox" id="door_test" role="switch"></label>
+    <div class="schakel"><span id="lbl_contact" data-i18n="settings.filter_contact"></span><button type="button" id="door_contact" role="switch" aria-checked="true" aria-labelledby="lbl_contact"></button></div>
+    <div class="schakel"><span id="lbl_test" data-i18n="settings.filter_test"></span><button type="button" id="door_test" role="switch" aria-checked="true" aria-labelledby="lbl_test"></button></div>
     <div id="filterSaved" role="status"></div>
   </div>
 
@@ -137,12 +138,17 @@
     // Filter switches: on = through to the Flows (default), off = no Flow. Saved at once.
     ['door_contact', 'door_test'].forEach((k) => {
       const el = document.getElementById(k);
-      Homey.get(k, (err, v) => { el.checked = err ? true : v !== false; });
-      el.addEventListener('change', () => Homey.set(k, el.checked, () => {
-        const s = document.getElementById('filterSaved');
-        s.textContent = Homey.__('settings.opgeslagen');
-        setTimeout(() => { s.textContent = ''; }, 2000);
-      }));
+      const zet = (aan) => el.setAttribute('aria-checked', aan ? 'true' : 'false');
+      Homey.get(k, (err, v) => zet(err ? true : v !== false));
+      el.addEventListener('click', () => {
+        const aan = el.getAttribute('aria-checked') !== 'true';
+        zet(aan);
+        Homey.set(k, aan, () => {
+          const s = document.getElementById('filterSaved');
+          s.textContent = Homey.__('settings.opgeslagen');
+          setTimeout(() => { s.textContent = ''; }, 2000);
+        });
+      });
     });
     document.getElementById('save').addEventListener('click', () => {
       KEYS.forEach((k) => Homey.set(k, document.getElementById(k).value.trim()));
