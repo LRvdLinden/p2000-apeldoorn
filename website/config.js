@@ -3,7 +3,7 @@ window.P2000_CONFIG = {
   api: "https://api.a-alerts.nl",
   mapkitToken: "",
   // Zet op true zodra api.a-alerts.nl de token-header toestaat (CORS); daarvoor breekt de preflight de live pager.
-  tokenAan: false,
+  tokenAan: true,
   appStoreURL: "https://apps.apple.com/nl/app/a-alerts/id6829732272",
 };
 
