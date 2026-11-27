@@ -102,7 +102,7 @@ function ap_kop(array $o): void {
 <link rel="stylesheet" href="/assets/css/pagina.css?v=1">
 <?php if (!empty($o['ld'])): ?><script type="application/ld+json"><?= json_encode($o['ld'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
 <?php endif; ?>
-<script src="/config.js?v=61"></script>
+<script src="/config.js?v=62"></script>
 <script src="/assets/js/consent.js?v=59" defer></script>
 </head>
 <body>

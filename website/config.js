@@ -2,6 +2,8 @@
 window.P2000_CONFIG = {
   api: "https://api.a-alerts.nl",
   mapkitToken: "",
+  // Zet op true zodra api.a-alerts.nl de token-header toestaat (CORS); daarvoor breekt de preflight de live pager.
+  tokenAan: false,
   appStoreURL: "https://apps.apple.com/nl/app/a-alerts/id6829732272",
 };
 
@@ -22,6 +24,7 @@ window.P2000_CONFIG = {
   window.fetch = async (invoer, opties) => {
     const url = typeof invoer === "string" ? invoer : invoer instanceof URL ? invoer.href : invoer && invoer.url;
     if (!url || !url.startsWith(basis + "/v1/") || /\/(afbeelding\.png|mapkit-token)|\/v1\/(app|changelog|content|status|downloads|radar|kaart)/.test(url)) return echt(invoer, opties);
+    if (!window.P2000_CONFIG.tokenAan) return echt(invoer, opties);
     const t = await haal();
     if (!t) return echt(invoer, opties);
     const kop = new Headers((opties && opties.headers) || (invoer instanceof Request ? invoer.headers : undefined));
