@@ -15,3 +15,4 @@ website/data/
 
 # APK staat alleen op de server (niet in de repo)
 website/downloads/*.apk
+website/_private/sleutel.php

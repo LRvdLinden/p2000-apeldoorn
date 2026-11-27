@@ -9,5 +9,7 @@
 	</dict>
 	<key>P2000APIURL</key>
 	<string>$(P2000_API_URL)</string>
+	<key>AALERTS_KEY</key>
+	<string>$(AALERTS_KEY)</string>
 </dict>
 </plist>

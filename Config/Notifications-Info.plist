@@ -9,5 +9,7 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).NotificationService</string>
 	</dict>
+	<key>AALERTS_KEY</key>
+	<string>$(AALERTS_KEY)</string>
 </dict>
 </plist>

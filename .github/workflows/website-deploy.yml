@@ -32,6 +32,15 @@ jobs:
             && git show origin/android-build:android.json > website/downloads/android.json && python3 tools/android_pagina.py && echo "APK: $(stat -c %s website/downloads/A-Alerts.apk) bytes" \
             || echo "::warning::Geen APK in android-build"
           rm -f website/.deploy
+      - name: API-sleutel klaarzetten (alleen op de server, nooit in de repo)
+        env:
+          AALERTS_KEY: ${{ secrets.AALERTS_KEY }}
+        run: |
+          if [ -n "${AALERTS_KEY:-}" ]; then
+            mkdir -p website/_private
+            printf '<?php\nreturn %s;\n' "$(php -r 'echo var_export(getenv("AALERTS_KEY"), true);')" > website/_private/sleutel.php
+            echo "AALERTS_KEY gezet"
+          else echo "::notice::AALERTS_KEY ontbreekt: token.php geeft een leeg token (API-toegangspoort staat dan nog uit)"; fi
       - name: Controleren
         id: check
         env:

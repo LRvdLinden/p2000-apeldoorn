@@ -9,6 +9,7 @@ declare(strict_types=1);
  */
 
 const AP_API = 'https://api.a-alerts.nl';
+require_once dirname(__DIR__) . '/_token.php';
 const AP_SITE = 'https://a-alerts.nl';
 const AP_DIENST = ['brandweer' => 'Brandweer', 'ambulance' => 'Ambulance', 'politie' => 'Politie', 'traumaheli' => 'Traumaheli', 'lifeliner' => 'Traumaheli'];
 const AP_KLEUR = ['brandweer' => '#E30613', 'ambulance' => '#F4C400', 'politie' => '#15428B', 'traumaheli' => '#9333EA', 'lifeliner' => '#9333EA'];
@@ -22,7 +23,7 @@ function ap_api(string $pad, int $ttl = 60): mixed {
   if (is_file($f) && time() - filemtime($f) < $ttl) { $j = json_decode((string)file_get_contents($f), true); if ($j !== null) return $j; }
   $ch = curl_init(AP_API . $pad);
   curl_setopt_array($ch, [CURLOPT_RETURNTRANSFER => true, CURLOPT_TIMEOUT => 10, CURLOPT_CONNECTTIMEOUT => 4, CURLOPT_ENCODING => '',
-    CURLOPT_HTTPHEADER => ['Accept: application/json', 'User-Agent: a-alerts.nl pagina']]);
+    CURLOPT_HTTPHEADER => array_values(array_filter(['Accept: application/json', 'User-Agent: a-alerts.nl pagina', ($t = aa_token('a')) !== '' ? 'X-AAlerts-Token: ' . $t : null]))]);
   $b = curl_exec($ch); $c = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE); curl_close($ch);
   if ($c !== 200 || !is_string($b)) {
     // Stale copy rather than an error page when the API hiccups.
@@ -101,7 +102,7 @@ function ap_kop(array $o): void {
 <link rel="stylesheet" href="/assets/css/pagina.css?v=1">
 <?php if (!empty($o['ld'])): ?><script type="application/ld+json"><?= json_encode($o['ld'], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) ?></script>
 <?php endif; ?>
-<script src="/config.js?v=60"></script>
+<script src="/config.js?v=61"></script>
 <script src="/assets/js/consent.js?v=59" defer></script>
 </head>
 <body>

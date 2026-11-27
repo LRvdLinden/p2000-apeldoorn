@@ -1,14 +1,25 @@
 'use strict';
 
 const https = require('https');
+const crypto = require('crypto');
 
 const BASE = 'https://api.a-alerts.nl';
+
+// Key of the A-Alerts API (env.json: AALERTS_KEY, not in git). Without it no token is sent.
+let apiKey = '';
+function setKey(k) { apiKey = String(k || ''); }
+/** Signed token for X-AAlerts-Token (soort a, valid 10 minutes). */
+function token() {
+  if (!apiKey) return null;
+  const basis = `a.${Math.floor(Date.now() / 1000)}`;
+  return `${basis}.${crypto.createHmac('sha256', apiKey).update(basis).digest('hex')}`;
+}
 
 /** GET JSON from the A-Alerts API, with a timeout and a few retries (exponential backoff). */
 function getJSON(path, { timeout = 15000, retries = 2 } = {}) {
   const once = () => new Promise((resolve, reject) => {
     const req = https.get(`${BASE}${path}`, {
-      headers: { Accept: 'application/json', 'User-Agent': 'A-Alerts-Homey/0.1 (+https://a-alerts.nl)', 'X-App-Client': 'A-Alerts-Homey' },
+      headers: { Accept: 'application/json', 'User-Agent': 'A-Alerts-Homey/0.1 (+https://a-alerts.nl)', 'X-App-Client': 'A-Alerts-Homey', ...(token() ? { 'X-AAlerts-Token': token() } : {}) },
       timeout,
     }, (res) => {
       let body = '';
@@ -33,6 +44,7 @@ function getJSON(path, { timeout = 15000, retries = 2 } = {}) {
 }
 
 module.exports = {
+  setKey,
   meldingen: (limit = 60) => getJSON(`/v1/meldingen?limit=${limit}`),
   waarschuwingen: (days = 3) => getJSON(`/v1/waarschuwingen?days=${days}&kind=1&vnog=1`),
   waarschuwing: (id) => getJSON(`/v1/waarschuwingen/${encodeURIComponent(id)}`),

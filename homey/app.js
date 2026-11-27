@@ -12,6 +12,7 @@ const NIEUWS_MAX_MS = 6 * 3_600_000; // news: a new (unseen) article triggers wh
 
 class AAlertsApp extends Homey.App {
   async onInit() {
+    api.setKey((Homey.env || {}).AALERTS_KEY);
     this.seen = new Set(this.homey.settings.get('seen') || []);
     this.warn = this.homey.settings.get('warn') || {};
     this.initialized = Boolean(this.homey.settings.get('initialized'));

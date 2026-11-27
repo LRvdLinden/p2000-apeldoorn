@@ -37,6 +37,8 @@ android {
         buildConfigField("String", "API_BASE", "\"https://api.a-alerts.nl/\"")
         // The old server: a device signs off there once, so pushes never arrive twice.
         buildConfigField("String", "OLD_API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
+        // Key of the API token (CI secret AALERTS_KEY; empty in a local build = no token).
+        buildConfigField("String", "API_KEY", "\"${System.getenv("AALERTS_KEY") ?: ""}\"")
         buildConfigField("String", "WEBSITE", "\"https://a-alerts.nl\"")
         buildConfigField("boolean", "HAS_FIREBASE", hasFirebase.toString())
         // Phones only (arm64 + armv7) keeps the APK small; the emulator test sets ANDROID_ALL_ABIS=1.

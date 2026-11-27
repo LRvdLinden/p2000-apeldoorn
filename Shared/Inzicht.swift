@@ -260,6 +260,7 @@ extension P2000API {
         if !query.isEmpty { comps.queryItems = query.sorted { $0.key < $1.key }.map { URLQueryItem(name: $0.key, value: $0.value) } }
         var request = URLRequest(url: comps.url!)
         request.setValue("A-Alerts-Apple/\(Config.version)", forHTTPHeaderField: "X-App-Client")
+        if let token = Config.apiToken() { request.setValue(token, forHTTPHeaderField: "X-AAlerts-Token") }
         request.cachePolicy = .reloadIgnoringLocalCacheData
         request.timeoutInterval = 25
         let (data, response) = try await URLSession.shared.data(for: request)

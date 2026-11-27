@@ -19,5 +19,7 @@
 	<true/>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
+	<key>AALERTS_KEY</key>
+	<string>$(AALERTS_KEY)</string>
 </dict>
 </plist>

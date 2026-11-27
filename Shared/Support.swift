@@ -1,5 +1,6 @@
 import Foundation
 import SwiftUI
+import CryptoKit
 #if canImport(UIKit)
 import UIKit
 #elseif canImport(AppKit)
@@ -19,6 +20,18 @@ func Lf(_ key: String, _ args: CVarArg...) -> String {
 }
 
 enum Config {
+    /// Access key of the A-Alerts API (from Secrets.xcconfig through Info.plist; empty when it is not set).
+    static let apiKey: String = {
+        let k = Bundle.main.object(forInfoDictionaryKey: "AALERTS_KEY") as? String ?? ""
+        return k.contains("$(") ? "" : k
+    }()
+    /// Signed token for the header X-AAlerts-Token (soort a, valid 10 minutes); nil when there is no key.
+    static func apiToken(now: Date = .now) -> String? {
+        guard !apiKey.isEmpty else { return nil }
+        let basis = "a.\(Int(now.timeIntervalSince1970))"
+        let mac = HMAC<SHA256>.authenticationCode(for: Data(basis.utf8), using: SymmetricKey(data: Data(apiKey.utf8)))
+        return basis + "." + mac.map { String(format: "%02x", $0) }.joined()
+    }
     /// Own backend: api.a-alerts.nl (replaces the Cloudflare Worker of worker/). The app does not use the website.
     static let apiBase: URL = {
         if let raw = Bundle.main.object(forInfoDictionaryKey: "P2000APIURL") as? String,

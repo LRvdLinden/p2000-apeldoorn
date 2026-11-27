@@ -7,5 +7,8 @@ DEVELOPMENT_TEAM = EU3UY476T6
 // the Cloudflare Worker. "//" starts a comment in .xcconfig, hence https:/$()/
 P2000_API_URL = https:/$()/api.a-alerts.nl
 
+// API access key (local value in Secrets.xcconfig, not in git; empty here)
+AALERTS_KEY =
+
 // Optional local overrides (not in git), e.g. a local wrangler dev URL while testing.
 #include? "Secrets.xcconfig"

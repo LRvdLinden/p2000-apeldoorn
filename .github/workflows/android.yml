@@ -25,6 +25,7 @@ jobs:
         working-directory: android
     env:
       ANDROID_BUILD: ${{ github.run_number }}
+      AALERTS_KEY: ${{ secrets.AALERTS_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4

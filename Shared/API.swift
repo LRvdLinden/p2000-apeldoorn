@@ -31,7 +31,9 @@ struct P2000API: Sendable {
     }
 
     private func get<T: Decodable>(_ url: URL, as type: T.Type) async throws -> T {
-        let (data, response) = try await session.data(from: url)
+        var request = URLRequest(url: url)
+        if let token = Config.apiToken() { request.setValue(token, forHTTPHeaderField: "X-AAlerts-Token") }
+        let (data, response) = try await session.data(for: request)
         if let http = response as? HTTPURLResponse, !(200..<300).contains(http.statusCode) {
             throw APIError.badStatus(http.statusCode)
         }
@@ -56,6 +58,7 @@ struct P2000API: Sendable {
     private func send(_ method: String, _ url: URL, json: [String: Any]? = nil) async throws -> Data {
         var request = URLRequest(url: url)
         request.httpMethod = method
+        if let token = Config.apiToken() { request.setValue(token, forHTTPHeaderField: "X-AAlerts-Token") }
         if let json {
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             request.httpBody = try JSONSerialization.data(withJSONObject: json)

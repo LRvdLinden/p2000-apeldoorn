@@ -13,11 +13,21 @@ import java.util.concurrent.TimeUnit
 
 /** Client for the A-Alerts API (Cloudflare Worker): the same API the Apple apps and the website use. */
 object Api {
+    /** Signed token for X-AAlerts-Token (soort a, valid 10 minutes); null without a key. */
+    private fun token(): String? {
+        val key = BuildConfig.API_KEY
+        if (key.isEmpty()) return null
+        val basis = "a.${System.currentTimeMillis() / 1000}"
+        val mac = javax.crypto.Mac.getInstance("HmacSHA256").apply { init(javax.crypto.spec.SecretKeySpec(key.toByteArray(), "HmacSHA256")) }
+        return basis + "." + mac.doFinal(basis.toByteArray()).joinToString("") { "%02x".format(it) }
+    }
+
     private val client = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)
         .addInterceptor { chain ->
             chain.proceed(chain.request().newBuilder()
+                .apply { token()?.let { header("X-AAlerts-Token", it) } }
                 .header("Accept", "application/json")
                 .header("X-App-Client", "A-Alerts-Android/${BuildConfig.VERSION_NAME}")
                 .header("User-Agent", "A-Alerts-Android/${BuildConfig.VERSION_NAME} (${BuildConfig.VERSION_CODE})")
