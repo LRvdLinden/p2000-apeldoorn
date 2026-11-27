@@ -1,0 +1,28 @@
+name: API-map zoeken via FTP (alleen lezen)
+on:
+  push:
+    branches: [a-alerts]
+    paths: [".github/workflows/api-ftp-probe.yml"]
+jobs:
+  probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: lftp
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq lftp >/dev/null
+      - name: Lijst de FTP-hoofdmap en de API-map
+        env:
+          FTP_SERVER: ${{ secrets.AALERTS_FTP_SERVER || secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.AALERTS_FTP_USERNAME || secrets.FTP_USERNAME || secrets.FTP_USER }}
+          FTP_PASSWORD: ${{ secrets.AALERTS_FTP_PASSWORD || secrets.FTP_PASSWORD }}
+          FTP_DIR: ${{ secrets.AALERTS_FTP_DIR || secrets.FTP_DIR }}
+          FTP_PORT: ${{ secrets.AALERTS_FTP_PORT || secrets.FTP_PORT }}
+        run: |
+          source tools/ftp.sh
+          ftp_connect
+          echo "FTP_TARGET=$FTP_TARGET"
+          echo "--- hoofdmap"; cat "$FTP_TMP/root.txt" | head -40
+          for d in api.a-alerts.nl "$FTP_TARGET/../api.a-alerts.nl" ../api.a-alerts.nl; do
+            echo "--- $d"; ftp_run "cls -1 \"$d\"" 2>&1 | head -15 || true
+          done
