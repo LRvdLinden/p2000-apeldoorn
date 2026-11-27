@@ -8,3 +8,4 @@ $origin = (string)($_SERVER['HTTP_ORIGIN'] ?? '');
 if ($origin !== '' && !preg_match('#^https://(www\.)?(a-alerts|p2000-apeldoorn)\.nl$#', $origin)) { http_response_code(403); echo '{"t":""}'; exit; }
 if (($_SERVER['HTTP_SEC_FETCH_SITE'] ?? 'same-origin') === 'cross-site') { http_response_code(403); echo '{"t":""}'; exit; }
 echo json_encode(['t' => aa_token('w'), 'ttl' => 6600]);
+
