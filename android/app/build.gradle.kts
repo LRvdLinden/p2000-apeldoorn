@@ -33,7 +33,7 @@ android {
         minSdk = 24
         targetSdk = 35
         versionCode = buildNumber
-        versionName = "2.0.3"
+        versionName = "2.0.4"
         buildConfigField("String", "API_BASE", "\"https://api.a-alerts.nl/\"")
         // The old server: a device signs off there once, so pushes never arrive twice.
         buildConfigField("String", "OLD_API_BASE", "\"https://p2000-apeldoorn-api.lrvdlinden.workers.dev/\"")
